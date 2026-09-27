@@ -17,12 +17,31 @@ const props = withDefaults(
     whole?: boolean
     // The form keeps the field as text (v-model without .number): the converted value is emitted as a string
     text?: boolean
+    // Bounds expressed in the API's unit (km or per km), converted to the display unit for the <input>
+    min?: number | string
+    max?: number | string
   }>(),
   { kind: 'distance', digits: 1, whole: false, text: false },
 )
 
 const toDisplay = (v: number) => (props.kind === 'distance' ? kmToDisplayDistance(v) : perDistance(v))
 const toApi = (v: number) => (props.kind === 'distance' ? displayDistanceToKm(v) : perDistanceToPerKm(v))
+
+const displayMin = computed(() => {
+  if (props.min === undefined || props.min === '') return undefined
+  const v = toDisplay(Number(props.min))
+  if (Number.isNaN(v)) return undefined
+  const factor = 10 ** props.digits
+  return props.whole ? Math.round(v) : Math.round(v * factor) / factor
+})
+
+const displayMax = computed(() => {
+  if (props.max === undefined || props.max === '') return undefined
+  const v = toDisplay(Number(props.max))
+  if (Number.isNaN(v)) return undefined
+  const factor = 10 ** props.digits
+  return props.whole ? Math.round(v) : Math.round(v * factor) / factor
+})
 
 // While the model is the value this field just emitted, the text stays as typed (rounding it would
 // rewrite the field under the cursor); any other value (loaded, reset) is shown rounded.
@@ -55,5 +74,5 @@ function onInput(event: Event) {
 </script>
 
 <template>
-  <input :id="id" type="number" :value="shown" @input="onInput" />
+  <input :id="id" type="number" :value="shown" :min="displayMin" :max="displayMax" @input="onInput" />
 </template>

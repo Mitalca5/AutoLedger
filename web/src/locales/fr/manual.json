@@ -25,7 +25,7 @@
     "automaticallyFillInTheEnergy": "Complétez automatiquement l'énergie et le coût de la distance non suivie",
     "energyEstimate": "Estimation de l'énergie",
     "saveEstimate": "Enregistrer l'estimation",
-    "invalidConsumption": "Consommation moyenne invalide (doit être comprise entre 1 et 100 kWh/100 {unit})",
+    "invalidConsumption": "Consommation moyenne invalide (doit être comprise entre {min} et {max} kWh/100 {unit})",
     "invalidField": "Champ invalide",
     "invalidRate": "Tarif électricité invalide (doit être compris entre 0.01 et 10 {cur}/kWh)",
     "saved": "Estimation de l'énergie enregistrée avec succès !"

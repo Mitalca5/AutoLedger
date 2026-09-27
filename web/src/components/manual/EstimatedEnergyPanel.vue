@@ -8,7 +8,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { currencySymbol, formatAmount } from '@/currency'
-import { distanceUnit, formatDistance, perDistance } from '@/units'
+import { distanceUnit, formatDistance, formatPerDistanceValue, perDistance } from '@/units'
 
 const props = defineProps<{
   vehicle: any
@@ -47,8 +47,10 @@ async function loadTco() {
 async function save() {
   const kwh100 = form.value.kwh_100km != null ? Number(form.value.kwh_100km) : null
   const rate = form.value.price_per_kwh != null ? Number(form.value.price_per_kwh) : null
-  if (kwh100 !== null && (kwh100 <= 0 || kwh100 > 100)) {
-    showAlert(t('manual.estimatedEnergyPanel.invalidConsumption', { unit: distanceUnit() }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
+  if (kwh100 !== null && (kwh100 < 1 || kwh100 > 100)) {
+    const min = perDistance(1).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })
+    const max = perDistance(100).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })
+    showAlert(t('manual.estimatedEnergyPanel.invalidConsumption', { unit: distanceUnit(), min, max }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
     return
   }
   if (rate !== null && (rate <= 0 || rate > 10)) {
@@ -119,7 +121,7 @@ onMounted(() => {
               step="0.1"
               min="1"
               max="100"
-              :placeholder="$t('common.example', { value: $n(16.5) })"
+              :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })"
               :disabled="!canEdit"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 disabled:opacity-50"
             />
