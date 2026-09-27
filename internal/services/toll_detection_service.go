@@ -8,6 +8,7 @@ import (
 	"github.com/teslacost/teslacost/internal/crypto"
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/teslamate"
 	"github.com/teslacost/teslacost/internal/tolldata"
 )
 
@@ -52,7 +53,7 @@ func (s *TollDetectionService) DetectTolls(ctx context.Context, vehicle *models.
 		return nil, fmt.Errorf("failed to build TeslaMate client: %w", err)
 	}
 
-	positions, err := client.GetDriveDetails(ctx, *vehicle.TeslaMateCarID, *drive.TeslaMateDriveID)
+	positions, units, err := client.GetDriveDetails(ctx, *vehicle.TeslaMateCarID, *drive.TeslaMateDriveID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch drive GPS trace: %w", err)
 	}
@@ -62,7 +63,7 @@ func (s *TollDetectionService) DetectTolls(ctx context.Context, vehicle *models.
 		trace[i] = tolldata.LatLon{Lat: p.Latitude, Lon: p.Longitude}
 	}
 
-	matches := tolldata.DetectCrossings(trace, s.dataset.Stations, tolldata.DefaultThresholdMeters)
+	matches := tolldata.DetectCrossings(trace, traceSpeedsKmh(positions, units.UnitOfLength), s.dataset.Stations, tolldata.DefaultThresholdMeters)
 	segments := s.dataset.BuildSegments(matches)
 
 	td := &models.TollDetection{
@@ -75,6 +76,21 @@ func (s *TollDetectionService) DetectTolls(ctx context.Context, vehicle *models.
 	}
 
 	return td, nil
+}
+
+// traceSpeedsKmh returns the trace's speeds in km/h, nil when TeslaMate sent none (it reports a
+// missing speed as 0, so a trace where every speed is 0 has no speed information).
+func traceSpeedsKmh(positions []teslamate.DrivePosition, unitOfLength string) []float64 {
+	speeds := make([]float64, len(positions))
+	known := false
+	for i, p := range positions {
+		speeds[i] = teslamate.ConvertDistanceToKm(p.Speed, unitOfLength)
+		known = known || p.Speed > 0
+	}
+	if !known {
+		return nil
+	}
+	return speeds
 }
 
 func toModelSegments(segments []tolldata.Segment) []models.TollSegment {

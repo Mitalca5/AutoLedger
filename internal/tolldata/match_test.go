@@ -100,7 +100,7 @@ func TestDetectCrossings_MultipleSegmentsOnOneDrive(t *testing.T) {
 		},
 	}
 
-	matches := DetectCrossings(trace, stations, DefaultThresholdMeters)
+	matches := DetectCrossings(trace, nil, stations, DefaultThresholdMeters)
 
 	if len(matches) != 8 {
 		names := make([]string, len(matches))
@@ -152,14 +152,14 @@ func TestDetectCrossings_NoStationsNearby(t *testing.T) {
 	stations := []Station{
 		{Name: "FAR", Type: "open", Lat: 10, Lon: 10},
 	}
-	matches := DetectCrossings(trace, stations, DefaultThresholdMeters)
+	matches := DetectCrossings(trace, nil, stations, DefaultThresholdMeters)
 	if len(matches) != 0 {
 		t.Errorf("expected no matches, got %d", len(matches))
 	}
 }
 
 func TestDetectCrossings_ShortTraceIsIgnored(t *testing.T) {
-	matches := DetectCrossings([]LatLon{{Lat: 0, Lon: 0}}, []Station{{Name: "X", Lat: 0, Lon: 0}}, DefaultThresholdMeters)
+	matches := DetectCrossings([]LatLon{{Lat: 0, Lon: 0}}, nil, []Station{{Name: "X", Lat: 0, Lon: 0}}, DefaultThresholdMeters)
 	if matches != nil {
 		t.Errorf("expected nil for a trace with fewer than 2 points, got %v", matches)
 	}
@@ -189,7 +189,7 @@ func TestBuildSegments_ExitAndReentryAtSameGate(t *testing.T) {
 	networkByStation := map[string]string{"W": "component_1", "X": "component_1", "Y": "component_1"}
 	ds := &Dataset{NetworkByStation: networkByStation}
 
-	matches := DetectCrossings(trace, stations, DefaultThresholdMeters)
+	matches := DetectCrossings(trace, nil, stations, DefaultThresholdMeters)
 
 	var xVisits int
 	for _, m := range matches {
@@ -249,8 +249,168 @@ func TestDefaultThresholdIsFiftyMeters(t *testing.T) {
 		{Name: "NEAR", Lat: 0.00036, Lon: 0.005},
 		{Name: "FAR", Lat: 0.00072, Lon: 0.005},
 	}
-	matches := DetectCrossings(trace, stations, DefaultThresholdMeters)
+	matches := DetectCrossings(trace, nil, stations, DefaultThresholdMeters)
 	if len(matches) != 1 || matches[0].Station.Name != "NEAR" {
 		t.Fatalf("a station 40 m from the trace is crossed, one 80 m away is not: %+v", matches)
+	}
+}
+
+// slowNear returns speeds for trace: slowKmh within 0.002° (~220 m) of one of the given
+// longitudes (a gate the car goes through), motorwayKmh elsewhere.
+func slowNear(trace []LatLon, slowKmh, motorwayKmh float64, lons ...float64) []float64 {
+	speeds := make([]float64, len(trace))
+	for i, p := range trace {
+		speeds[i] = motorwayKmh
+		for _, lon := range lons {
+			if math.Abs(p.Lon-lon) <= 0.002 {
+				speeds[i] = slowKmh
+			}
+		}
+	}
+	return speeds
+}
+
+func closedStations(network string, byName map[string]float64) ([]Station, map[string]string) {
+	var stations []Station
+	networkByStation := map[string]string{}
+	for name, lon := range byName {
+		stations = append(stations, Station{Name: name, Type: "close", Operator: "OP1", Lat: 0, Lon: lon})
+		networkByStation[name] = network
+	}
+	return stations, networkByStation
+}
+
+func segmentNames(segments []Segment) []string {
+	out := make([]string, len(segments))
+	for i, s := range segments {
+		out[i] = s.Entry + "->"
+		if s.Exit != nil {
+			out[i] += *s.Exit
+		}
+	}
+	return out
+}
+
+func assertSegments(t *testing.T, segments []Segment, want ...string) {
+	t.Helper()
+	got := segmentNames(segments)
+	if len(got) != len(want) {
+		t.Fatalf("expected segments %v, got %v", want, got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("expected segments %v, got %v", want, got)
+		}
+	}
+}
+
+func TestBuildSegments_ExitThenReentryElsewhereOnTheSameNetwork(t *testing.T) {
+	// Annecy -> Les Abrets on the motorway, the road from Les Abrets to Voiron, then Voiron ->
+	// Chatuzange on the motorway. The motorway passes two other gates of the network without
+	// going through them. All four stations are on one network and every pair is priced.
+	trace := buildStraightTrace(61, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{
+		"ANNECY": 0.000, "CHAMBERY": 0.010, "LES ABRETS": 0.020, "VOIRON": 0.040, "TULLINS": 0.050, "CHATUZANGE": 0.060,
+	})
+	price := money.FromFloat(10)
+	ds := &Dataset{
+		NetworkByStation: networkByStation,
+		ClosedPrice: map[string]map[string]money.Cents{
+			"ANNECY": {"LES ABRETS": price, "CHATUZANGE": price, "VOIRON": price},
+			"VOIRON": {"CHATUZANGE": price},
+		},
+	}
+	speeds := slowNear(trace, 20, 115, 0.000, 0.020, 0.040, 0.060)
+
+	matches := DetectCrossings(trace, speeds, stations, DefaultThresholdMeters)
+	if len(matches) != 6 {
+		t.Fatalf("expected the 6 stations to be matched, got %d", len(matches))
+	}
+	assertSegments(t, ds.BuildSegments(matches), "ANNECY->LES ABRETS", "VOIRON->CHATUZANGE")
+}
+
+func TestBuildSegments_StationsPassedAtMotorwaySpeedAreNotCrossed(t *testing.T) {
+	trace := buildStraightTrace(41, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{
+		"S1": 0.002, "S2": 0.010, "S3": 0.018, "S4": 0.026, "S5": 0.034,
+	})
+	ds := &Dataset{NetworkByStation: networkByStation}
+	speeds := slowNear(trace, 30, 90, 0.002, 0.034)
+
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, speeds, stations, DefaultThresholdMeters)), "S1->S5")
+}
+
+func TestBuildSegments_SpeedJustAboveTheGateLimitIsADriveBy(t *testing.T) {
+	trace := buildStraightTrace(21, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{"IN": 0.002, "PAST": 0.010, "OUT": 0.018})
+	ds := &Dataset{NetworkByStation: networkByStation}
+
+	atLimit := slowNear(trace, MaxGateSpeedKmh, MaxGateSpeedKmh+1, 0.002, 0.018)
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, atLimit, stations, DefaultThresholdMeters)), "IN->OUT")
+
+	allAtLimit := slowNear(trace, MaxGateSpeedKmh, MaxGateSpeedKmh)
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, allAtLimit, stations, DefaultThresholdMeters)), "IN->PAST", "OUT->")
+}
+
+func TestBuildSegments_OpenBarrierPassedAtSpeedIsKept(t *testing.T) {
+	// Free-flow gantries are crossed at full speed: only closed-network gates are filtered.
+	trace := buildStraightTrace(11, 0.001)
+	stations := []Station{{Name: "FREE FLOW", Type: "open", Operator: "OP1", Lat: 0, Lon: 0.005}}
+	ds := &Dataset{OpenPrice: map[string]money.Cents{"FREE FLOW": money.FromFloat(2)}}
+	speeds := slowNear(trace, 0, 130)
+
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, speeds, stations, DefaultThresholdMeters)), "FREE FLOW->")
+}
+
+func TestBuildSegments_CoLocatedGatesAreOnePassage(t *testing.T) {
+	// A barrier and its slip road ~17 m apart are both matched when the car goes through one of
+	// them: they are one exit, the priced one.
+	trace := buildStraightTrace(31, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{
+		"ENTRY": 0.002, "BARRIERE": 0.020, "BRETELLE": 0.02015,
+	})
+	ds := &Dataset{
+		NetworkByStation: networkByStation,
+		ClosedPrice:      map[string]map[string]money.Cents{"ENTRY": {"BARRIERE": money.FromFloat(4)}},
+	}
+	speeds := slowNear(trace, 10, 120, 0.002, 0.020)
+
+	segments := ds.BuildSegments(DetectCrossings(trace, speeds, stations, DefaultThresholdMeters))
+	assertSegments(t, segments, "ENTRY->BARRIERE")
+	if segments[0].EstimatedPrice == nil || *segments[0].EstimatedPrice != money.FromFloat(4) {
+		t.Errorf("expected the priced gate's price, got %+v", segments[0].EstimatedPrice)
+	}
+}
+
+func TestBuildSegments_MainlineBarrierClosesOneTicketAndOpensTheNext(t *testing.T) {
+	trace := buildStraightTrace(31, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{"A": 0.002, "BARRIER": 0.015, "C": 0.028})
+	price := money.FromFloat(3)
+	ds := &Dataset{
+		NetworkByStation: networkByStation,
+		ClosedPrice: map[string]map[string]money.Cents{
+			"A": {"BARRIER": price, "C": price}, "BARRIER": {"C": price},
+		},
+	}
+	speeds := slowNear(trace, 0, 110, 0.002, 0.015, 0.028)
+
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, speeds, stations, DefaultThresholdMeters)), "A->BARRIER", "BARRIER->C")
+}
+
+func TestBuildSegments_UnpricedCrossingsPairInOrder(t *testing.T) {
+	trace := buildStraightTrace(31, 0.001)
+	stations, networkByStation := closedStations("component_1", map[string]float64{"A": 0.002, "B": 0.015, "C": 0.028})
+	ds := &Dataset{NetworkByStation: networkByStation}
+	speeds := slowNear(trace, 0, 110, 0.002, 0.015, 0.028)
+
+	assertSegments(t, ds.BuildSegments(DetectCrossings(trace, speeds, stations, DefaultThresholdMeters)), "A->B", "C->")
+}
+
+func TestDetectCrossings_SpeedsOfAnotherLengthAreIgnored(t *testing.T) {
+	trace := buildStraightTrace(5, 0.001)
+	stations := []Station{{Name: "X", Type: "close", Lat: 0, Lon: 0.002}}
+	matches := DetectCrossings(trace, []float64{1, 2}, stations, DefaultThresholdMeters)
+	if len(matches) != 1 || matches[0].MinSpeedKmh != nil {
+		t.Fatalf("expected one match with an unknown speed, got %+v", matches)
 	}
 }
