@@ -8,7 +8,7 @@ import { RefreshCw, CheckCircle2, AlertCircle, X, Link2 } from 'lucide-vue-next'
 import { emptyVehicleForm, vehicleFormFrom } from '@/utils/vehicles'
 import { CURRENCIES } from '@/utils/expenses'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { distanceUnit, formatDistanceValue } from '@/units'
+import { distanceUnit, formatDistanceValue, formatPerDistanceValue } from '@/units'
 
 // Adds a vehicle, or edits \`editing\`. The TeslaMate connection can be tested with the values typed so far.
 const props = defineProps<{ editing: any | null }>()
@@ -120,7 +120,7 @@ async function testModalConnection() {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="vehicle-pre-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.consumptionKwh100km', { unit: distanceUnit() }) }}</label>
-              <DistanceInput kind="per-distance" id="vehicle-pre-kwh" v-model="form.estimated_kwh_100km" step="0.1" min="1" max="100" :placeholder="$t('common.example', { value: $n(16.5) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <DistanceInput kind="per-distance" id="vehicle-pre-kwh" v-model="form.estimated_kwh_100km" step="0.1" min="1" max="100" :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
             </div>
             <div>
               <label for="vehicle-pre-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.rateKwh', { currency: form.currency }) }}</label>

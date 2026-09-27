@@ -89,7 +89,7 @@ describe('message keys used in the source', () => {
   })
 
   // These placeholders carry the vehicle currency or the account's distance unit: a call that forgets one shows an empty gap.
-  const REQUIRED = ['cur', 'unit', 'speed', 'min', 'band']
+  const REQUIRED = ['cur', 'unit', 'speed', 'min', 'max', 'band']
   const message = (key: string) => key.split('.').reduce<unknown>((node, part) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[part] : undefined), catalog)
   // The text of a call from its opening parenthesis to the matching closing one.
   const callArgs = (source: string, open: number) => {

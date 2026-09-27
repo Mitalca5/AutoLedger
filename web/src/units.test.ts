@@ -87,4 +87,14 @@ describe('per-distance figures', () => {
     expect(formatDistanceValue(16.09344, 1)).toBe((10).toLocaleString('fr-FR', { minimumFractionDigits: 1 }))
     expect(formatDistance(1.609344, 1)).toBe(`${(1).toLocaleString('fr-FR', { minimumFractionDigits: 1 })} mi`)
   })
+
+  it('formats consumption range bounds in the current unit', () => {
+    setDistanceUnit('km')
+    expect(perDistance(1).toLocaleString('fr-FR', { maximumFractionDigits: 1 })).toBe('1')
+    expect(perDistance(100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })).toBe('100')
+
+    setDistanceUnit('mi')
+    expect(perDistance(1).toLocaleString('fr-FR', { maximumFractionDigits: 1 })).toBe('1,6')
+    expect(perDistance(100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })).toBe('160,9')
+  })
 })

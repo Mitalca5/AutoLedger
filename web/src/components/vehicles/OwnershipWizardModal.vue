@@ -19,7 +19,7 @@ import {
   ownershipStepError,
 } from '@/utils/vehicles'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { distanceUnit, formatDistance } from '@/units'
+import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceValue } from '@/units'
 
 // The acquisition contract of a vehicle (purchase, loan, LOA, LLD) in three steps. \`ownership\` is the saved
 // contract (null when there is none); saving reports the stored contract, deleting reports deleted.
@@ -385,11 +385,11 @@ async function handleDeleteOwnership() {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label for="own-lease-allowance" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.mileageAllowanceKmYear', { unit: distanceUnit() }) }}</label>
-                <DistanceInput id="own-lease-allowance" v-model="ownershipForm.lease_km_allowance_per_year" min="0" :placeholder="$t('common.example', { value: '15000' })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+                <DistanceInput id="own-lease-allowance" v-model="ownershipForm.lease_km_allowance_per_year" min="0" :placeholder="$t('common.example', { value: formatDistanceValue(15000) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
               <div>
                 <label for="own-lease-excess" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.pricePerExtraKmKm', { unit: distanceUnit(), cur: currencySymbol(currency) }) }}</label>
-                <DistanceInput kind="per-distance" id="own-lease-excess" v-model="ownershipForm.lease_excess_km_price" step="0.001" min="0" max="5" :placeholder="$t('common.example', { value: $n(0.15) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+                <DistanceInput kind="per-distance" :digits="3" id="own-lease-excess" v-model="ownershipForm.lease_excess_km_price" step="0.001" min="0" max="5" :placeholder="$t('common.example', { value: formatPerDistanceValue(0.15, 2) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
               <div>
                 <label for="own-lease-end-fees" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.estimatedReturnFees', { cur: currencySymbol(currency) }) }}</label>
