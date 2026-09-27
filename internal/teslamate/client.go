@@ -200,15 +200,15 @@ func (c *Client) GetDrives(ctx context.Context, carID int, opts DriveFilterOptio
 	return resp.Data.Drives, &resp.Data.Units, nil
 }
 
-// GetDriveDetails retrieves the full GPS trace (drive_details) for a single drive.
-func (c *Client) GetDriveDetails(ctx context.Context, carID, driveID int) ([]DrivePosition, error) {
+// GetDriveDetails retrieves the full GPS trace (drive_details) for a single drive, with the units its speeds are in.
+func (c *Client) GetDriveDetails(ctx context.Context, carID, driveID int) ([]DrivePosition, *Units, error) {
 	var resp DriveDetailResponse
 	endpoint := fmt.Sprintf("/api/v1/cars/%d/drives/%d", carID, driveID)
 	err := c.doRequest(ctx, http.MethodGet, endpoint, nil, &resp)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return resp.Data.Drive.DriveDetails, nil
+	return resp.Data.Drive.DriveDetails, &resp.Data.Units, nil
 }
 
 // GetCharges retrieves charges history for a specific car ID with optional filters.

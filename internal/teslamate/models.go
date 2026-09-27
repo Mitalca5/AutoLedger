@@ -110,6 +110,7 @@ type DrivePosition struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Date      string  `json:"date"`
+	Speed     float64 `json:"speed"` // Unit of Units.UnitOfLength per hour, 0 when TeslaMate has no speed
 }
 
 // DriveDetailResponse represents the response of /api/v1/cars/:CarID/drives/:DriveID,
@@ -119,6 +120,7 @@ type DriveDetailResponse struct {
 		Drive struct {
 			DriveDetails []DrivePosition `json:"drive_details"`
 		} `json:"drive"`
+		Units Units `json:"units"`
 	} `json:"data"`
 }
 
