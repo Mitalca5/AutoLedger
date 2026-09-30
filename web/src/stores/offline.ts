@@ -17,7 +17,8 @@ export const useOfflineStore = defineStore('offline', () => {
   async function refreshCount() {
     try {
       pendingCount.value = (await listQueuedMutations()).length
-    } catch {
+    } catch (err) {
+      console.error('Failed to read the offline queue', err)
       pendingCount.value = 0
     }
   }
@@ -70,20 +71,25 @@ export const useOfflineStore = defineStore('offline', () => {
     }
   }
 
+  // Background replay: an IndexedDB failure must not surface as an unhandled rejection
+  function flushInBackground() {
+    flush().catch((err) => console.error('Failed to replay the offline queue', err))
+  }
+
   function start() {
     if (started) return
     started = true
     window.addEventListener('online', () => {
       isOnline.value = true
-      flush()
+      flushInBackground()
     })
     window.addEventListener('offline', () => {
       isOnline.value = false
     })
     setInterval(() => {
-      if (pendingCount.value > 0) flush()
+      if (pendingCount.value > 0) flushInBackground()
     }, RETRY_INTERVAL_MS)
-    refreshCount().then(flush)
+    void refreshCount().then(flushInBackground)
   }
 
   function dismissFailures() {

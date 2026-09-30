@@ -36,7 +36,10 @@ function putInCache(request, response) {
   // Never store an HTML fallback under a CSS/JS URL
   if (response && response.status === 200 && response.type === 'basic' && isExpectedContentType(request, response)) {
     const copy = response.clone();
-    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.put(request, copy))
+      // A failed cache write (quota) only loses the offline copy
+      .catch((err) => console.warn('[sw] cache write failed', request.url || request, err));
   }
   return response;
 }

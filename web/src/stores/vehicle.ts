@@ -143,14 +143,14 @@ export const useVehicleStore = defineStore('vehicle', () => {
     }
     const wasAwayLong = hiddenSince !== null && Date.now() - hiddenSince >= STALE_AFTER_HIDDEN_MS
     hiddenSince = null
-    if (wasAwayLong) fetchVehicles()
-    else checkForNewData()
+    if (wasAwayLong) void fetchVehicles()
+    else void checkForNewData()
   }
 
   function startAutoRefresh() {
     if (pollTimer) return
     pollTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') checkForNewData()
+      if (document.visibilityState === 'visible') void checkForNewData()
     }, POLL_INTERVAL_MS)
     document.addEventListener('visibilitychange', onVisibilityChange)
   }
