@@ -1,20 +1,20 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: teslacost-db
+    container_name: ${DB_CONTAINER_NAME:-autoledger-db}
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-teslacost}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-teslacost_dev_secret}
-      POSTGRES_DB: ${DB_NAME:-teslacost}
+      POSTGRES_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      POSTGRES_PASSWORD: ${AUTOLEDGER_DB_PASSWORD:-${DB_PASSWORD:-autoledger_dev_secret}}
+      POSTGRES_DB: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
     ports:
       # Bound to localhost only: the DB does not need to be reachable from outside the host.
       # Set DB_PORT_BIND to 0.0.0.0:5432 (or similar) if you need external access.
       - "${DB_PORT_BIND:-127.0.0.1:5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - autoledger_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-teslacost} -d ${DB_NAME:-teslacost}"]
+      test: ["CMD-SHELL", "pg_isready -U ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}} -d ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,15 +25,15 @@ services:
         max-file: "3"
 
   api:
-    # Pin TESLACOST_VERSION (e.g. "v1.17.0") in your .env for reproducible deployments.
+    # Pin AUTOLEDGER_VERSION (or TESLACOST_VERSION, e.g. "v1.17.0") in your .env for reproducible deployments.
     # Defaults to "latest" for the quick-start curl-and-go flow described in the README.
-    image: ghcr.io/rem7474/teslacost:${TESLACOST_VERSION:-latest}
+    image: ghcr.io/rem7474/autoledger:${AUTOLEDGER_VERSION:-${TESLACOST_VERSION:-latest}}
     pull_policy: missing
     build:
       context: .
       dockerfile: Dockerfile
       target: prod
-    container_name: teslacost-api
+    container_name: ${APP_CONTAINER_NAME:-autoledger-app}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -57,15 +57,15 @@ services:
       # This compose file is the production deployment path; docker-compose.dev.yml overrides
       # this back to "development" for the local hot-reload workflow.
       ENVIRONMENT: ${ENVIRONMENT:-production}
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      AUTOLEDGER_BASE_URL: ${AUTOLEDGER_BASE_URL:-${APP_BASE_URL:-http://localhost:8080}}
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: ${DB_USER:-teslacost}
-      DB_PASSWORD: ${DB_PASSWORD:-teslacost_dev_secret}
-      DB_NAME: ${DB_NAME:-teslacost}
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_PASSWORD: ${AUTOLEDGER_DB_PASSWORD:-${DB_PASSWORD:-autoledger_dev_secret}}
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
       DB_SSLMODE: disable
-      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-change-this-to-a-secure-32-byte-key-in-prod!}
-      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_signing_key_for_teslacost_app}
+      AUTOLEDGER_ENCRYPTION_KEY: ${AUTOLEDGER_ENCRYPTION_KEY:-${APP_ENCRYPTION_KEY:-change-this-to-a-secure-32-byte-key-in-prod!}}
+      AUTOLEDGER_JWT_SECRET: ${AUTOLEDGER_JWT_SECRET:-${JWT_SECRET:-super_secret_jwt_signing_key_for_autoledger_app}}
       JWT_ACCESS_EXPIRATION_MINUTES: ${JWT_ACCESS_EXPIRATION_MINUTES:-}
       JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS:-}
       # Reverse proxy and browser hardening (see the README, section "Exposition sur Internet")
@@ -77,33 +77,33 @@ services:
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Paris}
-      STORAGE_DIR: ${STORAGE_DIR:-/data/documents}
+      AUTOLEDGER_STORAGE_DIR: ${AUTOLEDGER_STORAGE_DIR:-${STORAGE_DIR:-/data/documents}}
       # --- OIDC / SSO (optional) ---
       # Leave OIDC_ISSUER_URL empty to use local email/password auth only.
       # Uncomment and fill in to enable SSO via Authentik, Keycloak, Authelia, etc.
-      # OIDC_ISSUER_URL: https://auth.homelab.local/application/o/teslacost/
-      # OIDC_CLIENT_ID: teslacost
+      # OIDC_ISSUER_URL: https://auth.homelab.local/application/o/autoledger/
+      # OIDC_CLIENT_ID: autoledger
       # OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
-      # OIDC_REDIRECT_URL: https://teslacost.homelab.local/api/auth/oidc/callback
+      # OIDC_REDIRECT_URL: https://autoledger.homelab.local/api/auth/oidc/callback
       # OIDC_PROVIDER_NAME: Authentik
       # OIDC_ALLOWED_EMAILS: ${OIDC_ALLOWED_EMAILS:-}
       # OIDC_DISABLE_LOCAL_AUTH: "false"
     ports:
-      - "${PORT:-8080}:8080"
+      - "${AUTOLEDGER_PORT:-${PORT:-8080}}:8080"
     volumes:
-      - teslacost_documents:/data/documents
+      - autoledger_documents:/data/documents
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   backup:
     # Published alongside the api image with the same tag, so this file works on its own
     # (no repo checkout needed). The build section is only used for local development.
-    image: ghcr.io/rem7474/teslacost-backup:${TESLACOST_VERSION:-latest}
+    image: ghcr.io/rem7474/autoledger-backup:${AUTOLEDGER_VERSION:-${TESLACOST_VERSION:-latest}}
     pull_policy: missing
     build:
       context: ./backup
       dockerfile: Dockerfile
-    container_name: teslacost-backup
+    container_name: ${BACKUP_CONTAINER_NAME:-autoledger-backup}
     restart: unless-stopped
     depends_on:
       postgres:
@@ -115,14 +115,14 @@ services:
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: ${DB_USER:-teslacost}
-      DB_PASSWORD: ${DB_PASSWORD:-teslacost_dev_secret}
-      DB_NAME: ${DB_NAME:-teslacost}
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_PASSWORD: ${AUTOLEDGER_DB_PASSWORD:-${DB_PASSWORD:-autoledger_dev_secret}}
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
       BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
     volumes:
-      - teslacost_documents:/data/documents:ro
-      - teslacost_backups:/backups
+      - autoledger_documents:/data/documents:ro
+      - autoledger_backups:/backups
     logging:
       driver: json-file
       options:
@@ -130,9 +130,17 @@ services:
         max-file: "3"
 
 volumes:
-  postgres_data:
+  # For existing installations upgrading from TeslaCost:
+  # You can keep your existing volumes without migrating data by setting in your .env:
+  # DB_VOLUME_NAME=postgres_data
+  # DOCUMENTS_VOLUME_NAME=teslacost_documents
+  # BACKUPS_VOLUME_NAME=teslacost_backups
+  autoledger_db_data:
+    name: ${DB_VOLUME_NAME:-autoledger_db_data}
     driver: local
-  teslacost_documents:
+  autoledger_documents:
+    name: ${DOCUMENTS_VOLUME_NAME:-autoledger_documents}
     driver: local
-  teslacost_backups:
+  autoledger_backups:
+    name: ${BACKUPS_VOLUME_NAME:-autoledger_backups}
     driver: local

@@ -15,8 +15,8 @@ log() {
 
 run_backup() {
 	ts="$(date -u +%Y%m%d-%H%M%S)"
-	db_dump="${BACKUP_DIR}/teslacost-db-${ts}.sql.gz"
-	docs_archive="${BACKUP_DIR}/teslacost-documents-${ts}.tar.gz"
+	db_dump="${BACKUP_DIR}/autoledger-db-${ts}.sql.gz"
+	docs_archive="${BACKUP_DIR}/autoledger-documents-${ts}.tar.gz"
 
 	log "starting backup cycle..."
 
@@ -37,10 +37,10 @@ run_backup() {
 	fi
 
 	log "pruning backups older than ${RETENTION_DAYS} day(s)..."
-	find "${BACKUP_DIR}" -maxdepth 1 -name 'teslacost-*.gz' -mtime "+${RETENTION_DAYS}" -print -delete
+	find "${BACKUP_DIR}" -maxdepth 1 \( -name 'autoledger-*.gz' -o -name 'teslacost-*.gz' \) -mtime "+${RETENTION_DAYS}" -print -delete
 }
 
-log "TeslaCost backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
+log "AutoLedger backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
 
 while true; do
 	run_backup || log "ERROR: backup cycle exited unexpectedly, will retry next interval"
