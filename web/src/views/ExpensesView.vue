@@ -19,7 +19,8 @@ import UploadDocumentModal from '@/components/expenses/UploadDocumentModal.vue'
 import ReminderModal from '@/components/expenses/ReminderModal.vue'
 import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.vue'
 import WebhookModal from '@/components/expenses/WebhookModal.vue'
-import { Receipt, Plus, Wrench, Zap, Navigation, Paperclip, Eye, Bell, Radio } from 'lucide-vue-next'
+import CSVImportModal from '@/components/CSVImportModal.vue'
+import { Receipt, Plus, Wrench, Zap, Navigation, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 
@@ -257,6 +258,12 @@ function toggleMissingCostFilter() {
   loadData()
 }
 
+const showCSVImportModal = ref(false)
+
+function openCSVImportModal() {
+  showCSVImportModal.value = true
+}
+
 function openAddChargeModal() {
   editingCharge.value = null
   showChargeModal.value = true
@@ -409,14 +416,22 @@ async function openWebhookModal() {
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.newReminder') }}
         </button>
-        <button
-          v-if="activeTab === 'CHARGES' && !vehicleStore.isIce"
-          @click="openAddChargeModal"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
-        >
-          <Plus class="w-3.5 h-3.5" />
-          {{ vehicleStore.hasTeslaMate ? $t('expenses.expensesView.chargeOutsideTeslamate') : $t('expenses.expensesView.addCharge') }}
-        </button>
+        <template v-if="activeTab === 'CHARGES' && !vehicleStore.isIce">
+          <button
+            @click="openCSVImportModal"
+            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 border border-slate-700 transition-colors"
+          >
+            <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
+            <span>{{ $t('expenses.expensesView.importCsv') }}</span>
+          </button>
+          <button
+            @click="openAddChargeModal"
+            class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          >
+            <Plus class="w-3.5 h-3.5" />
+            {{ vehicleStore.hasTeslaMate ? $t('expenses.expensesView.chargeOutsideTeslamate') : $t('expenses.expensesView.addCharge') }}
+          </button>
+        </template>
         <button
           v-if="activeTab === 'DOCUMENTS'"
           @click="openUploadDocumentModal"
@@ -634,5 +649,12 @@ async function openWebhookModal() {
 
     <!-- Modal: Document In-App Preview (Modular Component) -->
     <DocumentPreviewModal :preview-doc="previewDoc" @close="closeDocPreview" />
+
+    <CSVImportModal
+      v-model:open="showCSVImportModal"
+      :vehicle-id="vehicleId"
+      default-type="CHARGES"
+      @imported="loadData"
+    />
   </div>
 </template>

@@ -27,6 +27,7 @@
     "enterTheInsurance": "Renseigner l'assurance",
     "qualifyTheDrives": "Qualifier les trajets",
     "completeTheCharges": "Compléter les recharges",
+    "manualTrackingNotice": "Suivi déclaratif",
     "tcoComplete": "TCO consolidé à {score_pct} %",
     "hideIssues": "Masquer les incohérences d'odomètre",
     "showIssues": "Voir les incohérences d'odomètre",

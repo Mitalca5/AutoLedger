@@ -157,6 +157,21 @@
     "group_needs_drive": "A group must contain at least one drive",
     "needs_drive": "A trip must contain at least one drive"
   },
+  "drive": {
+    "not_found": "Drive not found",
+    "missing_start_time": "Start date and time are required",
+    "invalid_distance": "Distance must be greater than 0",
+    "cannot_edit_synced": "Only manually logged drives can be edited",
+    "cannot_delete_synced": "Only manually logged drives can be deleted"
+  },
+  "import": {
+    "too_large": "The CSV file exceeds the maximum allowed size (5 MB)",
+    "missing_file": "Missing CSV file in request",
+    "read_failed": "Failed to read CSV file",
+    "empty": "The CSV file is empty",
+    "invalid_csv": "Invalid CSV file format",
+    "execute_failed": "Failed to execute CSV import"
+  },
   "toll": {
     "apply_failed": "Could not apply the toll fare",
     "detection_failed": "Toll detection failed (TeslaMateAPI unreachable or drive unavailable)",

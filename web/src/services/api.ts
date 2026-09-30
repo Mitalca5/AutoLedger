@@ -243,6 +243,30 @@ export const api = {
     if (params?.q) q.set('q', params.q)
     return request<any>(`/vehicles/${vehicleId}/drives?${q.toString()}`)
   },
+  createDrive: (vehicleId: string, data: any) =>
+    request<any>(`/vehicles/${vehicleId}/drives`, { method: 'POST', body: JSON.stringify(data) }),
+  updateDrive: (vehicleId: string, driveId: string, data: any) =>
+    request<any>(`/vehicles/${vehicleId}/drives/${driveId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteDrive: (vehicleId: string, driveId: string) =>
+    request<void>(`/vehicles/${vehicleId}/drives/${driveId}`, { method: 'DELETE' }),
+  previewCSVImport: (vehicleId: string, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request<any>(`/vehicles/${vehicleId}/import/preview`, {
+      method: 'POST',
+      body: formData,
+    })
+  },
+  executeCSVImport: (vehicleId: string, file: File, type?: string, skipDuplicates: boolean = true) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (type) formData.append('type', type)
+    formData.append('skip_duplicates', skipDuplicates ? 'true' : 'false')
+    return request<any>(`/vehicles/${vehicleId}/import/execute`, {
+      method: 'POST',
+      body: formData,
+    })
+  },
   updateDriveTags: (vehicleId: string, driveId: string, tags: string[]) =>
     request<any>(`/vehicles/${vehicleId}/drives/${driveId}/tags`, { method: 'PATCH', body: JSON.stringify({ tags }) }),
   setDriveTollReview: (vehicleId: string, driveId: string, reviewed: boolean) =>

@@ -21,6 +21,7 @@
     "expensesAndMaintenance": "Dépenses & Entretien",
     "chargeOutsideTeslamate": "Recharge hors TeslaMate",
     "addCharge": "Ajouter une recharge",
+    "importCsv": "Importer CSV",
     "deleteExpenseTitle": "Supprimer la dépense",
     "deleteTollMessage": "Supprimer ce péage / parking de {amount} ?",
     "deleteExpenseMessage": "Supprimer la dépense \"{description}\" de {amount} ?",

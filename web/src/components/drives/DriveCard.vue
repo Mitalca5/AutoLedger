@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
-import { MapPin, Clock, Users, Coins } from 'lucide-vue-next'
+import { MapPin, Clock, Users, Coins, Pencil, Trash2 } from 'lucide-vue-next'
 import QualifyActions from '@/components/drives/QualifyActions.vue'
 import { needsTollQualification } from '@/utils/drives'
 import { formatDayTime } from '@/utils/dates'
@@ -11,7 +11,14 @@ import { distanceUnit, formatDistance, perDistance } from '@/units'
 
 // One drive of the list: click opens its cost breakdown.
 defineProps<{ d: any; selected: boolean }>()
-const emit = defineEmits<{ open: [drive: any]; toggle: [drive: any]; 'toll-entry': [drive: any]; 'no-toll': [drive: any] }>()
+const emit = defineEmits<{
+  open: [drive: any]
+  toggle: [drive: any]
+  'toll-entry': [drive: any]
+  'no-toll': [drive: any]
+  edit: [drive: any]
+  delete: [drive: any]
+}>()
 const router = useRouter()
 const vehicleStore = useVehicleStore()
 const prefs = usePreferencesStore()
@@ -69,6 +76,12 @@ const formatDate = formatDayTime
           >
             {{ $t('drives.driveCard.personal') }}
           </span>
+          <span
+            v-if="d.is_manual"
+            class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0"
+          >
+            {{ $t('drives.drivesView.manual') }}
+          </span>
         </div>
 
         <!-- Route Address -->
@@ -122,6 +135,24 @@ const formatDate = formatDayTime
         <Users class="w-3.5 h-3.5 text-rose-500" />
         <span class="hidden md:inline">{{ $t('drives.driveCard.carpool') }}</span>
       </button>
+
+      <!-- Manual Drive Actions -->
+      <template v-if="vehicleStore.canEdit && d.is_manual">
+        <button
+          @click="emit('edit', d)"
+          class="p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
+          :title="$t('common.edit')"
+        >
+          <Pencil class="w-3.5 h-3.5" />
+        </button>
+        <button
+          @click="emit('delete', d)"
+          class="p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
+          :title="$t('common.delete')"
+        >
+          <Trash2 class="w-3.5 h-3.5" />
+        </button>
+      </template>
     </div>
   </div>
 </template>

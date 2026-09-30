@@ -19,9 +19,11 @@ import DriveCostModal from '@/components/drives/DriveCostModal.vue'
 import DriveGroupModal from '@/components/drives/DriveGroupModal.vue'
 import TripEditModal from '@/components/drives/TripEditModal.vue'
 import AddToTripModal from '@/components/drives/AddToTripModal.vue'
+import ManualDriveModal from '@/components/drives/ManualDriveModal.vue'
+import CSVImportModal from '@/components/CSVImportModal.vue'
 import { downloadCsv } from '@/utils/csv'
 import { formatAmount } from '@/currency'
-import { Receipt, Layers, List, RotateCcw } from 'lucide-vue-next'
+import { Receipt, Layers, List, RotateCcw, Plus, UploadCloud } from 'lucide-vue-next'
 import {
   driveCsvHeaders,
   applyBatchTag,
@@ -58,6 +60,45 @@ const hasTollOnly = ref(false)
 const tollSource = ref('')
 const unqualifiedCount = ref(0)
 const loading = ref(true)
+
+// Manual drive and CSV import modals
+const showManualDriveModal = ref(false)
+const driveToEdit = ref<any | null>(null)
+const showCSVImportModal = ref(false)
+
+function openManualDriveModal(drive?: any) {
+  driveToEdit.value = drive || null
+  showManualDriveModal.value = true
+}
+
+function openCSVImportModal() {
+  showCSVImportModal.value = true
+}
+
+function onDriveSaved() {
+  loadDrives()
+}
+
+function onCSVImported() {
+  loadDrives()
+}
+
+async function handleDeleteManualDrive(drive: any) {
+  if (!vehicleStore.activeVehicle || !drive.is_manual) return
+  const ok = await showConfirm({
+    title: t('drives.drivesView.deleteDriveTitle'),
+    message: t('drives.drivesView.deleteDriveMessage'),
+    confirmText: t('common.delete'),
+    type: 'danger',
+  })
+  if (!ok) return
+  try {
+    await api.deleteDrive(vehicleStore.activeVehicle.id, drive.id)
+    await loadDrives()
+  } catch (err: any) {
+    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+  }
+}
 
 // Period / month and address filters (edited in the toolbar)
 const periodMode = ref<'ALL' | 'MONTH' | 'CUSTOM'>('ALL')
@@ -597,10 +638,23 @@ async function handleBulkApplyToll() {
 
 <template>
   <div class="space-y-6">
-    <!-- Drives are imported from TeslaMate: explain why the list is empty for a vehicle that is not linked to it -->
-    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
-      <span>{{ $t('drives.drivesView.drivesAreImportedFromTeslamate') }}</span>
-      <router-link to="/vehicles" class="rounded-lg bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/30">{{ $t('drives.drivesView.setUpTheLink') }}</router-link>
+    <!-- Drives informational banner when no telemetry is linked -->
+    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate && total === 0" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 text-sm text-sky-200">
+      <span>{{ $t('drives.drivesView.noTelemetryBanner') }}</span>
+      <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
+        <button
+          @click="openCSVImportModal"
+          class="rounded-lg bg-sky-500/20 px-2.5 py-1 text-xs font-semibold text-sky-300 hover:bg-sky-500/30 transition-colors"
+        >
+          {{ $t('drives.drivesView.importCsv') }}
+        </button>
+        <button
+          @click="openManualDriveModal()"
+          class="rounded-lg bg-sky-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-sky-500 transition-colors"
+        >
+          {{ $t('drives.drivesView.newDrive') }}
+        </button>
+      </div>
     </div>
 
     <!-- Header & Filter Tabs -->
@@ -628,8 +682,27 @@ async function handleBulkApplyToll() {
         </div>
       </div>
 
-      <!-- Tag Filters -->
-      <div v-if="viewMode === 'DRIVES'" class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl self-start sm:self-auto flex-wrap">
+      <!-- Actions & Tag Filters container -->
+      <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
+        <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
+          <button
+            @click="openCSVImportModal"
+            class="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:border-slate-600 hover:bg-slate-700 transition-colors"
+          >
+            <UploadCloud class="w-4 h-4 text-sky-400" />
+            <span>{{ $t('drives.drivesView.importCsv') }}</span>
+          </button>
+          <button
+            @click="openManualDriveModal()"
+            class="flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-900/30 transition-all"
+          >
+            <Plus class="w-4 h-4" />
+            <span>{{ $t('drives.drivesView.newDrive') }}</span>
+          </button>
+        </div>
+
+        <!-- Tag Filters -->
+        <div v-if="viewMode === 'DRIVES'" class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl flex-wrap">
         <ToQualifyFilter
           :count="unqualifiedCount"
           :active="unqualifiedOnly"
@@ -693,6 +766,7 @@ async function handleBulkApplyToll() {
           :title="$t('drives.tripSuggestions.toQualifyHint')"
           @toggle="tripQualifyOnly = !tripQualifyOnly"
         />
+      </div>
       </div>
     </div>
 
@@ -785,6 +859,8 @@ async function handleBulkApplyToll() {
         @toggle="toggleSelectDrive"
         @toll-entry="openTollEntry"
         @no-toll="markNoToll"
+        @edit="openManualDriveModal"
+        @delete="handleDeleteManualDrive"
       />
 
       <DrivesPagination
@@ -858,6 +934,20 @@ async function handleBulkApplyToll() {
       :trip-groups="tripGroups"
       :selected-drive-ids="selectedDriveIds"
       @saved="onAddedToTrip"
+    />
+
+    <ManualDriveModal
+      v-model:open="showManualDriveModal"
+      :vehicle-id="vehicleId"
+      :drive="driveToEdit"
+      @saved="onDriveSaved"
+    />
+
+    <CSVImportModal
+      v-model:open="showCSVImportModal"
+      :vehicle-id="vehicleId"
+      default-type="DRIVES"
+      @imported="onCSVImported"
     />
   </div>
 </template>

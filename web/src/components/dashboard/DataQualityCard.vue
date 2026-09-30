@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { intlLocale, t } from '@/i18n'
 import { formatDistance } from '@/units'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { api } from '@/services/api'
-import { AlertTriangle } from 'lucide-vue-next'
+import { useVehicleStore } from '@/stores/vehicle'
+import { AlertTriangle, CheckCircle2 } from 'lucide-vue-next'
 
 // TCO completeness score with the reasons it is not 100 %, and the odometer inconsistencies on demand
 const props = defineProps<{ tco: any | null; vehicleId: string }>()
+const vehicleStore = useVehicleStore()
 
 const dataQuality = ref<any | null>(null)
 const showDataQuality = ref(false)
@@ -37,8 +39,15 @@ const issueLabels: Record<string, () => string> = {
   >
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
       <div class="flex items-center gap-2 text-sm font-bold" :class="tco.completeness.is_complete ? 'text-emerald-400' : 'text-amber-400'">
-        <AlertTriangle v-if="!tco.completeness.is_complete" class="w-4 h-4" />
-        {{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}
+        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-4 h-4 text-emerald-400" />
+        <AlertTriangle v-else class="w-4 h-4" />
+        <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
+        <span
+          v-if="vehicleStore.activeVehicle?.telemetry_mode === 'MANUAL'"
+          class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
+        >
+          {{ $t('dashboard.dataQualityCard.manualTrackingNotice') }}
+        </span>
       </div>
       <div class="w-full sm:w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
         <div

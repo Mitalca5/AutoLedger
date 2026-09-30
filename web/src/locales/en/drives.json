@@ -17,6 +17,11 @@
     "drives": "Drives",
     "drivesActualEnergyAndTolls": "{total} drives • Actual energy and tolls, wear and fixed costs spread per {unit}",
     "drivesAndTrips": "Drives and trips",
+    "newDrive": "New drive",
+    "importCsv": "Import CSV",
+    "noTelemetryBanner": "This vehicle runs in manual or semi-automatic mode. You can log drives manually or import your history via CSV.",
+    "deleteDriveTitle": "Delete drive",
+    "deleteDriveMessage": "Are you sure you want to delete this manual drive?",
     "setUpTheLink": "Set up the link",
     "drivesAreImportedFromTeslamate": "Drives are imported from TeslaMate. This vehicle is not linked to it.",
     "deselectPage": "Deselect the page",
@@ -261,5 +266,24 @@
     "failed": "The fare could not be applied."
   },
   "noDrive": "No drive",
-  "csvHeaders": "ID,Date,Start,Destination,Distance_{unit},Duration_min,Consumption_kWh_100{unit},Energy_kWh,Total_Cost_{cur},Cost_{unit}_{cur},Tags"
+  "csvHeaders": "ID,Date,Start,Destination,Distance_{unit},Duration_min,Consumption_kWh_100{unit},Energy_kWh,Total_Cost_{cur},Cost_{unit}_{cur},Tags",
+  "manualModal": {
+    "titleNew": "New drive",
+    "titleEdit": "Edit drive",
+    "dateStart": "Start date and time *",
+    "dateEnd": "End date and time",
+    "distance": "Distance ({unit}) *",
+    "energy": "Energy consumed (kWh)",
+    "energyPlaceholder": "Optional (calculated auto)",
+    "origin": "Origin address",
+    "originPlaceholder": "E.g. Home, Office...",
+    "destination": "Destination address",
+    "destinationPlaceholder": "E.g. Work, City...",
+    "startOdo": "Start odometer ({unit})",
+    "endOdo": "End odometer ({unit})",
+    "tag": "Tag",
+    "save": "Save drive",
+    "saving": "Saving...",
+    "distanceRequired": "Distance is required"
+  }
 }
