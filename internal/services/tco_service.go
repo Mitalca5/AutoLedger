@@ -297,7 +297,6 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 
 	if isManual {
 		// Manual tracking does not expect continuous drives; gaps between manual entries are normal.
-		comp.OdometerGaps = 0
 		if comp.OdometerAnomalies > 0 {
 			comp.Warnings = append(comp.Warnings, fmt.Sprintf(
 				"%d odometer inconsistency(ies) (odometer going backwards or distance differing from reading)", comp.OdometerAnomalies))

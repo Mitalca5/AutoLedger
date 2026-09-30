@@ -63,7 +63,15 @@ func mustVehicle(t *testing.T, repo *database.Repository, email string) *models.
 	if err != nil {
 		t.Fatal(err)
 	}
-	v := &models.Vehicle{UserID: u.ID, Name: "Model 3", TeslaMateAuthType: models.AuthModeNone, CurrentOdometer: 20000}
+	carID := 1
+	v := &models.Vehicle{
+		UserID:            u.ID,
+		Name:              "Model 3",
+		TeslaMateCarID:    &carID,
+		TeslaMateAuthType: models.AuthModeNone,
+		CurrentOdometer:   20000,
+		TelemetryMode:     models.TelemetryConnected,
+	}
 	if err := repo.CreateVehicle(ctx, v); err != nil {
 		t.Fatal(err)
 	}
