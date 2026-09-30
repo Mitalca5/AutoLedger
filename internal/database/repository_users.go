@@ -395,7 +395,8 @@ const vehicleColumns = `
 	id, user_id, name, vin, teslamate_car_id, current_odometer,
 	teslamate_api_url, teslamate_auth_type, teslamate_api_key_encrypted,
 	teslamate_basic_user, teslamate_basic_pass_encrypted,
-	estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain, teslamate_grafana_url,
+	estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain,
+	telemetry_mode, make, model, teslamate_grafana_url,
 	created_at, updated_at
 `
 
@@ -404,7 +405,8 @@ func scanVehicle(row pgx.Row, v *models.Vehicle) error {
 		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.TeslaMateCarID, &v.CurrentOdometer,
 		&v.TeslaMateAPIURL, &v.TeslaMateAuthType, &v.TeslaMateAPIKeyEncrypted,
 		&v.TeslaMateBasicUser, &v.TeslaMateBasicPassEnc,
-		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain, &v.TeslaMateGrafanaURL,
+		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
+		&v.TelemetryMode, &v.Make, &v.Model, &v.TeslaMateGrafanaURL,
 		&v.CreatedAt, &v.UpdatedAt,
 	)
 }

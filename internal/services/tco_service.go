@@ -53,11 +53,12 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	}
 	var currentOdometer float64
 	var estKwh100km, estPricePerKwh *float64
-	var powertrain string
-	if err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain FROM vehicles WHERE id = $1;`, vehicleID).Scan(&currentOdometer, &estKwh100km, &estPricePerKwh, &powertrain); err != nil {
+	var powertrain, telemetryMode string
+	if err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain, telemetry_mode FROM vehicles WHERE id = $1;`, vehicleID).Scan(&currentOdometer, &estKwh100km, &estPricePerKwh, &powertrain, &telemetryMode); err != nil {
 		return nil, fmt.Errorf("vehicle: %w", err)
 	}
 	isICE := powertrain == models.PowertrainICE
+	isManual := telemetryMode == models.TelemetryManual || telemetryMode == models.TelemetrySemiAuto
 	sum.Powertrain = powertrain
 	sum.EstimatedKwh100km = estKwh100km
 	sum.EstimatedPricePerKwh = estPricePerKwh
@@ -285,13 +286,31 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	if err := s.pool.QueryRow(ctx, database.OdometerContinuitySummarySQL, vehicleID).Scan(&comp.OdometerGaps, &gapKm, &comp.OdometerAnomalies); err != nil {
 		return nil, fmt.Errorf("odometer continuity: %w", err)
 	}
-	if comp.OdometerGaps > 0 {
-		comp.Warnings = append(comp.Warnings, fmt.Sprintf(
-			"%d odometer gap(s) between consecutive drives (%.0f km with no recorded drive)", comp.OdometerGaps, gapKm))
-	}
-	if comp.OdometerAnomalies > 0 {
-		comp.Warnings = append(comp.Warnings, fmt.Sprintf(
-			"%d odometer inconsistency(ies) (odometer going backwards or distance differing from the reading) to check in TeslaMate", comp.OdometerAnomalies))
+
+	var checkpointCount int
+	var daysSinceCheckpoint int
+	_ = s.pool.QueryRow(ctx, `
+		SELECT COUNT(*), COALESCE(EXTRACT(DAY FROM (NOW() - MAX(date)))::int, 999)
+		FROM odometer_checkpoints
+		WHERE vehicle_id = $1;
+	`, vehicleID).Scan(&checkpointCount, &daysSinceCheckpoint)
+
+	if isManual {
+		// Manual tracking does not expect continuous drives; gaps between manual entries are normal.
+		comp.OdometerGaps = 0
+		if comp.OdometerAnomalies > 0 {
+			comp.Warnings = append(comp.Warnings, fmt.Sprintf(
+				"%d odometer inconsistency(ies) (odometer going backwards or distance differing from reading)", comp.OdometerAnomalies))
+		}
+	} else {
+		if comp.OdometerGaps > 0 {
+			comp.Warnings = append(comp.Warnings, fmt.Sprintf(
+				"%d odometer gap(s) between consecutive drives (%.0f km with no recorded drive)", comp.OdometerGaps, gapKm))
+		}
+		if comp.OdometerAnomalies > 0 {
+			comp.Warnings = append(comp.Warnings, fmt.Sprintf(
+				"%d odometer inconsistency(ies) (odometer going backwards or distance differing from the reading) to check in TeslaMate", comp.OdometerAnomalies))
+		}
 	}
 
 	comp.IsComplete = len(comp.Warnings) == 0
@@ -313,6 +332,9 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		odometerAnomalies:   comp.OdometerAnomalies + comp.OdometerGaps,
 		ice:                 isICE,
 		iceFillUps:          fuelStats.FillUps,
+		telemetryMode:       telemetryMode,
+		daysSinceOdometer:   daysSinceCheckpoint,
+		hasCheckpoints:      checkpointCount > 0,
 	})
 
 	// 10. Aggregates

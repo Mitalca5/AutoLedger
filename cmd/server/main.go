@@ -345,6 +345,8 @@ func main() {
 		fuelHandler := handlers.NewFuelHandler(repo)
 		reminderHandler := handlers.NewReminderHandler(repo, notificationService)
 		vehicleMemberHandler := handlers.NewVehicleMemberHandler(repo)
+		csvImportService := services.NewCSVImportService(repo)
+		importHandler := handlers.NewImportHandler(repo, csvImportService)
 
 		// Public Auth
 		r.Route("/api/auth", func(r chi.Router) {
@@ -424,7 +426,14 @@ func main() {
 
 				// Drives
 				r.Get("/{vehicleId}/drives", driveHandler.List)
+				r.Post("/{vehicleId}/drives", driveHandler.Create)
+				r.Put("/{vehicleId}/drives/{driveId}", driveHandler.Update)
+				r.Delete("/{vehicleId}/drives/{driveId}", driveHandler.Delete)
 				r.Get("/{vehicleId}/drives/{driveId}/expenses", driveHandler.GetDriveExpenses)
+
+				// Import (CSV Charges & Drives)
+				r.Post("/{vehicleId}/import/preview", importHandler.Preview)
+				r.Post("/{vehicleId}/import/execute", importHandler.Execute)
 				r.Patch("/{vehicleId}/drives/{driveId}/tags", driveHandler.UpdateTags)
 				r.Patch("/{vehicleId}/drives/{driveId}/toll-review", driveHandler.SetTollReview)
 				r.Get("/{vehicleId}/drives/{driveId}/toll-detection", driveHandler.GetTollDetection)

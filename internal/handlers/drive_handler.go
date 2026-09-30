@@ -536,6 +536,213 @@ func (h *DriveHandler) DeleteTripGroup(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"success": true})
 }
 
+type SaveManualDriveRequest struct {
+	StartTime         time.Time `json:"start_time"`
+	EndTime           *time.Time `json:"end_time"`
+	DistanceKm        float64   `json:"distance_km"`
+	DurationMin       *int      `json:"duration_min"`
+	EnergyConsumedKwh *float64  `json:"energy_consumed_kwh"`
+	StartOdometer     *float64  `json:"start_odometer"`
+	EndOdometer       *float64  `json:"end_odometer"`
+	StartAddress      *string   `json:"start_address"`
+	EndAddress        *string   `json:"end_address"`
+	Tags              []string  `json:"tags"`
+}
+
+// Create records a manually entered drive.
+func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
+	vehicleID := chi.URLParam(r, "vehicleId")
+	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
+	if vehicle == nil {
+		return
+	}
+
+	var req SaveManualDriveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	if req.StartTime.IsZero() {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.missing_start_time", "Start time is required"))
+		return
+	}
+	if req.DistanceKm <= 0 || req.DistanceKm > 3000 {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.invalid_distance", "Distance must be between 0.1 and 3000 km"))
+		return
+	}
+
+	endTime := req.StartTime
+	if req.EndTime != nil && req.EndTime.After(req.StartTime) {
+		endTime = *req.EndTime
+	} else if req.DurationMin != nil && *req.DurationMin > 0 {
+		endTime = req.StartTime.Add(time.Duration(*req.DurationMin) * time.Minute)
+	} else {
+		// Default to 50 km/h average speed
+		duration := int(math.Max(1, math.Round((req.DistanceKm / 50.0) * 60)))
+		endTime = req.StartTime.Add(time.Duration(duration) * time.Minute)
+	}
+
+	durationMin := int(math.Max(1, math.Round(endTime.Sub(req.StartTime).Minutes())))
+
+	var energy float64
+	var cons100 float64
+	if req.EnergyConsumedKwh != nil && *req.EnergyConsumedKwh > 0 {
+		energy = *req.EnergyConsumedKwh
+		cons100 = (energy / req.DistanceKm) * 100
+	} else {
+		if vehicle.EstimatedKwh100km != nil && *vehicle.EstimatedKwh100km > 0 {
+			cons100 = *vehicle.EstimatedKwh100km
+		} else {
+			cons100 = 16.0
+		}
+		energy = (cons100 * req.DistanceKm) / 100
+	}
+
+	if req.StartOdometer != nil && req.EndOdometer == nil {
+		endOdo := *req.StartOdometer + req.DistanceKm
+		req.EndOdometer = &endOdo
+	} else if req.EndOdometer != nil && req.StartOdometer == nil {
+		startOdo := *req.EndOdometer - req.DistanceKm
+		req.StartOdometer = &startOdo
+	}
+
+	tags := req.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	d := &models.Drive{
+		VehicleID:           vehicleID,
+		StartTime:           req.StartTime,
+		EndTime:             endTime,
+		StartOdometer:       req.StartOdometer,
+		EndOdometer:         req.EndOdometer,
+		DistanceKm:          req.DistanceKm,
+		DurationMin:         durationMin,
+		StartAddress:        req.StartAddress,
+		EndAddress:          req.EndAddress,
+		EnergyConsumedKwh:   &energy,
+		ConsumptionKwh100km: &cons100,
+		Tags:                tags,
+		IsManual:            true,
+	}
+
+	if err := h.repo.CreateManualDrive(r.Context(), d); err != nil {
+		writeRepoError(w, r, err, "Failed to create manual drive")
+		return
+	}
+
+	// Update vehicle odometer if this drive ended higher than current odometer
+	if req.EndOdometer != nil && *req.EndOdometer > vehicle.CurrentOdometer {
+		_ = h.repo.UpdateVehicleOdometer(r.Context(), vehicleID, *req.EndOdometer)
+	}
+
+	writeJSON(w, http.StatusCreated, d)
+}
+
+// Update edits a manually entered drive.
+func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
+	vehicleID := chi.URLParam(r, "vehicleId")
+	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
+	if vehicle == nil {
+		return
+	}
+
+	driveID := chi.URLParam(r, "driveId")
+	existing, err := h.repo.GetDriveByID(r.Context(), driveID, vehicleID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to get drive")
+		return
+	}
+
+	if !existing.IsManual {
+		writeAPIError(w, http.StatusForbidden, apierror.New("drive.cannot_edit_synced", "Synchronized drives cannot be edited directly"))
+		return
+	}
+
+	var req SaveManualDriveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	if !req.StartTime.IsZero() {
+		existing.StartTime = req.StartTime
+	}
+	if req.DistanceKm > 0 {
+		if req.DistanceKm > 3000 {
+			writeAPIError(w, http.StatusBadRequest, apierror.New("drive.invalid_distance", "Distance must be between 0.1 and 3000 km"))
+			return
+		}
+		existing.DistanceKm = req.DistanceKm
+	}
+
+	if req.EndTime != nil && req.EndTime.After(existing.StartTime) {
+		existing.EndTime = *req.EndTime
+	} else if req.DurationMin != nil && *req.DurationMin > 0 {
+		existing.EndTime = existing.StartTime.Add(time.Duration(*req.DurationMin) * time.Minute)
+	}
+	existing.DurationMin = int(math.Max(1, math.Round(existing.EndTime.Sub(existing.StartTime).Minutes())))
+
+	if req.EnergyConsumedKwh != nil && *req.EnergyConsumedKwh > 0 {
+		energy := *req.EnergyConsumedKwh
+		cons100 := (energy / existing.DistanceKm) * 100
+		existing.EnergyConsumedKwh = &energy
+		existing.ConsumptionKwh100km = &cons100
+	}
+
+	if req.StartOdometer != nil {
+		existing.StartOdometer = req.StartOdometer
+	}
+	if req.EndOdometer != nil {
+		existing.EndOdometer = req.EndOdometer
+	}
+	if req.StartAddress != nil {
+		existing.StartAddress = req.StartAddress
+	}
+	if req.EndAddress != nil {
+		existing.EndAddress = req.EndAddress
+	}
+	if req.Tags != nil {
+		existing.Tags = req.Tags
+	}
+
+	if err := h.repo.UpdateManualDrive(r.Context(), existing); err != nil {
+		writeRepoError(w, r, err, "Failed to update manual drive")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, existing)
+}
+
+// Delete removes a manually entered drive.
+func (h *DriveHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	vehicleID := chi.URLParam(r, "vehicleId")
+	if v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor); v == nil {
+		return
+	}
+
+	driveID := chi.URLParam(r, "driveId")
+	existing, err := h.repo.GetDriveByID(r.Context(), driveID, vehicleID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to get drive")
+		return
+	}
+
+	if !existing.IsManual {
+		writeAPIError(w, http.StatusForbidden, apierror.New("drive.cannot_delete_synced", "Synchronized drives cannot be deleted manually"))
+		return
+	}
+
+	if err := h.repo.DeleteManualDrive(r.Context(), driveID, vehicleID); err != nil {
+		writeRepoError(w, r, err, "Failed to delete manual drive")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func parseDriveFilter(r *http.Request) database.DriveFilter {
 	filter := database.DriveFilter{
 		Tag:             r.URL.Query().Get("tag"),
