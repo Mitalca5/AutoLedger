@@ -180,12 +180,15 @@ func Load() *Config {
 	}
 }
 
-// knownDefaultJWTSecret and knownDefaultEncryptionKeys are the literal placeholder values
-// shipped in docker-compose.yml, .env.example and this package's own defaults. Running with
-// one of these in production means anyone who has read the (public) source code can forge
-// authentication tokens or decrypt stored TeslaMate credentials.
-const knownDefaultJWTSecret = "super_secret_jwt_signing_key_for_teslacost_app"
-const knownDefaultDBPassword = "teslacost_dev_secret"
+var knownDefaultJWTSecrets = []string{
+	"super_secret_jwt_signing_key_for_teslacost_app",
+	"super_secret_jwt_signing_key_for_autoledger_app",
+}
+
+var knownDefaultDBPasswords = []string{
+	"teslacost_dev_secret",
+	"autoledger_dev_secret",
+}
 
 var knownDefaultEncryptionKeys = []string{
 	"dev-default-32-byte-secret-key!!",             // internal/config/config.go Load() fallback
@@ -199,19 +202,19 @@ var knownDefaultEncryptionKeys = []string{
 func (c *Config) InsecureDefaults() []string {
 	var warnings []string
 
-	if c.JWTSecret == knownDefaultJWTSecret {
+	if slices.Contains(knownDefaultJWTSecrets, c.JWTSecret) {
 		warnings = append(warnings, "JWT_SECRET is set to the well-known default value from the repository — anyone can forge valid session tokens")
 	}
 
 	for _, known := range knownDefaultEncryptionKeys {
 		if c.AppEncryptionKey == known {
-			warnings = append(warnings, "APP_ENCRYPTION_KEY is set to a well-known placeholder value — stored TeslaMate credentials can be decrypted by anyone with the source code")
+			warnings = append(warnings, "APP_ENCRYPTION_KEY is set to a well-known placeholder value — stored credentials can be decrypted by anyone with the source code")
 			break
 		}
 	}
 
 	if u, err := url.Parse(c.DatabaseURL); err == nil && u.User != nil {
-		if pass, _ := u.User.Password(); pass == knownDefaultDBPassword {
+		if pass, _ := u.User.Password(); slices.Contains(knownDefaultDBPasswords, pass) {
 			warnings = append(warnings, "DB_PASSWORD is set to the well-known default value from the repository")
 		}
 	}
