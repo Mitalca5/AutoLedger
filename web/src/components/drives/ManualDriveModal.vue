@@ -142,10 +142,11 @@ async function handleSubmit() {
         <!-- Times -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-start-time" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.dateStart') }}
             </label>
             <input
+              id="manual-drive-start-time"
               v-model="startTime"
               type="datetime-local"
               required
@@ -153,10 +154,11 @@ async function handleSubmit() {
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-end-time" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.dateEnd') }}
             </label>
             <input
+              id="manual-drive-end-time"
               v-model="endTime"
               type="datetime-local"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
@@ -167,10 +169,11 @@ async function handleSubmit() {
         <!-- Distance & Energy -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-distance" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.distance', { unit: distanceUnit() }) }}
             </label>
             <DistanceInput
+              id="manual-drive-distance"
               v-model="distanceKm"
               required
               min="0.1"
@@ -179,10 +182,11 @@ async function handleSubmit() {
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-energy" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.energy') }}
             </label>
             <input
+              id="manual-drive-energy"
               v-model.number="energyKwh"
               type="number"
               step="0.1"
@@ -196,10 +200,11 @@ async function handleSubmit() {
         <!-- Locations -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-start-address" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.origin') }}
             </label>
             <input
+              id="manual-drive-start-address"
               v-model="startAddress"
               type="text"
               :placeholder="$t('drives.manualModal.originPlaceholder')"
@@ -207,10 +212,11 @@ async function handleSubmit() {
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-end-address" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.destination') }}
             </label>
             <input
+              id="manual-drive-end-address"
               v-model="endAddress"
               type="text"
               :placeholder="$t('drives.manualModal.destinationPlaceholder')"
@@ -222,10 +228,11 @@ async function handleSubmit() {
         <!-- Odometers -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-start-odo" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.startOdo', { unit: distanceUnit() }) }}
             </label>
             <DistanceInput
+              id="manual-drive-start-odo"
               v-model="startOdometer"
               step="1"
               min="0"
@@ -233,10 +240,11 @@ async function handleSubmit() {
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="manual-drive-end-odo" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.endOdo', { unit: distanceUnit() }) }}
             </label>
             <DistanceInput
+              id="manual-drive-end-odo"
               v-model="endOdometer"
               step="1"
               min="0"

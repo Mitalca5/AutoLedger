@@ -152,11 +152,12 @@ async function handleExecute() {
         <div v-else class="space-y-4">
           <!-- File selection -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label for="csv-file-input" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('import.selectFile') }}
             </label>
             <div class="flex items-center gap-3">
               <input
+                id="csv-file-input"
                 type="file"
                 accept=".csv,text/csv"
                 @change="onFileChange"
@@ -177,10 +178,11 @@ async function handleExecute() {
           <!-- Type and options -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label for="csv-type-select" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
                 {{ $t('import.typeLabel') }}
               </label>
               <select
+                id="csv-type-select"
                 v-model="selectedType"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
               >
@@ -190,8 +192,9 @@ async function handleExecute() {
               </select>
             </div>
             <div class="flex items-center pt-5">
-              <label class="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer">
+              <label for="csv-skip-duplicates" class="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer">
                 <input
+                  id="csv-skip-duplicates"
                   v-model="skipDuplicates"
                   type="checkbox"
                   class="rounded text-indigo-500 focus:ring-indigo-500/20 bg-slate-900 border-slate-700 w-4 h-4"
