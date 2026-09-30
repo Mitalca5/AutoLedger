@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { Plus, X } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
@@ -20,14 +20,12 @@ const { showAlert } = useConfirm()
 const vehicleStore = useVehicleStore()
 
 const addType = ref<'SET_4' | 'SET_4_STORAGE' | 'SET_2_FRONT' | 'SET_2_REAR' | 'SET_2_STORAGE' | 'SINGLE'>('SET_4')
-const dimensionPreset = ref('235/40 R19 96W')
-const isCustomDimension = ref(false)
 const isTotalPrice = ref(true)
 
 const addTireForm = ref({
-  brand: 'Michelin',
-  model: 'Pilot Sport EV',
-  dimension: '235/40 R19 96W',
+  brand: '',
+  model: '',
+  dimension: '',
   season: 'SUMMER',
   purchase_date: todayIso(),
   total_price: 880,
@@ -41,44 +39,10 @@ const addTireForm = ref({
   current_position: 'FL',
 })
 
-// Tesla predefined tire dimensions
-const teslaDimensionPresets = [
-  { group: 'Tesla Model 3', label: '18" Aero — 235/45 R18 98Y', value: '235/45 R18 98Y' },
-  { group: 'Tesla Model 3', label: '19" Sport — 235/40 R19 96W', value: '235/40 R19 96W' },
-  { group: 'Tesla Model 3', label: '20" Performance — 245/35 R20 95Y', value: '245/35 R20 95Y' },
-  { group: 'Tesla Model Y', label: '19" Gemini — 255/45 R19 104W', value: '255/45 R19 104W' },
-  { group: 'Tesla Model Y', label: '20" Induction — 255/40 R20 101W', value: '255/40 R20 101W' },
-  { group: 'Tesla Model Y', label: `21" Überturbine ${t('tires.tireAddModal.front')} — 255/35 R21 98W`, value: '255/35 R21 98W' },
-  { group: 'Tesla Model Y', label: `21" Überturbine ${t('tires.tireAddModal.rear')} — 275/35 R21 103W`, value: '275/35 R21 103W' },
-  { group: 'Tesla Model S', label: '19" Tempest — 255/45 R19 104Y', value: '255/45 R19 104Y' },
-  { group: 'Tesla Model S', label: `21" Arachnid ${t('tires.tireAddModal.front')} — 265/35 R21`, value: '265/35 R21' },
-  { group: 'Tesla Model S', label: `21" Arachnid ${t('tires.tireAddModal.rear')} — 295/30 R21`, value: '295/30 R21' },
-  { group: 'Tesla Model X', label: '20" Cyberstream — 265/45 R20 / 275/45 R20', value: '265/45 R20' },
-]
-const customDimensionPreset = { group: 'Other', label: t('tires.tireAddModal.customSize'), value: 'CUSTOM' }
-// The Tesla model presets are offered to vehicles linked to TeslaMate; any other vehicle types its dimension
-const dimensionPresets = computed(() =>
-  vehicleStore.hasTeslaMate ? [...teslaDimensionPresets, customDimensionPreset] : [customDimensionPreset],
-)
-
-function onDimensionPresetChange() {
-  if (dimensionPreset.value === 'CUSTOM') {
-    isCustomDimension.value = true
-    addTireForm.value.dimension = ''
-  } else {
-    isCustomDimension.value = false
-    addTireForm.value.dimension = dimensionPreset.value
-  }
-}
-
 // Mounted tires start at the vehicle's current odometer
 watch(open, (isOpen) => {
   if (!isOpen) return
   if (props.currentOdometer) addTireForm.value.mounted_odometer = Math.round(props.currentOdometer)
-  if (!vehicleStore.hasTeslaMate) {
-    dimensionPreset.value = 'CUSTOM'
-    onDimensionPresetChange()
-  }
 })
 
 async function handleCreateTires() {
@@ -221,37 +185,14 @@ async function handleCreateTires() {
         </select>
       </div>
 
-      <!-- Dimension Dropdown -->
-      <div class="space-y-1">
-        <label for="tire-dimension-preset" class="block text-xs font-semibold text-slate-400">{{ $t('tires.tireAddModal.approvedSize') }}</label>
-        <select id="tire-dimension-preset"
-          v-model="dimensionPreset"
-          @change="onDimensionPresetChange"
-          class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500 font-mono"
-        >
-          <option v-for="p in dimensionPresets" :key="p.value" :value="p.value">
-            {{ p.label }}
-          </option>
-        </select>
-        <div v-if="isCustomDimension" class="pt-1.5">
-          <label for="tire-add-tire-dimension" class="sr-only">{{ $t('tires.tireAddModal.customDimension') }}</label>
-          <input id="tire-add-tire-dimension"
-            v-model="addTireForm.dimension"
-            type="text"
-            :placeholder="$t('common.example', { value: '245/40 R19 98Y' })"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500 font-mono"
-          />
-        </div>
-      </div>
-
-      <!-- Brand, Model, Season -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <!-- Brand, Model, Dimension, Season -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label for="tire-add-tire-brand" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.brand') }}</label>
           <input id="tire-add-tire-brand"
             v-model="addTireForm.brand"
             type="text"
-            :placeholder="$t('tires.tireAddModal.michelinPirelliHankook')"
+            :placeholder="$t('tires.tireAddModal.brand')"
             class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
           />
         </div>
@@ -260,8 +201,17 @@ async function handleCreateTires() {
           <input id="tire-add-tire-model"
             v-model="addTireForm.model"
             type="text"
-            :placeholder="$t('tires.tireAddModal.pilotSportEvWinterSottozero')"
+            :placeholder="$t('tires.tireAddModal.model')"
             class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+          />
+        </div>
+        <div>
+          <label for="tire-add-tire-dimension" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.dimension') }}</label>
+          <input id="tire-add-tire-dimension"
+            v-model="addTireForm.dimension"
+            type="text"
+            placeholder="235/45 R18 98Y"
+            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500 font-mono"
           />
         </div>
         <div>
