@@ -76,6 +76,17 @@ async function testModalConnection() {
       </div>
 
       <form id="vehicle-modal-form" @submit.prevent="handleSave" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="vehicle-make" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('onboarding.onboardingView.make') }}</label>
+            <input id="vehicle-make" v-model="form.make" :placeholder="$t('onboarding.onboardingView.makePlaceholder')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          </div>
+          <div>
+            <label for="vehicle-model" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('onboarding.onboardingView.model') }}</label>
+            <input id="vehicle-model" v-model="form.model" :placeholder="$t('onboarding.onboardingView.modelPlaceholder')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          </div>
+        </div>
+
         <div>
           <label for="vehicle-name" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.vehicleName') }}</label>
           <input id="vehicle-name" v-model="form.name" required :placeholder="$t('vehicles.vehicleFormModal.eGMyCar')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
@@ -100,7 +111,7 @@ async function testModalConnection() {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label for="vehicle-vin" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.vinOptional') }}</label>
-            <input id="vehicle-vin" v-model="form.vin" placeholder="5YJ3E1EB..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="vehicle-vin" v-model="form.vin" placeholder="VIN" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
           </div>
           <div>
             <label for="vehicle-current-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ form.powertrain === 'ICE' ? $t('vehicles.vehicleFormModal.currentMileage', { unit: distanceUnit() }) : $t('vehicles.vehicleFormModal.initialOdometer', { unit: distanceUnit() }) }}</label>

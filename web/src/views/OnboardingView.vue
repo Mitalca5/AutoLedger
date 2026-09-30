@@ -24,8 +24,7 @@ const adminPassword = ref('')
 const adminConfirmPassword = ref('')
 
 // Step 2: Vehicle Setup
-const commonMakes = ['Tesla', 'Renault', 'Peugeot', 'Hyundai', 'Kia', 'MG', 'BMW', 'Volkswagen', 'Autre']
-const vehicleMake = ref('Tesla')
+const vehicleMake = ref('')
 const vehicleModel = ref('')
 const vehicleName = ref('')
 const vehicleVin = ref('')
@@ -33,17 +32,10 @@ const vehiclePowertrain = ref<'EV' | 'ICE'>('EV')
 const telemetryMode = ref<'CONNECTED' | 'SEMI_AUTO' | 'MANUAL'>('CONNECTED')
 const vehicleOdometer = ref(15000)
 
-function selectMake(make: string) {
-  vehicleMake.value = make
-  if (make !== 'Tesla' && telemetryMode.value === 'CONNECTED') {
-    telemetryMode.value = 'MANUAL'
-  }
-  updateVehicleNameDefault()
-}
-
 function updateVehicleNameDefault() {
-  if (!vehicleName.value || commonMakes.includes(vehicleName.value.trim())) {
-    vehicleName.value = vehicleModel.value ? `${vehicleMake.value} ${vehicleModel.value}` : vehicleMake.value
+  const parts = [vehicleMake.value.trim(), vehicleModel.value.trim()].filter(Boolean)
+  if (!vehicleName.value || vehicleName.value === parts.slice(0, -1).join(' ')) {
+    vehicleName.value = parts.join(' ')
   }
 }
 
@@ -278,26 +270,18 @@ function finishOnboarding() {
         </div>
 
         <form @submit.prevent="handleStep2Submit" class="space-y-4">
-          <!-- Make Selection -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider">{{ $t('onboarding.onboardingView.make') }}</label>
-            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              <button
-                v-for="make in commonMakes"
-                :key="make"
-                type="button"
-                @click="selectMake(make)"
-                class="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-center truncate"
-                :class="vehicleMake === make
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500 shadow-sm ring-1 ring-rose-500/40'
-                  : 'bg-slate-800/80 text-slate-400 border-slate-700/80 hover:bg-slate-800 hover:text-slate-200'"
-              >
-                {{ make }}
-              </button>
-            </div>
-          </div>
-
+          <!-- Make & Model Inputs -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="onboarding-vehicle-make" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.make') }}</label>
+              <input id="onboarding-vehicle-make"
+                v-model="vehicleMake"
+                @input="updateVehicleNameDefault"
+                type="text"
+                :placeholder="$t('onboarding.onboardingView.makePlaceholder')"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              />
+            </div>
             <div>
               <label for="onboarding-vehicle-model" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.model') }}</label>
               <input id="onboarding-vehicle-model"
@@ -308,16 +292,17 @@ function finishOnboarding() {
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
-            <div>
-              <label for="onboarding-vehicle-name" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.vehicleName') }}</label>
-              <input id="onboarding-vehicle-name"
-                v-model="vehicleName"
-                type="text"
-                required
-                :placeholder="$t('onboarding.onboardingView.eGMyCar')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
-              />
-            </div>
+          </div>
+
+          <div>
+            <label for="onboarding-vehicle-name" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.vehicleName') }}</label>
+            <input id="onboarding-vehicle-name"
+              v-model="vehicleName"
+              type="text"
+              required
+              :placeholder="$t('onboarding.onboardingView.vehicleName')"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+            />
           </div>
 
           <div>
@@ -392,7 +377,7 @@ function finishOnboarding() {
               <input id="onboarding-vehicle-vin"
                 v-model="vehicleVin"
                 type="text"
-                placeholder="5YJ3E7EB..."
+                placeholder="VIN"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>

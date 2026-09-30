@@ -54,7 +54,7 @@
     "powertrain": "Powertrain",
     "currency": "Currency",
     "currencyFixed": "Fixed at creation: costs are recorded in this currency for the vehicle's whole life.",
-    "eGMyCar": "e.g. My car",
+    "eGMyCar": "Vehicle name",
     "vehicleName": "Vehicle name",
     "edit": "Edit the vehicle",
     "currentMileage": "Current mileage ({unit})",
