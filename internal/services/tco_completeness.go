@@ -18,6 +18,9 @@ type completenessInputs struct {
 	odometerAnomalies   int
 	ice                 bool // Combustion vehicle: energy and distance come from fuel fill-ups
 	iceFillUps          int
+	telemetryMode       string // CONNECTED, SEMI_AUTO, MANUAL
+	daysSinceOdometer   int    // Days since last odometer checkpoint
+	hasCheckpoints      bool   // Vehicle has odometer checkpoints recorded
 }
 
 func ratio(part, total float64) float64 {
@@ -45,14 +48,32 @@ func boolScore(ok bool) float64 {
 // completenessScore weights how much of the TCO rests on complete data.
 func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 	distance := 0.0
+	isManual := in.telemetryMode == "MANUAL" || in.telemetryMode == "SEMI_AUTO"
+
 	if in.basisKm > 0 {
-		distance = ratio(in.trackedKm, in.basisKm)
+		if isManual && in.hasCheckpoints {
+			// For manual tracking, regular odometer checkpoints provide distance validity.
+			if in.daysSinceOdometer <= 45 {
+				distance = 1.0
+			} else if in.daysSinceOdometer <= 90 {
+				distance = math.Max(0.5, 1.0-float64(in.daysSinceOdometer-45)/90.0)
+			} else {
+				distance = 0.5
+			}
+			if in.trackedKm > 0 {
+				distance = math.Max(distance, ratio(in.trackedKm, in.basisKm))
+			}
+		} else {
+			distance = ratio(in.trackedKm, in.basisKm)
+		}
 	}
 	energyLabel, energyScore := "Charges with a cost (kWh)", ratio(in.kwhPriced, in.kwhAdded)
 	distanceLabel := "Kilometres covered by drives"
 	if in.ice {
 		energyLabel, energyScore = "Fuel fill-ups recorded", boolScore(in.iceFillUps > 0)
 		distanceLabel = "Kilometres covered by readings and fill-ups"
+	} else if isManual {
+		distanceLabel = "Kilometres covered by readings and drives"
 	}
 	dims := []struct {
 		key, label string

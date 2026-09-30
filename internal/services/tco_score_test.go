@@ -77,3 +77,30 @@ func TestCompletenessScoreEmptyDenominators(t *testing.T) {
 		t.Errorf("tolls dimension = %+v, want 75%%", dims[2])
 	}
 }
+
+func TestCompletenessScoreManualEV(t *testing.T) {
+	// A manual EV without drives tracking, but with recent odometer checkpoints,
+	// recorded charges with price, insurance and acquisition entered.
+	in := completenessInputs{
+		telemetryMode:       "MANUAL",
+		hasCheckpoints:      true,
+		daysSinceOdometer:   15,
+		basisKm:             5000,
+		trackedKm:           0, // No automated drives
+		kwhAdded:            300,
+		kwhPriced:           300,
+		insurancePresent:    true,
+		acquisitionComplete: true,
+	}
+
+	score, dims := completenessScore(in)
+	if score != 100 {
+		t.Fatalf("expected 100%% score for properly maintained manual EV, got %d%% (dims: %+v)", score, dims)
+	}
+
+	for _, d := range dims {
+		if d.ScorePct != 100 {
+			t.Errorf("expected dimension %s to be 100%%, got %d%%", d.Key, d.ScorePct)
+		}
+	}
+}

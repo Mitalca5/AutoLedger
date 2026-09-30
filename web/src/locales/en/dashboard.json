@@ -27,6 +27,7 @@
     "enterTheInsurance": "Enter the insurance",
     "qualifyTheDrives": "Qualify the drives",
     "completeTheCharges": "Complete the charges",
+    "manualTrackingNotice": "Declarative tracking",
     "tcoComplete": "TCO {score_pct}% complete",
     "hideIssues": "Hide the odometer inconsistencies",
     "showIssues": "View the odometer inconsistencies",

@@ -45,6 +45,9 @@ type SaveVehicleRequest struct {
 	EstimatedPricePerKwh *float64        `json:"estimated_price_per_kwh"`
 	Currency             string          `json:"currency"`              // ISO 4217 code, fixed at creation; ignored on update
 	Powertrain           string          `json:"powertrain"`            // EV (default) or ICE
+	TelemetryMode        string          `json:"telemetry_mode"`        // CONNECTED, SEMI_AUTO, MANUAL
+	Make                 string          `json:"make"`                  // Tesla, Renault, etc.
+	Model                string          `json:"model"`                 // Model 3, Megane, etc.
 	TeslaMateGrafanaURL  *string         `json:"teslamate_grafana_url"` // Optional; empty clears it
 }
 
@@ -169,6 +172,24 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		authType = models.AuthModeNone
 	}
 
+	telemetryMode := req.TelemetryMode
+	if telemetryMode == "" {
+		if req.TeslaMateCarID != nil || (req.TeslaMateAPIURL != nil && *req.TeslaMateAPIURL != "") {
+			telemetryMode = models.TelemetryConnected
+		} else {
+			telemetryMode = models.TelemetryManual
+		}
+	}
+
+	makeName := strings.TrimSpace(req.Make)
+	if makeName == "" {
+		if telemetryMode == models.TelemetryConnected {
+			makeName = "Tesla"
+		} else {
+			makeName = "Generic"
+		}
+	}
+
 	v := &models.Vehicle{
 		UserID:                   userID,
 		Name:                     req.Name,
@@ -184,6 +205,9 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		EstimatedPricePerKwh:     req.EstimatedPricePerKwh,
 		Currency:                 currency,
 		Powertrain:               powertrain,
+		TelemetryMode:            telemetryMode,
+		Make:                     makeName,
+		Model:                    strings.TrimSpace(req.Model),
 		TeslaMateGrafanaURL:      grafanaURL,
 	}
 
@@ -279,6 +303,15 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.EstimatedPricePerKwh != nil {
 		existing.EstimatedPricePerKwh = req.EstimatedPricePerKwh
+	}
+	if req.TelemetryMode != "" {
+		existing.TelemetryMode = req.TelemetryMode
+	}
+	if req.Make != "" {
+		existing.Make = strings.TrimSpace(req.Make)
+	}
+	if req.Model != "" {
+		existing.Model = strings.TrimSpace(req.Model)
 	}
 
 	if err := h.repo.UpdateVehicle(r.Context(), existing); err != nil {

@@ -21,6 +21,7 @@
     "expensesAndMaintenance": "Dépenses & Entretien",
     "chargeOutsideTeslamate": "Recharge hors TeslaMate",
     "addCharge": "Ajouter une recharge",
+    "importCsv": "Importer CSV",
     "deleteExpenseTitle": "Supprimer la dépense",
     "deleteTollMessage": "Supprimer ce péage / parking de {amount} ?",
     "deleteExpenseMessage": "Supprimer la dépense \"{description}\" de {amount} ?",
@@ -293,7 +294,7 @@
     "noTollOrParkingRecorded": "Aucun péage ou parking enregistré."
   },
   "uploadDocumentModal": {
-    "eGServiceInvoiceAugust": "ex: Facture révision Tesla Chambourcy, péages août 2026...",
+    "eGServiceInvoiceAugust": "ex: Facture révision, péages août 2026...",
     "descriptionInvoiceRefOptional": "Description / Réf. facture (optionnel)",
     "dragYourInvoiceHereOr": "Glissez votre facture ou cliquez pour parcourir",
     "receiptFile": "Fichier justificatif",

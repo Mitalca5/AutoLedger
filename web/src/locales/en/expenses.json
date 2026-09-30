@@ -21,6 +21,7 @@
     "expensesAndMaintenance": "Expenses and maintenance",
     "chargeOutsideTeslamate": "Charge outside TeslaMate",
     "addCharge": "Add a charge",
+    "importCsv": "Import CSV",
     "deleteExpenseTitle": "Delete the expense",
     "deleteTollMessage": "Delete this toll / parking fee of {amount}?",
     "deleteExpenseMessage": "Delete the expense \"{description}\" of {amount}?",

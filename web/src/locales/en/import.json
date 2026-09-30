@@ -1,0 +1,21 @@
+{
+  "modalTitle": "Import data (CSV)",
+  "previewFailed": "Failed to read CSV file",
+  "executeFailed": "Failed to import data",
+  "successTitle": "Import completed successfully",
+  "imported": "Imported",
+  "skipped": "Skipped duplicates",
+  "errors": "Errors",
+  "selectFile": "Select a CSV file",
+  "previewBtn": "Preview",
+  "typeLabel": "Data type",
+  "autoDetect": "Auto-detect",
+  "typeCharges": "Charges",
+  "typeDrives": "Drives",
+  "skipDuplicates": "Skip detected duplicates",
+  "detected": "Detected",
+  "linesFound": "rows detected",
+  "columns": "columns",
+  "importing": "Importing...",
+  "confirmImport": "Import rows"
+}

@@ -1,0 +1,21 @@
+{
+  "modalTitle": "Importer des données (CSV)",
+  "previewFailed": "Erreur lors de la lecture du fichier CSV",
+  "executeFailed": "Erreur lors de l’importation",
+  "successTitle": "Importation terminée avec succès",
+  "imported": "Importés",
+  "skipped": "Doublons ignorés",
+  "errors": "Erreurs",
+  "selectFile": "Sélectionner un fichier CSV",
+  "previewBtn": "Prévisualiser",
+  "typeLabel": "Type de données",
+  "autoDetect": "Détection automatique",
+  "typeCharges": "Recharges",
+  "typeDrives": "Trajets",
+  "skipDuplicates": "Ignorer les doublons détectés",
+  "detected": "Détecté",
+  "linesFound": "lignes détectées",
+  "columns": "colonnes",
+  "importing": "Importation...",
+  "confirmImport": "Importer les lignes"
+}

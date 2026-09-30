@@ -157,6 +157,21 @@
     "group_needs_drive": "Un groupe doit contenir au moins un trajet",
     "needs_drive": "Un voyage doit contenir au moins un trajet"
   },
+  "drive": {
+    "not_found": "Trajet introuvable",
+    "missing_start_time": "La date et l'heure de début sont requises",
+    "invalid_distance": "La distance doit être supérieure à 0",
+    "cannot_edit_synced": "Seuls les trajets saisis manuellement peuvent être modifiés",
+    "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés"
+  },
+  "import": {
+    "too_large": "Le fichier CSV dépasse la taille maximale autorisée (5 Mo)",
+    "missing_file": "Fichier CSV manquant dans la requête",
+    "read_failed": "Échec de lecture du fichier CSV",
+    "empty": "Le fichier CSV est vide",
+    "invalid_csv": "Format de fichier CSV invalide",
+    "execute_failed": "Échec du traitement de l'import CSV"
+  },
   "toll": {
     "apply_failed": "Échec de l'application du tarif de péage",
     "detection_failed": "Échec de la détection des péages (TeslaMateAPI injoignable ou trajet non disponible)",

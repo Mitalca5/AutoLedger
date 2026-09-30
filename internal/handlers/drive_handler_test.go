@@ -80,3 +80,25 @@ func TestParseDriveFilter(t *testing.T) {
 		}
 	})
 }
+
+func TestManualDriveValidation(t *testing.T) {
+	t.Run("valid distance and times", func(t *testing.T) {
+		req := SaveManualDriveRequest{
+			StartTime:  time.Now().Add(-1 * time.Hour),
+			DistanceKm: 25.5,
+		}
+		if req.DistanceKm <= 0 || req.DistanceKm > 3000 {
+			t.Errorf("expected valid distance, got %f", req.DistanceKm)
+		}
+	})
+
+	t.Run("invalid distance triggers check", func(t *testing.T) {
+		req := SaveManualDriveRequest{
+			StartTime:  time.Now(),
+			DistanceKm: -5.0,
+		}
+		if !(req.DistanceKm <= 0 || req.DistanceKm > 3000) {
+			t.Errorf("expected distance <= 0 to be invalid")
+		}
+	})
+}

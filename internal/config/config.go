@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -55,18 +56,18 @@ type Config struct {
 
 // Load reads configuration from environment variables with sensible defaults.
 func Load() *Config {
-	port := getEnv("PORT", "8080")
-	appBaseURL := getEnv("APP_BASE_URL", "http://localhost:8080")
+	port := getEnvWithFallback("AUTOLEDGER_PORT", "PORT", "8080")
+	appBaseURL := getEnvWithFallback("AUTOLEDGER_BASE_URL", "APP_BASE_URL", "http://localhost:8080")
 	env := getEnv("ENVIRONMENT", "development")
 
 	// Determine database URL:
 	// If DB_HOST is set, build a safely URL-encoded connection string (preventing issues with special characters in passwords).
 	var dbURL string
-	if dbHost := getEnv("DB_HOST", ""); dbHost != "" {
-		dbPort := getEnv("DB_PORT", "5432")
-		dbUser := getEnv("DB_USER", "teslacost")
-		dbPass := getEnv("DB_PASSWORD", "")
-		dbName := getEnv("DB_NAME", "teslacost")
+	if dbHost := getEnvWithFallback("AUTOLEDGER_DB_HOST", "DB_HOST", ""); dbHost != "" {
+		dbPort := getEnvWithFallback("AUTOLEDGER_DB_PORT", "DB_PORT", "5432")
+		dbUser := getEnvWithFallback("AUTOLEDGER_DB_USER", "DB_USER", "teslacost")
+		dbPass := getEnvWithFallback("AUTOLEDGER_DB_PASSWORD", "DB_PASSWORD", "")
+		dbName := getEnvWithFallback("AUTOLEDGER_DB_NAME", "DB_NAME", "teslacost")
 		dbSSL := getEnv("DB_SSLMODE", "disable")
 
 		u := &url.URL{
@@ -79,12 +80,12 @@ func Load() *Config {
 		dbURL = u.String()
 	} else {
 		// No credentials in code: the password comes from DATABASE_URL, DB_PASSWORD or PGPASSWORD.
-		rawURL := getEnv("DATABASE_URL", "postgres://teslacost@localhost:5432/teslacost?sslmode=disable")
+		rawURL := getEnvWithFallback("AUTOLEDGER_DATABASE_URL", "DATABASE_URL", "postgres://teslacost@localhost:5432/teslacost?sslmode=disable")
 		dbURL = NormalizeDatabaseURL(rawURL)
 	}
 
-	encKey := getEnv("APP_ENCRYPTION_KEY", "dev-default-32-byte-secret-key!!")
-	jwtSecret := getEnv("JWT_SECRET", "super_secret_jwt_signing_key_for_teslacost_app")
+	encKey := getEnvWithFallback("AUTOLEDGER_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY", "dev-default-32-byte-secret-key!!")
+	jwtSecret := getEnvWithFallback("AUTOLEDGER_JWT_SECRET", "JWT_SECRET", "super_secret_jwt_signing_key_for_teslacost_app")
 	jwtAccessExpMinutes, _ := strconv.Atoi(getEnv("JWT_ACCESS_EXPIRATION_MINUTES", "15"))
 	if jwtAccessExpMinutes <= 0 {
 		jwtAccessExpMinutes = 15
@@ -119,7 +120,7 @@ func Load() *Config {
 	}
 
 	reportingTimezone := getEnv("APP_TIMEZONE", "Europe/Paris")
-	storageDir := getEnv("STORAGE_DIR", "./data/documents")
+	storageDir := getEnvWithFallback("AUTOLEDGER_STORAGE_DIR", "STORAGE_DIR", "./data/documents")
 
 	// OIDC configuration
 	oidcIssuerURL := getEnv("OIDC_ISSUER_URL", "")
@@ -252,6 +253,20 @@ func getEnv(key, defaultVal string) string {
 	return defaultVal
 }
 
+func getEnvWithFallback(primaryKey, fallbackKey, defaultVal string) string {
+	if val, exists := os.LookupEnv(primaryKey); exists && val != "" {
+		return val
+	}
+	if val, exists := os.LookupEnv(fallbackKey); exists && val != "" {
+		slog.Warn("using deprecated configuration environment variable",
+			"deprecated", fallbackKey,
+			"recommended", primaryKey,
+		)
+		return val
+	}
+	return defaultVal
+}
+
 func getEnvBool(key string, defaultVal bool) bool {
 	val, exists := os.LookupEnv(key)
 	if !exists || val == "" {
@@ -259,6 +274,22 @@ func getEnvBool(key string, defaultVal bool) bool {
 	}
 	val = strings.ToLower(strings.TrimSpace(val))
 	return val == "true" || val == "1" || val == "yes"
+}
+
+func getEnvBoolWithFallback(primaryKey, fallbackKey string, defaultVal bool) bool {
+	if val, exists := os.LookupEnv(primaryKey); exists && val != "" {
+		val = strings.ToLower(strings.TrimSpace(val))
+		return val == "true" || val == "1" || val == "yes"
+	}
+	if val, exists := os.LookupEnv(fallbackKey); exists && val != "" {
+		slog.Warn("using deprecated configuration environment variable",
+			"deprecated", fallbackKey,
+			"recommended", primaryKey,
+		)
+		val = strings.ToLower(strings.TrimSpace(val))
+		return val == "true" || val == "1" || val == "yes"
+	}
+	return defaultVal
 }
 
 // NormalizeDatabaseURL ensures that any special characters in the password component

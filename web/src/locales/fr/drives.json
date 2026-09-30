@@ -17,6 +17,11 @@
     "drives": "Trajets",
     "drivesActualEnergyAndTolls": "{total} trajets • Énergie et péages réels, usure et charges fixes réparties au {unit}",
     "drivesAndTrips": "Trajets & Voyages",
+    "newDrive": "Nouveau trajet",
+    "importCsv": "Importer CSV",
+    "noTelemetryBanner": "Ce véhicule fonctionne en suivi autonome ou semi-auto. Vous pouvez enregistrer vos trajets manuellement ou importer vos historiques au format CSV.",
+    "deleteDriveTitle": "Supprimer le trajet",
+    "deleteDriveMessage": "Êtes-vous sûr de vouloir supprimer ce trajet manuel ?",
     "setUpTheLink": "Configurer la liaison",
     "drivesAreImportedFromTeslamate": "Les trajets sont importés depuis TeslaMate. Ce véhicule n'y est pas relié.",
     "deselectPage": "Désélectionner la page",
@@ -261,5 +266,24 @@
     "failed": "Le tarif n'a pas pu être appliqué."
   },
   "noDrive": "Aucun trajet",
-  "csvHeaders": "ID,Date,Depart,Arrivee,Distance_{unit},Duree_min,Conso_kWh_100{unit},Energie_kWh,Cout_Total_{cur},Cout_{unit}_{cur},Tags"
+  "csvHeaders": "ID,Date,Depart,Arrivee,Distance_{unit},Duree_min,Conso_kWh_100{unit},Energie_kWh,Cout_Total_{cur},Cout_{unit}_{cur},Tags",
+  "manualModal": {
+    "titleNew": "Nouveau trajet",
+    "titleEdit": "Modifier le trajet",
+    "dateStart": "Date et heure de début *",
+    "dateEnd": "Date et heure de fin",
+    "distance": "Distance ({unit}) *",
+    "energy": "Énergie consommée (kWh)",
+    "energyPlaceholder": "Optionnel (calculée auto)",
+    "origin": "Lieu de départ",
+    "originPlaceholder": "Ex: Maison, Nantes...",
+    "destination": "Lieu d'arrivée",
+    "destinationPlaceholder": "Ex: Travail, Rennes...",
+    "startOdo": "Compteur début ({unit})",
+    "endOdo": "Compteur fin ({unit})",
+    "tag": "Classification",
+    "save": "Enregistrer le trajet",
+    "saving": "Enregistrement...",
+    "distanceRequired": "La distance est requise"
+  }
 }

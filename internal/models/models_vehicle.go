@@ -41,10 +41,20 @@ type Vehicle struct {
 	EstimatedPricePerKwh     *float64    `json:"estimated_price_per_kwh,omitempty"`
 	Currency                 string      `json:"currency"`                        // ISO 4217 code, fixed at creation: see CLAUDE.md
 	Powertrain               string      `json:"powertrain"`                      // PowertrainEV | PowertrainICE
+	TelemetryMode            string      `json:"telemetry_mode"`                  // TelemetryConnected | TelemetrySemiAuto | TelemetryManual
+	Make                     string      `json:"make"`                            // Brand name: Tesla, Renault, Peugeot, etc.
+	Model                    string      `json:"model"`                           // Model name: Model 3, Megane E-Tech, etc.
 	TeslaMateGrafanaURL      *string     `json:"teslamate_grafana_url,omitempty"` // Grafana serving the TeslaMate dashboards, to link drives
 	CreatedAt                time.Time   `json:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at"`
 }
+
+// Telemetry modes determine how energy and distance data are ingested.
+const (
+	TelemetryConnected = "CONNECTED"
+	TelemetrySemiAuto  = "SEMI_AUTO"
+	TelemetryManual    = "MANUAL"
+)
 
 // Vehicle powertrains. ICE vehicles are tracked manually (fuel fill-ups) and have no TeslaMate link.
 const (

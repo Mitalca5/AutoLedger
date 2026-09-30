@@ -607,6 +607,69 @@ func (r *Repository) DeleteDriveExpense(ctx context.Context, vehicleID, expenseI
 	return nil
 }
 
+func (r *Repository) CreateManualDrive(ctx context.Context, d *models.Drive) error {
+	if d.Tags == nil {
+		d.Tags = []string{}
+	}
+	query := `
+		INSERT INTO drives (
+			vehicle_id, start_time, end_time,
+			start_odometer, end_odometer, distance_km, duration_min,
+			start_address, end_address, energy_consumed_kwh,
+			consumption_kwh_100km, tags, is_manual
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE)
+		RETURNING id, created_at, updated_at;
+	`
+	return r.pool.QueryRow(ctx, query,
+		d.VehicleID, d.StartTime, d.EndTime,
+		d.StartOdometer, d.EndOdometer, d.DistanceKm, d.DurationMin,
+		d.StartAddress, d.EndAddress, d.EnergyConsumedKwh,
+		d.ConsumptionKwh100km, d.Tags,
+	).Scan(&d.ID, &d.CreatedAt, &d.UpdatedAt)
+}
+
+func (r *Repository) UpdateManualDrive(ctx context.Context, d *models.Drive) error {
+	if d.Tags == nil {
+		d.Tags = []string{}
+	}
+	query := `
+		UPDATE drives
+		SET start_time = $1, end_time = $2,
+		    start_odometer = $3, end_odometer = $4,
+		    distance_km = $5, duration_min = $6,
+		    start_address = $7, end_address = $8,
+		    energy_consumed_kwh = $9, consumption_kwh_100km = $10,
+		    tags = $11, updated_at = NOW()
+		WHERE id = $12 AND vehicle_id = $13 AND is_manual = TRUE;
+	`
+	tag, err := r.pool.Exec(ctx, query,
+		d.StartTime, d.EndTime,
+		d.StartOdometer, d.EndOdometer,
+		d.DistanceKm, d.DurationMin,
+		d.StartAddress, d.EndAddress,
+		d.EnergyConsumedKwh, d.ConsumptionKwh100km,
+		d.Tags, d.ID, d.VehicleID,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+func (r *Repository) DeleteManualDrive(ctx context.Context, driveID, vehicleID string) error {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM drives WHERE id = $1 AND vehicle_id = $2 AND is_manual = TRUE;`, driveID, vehicleID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // ============================================================================
 // Tires, Wear Logs & Rotations
 // ============================================================================

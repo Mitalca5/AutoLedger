@@ -54,7 +54,7 @@
     "powertrain": "Motorisation",
     "currency": "Devise",
     "currencyFixed": "Fixée à la création : les coûts sont enregistrés dans cette devise pour toute la vie du véhicule.",
-    "eGMyCar": "ex: Ma voiture",
+    "eGMyCar": "Nom du véhicule",
     "vehicleName": "Nom du véhicule",
     "edit": "Modifier le véhicule",
     "currentMileage": "Kilométrage actuel ({unit})",

@@ -9,6 +9,7 @@
   "delete": "Supprimer",
   "confirm": "Confirmer",
   "success": "Succès",
+  "error": "Erreur",
   "errorWithMessage": "Erreur : {message}",
   "requiredField": "Champ requis",
   "deleteError": "Erreur lors de la suppression : {message}",

@@ -24,13 +24,23 @@ const adminPassword = ref('')
 const adminConfirmPassword = ref('')
 
 // Step 2: Vehicle Setup
+const vehicleMake = ref('')
+const vehicleModel = ref('')
 const vehicleName = ref('')
 const vehicleVin = ref('')
 const vehiclePowertrain = ref<'EV' | 'ICE'>('EV')
+const telemetryMode = ref<'CONNECTED' | 'SEMI_AUTO' | 'MANUAL'>('CONNECTED')
 const vehicleOdometer = ref(15000)
 
+function updateVehicleNameDefault() {
+  const parts = [vehicleMake.value.trim(), vehicleModel.value.trim()].filter(Boolean)
+  if (!vehicleName.value || vehicleName.value === parts.slice(0, -1).join(' ')) {
+    vehicleName.value = parts.join(' ')
+  }
+}
+
 // Step 3: TeslaMate Connection (Optional)
-const enableTeslaMate = ref(false)
+const enableTeslaMate = ref(true)
 const teslamateUrl = ref('')
 const teslamateAuthType = ref<'BEARER' | 'BASIC' | 'NONE'>('NONE')
 const teslamateApiKey = ref('')
@@ -78,8 +88,7 @@ async function handleStep2Submit() {
     error.value = t('onboarding.vehicleNameRequired')
     return
   }
-  if (vehiclePowertrain.value === 'ICE') {
-    // A combustion vehicle has no TeslaMate link: skip the synchronization step
+  if (vehiclePowertrain.value === 'ICE' || telemetryMode.value !== 'CONNECTED') {
     enableTeslaMate.value = false
     await handleFinalSubmit()
     return
@@ -120,15 +129,19 @@ async function handleFinalSubmit() {
   error.value = ''
   loading.value = true
   try {
+    const isConn = enableTeslaMate.value && telemetryMode.value === 'CONNECTED'
     const payload: any = {
       name: vehicleName.value,
       powertrain: vehiclePowertrain.value,
+      telemetry_mode: vehiclePowertrain.value === 'ICE' ? 'MANUAL' : telemetryMode.value,
+      make: vehicleMake.value,
+      model: vehicleModel.value,
       vin: vehicleVin.value || undefined,
       current_odometer: Number(vehicleOdometer.value) || 0,
-      teslamate_auth_type: enableTeslaMate.value ? teslamateAuthType.value : 'NONE',
+      teslamate_auth_type: isConn ? teslamateAuthType.value : 'NONE',
     }
 
-    if (enableTeslaMate.value && teslamateUrl.value) {
+    if (isConn && teslamateUrl.value) {
       payload.teslamate_api_url = teslamateUrl.value
       if (teslamateAuthType.value === 'BEARER') {
         payload.teslamate_api_key = teslamateApiKey.value
@@ -257,14 +270,38 @@ function finishOnboarding() {
         </div>
 
         <form @submit.prevent="handleStep2Submit" class="space-y-4">
+          <!-- Make & Model Inputs -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="onboarding-vehicle-make" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.make') }}</label>
+              <input id="onboarding-vehicle-make"
+                v-model="vehicleMake"
+                @input="updateVehicleNameDefault"
+                type="text"
+                :placeholder="$t('onboarding.onboardingView.makePlaceholder')"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              />
+            </div>
+            <div>
+              <label for="onboarding-vehicle-model" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.model') }}</label>
+              <input id="onboarding-vehicle-model"
+                v-model="vehicleModel"
+                @input="updateVehicleNameDefault"
+                type="text"
+                :placeholder="$t('onboarding.onboardingView.modelPlaceholder')"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              />
+            </div>
+          </div>
+
           <div>
             <label for="onboarding-vehicle-name" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.vehicleName') }}</label>
             <input id="onboarding-vehicle-name"
               v-model="vehicleName"
               type="text"
               required
-              :placeholder="$t('onboarding.onboardingView.eGMyCar')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              :placeholder="$t('onboarding.onboardingView.vehicleName')"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
             />
           </div>
 
@@ -272,14 +309,59 @@ function finishOnboarding() {
             <label for="onboarding-vehicle-powertrain" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.powertrain') }}</label>
             <select id="onboarding-vehicle-powertrain"
               v-model="vehiclePowertrain"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
             >
               <option value="EV">{{ $t('onboarding.onboardingView.electricTeslamateTrackingAvailable') }}</option>
               <option value="ICE">{{ $t('onboarding.onboardingView.combustionFillUpsEnteredBy') }}</option>
             </select>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Tracking Mode Selection (EV only) -->
+          <div v-if="vehiclePowertrain === 'EV'" class="space-y-2 pt-2">
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">{{ $t('onboarding.onboardingView.chooseTrackingMode') }}</label>
+            <div class="grid grid-cols-1 gap-2.5">
+              <label
+                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
+                :class="telemetryMode === 'CONNECTED'
+                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
+                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
+              >
+                <input v-model="telemetryMode" type="radio" value="CONNECTED" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+                <div>
+                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeConnected') }}</span>
+                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeConnectedDesc') }}</span>
+                </div>
+              </label>
+
+              <label
+                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
+                :class="telemetryMode === 'SEMI_AUTO'
+                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
+                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
+              >
+                <input v-model="telemetryMode" type="radio" value="SEMI_AUTO" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+                <div>
+                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeSemiAuto') }}</span>
+                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeSemiAutoDesc') }}</span>
+                </div>
+              </label>
+
+              <label
+                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
+                :class="telemetryMode === 'MANUAL'
+                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
+                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
+              >
+                <input v-model="telemetryMode" type="radio" value="MANUAL" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+                <div>
+                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeManual') }}</span>
+                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeManualDesc') }}</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
               <label for="onboarding-vehicle-odometer" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.currentOdometerKm', { unit: distanceUnit() }) }}</label>
               <DistanceInput id="onboarding-vehicle-odometer"
@@ -287,7 +369,7 @@ function finishOnboarding() {
                 min="0"
                 step="1"
                 required
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
             <div>
@@ -295,17 +377,18 @@ function finishOnboarding() {
               <input id="onboarding-vehicle-vin"
                 v-model="vehicleVin"
                 type="text"
-                placeholder="5YJ3E7EB..."
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                placeholder="VIN"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            class="w-full py-3.5 px-4 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 transition-all"
+            :disabled="loading"
+            class="w-full py-3.5 px-4 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
-            <span>{{ vehiclePowertrain === 'ICE' ? $t('onboarding.finish') : $t('onboarding.continueToTeslamate') }}</span>
+            <span>{{ (vehiclePowertrain === 'ICE' || telemetryMode !== 'CONNECTED') ? $t('onboarding.finish') : $t('onboarding.continueToTeslamate') }}</span>
             <ArrowRight class="w-4 h-4" />
           </button>
         </form>
