@@ -60,7 +60,7 @@ export function useDocumentPreview(vehicleId: () => string | undefined) {
         }
       }
     } catch (err: any) {
-      showAlert(t('shell.documents.accessError', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('shell.documents.accessError', { message: err.message }), t('shell.confirm.error'), 'danger')
     } finally {
       loadingDocId.value = null
     }

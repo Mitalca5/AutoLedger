@@ -40,9 +40,9 @@ export function useDocumentAttach(
       onAdded(doc)
       form.document_id = doc.id
       form.document_filename = doc.filename
-      showAlert(t('shell.documents.attached', { filename: doc.filename }), t('common.success'), 'success')
+      void showAlert(t('shell.documents.attached', { filename: doc.filename }), t('common.success'), 'success')
     } catch (err: any) {
-      showAlert(t('shell.documents.uploadError', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('shell.documents.uploadError', { message: err.message }), t('shell.confirm.error'), 'danger')
     } finally {
       isUploadingDocument.value = false
     }
