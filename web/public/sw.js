@@ -38,7 +38,8 @@ function putInCache(request, response) {
     const copy = response.clone();
     caches.open(CACHE_NAME)
       .then((cache) => cache.put(request, copy))
-      .catch(() => {}); // A failed cache write (quota) only loses the offline copy
+      // A failed cache write (quota) only loses the offline copy
+      .catch((err) => console.warn('[sw] cache write failed', request.url || request, err));
   }
   return response;
 }

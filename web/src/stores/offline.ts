@@ -17,7 +17,8 @@ export const useOfflineStore = defineStore('offline', () => {
   async function refreshCount() {
     try {
       pendingCount.value = (await listQueuedMutations()).length
-    } catch {
+    } catch (err) {
+      console.error('Failed to read the offline queue', err)
       pendingCount.value = 0
     }
   }
