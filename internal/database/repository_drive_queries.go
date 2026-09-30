@@ -20,7 +20,7 @@ func (r *Repository) GetDriveByID(ctx context.Context, driveID, vehicleID string
 		SELECT id, vehicle_id, teslamate_drive_id, start_time, end_time,
 		       start_odometer, end_odometer, distance_km, duration_min,
 		       speed_avg, speed_max, power_max, power_min, start_address, end_address, energy_consumed_kwh,
-		       consumption_kwh_100km, tags, is_manual, toll_reviewed_at, created_at, updated_at
+		       consumption_kwh_100km, tags, is_manual, energy_estimated, toll_reviewed_at, created_at, updated_at
 		FROM drives
 		WHERE id::text = $1 AND vehicle_id = $2 AND deleted_upstream_at IS NULL;
 	`
@@ -30,7 +30,7 @@ func (r *Repository) GetDriveByID(ctx context.Context, driveID, vehicleID string
 		&d.StartOdometer, &d.EndOdometer, &d.DistanceKm, &d.DurationMin,
 		&d.SpeedAvg, &d.SpeedMax, &d.PowerMax, &d.PowerMin,
 		&d.StartAddress, &d.EndAddress, &d.EnergyConsumedKwh,
-		&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
+		&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.EnergyEstimated, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -46,7 +46,7 @@ func (r *Repository) GetTripGroupDrives(ctx context.Context, vehicleID, tripGrou
 		SELECT d.id, d.vehicle_id, d.teslamate_drive_id, d.start_time, d.end_time,
 		       d.start_odometer, d.end_odometer, d.distance_km, d.duration_min,
 		       d.speed_avg, d.speed_max, d.power_max, d.power_min, d.start_address, d.end_address, d.energy_consumed_kwh,
-		       d.consumption_kwh_100km, d.tags, d.is_manual, d.toll_reviewed_at, d.created_at, d.updated_at
+		       d.consumption_kwh_100km, d.tags, d.is_manual, d.energy_estimated, d.toll_reviewed_at, d.created_at, d.updated_at
 		FROM drives d
 		JOIN trip_group_drives tgd ON d.id = tgd.drive_id
 		JOIN trip_groups tg ON tg.id = tgd.trip_group_id
@@ -67,7 +67,7 @@ func (r *Repository) GetTripGroupDrives(ctx context.Context, vehicleID, tripGrou
 			&d.StartOdometer, &d.EndOdometer, &d.DistanceKm, &d.DurationMin,
 			&d.SpeedAvg, &d.SpeedMax, &d.PowerMax, &d.PowerMin,
 			&d.StartAddress, &d.EndAddress, &d.EnergyConsumedKwh,
-			&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
+			&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.EnergyEstimated, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

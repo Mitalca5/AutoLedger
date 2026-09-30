@@ -26,14 +26,16 @@ type Drive struct {
 	EnergyConsumedKwh   *float64  `json:"energy_consumed_kwh,omitempty"`
 	ConsumptionKwh100km *float64  `json:"consumption_kwh_100km,omitempty"`
 	// Stored by the synchronization and read by the energy statistics, not exposed with the drive.
-	StartBatteryLevel *int       `json:"-"`
-	EndBatteryLevel   *int       `json:"-"`
-	OutsideTempC      *float64   `json:"-"`
-	Tags              []string   `json:"tags"`
-	IsManual          bool       `json:"is_manual"`
-	TollReviewedAt    *time.Time `json:"toll_reviewed_at,omitempty"`
-	CreatedAt         time.Time  `json:"created_at"`
-	UpdatedAt         time.Time  `json:"updated_at"`
+	StartBatteryLevel *int     `json:"-"`
+	EndBatteryLevel   *int     `json:"-"`
+	OutsideTempC      *float64 `json:"-"`
+	Tags              []string `json:"tags"`
+	IsManual          bool     `json:"is_manual"`
+	// EnergyEstimated marks an energy derived from the vehicle's average consumption rather than measured or typed.
+	EnergyEstimated bool       `json:"energy_estimated"`
+	TollReviewedAt  *time.Time `json:"toll_reviewed_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 // IsHighway returns true if the drive matches the highway detection heuristic. It favours recall:

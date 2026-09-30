@@ -200,7 +200,7 @@ func (r *Repository) ListDrives(ctx context.Context, vehicleID string, filter Dr
 		SELECT id, vehicle_id, teslamate_drive_id, start_time, end_time,
 		       start_odometer, end_odometer, distance_km, duration_min,
 		       speed_avg, speed_max, power_max, power_min, start_address, end_address, energy_consumed_kwh,
-		       consumption_kwh_100km, tags, is_manual, toll_reviewed_at, created_at, updated_at
+		       consumption_kwh_100km, tags, is_manual, energy_estimated, toll_reviewed_at, created_at, updated_at
 		FROM drives
 		WHERE ` + whereClause + fmt.Sprintf(" ORDER BY start_time DESC LIMIT $%d OFFSET $%d;", argIdx, argIdx+1)
 
@@ -219,7 +219,7 @@ func (r *Repository) ListDrives(ctx context.Context, vehicleID string, filter Dr
 			&d.StartOdometer, &d.EndOdometer, &d.DistanceKm, &d.DurationMin,
 			&d.SpeedAvg, &d.SpeedMax, &d.PowerMax, &d.PowerMin,
 			&d.StartAddress, &d.EndAddress, &d.EnergyConsumedKwh,
-			&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
+			&d.ConsumptionKwh100km, &d.Tags, &d.IsManual, &d.EnergyEstimated, &d.TollReviewedAt, &d.CreatedAt, &d.UpdatedAt,
 		); err != nil {
 			return nil, 0, err
 		}
@@ -616,15 +616,15 @@ func (r *Repository) CreateManualDrive(ctx context.Context, d *models.Drive) err
 			vehicle_id, start_time, end_time,
 			start_odometer, end_odometer, distance_km, duration_min,
 			start_address, end_address, energy_consumed_kwh,
-			consumption_kwh_100km, tags, is_manual
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE)
+			consumption_kwh_100km, tags, is_manual, energy_estimated
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, $13)
 		RETURNING id, created_at, updated_at;
 	`
 	return r.pool.QueryRow(ctx, query,
 		d.VehicleID, d.StartTime, d.EndTime,
 		d.StartOdometer, d.EndOdometer, d.DistanceKm, d.DurationMin,
 		d.StartAddress, d.EndAddress, d.EnergyConsumedKwh,
-		d.ConsumptionKwh100km, d.Tags,
+		d.ConsumptionKwh100km, d.Tags, d.EnergyEstimated,
 	).Scan(&d.ID, &d.CreatedAt, &d.UpdatedAt)
 }
 
@@ -638,16 +638,16 @@ func (r *Repository) UpdateManualDrive(ctx context.Context, d *models.Drive) err
 		    start_odometer = $3, end_odometer = $4,
 		    distance_km = $5, duration_min = $6,
 		    start_address = $7, end_address = $8,
-		    energy_consumed_kwh = $9, consumption_kwh_100km = $10,
-		    tags = $11, updated_at = NOW()
-		WHERE id = $12 AND vehicle_id = $13 AND is_manual = TRUE;
+		    energy_consumed_kwh = $9, consumption_kwh_100km = $10, energy_estimated = $11,
+		    tags = $12, updated_at = NOW()
+		WHERE id = $13 AND vehicle_id = $14 AND is_manual = TRUE;
 	`
 	tag, err := r.pool.Exec(ctx, query,
 		d.StartTime, d.EndTime,
 		d.StartOdometer, d.EndOdometer,
 		d.DistanceKm, d.DurationMin,
 		d.StartAddress, d.EndAddress,
-		d.EnergyConsumedKwh, d.ConsumptionKwh100km,
+		d.EnergyConsumedKwh, d.ConsumptionKwh100km, d.EnergyEstimated,
 		d.Tags, d.ID, d.VehicleID,
 	)
 	if err != nil {
