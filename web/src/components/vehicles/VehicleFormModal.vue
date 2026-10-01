@@ -224,7 +224,7 @@ async function testModalConnection() {
         <!-- Devise & Kilométrage -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="vehicle-current-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ form.powertrain === 'ICE' ? $t('vehicles.vehicleFormModal.currentMileage', { unit: distanceUnit() }) : $t('vehicles.vehicleFormModal.initialOdometer', { unit: distanceUnit() }) }}</label>
+            <label for="vehicle-current-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.currentMileage', { unit: distanceUnit() }) }}</label>
             <DistanceInput
               id="vehicle-current-odometer"
               v-model="form.current_odometer"
@@ -232,6 +232,7 @@ async function testModalConnection() {
               :disabled="!!form.teslamate_api_url && form.telemetry_mode === 'CONNECTED'"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-rose-500"
             />
+            <p class="mt-1 text-[11px] text-slate-500">{{ $t('vehicles.vehicleFormModal.currentMileageHelp') }}</p>
           </div>
           <div>
             <label for="vehicle-currency" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.currency') }}</label>

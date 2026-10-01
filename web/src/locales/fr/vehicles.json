@@ -58,6 +58,7 @@
     "vehicleName": "Nom du véhicule",
     "edit": "Modifier le véhicule",
     "currentMileage": "Kilométrage actuel ({unit})",
+    "currentMileageHelp": "Relevé au compteur aujourd'hui. L'odomètre d'achat se configure dans le contrat.",
     "initialOdometer": "Odomètre initial ({unit})",
     "testStatus": "Statut : {state} • Odomètre : {odometer} {unit}",
     "urlFirst": "Veuillez d'abord renseigner l'URL de l'API TeslaMate",
