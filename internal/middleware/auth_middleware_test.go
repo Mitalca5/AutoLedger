@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -93,5 +95,53 @@ func TestAuthenticateJWTRejectsMissingCredentials(t *testing.T) {
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d", rec.Code)
+	}
+}
+
+type fakeTokenValidator map[string]string // token hash -> user ID
+
+func (f fakeTokenValidator) ValidateAPIToken(_ context.Context, tokenHash string) (string, string, error) {
+	if userID, ok := f[tokenHash]; ok {
+		return userID, userID + "@example.com", nil
+	}
+	return "", "", errors.New("unknown token")
+}
+
+func TestAPITokensOnlyOpenIntegrationRoutes(t *testing.T) {
+	secret := "test-secret"
+	apiToken := auth.TokenPrefix + "0123456789abcdef0123456789abcdef0123456789abcdef"
+	validator := fakeTokenValidator{auth.HashAPIToken(apiToken): "user-1"}
+	session, err := auth.GenerateAccessToken("user-2", "user2@example.com", secret, 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	call := func(mw func(http.Handler) http.Handler, bearer string) (int, string) {
+		var gotUserID string
+		handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotUserID = GetUserID(r.Context())
+			w.WriteHeader(http.StatusOK)
+		}))
+		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+bearer)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec.Code, gotUserID
+	}
+
+	if code, _ := call(AuthenticateJWT(secret), apiToken); code != http.StatusUnauthorized {
+		t.Errorf("session routes: a valid API token got %d, want 401", code)
+	}
+	if code, user := call(AuthenticateJWT(secret), session); code != http.StatusOK || user != "user-2" {
+		t.Errorf("session routes: a session got %d for %q, want 200 for user-2", code, user)
+	}
+	if code, user := call(AuthenticateIntegration(secret, validator), apiToken); code != http.StatusOK || user != "user-1" {
+		t.Errorf("integration routes: a valid API token got %d for %q, want 200 for user-1", code, user)
+	}
+	if code, _ := call(AuthenticateIntegration(secret, validator), auth.TokenPrefix+"revoked"); code != http.StatusUnauthorized {
+		t.Errorf("integration routes: an unknown API token got %d, want 401", code)
+	}
+	if code, user := call(AuthenticateIntegration(secret, validator), session); code != http.StatusOK || user != "user-2" {
+		t.Errorf("integration routes: a session got %d for %q, want 200 for user-2", code, user)
 	}
 }
