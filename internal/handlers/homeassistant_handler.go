@@ -31,6 +31,8 @@ func NewHomeAssistantHandler(repo *database.Repository, tariffService *services.
 }
 
 type HAEventPayload struct {
+	// EventID identifies the event for the sender: an event sent again with the same ID is not recorded twice.
+	EventID   *string      `json:"event_id"`
 	VehicleID *string      `json:"vehicle_id"`
 	EventType string       `json:"event_type"`
 	Source    string       `json:"source"`
@@ -63,8 +65,6 @@ type VehicleMetricsResponse struct {
 
 // HandleEvent ingests charging sessions or telemetry updates from Home Assistant webhooks / custom component.
 func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
-
 	var req HAEventPayload
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
@@ -82,16 +82,30 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	h.recordChargingSession(w, r, &req)
+}
+
+// maxSessionKwh bounds the energy of one session: a larger value is a cumulative meter reading, not a session.
+const maxSessionKwh = 500.0
+
+// recordChargingSession stores a charging session for its vehicle, or as a pending charge when the vehicle cannot
+// be told (a charger shared by several vehicles). A session already received is answered as a duplicate.
+func (h *HomeAssistantHandler) recordChargingSession(w http.ResponseWriter, r *http.Request, req *HAEventPayload) {
+	userID := middleware.GetUserID(r.Context())
+
 	endTime := time.Now().UTC()
 	if req.Data.EndTime != nil {
 		endTime = req.Data.EndTime.UTC()
 	} else if req.Timestamp != nil {
 		endTime = req.Timestamp.UTC()
 	}
-
 	startTime := endTime
 	if req.Data.StartTime != nil {
 		startTime = req.Data.StartTime.UTC()
+	}
+	if startTime.After(endTime) {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("charge.invalid_period", "The session starts after it ends"))
+		return
 	}
 
 	energyKwh := 0.0
@@ -100,77 +114,73 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 	} else if req.Data.EnergyAddedKwh != nil {
 		energyKwh = *req.Data.EnergyAddedKwh
 	}
-
-	location := "home"
-	if req.Data.Location != nil && strings.TrimSpace(*req.Data.Location) != "" {
-		location = strings.TrimSpace(*req.Data.Location)
+	if energyKwh <= 0 || energyKwh > maxSessionKwh {
+		writeAPIError(w, http.StatusBadRequest, apierror.Newf("charge.invalid_energy", "The session energy must be above 0 and at most %g kWh", maxSessionKwh))
+		return
 	}
 
-	var targetVehicle *models.Vehicle
+	location := optionalText(req.Data.Location)
+	eventID := optionalText(req.EventID)
 
-	// Resolve target vehicle
-	if req.VehicleID != nil && strings.TrimSpace(*req.VehicleID) != "" {
-		targetVehicle = requireVehicleAccess(w, r, h.repo, strings.TrimSpace(*req.VehicleID), models.RoleEditor)
-		if targetVehicle == nil {
+	vehicles, err := h.repo.ListVehiclesByUserID(r.Context(), userID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to inspect user vehicles")
+		return
+	}
+	var target *models.Vehicle
+	if requested := optionalText(req.VehicleID); requested != nil {
+		if target = requireVehicleAccess(w, r, h.repo, *requested, models.RoleEditor); target == nil {
+			return
+		}
+		if target.Powertrain == models.PowertrainICE {
+			writeAPIError(w, http.StatusBadRequest, apierror.New("charge.electric_only", "Charging sessions only apply to electric vehicles"))
 			return
 		}
 	} else {
-		// Vehicle not provided; attempt automatic single-EV or default assignment
-		vehicles, err := h.repo.ListVehiclesByUserID(r.Context(), userID)
-		if err != nil {
-			writeRepoError(w, r, err, "Failed to inspect user vehicles")
-			return
-		}
-
-		var defaultHomeVeh *models.Vehicle
-		var evVehicles []models.Vehicle
-		for i := range vehicles {
-			v := vehicles[i]
-			if v.IsHomeChargerDefault {
-				defaultHomeVeh = &v
-			}
-			pt := strings.ToUpper(v.Powertrain)
-			if pt == "BEV" || pt == "PHEV" || pt == "" {
-				evVehicles = append(evVehicles, v)
-			}
-		}
-
-		if defaultHomeVeh != nil {
-			targetVehicle = defaultHomeVeh
-		} else if len(evVehicles) == 1 {
-			targetVehicle = &evVehicles[0]
-		}
+		target = chargingSessionVehicle(vehicles)
 	}
 
-	// If vehicle is still unresolved, send to Pending Charges
-	if targetVehicle == nil {
-		rawMap := map[string]any{
-			"raw_event": req,
-		}
+	// A session already received: recorded on any of the account's vehicles, or still pending
+	vehicleIDs := make([]string, 0, len(vehicles))
+	for _, v := range vehicles {
+		vehicleIDs = append(vehicleIDs, v.ID)
+	}
+	if id, found, err := h.repo.FindIngestedCharge(r.Context(), vehicleIDs, eventID, startTime, energyKwh); err != nil {
+		writeRepoError(w, r, err, "Failed to check duplicate charges")
+		return
+	} else if found {
+		writeJSON(w, http.StatusOK, map[string]any{"status": "duplicate", "charge_id": id})
+		return
+	}
+	if id, found, err := h.repo.FindPendingCharge(r.Context(), userID, eventID, startTime, energyKwh); err != nil {
+		writeRepoError(w, r, err, "Failed to check duplicate pending charges")
+		return
+	} else if found {
+		writeJSON(w, http.StatusOK, map[string]any{"status": "duplicate", "pending_id": id})
+		return
+	}
+
+	if target == nil {
 		pending := &models.PendingCharge{
 			UserID:      userID,
 			Source:      "homeassistant",
-			ChargerName: req.Data.ChargerName,
+			ChargerName: optionalText(req.Data.ChargerName),
 			StartTime:   startTime,
 			EndTime:     endTime,
 			EnergyKwh:   energyKwh,
 			Location:    location,
-			RawData:     rawMap,
+			RawData:     map[string]any{"raw_event": req},
+			ExternalID:  eventID,
 		}
 		if err := h.repo.CreatePendingCharge(r.Context(), pending); err != nil {
 			writeRepoError(w, r, err, "Failed to record pending charge")
 			return
 		}
-
-		writeJSON(w, http.StatusCreated, map[string]any{
-			"status":     "pending_qualification",
-			"pending_id": pending.ID,
-			"message":    "Charging session queued for vehicle assignment",
-		})
+		writeJSON(w, http.StatusCreated, map[string]any{"status": "pending_qualification", "pending_id": pending.ID})
 		return
 	}
 
-	// Compute financial cost if not explicitly provided
+	// Cost: the one sent, otherwise the vehicle's tariff plan, otherwise left to complete
 	var cost *money.Cents
 	if req.Data.Cost != nil {
 		c := money.FromFloat(*req.Data.Cost)
@@ -178,55 +188,73 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 	} else if req.Data.CostCents != nil {
 		c := money.Cents(*req.Data.CostCents)
 		cost = &c
-	} else {
-		plan, _ := h.repo.GetVehicleTariffPlan(r.Context(), targetVehicle.ID)
-		if plan != nil && energyKwh > 0 {
-			computed, err := h.tariffService.CalculateSessionCost(plan, startTime, endTime, energyKwh)
-			if err == nil && computed > 0 {
-				cost = &computed
-			}
+	} else if plan, _ := h.repo.GetVehicleTariffPlan(r.Context(), target.ID); plan != nil {
+		if computed, err := h.tariffService.CalculateSessionCost(plan, startTime, endTime, energyKwh); err == nil && computed > 0 {
+			cost = &computed
 		}
-	}
-
-	noteStr := "Home Assistant charging session"
-	if req.Data.ChargerName != nil && strings.TrimSpace(*req.Data.ChargerName) != "" {
-		noteStr += " from " + strings.TrimSpace(*req.Data.ChargerName)
 	}
 
 	charge := &models.ChargeLog{
-		VehicleID:         targetVehicle.ID,
+		VehicleID:         target.ID,
 		Date:              startTime,
 		EndDate:           &endTime,
-		Address:           &location,
+		Address:           location,
 		KwhAdded:          energyKwh,
 		Cost:              cost,
 		CostSource:        "HOMEASSISTANT",
-		Currency:          targetVehicle.Currency,
+		Currency:          target.Currency,
 		Odometer:          req.Data.OdometerKm,
 		StartBatteryLevel: req.Data.SocStart,
 		EndBatteryLevel:   req.Data.SocEnd,
-		IsManual:          true,
-		Notes:             &noteStr,
+		ExternalID:        eventID,
 	}
-
-	if err := h.repo.CreateManualCharge(r.Context(), charge); err != nil {
+	if err := h.repo.CreateIngestedCharge(r.Context(), charge); err != nil {
 		writeRepoError(w, r, err, "Failed to store charge log")
 		return
 	}
-
-	// Update odometer if provided and advances vehicle mileage
-	if req.Data.OdometerKm != nil && *req.Data.OdometerKm > 0 {
-		if *req.Data.OdometerKm > targetVehicle.CurrentOdometer {
-			_ = h.repo.UpdateVehicleOdometer(r.Context(), targetVehicle.ID, *req.Data.OdometerKm)
-		}
+	if req.Data.OdometerKm != nil && *req.Data.OdometerKm > target.CurrentOdometer {
+		_ = h.repo.UpdateVehicleOdometer(r.Context(), target.ID, *req.Data.OdometerKm)
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{
 		"status":     "recorded",
-		"vehicle_id": targetVehicle.ID,
+		"vehicle_id": target.ID,
 		"charge_id":  charge.ID,
 		"cost":       charge.Cost,
 	})
+}
+
+// chargingSessionVehicle guesses the vehicle of a session sent without one, among the vehicles the account can
+// edit: the one marked as the home charger's default, otherwise the only electric vehicle. Nil when it cannot tell.
+func chargingSessionVehicle(vehicles []models.Vehicle) *models.Vehicle {
+	var electric []*models.Vehicle
+	for i := range vehicles {
+		v := &vehicles[i]
+		if v.Role != models.RoleOwner && v.Role != models.RoleEditor {
+			continue
+		}
+		if v.IsHomeChargerDefault {
+			return v
+		}
+		if v.Powertrain != models.PowertrainICE {
+			electric = append(electric, v)
+		}
+	}
+	if len(electric) == 1 {
+		return electric[0]
+	}
+	return nil
+}
+
+// optionalText is the trimmed value of an optional text, nil when absent or blank.
+func optionalText(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	if t := strings.TrimSpace(*s); t != "" {
+		return &t
+	}
+	return nil
 }
 
 // Event types accepted by HandleEvent. An empty type is a charging session (the first blueprint sent none).

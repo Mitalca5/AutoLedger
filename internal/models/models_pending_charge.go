@@ -12,7 +12,8 @@ type PendingCharge struct {
 	StartTime   time.Time      `json:"start_time"`
 	EndTime     time.Time      `json:"end_time"`
 	EnergyKwh   float64        `json:"energy_kwh"`
-	Location    string         `json:"location"`
+	Location    *string        `json:"location,omitempty"`
+	ExternalID  *string        `json:"-"` // event_id sent by the integration, to recognise a resent event
 	RawData     map[string]any `json:"raw_data,omitempty"`
 	CreatedAt   time.Time      `json:"created_at"`
 }

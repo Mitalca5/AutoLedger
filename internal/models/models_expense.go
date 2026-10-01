@@ -46,14 +46,16 @@ type ChargeLog struct {
 	FxRate            *float64     `json:"fx_rate,omitempty"`
 	Odometer          *float64     `json:"odometer,omitempty"`
 	// Stored by the synchronization and read by the energy statistics, not exposed with the charge.
-	StartBatteryLevel *int      `json:"-"`
-	EndBatteryLevel   *int      `json:"-"`
-	OutsideTempC      *float64  `json:"-"`
-	IsManual          bool      `json:"is_manual"`
-	Notes             *string   `json:"notes,omitempty"`
-	DocumentID        *string   `json:"document_id,omitempty"`
-	DocumentFilename  *string   `json:"document_filename,omitempty"`
-	CreatedAt         time.Time `json:"created_at"`
+	StartBatteryLevel *int     `json:"-"`
+	EndBatteryLevel   *int     `json:"-"`
+	OutsideTempC      *float64 `json:"-"`
+	IsManual          bool     `json:"is_manual"`
+	Notes             *string  `json:"notes,omitempty"`
+	DocumentID        *string  `json:"document_id,omitempty"`
+	// ExternalID is the event_id an integration sent with the charge, to recognise a resent event.
+	ExternalID       *string   `json:"-"`
+	DocumentFilename *string   `json:"document_filename,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
 }
 
 // ExpenseDocument represents a file attachment or invoice stored on the filesystem volume.
