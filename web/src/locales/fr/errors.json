@@ -120,10 +120,15 @@
     "grafana_url_invalid": "URL Grafana invalide (http:// ou https:// requis)",
     "grafana_url_credentials": "L'URL Grafana ne doit pas contenir d'identifiants",
     "powertrain_invalid": "Motorisation invalide (EV ou ICE)",
-    "currency_invalid": "Devise invalide : {p0}"
+    "currency_invalid": "Devise invalide : {p0}",
+    "not_specified": "L'événement doit indiquer son véhicule"
   },
   "drive": {
-    "not_found": "Trajet introuvable"
+    "not_found": "Trajet introuvable",
+    "missing_start_time": "La date et l'heure de début sont requises",
+    "invalid_distance": "La distance doit être supérieure à 0",
+    "cannot_edit_synced": "Seuls les trajets saisis manuellement peuvent être modifiés",
+    "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés"
   },
   "fuel": {
     "combustion_only": "Les pleins de carburant ne concernent que les véhicules thermiques",
@@ -156,13 +161,6 @@
     "drive_required": "Sélectionnez au moins un trajet",
     "group_needs_drive": "Un groupe doit contenir au moins un trajet",
     "needs_drive": "Un voyage doit contenir au moins un trajet"
-  },
-  "drive": {
-    "not_found": "Trajet introuvable",
-    "missing_start_time": "La date et l'heure de début sont requises",
-    "invalid_distance": "La distance doit être supérieure à 0",
-    "cannot_edit_synced": "Seuls les trajets saisis manuellement peuvent être modifiés",
-    "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés"
   },
   "import": {
     "too_large": "Le fichier CSV dépasse la taille maximale autorisée (5 Mo)",
@@ -275,5 +273,11 @@
     "auth_refused": "TeslaMateAPI a répondu avec le statut {p0} : authentification refusée",
     "not_found": "TeslaMateAPI a répondu avec le statut {p0} : ressource introuvable (URL ou identifiant de véhicule incorrect)",
     "url_required": "L'URL de l'API TeslaMate est requise"
+  },
+  "telemetry": {
+    "missing_odometer": "Aucun relevé kilométrique valide dans l'événement"
+  },
+  "integration": {
+    "unknown_event_type": "Type d'événement inconnu : {p0}"
   }
 }
