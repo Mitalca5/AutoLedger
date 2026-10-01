@@ -1,0 +1,29 @@
+{
+  "sectionTitle": "Tarification Électrique & Borne Domicile",
+  "planSelectLabel": "Grille tarifaire résidentielle",
+  "noPlanManual": "Aucune (Saisie manuelle des coûts)",
+  "planSelectHint": "Appliqué automatiquement lors de la réception de sessions Home Assistant sans coût renseigné",
+  "publicModal": {
+    "title": "Calculateur Borne Publique",
+    "subtitle": "Calculez les frais selon la structure kWh, minutes et frais d'inactivité",
+    "openCalculator": "Calculateur borne publique",
+    "presetLabel": "Réseau de recharge / Modèle",
+    "customPricing": "Tarification personnalisée",
+    "energyKwh": "Énergie (kWh)",
+    "durationMin": "Durée de charge (min)",
+    "idleMin": "Temps d'inactivité (min)",
+    "ratesSection": "Structure tarifaire",
+    "connectionFee": "Frais de connexion",
+    "costPerKwh": "Prix du kWh",
+    "costPerMin": "Prix par minute",
+    "idleFeePerMin": "Frais d'inactivité",
+    "idleGraceMin": "Délai de grâce d'inactivité",
+    "saveAsPreset": "Enregistrer comme nouveau modèle",
+    "estimatedTotal": "Total calculé",
+    "breakdownConnection": "Frais de connexion",
+    "breakdownEnergy": "Coût de l'énergie",
+    "breakdownDuration": "Coût du temps de charge",
+    "breakdownIdle": "Pénalité d'inactivité",
+    "applyButton": "Insérer dans la recharge"
+  }
+}

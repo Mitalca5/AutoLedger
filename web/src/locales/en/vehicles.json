@@ -199,5 +199,7 @@
     "leaseDuration": "Please enter the lease duration in months"
   },
   "testSuccess": "Connection successful! Status: {state} ({odometer} {unit})",
-  "leaseSummary": "{rent}/month over {months} months"
+  "leaseSummary": "{rent}/month over {months} months",
+  "homeChargerDefaultLabel": "Default EV for household home charger",
+  "homeChargerDefaultHint": "Automatically assign unassigned sessions from your home charger to this vehicle"
 }

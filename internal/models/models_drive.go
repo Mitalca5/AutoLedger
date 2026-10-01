@@ -30,6 +30,8 @@ type Drive struct {
 	EndBatteryLevel   *int       `json:"-"`
 	OutsideTempC      *float64   `json:"-"`
 	Tags              []string   `json:"tags"`
+	DriverID          *string    `json:"driver_id,omitempty"`
+	DriverName        *string    `json:"driver_name,omitempty"`
 	IsManual          bool       `json:"is_manual"`
 	TollReviewedAt    *time.Time `json:"toll_reviewed_at,omitempty"`
 	CreatedAt         time.Time  `json:"created_at"`

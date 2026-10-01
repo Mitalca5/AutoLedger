@@ -199,5 +199,7 @@
     "leaseDuration": "Veuillez renseigner la durée de la location en mois"
   },
   "testSuccess": "Connexion réussie ! Statut : {state} ({odometer} {unit})",
-  "leaseSummary": "{rent}/mois sur {months} mois"
+  "leaseSummary": "{rent}/mois sur {months} mois",
+  "homeChargerDefaultLabel": "Véhicule principal pour la borne à domicile",
+  "homeChargerDefaultHint": "Attribue automatiquement les recharges de votre borne non qualifiées à ce véhicule"
 }

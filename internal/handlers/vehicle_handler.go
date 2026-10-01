@@ -49,6 +49,9 @@ type SaveVehicleRequest struct {
 	Make                 string          `json:"make"`                  // Tesla, Renault, etc.
 	Model                string          `json:"model"`                 // Model 3, Megane, etc.
 	TeslaMateGrafanaURL  *string         `json:"teslamate_grafana_url"` // Optional; empty clears it
+	DefaultDriverID      *string         `json:"default_driver_id"`
+	TariffPlanID         *string         `json:"tariff_plan_id"`
+	IsHomeChargerDefault bool            `json:"is_home_charger_default"`
 }
 
 // normalizeGrafanaURL validates the base URL of the Grafana serving the TeslaMate dashboards.
@@ -209,6 +212,9 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Make:                     makeName,
 		Model:                    strings.TrimSpace(req.Model),
 		TeslaMateGrafanaURL:      grafanaURL,
+		DefaultDriverID:          req.DefaultDriverID,
+		TariffPlanID:             req.TariffPlanID,
+		IsHomeChargerDefault:     req.IsHomeChargerDefault,
 	}
 
 	if err := h.repo.CreateVehicle(r.Context(), v); err != nil {
@@ -313,6 +319,9 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Model != "" {
 		existing.Model = strings.TrimSpace(req.Model)
 	}
+	existing.DefaultDriverID = req.DefaultDriverID
+	existing.TariffPlanID = req.TariffPlanID
+	existing.IsHomeChargerDefault = req.IsHomeChargerDefault
 
 	if err := h.repo.UpdateVehicle(r.Context(), existing); err != nil {
 		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", "Failed to update vehicle"))

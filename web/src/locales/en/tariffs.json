@@ -1,0 +1,29 @@
+{
+  "sectionTitle": "Electricity Tariff & Home Charger",
+  "planSelectLabel": "Residential Tariff Plan",
+  "noPlanManual": "None (Manual charge costs)",
+  "planSelectHint": "Applied automatically when receiving Home Assistant charging sessions without a price",
+  "publicModal": {
+    "title": "Public Charging Calculator",
+    "subtitle": "Calculate fees with connection, duration and idle pricing",
+    "openCalculator": "Public charger calculator",
+    "presetLabel": "Charging Network / Preset",
+    "customPricing": "Custom Pricing",
+    "energyKwh": "Energy (kWh)",
+    "durationMin": "Duration (min)",
+    "idleMin": "Idle Time (min)",
+    "ratesSection": "Pricing Structure",
+    "connectionFee": "Connection Fee",
+    "costPerKwh": "Energy Price",
+    "costPerMin": "Duration Price",
+    "idleFeePerMin": "Idle Fee",
+    "idleGraceMin": "Idle Grace Period",
+    "saveAsPreset": "Save pricing as new preset",
+    "estimatedTotal": "Calculated Total",
+    "breakdownConnection": "Connection fee",
+    "breakdownEnergy": "Energy cost",
+    "breakdownDuration": "Duration cost",
+    "breakdownIdle": "Idle fee",
+    "applyButton": "Apply to Charge"
+  }
+}

@@ -39,13 +39,39 @@ func extractBearerToken(r *http.Request) (string, error) {
 	return "", fmt.Errorf("missing Authorization header or %s cookie", accessTokenCookieName)
 }
 
-// AuthenticateJWT returns a middleware that validates the JWT token.
-func AuthenticateJWT(jwtSecret string) func(http.Handler) http.Handler {
+type APITokenValidator interface {
+	ValidateAPIToken(ctx context.Context, tokenHash string) (string, string, error)
+}
+
+// AuthenticateJWT returns a middleware that validates JWT access tokens or API tokens.
+func AuthenticateJWT(jwtSecret string, validator ...APITokenValidator) func(http.Handler) http.Handler {
+	var tokenValidator APITokenValidator
+	if len(validator) > 0 {
+		tokenValidator = validator[0]
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenString, err := extractBearerToken(r)
 			if err != nil {
 				sendJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+
+			if auth.IsAPIToken(tokenString) {
+				if tokenValidator == nil {
+					sendJSONError(w, http.StatusUnauthorized, "API token authentication not configured")
+					return
+				}
+				tokenHash := auth.HashAPIToken(tokenString)
+				userID, email, err := tokenValidator.ValidateAPIToken(r.Context(), tokenHash)
+				if err != nil {
+					sendJSONError(w, http.StatusUnauthorized, "Invalid or expired API token")
+					return
+				}
+				ctx := context.WithValue(r.Context(), UserIDKey, userID)
+				ctx = context.WithValue(ctx, UserEmailKey, email)
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 

@@ -23,10 +23,22 @@ const modalTestLoading = ref(false)
 const modalTestResult = ref<{ success: boolean; status?: any; error?: string } | null>(null)
 const form = ref(emptyVehicleForm())
 
+const tariffPlans = ref<any[]>([])
+
+async function loadTariffPlans() {
+  try {
+    const res = await api.getTariffPlans()
+    tariffPlans.value = res.plans || []
+  } catch (err) {
+    console.error('Failed to load tariff plans', err)
+  }
+}
+
 watch(open, (isOpen) => {
   if (!isOpen) return
   modalTestResult.value = null
   form.value = props.editing ? vehicleFormFrom(props.editing) : emptyVehicleForm()
+  loadTariffPlans()
 })
 
 async function handleSave() {
@@ -138,6 +150,30 @@ async function testModalConnection() {
               <input id="vehicle-pre-rate" v-model.number="form.estimated_price_per_kwh" type="number" step="0.0001" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
             </div>
           </div>
+        </div>
+
+        <!-- Tariffs & Home Charger Section -->
+        <div v-if="form.powertrain !== 'ICE'" class="pt-2 border-t border-slate-800 space-y-3">
+          <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">{{ $t('tariffs.sectionTitle') }}</h4>
+
+          <div>
+            <label for="vehicle-tariff-plan" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('tariffs.planSelectLabel') }}</label>
+            <select id="vehicle-tariff-plan" v-model="form.tariff_plan_id" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+              <option :value="null">{{ $t('tariffs.noPlanManual') }}</option>
+              <option v-for="p in tariffPlans" :key="p.id" :value="p.id">
+                {{ p.name }} ({{ p.plan_type }})
+              </option>
+            </select>
+            <p class="text-[11px] text-slate-400 mt-1">{{ $t('tariffs.planSelectHint') }}</p>
+          </div>
+
+          <label for="vehicle-home-charger-default" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">
+            <input id="vehicle-home-charger-default" type="checkbox" v-model="form.is_home_charger_default" class="mt-0.5 rounded border-slate-600 text-rose-600 focus:ring-rose-500 bg-slate-900" />
+            <div class="text-xs">
+              <span class="font-semibold text-white block">{{ $t('vehicles.homeChargerDefaultLabel') }}</span>
+              <span class="text-slate-400 block mt-0.5">{{ $t('vehicles.homeChargerDefaultHint') }}</span>
+            </div>
+          </label>
         </div>
 
         <!-- TeslaMate API Section -->

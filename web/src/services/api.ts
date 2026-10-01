@@ -249,6 +249,11 @@ export const api = {
     request<any>(`/vehicles/${vehicleId}/drives/${driveId}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteDrive: (vehicleId: string, driveId: string) =>
     request<void>(`/vehicles/${vehicleId}/drives/${driveId}`, { method: 'DELETE' }),
+  updateDriveDriver: (vehicleId: string, driveId: string, driverId: string | null) =>
+    request<{ success: boolean }>(`/vehicles/${vehicleId}/drives/${driveId}/driver`, {
+      method: 'PUT',
+      body: JSON.stringify({ driver_id: driverId }),
+    }),
   previewCSVImport: (vehicleId: string, file: File) => {
     const formData = new FormData()
     formData.append('file', file)
@@ -467,6 +472,42 @@ export const api = {
     request<{ success: boolean }>(`/vehicles/${vehicleId}/webhook`, { method: 'DELETE' }, t('shell.api.webhookDeleted')),
   testVehicleWebhook: (vehicleId: string, data: any) =>
     request<{ success: boolean; message: string }>(`/vehicles/${vehicleId}/webhook/test`, { method: 'POST', body: JSON.stringify(data) }, t('shell.api.webhookTest')),
+
+  // API Tokens (Home Assistant & Automations)
+  getAPITokens: () => request<{ tokens: APITokenInfo[] }>('/auth/tokens'),
+  createAPIToken: (data: { name: string; expires_at?: string | null }) =>
+    request<APITokenCreatedResponse>('/auth/tokens', { method: 'POST', body: JSON.stringify(data) }),
+  revokeAPIToken: (tokenId: string) =>
+    request<{ success: boolean }>(`/auth/tokens/${tokenId}`, { method: 'DELETE' }),
+
+  // Tariff Plans & Public Charging
+  getTariffPlans: () => request<{ plans: TariffPlan[] }>('/tariffs/plans'),
+  createTariffPlan: (data: Partial<TariffPlan>) =>
+    request<TariffPlan>('/tariffs/plans', { method: 'POST', body: JSON.stringify(data) }),
+  updateTariffPlan: (id: string, data: Partial<TariffPlan>) =>
+    request<TariffPlan>(`/tariffs/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteTariffPlan: (id: string) =>
+    request<{ success: boolean }>(`/tariffs/plans/${id}`, { method: 'DELETE' }),
+  calculateSessionCost: (data: { plan_id?: string; start_time: string; end_time: string; kwh: number }) =>
+    request<{ cost: number }>('/tariffs/calculate-session', { method: 'POST', body: JSON.stringify(data) }),
+
+  getPublicPresets: () => request<{ presets: PublicChargingPreset[] }>('/tariffs/public-presets'),
+  createPublicPreset: (data: Partial<PublicChargingPreset>) =>
+    request<PublicChargingPreset>('/tariffs/public-presets', { method: 'POST', body: JSON.stringify(data) }),
+  deletePublicPreset: (id: string) =>
+    request<{ success: boolean }>(`/tariffs/public-presets/${id}`, { method: 'DELETE' }),
+  calculatePublicCharge: (data: PublicChargingCalculationRequest) =>
+    request<PublicChargingBreakdown>('/tariffs/calculate-public', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Pending Charges ("Recharges à qualifier")
+  getPendingCharges: () => request<{ pending_charges: PendingCharge[] }>('/pending-charges'),
+  assignPendingCharge: (id: string, data: AssignPendingChargeRequest) =>
+    request<any>(`/pending-charges/${id}/assign`, { method: 'POST', body: JSON.stringify(data) }),
+  deletePendingCharge: (id: string) =>
+    request<{ success: boolean }>(`/pending-charges/${id}`, { method: 'DELETE' }),
+
+  // Household Fleet Summary
+  getFleetSummary: () => request<FleetSummaryResponse>('/fleet/summary'),
 }
 
 export interface MaintenanceReminder {
@@ -500,4 +541,134 @@ export interface VehicleWebhook {
   enabled: boolean
   created_at: string
   updated_at: string
+}
+
+// API Tokens
+export interface APITokenInfo {
+  id: string
+  name: string
+  token_prefix: string
+  last_used_at: string | null
+  expires_at: string | null
+  created_at: string
+}
+
+export interface APITokenCreatedResponse {
+  token: string
+  info: APITokenInfo
+}
+
+// Tariffs & Public Charging
+export interface TimeWindow {
+  start_time: string
+  end_time: string
+  days_of_week?: number[]
+}
+
+export interface TariffPlan {
+  id: string
+  user_id: string
+  name: string
+  plan_type: 'FLAT' | 'TIME_OF_USE'
+  currency: string
+  flat_rate_cents?: number | null
+  peak_rate_cents?: number | null
+  offpeak_rate_cents?: number | null
+  time_windows?: TimeWindow[] | null
+  is_default: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PublicChargingPreset {
+  id: string
+  user_id: string
+  name: string
+  network?: string | null
+  currency: string
+  connection_fee_cents?: number | null
+  cost_per_kwh_cents?: number | null
+  cost_per_minute_cents?: number | null
+  idle_fee_per_minute_cents?: number | null
+  idle_grace_minutes?: number | null
+  created_at: string
+}
+
+export interface PublicChargingCalculationRequest {
+  connection_fee_cents?: number | null
+  cost_per_kwh_cents?: number | null
+  cost_per_minute_cents?: number | null
+  idle_fee_per_minute_cents?: number | null
+  idle_grace_minutes?: number | null
+  kwh: number
+  charging_minutes: number
+  idle_minutes?: number | null
+}
+
+export interface PublicChargingBreakdown {
+  connection_fee_cents: number
+  energy_cost_cents: number
+  duration_cost_cents: number
+  idle_cost_cents: number
+  total_cost_cents: number
+  summary: string
+}
+
+// Pending Charges ("Recharges à qualifier")
+export interface PendingCharge {
+  id: string
+  user_id: string
+  source: string
+  charger_name?: string | null
+  start_time: string
+  end_time: string
+  energy_kwh: number
+  location: string
+  raw_data?: Record<string, any> | null
+  created_at: string
+}
+
+export interface AssignPendingChargeRequest {
+  vehicle_id: string
+  driver_id?: string | null
+}
+
+// Household Fleet Dashboard
+export interface FleetMonthlyCost {
+  month: string
+  total_cost: number
+  energy_cost: number
+  other_cost: number
+  distance_km: number
+  by_vehicle: Record<string, number>
+}
+
+export interface VehicleFleetMetric {
+  vehicle_id: string
+  name: string
+  make: string
+  model: string
+  currency: string
+  current_odometer: number
+  month_distance_km: number
+  month_cost: number
+  energy_cost_per_100km: number
+}
+
+export interface MemberKmShare {
+  driver_id: string | null
+  driver_name: string
+  distance_km: number
+  percentage: number
+}
+
+export interface FleetSummaryResponse {
+  total_vehicles: number
+  currency: string
+  current_month_cost: number
+  current_month_distance_km: number
+  current_month_energy_kwh: number
+  monthly_costs: FleetMonthlyCost[]
+  vehicles: VehicleFleetMetric[]
+  member_km_shares: MemberKmShare[]
 }
