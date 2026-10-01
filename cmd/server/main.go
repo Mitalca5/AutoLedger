@@ -377,9 +377,18 @@ func main() {
 			r.With(httprate.LimitByIP(20, time.Minute)).Get("/oidc/callback", authHandler.OIDCCallback)
 		})
 
-		// Protected Routes
+		// Integration routes: the only ones an API token opens (Home Assistant, scripts); a session works too.
 		r.Group(func(r chi.Router) {
-			r.Use(appMiddleware.AuthenticateJWT(cfg.JWTSecret, repo))
+			r.Use(appMiddleware.AuthenticateIntegration(cfg.JWTSecret, repo))
+			r.Use(handlers.Idempotency(repo))
+
+			r.Post("/api/integrations/homeassistant/event", haHandler.HandleEvent)
+			r.Get("/api/integrations/homeassistant/vehicles/{vehicleId}/metrics", haHandler.GetVehicleMetrics)
+		})
+
+		// Protected Routes (session only)
+		r.Group(func(r chi.Router) {
+			r.Use(appMiddleware.AuthenticateJWT(cfg.JWTSecret))
 			r.Use(handlers.Idempotency(repo))
 
 			r.Get("/api/auth/me", authHandler.Me)
@@ -419,9 +428,6 @@ func main() {
 
 			// Household Fleet Dashboard
 			r.Get("/api/fleet/summary", fleetHandler.GetSummary)
-
-			// Home Assistant Ingestion Webhook
-			r.Post("/api/integrations/homeassistant/event", haHandler.HandleEvent)
 
 			// EV vs ICE cost comparison (informational)
 			r.Route("/api/comparison-scenarios", func(r chi.Router) {
@@ -556,9 +562,6 @@ func main() {
 				// TCO Analytics
 				r.Get("/{vehicleId}/tco", tcoHandler.GetTCO)
 				r.Get("/{vehicleId}/energy-stats", energyHandler.GetStats)
-
-				// Metrics & Sensor Feeds
-				r.Get("/{vehicleId}/metrics", haHandler.GetVehicleMetrics)
 			})
 		})
 	}

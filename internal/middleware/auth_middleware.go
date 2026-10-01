@@ -43,13 +43,21 @@ type APITokenValidator interface {
 	ValidateAPIToken(ctx context.Context, tokenHash string) (string, string, error)
 }
 
-// AuthenticateJWT returns a middleware that validates JWT access tokens or API tokens.
-func AuthenticateJWT(jwtSecret string, validator ...APITokenValidator) func(http.Handler) http.Handler {
-	var tokenValidator APITokenValidator
-	if len(validator) > 0 {
-		tokenValidator = validator[0]
-	}
+// AuthenticateJWT returns a middleware that accepts a session access token only. An API token
+// (auth.TokenPrefix) is refused here: it only opens the integration routes (AuthenticateIntegration),
+// so a token copied into a home-automation setup cannot read the account, manage sessions or mint tokens.
+func AuthenticateJWT(jwtSecret string) func(http.Handler) http.Handler {
+	return authenticate(jwtSecret, nil)
+}
 
+// AuthenticateIntegration returns a middleware for the integration routes (/api/integrations/**):
+// it accepts an API token, checked by validator, as well as a session access token.
+func AuthenticateIntegration(jwtSecret string, validator APITokenValidator) func(http.Handler) http.Handler {
+	return authenticate(jwtSecret, validator)
+}
+
+// authenticate validates the bearer token; API tokens are accepted only when validator is set.
+func authenticate(jwtSecret string, tokenValidator APITokenValidator) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenString, err := extractBearerToken(r)
@@ -60,7 +68,7 @@ func AuthenticateJWT(jwtSecret string, validator ...APITokenValidator) func(http
 
 			if auth.IsAPIToken(tokenString) {
 				if tokenValidator == nil {
-					sendJSONError(w, http.StatusUnauthorized, "API token authentication not configured")
+					sendJSONError(w, http.StatusUnauthorized, "API tokens are only accepted on integration endpoints")
 					return
 				}
 				tokenHash := auth.HashAPIToken(tokenString)

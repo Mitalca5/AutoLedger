@@ -55,7 +55,7 @@
   "distanceUnitMi": "Miles",
   "tokens": {
     "title": "API Tokens & Automations",
-    "subtitle": "Personal Access Tokens to connect Home Assistant, webhooks and third-party scripts",
+    "subtitle": "To send data from Home Assistant, a charger or a script. A token only opens the integration endpoints, never the rest of the account.",
     "create": "Generate Token",
     "haBlueprintTitle": "Home Assistant Blueprint Available",
     "haBlueprintSubtitle": "Easily configure the automatic push of your charging sessions from Home Assistant",
