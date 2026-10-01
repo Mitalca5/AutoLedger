@@ -285,5 +285,7 @@
     "save": "Save drive",
     "saving": "Saving...",
     "distanceRequired": "Distance is required"
-  }
+  },
+  "driverLabel": "Driver",
+  "unassignedDriver": "Unassigned (Household default)"
 }

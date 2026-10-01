@@ -75,7 +75,7 @@ describe('message keys used in the source', () => {
   const catalog = i18n.global.getLocaleMessage('en') as Record<string, unknown>
   const defined = (key: string) => key.split('.').reduce<unknown>((node, part) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[part] : undefined), catalog) !== undefined
   // Every namespace of the application, so a key borrowed from another area is reported even when that catalog is absent.
-  const namespaces = new Set(['common', 'shell', 'auth', 'onboarding', 'account', 'dashboard', 'drives', 'expenses', 'tires', 'vehicles', 'carpool', 'manual', 'comparison', 'quickadd', 'errors', 'messages'])
+  const namespaces = new Set(['common', 'shell', 'auth', 'onboarding', 'account', 'dashboard', 'drives', 'expenses', 'tires', 'vehicles', 'carpool', 'manual', 'comparison', 'quickadd', 'errors', 'messages', 'fleet', 'tariffs', 'pendingCharges'])
 
   it('all exist in the catalogs', () => {
     const missing: string[] = []

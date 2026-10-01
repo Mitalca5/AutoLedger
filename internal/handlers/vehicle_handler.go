@@ -48,6 +48,9 @@ type SaveVehicleRequest struct {
 	Make                 *string         `json:"make"`                  // Free text; omitted keeps it on update, empty clears it
 	Model                *string         `json:"model"`                 // Free text; omitted keeps it on update, empty clears it
 	TeslaMateGrafanaURL  *string         `json:"teslamate_grafana_url"` // Optional; empty clears it
+	DefaultDriverID      *string         `json:"default_driver_id"`
+	TariffPlanID         *string         `json:"tariff_plan_id"`
+	IsHomeChargerDefault bool            `json:"is_home_charger_default"`
 }
 
 // trimmedText is the trimmed value of an optional free-text field, empty when absent.
@@ -179,6 +182,20 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		authType = models.AuthModeNone
 	}
 
+	if powertrain == models.PowertrainICE {
+		req.TeslaMateCarID = nil
+		req.TeslaMateAPIURL = nil
+		req.TeslaMateGrafanaURL = nil
+		req.TeslaMateAPIKey = nil
+		req.TeslaMateBasicUser = nil
+		req.TeslaMateBasicPass = nil
+		encKey = nil
+		encPass = nil
+		authType = models.AuthModeNone
+	} else if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
+		req.TeslaMateCarID = nil
+	}
+
 	v := &models.Vehicle{
 		UserID:                   userID,
 		Name:                     req.Name,
@@ -197,6 +214,9 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Make:                     trimmedText(req.Make),
 		Model:                    trimmedText(req.Model),
 		TeslaMateGrafanaURL:      grafanaURL,
+		DefaultDriverID:          req.DefaultDriverID,
+		TariffPlanID:             req.TariffPlanID,
+		IsHomeChargerDefault:     req.IsHomeChargerDefault,
 	}
 
 	if err := h.repo.CreateVehicle(r.Context(), v); err != nil {
@@ -262,13 +282,27 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	existing.Name = req.Name
 	existing.Vin = req.Vin
-	existing.TeslaMateCarID = req.TeslaMateCarID
+	if existing.Powertrain == models.PowertrainICE {
+		existing.TeslaMateCarID = nil
+		existing.TeslaMateAPIURL = nil
+		existing.TeslaMateGrafanaURL = nil
+		existing.TeslaMateAuthType = models.AuthModeNone
+		existing.TeslaMateAPIKeyEncrypted = nil
+		existing.TeslaMateBasicUser = nil
+		existing.TeslaMateBasicPassEnc = nil
+	} else {
+		if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
+			existing.TeslaMateCarID = nil
+		} else if req.TeslaMateCarID != nil {
+			existing.TeslaMateCarID = req.TeslaMateCarID
+		}
+		existing.TeslaMateAPIURL = req.TeslaMateAPIURL
+		if req.TeslaMateAuthType != "" {
+			existing.TeslaMateAuthType = req.TeslaMateAuthType
+		}
+	}
 	if req.CurrentOdometer > 0 {
 		existing.CurrentOdometer = req.CurrentOdometer
-	}
-	existing.TeslaMateAPIURL = req.TeslaMateAPIURL
-	if req.TeslaMateAuthType != "" {
-		existing.TeslaMateAuthType = req.TeslaMateAuthType
 	}
 
 	if req.TeslaMateAPIKey != nil && *req.TeslaMateAPIKey != "" {
@@ -298,6 +332,9 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Model != nil {
 		existing.Model = trimmedText(req.Model)
 	}
+	existing.DefaultDriverID = req.DefaultDriverID
+	existing.TariffPlanID = req.TariffPlanID
+	existing.IsHomeChargerDefault = req.IsHomeChargerDefault
 
 	if err := h.repo.UpdateVehicle(r.Context(), existing); err != nil {
 		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", "Failed to update vehicle"))

@@ -1,0 +1,247 @@
+package handlers
+
+import (
+	"encoding/json"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/teslacost/teslacost/internal/apierror"
+	"github.com/teslacost/teslacost/internal/database"
+	"github.com/teslacost/teslacost/internal/middleware"
+	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/money"
+	"github.com/teslacost/teslacost/internal/services"
+)
+
+type TariffHandler struct {
+	repo          *database.Repository
+	tariffService *services.TariffService
+}
+
+func NewTariffHandler(repo *database.Repository, tariffService *services.TariffService) *TariffHandler {
+	return &TariffHandler{
+		repo:          repo,
+		tariffService: tariffService,
+	}
+}
+
+func (h *TariffHandler) List(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	plans, err := h.repo.ListTariffPlans(r.Context(), userID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to list tariff plans")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"plans": plans})
+}
+
+type SaveTariffPlanRequest struct {
+	Name             string              `json:"name"`
+	PlanType         string              `json:"plan_type"`
+	Currency         string              `json:"currency"`
+	FlatRateCents    *money.Cents        `json:"flat_rate_cents"`
+	PeakRateCents    *money.Cents        `json:"peak_rate_cents"`
+	OffpeakRateCents *money.Cents        `json:"offpeak_rate_cents"`
+	TimeWindows      []models.TimeWindow `json:"time_windows"`
+	IsDefault        bool                `json:"is_default"`
+}
+
+func (h *TariffHandler) Create(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+
+	var req SaveTariffPlanRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	name := strings.TrimSpace(req.Name)
+	if name == "" {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("tariff.name_required", "Tariff plan name is required"))
+		return
+	}
+
+	planType := req.PlanType
+	if planType != models.TariffTypeFlat && planType != models.TariffTypeTimeOfUse {
+		planType = models.TariffTypeTimeOfUse
+	}
+
+	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
+	if currency == "" {
+		currency = "EUR"
+	}
+
+	plan := &models.TariffPlan{
+		UserID:           userID,
+		Name:             name,
+		PlanType:         planType,
+		Currency:         currency,
+		FlatRateCents:    req.FlatRateCents,
+		PeakRateCents:    req.PeakRateCents,
+		OffpeakRateCents: req.OffpeakRateCents,
+		TimeWindows:      req.TimeWindows,
+		IsDefault:        req.IsDefault,
+	}
+
+	if err := h.repo.CreateTariffPlan(r.Context(), plan); err != nil {
+		writeRepoError(w, r, err, "Failed to create tariff plan")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, plan)
+}
+
+func (h *TariffHandler) Update(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	planID := chi.URLParam(r, "id")
+
+	existing, err := h.repo.GetTariffPlanByID(r.Context(), planID, userID)
+	if err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("tariff.not_found", "Tariff plan not found"))
+		return
+	}
+
+	var req SaveTariffPlanRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	name := strings.TrimSpace(req.Name)
+	if name != "" {
+		existing.Name = name
+	}
+	if req.PlanType != "" {
+		existing.PlanType = req.PlanType
+	}
+	if req.Currency != "" {
+		existing.Currency = strings.ToUpper(strings.TrimSpace(req.Currency))
+	}
+	existing.FlatRateCents = req.FlatRateCents
+	existing.PeakRateCents = req.PeakRateCents
+	existing.OffpeakRateCents = req.OffpeakRateCents
+	if req.TimeWindows != nil {
+		existing.TimeWindows = req.TimeWindows
+	}
+	existing.IsDefault = req.IsDefault
+
+	if err := h.repo.UpdateTariffPlan(r.Context(), existing); err != nil {
+		writeRepoError(w, r, err, "Failed to update tariff plan")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, existing)
+}
+
+func (h *TariffHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	planID := chi.URLParam(r, "id")
+
+	if err := h.repo.DeleteTariffPlan(r.Context(), planID, userID); err != nil {
+		writeRepoError(w, r, err, "Failed to delete tariff plan")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// CalculateSessionCostRequest helper for quick cost test from frontend
+type CalculateSessionCostRequest struct {
+	PlanID    *string   `json:"plan_id"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Kwh       float64   `json:"kwh"`
+}
+
+func (h *TariffHandler) Calculate(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+
+	var req CalculateSessionCostRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	var plan *models.TariffPlan
+	var err error
+	if req.PlanID != nil && *req.PlanID != "" {
+		plan, err = h.repo.GetTariffPlanByID(r.Context(), *req.PlanID, userID)
+		if err != nil {
+			writeAPIError(w, http.StatusNotFound, apierror.New("tariff.not_found", "Tariff plan not found"))
+			return
+		}
+	} else {
+		plan, _ = h.repo.GetDefaultTariffPlan(r.Context(), userID)
+	}
+
+	cost, err := h.tariffService.CalculateSessionCost(plan, req.StartTime, req.EndTime, req.Kwh)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", err.Error()))
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"cost": cost})
+}
+
+func (h *TariffHandler) CalculatePublic(w http.ResponseWriter, r *http.Request) {
+	var req models.PublicChargingCalculationRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	breakdown := h.tariffService.CalculatePublicCharging(req)
+	writeJSON(w, http.StatusOK, breakdown)
+}
+
+// Public Charging Presets
+
+func (h *TariffHandler) ListPublicPresets(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	presets, err := h.repo.ListPublicChargingPresets(r.Context(), userID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to list public charging presets")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"presets": presets})
+}
+
+func (h *TariffHandler) CreatePublicPreset(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+
+	var preset models.PublicChargingPreset
+	if err := json.NewDecoder(r.Body).Decode(&preset); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	preset.Name = strings.TrimSpace(preset.Name)
+	if preset.Name == "" {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("preset.name_required", "Preset name is required"))
+		return
+	}
+	preset.UserID = userID
+	if preset.Currency == "" {
+		preset.Currency = "EUR"
+	}
+
+	if err := h.repo.CreatePublicChargingPreset(r.Context(), &preset); err != nil {
+		writeRepoError(w, r, err, "Failed to save public charging preset")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, preset)
+}
+
+func (h *TariffHandler) DeletePublicPreset(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	presetID := chi.URLParam(r, "id")
+
+	if err := h.repo.DeletePublicChargingPreset(r.Context(), presetID, userID); err != nil {
+		writeRepoError(w, r, err, "Failed to delete preset")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}

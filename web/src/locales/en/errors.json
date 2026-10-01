@@ -205,7 +205,19 @@
     "energy_invalid": "Invalid energy added",
     "energy_positive": "The energy added must be positive",
     "manual_cost_required": "The cost of a manual charge is required",
-    "cost_required": "The cost is required"
+    "cost_required": "The cost is required",
+    "pending_not_found": "Pending charge not found"
+  },
+  "tariff": {
+    "name_required": "Tariff plan name is required",
+    "not_found": "Tariff plan not found"
+  },
+  "preset": {
+    "name_required": "Preset name is required"
+  },
+  "token": {
+    "name_required": "Token name is required",
+    "name_too_long": "Token name must be at most 100 characters"
   },
   "ownership": {
     "start_required": "The start date (purchase or contract) is required",

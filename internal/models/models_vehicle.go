@@ -46,6 +46,9 @@ type Vehicle struct {
 	Make                     string      `json:"make"`                            // Free text, empty when not given
 	Model                    string      `json:"model"`                           // Free text, empty when not given
 	TeslaMateGrafanaURL      *string     `json:"teslamate_grafana_url,omitempty"` // Grafana serving the TeslaMate dashboards, to link drives
+	DefaultDriverID          *string     `json:"default_driver_id,omitempty"`
+	TariffPlanID             *string     `json:"tariff_plan_id,omitempty"`
+	IsHomeChargerDefault     bool        `json:"is_home_charger_default"`
 	CreatedAt                time.Time   `json:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at"`
 }

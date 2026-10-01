@@ -1,0 +1,13 @@
+{
+  "bannerCount": "recharge à qualifier | recharges à qualifier",
+  "bannerDescription": "Sessions non attribuées reçues depuis Home Assistant",
+  "qualifyButton": "Qualifier",
+  "modalTitle": "Recharges à qualifier",
+  "modalSubtitle": "Attribuez les sessions capturées par votre borne partagée à un véhicule du foyer",
+  "loading": "Chargement des recharges en attente...",
+  "empty": "Aucune recharge en attente de qualification. Tout est à jour !",
+  "assign": "Attribuer",
+  "assigning": "Attribution...",
+  "dismiss": "Ignorer",
+  "selectVehicle": "Sélectionner un véhicule"
+}

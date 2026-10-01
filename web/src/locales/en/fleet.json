@@ -1,0 +1,35 @@
+{
+  "title": "Household Fleet",
+  "subtitle": "Consolidated overview and multi-vehicle comparison for your household",
+  "refresh": "Refresh",
+  "kpi": {
+    "vehicles": "Vehicles",
+    "activeVehicles": "Active in household",
+    "monthCost": "This Month Cost",
+    "currentMonthTotal": "Total monthly spending",
+    "monthDistance": "This Month Distance",
+    "fleetTravelled": "Total distance traveled",
+    "monthEnergy": "This Month Energy",
+    "energyDelivered": "Delivered charging energy"
+  },
+  "vehicles": {
+    "comparisonTitle": "Vehicles & Energy Efficiency",
+    "efficiencyMetricHint": "Real charging cost per 100 distance units",
+    "mostEconomical": "Most Economical",
+    "energyCostPer100": "Energy Cost / 100",
+    "currentMonthCost": "Month Cost",
+    "currentMonthDistance": "Month Distance",
+    "odometer": "Odometer"
+  },
+  "chart": {
+    "monthlyCostHistory": "Fleet Monthly Cost History",
+    "stackedBreakdown": "Energy vs. other expenses",
+    "energyCost": "Energy",
+    "otherCost": "Other Expenses"
+  },
+  "drivers": {
+    "title": "Driver Distance Distribution",
+    "subtitle": "Kilometers logged per household driver this month",
+    "noData": "No drives logged with driver assignment yet."
+  }
+}

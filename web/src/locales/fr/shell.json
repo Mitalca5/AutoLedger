@@ -54,6 +54,7 @@
   },
   "nav": {
     "dashboard": "Tableau de bord",
+    "fleet": "Flotte Foyer",
     "home": "Accueil",
     "drives": "Trajets",
     "carpools": "Covoiturage",

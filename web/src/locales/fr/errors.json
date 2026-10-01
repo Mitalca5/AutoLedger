@@ -205,7 +205,19 @@
     "energy_invalid": "Énergie ajoutée invalide",
     "energy_positive": "L'énergie ajoutée doit être positive",
     "manual_cost_required": "Le coût d'une recharge manuelle est requis",
-    "cost_required": "Le coût est requis"
+    "cost_required": "Le coût est requis",
+    "pending_not_found": "Recharge en attente introuvable"
+  },
+  "tariff": {
+    "name_required": "Le nom de la grille tarifaire est requis",
+    "not_found": "Grille tarifaire introuvable"
+  },
+  "preset": {
+    "name_required": "Le nom du préréglage est requis"
+  },
+  "token": {
+    "name_required": "Le nom du jeton est requis",
+    "name_too_long": "Le nom du jeton ne doit pas dépasser 100 caractères"
   },
   "ownership": {
     "start_required": "La date de début (achat ou contrat) est requise",

@@ -54,7 +54,19 @@ export function hasTeslaMate(v: { powertrain?: string; teslamate_api_url?: strin
   return !!v && v.powertrain !== 'ICE' && !!v.teslamate_api_url?.trim()
 }
 
-export function emptyVehicleForm() {
+/**
+ * Computes the next auto-incremental TeslaMate car ID based on existing vehicles (defaults to 1).
+ */
+export function nextTeslaMateCarId(vehicles?: { teslamate_car_id?: number | null }[] | null): number {
+  if (!vehicles || vehicles.length === 0) return 1
+  const ids = vehicles
+    .map((v) => v.teslamate_car_id)
+    .filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+  if (ids.length === 0) return 1
+  return Math.max(...ids) + 1
+}
+
+export function emptyVehicleForm(existingVehicles?: { teslamate_car_id?: number | null }[] | null) {
   return {
     name: '',
     powertrain: 'EV',
@@ -63,7 +75,7 @@ export function emptyVehicleForm() {
     currency: 'EUR',
     vin: '',
     current_odometer: 0,
-    teslamate_car_id: 1,
+    teslamate_car_id: nextTeslaMateCarId(existingVehicles) as number | null,
     teslamate_api_url: '',
     teslamate_grafana_url: '',
     teslamate_auth_type: 'NONE',
@@ -72,6 +84,9 @@ export function emptyVehicleForm() {
     teslamate_basic_pass: '',
     estimated_kwh_100km: null as number | null,
     estimated_price_per_kwh: null as number | null,
+    tariff_plan_id: null as string | null,
+    default_driver_id: null as string | null,
+    is_home_charger_default: false,
   }
 }
 
@@ -96,6 +111,9 @@ export function vehicleFormFrom(v: any): VehicleForm {
     teslamate_basic_pass: '',
     estimated_kwh_100km: v.estimated_kwh_100km ?? null,
     estimated_price_per_kwh: v.estimated_price_per_kwh ?? null,
+    tariff_plan_id: v.tariff_plan_id || null,
+    default_driver_id: v.default_driver_id || null,
+    is_home_charger_default: !!v.is_home_charger_default,
   }
 }
 
