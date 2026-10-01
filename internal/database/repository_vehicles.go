@@ -28,20 +28,7 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	if v.Currency == "" {
 		v.Currency = "EUR"
 	}
-	if v.TelemetryMode == "" {
-		if v.TeslaMateCarID != nil || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "") {
-			v.TelemetryMode = models.TelemetryConnected
-		} else {
-			v.TelemetryMode = models.TelemetryManual
-		}
-	}
-	if v.Make == "" {
-		if v.TelemetryMode == models.TelemetryConnected {
-			v.Make = "Tesla"
-		} else {
-			v.Make = "Generic"
-		}
-	}
+	v.TelemetryMode = v.DerivedTelemetryMode()
 	query := `
 		INSERT INTO vehicles (
 			user_id, name, vin, teslamate_car_id, current_odometer,
@@ -204,6 +191,7 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		    updated_at = NOW()
 		WHERE id = $17;
 	`
+	v.TelemetryMode = v.DerivedTelemetryMode()
 	tag, err := r.pool.Exec(ctx, query,
 		v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
 		v.TeslaMateAPIURL, v.TeslaMateAuthType, v.TeslaMateAPIKeyEncrypted,

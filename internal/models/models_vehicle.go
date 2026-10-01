@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"github.com/teslacost/teslacost/internal/money"
@@ -41,20 +42,30 @@ type Vehicle struct {
 	EstimatedPricePerKwh     *float64    `json:"estimated_price_per_kwh,omitempty"`
 	Currency                 string      `json:"currency"`                        // ISO 4217 code, fixed at creation: see CLAUDE.md
 	Powertrain               string      `json:"powertrain"`                      // PowertrainEV | PowertrainICE
-	TelemetryMode            string      `json:"telemetry_mode"`                  // TelemetryConnected | TelemetrySemiAuto | TelemetryManual
-	Make                     string      `json:"make"`                            // Brand name: Tesla, Renault, Peugeot, etc.
-	Model                    string      `json:"model"`                           // Model name: Model 3, Megane E-Tech, etc.
+	TelemetryMode            string      `json:"telemetry_mode"`                  // Derived by DerivedTelemetryMode, never entered
+	Make                     string      `json:"make"`                            // Free text, empty when not given
+	Model                    string      `json:"model"`                           // Free text, empty when not given
 	TeslaMateGrafanaURL      *string     `json:"teslamate_grafana_url,omitempty"` // Grafana serving the TeslaMate dashboards, to link drives
 	CreatedAt                time.Time   `json:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at"`
 }
 
-// Telemetry modes determine how energy and distance data are ingested.
+// Telemetry modes describe how a vehicle's data arrives. The server derives the mode from the vehicle's
+// configuration (DerivedTelemetryMode); it is not an input.
 const (
 	TelemetryConnected = "CONNECTED"
 	TelemetrySemiAuto  = "SEMI_AUTO"
 	TelemetryManual    = "MANUAL"
 )
+
+// DerivedTelemetryMode is CONNECTED for an electric vehicle with a teslamateapi URL (the condition the
+// synchronization and the frontend's hasTeslaMate use), MANUAL otherwise.
+func (v *Vehicle) DerivedTelemetryMode() string {
+	if v.Powertrain != PowertrainICE && v.TeslaMateAPIURL != nil && strings.TrimSpace(*v.TeslaMateAPIURL) != "" {
+		return TelemetryConnected
+	}
+	return TelemetryManual
+}
 
 // Vehicle powertrains. ICE vehicles are tracked manually (fuel fill-ups) and have no TeslaMate link.
 const (

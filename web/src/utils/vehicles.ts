@@ -58,7 +58,6 @@ export function emptyVehicleForm() {
   return {
     name: '',
     powertrain: 'EV',
-    telemetry_mode: 'MANUAL' as 'CONNECTED' | 'SEMI_AUTO' | 'MANUAL',
     make: '',
     model: '',
     currency: 'EUR',
@@ -83,7 +82,6 @@ export function vehicleFormFrom(v: any): VehicleForm {
   return {
     name: v.name,
     powertrain: v.powertrain || 'EV',
-    telemetry_mode: v.telemetry_mode || (v.teslamate_car_id ? 'CONNECTED' : 'MANUAL'),
     make: v.make || '',
     model: v.model || '',
     currency: v.currency || 'EUR',
