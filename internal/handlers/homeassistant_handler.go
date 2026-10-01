@@ -218,6 +218,46 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 	})
 }
 
+// IntegrationVehicle is the view of a vehicle given to Home Assistant and scripts: what an integration needs to
+// name its devices and entities, without the TeslaMate connection settings or any other account data.
+type IntegrationVehicle struct {
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Make            string  `json:"make"`
+	Model           string  `json:"model"`
+	Powertrain      string  `json:"powertrain"`
+	Currency        string  `json:"currency"`
+	CurrentOdometer float64 `json:"current_odometer"`
+}
+
+func integrationVehicle(v *models.Vehicle) IntegrationVehicle {
+	return IntegrationVehicle{ID: v.ID, Name: v.Name, Make: v.Make, Model: v.Model, Powertrain: v.Powertrain,
+		Currency: v.Currency, CurrentOdometer: v.CurrentOdometer}
+}
+
+// ListVehicles lists the vehicles the token's account can see, in the integration view.
+func (h *HomeAssistantHandler) ListVehicles(w http.ResponseWriter, r *http.Request) {
+	vehicles, err := h.repo.ListVehiclesByUserID(r.Context(), middleware.GetUserID(r.Context()))
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to list vehicles")
+		return
+	}
+	out := make([]IntegrationVehicle, 0, len(vehicles))
+	for i := range vehicles {
+		out = append(out, integrationVehicle(&vehicles[i]))
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// GetVehicle returns one vehicle in the integration view.
+func (h *HomeAssistantHandler) GetVehicle(w http.ResponseWriter, r *http.Request) {
+	vehicle := requireVehicleAccess(w, r, h.repo, chi.URLParam(r, "vehicleId"), models.RoleViewer)
+	if vehicle == nil {
+		return
+	}
+	writeJSON(w, http.StatusOK, integrationVehicle(vehicle))
+}
+
 // GetVehicleMetrics provides aggregated financial and efficiency indicators for Home Assistant sensors.
 func (h *HomeAssistantHandler) GetVehicleMetrics(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")

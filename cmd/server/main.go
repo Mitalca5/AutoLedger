@@ -383,6 +383,8 @@ func main() {
 			r.Use(handlers.Idempotency(repo))
 
 			r.Post("/api/integrations/homeassistant/event", haHandler.HandleEvent)
+			r.Get("/api/integrations/homeassistant/vehicles", haHandler.ListVehicles)
+			r.Get("/api/integrations/homeassistant/vehicles/{vehicleId}", haHandler.GetVehicle)
 			r.Get("/api/integrations/homeassistant/vehicles/{vehicleId}/metrics", haHandler.GetVehicleMetrics)
 		})
 
