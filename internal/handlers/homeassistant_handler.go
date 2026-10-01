@@ -71,6 +71,17 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	switch strings.TrimSpace(req.EventType) {
+	case "", haEventChargingSessionEnd:
+		// A charging session, handled below
+	case haEventOdometerUpdate, haEventTelemetryUpdate:
+		h.recordOdometer(w, r, &req)
+		return
+	default:
+		writeAPIError(w, http.StatusBadRequest, apierror.Newf("integration.unknown_event_type", "Unknown event type %q", req.EventType))
+		return
+	}
+
 	endTime := time.Now().UTC()
 	if req.Data.EndTime != nil {
 		endTime = req.Data.EndTime.UTC()
@@ -215,6 +226,42 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 		"vehicle_id": targetVehicle.ID,
 		"charge_id":  charge.ID,
 		"cost":       charge.Cost,
+	})
+}
+
+// Event types accepted by HandleEvent. An empty type is a charging session (the first blueprint sent none).
+const (
+	haEventChargingSessionEnd = "charging_session_end"
+	haEventOdometerUpdate     = "odometer_update"
+	haEventTelemetryUpdate    = "telemetry_update"
+)
+
+// recordOdometer applies an odometer reading. Unlike a charging session it is never attributed by guess:
+// the event must name its vehicle, since a reading sent to the wrong vehicle would overwrite its mileage.
+func (h *HomeAssistantHandler) recordOdometer(w http.ResponseWriter, r *http.Request, req *HAEventPayload) {
+	if req.VehicleID == nil || strings.TrimSpace(*req.VehicleID) == "" {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.not_specified", "The event must name its vehicle"))
+		return
+	}
+	if req.Data.OdometerKm == nil || *req.Data.OdometerKm <= 0 {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("telemetry.missing_odometer", "No valid odometer reading provided"))
+		return
+	}
+	vehicle := requireVehicleAccess(w, r, h.repo, strings.TrimSpace(*req.VehicleID), models.RoleEditor)
+	if vehicle == nil {
+		return
+	}
+	odometer := *req.Data.OdometerKm
+	if odometer > vehicle.CurrentOdometer {
+		if err := h.repo.UpdateVehicleOdometer(r.Context(), vehicle.ID, odometer); err != nil {
+			writeRepoError(w, r, err, "Failed to update vehicle odometer")
+			return
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":           "recorded",
+		"vehicle_id":       vehicle.ID,
+		"current_odometer": math.Max(vehicle.CurrentOdometer, odometer),
 	})
 }
 

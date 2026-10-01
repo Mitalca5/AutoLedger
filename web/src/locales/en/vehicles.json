@@ -58,6 +58,7 @@
     "vehicleName": "Vehicle name",
     "edit": "Edit the vehicle",
     "currentMileage": "Current mileage ({unit})",
+    "currentMileageHelp": "Dashboard reading today. Purchase mileage is configured in the contract.",
     "initialOdometer": "Initial odometer ({unit})",
     "testStatus": "Status: {state} • Odometer: {odometer} {unit}",
     "urlFirst": "Please enter the TeslaMate API URL first",

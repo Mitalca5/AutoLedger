@@ -120,10 +120,15 @@
     "grafana_url_invalid": "Invalid Grafana URL (http:// or https:// required)",
     "grafana_url_credentials": "The Grafana URL must not contain credentials",
     "powertrain_invalid": "Invalid powertrain (EV or ICE)",
-    "currency_invalid": "Invalid currency: {p0}"
+    "currency_invalid": "Invalid currency: {p0}",
+    "not_specified": "The event must name its vehicle"
   },
   "drive": {
-    "not_found": "Drive not found"
+    "not_found": "Drive not found",
+    "missing_start_time": "Start date and time are required",
+    "invalid_distance": "Distance must be greater than 0",
+    "cannot_edit_synced": "Only manually logged drives can be edited",
+    "cannot_delete_synced": "Only manually logged drives can be deleted"
   },
   "fuel": {
     "combustion_only": "Fuel fill-ups only apply to combustion vehicles",
@@ -156,13 +161,6 @@
     "drive_required": "Select at least one drive",
     "group_needs_drive": "A group must contain at least one drive",
     "needs_drive": "A trip must contain at least one drive"
-  },
-  "drive": {
-    "not_found": "Drive not found",
-    "missing_start_time": "Start date and time are required",
-    "invalid_distance": "Distance must be greater than 0",
-    "cannot_edit_synced": "Only manually logged drives can be edited",
-    "cannot_delete_synced": "Only manually logged drives can be deleted"
   },
   "import": {
     "too_large": "The CSV file exceeds the maximum allowed size (5 MB)",
@@ -275,5 +273,11 @@
     "auth_refused": "TeslaMateAPI answered with status {p0}: authentication refused",
     "not_found": "TeslaMateAPI answered with status {p0}: resource not found (wrong URL or vehicle identifier)",
     "url_required": "The TeslaMate API URL is required"
+  },
+  "telemetry": {
+    "missing_odometer": "No valid odometer reading in the event"
+  },
+  "integration": {
+    "unknown_event_type": "Unknown event type: {p0}"
   }
 }
