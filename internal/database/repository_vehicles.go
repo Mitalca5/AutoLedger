@@ -28,11 +28,29 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	if v.Currency == "" {
 		v.Currency = "EUR"
 	}
-	if v.TelemetryMode == "" {
-		if v.TeslaMateCarID != nil || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "") {
-			v.TelemetryMode = models.TelemetryConnected
-		} else {
-			v.TelemetryMode = models.TelemetryManual
+	if v.Powertrain == models.PowertrainICE {
+		v.TeslaMateCarID = nil
+		v.TelemetryMode = models.TelemetryManual
+		v.TeslaMateAPIURL = nil
+		v.TeslaMateGrafanaURL = nil
+	} else {
+		if v.TelemetryMode == "" {
+			if v.TeslaMateCarID != nil || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "") {
+				v.TelemetryMode = models.TelemetryConnected
+			} else {
+				v.TelemetryMode = models.TelemetryManual
+			}
+		}
+		if v.TeslaMateCarID == nil && (v.TelemetryMode == models.TelemetryConnected || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "")) {
+			var nextCarID int
+			err := tx.QueryRow(ctx, `
+				SELECT COALESCE(MAX(teslamate_car_id), 0) + 1
+				FROM vehicles
+				WHERE user_id = $1
+			`, v.UserID).Scan(&nextCarID)
+			if err == nil && nextCarID > 0 {
+				v.TeslaMateCarID = &nextCarID
+			}
 		}
 	}
 	if v.Make == "" {

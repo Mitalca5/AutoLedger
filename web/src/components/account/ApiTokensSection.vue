@@ -203,7 +203,7 @@ onMounted(() => {
                 type="text"
                 required
                 maxlength="100"
-                placeholder="ex: Home Assistant Chambery"
+                :placeholder="t('account.tokens.namePlaceholder')"
                 class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-rose-500 focus:outline-none"
               />
             </div>

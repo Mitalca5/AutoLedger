@@ -72,6 +72,7 @@
     "modalTitle": "Generate New API Token",
     "modalSubtitle": "Choose a recognizable name for your integration or device",
     "nameLabel": "Token Name",
+    "namePlaceholder": "E.g. Home Assistant",
     "expiryLabel": "Expiration",
     "noExpiry": "Never expires",
     "days": "days",

@@ -31,7 +31,7 @@ const syncSummary = computed(() => {
 function onVehicleChange(event: Event) {
   const target = event.target as HTMLSelectElement
   if (target.value === 'new') {
-    router.push('/vehicles')
+    router.push({ path: '/vehicles', query: { add: '1' } })
   } else {
     vehicleStore.setActiveVehicle(target.value)
   }
