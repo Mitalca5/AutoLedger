@@ -537,16 +537,17 @@ func (h *DriveHandler) DeleteTripGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 type SaveManualDriveRequest struct {
-	StartTime         time.Time `json:"start_time"`
+	StartTime         time.Time  `json:"start_time"`
 	EndTime           *time.Time `json:"end_time"`
-	DistanceKm        float64   `json:"distance_km"`
-	DurationMin       *int      `json:"duration_min"`
-	EnergyConsumedKwh *float64  `json:"energy_consumed_kwh"`
-	StartOdometer     *float64  `json:"start_odometer"`
-	EndOdometer       *float64  `json:"end_odometer"`
-	StartAddress      *string   `json:"start_address"`
-	EndAddress        *string   `json:"end_address"`
-	Tags              []string  `json:"tags"`
+	DistanceKm        float64    `json:"distance_km"`
+	DurationMin       *int       `json:"duration_min"`
+	EnergyConsumedKwh *float64   `json:"energy_consumed_kwh"`
+	StartOdometer     *float64   `json:"start_odometer"`
+	EndOdometer       *float64   `json:"end_odometer"`
+	StartAddress      *string    `json:"start_address"`
+	EndAddress        *string    `json:"end_address"`
+	Tags              []string   `json:"tags"`
+	DriverID          *string    `json:"driver_id"`
 }
 
 // Create records a manually entered drive.
@@ -579,7 +580,7 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 		endTime = req.StartTime.Add(time.Duration(*req.DurationMin) * time.Minute)
 	} else {
 		// Default to 50 km/h average speed
-		duration := int(math.Max(1, math.Round((req.DistanceKm / 50.0) * 60)))
+		duration := int(math.Max(1, math.Round((req.DistanceKm/50.0)*60)))
 		endTime = req.StartTime.Add(time.Duration(duration) * time.Minute)
 	}
 
@@ -625,6 +626,7 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 		EnergyConsumedKwh:   &energy,
 		ConsumptionKwh100km: &cons100,
 		Tags:                tags,
+		DriverID:            req.DriverID,
 		IsManual:            true,
 	}
 
@@ -707,6 +709,7 @@ func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Tags != nil {
 		existing.Tags = req.Tags
 	}
+	existing.DriverID = req.DriverID
 
 	if err := h.repo.UpdateManualDrive(r.Context(), existing); err != nil {
 		writeRepoError(w, r, err, "Failed to update manual drive")
@@ -714,6 +717,32 @@ func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, existing)
+}
+
+type UpdateDriverRequest struct {
+	DriverID *string `json:"driver_id"`
+}
+
+// UpdateDriver assigns or changes the driver on any drive (manual or synced).
+func (h *DriveHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
+	vehicleID := chi.URLParam(r, "vehicleId")
+	driveID := chi.URLParam(r, "driveId")
+	if v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor); v == nil {
+		return
+	}
+
+	var req UpdateDriverRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+
+	if err := h.repo.SetDriveDriver(r.Context(), driveID, vehicleID, req.DriverID); err != nil {
+		writeRepoError(w, r, err, "Failed to update driver")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"success": true, "driver_id": req.DriverID})
 }
 
 // Delete removes a manually entered drive.

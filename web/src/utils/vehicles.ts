@@ -73,6 +73,9 @@ export function emptyVehicleForm() {
     teslamate_basic_pass: '',
     estimated_kwh_100km: null as number | null,
     estimated_price_per_kwh: null as number | null,
+    tariff_plan_id: null as string | null,
+    default_driver_id: null as string | null,
+    is_home_charger_default: false,
   }
 }
 
@@ -98,6 +101,9 @@ export function vehicleFormFrom(v: any): VehicleForm {
     teslamate_basic_pass: '',
     estimated_kwh_100km: v.estimated_kwh_100km ?? null,
     estimated_price_per_kwh: v.estimated_price_per_kwh ?? null,
+    tariff_plan_id: v.tariff_plan_id || null,
+    default_driver_id: v.default_driver_id || null,
+    is_home_charger_default: !!v.is_home_charger_default,
   }
 }
 

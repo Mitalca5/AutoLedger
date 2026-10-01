@@ -2,6 +2,7 @@
 import { t } from '@/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import DistanceUnitSwitcher from '@/components/DistanceUnitSwitcher.vue'
+import ApiTokensSection from '@/components/account/ApiTokensSection.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { KeyRound, Laptop, LogOut, ShieldCheck, SlidersHorizontal, Smartphone, UserRound } from 'lucide-vue-next'
@@ -229,6 +230,8 @@ onMounted(load)
         <p class="text-[11px] text-slate-400">{{ $t('account.accountView.otherDevicesAreSignedOut') }}</p>
       </form>
     </section>
+
+    <ApiTokensSection />
 
     <section class="rounded-2xl border border-slate-800 bg-slate-900 p-5" aria-labelledby="account-sessions">
       <div class="mb-3 flex flex-wrap items-center justify-between gap-2">

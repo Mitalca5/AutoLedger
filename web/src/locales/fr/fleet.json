@@ -1,0 +1,35 @@
+{
+  "title": "Flotte Foyer",
+  "subtitle": "Vue consolidée et comparaison multi-véhicules du foyer",
+  "refresh": "Actualiser",
+  "kpi": {
+    "vehicles": "Véhicules",
+    "activeVehicles": "Actifs dans le foyer",
+    "monthCost": "Coût ce mois",
+    "currentMonthTotal": "Dépenses mensuelles globales",
+    "monthDistance": "Distance ce mois",
+    "fleetTravelled": "Distance totale parcourue",
+    "monthEnergy": "Énergie ce mois",
+    "energyDelivered": "Énergie de recharge délivrée"
+  },
+  "vehicles": {
+    "comparisonTitle": "Véhicules & Efficacité Énergétique",
+    "efficiencyMetricHint": "Coût réel de recharge aux 100 unités de distance",
+    "mostEconomical": "Plus économique",
+    "energyCostPer100": "Coût Énergie / 100",
+    "currentMonthCost": "Coût du mois",
+    "currentMonthDistance": "Distance du mois",
+    "odometer": "Odomètre"
+  },
+  "chart": {
+    "monthlyCostHistory": "Historique des coûts de la flotte",
+    "stackedBreakdown": "Énergie vs autres dépenses",
+    "energyCost": "Énergie",
+    "otherCost": "Autres dépenses"
+  },
+  "drivers": {
+    "title": "Répartition des kilomètres par conducteur",
+    "subtitle": "Kilomètres enregistrés par membre du foyer ce mois-ci",
+    "noData": "Aucun trajet avec conducteur assigné pour le moment."
+  }
+}

@@ -6,10 +6,11 @@ import { api, type ExpenseDocumentHeader } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useDocumentAttach } from '@/composables/useDocumentAttach'
 import { useVehicleStore } from '@/stores/vehicle'
-import { Zap, X, Paperclip, FileText, Eye, UploadCloud } from 'lucide-vue-next'
+import { Zap, X, Paperclip, FileText, Eye, UploadCloud, Calculator } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { CURRENCIES, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import PublicChargeCalculatorModal from '@/components/expenses/PublicChargeCalculatorModal.vue'
 
 // Records a charge made outside TeslaMate, or completes / corrects the cost of `editing`.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[]; currentOdometer: number }>()
@@ -43,6 +44,22 @@ const chargeForm = ref({
   document_id: null as string | null,
   document_filename: null as string | null,
 })
+
+const showPublicCalc = ref(false)
+
+function handleApplyPublicCalc(cost: number, calculatedKwh?: number, summaryNote?: string) {
+  chargeForm.value.cost = cost.toFixed(2)
+  if (calculatedKwh && (!chargeForm.value.kwh_added || Number(chargeForm.value.kwh_added) <= 0)) {
+    chargeForm.value.kwh_added = calculatedKwh.toFixed(3)
+  }
+  if (summaryNote) {
+    if (chargeForm.value.notes) {
+      chargeForm.value.notes += ' | ' + summaryNote
+    } else {
+      chargeForm.value.notes = summaryNote
+    }
+  }
+}
 
 watch(open, (isOpen) => {
   if (!isOpen) return
@@ -149,7 +166,17 @@ async function handleSaveCharge() {
         </template>
 
         <div>
-          <label for="charge-form-cost" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.cost') }}</label>
+          <div class="flex items-center justify-between mb-1">
+            <label for="charge-form-cost" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.chargeModal.cost') }}</label>
+            <button
+              type="button"
+              @click="showPublicCalc = true"
+              class="inline-flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 font-medium"
+            >
+              <Calculator class="w-3.5 h-3.5" />
+              {{ $t('tariffs.publicModal.openCalculator') }}
+            </button>
+          </div>
           <div class="flex gap-1.5">
             <input id="charge-form-cost" v-model="chargeForm.cost" type="number" inputmode="decimal" step="0.01" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field-touch w-full min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
             <label for="charge-form-currency" class="sr-only">{{ $t('expenses.chargeModal.currency') }}</label>
@@ -246,4 +273,11 @@ async function handleSaveCharge() {
       </div>
     </div>
   </div>
+
+  <PublicChargeCalculatorModal
+    v-model:open="showPublicCalc"
+    :currency="chargeForm.currency"
+    :initial-kwh="chargeForm.kwh_added ? Number(chargeForm.kwh_added) : null"
+    @apply="handleApplyPublicCalc"
+  />
 </template>

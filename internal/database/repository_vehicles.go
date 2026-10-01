@@ -42,14 +42,18 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 			v.Make = "Generic"
 		}
 	}
+	if v.DefaultDriverID == nil {
+		v.DefaultDriverID = &v.UserID
+	}
 	query := `
 		INSERT INTO vehicles (
 			user_id, name, vin, teslamate_car_id, current_odometer,
 			teslamate_api_url, teslamate_auth_type, teslamate_api_key_encrypted,
 			teslamate_basic_user, teslamate_basic_pass_encrypted,
 			estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain,
-			telemetry_mode, make, model, teslamate_grafana_url
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+			telemetry_mode, make, model, teslamate_grafana_url,
+			default_driver_id, tariff_plan_id, is_home_charger_default
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 		RETURNING id, created_at, updated_at;
 	`
 	err = tx.QueryRow(ctx, query,
@@ -58,6 +62,7 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 		v.TeslaMateBasicUser, v.TeslaMateBasicPassEnc,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Currency, v.Powertrain,
 		v.TelemetryMode, v.Make, v.Model, v.TeslaMateGrafanaURL,
+		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
 	).Scan(&v.ID, &v.CreatedAt, &v.UpdatedAt)
 	if err != nil {
 		return fmt.Errorf("failed to create vehicle: %w", err)
@@ -105,6 +110,7 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 		       v.teslamate_basic_user, v.teslamate_basic_pass_encrypted,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
 		       v.telemetry_mode, v.make, v.model, v.teslamate_grafana_url,
+		       v.default_driver_id, v.tariff_plan_id, v.is_home_charger_default,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $1 THEN 'OWNER' ELSE 'VIEWER' END) as role
 		FROM vehicles v
@@ -128,6 +134,7 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 			&v.TeslaMateBasicUser, &v.TeslaMateBasicPassEnc,
 			&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
 			&v.TelemetryMode, &v.Make, &v.Model, &v.TeslaMateGrafanaURL,
+			&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault,
 			&v.CreatedAt, &v.UpdatedAt, &role,
 		); err != nil {
 			return nil, err
@@ -200,9 +207,10 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		    teslamate_basic_pass_encrypted = $9,
 		    estimated_kwh_100km = $10, estimated_price_per_kwh = $11,
 		    powertrain = $12, telemetry_mode = $13, make = $14, model = $15,
-		    teslamate_grafana_url = $16,
+		    teslamate_grafana_url = $16, default_driver_id = $17, tariff_plan_id = $18,
+		    is_home_charger_default = $19,
 		    updated_at = NOW()
-		WHERE id = $17;
+		WHERE id = $20;
 	`
 	tag, err := r.pool.Exec(ctx, query,
 		v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
@@ -210,6 +218,7 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		v.TeslaMateBasicUser, v.TeslaMateBasicPassEnc,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Powertrain,
 		v.TelemetryMode, v.Make, v.Model, v.TeslaMateGrafanaURL,
+		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
 		v.ID,
 	)
 	if err != nil {
