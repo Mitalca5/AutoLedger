@@ -64,13 +64,14 @@ func mustVehicle(t *testing.T, repo *database.Repository, email string) *models.
 		t.Fatal(err)
 	}
 	carID := 1
+	apiURL := "http://teslamate.invalid"
 	v := &models.Vehicle{
 		UserID:            u.ID,
-		Name:              "Model 3",
+		Name:              "Connected EV",
 		TeslaMateCarID:    &carID,
+		TeslaMateAPIURL:   &apiURL,
 		TeslaMateAuthType: models.AuthModeNone,
 		CurrentOdometer:   20000,
-		TelemetryMode:     models.TelemetryConnected,
 	}
 	if err := repo.CreateVehicle(ctx, v); err != nil {
 		t.Fatal(err)

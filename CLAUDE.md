@@ -71,6 +71,7 @@ backup/                     sidecar image: pg_dump + documents archive on a sche
 - teslamateapi facts (verified in its source, its README has no field docs): drives/charges carry `battery_details{start_battery_level,end_battery_level}` and `outside_temp_avg` in `units.unit_of_temperature` (F is possible); `charge_energy_used` is `GREATEST(used, added)`, so used == added means "not measured" (DC); missing levels arrive as 0; `/battery-health` reports current capacity over the best capacity ever observed.
 - Manual charges require a cost. `UpdateCharge` overwrites notes/`document_id` with what it receives: send the existing values back when only completing a cost. Foreign currency (`fx_rate`) exists only on manual entries.
 - Sessions: 15-minute JWT access token, 30-day rotating refresh token in an `HttpOnly` cookie with reuse detection. With `ENVIRONMENT=production` the server refuses to start on published default secrets.
+- `telemetry_mode` is derived by the server on every vehicle write (`Vehicle.DerivedTelemetryMode`): `CONNECTED` for an electric vehicle with a teslamateapi URL, `MANUAL` otherwise (`SEMI_AUTO` is reserved for push sources). Clients never send it. `make` and `model` are empty when not given, never filled with a default.
 
 ## Conventions
 
