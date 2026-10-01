@@ -8,5 +8,6 @@
   "empty": "Aucune recharge en attente de qualification. Tout est à jour !",
   "assign": "Attribuer",
   "assigning": "Attribution...",
-  "dismiss": "Ignorer"
+  "dismiss": "Ignorer",
+  "selectVehicle": "Sélectionner un véhicule"
 }

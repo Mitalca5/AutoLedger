@@ -421,11 +421,12 @@ async function handleDeleteExpense(exp: any) {
 
         <!-- Driver attribution (only for individual drives) -->
         <div v-if="!selectedCostDrive.is_trip_group && vehicleStore.canEdit" class="pt-2 border-t border-slate-700/60 flex items-center justify-between gap-2">
-          <span class="text-xs text-slate-400 flex items-center gap-1.5">
+          <label for="drive-driver-select" class="text-xs text-slate-400 flex items-center gap-1.5 cursor-pointer">
             <User class="w-3.5 h-3.5 text-purple-400" />
             {{ $t('drives.driverLabel') }}
-          </span>
+          </label>
           <select
+            id="drive-driver-select"
             :value="selectedCostDrive.driver_id || ''"
             @change="handleDriverChange($event)"
             class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:border-purple-500 focus:outline-none"

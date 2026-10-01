@@ -171,8 +171,9 @@ onMounted(() => {
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
         <!-- Preset selector -->
         <div>
-          <label class="block text-slate-300 font-medium mb-1">{{ t('tariffs.publicModal.presetLabel') }}</label>
+          <label for="public-preset-select" class="block text-slate-300 font-medium mb-1">{{ t('tariffs.publicModal.presetLabel') }}</label>
           <select
+            id="public-preset-select"
             v-model="selectedPresetId"
             class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
           >
@@ -186,8 +187,9 @@ onMounted(() => {
         <!-- Session Consumption Inputs -->
         <div class="grid grid-cols-3 gap-3 p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
           <div>
-            <label class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.energyKwh') }}</label>
+            <label for="public-charge-kwh" class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.energyKwh') }}</label>
             <input
+              id="public-charge-kwh"
               v-model="kwh"
               type="number"
               step="0.01"
@@ -197,8 +199,9 @@ onMounted(() => {
             />
           </div>
           <div>
-            <label class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.durationMin') }}</label>
+            <label for="public-charge-duration" class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.durationMin') }}</label>
             <input
+              id="public-charge-duration"
               v-model="chargingMinutes"
               type="number"
               step="1"
@@ -208,8 +211,9 @@ onMounted(() => {
             />
           </div>
           <div>
-            <label class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.idleMin') }}</label>
+            <label for="public-charge-idle" class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.idleMin') }}</label>
             <input
+              id="public-charge-idle"
               v-model="idleMinutes"
               type="number"
               step="1"
@@ -225,8 +229,9 @@ onMounted(() => {
           <span class="block font-semibold text-slate-300">{{ t('tariffs.publicModal.ratesSection') }}</span>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.connectionFee') }} ({{ currency }})</label>
+              <label for="public-charge-conn-fee" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.connectionFee') }} ({{ currency }})</label>
               <input
+                id="public-charge-conn-fee"
                 v-model="connectionFee"
                 type="number"
                 step="0.01"
@@ -236,8 +241,9 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerKwh') }} ({{ currency }}/kWh)</label>
+              <label for="public-charge-kwh-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerKwh') }} ({{ currency }}/kWh)</label>
               <input
+                id="public-charge-kwh-cost"
                 v-model="costPerKwh"
                 type="number"
                 step="0.001"
@@ -247,8 +253,9 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerMin') }} ({{ currency }}/min)</label>
+              <label for="public-charge-min-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerMin') }} ({{ currency }}/min)</label>
               <input
+                id="public-charge-min-cost"
                 v-model="costPerMinute"
                 type="number"
                 step="0.01"
@@ -258,8 +265,9 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.idleFeePerMin') }} ({{ currency }}/min)</label>
+              <label for="public-charge-idle-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.idleFeePerMin') }} ({{ currency }}/min)</label>
               <input
+                id="public-charge-idle-cost"
                 v-model="idleFeePerMinute"
                 type="number"
                 step="0.01"
@@ -270,8 +278,9 @@ onMounted(() => {
             </div>
           </div>
           <div>
-            <label class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.idleGraceMin') }}</label>
+            <label for="public-charge-grace" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.idleGraceMin') }}</label>
             <input
+              id="public-charge-grace"
               v-model="idleGraceMinutes"
               type="number"
               step="1"
@@ -295,7 +304,9 @@ onMounted(() => {
             </button>
           </div>
           <div v-else class="flex items-center gap-2">
+            <label for="public-charge-preset-name" class="sr-only">{{ t('tariffs.publicModal.saveAsPreset') }}</label>
             <input
+              id="public-charge-preset-name"
               v-model="savePresetName"
               type="text"
               placeholder="ex: Ionity Direct"

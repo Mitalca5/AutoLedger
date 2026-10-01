@@ -8,5 +8,6 @@
   "empty": "No pending charges to qualify. All sessions are up to date!",
   "assign": "Assign",
   "assigning": "Assigning...",
-  "dismiss": "Dismiss"
+  "dismiss": "Dismiss",
+  "selectVehicle": "Select vehicle"
 }

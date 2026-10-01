@@ -194,10 +194,11 @@ onMounted(() => {
 
           <form @submit.prevent="handleCreateToken" class="space-y-3">
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1">
+              <label for="token-name-input" class="block text-xs font-medium text-slate-300 mb-1">
                 {{ t('account.tokens.nameLabel') }}
               </label>
               <input
+                id="token-name-input"
                 v-model="tokenName"
                 type="text"
                 required
@@ -208,10 +209,11 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1">
+              <label for="token-expiry-select" class="block text-xs font-medium text-slate-300 mb-1">
                 {{ t('account.tokens.expiryLabel') }}
               </label>
               <select
+                id="token-expiry-select"
                 v-model="tokenExpiresDays"
                 class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-rose-500 focus:outline-none"
               >

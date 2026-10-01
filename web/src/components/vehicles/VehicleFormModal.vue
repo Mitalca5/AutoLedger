@@ -167,8 +167,8 @@ async function testModalConnection() {
             <p class="text-[11px] text-slate-400 mt-1">{{ $t('tariffs.planSelectHint') }}</p>
           </div>
 
-          <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">
-            <input type="checkbox" v-model="form.is_home_charger_default" class="mt-0.5 rounded border-slate-600 text-rose-600 focus:ring-rose-500 bg-slate-900" />
+          <label for="vehicle-home-charger-default" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">
+            <input id="vehicle-home-charger-default" type="checkbox" v-model="form.is_home_charger_default" class="mt-0.5 rounded border-slate-600 text-rose-600 focus:ring-rose-500 bg-slate-900" />
             <div class="text-xs">
               <span class="font-semibold text-white block">{{ $t('vehicles.homeChargerDefaultLabel') }}</span>
               <span class="text-slate-400 block mt-0.5">{{ $t('vehicles.homeChargerDefaultHint') }}</span>

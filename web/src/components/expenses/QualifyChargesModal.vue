@@ -151,7 +151,11 @@ onMounted(() => {
 
             <!-- Vehicle Assignment Action -->
             <div class="flex items-center gap-2 shrink-0">
+              <label :for="'qualify-vehicle-' + charge.id" class="sr-only">
+                {{ t('pendingCharges.selectVehicle') }}
+              </label>
               <select
+                :id="'qualify-vehicle-' + charge.id"
                 v-model="selectedVehicleIds[charge.id]"
                 class="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
               >
