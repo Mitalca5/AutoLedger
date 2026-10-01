@@ -32,6 +32,12 @@ func TestIntegrationEnergyStats(t *testing.T) {
 	drive(1, time.Date(2026, 1, 31, 23, 30, 0, 0, time.UTC), 100, kwh(15))
 	drive(2, time.Date(2026, 2, 10, 9, 0, 0, 0, time.UTC), 200, nil) // no energy reading: distance only
 	deleted := drive(3, time.Date(2026, 2, 12, 9, 0, 0, 0, time.UTC), 300, kwh(60))
+	// A manual drive whose energy was derived from the average consumption: its distance counts, not its energy.
+	estimated := &models.Drive{VehicleID: v.ID, StartTime: time.Date(2026, 2, 14, 9, 0, 0, 0, time.UTC), EndTime: time.Date(2026, 2, 14, 10, 0, 0, 0, time.UTC),
+		DistanceKm: 50, DurationMin: 60, EnergyConsumedKwh: kwh(40), ConsumptionKwh100km: kwh(80), EnergyEstimated: true}
+	if err := repo.CreateManualDrive(ctx, estimated); err != nil {
+		t.Fatal(err)
+	}
 
 	charge := func(tmID int, start time.Time, hours float64, added float64, used *float64, cost *money.Cents, currency string, fx *float64) {
 		end := start.Add(time.Duration(hours * float64(time.Hour)))
@@ -73,10 +79,10 @@ func TestIntegrationEnergyStats(t *testing.T) {
 		t.Fatalf("expected the 23:30 UTC drive in the Paris month of February, got %+v", got.Months)
 	}
 	m := got.Months[0]
-	if m.DistanceKm != 300 {
-		t.Errorf("distance: got %v, want 300 (deleted drive excluded)", m.DistanceKm)
+	if m.DistanceKm != 350 {
+		t.Errorf("distance: got %v, want 350 (deleted drive excluded, estimated manual drive included)", m.DistanceKm)
 	}
-	eq(t, "consumption", m.ConsumptionKwh100km, 15.0) // 15 kWh over the 100 km with a reading
+	eq(t, "consumption", m.ConsumptionKwh100km, 15.0) // 15 kWh over the 100 km with a reading; the estimated drive stays out
 	if m.EnergyCost != money.FromFloat(32) {          // 6 + 20 + 6 (GBP converted); no tariff and no rate stay out
 		t.Errorf("energy cost: got %v, want 32.00", m.EnergyCost)
 	}

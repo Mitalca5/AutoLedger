@@ -45,13 +45,20 @@ type SaveVehicleRequest struct {
 	EstimatedPricePerKwh *float64        `json:"estimated_price_per_kwh"`
 	Currency             string          `json:"currency"`              // ISO 4217 code, fixed at creation; ignored on update
 	Powertrain           string          `json:"powertrain"`            // EV (default) or ICE
-	TelemetryMode        string          `json:"telemetry_mode"`        // CONNECTED, SEMI_AUTO, MANUAL
-	Make                 string          `json:"make"`                  // Tesla, Renault, etc.
-	Model                string          `json:"model"`                 // Model 3, Megane, etc.
+	Make                 *string         `json:"make"`                  // Free text; omitted keeps it on update, empty clears it
+	Model                *string         `json:"model"`                 // Free text; omitted keeps it on update, empty clears it
 	TeslaMateGrafanaURL  *string         `json:"teslamate_grafana_url"` // Optional; empty clears it
 	DefaultDriverID      *string         `json:"default_driver_id"`
 	TariffPlanID         *string         `json:"tariff_plan_id"`
 	IsHomeChargerDefault bool            `json:"is_home_charger_default"`
+}
+
+// trimmedText is the trimmed value of an optional free-text field, empty when absent.
+func trimmedText(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return strings.TrimSpace(*s)
 }
 
 // normalizeGrafanaURL validates the base URL of the Grafana serving the TeslaMate dashboards.
@@ -175,7 +182,6 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		authType = models.AuthModeNone
 	}
 
-	telemetryMode := req.TelemetryMode
 	if powertrain == models.PowertrainICE {
 		req.TeslaMateCarID = nil
 		req.TeslaMateAPIURL = nil
@@ -185,28 +191,9 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		req.TeslaMateBasicPass = nil
 		encKey = nil
 		encPass = nil
-		telemetryMode = models.TelemetryManual
 		authType = models.AuthModeNone
-	} else {
-		if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
-			req.TeslaMateCarID = nil
-		}
-		if telemetryMode == "" {
-			if req.TeslaMateCarID != nil || (req.TeslaMateAPIURL != nil && *req.TeslaMateAPIURL != "") {
-				telemetryMode = models.TelemetryConnected
-			} else {
-				telemetryMode = models.TelemetryManual
-			}
-		}
-	}
-
-	makeName := strings.TrimSpace(req.Make)
-	if makeName == "" {
-		if telemetryMode == models.TelemetryConnected {
-			makeName = "Tesla"
-		} else {
-			makeName = "Generic"
-		}
+	} else if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
+		req.TeslaMateCarID = nil
 	}
 
 	v := &models.Vehicle{
@@ -224,9 +211,8 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		EstimatedPricePerKwh:     req.EstimatedPricePerKwh,
 		Currency:                 currency,
 		Powertrain:               powertrain,
-		TelemetryMode:            telemetryMode,
-		Make:                     makeName,
-		Model:                    strings.TrimSpace(req.Model),
+		Make:                     trimmedText(req.Make),
+		Model:                    trimmedText(req.Model),
 		TeslaMateGrafanaURL:      grafanaURL,
 		DefaultDriverID:          req.DefaultDriverID,
 		TariffPlanID:             req.TariffPlanID,
@@ -304,7 +290,6 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		existing.TeslaMateAPIKeyEncrypted = nil
 		existing.TeslaMateBasicUser = nil
 		existing.TeslaMateBasicPassEnc = nil
-		existing.TelemetryMode = models.TelemetryManual
 	} else {
 		if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
 			existing.TeslaMateCarID = nil
@@ -341,14 +326,11 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.EstimatedPricePerKwh != nil {
 		existing.EstimatedPricePerKwh = req.EstimatedPricePerKwh
 	}
-	if req.TelemetryMode != "" {
-		existing.TelemetryMode = req.TelemetryMode
+	if req.Make != nil {
+		existing.Make = trimmedText(req.Make)
 	}
-	if req.Make != "" {
-		existing.Make = strings.TrimSpace(req.Make)
-	}
-	if req.Model != "" {
-		existing.Model = strings.TrimSpace(req.Model)
+	if req.Model != nil {
+		existing.Model = trimmedText(req.Model)
 	}
 	existing.DefaultDriverID = req.DefaultDriverID
 	existing.TariffPlanID = req.TariffPlanID

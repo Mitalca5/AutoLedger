@@ -428,8 +428,8 @@ func (s *EnergyStatsService) Compute(ctx context.Context, vehicleID string) (*En
 	driveRows, err := s.pool.Query(ctx, `
 		SELECT TO_CHAR(start_time AT TIME ZONE $2, 'YYYY-MM') AS m,
 		       COALESCE(SUM(distance_km), 0)::float8,
-		       COALESCE(SUM(distance_km) FILTER (WHERE energy_consumed_kwh > 0), 0)::float8,
-		       COALESCE(SUM(energy_consumed_kwh) FILTER (WHERE energy_consumed_kwh > 0), 0)::float8
+		       COALESCE(SUM(distance_km) FILTER (WHERE energy_consumed_kwh > 0 AND NOT energy_estimated), 0)::float8,
+		       COALESCE(SUM(energy_consumed_kwh) FILTER (WHERE energy_consumed_kwh > 0 AND NOT energy_estimated), 0)::float8
 		FROM drives
 		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL
 		GROUP BY m;

@@ -30,36 +30,20 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	}
 	if v.Powertrain == models.PowertrainICE {
 		v.TeslaMateCarID = nil
-		v.TelemetryMode = models.TelemetryManual
 		v.TeslaMateAPIURL = nil
 		v.TeslaMateGrafanaURL = nil
-	} else {
-		if v.TelemetryMode == "" {
-			if v.TeslaMateCarID != nil || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "") {
-				v.TelemetryMode = models.TelemetryConnected
-			} else {
-				v.TelemetryMode = models.TelemetryManual
-			}
-		}
-		if v.TeslaMateCarID == nil && (v.TelemetryMode == models.TelemetryConnected || (v.TeslaMateAPIURL != nil && *v.TeslaMateAPIURL != "")) {
-			var nextCarID int
-			err := tx.QueryRow(ctx, `
-				SELECT COALESCE(MAX(teslamate_car_id), 0) + 1
-				FROM vehicles
-				WHERE user_id = $1
-			`, v.UserID).Scan(&nextCarID)
-			if err == nil && nextCarID > 0 {
-				v.TeslaMateCarID = &nextCarID
-			}
+	} else if v.TeslaMateCarID == nil && v.TeslaMateAPIURL != nil && strings.TrimSpace(*v.TeslaMateAPIURL) != "" {
+		var nextCarID int
+		err := tx.QueryRow(ctx, `
+			SELECT COALESCE(MAX(teslamate_car_id), 0) + 1
+			FROM vehicles
+			WHERE user_id = $1
+		`, v.UserID).Scan(&nextCarID)
+		if err == nil && nextCarID > 0 {
+			v.TeslaMateCarID = &nextCarID
 		}
 	}
-	if v.Make == "" {
-		if v.TelemetryMode == models.TelemetryConnected {
-			v.Make = "Tesla"
-		} else {
-			v.Make = "Generic"
-		}
-	}
+	v.TelemetryMode = v.DerivedTelemetryMode()
 	if v.DefaultDriverID == nil {
 		v.DefaultDriverID = &v.UserID
 	}
@@ -230,6 +214,7 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		    updated_at = NOW()
 		WHERE id = $20;
 	`
+	v.TelemetryMode = v.DerivedTelemetryMode()
 	tag, err := r.pool.Exec(ctx, query,
 		v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
 		v.TeslaMateAPIURL, v.TeslaMateAuthType, v.TeslaMateAPIKeyEncrypted,

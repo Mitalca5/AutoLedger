@@ -79,6 +79,8 @@
     "personal": "Perso",
     "work": "Pro",
     "kwh100km": "{consumption_kwh_100km} kWh/100 {unit}",
+    "kwh100kmEstimated": "≈ {consumption_kwh_100km} kWh/100 {unit}",
+    "estimatedConsumption": "Estimée à partir de la consommation moyenne du véhicule",
     "min": "{duration_min} min",
     "selectThisDrive": "Sélectionner ce trajet",
     "unknownStart": "Départ inconnu",

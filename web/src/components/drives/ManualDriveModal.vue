@@ -5,6 +5,7 @@ import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { distanceUnit } from '@/units'
+import { toLocalDateTimeInput } from '@/utils/dates'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { X, Plus, Calendar, MapPin, Gauge, Zap } from 'lucide-vue-next'
 
@@ -25,13 +26,7 @@ const prefs = usePreferencesStore()
 const loading = ref(false)
 const error = ref('')
 
-function nowIsoLocal() {
-  const d = new Date()
-  const offset = d.getTimezoneOffset() * 60000
-  return new Date(d.getTime() - offset).toISOString().slice(0, 16)
-}
-
-const startTime = ref(nowIsoLocal())
+const startTime = ref(toLocalDateTimeInput())
 const endTime = ref('')
 const distanceKm = ref<number | null>(null)
 const energyKwh = ref<number | null>(null)
@@ -48,17 +43,18 @@ watch(
     error.value = ''
     if (props.drive) {
       const d = props.drive
-      startTime.value = d.start_time ? new Date(d.start_time).toISOString().slice(0, 16) : nowIsoLocal()
-      endTime.value = d.end_time ? new Date(d.end_time).toISOString().slice(0, 16) : ''
+      startTime.value = toLocalDateTimeInput(d.start_time || new Date())
+      endTime.value = d.end_time ? toLocalDateTimeInput(d.end_time) : ''
       distanceKm.value = d.distance_km ?? null
-      energyKwh.value = d.energy_consumed_kwh ?? null
+      // An estimated energy stays empty so saving keeps it estimated (the server recomputes it from the distance)
+      energyKwh.value = d.energy_estimated ? null : (d.energy_consumed_kwh ?? null)
       startAddress.value = d.start_address || ''
       endAddress.value = d.end_address || ''
       startOdometer.value = d.start_odometer ?? null
       endOdometer.value = d.end_odometer ?? null
       selectedTag.value = d.tags?.includes('Pro') ? 'Pro' : d.tags?.includes('Perso') ? 'Perso' : ''
     } else {
-      startTime.value = nowIsoLocal()
+      startTime.value = toLocalDateTimeInput()
       endTime.value = ''
       distanceKm.value = null
       energyKwh.value = null

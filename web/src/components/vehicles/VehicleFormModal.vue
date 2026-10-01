@@ -47,6 +47,8 @@ const modalTestLoading = ref(false)
 const modalTestResult = ref<{ success: boolean; status?: any; error?: string } | null>(null)
 const form = ref(emptyVehicleForm(existingVehicles.value))
 const showAdvanced = ref(false)
+// Shows the TeslaMate fields; without a teslamateapi URL the server tracks the vehicle as manual
+const connectTeslaMate = ref(false)
 
 const tariffPlans = ref<any[]>([])
 
@@ -68,7 +70,7 @@ function setPowertrain(p: 'EV' | 'ICE') {
   if (isEditing.value) return
   form.value.powertrain = p
   if (p === 'ICE') {
-    form.value.telemetry_mode = 'MANUAL'
+    connectTeslaMate.value = false
   }
 }
 
@@ -86,6 +88,7 @@ watch(open, (isOpen) => {
   modalTestResult.value = null
   showAdvanced.value = false
   form.value = props.editing ? vehicleFormFrom(props.editing) : emptyVehicleForm(existingVehicles.value)
+  connectTeslaMate.value = !!form.value.teslamate_api_url
   loadTariffPlans()
 })
 
@@ -93,7 +96,6 @@ async function handleSave() {
   try {
     const payload: Record<string, any> = { ...form.value }
     if (payload.powertrain === 'ICE') {
-      payload.telemetry_mode = 'MANUAL'
       payload.teslamate_car_id = null
       payload.teslamate_api_url = ''
       payload.teslamate_grafana_url = ''
@@ -104,7 +106,7 @@ async function handleSave() {
       payload.is_home_charger_default = false
       payload.estimated_kwh_100km = null
       payload.estimated_price_per_kwh = null
-    } else if (payload.telemetry_mode !== 'CONNECTED') {
+    } else if (!connectTeslaMate.value) {
       payload.teslamate_car_id = null
       payload.teslamate_api_url = ''
       payload.teslamate_grafana_url = ''
@@ -229,7 +231,7 @@ async function testModalConnection() {
               id="vehicle-current-odometer"
               v-model="form.current_odometer"
               step="1"
-              :disabled="!!form.teslamate_api_url && form.telemetry_mode === 'CONNECTED'"
+              :disabled="!!form.teslamate_api_url && connectTeslaMate"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-rose-500"
             />
             <p class="mt-1 text-[11px] text-slate-500">{{ $t('vehicles.vehicleFormModal.currentMileageHelp') }}</p>
@@ -259,59 +261,25 @@ async function testModalConnection() {
           />
         </div>
 
-        <!-- 2. Choix du mode de suivi (Uniquement pour EV) -->
-        <div v-if="form.powertrain === 'EV'" class="pt-3 border-t border-slate-800 space-y-2">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">{{ $t('vehicles.vehicleFormModal.trackingMode') }}</label>
-            <p class="text-[11px] text-slate-400 mt-0.5">{{ $t('vehicles.vehicleFormModal.chooseTrackingMode') }}</p>
-          </div>
-          <div class="grid grid-cols-1 gap-2">
-            <!-- Mode CONNECTED -->
-            <label
-              class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
-              :class="form.telemetry_mode === 'CONNECTED'
-                ? 'bg-rose-500/10 border-rose-500/50 shadow-sm ring-1 ring-rose-500/20'
-                : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-            >
-              <input v-model="form.telemetry_mode" type="radio" value="CONNECTED" class="mt-0.5 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-              <div>
-                <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.modeConnected') }}</span>
-                <span class="text-[11px] text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.modeConnectedDesc') }}</span>
-              </div>
-            </label>
-
-            <!-- Mode SEMI_AUTO -->
-            <label
-              class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
-              :class="form.telemetry_mode === 'SEMI_AUTO'
-                ? 'bg-rose-500/10 border-rose-500/50 shadow-sm ring-1 ring-rose-500/20'
-                : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-            >
-              <input v-model="form.telemetry_mode" type="radio" value="SEMI_AUTO" class="mt-0.5 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-              <div>
-                <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.modeSemiAuto') }}</span>
-                <span class="text-[11px] text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.modeSemiAutoDesc') }}</span>
-              </div>
-            </label>
-
-            <!-- Mode MANUAL -->
-            <label
-              class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
-              :class="form.telemetry_mode === 'MANUAL'
-                ? 'bg-rose-500/10 border-rose-500/50 shadow-sm ring-1 ring-rose-500/20'
-                : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-            >
-              <input v-model="form.telemetry_mode" type="radio" value="MANUAL" class="mt-0.5 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-              <div>
-                <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.modeManual') }}</span>
-                <span class="text-[11px] text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.modeManualDesc') }}</span>
-              </div>
-            </label>
-          </div>
+        <!-- 2. TeslaMate synchronization (electric vehicles); the tracking mode follows from it on the server -->
+        <div v-if="form.powertrain === 'EV'" class="pt-3 border-t border-slate-800">
+          <label
+            for="vehicle-connect-teslamate"
+            class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
+            :class="connectTeslaMate
+              ? 'bg-rose-500/10 border-rose-500/50 shadow-sm ring-1 ring-rose-500/20'
+              : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
+          >
+            <input id="vehicle-connect-teslamate" v-model="connectTeslaMate" type="checkbox" class="mt-0.5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+            <div>
+              <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.teslamateSync') }}</span>
+              <span class="text-[11px] text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.teslamateSyncDesc') }}</span>
+            </div>
+          </label>
         </div>
 
         <!-- 3. Paramètres de télémétrie connectée (Visible UNIQUEMENT si EV et CONNECTED) -->
-        <div v-if="form.powertrain === 'EV' && form.telemetry_mode === 'CONNECTED'" class="pt-3 border-t border-slate-800 space-y-3">
+        <div v-if="form.powertrain === 'EV' && connectTeslaMate" class="pt-3 border-t border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider">{{ $t('vehicles.vehicleFormModal.telemetrySettings') }}</h4>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">TeslaMate</span>

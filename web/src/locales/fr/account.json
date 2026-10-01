@@ -55,7 +55,7 @@
   "distanceUnitMi": "Miles",
   "tokens": {
     "title": "Jetons d'API & Automatisations",
-    "subtitle": "Jetons d'accès personnels pour connecter Home Assistant, vos webhooks et vos scripts tiers",
+    "subtitle": "Pour envoyer des données depuis Home Assistant, une borne ou un script. Un jeton n'ouvre que les routes d'intégration, jamais le reste du compte.",
     "create": "Générer un jeton",
     "haBlueprintTitle": "Blueprint Home Assistant Disponible",
     "haBlueprintSubtitle": "Configurez l'envoi automatique de vos sessions de recharge depuis Home Assistant en quelques clics",
