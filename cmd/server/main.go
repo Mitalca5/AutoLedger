@@ -348,6 +348,18 @@ func main() {
 		csvImportService := services.NewCSVImportService(repo)
 		importHandler := handlers.NewImportHandler(repo, csvImportService)
 
+		tariffService := services.NewTariffService()
+		fleetService := services.NewFleetService(repo)
+
+		tokenHandler := handlers.NewTokenHandler(repo)
+		tariffHandler := handlers.NewTariffHandler(repo, tariffService)
+		pendingChargesHandler := handlers.NewPendingChargesHandler(repo, tariffService)
+		fleetHandler := handlers.NewFleetHandler(fleetService)
+		haHandler := handlers.NewHomeAssistantHandler(repo, tariffService)
+
+		// Public Blueprint YAML for Home Assistant 1-click import
+		r.Get("/api/integrations/homeassistant/blueprint.yaml", haHandler.GetBlueprint)
+
 		// Public Auth
 		r.Route("/api/auth", func(r chi.Router) {
 			r.Get("/config", authHandler.GetConfig)
@@ -367,7 +379,7 @@ func main() {
 
 		// Protected Routes
 		r.Group(func(r chi.Router) {
-			r.Use(appMiddleware.AuthenticateJWT(cfg.JWTSecret))
+			r.Use(appMiddleware.AuthenticateJWT(cfg.JWTSecret, repo))
 			r.Use(handlers.Idempotency(repo))
 
 			r.Get("/api/auth/me", authHandler.Me)
@@ -377,6 +389,39 @@ func main() {
 			r.With(httprate.LimitByIP(10, time.Minute)).Post("/api/auth/password", authHandler.ChangePassword)
 			r.Put("/api/auth/language", authHandler.UpdateLanguage)
 			r.Put("/api/auth/distance-unit", authHandler.UpdateDistanceUnit)
+
+			// API Tokens (External Integrations / Home Assistant)
+			r.Route("/api/auth/tokens", func(r chi.Router) {
+				r.Get("/", tokenHandler.ListTokens)
+				r.Post("/", tokenHandler.CreateToken)
+				r.Delete("/{tokenId}", tokenHandler.RevokeToken)
+			})
+
+			// Tariffs & Public Charging Calculator
+			r.Route("/api/tariffs", func(r chi.Router) {
+				r.Get("/plans", tariffHandler.List)
+				r.Post("/plans", tariffHandler.Create)
+				r.Put("/plans/{id}", tariffHandler.Update)
+				r.Delete("/plans/{id}", tariffHandler.Delete)
+				r.Post("/calculate-session", tariffHandler.Calculate)
+				r.Get("/public-presets", tariffHandler.ListPublicPresets)
+				r.Post("/public-presets", tariffHandler.CreatePublicPreset)
+				r.Delete("/public-presets/{id}", tariffHandler.DeletePublicPreset)
+				r.Post("/calculate-public", tariffHandler.CalculatePublic)
+			})
+
+			// Pending Charges ("Recharges à qualifier")
+			r.Route("/api/pending-charges", func(r chi.Router) {
+				r.Get("/", pendingChargesHandler.List)
+				r.Post("/{id}/assign", pendingChargesHandler.Assign)
+				r.Delete("/{id}", pendingChargesHandler.Delete)
+			})
+
+			// Household Fleet Dashboard
+			r.Get("/api/fleet/summary", fleetHandler.GetSummary)
+
+			// Home Assistant Ingestion Webhook
+			r.Post("/api/integrations/homeassistant/event", haHandler.HandleEvent)
 
 			// EV vs ICE cost comparison (informational)
 			r.Route("/api/comparison-scenarios", func(r chi.Router) {
@@ -429,6 +474,7 @@ func main() {
 				r.Post("/{vehicleId}/drives", driveHandler.Create)
 				r.Put("/{vehicleId}/drives/{driveId}", driveHandler.Update)
 				r.Delete("/{vehicleId}/drives/{driveId}", driveHandler.Delete)
+				r.Put("/{vehicleId}/drives/{driveId}/driver", driveHandler.UpdateDriver)
 				r.Get("/{vehicleId}/drives/{driveId}/expenses", driveHandler.GetDriveExpenses)
 
 				// Import (CSV Charges & Drives)
@@ -510,6 +556,9 @@ func main() {
 				// TCO Analytics
 				r.Get("/{vehicleId}/tco", tcoHandler.GetTCO)
 				r.Get("/{vehicleId}/energy-stats", energyHandler.GetStats)
+
+				// Metrics & Sensor Feeds
+				r.Get("/{vehicleId}/metrics", haHandler.GetVehicleMetrics)
 			})
 		})
 	}

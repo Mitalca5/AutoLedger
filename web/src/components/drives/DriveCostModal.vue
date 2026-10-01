@@ -6,7 +6,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { Receipt, Layers, MapPin, ExternalLink, Zap, X, Users, Coins, Shield, Wrench, Disc, Plus, AlertTriangle, Pencil, Trash2, Save, ArrowLeft, ChevronRight, ChevronDown, Radar } from 'lucide-vue-next'
+import { Receipt, Layers, MapPin, ExternalLink, Zap, X, Users, Coins, Shield, Wrench, Disc, Plus, AlertTriangle, Pencil, Trash2, Save, ArrowLeft, ChevronRight, ChevronDown, Radar, User } from 'lucide-vue-next'
 import { teslamateDriveUrl as buildTeslamateDriveUrl, tollApplyStatusLabel, mergeExpensesByDrive } from '@/utils/drives'
 import { formatDayTime } from '@/utils/dates'
 import { buildDriveBreakdown } from '@/utils/costBreakdown'
@@ -120,7 +120,35 @@ watch(open, (isOpen) => {
   inlineTollNotes.value = ''
   loadDriveExpenses(drive.id)
   loadTollDetection(drive)
+  loadVehicleMembers()
 })
+
+const vehicleMembers = ref<any[]>([])
+
+async function loadVehicleMembers() {
+  if (!props.vehicleId) return
+  try {
+    const list = await api.getVehicleMembers(props.vehicleId)
+    vehicleMembers.value = list
+  } catch (err) {
+    console.error('Failed to load vehicle members', err)
+  }
+}
+
+async function handleDriverChange(event: Event) {
+  const val = (event.target as HTMLSelectElement).value
+  const driverId = val.trim() ? val.trim() : null
+  if (!props.vehicleId || !selectedCostDrive.value?.id) return
+  try {
+    await api.updateDriveDriver(props.vehicleId, selectedCostDrive.value.id, driverId)
+    const refreshed = await props.refreshDrive(selectedCostDrive.value.id)
+    if (refreshed) {
+      selectedCostDrive.value = refreshed
+    }
+  } catch (err: any) {
+    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+  }
+}
 
 // Expenses of a trip group: those of its drives, each listed once with its full share across the trip
 async function loadTripExpenses() {
@@ -389,6 +417,25 @@ async function handleDeleteExpense(exp: any) {
               {{ $t('drives.driveCostModal.personal') }}
             </button>
           </div>
+        </div>
+
+        <!-- Driver attribution (only for individual drives) -->
+        <div v-if="!selectedCostDrive.is_trip_group && vehicleStore.canEdit" class="pt-2 border-t border-slate-700/60 flex items-center justify-between gap-2">
+          <label for="drive-driver-select" class="text-xs text-slate-400 flex items-center gap-1.5 cursor-pointer">
+            <User class="w-3.5 h-3.5 text-purple-400" />
+            {{ $t('drives.driverLabel') }}
+          </label>
+          <select
+            id="drive-driver-select"
+            :value="selectedCostDrive.driver_id || ''"
+            @change="handleDriverChange($event)"
+            class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:border-purple-500 focus:outline-none"
+          >
+            <option value="">{{ $t('drives.unassignedDriver') }}</option>
+            <option v-for="m in vehicleMembers" :key="m.user_id" :value="m.user_id">
+              {{ m.name || m.email }}
+            </option>
+          </select>
         </div>
       </div>
 

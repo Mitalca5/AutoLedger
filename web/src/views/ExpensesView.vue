@@ -20,6 +20,7 @@ import ReminderModal from '@/components/expenses/ReminderModal.vue'
 import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.vue'
 import WebhookModal from '@/components/expenses/WebhookModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
+import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
 import { Receipt, Plus, Wrench, Zap, Navigation, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
@@ -122,6 +123,22 @@ async function loadReminders() {
   }
 }
 
+const pendingChargesCount = ref(0)
+const showQualifyModal = ref(false)
+
+async function checkPendingCharges() {
+  try {
+    const res = await api.getPendingCharges()
+    pendingChargesCount.value = res.pending_charges?.length || 0
+  } catch {
+    pendingChargesCount.value = 0
+  }
+}
+
+async function onChargesAssigned() {
+  await loadData()
+}
+
 async function loadData() {
   if (!vehicleStore.activeVehicle) return
   loading.value = true
@@ -138,6 +155,7 @@ async function loadData() {
       charges.value = res.charges
       chargesTotal.value = res.total || 0
       chargesWithoutCost.value = res.charges_without_cost || 0
+      checkPendingCharges()
     } else if (activeTab.value === 'DOCUMENTS') {
       documents.value = await api.getDocuments(vehicleStore.activeVehicle.id)
     }
@@ -561,6 +579,25 @@ async function openWebhookModal() {
       @delete="handleDeleteReminder"
     />
 
+    <div
+      v-if="activeTab === 'CHARGES' && !vehicleStore.isIce && pendingChargesCount > 0"
+      class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+    >
+      <div class="flex items-center gap-2.5 text-amber-300">
+        <Zap class="w-4 h-4 text-amber-400 shrink-0" />
+        <span>
+          <strong>{{ pendingChargesCount }} {{ $t('pendingCharges.bannerCount', { count: pendingChargesCount }) }}</strong>
+          — {{ $t('pendingCharges.bannerDescription') }}
+        </span>
+      </div>
+      <button
+        @click="showQualifyModal = true"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-colors shrink-0"
+      >
+        {{ $t('pendingCharges.qualifyButton') }}
+      </button>
+    </div>
+
     <ChargesPanel
       v-if="activeTab === 'CHARGES' && !vehicleStore.isIce"
       :charges="charges"
@@ -655,6 +692,11 @@ async function openWebhookModal() {
       :vehicle-id="vehicleId"
       default-type="CHARGES"
       @imported="loadData"
+    />
+
+    <QualifyChargesModal
+      v-model:open="showQualifyModal"
+      @assigned="onChargesAssigned"
     />
   </div>
 </template>

@@ -30,6 +30,8 @@ type Drive struct {
 	EndBatteryLevel   *int     `json:"-"`
 	OutsideTempC      *float64 `json:"-"`
 	Tags              []string `json:"tags"`
+	DriverID          *string  `json:"driver_id,omitempty"`
+	DriverName        *string  `json:"driver_name,omitempty"`
 	IsManual          bool     `json:"is_manual"`
 	// EnergyEstimated marks an energy derived from the vehicle's average consumption rather than measured or typed.
 	EnergyEstimated bool       `json:"energy_estimated"`

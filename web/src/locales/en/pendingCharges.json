@@ -1,0 +1,13 @@
+{
+  "bannerCount": "charge to qualify | charges to qualify",
+  "bannerDescription": "Unassigned sessions received from Home Assistant",
+  "qualifyButton": "Qualify",
+  "modalTitle": "Charges to Qualify",
+  "modalSubtitle": "Assign sessions captured by your shared charger to a household vehicle",
+  "loading": "Loading pending charges...",
+  "empty": "No pending charges to qualify. All sessions are up to date!",
+  "assign": "Assign",
+  "assigning": "Assigning...",
+  "dismiss": "Dismiss",
+  "selectVehicle": "Select vehicle"
+}

@@ -62,7 +62,19 @@
     "testStatus": "Status: {state} • Odometer: {odometer} {unit}",
     "urlFirst": "Please enter the TeslaMate API URL first",
     "testing": "Testing the connection...",
-    "testConnection": "Test the TeslaMate connection"
+    "testConnection": "Test the TeslaMate connection",
+    "trackingMode": "Data tracking mode",
+    "chooseTrackingMode": "How do you want to feed your vehicle data?",
+    "modeManual": "Manual / Declarative",
+    "modeManualDesc": "Direct manual entry of charges, mileage checks and expenses",
+    "modeSemiAuto": "Semi-Automatic",
+    "modeSemiAutoDesc": "Batch file imports (CSV) and smart home integrations",
+    "modeConnected": "Connected telemetry",
+    "modeConnectedDesc": "Automatic continuous synchronization via connector (e.g. TeslaMate)",
+    "telemetrySettings": "Telemetry connector settings",
+    "copyFromExisting": "Copy settings from {name}",
+    "advancedOptions": "Additional options (Tariffs & Energy)",
+    "advancedOptionsDesc": "Tariff plan, default home charger and estimated consumption"
   },
   "vehicleMembersModal": {
     "leave": "Leave",
@@ -199,5 +211,7 @@
     "leaseDuration": "Please enter the lease duration in months"
   },
   "testSuccess": "Connection successful! Status: {state} ({odometer} {unit})",
-  "leaseSummary": "{rent}/month over {months} months"
+  "leaseSummary": "{rent}/month over {months} months",
+  "homeChargerDefaultLabel": "Default EV for household home charger",
+  "homeChargerDefaultHint": "Automatically assign unassigned sessions from your home charger to this vehicle"
 }

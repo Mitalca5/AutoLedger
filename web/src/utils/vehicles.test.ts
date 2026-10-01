@@ -9,6 +9,7 @@ import {
   isPurchaseType,
   leasePreview,
   loanPreview,
+  nextTeslaMateCarId,
   nullIfEmpty,
   ownershipFormFrom,
   ownershipPayload,
@@ -20,6 +21,24 @@ import {
 
 const form = (over: Record<string, any> = {}) => ({ ...emptyOwnership(), ...over })
 
+describe('nextTeslaMateCarId', () => {
+  it('returns 1 when no vehicles exist or list is empty', () => {
+    expect(nextTeslaMateCarId()).toBe(1)
+    expect(nextTeslaMateCarId(null)).toBe(1)
+    expect(nextTeslaMateCarId([])).toBe(1)
+  })
+
+  it('ignores null, undefined or non-positive IDs', () => {
+    expect(nextTeslaMateCarId([{ teslamate_car_id: null }, { teslamate_car_id: undefined }, { teslamate_car_id: 0 }, { teslamate_car_id: -1 }])).toBe(1)
+  })
+
+  it('increments from max existing ID', () => {
+    expect(nextTeslaMateCarId([{ teslamate_car_id: 1 }])).toBe(2)
+    expect(nextTeslaMateCarId([{ teslamate_car_id: 1 }, { teslamate_car_id: 2 }])).toBe(3)
+    expect(nextTeslaMateCarId([{ teslamate_car_id: 2 }, { teslamate_car_id: 5 }])).toBe(6)
+  })
+})
+
 describe('vehicle form', () => {
   it('starts blank, electric, with no TeslaMate settings', () => {
     const f = emptyVehicleForm()
@@ -27,6 +46,15 @@ describe('vehicle form', () => {
     expect(f.powertrain).toBe('EV')
     expect(f.teslamate_auth_type).toBe('NONE')
     expect(f.estimated_kwh_100km).toBeNull()
+    expect(f.teslamate_car_id).toBe(1)
+  })
+
+  it('auto-increments teslamate_car_id when existing vehicles are provided', () => {
+    const f1 = emptyVehicleForm([{ teslamate_car_id: 1 }])
+    expect(f1.teslamate_car_id).toBe(2)
+
+    const f2 = emptyVehicleForm([{ teslamate_car_id: 1 }, { teslamate_car_id: 2 }])
+    expect(f2.teslamate_car_id).toBe(3)
   })
 
   it('fills an existing vehicle, rounding the odometer and never restoring secrets', () => {

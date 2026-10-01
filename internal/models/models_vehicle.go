@@ -45,6 +45,9 @@ type Vehicle struct {
 	Make                     string      `json:"make"`                            // Brand name: Tesla, Renault, Peugeot, etc.
 	Model                    string      `json:"model"`                           // Model name: Model 3, Megane E-Tech, etc.
 	TeslaMateGrafanaURL      *string     `json:"teslamate_grafana_url,omitempty"` // Grafana serving the TeslaMate dashboards, to link drives
+	DefaultDriverID          *string     `json:"default_driver_id,omitempty"`
+	TariffPlanID             *string     `json:"tariff_plan_id,omitempty"`
+	IsHomeChargerDefault     bool        `json:"is_home_charger_default"`
 	CreatedAt                time.Time   `json:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at"`
 }

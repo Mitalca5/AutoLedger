@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
@@ -14,6 +15,8 @@ import { Plus } from 'lucide-vue-next'
 // and its API calls and reports back.
 const vehicleStore = useVehicleStore()
 const { showConfirm, showAlert } = useConfirm()
+const route = useRoute()
+const router = useRouter()
 
 // Add / edit vehicle
 const showModal = ref(false)
@@ -42,9 +45,21 @@ async function loadOwnerships() {
   ownerships.value = Object.fromEntries(entries)
 }
 
+function checkAddQuery() {
+  if (route.query.add === '1' || route.query.add === 'true') {
+    openCreateModal()
+    router.replace({ path: '/vehicles', query: {} })
+  }
+}
+
 onMounted(async () => {
   await vehicleStore.fetchVehicles()
   await loadOwnerships()
+  checkAddQuery()
+})
+
+watch(() => route.query.add, () => {
+  checkAddQuery()
 })
 
 function openCreateModal() {
@@ -134,7 +149,7 @@ function openMembersModal(v: any) {
       />
     </div>
 
-    <VehicleFormModal v-model:open="showModal" :editing="editingVehicle" @saved="onVehicleSaved" />
+    <VehicleFormModal v-model:open="showModal" :editing="editingVehicle" :vehicles="vehicleStore.vehicles" @saved="onVehicleSaved" />
 
     <OwnershipWizardModal
       v-model:open="showOwnershipModal"

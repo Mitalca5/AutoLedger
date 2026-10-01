@@ -287,5 +287,7 @@
     "save": "Enregistrer le trajet",
     "saving": "Enregistrement...",
     "distanceRequired": "La distance est requise"
-  }
+  },
+  "driverLabel": "Conducteur",
+  "unassignedDriver": "Non assigné (Conducteur par défaut du foyer)"
 }
