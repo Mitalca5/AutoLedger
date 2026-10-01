@@ -60,8 +60,13 @@ const formatDate = formatDayTime
           <span v-if="d.duration_min" class="text-xs text-slate-400 flex items-center gap-1 shrink-0">
             <Clock class="w-3 h-3" /> {{ $t('drives.driveCard.min', { duration_min: d.duration_min }) }}
           </span>
-          <span v-if="d.consumption_kwh_100km" class="text-xs text-sky-400 font-mono shrink-0">
-            {{ $t('drives.driveCard.kwh100km', { unit: distanceUnit(), consumption_kwh_100km: Math.round(perDistance(d.consumption_kwh_100km) * 10) / 10 }) }}
+          <span
+            v-if="d.consumption_kwh_100km"
+            class="text-xs font-mono shrink-0"
+            :class="d.energy_estimated ? 'text-slate-400' : 'text-sky-400'"
+            :title="d.energy_estimated ? $t('drives.driveCard.estimatedConsumption') : undefined"
+          >
+            {{ $t(d.energy_estimated ? 'drives.driveCard.kwh100kmEstimated' : 'drives.driveCard.kwh100km', { unit: distanceUnit(), consumption_kwh_100km: Math.round(perDistance(d.consumption_kwh_100km) * 10) / 10 }) }}
           </span>
           <!-- Clean tag pills -->
           <span

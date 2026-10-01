@@ -24,13 +24,13 @@ const (
 )
 
 type CSVPreviewResult struct {
-	Type           ImportType       `json:"type"`
-	TotalRows      int              `json:"total_rows"`
-	ValidRows      int              `json:"valid_rows"`
-	InvalidRows    int              `json:"invalid_rows"`
-	Headers        []string         `json:"headers"`
-	SampleRows     []map[string]any `json:"sample_rows"`
-	ValidationErrors []string       `json:"validation_errors,omitempty"`
+	Type             ImportType       `json:"type"`
+	TotalRows        int              `json:"total_rows"`
+	ValidRows        int              `json:"valid_rows"`
+	InvalidRows      int              `json:"invalid_rows"`
+	Headers          []string         `json:"headers"`
+	SampleRows       []map[string]any `json:"sample_rows"`
+	ValidationErrors []string         `json:"validation_errors,omitempty"`
 }
 
 type CSVExecuteResult struct {
@@ -320,7 +320,7 @@ func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle,
 				}
 			}
 			if endTime.Equal(startTime) {
-				duration := int(math.Max(1, math.Round((dist / 50.0) * 60)))
+				duration := int(math.Max(1, math.Round((dist/50.0)*60)))
 				endTime = startTime.Add(time.Duration(duration) * time.Minute)
 			}
 			durationMin := int(math.Max(1, math.Round(endTime.Sub(startTime).Minutes())))
@@ -333,13 +333,9 @@ func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle,
 					cons100 = (energy / dist) * 100
 				}
 			}
-			if energy == 0 {
-				if vehicle.EstimatedKwh100km != nil && *vehicle.EstimatedKwh100km > 0 {
-					cons100 = *vehicle.EstimatedKwh100km
-				} else {
-					cons100 = 16.0
-				}
-				energy = (cons100 * dist) / 100
+			estimated := energy == 0
+			if estimated {
+				energy, cons100 = EstimateDriveEnergy(vehicle.EstimatedKwh100km, dist)
 			}
 
 			tags := []string{}
@@ -359,6 +355,7 @@ func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle,
 				ConsumptionKwh100km: &cons100,
 				Tags:                tags,
 				IsManual:            true,
+				EnergyEstimated:     estimated,
 			}
 
 			if err := s.repo.CreateManualDrive(ctx, drive); err != nil {

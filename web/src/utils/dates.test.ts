@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { formatDayTime, todayIso, toIsoDay } from './dates'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { formatDayTime, todayIso, toIsoDay, toLocalDateTimeInput } from './dates'
 
 describe('dates', () => {
   it('gives the UTC day of a date', () => {
@@ -10,6 +10,26 @@ describe('dates', () => {
   it('formats today as YYYY-MM-DD', () => {
     expect(todayIso()).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(todayIso()).toBe(new Date().toISOString().slice(0, 10))
+  })
+
+  describe('datetime-local value', () => {
+    const tz = process.env.TZ
+    beforeAll(() => {
+      process.env.TZ = 'Europe/Paris'
+    })
+    afterAll(() => {
+      process.env.TZ = tz
+    })
+
+    it('gives the local time, not the UTC one', () => {
+      expect(toLocalDateTimeInput('2026-09-01T06:05:00Z')).toBe('2026-09-01T08:05')
+      expect(toLocalDateTimeInput('2026-01-31T23:30:00Z')).toBe('2026-02-01T00:30')
+    })
+
+    it('reads back as the same instant', () => {
+      const saved = '2026-09-01T06:05:00.000Z'
+      expect(new Date(toLocalDateTimeInput(saved)).toISOString()).toBe(saved)
+    })
   })
 
   it('formats a short date with the time', () => {

@@ -2148,6 +2148,43 @@ func TestIntegrationEstimatedEnergyStartsWithFirstManualCharge(t *testing.T) {
 	if sum.EstimatedEnergyDistanceKm < 499 || sum.EstimatedEnergyDistanceKm > 501 {
 		t.Errorf("with a charge halfway the estimate covers %v km, want 500", sum.EstimatedEnergyDistanceKm)
 	}
+
+	manualDrive := func(v *models.Vehicle, daysAgo int, startOdo, km float64) {
+		endOdo := startOdo + km
+		d := &models.Drive{VehicleID: v.ID, StartTime: at(daysAgo), EndTime: at(daysAgo).Add(3 * time.Hour),
+			StartOdometer: &startOdo, EndOdometer: &endOdo, DistanceKm: km, DurationMin: 180}
+		if err := repo.CreateManualDrive(ctx, d); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// A drive typed by hand carries no energy cost: it neither starts tracking nor removes its distance from the estimate.
+	drove := newVehicle("est-manual-drive@example.com")
+	manualDrive(drove, 80, 10100, 200)
+	sum, err = tco.ComputeVehicleTCO(ctx, drove.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.EstimatedEnergyDistanceKm < 999 || sum.EstimatedEnergyDistanceKm > 1001 {
+		t.Errorf("with a manual drive and no charge the estimate covers %v km, want 1000", sum.EstimatedEnergyDistanceKm)
+	}
+	if total := sum.TotalDistanceKm + sum.SmoothedDistanceKm; total < 999 || total > 1001 {
+		t.Errorf("the manual drive is counted once in the distance: got %v km, want 1000", total)
+	}
+
+	// Manual drive before the first manual charge: tracking still starts with the charge, the drive's distance is estimated.
+	both := newVehicle("est-manual-drive-charge@example.com")
+	manualDrive(both, 80, 10100, 200)
+	if err := repo.CreateManualCharge(ctx, &models.ChargeLog{VehicleID: both.ID, Date: at(60), KwhAdded: 50, Cost: &cost, Currency: "EUR"}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err = tco.ComputeVehicleTCO(ctx, both.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.EstimatedEnergyDistanceKm < 499 || sum.EstimatedEnergyDistanceKm > 501 {
+		t.Errorf("with a manual drive then a charge halfway the estimate covers %v km, want 500", sum.EstimatedEnergyDistanceKm)
+	}
 }
 
 func TestIntegrationMultiLegCarpoolBecomesATrip(t *testing.T) {

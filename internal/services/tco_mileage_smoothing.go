@@ -59,12 +59,13 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 		return nil, nil, nil
 	}
 
+	// Tracking starts with the first synchronized record: a drive typed by hand carries no energy cost.
 	var firstDriveTime *time.Time
 	var firstDriveOdo *float64
 	_ = s.pool.QueryRow(ctx, `
 		SELECT start_time, start_odometer
 		FROM drives
-		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_odometer > 0
+		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_odometer > 0 AND is_manual = FALSE
 		ORDER BY start_time ASC LIMIT 1;
 	`, vehicleID).Scan(&firstDriveTime, &firstDriveOdo)
 
@@ -177,29 +178,30 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 			continue
 		}
 
-		// Calculate tracked distance in [t1, t2]
-		var trackedKm float64
+		// Distance of the drives in [t1, t2]: every drive counts for the distance, only synchronized
+		// ones for the energy (a manual drive's distance still needs its energy estimated before tracking).
+		var trackedKm, syncedKm float64
 		err := s.pool.QueryRow(ctx, `
-			SELECT COALESCE(SUM(distance_km), 0)
+			SELECT COALESCE(SUM(distance_km), 0), COALESCE(SUM(distance_km) FILTER (WHERE is_manual = FALSE), 0)
 			FROM drives
 			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL
 			  AND start_time >= $2 AND start_time < $3;
-		`, vehicleID, t1, t2).Scan(&trackedKm)
+		`, vehicleID, t1, t2).Scan(&trackedKm, &syncedKm)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		missingKm := deltaOdo - trackedKm
-		if missingKm <= 1.0 {
-			continue
+		if missingKm := deltaOdo - trackedKm; missingKm > 1.0 {
+			intervalSmoothed, _ := allocateSmoothingForInterval(t1, t2, missingKm, firstTrackingTime)
+			for month, km := range intervalSmoothed {
+				smoothedByMonth[month] += km
+			}
 		}
-
-		intervalSmoothed, intervalPreTm := allocateSmoothingForInterval(t1, t2, missingKm, firstTrackingTime)
-		for month, km := range intervalSmoothed {
-			smoothedByMonth[month] += km
-		}
-		for month, km := range intervalPreTm {
-			preTmByMonth[month] += km
+		if unpricedKm := deltaOdo - syncedKm; unpricedKm > 1.0 {
+			_, intervalPreTm := allocateSmoothingForInterval(t1, t2, unpricedKm, firstTrackingTime)
+			for month, km := range intervalPreTm {
+				preTmByMonth[month] += km
+			}
 		}
 	}
 

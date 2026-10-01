@@ -586,18 +586,13 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	durationMin := int(math.Max(1, math.Round(endTime.Sub(req.StartTime).Minutes())))
 
-	var energy float64
-	var cons100 float64
-	if req.EnergyConsumedKwh != nil && *req.EnergyConsumedKwh > 0 {
+	var energy, cons100 float64
+	estimated := req.EnergyConsumedKwh == nil || *req.EnergyConsumedKwh <= 0
+	if estimated {
+		energy, cons100 = services.EstimateDriveEnergy(vehicle.EstimatedKwh100km, req.DistanceKm)
+	} else {
 		energy = *req.EnergyConsumedKwh
 		cons100 = (energy / req.DistanceKm) * 100
-	} else {
-		if vehicle.EstimatedKwh100km != nil && *vehicle.EstimatedKwh100km > 0 {
-			cons100 = *vehicle.EstimatedKwh100km
-		} else {
-			cons100 = 16.0
-		}
-		energy = (cons100 * req.DistanceKm) / 100
 	}
 
 	if req.StartOdometer != nil && req.EndOdometer == nil {
@@ -628,6 +623,7 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Tags:                tags,
 		DriverID:            req.DriverID,
 		IsManual:            true,
+		EnergyEstimated:     estimated,
 	}
 
 	if err := h.repo.CreateManualDrive(r.Context(), d); err != nil {
@@ -691,6 +687,16 @@ func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
 		energy := *req.EnergyConsumedKwh
 		cons100 := (energy / existing.DistanceKm) * 100
 		existing.EnergyConsumedKwh = &energy
+		existing.ConsumptionKwh100km = &cons100
+		existing.EnergyEstimated = false
+	} else if existing.EnergyEstimated {
+		// Keep an estimated energy in line with the (possibly edited) distance and the vehicle's current estimate
+		energy, cons100 := services.EstimateDriveEnergy(vehicle.EstimatedKwh100km, existing.DistanceKm)
+		existing.EnergyConsumedKwh = &energy
+		existing.ConsumptionKwh100km = &cons100
+	} else if existing.EnergyConsumedKwh != nil && *existing.EnergyConsumedKwh > 0 {
+		// A typed energy stays, its consumption follows the distance
+		cons100 := (*existing.EnergyConsumedKwh / existing.DistanceKm) * 100
 		existing.ConsumptionKwh100km = &cons100
 	}
 
