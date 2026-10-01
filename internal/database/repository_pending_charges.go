@@ -20,20 +20,20 @@ func (r *Repository) CreatePendingCharge(ctx context.Context, c *models.PendingC
 
 	query := `
 		INSERT INTO pending_charges (
-			user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data, external_id
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at;
 	`
 	return r.pool.QueryRow(ctx, query,
 		c.UserID, c.Source, c.ChargerName, c.StartTime, c.EndTime,
-		c.EnergyKwh, c.Location, rawJSON,
+		c.EnergyKwh, c.Location, rawJSON, c.ExternalID,
 	).Scan(&c.ID, &c.CreatedAt)
 }
 
 // ListPendingCharges retrieves all unassigned charges for a user.
 func (r *Repository) ListPendingCharges(ctx context.Context, userID string) ([]models.PendingCharge, error) {
 	query := `
-		SELECT id, user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data, created_at
+		SELECT id, user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data, external_id, created_at
 		FROM pending_charges
 		WHERE user_id = $1
 		ORDER BY start_time DESC;
@@ -50,7 +50,7 @@ func (r *Repository) ListPendingCharges(ctx context.Context, userID string) ([]m
 		var rawJSON []byte
 		if err := rows.Scan(
 			&c.ID, &c.UserID, &c.Source, &c.ChargerName, &c.StartTime, &c.EndTime,
-			&c.EnergyKwh, &c.Location, &rawJSON, &c.CreatedAt,
+			&c.EnergyKwh, &c.Location, &rawJSON, &c.ExternalID, &c.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func (r *Repository) ListPendingCharges(ctx context.Context, userID string) ([]m
 // GetPendingChargeByID retrieves a single pending charge.
 func (r *Repository) GetPendingChargeByID(ctx context.Context, id, userID string) (*models.PendingCharge, error) {
 	query := `
-		SELECT id, user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data, created_at
+		SELECT id, user_id, source, charger_name, start_time, end_time, energy_kwh, location, raw_data, external_id, created_at
 		FROM pending_charges
 		WHERE id = $1 AND user_id = $2;
 	`
@@ -76,7 +76,7 @@ func (r *Repository) GetPendingChargeByID(ctx context.Context, id, userID string
 	var rawJSON []byte
 	err := r.pool.QueryRow(ctx, query, id, userID).Scan(
 		&c.ID, &c.UserID, &c.Source, &c.ChargerName, &c.StartTime, &c.EndTime,
-		&c.EnergyKwh, &c.Location, &rawJSON, &c.CreatedAt,
+		&c.EnergyKwh, &c.Location, &rawJSON, &c.ExternalID, &c.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

@@ -204,7 +204,10 @@
     "energy_positive": "The energy added must be positive",
     "manual_cost_required": "The cost of a manual charge is required",
     "cost_required": "The cost is required",
-    "pending_not_found": "Pending charge not found"
+    "pending_not_found": "Pending charge not found",
+    "invalid_period": "The session ends before it starts",
+    "invalid_energy": "The session energy must be above 0 and at most {p0} kWh",
+    "electric_only": "Charging sessions only apply to electric vehicles"
   },
   "tariff": {
     "name_required": "Tariff plan name is required",

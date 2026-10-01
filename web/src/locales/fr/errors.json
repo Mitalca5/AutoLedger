@@ -204,7 +204,10 @@
     "energy_positive": "L'énergie ajoutée doit être positive",
     "manual_cost_required": "Le coût d'une recharge manuelle est requis",
     "cost_required": "Le coût est requis",
-    "pending_not_found": "Recharge en attente introuvable"
+    "pending_not_found": "Recharge en attente introuvable",
+    "invalid_period": "La session se termine avant d'avoir commencé",
+    "invalid_energy": "L'énergie de la session doit être supérieure à 0 et au plus {p0} kWh",
+    "electric_only": "Les sessions de recharge ne concernent que les véhicules électriques"
   },
   "tariff": {
     "name_required": "Le nom de la grille tarifaire est requis",

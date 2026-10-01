@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -56,43 +57,65 @@ func (h *PendingChargesHandler) Assign(w http.ResponseWriter, r *http.Request) {
 	if vehicle == nil {
 		return
 	}
+	if vehicle.Powertrain == models.PowertrainICE {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("charge.electric_only", "Charging sessions only apply to electric vehicles"))
+		return
+	}
 
-	// Compute cost if needed
+	// What the integration sent with the session: cost, battery levels, odometer
+	event := pendingEvent(pc)
 	var cost *money.Cents
-	plan, _ := h.repo.GetVehicleTariffPlan(r.Context(), req.VehicleID)
-	if plan != nil {
-		computed, err := h.tariffService.CalculateSessionCost(plan, pc.StartTime, pc.EndTime, pc.EnergyKwh)
-		if err == nil && computed > 0 {
+	if event.Data.Cost != nil {
+		c := money.FromFloat(*event.Data.Cost)
+		cost = &c
+	} else if event.Data.CostCents != nil {
+		c := money.Cents(*event.Data.CostCents)
+		cost = &c
+	} else if plan, _ := h.repo.GetVehicleTariffPlan(r.Context(), vehicle.ID); plan != nil {
+		if computed, err := h.tariffService.CalculateSessionCost(plan, pc.StartTime, pc.EndTime, pc.EnergyKwh); err == nil && computed > 0 {
 			cost = &computed
 		}
 	}
 
-	noteStr := "Qualified charging session"
-	if pc.ChargerName != nil && *pc.ChargerName != "" {
-		noteStr += " from " + *pc.ChargerName
-	}
-
 	charge := &models.ChargeLog{
-		VehicleID:  req.VehicleID,
-		Date:       pc.StartTime,
-		EndDate:    &pc.EndTime,
-		Address:    &pc.Location,
-		KwhAdded:   pc.EnergyKwh,
-		Cost:       cost,
-		CostSource: "HOMEASSISTANT",
-		Currency:   vehicle.Currency,
-		IsManual:   true,
-		Notes:      &noteStr,
+		VehicleID:         vehicle.ID,
+		Date:              pc.StartTime,
+		EndDate:           &pc.EndTime,
+		Address:           pc.Location,
+		KwhAdded:          pc.EnergyKwh,
+		Cost:              cost,
+		CostSource:        "HOMEASSISTANT",
+		Currency:          vehicle.Currency,
+		Odometer:          event.Data.OdometerKm,
+		StartBatteryLevel: event.Data.SocStart,
+		EndBatteryLevel:   event.Data.SocEnd,
+		ExternalID:        pc.ExternalID,
 	}
-
-	if err := h.repo.CreateManualCharge(r.Context(), charge); err != nil {
+	if err := h.repo.AssignPendingCharge(r.Context(), pendingID, userID, charge); err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			// Assigned or dismissed meanwhile (a second click)
+			writeAPIError(w, http.StatusNotFound, apierror.New("charge.pending_not_found", "Pending charge not found"))
+			return
+		}
 		writeRepoError(w, r, err, "Failed to record charge")
 		return
 	}
-
-	_ = h.repo.DeletePendingCharge(r.Context(), pendingID, userID)
+	if charge.Odometer != nil && *charge.Odometer > vehicle.CurrentOdometer {
+		_ = h.repo.UpdateVehicleOdometer(r.Context(), vehicle.ID, *charge.Odometer)
+	}
 
 	writeJSON(w, http.StatusOK, charge)
+}
+
+// pendingEvent is the event a pending charge was created from (stored in its raw data), empty when unreadable.
+func pendingEvent(pc *models.PendingCharge) HAEventPayload {
+	var event HAEventPayload
+	if raw, ok := pc.RawData["raw_event"]; ok {
+		if b, err := json.Marshal(raw); err == nil {
+			_ = json.Unmarshal(b, &event)
+		}
+	}
+	return event
 }
 
 func (h *PendingChargesHandler) Delete(w http.ResponseWriter, r *http.Request) {

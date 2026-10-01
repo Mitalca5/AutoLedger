@@ -136,7 +136,7 @@ onMounted(() => {
                 <span v-if="charge.charger_name" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
                   {{ charge.charger_name }}
                 </span>
-                <span class="text-[11px] text-slate-400">
+                <span v-if="charge.location" class="text-[11px] text-slate-400">
                   {{ charge.location }}
                 </span>
               </div>
