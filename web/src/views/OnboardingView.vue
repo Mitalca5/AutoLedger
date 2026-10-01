@@ -143,6 +143,7 @@ async function handleFinalSubmit() {
 
     if (isConn && teslamateUrl.value) {
       payload.teslamate_api_url = teslamateUrl.value
+      payload.teslamate_car_id = 1
       if (teslamateAuthType.value === 'BEARER') {
         payload.teslamate_api_key = teslamateApiKey.value
       } else if (teslamateAuthType.value === 'BASIC') {

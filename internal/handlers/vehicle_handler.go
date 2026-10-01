@@ -176,11 +176,27 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	telemetryMode := req.TelemetryMode
-	if telemetryMode == "" {
-		if req.TeslaMateCarID != nil || (req.TeslaMateAPIURL != nil && *req.TeslaMateAPIURL != "") {
-			telemetryMode = models.TelemetryConnected
-		} else {
-			telemetryMode = models.TelemetryManual
+	if powertrain == models.PowertrainICE {
+		req.TeslaMateCarID = nil
+		req.TeslaMateAPIURL = nil
+		req.TeslaMateGrafanaURL = nil
+		req.TeslaMateAPIKey = nil
+		req.TeslaMateBasicUser = nil
+		req.TeslaMateBasicPass = nil
+		encKey = nil
+		encPass = nil
+		telemetryMode = models.TelemetryManual
+		authType = models.AuthModeNone
+	} else {
+		if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
+			req.TeslaMateCarID = nil
+		}
+		if telemetryMode == "" {
+			if req.TeslaMateCarID != nil || (req.TeslaMateAPIURL != nil && *req.TeslaMateAPIURL != "") {
+				telemetryMode = models.TelemetryConnected
+			} else {
+				telemetryMode = models.TelemetryManual
+			}
 		}
 	}
 
@@ -280,13 +296,28 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	existing.Name = req.Name
 	existing.Vin = req.Vin
-	existing.TeslaMateCarID = req.TeslaMateCarID
+	if existing.Powertrain == models.PowertrainICE {
+		existing.TeslaMateCarID = nil
+		existing.TeslaMateAPIURL = nil
+		existing.TeslaMateGrafanaURL = nil
+		existing.TeslaMateAuthType = models.AuthModeNone
+		existing.TeslaMateAPIKeyEncrypted = nil
+		existing.TeslaMateBasicUser = nil
+		existing.TeslaMateBasicPassEnc = nil
+		existing.TelemetryMode = models.TelemetryManual
+	} else {
+		if req.TeslaMateCarID != nil && *req.TeslaMateCarID <= 0 {
+			existing.TeslaMateCarID = nil
+		} else if req.TeslaMateCarID != nil {
+			existing.TeslaMateCarID = req.TeslaMateCarID
+		}
+		existing.TeslaMateAPIURL = req.TeslaMateAPIURL
+		if req.TeslaMateAuthType != "" {
+			existing.TeslaMateAuthType = req.TeslaMateAuthType
+		}
+	}
 	if req.CurrentOdometer > 0 {
 		existing.CurrentOdometer = req.CurrentOdometer
-	}
-	existing.TeslaMateAPIURL = req.TeslaMateAPIURL
-	if req.TeslaMateAuthType != "" {
-		existing.TeslaMateAuthType = req.TeslaMateAuthType
 	}
 
 	if req.TeslaMateAPIKey != nil && *req.TeslaMateAPIKey != "" {

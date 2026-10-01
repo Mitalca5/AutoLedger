@@ -62,7 +62,19 @@
     "testStatus": "Statut : {state} • Odomètre : {odometer} {unit}",
     "urlFirst": "Veuillez d'abord renseigner l'URL de l'API TeslaMate",
     "testing": "Test de connexion en cours...",
-    "testConnection": "Tester la connexion TeslaMate"
+    "testConnection": "Tester la connexion TeslaMate",
+    "trackingMode": "Mode de suivi des données",
+    "chooseTrackingMode": "Comment souhaitez-vous alimenter vos données ?",
+    "modeManual": "Manuel / Déclaratif",
+    "modeManualDesc": "Saisie directe des recharges, relevés kilométriques et dépenses",
+    "modeSemiAuto": "Semi-Automatique",
+    "modeSemiAutoDesc": "Imports de fichiers (CSV) et intégrations domotiques",
+    "modeConnected": "Télémétrie connectée",
+    "modeConnectedDesc": "Synchronisation automatique via connecteur (ex: TeslaMate)",
+    "telemetrySettings": "Configuration du connecteur de télémétrie",
+    "copyFromExisting": "Copier les réglages de {name}",
+    "advancedOptions": "Options complémentaires (Tarifs & Énergie)",
+    "advancedOptionsDesc": "Plan tarifaire, borne domicile par défaut et consommations estimées"
   },
   "vehicleMembersModal": {
     "leave": "Quitter",

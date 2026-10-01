@@ -72,6 +72,7 @@
     "modalTitle": "Générer un nouveau jeton d'API",
     "modalSubtitle": "Choisissez un nom identifiable pour votre intégration ou appareil",
     "nameLabel": "Nom du jeton",
+    "namePlaceholder": "Ex : Home Assistant",
     "expiryLabel": "Expiration",
     "noExpiry": "N'expire jamais",
     "days": "jours",
