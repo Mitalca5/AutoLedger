@@ -131,6 +131,30 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
+	// Telemetry / odometer update (does not generate a charge log)
+	if req.EventType == "odometer_update" || req.EventType == "telemetry_update" {
+		if targetVehicle == nil {
+			writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.not_specified", "Vehicle must be specified for telemetry update"))
+			return
+		}
+		if req.Data.OdometerKm != nil && *req.Data.OdometerKm > 0 {
+			if *req.Data.OdometerKm > targetVehicle.CurrentOdometer {
+				if err := h.repo.UpdateVehicleOdometer(r.Context(), targetVehicle.ID, *req.Data.OdometerKm); err != nil {
+					writeRepoError(w, r, err, "Failed to update vehicle odometer")
+					return
+				}
+			}
+			writeJSON(w, http.StatusOK, map[string]any{
+				"status":           "recorded",
+				"vehicle_id":       targetVehicle.ID,
+				"current_odometer": math.Max(targetVehicle.CurrentOdometer, *req.Data.OdometerKm),
+			})
+			return
+		}
+		writeAPIError(w, http.StatusBadRequest, apierror.New("telemetry.missing_odometer", "No valid odometer reading provided"))
+		return
+	}
+
 	// If vehicle is still unresolved, send to Pending Charges
 	if targetVehicle == nil {
 		rawMap := map[string]any{
