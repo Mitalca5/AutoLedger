@@ -2,9 +2,10 @@
 -- with a teslamateapi URL (the condition the synchronization uses), MANUAL otherwise.
 UPDATE vehicles
 SET telemetry_mode = CASE
-    WHEN powertrain <> 'ICE' AND COALESCE(TRIM(teslamate_api_url), '') <> '' THEN 'CONNECTED'
+    WHEN powertrain <> 'ICE' AND LENGTH(TRIM(COALESCE(teslamate_api_url, ''))) > 0 THEN 'CONNECTED'
     ELSE 'MANUAL'
-END;
+END
+WHERE id IS NOT NULL;
 
 -- Make and model are free text: no placeholder value when none was given.
 ALTER TABLE vehicles ALTER COLUMN make SET DEFAULT '';
