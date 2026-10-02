@@ -115,25 +115,25 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- Home Assistant Blueprint Info Banner -->
+    <!-- Home Assistant integration Info Banner -->
     <div class="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-start gap-2.5">
         <Sparkles class="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
         <div>
-          <h3 class="text-xs font-semibold text-blue-200">{{ t('account.tokens.haBlueprintTitle') }}</h3>
+          <h3 class="text-xs font-semibold text-blue-200">{{ t('account.tokens.haIntegrationTitle') }}</h3>
           <p class="text-[11px] text-blue-300/80 mt-0.5">
-            {{ t('account.tokens.haBlueprintSubtitle') }}
+            {{ t('account.tokens.haIntegrationSubtitle') }}
           </p>
         </div>
       </div>
       <a
-        href="/api/integrations/homeassistant/blueprint.yaml"
+        href="https://github.com/Rem7474/autoledger-homeassistant"
         target="_blank"
-        download="autoledger_charging_session.yaml"
+        rel="noopener noreferrer"
         class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-200 text-xs font-medium transition-colors shrink-0"
       >
         <ExternalLink class="h-3 w-3" />
-        {{ t('account.tokens.downloadBlueprint') }}
+        {{ t('account.tokens.haIntegrationLink') }}
       </a>
     </div>
 
