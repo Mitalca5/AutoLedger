@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 )
 
 // Charging sessions pushed by integrations (Home Assistant, scripts): storage and duplicate detection.
@@ -119,4 +120,26 @@ func foundID(id string, err error) (string, bool, error) {
 		return "", false, err
 	}
 	return id, true, nil
+}
+
+// FindIngestedDrive looks for a drive an integration already sent: by event id when it has one, otherwise a drive
+// of the vehicle that starts and measures about the same.
+func (r *Repository) FindIngestedDrive(ctx context.Context, vehicleID string, eventID *string, start time.Time, distanceKm float64) (string, bool, error) {
+	var id string
+	var err error
+	if eventID != nil {
+		err = r.pool.QueryRow(ctx, `SELECT id FROM drives WHERE vehicle_id = $1 AND origin = 'WEBHOOK' AND external_id = $2 LIMIT 1;`, vehicleID, *eventID).Scan(&id)
+	} else {
+		err = r.pool.QueryRow(ctx, `
+			SELECT id FROM drives
+			WHERE vehicle_id = $1
+			  AND ABS(EXTRACT(EPOCH FROM (start_time - $2))) <= $4
+			  AND ABS(distance_km - $3) <= $5
+			LIMIT 1;
+		`, vehicleID, start, distanceKm, ingest.DriveTimeWindow.Seconds(), ingest.DriveKmDelta).Scan(&id)
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", false, nil
+	}
+	return id, err == nil, err
 }

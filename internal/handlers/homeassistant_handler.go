@@ -41,15 +41,17 @@ func NewHomeAssistantHandler(repo *database.Repository, tariffService *services.
 
 type HAEventPayload struct {
 	// EventID identifies the event for the sender: an event sent again with the same ID is not recorded twice.
-	EventID   *string      `json:"event_id"`
-	VehicleID *string      `json:"vehicle_id"`
-	EventType string       `json:"event_type"`
-	Source    string       `json:"source"`
-	Timestamp *time.Time   `json:"timestamp"`
-	Data      HAChargeData `json:"data"`
+	EventID   *string    `json:"event_id"`
+	VehicleID *string    `json:"vehicle_id"`
+	EventType string     `json:"event_type"`
+	Source    string     `json:"source"`
+	Timestamp *time.Time `json:"timestamp"`
+	// DistanceUnit is the unit of the distances and odometer readings of the event ("km", the default, or "mi").
+	DistanceUnit string      `json:"distance_unit"`
+	Data         HAEventData `json:"data"`
 }
 
-type HAChargeData struct {
+type HAEventData struct {
 	StartTime      *time.Time `json:"start_time"`
 	EndTime        *time.Time `json:"end_time"`
 	EnergyKwh      *float64   `json:"energy_kwh"`
@@ -61,6 +63,20 @@ type HAChargeData struct {
 	OdometerKm     *float64   `json:"odometer_km"`
 	SocStart       *int       `json:"soc_start"`
 	SocEnd         *int       `json:"soc_end"`
+
+	// Odometer readings, drives and fill-ups. Distances are in the event's distance_unit, except odometer_km.
+	Odometer      *float64 `json:"odometer"`
+	Distance      *float64 `json:"distance"`
+	StartOdometer *float64 `json:"start_odometer"`
+	EndOdometer   *float64 `json:"end_odometer"`
+	DurationMin   *int     `json:"duration_min"`
+	StartAddress  *string  `json:"start_address"`
+	EndAddress    *string  `json:"end_address"`
+	Amount        *float64 `json:"amount"`
+	Liters        *float64 `json:"liters"`
+	PricePerLiter *float64 `json:"price_per_liter"`
+	FuelType      *string  `json:"fuel_type"`
+	IsFullTank    *bool    `json:"is_full_tank"`
 }
 
 type VehicleMetricsResponse struct {
@@ -83,8 +99,14 @@ func (h *HomeAssistantHandler) HandleEvent(w http.ResponseWriter, r *http.Reques
 	switch strings.TrimSpace(req.EventType) {
 	case "", haEventChargingSessionEnd:
 		// A charging session, handled below
-	case haEventOdometerUpdate, haEventTelemetryUpdate:
+	case haEventOdometer, haEventOdometerUpdate, haEventTelemetryUpdate:
 		h.recordOdometer(w, r, &req)
+		return
+	case haEventDrive:
+		h.recordDrive(w, r, &req)
+		return
+	case haEventFuel:
+		h.recordFuel(w, r, &req)
 		return
 	default:
 		writeAPIError(w, http.StatusBadRequest, apierror.Newf("integration.unknown_event_type", "Unknown event type %q", req.EventType))
@@ -269,8 +291,12 @@ func optionalText(s *string) *string {
 // Event types accepted by HandleEvent. An empty type is a charging session (the first blueprint sent none).
 const (
 	haEventChargingSessionEnd = "charging_session_end"
-	haEventOdometerUpdate     = "odometer_update"
-	haEventTelemetryUpdate    = "telemetry_update"
+	haEventOdometer           = "odometer"
+	haEventDrive              = "drive"
+	haEventFuel               = "fuel"
+	// Older names of the odometer event, still sent by existing automations.
+	haEventOdometerUpdate  = "odometer_update"
+	haEventTelemetryUpdate = "telemetry_update"
 )
 
 // recordOdometer applies an odometer reading. Unlike a charging session it is never attributed by guess:
@@ -280,7 +306,12 @@ func (h *HomeAssistantHandler) recordOdometer(w http.ResponseWriter, r *http.Req
 		writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.not_specified", "The event must name its vehicle"))
 		return
 	}
-	if req.Data.OdometerKm == nil || *req.Data.OdometerKm <= 0 {
+	factor, ok := distanceFactor(w, req.DistanceUnit)
+	if !ok {
+		return
+	}
+	reading := eventOdometerKm(&req.Data, factor)
+	if reading == nil || *reading <= 0 || *reading > maxEventOdometerKm {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("telemetry.missing_odometer", "No valid odometer reading provided"))
 		return
 	}
@@ -288,7 +319,7 @@ func (h *HomeAssistantHandler) recordOdometer(w http.ResponseWriter, r *http.Req
 	if vehicle == nil {
 		return
 	}
-	odometer := *req.Data.OdometerKm
+	odometer := *reading
 	if odometer > vehicle.CurrentOdometer {
 		if err := h.repo.UpdateVehicleOdometer(r.Context(), vehicle.ID, odometer); err != nil {
 			writeRepoError(w, r, err, "Failed to update vehicle odometer")

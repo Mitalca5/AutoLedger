@@ -300,6 +300,7 @@
     "missing_odometer": "Aucun relevé kilométrique valide dans l'événement"
   },
   "integration": {
-    "unknown_event_type": "Type d'événement inconnu : {p0}"
+    "unknown_event_type": "Type d'événement inconnu : {p0}",
+    "invalid_distance_unit": "Unité de distance inconnue : {p0} (km ou mi)"
   }
 }
