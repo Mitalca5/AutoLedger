@@ -436,6 +436,7 @@ func main() {
 
 			// Household Fleet Dashboard
 			r.Get("/api/fleet/summary", fleetHandler.GetSummary)
+			r.Put("/api/fleet/budget", fleetHandler.SetBudget)
 
 			// EV vs ICE cost comparison (informational)
 			r.Route("/api/comparison-scenarios", func(r chi.Router) {

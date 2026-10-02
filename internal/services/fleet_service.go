@@ -5,6 +5,7 @@ import (
 
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/money"
 )
 
 // FleetService coordinates aggregated multi-vehicle analytics for households.
@@ -19,4 +20,9 @@ func NewFleetService(repo *database.Repository) *FleetService {
 // GetSummary returns consolidated KPIs, monthly breakdown and driver shares for all vehicles of a household.
 func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.FleetSummaryResponse, error) {
 	return s.repo.GetFleetSummary(ctx, userID)
+}
+
+// SetMonthlyBudget stores the household monthly budget; nil removes it.
+func (s *FleetService) SetMonthlyBudget(ctx context.Context, userID string, budget *money.Cents) error {
+	return s.repo.SetFleetMonthlyBudget(ctx, userID, budget)
 }

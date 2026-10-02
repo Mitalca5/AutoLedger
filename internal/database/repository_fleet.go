@@ -30,6 +30,10 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 		MemberKmShares: []models.MemberKmShare{},
 	}
 
+	if err := r.pool.QueryRow(ctx, `SELECT fleet_monthly_budget FROM users WHERE id = $1`, userID).Scan(&res.MonthlyBudget); err != nil {
+		return nil, fmt.Errorf("failed to read the fleet budget: %w", err)
+	}
+
 	if len(vehicles) == 0 {
 		return res, nil
 	}
@@ -294,4 +298,16 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 	}
 
 	return res, nil
+}
+
+// SetFleetMonthlyBudget stores the household monthly budget; nil removes it.
+func (r *Repository) SetFleetMonthlyBudget(ctx context.Context, userID string, budget *money.Cents) error {
+	tag, err := r.pool.Exec(ctx, `UPDATE users SET fleet_monthly_budget = $2, updated_at = NOW() WHERE id = $1`, userID, budget)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }

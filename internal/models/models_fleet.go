@@ -4,9 +4,11 @@ import "github.com/teslacost/teslacost/internal/money"
 
 // FleetSummaryResponse aggregates multi-vehicle household metrics.
 type FleetSummaryResponse struct {
-	TotalVehicles          int                  `json:"total_vehicles"`
-	Currency               string               `json:"currency"`
-	CurrentMonthCost       money.Cents          `json:"current_month_cost"`
+	TotalVehicles    int         `json:"total_vehicles"`
+	Currency         string      `json:"currency"`
+	CurrentMonthCost money.Cents `json:"current_month_cost"`
+	// MonthlyBudget is the household spending target for a month; nil when none is set.
+	MonthlyBudget          *money.Cents         `json:"monthly_budget"`
 	CurrentMonthDistanceKm float64              `json:"current_month_distance_km"`
 	CurrentMonthEnergyKwh  float64              `json:"current_month_energy_kwh"`
 	MonthlyCosts           []FleetMonthlyCost   `json:"monthly_costs"`

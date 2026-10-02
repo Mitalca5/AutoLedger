@@ -3,7 +3,9 @@ import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import { LayoutGrid, Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown, ArrowUpRight } from 'lucide-vue-next'
 import { Chart, registerables } from 'chart.js'
 import { api, type FleetSummaryResponse } from '@/services/api'
-import { formatMoney, formatAmount } from '@/currency'
+import { formatAmount } from '@/currency'
+import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance } from '@/units'
 import { t } from '@/i18n'
 
@@ -15,6 +17,40 @@ const chartCanvas = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
 
 const distanceUnitLabel = computed(() => currentDistanceUnit())
+const { showAlert } = useConfirm()
+
+const editingBudget = ref(false)
+const budgetInput = ref('')
+const savingBudget = ref(false)
+const usage = computed(() => (summary.value?.monthly_budget ? budgetUsage(summary.value.current_month_cost, summary.value.monthly_budget) : null))
+
+function startEditBudget() {
+  budgetInput.value = summary.value?.monthly_budget ? String(summary.value.monthly_budget) : ''
+  editingBudget.value = true
+}
+
+async function saveBudget(amount: number | null) {
+  if (!summary.value) return
+  savingBudget.value = true
+  try {
+    const res = await api.setFleetBudget(amount)
+    summary.value.monthly_budget = res.monthly_budget
+    editingBudget.value = false
+  } catch (err: any) {
+    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+  } finally {
+    savingBudget.value = false
+  }
+}
+
+function submitBudget() {
+  const amount = parseBudgetInput(budgetInput.value)
+  if (amount === null) {
+    showAlert(t('fleet.budget.invalid'), t('shell.confirm.error'), 'danger')
+    return
+  }
+  void saveBudget(amount)
+}
 
 async function loadFleetSummary() {
   loading.value = true
@@ -47,8 +83,8 @@ function renderChart() {
   }
 
   const months = summary.value.monthly_costs.map((m) => m.month)
-  const energyCosts = summary.value.monthly_costs.map((m) => m.energy_cost / 100)
-  const otherCosts = summary.value.monthly_costs.map((m) => m.other_cost / 100)
+  const energyCosts = summary.value.monthly_costs.map((m) => m.energy_cost)
+  const otherCosts = summary.value.monthly_costs.map((m) => m.other_cost)
 
   chartInstance = new Chart(chartCanvas.value, {
     type: 'bar',
@@ -155,6 +191,49 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
+    <!-- Monthly budget -->
+    <div v-if="summary" class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.budget.title') }}</span>
+        <div v-if="!editingBudget" class="flex items-center gap-3 text-xs font-semibold">
+          <button type="button" @click="startEditBudget" class="text-rose-400 hover:text-rose-300">
+            {{ summary.monthly_budget ? t('fleet.budget.edit') : t('fleet.budget.set') }}
+          </button>
+          <button v-if="summary.monthly_budget" type="button" :disabled="savingBudget" @click="saveBudget(null)" class="text-slate-400 hover:text-white">
+            {{ t('fleet.budget.remove') }}
+          </button>
+        </div>
+      </div>
+      <form v-if="editingBudget" class="flex flex-wrap items-center gap-2" @submit.prevent="submitBudget">
+        <input
+          v-model="budgetInput"
+          type="text"
+          inputmode="decimal"
+          :aria-label="t('fleet.budget.title')"
+          :placeholder="t('fleet.budget.placeholder', { currency: summary.currency })"
+          class="min-w-0 flex-1 bg-slate-800 text-slate-100 rounded-xl px-3 py-2 text-sm border border-slate-700"
+        />
+        <button type="submit" :disabled="savingBudget" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50">{{ t('common.save') }}</button>
+        <button type="button" @click="editingBudget = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">{{ t('common.cancel') }}</button>
+      </form>
+      <template v-if="usage && summary.monthly_budget && !editingBudget">
+        <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(usage.percent)" aria-valuemin="0" aria-valuemax="100">
+          <div
+            class="h-full rounded-full"
+            :class="usage.status === 'over' ? 'bg-rose-500' : usage.status === 'warning' ? 'bg-amber-400' : 'bg-emerald-500'"
+            :style="{ width: `${Math.min(100, usage.percent)}%` }"
+          ></div>
+        </div>
+        <p class="text-xs text-slate-300 break-words">
+          {{ t('fleet.budget.spent', { spent: formatAmount(summary.current_month_cost, summary.currency), budget: formatAmount(summary.monthly_budget, summary.currency), percent: Math.round(usage.percent) }) }}
+          <span :class="usage.status === 'over' ? 'text-rose-400' : 'text-slate-400'">
+            · {{ usage.status === 'over' ? t('fleet.budget.over', { amount: formatAmount(-usage.remaining, summary.currency) }) : t('fleet.budget.remaining', { amount: formatAmount(usage.remaining, summary.currency) }) }}
+          </span>
+        </p>
+      </template>
+      <p v-else-if="!editingBudget" class="text-xs text-slate-400">{{ t('fleet.budget.none') }}</p>
+    </div>
+
     <!-- KPI Grid -->
     <div v-if="summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
@@ -176,7 +255,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <p class="text-2xl font-bold text-white mt-2">
-          {{ formatMoney(summary.current_month_cost, summary.currency) }}
+          {{ formatAmount(summary.current_month_cost, summary.currency) }}
         </p>
         <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.currentMonthTotal') }}</p>
       </div>
@@ -259,7 +338,7 @@ onBeforeUnmount(() => {
             <div>
               <span class="text-[11px] text-slate-400 block">{{ t('fleet.vehicles.currentMonthCost') }}</span>
               <span class="text-sm font-semibold text-white block mt-0.5">
-                {{ formatMoney(v.month_cost, v.currency) }}
+                {{ formatAmount(v.month_cost, v.currency) }}
               </span>
             </div>
 

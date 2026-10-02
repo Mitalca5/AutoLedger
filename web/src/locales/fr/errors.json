@@ -197,6 +197,9 @@
       "database_error": "Ligne {p0} : la ligne n’a pas pu être enregistrée, rien n’a été importé"
     }
   },
+  "fleet": {
+    "invalid_budget": "Le budget doit être un montant positif"
+  },
   "toll": {
     "apply_failed": "Échec de l'application du tarif de péage",
     "detection_failed": "Échec de la détection des péages (TeslaMateAPI injoignable ou trajet non disponible)",

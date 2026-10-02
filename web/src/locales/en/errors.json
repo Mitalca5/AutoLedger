@@ -197,6 +197,9 @@
       "database_error": "Line {p0}: the row could not be saved, nothing was imported"
     }
   },
+  "fleet": {
+    "invalid_budget": "The budget must be a positive amount"
+  },
   "toll": {
     "apply_failed": "Could not apply the toll fare",
     "detection_failed": "Toll detection failed (TeslaMateAPI unreachable or drive unavailable)",

@@ -31,5 +31,17 @@
     "title": "Driver Distance Distribution",
     "subtitle": "Kilometers logged per household driver this month",
     "noData": "No drives logged with driver assignment yet."
+  },
+  "budget": {
+    "title": "Monthly budget",
+    "set": "Set a budget",
+    "edit": "Edit",
+    "remove": "Remove",
+    "placeholder": "Amount per month ({currency})",
+    "invalid": "Enter a budget greater than zero",
+    "none": "No budget set: add one to follow the household spending this month.",
+    "spent": "{spent} of {budget} ({percent}%)",
+    "remaining": "{amount} left",
+    "over": "{amount} over"
   }
 }

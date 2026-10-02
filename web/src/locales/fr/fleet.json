@@ -31,5 +31,17 @@
     "title": "Répartition des kilomètres par conducteur",
     "subtitle": "Kilomètres enregistrés par membre du foyer ce mois-ci",
     "noData": "Aucun trajet avec conducteur assigné pour le moment."
+  },
+  "budget": {
+    "title": "Budget mensuel",
+    "set": "Définir un budget",
+    "edit": "Modifier",
+    "remove": "Supprimer",
+    "placeholder": "Montant par mois ({currency})",
+    "invalid": "Saisissez un budget supérieur à zéro",
+    "none": "Aucun budget défini : ajoutez-en un pour suivre les dépenses du foyer ce mois-ci.",
+    "spent": "{spent} sur {budget} ({percent} %)",
+    "remaining": "{amount} restants",
+    "over": "{amount} de dépassement"
   }
 }
