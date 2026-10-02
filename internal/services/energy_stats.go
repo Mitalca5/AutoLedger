@@ -132,6 +132,9 @@ type energyCharge struct {
 	// State of charge (%) at both ends of the session, nil when unknown.
 	StartSoc *int
 	EndSoc   *int
+	// GridSide marks an energy read upstream of the charger (a wallbox meter pushed by an integration): it
+	// includes the charging losses, so it says nothing about what the battery stored.
+	GridSide bool
 }
 
 // classifyCharge buckets a session by average power. ok is false when no power can be derived.
@@ -209,7 +212,7 @@ func socSwing(c energyCharge) int {
 // usableCapacity estimates the usable battery capacity (kWh) from the energy added and the state of charge gained.
 func usableCapacity(c energyCharge) (float64, bool) {
 	swing := socSwing(c)
-	if swing < minSocSwingForCapacity || c.KwhAdded <= 0 {
+	if swing < minSocSwingForCapacity || c.KwhAdded <= 0 || c.GridSide {
 		return 0, false
 	}
 	capacity := c.KwhAdded / (float64(swing) / 100)
@@ -494,6 +497,7 @@ func (s *EnergyStatsService) Compute(ctx context.Context, vehicleID string) (*En
 	chargeRows, err := s.pool.Query(ctx, `
 		SELECT TO_CHAR(date AT TIME ZONE $2, 'YYYY-MM') AS m, date, end_date, kwh_added::float8, kwh_used::float8,
 		       start_battery_level, end_battery_level,
+		       origin = 'WEBHOOK' AND kwh_used IS NULL AS grid_side,
 		       CASE WHEN cost IS NULL THEN NULL
 		            WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN ROUND(cost, 2)
 		            WHEN fx_rate IS NOT NULL THEN ROUND(cost * fx_rate, 2) END AS cost_eur
@@ -507,7 +511,7 @@ func (s *EnergyStatsService) Compute(ctx context.Context, vehicleID string) (*En
 	var charges []energyCharge
 	for chargeRows.Next() {
 		var c energyCharge
-		if err := chargeRows.Scan(&c.Month, &c.Start, &c.End, &c.KwhAdded, &c.KwhUsed, &c.StartSoc, &c.EndSoc, &c.Cost); err != nil {
+		if err := chargeRows.Scan(&c.Month, &c.Start, &c.End, &c.KwhAdded, &c.KwhUsed, &c.StartSoc, &c.EndSoc, &c.GridSide, &c.Cost); err != nil {
 			chargeRows.Close()
 			return nil, err
 		}

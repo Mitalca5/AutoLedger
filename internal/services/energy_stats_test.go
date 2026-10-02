@@ -208,6 +208,7 @@ func TestUsableCapacityNeedsAWideSwingAndAPlausibleResult(t *testing.T) {
 		"unknown levels":           {KwhAdded: 40, Start: d},
 		"implausibly small result": sessionSoc(d, 5, 10, 90, nil),
 		"implausibly large result": sessionSoc(d, 200, 10, 60, nil),
+		"grid-side wallbox energy": func() energyCharge { c := sessionSoc(d, 40, 20, 70, nil); c.GridSide = true; return c }(),
 	} {
 		if _, ok := usableCapacity(c); ok {
 			t.Errorf("%s: estimate accepted", name)
