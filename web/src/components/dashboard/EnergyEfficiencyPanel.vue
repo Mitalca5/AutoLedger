@@ -47,6 +47,11 @@ const donutItems = computed(() =>
 
 const visibleMonths = computed(() => filterMonthsByRange(stats.value?.months ?? [], range.value))
 
+const basis = computed(() => stats.value?.basis)
+const showConsumption = computed(() => basis.value?.consumption !== 'unavailable')
+const showCost = computed(() => basis.value?.cost !== 'unavailable')
+const hasDerived = computed(() => basis.value?.consumption === 'derived' || basis.value?.cost === 'derived')
+
 const hasData = computed(() => (stats.value?.months.length ?? 0) > 0)
 
 const totalKwh = computed(() => acDc.value.classes.reduce((sum, c) => sum + c.kwh_added, 0))
@@ -203,12 +208,16 @@ onBeforeUnmount(() => {
       <router-link to="/expenses?tab=CHARGES" class="font-semibold underline">{{ $t('dashboard.energyEfficiencyPanel.completeThem') }}</router-link>
     </p>
 
+    <p v-if="hasDerived" class="rounded-lg border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-xs text-sky-300">
+      {{ $t('dashboard.energyEfficiencyPanel.derivedNote') }}
+    </p>
+
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div>
+      <div v-if="showConsumption">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.monthlyConsumption') }}</h4>
         <div class="h-56"><canvas ref="consumptionRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
       </div>
-      <div>
+      <div v-if="showCost">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.energyCostPer100Km', { unit: distanceUnit() }) }}</h4>
         <div class="h-56"><canvas ref="costRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyEnergyCostPer100', { unit: distanceUnit() })"></canvas></div>
       </div>
@@ -267,8 +276,8 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-if="stats">
-      <EnergyTemperatureSection :stats="stats" />
-      <EnergyBatterySection :stats="stats" :grafana-url="grafanaUrl" />
+      <EnergyTemperatureSection v-if="basis?.temperature !== 'unavailable'" :stats="stats" />
+      <EnergyBatterySection v-if="basis?.battery !== 'unavailable'" :stats="stats" :grafana-url="grafanaUrl" />
     </template>
   </section>
   <p v-else-if="failed" role="alert" class="rounded-xl border border-slate-800 bg-slate-900 p-3 text-xs text-slate-400">

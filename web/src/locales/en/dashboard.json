@@ -56,6 +56,7 @@
     "tooltip": "{label}: {value} kWh"
   },
   "energyEfficiencyPanel": {
+    "derivedNote": "Consumption and cost per 100 km are derived from your odometer readings and charges (energy added to the battery over the distance between readings), not measured by the car. Add readings regularly to keep them accurate.",
     "theEnergyEfficiencyStatisticsCould": "The energy efficiency statistics could not be loaded.",
     "kwhKwhEfficiency": "{value} kWh · {value2}/kWh · efficiency {value3}",
     "ofTheEnergyChargeS": "{value}% of the energy · {sessions} charge(s)",

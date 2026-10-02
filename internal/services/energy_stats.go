@@ -109,6 +109,7 @@ type EnergyStats struct {
 	Temperature     TemperatureEffect `json:"temperature"`
 	// BatteryHealth is the history of the health computed by TeslaMate, one reading a day at most.
 	BatteryHealth []models.BatterySnapshot `json:"battery_health"`
+	Basis         EnergyBasis              `json:"basis"`
 }
 
 // energyDriveMonth is the drives of a month, aggregated by the database.
@@ -275,7 +276,7 @@ func recentCapacities(charges []energyCharge, n int) []float64 {
 }
 
 // computeEnergyStats derives the statistics from drives aggregated per month and from charging sessions.
-func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge) *EnergyStats {
+func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge, odometerKm map[string]float64) *EnergyStats {
 	months := map[string]*energyAcc{}
 	get := func(m string) *energyAcc {
 		if months[m] == nil {
@@ -320,6 +321,26 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge) *Ener
 		keys = append(keys, m)
 	}
 	sort.Strings(keys)
+	// Months driven without any charge still hold distance the neighbouring charges paid for.
+	if len(keys) > 0 {
+		first, last := keys[0], keys[len(keys)-1]
+		for m := range odometerKm {
+			if m > first && m < last && months[m] == nil {
+				get(m)
+				keys = append(keys, m)
+			}
+		}
+		sort.Strings(keys)
+	}
+
+	// A month without any tracked drive takes its distance from the odometer readings.
+	derivedMonths := map[string]bool{}
+	for _, m := range keys {
+		if a := months[m]; a.distanceKm == 0 && odometerKm[m] > 0 {
+			a.distanceKm = odometerKm[m]
+			derivedMonths[m] = true
+		}
+	}
 
 	out := &EnergyStats{
 		Months:          make([]EnergyMonth, 0, len(keys)),
@@ -361,6 +382,15 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge) *Ener
 		if winKm >= minDistanceForTrailing {
 			em.CostPer100kmTrailing = ratioPtr(winCost.Float()*100, winKm, 2)
 		}
+		if derivedMonths[m] && em.ConsumptionKwh100km == nil && winKm >= minDistanceForTrailing {
+			var winKwh float64
+			for _, wm := range previousMonths(m, trailingMonths) {
+				if w := months[wm]; w != nil && w.distanceKm > 0 {
+					winKwh += w.kwhAdded
+				}
+			}
+			em.ConsumptionKwh100km = ratioPtr(winKwh*100, winKm, 1)
+		}
 		out.Months = append(out.Months, em)
 	}
 
@@ -383,11 +413,15 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge) *Ener
 	// Cost per 100 km only counts the months where distance is tracked: energy bought before tracking started has no
 	// matching distance and would inflate it.
 	var trackedCost money.Cents
-	var trackedKm float64
-	for _, a := range months {
+	var trackedKm, trackedKwh, derivedKm float64
+	for m, a := range months {
 		if a.distanceKm > 0 {
 			trackedCost += a.cost
 			trackedKm += a.distanceKm
+			trackedKwh += a.kwhAdded
+			if derivedMonths[m] {
+				derivedKm += a.distanceKm
+			}
 		}
 	}
 	out.Summary = EnergySummary{
@@ -401,7 +435,11 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge) *Ener
 	if trackedKm >= minDistanceForCostPer100km {
 		out.Summary.CostPer100km = ratioPtr(trackedCost.Float()*100, trackedKm, 2)
 	}
+	if out.Summary.ConsumptionKwh100km == nil && derivedKm >= minDistanceForTrailing {
+		out.Summary.ConsumptionKwh100km = ratioPtr(trackedKwh*100, trackedKm, 1)
+	}
 	out.Summary.CostPerFullCharge = fullChargeCost(total.costSwingPriced, total.socSwingPriced)
+	out.Basis = energyBasis(out, total.measuredKm > 0, total.distanceKm > 0, derivedKm > 0)
 	if recent := recentCapacities(charges, currentCapacitySamples); len(recent) > 0 {
 		c := round1(median(recent))
 		out.Summary.EstimatedCapacityKwh = &c
@@ -480,16 +518,30 @@ func (s *EnergyStatsService) Compute(ctx context.Context, vehicleID string) (*En
 		return nil, err
 	}
 
-	stats := computeEnergyStats(drives, charges)
+	points, err := s.odometerPoints(ctx, vehicleID)
+	if err != nil {
+		return nil, err
+	}
+	loc, err := time.LoadLocation(s.timezone)
+	if err != nil {
+		loc = time.UTC
+	}
+	stats := computeEnergyStats(drives, charges, monthlyOdometerDistance(points, loc))
 
 	bins, err := s.temperatureBins(ctx, vehicleID)
 	if err != nil {
 		return nil, err
 	}
 	stats.TemperatureBins, stats.Temperature = computeTemperature(bins, stats.Summary.PricePerKwh)
+	if len(stats.TemperatureBins) > 0 {
+		stats.Basis.Temperature = BasisMeasured
+	}
 
 	if stats.BatteryHealth, err = s.batteryHealth(ctx, vehicleID); err != nil {
 		return nil, err
+	}
+	if len(stats.BatteryHealth) > 0 {
+		stats.Basis.Battery = BasisMeasured
 	}
 	return stats, nil
 }
@@ -540,4 +592,29 @@ func (s *EnergyStatsService) batteryHealth(ctx context.Context, vehicleID string
 		snaps = append(snaps, snap)
 	}
 	return snaps, rows.Err()
+}
+
+// energyBasis tells which figures rest on drives and charges that report them and which are derived from the
+// odometer. Temperature and battery are filled in by the caller once their own data is read.
+func energyBasis(stats *EnergyStats, measuredConsumption, driveDistance, derivedDistance bool) EnergyBasis {
+	b := EnergyBasis{Consumption: BasisUnavailable, Cost: BasisUnavailable, Charging: BasisUnavailable,
+		FullCharge: BasisUnavailable, Temperature: BasisUnavailable, Battery: BasisUnavailable}
+	if measuredConsumption {
+		b.Consumption = BasisMeasured
+	} else if stats.Summary.ConsumptionKwh100km != nil {
+		b.Consumption = BasisDerived
+	}
+	if stats.Summary.CostPer100km != nil {
+		b.Cost = BasisMeasured
+		if derivedDistance && !driveDistance {
+			b.Cost = BasisDerived
+		}
+	}
+	if len(stats.ChargeClasses) > 0 {
+		b.Charging = BasisMeasured
+	}
+	if stats.Summary.CostPerFullCharge != nil {
+		b.FullCharge = BasisMeasured
+	}
+	return b
 }

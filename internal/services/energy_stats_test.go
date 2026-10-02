@@ -114,7 +114,7 @@ func TestComputeEnergyStats(t *testing.T) {
 		session("2026-02", 3, 20, ptrF(22), nil),         // AC, no tariff known
 	}
 
-	got := computeEnergyStats(drives, charges)
+	got := computeEnergyStats(drives, charges, nil)
 
 	if len(got.Months) != 4 {
 		t.Fatalf("months: got %d, want 4 (Dec to Mar)", len(got.Months))
@@ -170,7 +170,7 @@ func TestComputeEnergyStats(t *testing.T) {
 }
 
 func TestComputeEnergyStatsWithoutData(t *testing.T) {
-	got := computeEnergyStats(nil, nil)
+	got := computeEnergyStats(nil, nil, nil)
 	if got.Months == nil || got.ChargeClasses == nil {
 		t.Fatal("empty statistics must serialise as empty lists, not null")
 	}
@@ -183,7 +183,7 @@ func TestComputeEnergyStatsWithoutData(t *testing.T) {
 
 func TestComputeEnergyStatsUnknownClassForManualCharges(t *testing.T) {
 	start := time.Date(2026, 1, 10, 18, 0, 0, 0, time.UTC)
-	got := computeEnergyStats(nil, []energyCharge{{Month: "2026-01", Start: start, KwhAdded: 25, Cost: ptrCents(7.5)}})
+	got := computeEnergyStats(nil, []energyCharge{{Month: "2026-01", Start: start, KwhAdded: 25, Cost: ptrCents(7.5)}}, nil)
 	if len(got.ChargeClasses) != 1 || got.ChargeClasses[0].Class != ChargeClassUnknown {
 		t.Fatalf("got %+v", got.ChargeClasses)
 	}
@@ -225,7 +225,7 @@ func TestCapacityEstimateUsesMedianAndMostRecentSessions(t *testing.T) {
 	for i, k := range kwhs {
 		charges = append(charges, sessionSoc(base.AddDate(0, 0, i*10), k, 20, 70, nil))
 	}
-	got := computeEnergyStats(nil, charges)
+	got := computeEnergyStats(nil, charges, nil)
 
 	// Window: 75, 79, 80, 80, 81, 79, 80, 80, 79, 81 (the newest plausible ones) => median 80.
 	eq(t, "current capacity", got.Summary.EstimatedCapacityKwh, 80)
@@ -255,7 +255,7 @@ func TestCostPerFullChargeGroupsByClass(t *testing.T) {
 	small := sessionSoc(d, 8, 50, 60, ptrCents(100)) // 10 points: too small a swing to price a full charge
 	unpriced := sessionSoc(d, 40, 20, 70, nil)
 
-	got := computeEnergyStats(nil, []energyCharge{ac, dc, small, unpriced})
+	got := computeEnergyStats(nil, []energyCharge{ac, dc, small, unpriced}, nil)
 
 	eq(t, "overall", got.Summary.CostPerFullCharge, 28.89) // 26 EUR over 90 points
 	for _, c := range got.ChargeClasses {
@@ -269,7 +269,7 @@ func TestCostPerFullChargeGroupsByClass(t *testing.T) {
 }
 
 func TestChargesWithoutLevelsGiveNoCapacityNorFullChargeCost(t *testing.T) {
-	got := computeEnergyStats(nil, []energyCharge{session("2026-01", 4, 30, ptrF(33), ptrCents(6))})
+	got := computeEnergyStats(nil, []energyCharge{session("2026-01", 4, 30, ptrF(33), ptrCents(6))}, nil)
 	isNil(t, "capacity", got.Summary.EstimatedCapacityKwh)
 	isNil(t, "full charge", got.Summary.CostPerFullCharge)
 	isNil(t, "monthly capacity", got.Months[0].EstimatedCapacityKwh)
@@ -322,5 +322,59 @@ func TestComputeTemperatureWithoutDrives(t *testing.T) {
 	bins, _ := computeTemperature(nil, nil)
 	if bins == nil || len(bins) != 0 {
 		t.Errorf("empty input must give an empty, non-nil list, got %v", bins)
+	}
+}
+
+func TestMonthlyOdometerDistanceSpreadsReadingsOverMonths(t *testing.T) {
+	d := func(m time.Month, day int) time.Time { return time.Date(2026, m, day, 0, 0, 0, 0, time.UTC) }
+	got := monthlyOdometerDistance([]odometerPoint{
+		{d(time.March, 1), 1000},
+		{d(time.January, 1), 0},  // out of order on purpose
+		{d(time.April, 1), 1000}, // same mileage: parked
+		{d(time.May, 1), 900},    // goes backwards: ignored
+	}, time.UTC)
+	// Jan 1 -> Mar 1 is 59 days for 1000 km, spread by day.
+	if v := got["2026-01"]; v < 525 || v > 526 {
+		t.Errorf("january = %v, want ~525.4", v)
+	}
+	if v := got["2026-02"]; v < 474 || v > 475 {
+		t.Errorf("february = %v, want ~474.6", v)
+	}
+	if got["2026-03"] != 0 || got["2026-05"] != 0 {
+		t.Errorf("no distance expected after the last increase, got %+v", got)
+	}
+}
+
+func TestComputeEnergyStatsDerivesFromOdometerWithoutDrives(t *testing.T) {
+	charges := []energyCharge{
+		session("2026-01", 4, 30, nil, ptrCents(6)),
+		session("2026-02", 4, 30, nil, ptrCents(6)),
+		session("2026-03", 4, 30, nil, ptrCents(6)),
+	}
+	odo := map[string]float64{"2026-01": 400, "2026-02": 400, "2026-03": 400}
+	got := computeEnergyStats(nil, charges, odo)
+
+	eq(t, "derived consumption", got.Summary.ConsumptionKwh100km, 7.5) // 90 kWh over 1200 km
+	eq(t, "derived cost per 100 km", got.Summary.CostPer100km, 1.5)    // 18 over 1200 km
+	if got.Basis.Consumption != BasisDerived || got.Basis.Cost != BasisDerived {
+		t.Errorf("basis = %+v, want derived consumption and cost", got.Basis)
+	}
+	if got.Basis.Charging != BasisMeasured || got.Basis.Temperature != BasisUnavailable || got.Basis.Battery != BasisUnavailable {
+		t.Errorf("basis = %+v", got.Basis)
+	}
+}
+
+func TestComputeEnergyStatsBasisIsMeasuredWithDrives(t *testing.T) {
+	drives := []energyDriveMonth{{Month: "2026-01", DistanceKm: 1000, MeasuredKm: 1000, Kwh: 150}}
+	got := computeEnergyStats(drives, []energyCharge{session("2026-01", 4, 30, nil, ptrCents(6))}, map[string]float64{"2026-01": 999})
+	if got.Basis.Consumption != BasisMeasured || got.Basis.Cost != BasisMeasured {
+		t.Errorf("basis = %+v, want measured", got.Basis)
+	}
+}
+
+func TestComputeEnergyStatsBasisUnavailableWithoutAnything(t *testing.T) {
+	got := computeEnergyStats(nil, []energyCharge{session("2026-01", 4, 30, nil, ptrCents(6))}, nil)
+	if got.Basis.Consumption != BasisUnavailable || got.Basis.Cost != BasisUnavailable {
+		t.Errorf("basis = %+v, want unavailable without distance", got.Basis)
 	}
 }

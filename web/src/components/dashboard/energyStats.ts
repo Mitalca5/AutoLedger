@@ -41,6 +41,18 @@ export interface BatterySnapshot {
   health_percent?: number
 }
 
+// How a section's figures were obtained: read from drives or charges, derived from odometer readings, or missing
+export type EnergyBasisKind = 'measured' | 'derived' | 'unavailable'
+
+export interface EnergyBasis {
+  consumption: EnergyBasisKind
+  cost: EnergyBasisKind
+  charging: EnergyBasisKind
+  full_charge: EnergyBasisKind
+  temperature: EnergyBasisKind
+  battery: EnergyBasisKind
+}
+
 export interface EnergyStats {
   months: EnergyMonth[]
   charge_classes: ChargeClass[]
@@ -62,6 +74,7 @@ export interface EnergyStats {
     extra_cost_per_100km?: number
   }
   battery_health: BatterySnapshot[]
+  basis?: EnergyBasis
 }
 
 function round1(v: number) {

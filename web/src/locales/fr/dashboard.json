@@ -56,6 +56,7 @@
     "tooltip": "{label} : {value} kWh"
   },
   "energyEfficiencyPanel": {
+    "derivedNote": "La consommation et le coût aux 100 km sont déduits de vos relevés de compteur et de vos recharges (énergie ajoutée à la batterie sur la distance entre les relevés), pas mesurés par le véhicule. Ajoutez des relevés régulièrement pour les garder précis.",
     "theEnergyEfficiencyStatisticsCould": "Les statistiques d'efficacité énergétique n'ont pas pu être chargées.",
     "kwhKwhEfficiency": "{value} kWh · {value2}/kWh · rendement {value3}",
     "ofTheEnergyChargeS": "{value} % de l'énergie · {sessions} recharge(s)",
