@@ -4,12 +4,21 @@
       <stop offset="0%" stop-color="#0f172a"/>
       <stop offset="100%" stop-color="#020617"/>
     </linearGradient>
-    <linearGradient id="bolt" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="car" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#f43f5e"/>
       <stop offset="100%" stop-color="#e11d48"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="128" fill="url(#bg)"/>
   <circle cx="256" cy="256" r="180" stroke="#1e293b" stroke-width="12" fill="none"/>
-  <path d="M280 80 L160 272 L244 272 L220 432 L352 240 L268 240 Z" fill="url(#bolt)" stroke="#fb7185" stroke-width="6" stroke-linejoin="round"/>
+  <g transform="translate(0 -8)">
+    <path d="M116 304 L116 274 Q116 254 138 250 L188 242 L220 200 Q231 186 249 186 L318 186 Q335 186 347 200 L374 240 L384 242 Q404 246 404 268 L404 304 Q404 318 390 318 L122 318 Q116 318 116 304 Z" fill="url(#car)" stroke="#fb7185" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M204 240 L230 204 Q236 198 246 198 L290 198 L290 240 Z M306 198 L320 198 Q330 198 336 206 L358 240 L306 240 Z" fill="#0f172a"/>
+    <circle cx="184" cy="318" r="46" fill="#0f172a"/>
+    <circle cx="336" cy="318" r="46" fill="#0f172a"/>
+    <circle cx="184" cy="318" r="32" fill="url(#car)" stroke="#fb7185" stroke-width="6"/>
+    <circle cx="336" cy="318" r="32" fill="url(#car)" stroke="#fb7185" stroke-width="6"/>
+    <circle cx="184" cy="318" r="10" fill="#0f172a"/>
+    <circle cx="336" cy="318" r="10" fill="#0f172a"/>
+  </g>
 </svg>
