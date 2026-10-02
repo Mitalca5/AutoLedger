@@ -69,6 +69,9 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	if err != nil {
 		return fmt.Errorf("failed to create vehicle: %w", err)
 	}
+	if err := saveTeslaMateSource(ctx, tx, v); err != nil {
+		return err
+	}
 
 	memberQuery := `
 		INSERT INTO vehicle_members (vehicle_id, user_id, role)
@@ -102,7 +105,20 @@ func (r *Repository) listVehicles(ctx context.Context, where string, args ...any
 		v.Role = models.RoleOwner
 		list = append(list, v)
 	}
-	return list, rows.Err()
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return list, r.loadSourcesInto(ctx, list)
+}
+
+// loadSourcesInto reads the TeslaMate source of every vehicle of the slice.
+func (r *Repository) loadSourcesInto(ctx context.Context, list []models.Vehicle) error {
+	ptrs := make([]*models.Vehicle, len(list))
+	for i := range list {
+		ptrs[i] = &list[i]
+	}
+	return r.loadTeslaMateSources(ctx, ptrs)
 }
 
 func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([]models.Vehicle, error) {
@@ -142,14 +158,25 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 			return nil, err
 		}
 		v.Role = models.VehicleRole(role)
-		sanitizeVehicleForRole(&v)
 		list = append(list, v)
 	}
-	return list, rows.Err()
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := r.loadSourcesInto(ctx, list); err != nil {
+		return nil, err
+	}
+	for i := range list {
+		sanitizeVehicleForRole(&list[i])
+	}
+	return list, nil
 }
 
 func (r *Repository) ListAllVehiclesWithTeslaMate(ctx context.Context) ([]models.Vehicle, error) {
-	return r.listVehicles(ctx, `teslamate_api_url IS NOT NULL AND teslamate_api_url != ''`)
+	return r.listVehicles(ctx, `id IN (
+		SELECT vehicle_id FROM vehicle_data_sources
+		WHERE provider = 'TESLAMATE' AND COALESCE(config->>'api_url', '') <> '')`)
 }
 
 func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*models.Vehicle, error) {
@@ -182,6 +209,9 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 		return nil, fmt.Errorf("failed to get vehicle: %w", err)
 	}
 	v.Role = models.VehicleRole(role)
+	if err := r.loadTeslaMateSources(ctx, []*models.Vehicle{&v}); err != nil {
+		return nil, err
+	}
 	sanitizeVehicleForRole(&v)
 	return &v, nil
 }
@@ -197,6 +227,9 @@ func (r *Repository) GetVehicleByIDInternal(ctx context.Context, id string) (*mo
 		return nil, fmt.Errorf("failed to get vehicle: %w", err)
 	}
 	v.Role = models.RoleOwner
+	if err := r.loadTeslaMateSources(ctx, []*models.Vehicle{&v}); err != nil {
+		return nil, err
+	}
 	return &v, nil
 }
 
@@ -215,7 +248,12 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		WHERE id = $20;
 	`
 	v.TelemetryMode = v.DerivedTelemetryMode()
-	tag, err := r.pool.Exec(ctx, query,
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+	tag, err := tx.Exec(ctx, query,
 		v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
 		v.TeslaMateAPIURL, v.TeslaMateAuthType, v.TeslaMateAPIKeyEncrypted,
 		v.TeslaMateBasicUser, v.TeslaMateBasicPassEnc,
@@ -229,6 +267,12 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 	}
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
+	}
+	if err := saveTeslaMateSource(ctx, tx, v); err != nil {
+		return err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit vehicle update: %w", err)
 	}
 	return nil
 }
