@@ -183,6 +183,8 @@ export const api = {
     request<any>(`/vehicles/${id}/estimated-energy`, { method: 'PUT', body: JSON.stringify(data) }),
   getOdometerAt: (vehicleId: string, date: string) =>
     request<{ odometer: number; source: string }>(`/vehicles/${vehicleId}/odometer-at?date=${encodeURIComponent(date)}`),
+  getOdometerEstimate: (vehicleId: string, date: string) =>
+    request<{ odometer: number | null; source: string }>(`/vehicles/${vehicleId}/odometer-estimate?date=${encodeURIComponent(date)}`),
   getDataQuality: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/data-quality`),
 
   // Vehicle Members

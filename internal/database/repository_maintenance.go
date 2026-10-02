@@ -164,3 +164,44 @@ func (r *Repository) GetOdometerAtDate(ctx context.Context, vehicleID string, at
 // ============================================================================
 // Charges
 // ============================================================================
+
+// OdometerAnchor is a dated odometer reading of a vehicle.
+type OdometerAnchor struct {
+	Date time.Time
+	Km   float64
+}
+
+// ListOdometerAnchors lists every dated odometer reading of a vehicle: drive starts and ends, checkpoints,
+// fill-ups, the start of the ownership and the current odometer (dated at the last change of the vehicle).
+func (r *Repository) ListOdometerAnchors(ctx context.Context, vehicleID string) ([]OdometerAnchor, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT start_time, start_odometer FROM drives
+		  WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_odometer > 0
+		UNION ALL
+		SELECT end_time, end_odometer FROM drives
+		  WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND end_odometer > 0
+		UNION ALL
+		SELECT date::timestamptz, odometer FROM odometer_checkpoints WHERE vehicle_id = $1
+		UNION ALL
+		SELECT date, odometer FROM fuel_logs WHERE vehicle_id = $1 AND odometer IS NOT NULL
+		UNION ALL
+		SELECT start_date::timestamptz, start_odometer FROM vehicle_ownership
+		  WHERE vehicle_id = $1 AND start_odometer IS NOT NULL
+		UNION ALL
+		SELECT updated_at, current_odometer FROM vehicles WHERE id = $1 AND current_odometer > 0;
+	`, vehicleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []OdometerAnchor
+	for rows.Next() {
+		var a OdometerAnchor
+		if err := rows.Scan(&a.Date, &a.Km); err != nil {
+			return nil, err
+		}
+		out = append(out, a)
+	}
+	return out, rows.Err()
+}

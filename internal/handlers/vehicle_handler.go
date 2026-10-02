@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -589,4 +590,36 @@ func (h *VehicleHandler) GetOdometerAtDate(w http.ResponseWriter, r *http.Reques
 		"odometer": odo,
 		"source":   source,
 	})
+}
+
+// GetOdometerEstimate estimates the odometer at a date from the readings on either side of it, the way the
+// monthly mileage smoothing spreads a distance.
+func (h *VehicleHandler) GetOdometerEstimate(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	vehicleID := chi.URLParam(r, "id")
+
+	if _, err := h.repo.GetVehicleByID(r.Context(), vehicleID, userID); err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
+		return
+	}
+	at, err := parseDate(r.URL.Query().Get("date"))
+	if err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_date", "Invalid date"))
+		return
+	}
+	stored, err := h.repo.ListOdometerAnchors(r.Context(), vehicleID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to resolve odometer")
+		return
+	}
+	anchors := make([]services.OdometerAnchor, len(stored))
+	for i, a := range stored {
+		anchors[i] = services.OdometerAnchor{Date: a.Date, Km: a.Km}
+	}
+	km, source, ok := services.EstimateOdometerAt(anchors, at)
+	if !ok {
+		writeJSON(w, http.StatusOK, map[string]any{"odometer": nil, "source": "none"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"odometer": math.Round(km), "source": source})
 }

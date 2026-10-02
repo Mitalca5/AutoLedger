@@ -455,6 +455,7 @@ func main() {
 				r.Delete("/{id}/ownership", vehicleHandler.DeleteOwnership)
 				r.Put("/{id}/estimated-energy", vehicleHandler.UpdateEstimatedEnergy)
 				r.Get("/{id}/odometer-at", vehicleHandler.GetOdometerAtDate)
+				r.Get("/{id}/odometer-estimate", vehicleHandler.GetOdometerEstimate)
 				r.Get("/{vehicleId}/data-quality", tcoHandler.GetDataQuality)
 
 				// Shared Vehicle Members

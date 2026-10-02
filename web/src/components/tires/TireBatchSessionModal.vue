@@ -8,6 +8,7 @@ import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 
 // Records the same past session on several tires stored in the garage
@@ -29,6 +30,27 @@ const batchSessionForm = ref({
   position: 'STORAGE',
 })
 
+const mountedPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value,
+  date: () => batchSessionForm.value.mounted_date,
+  current: () => batchSessionForm.value.mounted_odometer,
+  fill: (km) => {
+    batchSessionForm.value.mounted_odometer = km
+    onBatchOdometerChange()
+  },
+})
+const dismountedPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value,
+  date: () => batchSessionForm.value.dismounted_date,
+  current: () => batchSessionForm.value.dismounted_odometer,
+  fill: (km) => {
+    batchSessionForm.value.dismounted_odometer = km
+    onBatchOdometerChange()
+  },
+})
+
 watch(open, (isOpen) => {
   if (!isOpen) return
   const storageIds = props.storageTires.map((t) => t.tire.id)
@@ -45,6 +67,8 @@ watch(open, (isOpen) => {
     notes: '',
     position: 'STORAGE',
   }
+  mountedPrefill.reset(curOdo)
+  dismountedPrefill.reset(curOdo)
 })
 
 function toggleBatchSessionTire(id: string) {

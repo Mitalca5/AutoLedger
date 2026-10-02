@@ -8,6 +8,7 @@ import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { emptySessionForm, formatDate, type SessionForm } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 
 // Adds or edits (editingSessionId set) a mount session of selectedTire; initialForm seeds the fields when the modal opens
@@ -25,8 +26,32 @@ const { showAlert } = useConfirm()
 
 const sessionForm = ref<SessionForm>(emptySessionForm())
 
+const mountedPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value,
+  date: () => sessionForm.value.mounted_date,
+  current: () => sessionForm.value.mounted_odometer,
+  fill: (km) => {
+    sessionForm.value.mounted_odometer = km
+    onSessionOdometerChange()
+  },
+})
+const dismountedPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value && sessionForm.value.is_dismounted,
+  date: () => sessionForm.value.dismounted_date,
+  current: () => sessionForm.value.dismounted_odometer,
+  fill: (km) => {
+    sessionForm.value.dismounted_odometer = km
+    onSessionOdometerChange()
+  },
+})
+
 watch(open, (isOpen) => {
-  if (isOpen) sessionForm.value = { ...props.initialForm }
+  if (!isOpen) return
+  sessionForm.value = { ...props.initialForm }
+  mountedPrefill.reset()
+  dismountedPrefill.reset()
 })
 
 function applyCopiedSessionToForm() {

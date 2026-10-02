@@ -9,6 +9,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { getLastDismountInfo, isMountedPosition } from '@/utils/tires'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 
 // Dispose (worn out, damaged, sold) keeps history and cost; deleting a tire removes an erroneous entry
@@ -20,6 +21,16 @@ const { showAlert } = useConfirm()
 
 const disposeForm = ref({ date: todayIso(), odometer: 0 as number | string })
 
+const odometerPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value && isMountedPosition(props.selectedTire?.current_position),
+  date: () => disposeForm.value.date,
+  current: () => disposeForm.value.odometer,
+  fill: (km) => {
+    disposeForm.value.odometer = km
+  },
+})
+
 watch(open, (isOpen) => {
   if (!isOpen) return
   const t = props.selectedTire
@@ -30,6 +41,7 @@ watch(open, (isOpen) => {
     date: (!isMounted && lastDismount?.date) ? lastDismount.date : todayIso(),
     odometer: isMounted ? Math.round(props.currentOdometer || 0) : (lastDismount?.odometer || ''),
   }
+  odometerPrefill.reset(isMounted ? Math.round(props.currentOdometer || 0) : null)
 })
 
 async function handleDisposeTire() {

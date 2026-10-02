@@ -11,6 +11,7 @@ import { toIsoDay } from '@/utils/dates'
 import { useVehicleStore } from '@/stores/vehicle'
 import { currencySymbol } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 
 // Empty fields are left unchanged. fallbackTire / fallbackStats stand in for a tire the list does not carry (opened from its history).
@@ -46,8 +47,23 @@ function emptyTireEdit() {
 const editedTires = computed(() => props.tires.filter((t) => tireEditIds.value.includes(t.tire.id)))
 const editIncludesMounted = computed(() => editedTires.value.some((t) => isMountedPosition(t.tire.current_position)))
 
+// A single tire's fitting odometer is prefilled from the fitting date while it is empty; with several tires an
+// empty field means "unchanged" and stays so.
+const mountedPrefill = useOdometerPrefill({
+  vehicleId: () => props.vehicleId,
+  enabled: () => open.value && tireEditIds.value.length === 1 && editIncludesMounted.value,
+  date: () => tireEditForm.value.mounted_date,
+  current: () => tireEditForm.value.mounted_odometer,
+  fill: (km) => {
+    tireEditForm.value.mounted_odometer = km
+  },
+})
+
 watch(open, (isOpen) => {
-  if (isOpen) init([...props.tireIds])
+  if (isOpen) {
+    init([...props.tireIds])
+    mountedPrefill.reset()
+  }
 })
 
 function init(ids: string[]) {
