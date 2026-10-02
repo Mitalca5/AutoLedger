@@ -19,7 +19,7 @@
     "free": "Gratuit",
     "cost": "Coût ({cur})",
     "energyAddedKwh": "Énergie ajoutée (kWh)",
-    "chargeOutsideTeslamateThirdParty": "Recharge hors TeslaMate (borne chez un tiers, prise non suivie).",
+    "chargeOutsideTeslamateThirdParty": "Recharge que le véhicule n'a pas enregistrée lui-même (borne tierce, prise non suivie).",
     "saveTheCharge": "Enregistrer la recharge",
     "message": "Recharge de {kwh} kWh",
     "saveFailed": "Impossible d'enregistrer la recharge."
@@ -54,7 +54,7 @@
     "cost": "Coût ({cur})",
     "costOfTheChargeOf": "Coût de la recharge du {date} ({cur})",
     "kwh": "+{kwh_added} kWh",
-    "teslamateChargesWithoutARate": "Recharges TeslaMate sans tarif. Le coût saisi ici n'est pas écrasé par les synchronisations.",
+    "teslamateChargesWithoutARate": "Recharges sans tarif. Le coût saisi ici n'est pas écrasé par les synchronisations.",
     "allHaveCost": "Toutes les recharges ont un coût.",
     "costAdded": "Coût de {cost} ajouté",
     "saveFailed": "Impossible d'enregistrer le coût.",

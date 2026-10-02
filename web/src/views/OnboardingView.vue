@@ -7,9 +7,11 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
-import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2 } from 'lucide-vue-next'
+import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2, Webhook, FileSpreadsheet, Download, Copy } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
-import { buildVehiclePayload, emptyTeslaMateForm, offersDataSources, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
+import { buildVehiclePayload, emptyTeslaMateForm, supportsTeslaMate, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
+import { csvTemplate, csvTemplateFilename, csvTemplateTypes, webhookSnippet, type CsvTemplateType } from '@/utils/dataSources'
+import { downloadCsv } from '@/utils/csv'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -42,6 +44,26 @@ function updateVehicleNameDefault() {
 // Step 3: data sources (optional, nothing preselected)
 const teslamate = reactive(emptyTeslaMateForm())
 const testResult = ref<{ ok: boolean; message: string } | null>(null)
+const useWebhook = ref(false)
+const webhook = ref<{ token: string; snippet: string } | null>(null)
+const webhookFailed = ref(false)
+const copiedField = ref<'token' | 'snippet' | ''>('')
+
+function downloadTemplate(type: CsvTemplateType) {
+  const { headers, rows } = csvTemplate(type)
+  downloadCsv(csvTemplateFilename(type), headers, rows)
+}
+
+async function copy(field: 'token' | 'snippet') {
+  if (!webhook.value) return
+  try {
+    await navigator.clipboard.writeText(webhook.value[field])
+    copiedField.value = field
+    setTimeout(() => (copiedField.value = ''), 2000)
+  } catch {
+    copiedField.value = ''
+  }
+}
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
@@ -81,10 +103,6 @@ async function handleStep2Submit() {
   error.value = ''
   if (!vehicleName.value) {
     error.value = t('onboarding.vehicleNameRequired')
-    return
-  }
-  if (!offersDataSources(vehiclePowertrain.value)) {
-    await handleFinalSubmit()
     return
   }
   currentStep.value = 3
@@ -128,7 +146,15 @@ async function handleFinalSubmit() {
       teslamate,
     })
 
-    await api.createVehicle(payload)
+    const vehicle = await api.createVehicle(payload)
+    if (useWebhook.value) {
+      try {
+        const { token } = await api.createAPIToken({ name: 'Home Assistant' })
+        webhook.value = { token, snippet: webhookSnippet(window.location.origin, token, vehicle.id) }
+      } catch {
+        webhookFailed.value = true
+      }
+    }
     await vehicleStore.fetchVehicles()
     currentStep.value = 4
   } catch (err: any) {
@@ -320,13 +346,13 @@ function finishOnboarding() {
             :disabled="loading"
             class="w-full py-3.5 px-4 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
-            <span>{{ offersDataSources(vehiclePowertrain) ? $t('onboarding.continueToSources') : $t('onboarding.finish') }}</span>
+            <span>{{ $t('onboarding.continueToSources') }}</span>
             <ArrowRight class="w-4 h-4" />
           </button>
         </form>
       </div>
 
-      <!-- STEP 3: TeslaMate Sync (Optional) -->
+      <!-- STEP 3: Data sources (optional) -->
       <div v-else-if="currentStep === 3">
         <div class="mb-6">
           <h2 class="text-lg font-semibold text-white flex items-center gap-2">
@@ -337,15 +363,16 @@ function finishOnboarding() {
         </div>
 
         <div class="space-y-4">
-          <label class="flex items-center gap-3 p-4 bg-slate-800/60 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-800 transition-colors">
-            <input v-model="teslamate.enabled" type="checkbox" class="w-5 h-5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-            <div>
+          <label v-if="supportsTeslaMate(vehiclePowertrain)" class="flex items-center gap-3 p-4 bg-slate-800/60 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-800 transition-colors">
+            <input v-model="teslamate.enabled" type="checkbox" class="w-5 h-5 shrink-0 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+            <Link2 class="w-5 h-5 shrink-0 text-rose-400" />
+            <div class="min-w-0">
               <span class="text-sm font-medium text-white block">{{ $t('onboarding.onboardingView.enableTheTeslamateapiLink') }}</span>
               <span class="text-xs text-slate-400 block">{{ $t('onboarding.onboardingView.automaticallySyncsDrivesChargesAnd') }}</span>
             </div>
           </label>
 
-          <div v-if="teslamate.enabled" class="p-4 bg-slate-800/40 border border-slate-800 rounded-2xl space-y-4">
+          <div v-if="supportsTeslaMate(vehiclePowertrain) && teslamate.enabled" class="p-4 bg-slate-800/40 border border-slate-800 rounded-2xl space-y-4">
             <div>
               <label for="onboarding-teslamate-url" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.teslamateApiUrl') }}</label>
               <input id="onboarding-teslamate-url"
@@ -424,6 +451,40 @@ function finishOnboarding() {
             </div>
           </div>
 
+          <label class="flex items-center gap-3 p-4 bg-slate-800/60 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-800 transition-colors">
+            <input v-model="useWebhook" type="checkbox" class="w-5 h-5 shrink-0 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+            <Webhook class="w-5 h-5 shrink-0 text-rose-400" />
+            <div class="min-w-0">
+              <span class="text-sm font-medium text-white block">{{ $t('onboarding.webhookTitle') }}</span>
+              <span class="text-xs text-slate-400 block">{{ $t('onboarding.webhookDescription') }}</span>
+            </div>
+          </label>
+
+          <div class="p-4 bg-slate-800/60 border border-slate-700 rounded-xl">
+            <div class="flex items-center gap-3">
+              <span class="w-5 shrink-0" aria-hidden="true"></span>
+              <FileSpreadsheet class="w-5 h-5 shrink-0 text-rose-400" />
+              <div class="min-w-0">
+                <span class="text-sm font-medium text-white block">{{ $t('onboarding.csvTitle') }}</span>
+                <span class="text-xs text-slate-400 block">{{ $t('onboarding.csvDescription') }}</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button
+                v-for="type in csvTemplateTypes(vehiclePowertrain)"
+                :key="type"
+                type="button"
+                @click="downloadTemplate(type)"
+                class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700 transition-colors"
+              >
+                <Download class="w-3.5 h-3.5 text-rose-400" />
+                {{ $t(`onboarding.csvTemplate.${type}`) }}
+              </button>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500">{{ $t('onboarding.dataSourcesLater') }}</p>
+
           <div class="flex gap-3 pt-2">
             <button
               type="button"
@@ -454,6 +515,30 @@ function finishOnboarding() {
         <p class="text-slate-400 text-sm max-w-sm mx-auto mb-6">
           {{ $t('onboarding.onboardingView.yourAdministratorAccountAndYour') }}
         </p>
+        <div v-if="webhook" class="text-left bg-slate-800/60 border border-slate-700 rounded-xl p-4 mb-6 space-y-3">
+          <h3 class="text-sm font-semibold text-white">{{ $t('onboarding.webhookReadyTitle') }}</h3>
+          <p class="text-xs text-slate-400">{{ $t('onboarding.webhookReadyHint') }}</p>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">{{ $t('onboarding.webhookToken') }}</span>
+              <button type="button" @click="copy('token')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1">
+                <Copy class="w-3.5 h-3.5" />{{ copiedField === 'token' ? $t('onboarding.copied') : $t('onboarding.copy') }}
+              </button>
+            </div>
+            <code class="block bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-emerald-300 break-all">{{ webhook.token }}</code>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">{{ $t('onboarding.webhookExample') }}</span>
+              <button type="button" @click="copy('snippet')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1">
+                <Copy class="w-3.5 h-3.5" />{{ copiedField === 'snippet' ? $t('onboarding.copied') : $t('onboarding.copy') }}
+              </button>
+            </div>
+            <pre class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-[11px] text-slate-300 overflow-x-auto whitespace-pre">{{ webhook.snippet }}</pre>
+          </div>
+        </div>
+        <p v-else-if="webhookFailed" class="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-6">{{ $t('onboarding.webhookTokenFailed') }}</p>
+
         <button
           @click="finishOnboarding"
           class="w-full py-3.5 px-6 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 transition-all"

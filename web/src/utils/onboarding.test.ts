@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildVehiclePayload,
   emptyTeslaMateForm,
-  offersDataSources,
+  supportsTeslaMate,
   teslaMateCredentials,
   type OnboardingVehicleForm,
 } from './onboarding'
@@ -26,10 +26,10 @@ describe('emptyTeslaMateForm', () => {
   })
 })
 
-describe('offersDataSources', () => {
-  it('is only offered to electric vehicles', () => {
-    expect(offersDataSources('EV')).toBe(true)
-    expect(offersDataSources('ICE')).toBe(false)
+describe('supportsTeslaMate', () => {
+  it('only applies to electric vehicles', () => {
+    expect(supportsTeslaMate('EV')).toBe(true)
+    expect(supportsTeslaMate('ICE')).toBe(false)
   })
 })
 

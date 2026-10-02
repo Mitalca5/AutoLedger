@@ -16,7 +16,7 @@
     "teslamateApiUrl": "URL de l'API TeslaMate",
     "automaticallySyncsDrivesChargesAnd": "Synchronise automatiquement trajets, recharges et odomètre",
     "enableTheTeslamateapiLink": "Synchroniser avec TeslaMate",
-    "youCanConnectYourTeslamateapi": "Sans source, vous saisissez les recharges et les relevés de compteur à la main. Vous pouvez connecter TeslaMate maintenant ou plus tard depuis les réglages du véhicule.",
+    "youCanConnectYourTeslamateapi": "Connectez une source pour alimenter vos données automatiquement, ou passez cette étape et saisissez tout à la main. Les trois sont facultatives.",
     "3TeslamateSynchronizationOptional": "3. Sources de données (facultatif)",
     "vinOptional": "Numéro VIN (Optionnel)",
     "currentOdometerKm": "Odomètre actuel ({unit})",
@@ -55,5 +55,23 @@
   "testConnection": "Tester la connexion TeslaMate",
   "saving": "Enregistrement...",
   "finalize": "Finaliser la configuration",
-  "continueToSources": "Continuer vers les sources de données (facultatif)"
+  "continueToSources": "Continuer vers les sources de données (facultatif)",
+  "dataSourcesLater": "Rien à connecter maintenant ? Terminez la configuration et ajoutez une source plus tard depuis le bouton « Sources de données » du véhicule.",
+  "webhookTitle": "Webhook / Home Assistant",
+  "webhookDescription": "Envoyez relevés kilométriques, trajets ou pleins depuis Home Assistant ou n'importe quel script. Un jeton d'API est créé à la fin.",
+  "csvTitle": "Import CSV",
+  "csvDescription": "Importez votre historique depuis un tableur. Téléchargez un modèle, remplissez-le, puis importez-le depuis la page Trajets ou Dépenses.",
+  "csvTemplate": {
+    "CHARGES": "Recharges",
+    "DRIVES": "Trajets",
+    "FUEL": "Pleins",
+    "ODOMETER": "Kilométrage"
+  },
+  "webhookReadyTitle": "Votre webhook est prêt",
+  "webhookReadyHint": "Copiez ce jeton maintenant : il n'est affiché qu'une seule fois. L'exemple envoie un relevé kilométrique pour votre véhicule.",
+  "webhookToken": "Jeton d'API",
+  "webhookExample": "Exemple",
+  "copy": "Copier",
+  "copied": "Copié",
+  "webhookTokenFailed": "Le véhicule a été créé, mais le jeton d'API n'a pas pu être généré. Vous pouvez en créer un depuis les paramètres du compte."
 }

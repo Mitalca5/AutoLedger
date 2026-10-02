@@ -16,7 +16,7 @@
     "teslamateApiUrl": "TeslaMate API URL",
     "automaticallySyncsDrivesChargesAnd": "Automatically syncs drives, charges and odometer",
     "enableTheTeslamateapiLink": "Sync with TeslaMate",
-    "youCanConnectYourTeslamateapi": "Without a source you enter charges and odometer readings by hand. You can connect TeslaMate now or later from the vehicle settings.",
+    "youCanConnectYourTeslamateapi": "Connect a source to fill your data automatically, or skip this step and enter everything by hand. All three are optional.",
     "3TeslamateSynchronizationOptional": "3. Data sources (optional)",
     "vinOptional": "VIN (optional)",
     "currentOdometerKm": "Current odometer ({unit})",
@@ -55,5 +55,23 @@
   "testConnection": "Test the TeslaMate connection",
   "saving": "Saving...",
   "finalize": "Finish the setup",
-  "continueToSources": "Continue to data sources (optional)"
+  "continueToSources": "Continue to data sources (optional)",
+  "dataSourcesLater": "Nothing to connect now? Finish the setup and add a source later from the vehicle's \"Data sources\" button.",
+  "webhookTitle": "Webhook / Home Assistant",
+  "webhookDescription": "Push odometer readings, drives or fill-ups from Home Assistant or any script. An API token is created when you finish.",
+  "csvTitle": "CSV import",
+  "csvDescription": "Bring in your history from a spreadsheet. Download a template, fill it in, then import it from the Drives or Expenses page.",
+  "csvTemplate": {
+    "CHARGES": "Charges",
+    "DRIVES": "Drives",
+    "FUEL": "Fill-ups",
+    "ODOMETER": "Odometer"
+  },
+  "webhookReadyTitle": "Your webhook is ready",
+  "webhookReadyHint": "Copy this token now: it is shown only once. The example sends an odometer reading for your vehicle.",
+  "webhookToken": "API token",
+  "webhookExample": "Example",
+  "copy": "Copy",
+  "copied": "Copied",
+  "webhookTokenFailed": "The vehicle was created, but the API token could not be generated. You can create one from your account settings."
 }

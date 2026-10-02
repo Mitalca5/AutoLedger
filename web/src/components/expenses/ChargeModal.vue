@@ -130,7 +130,7 @@ async function handleSaveCharge() {
         <div class="min-w-0 pr-2">
           <h3 class="text-base font-bold text-white flex items-center gap-2 truncate">
             <Zap class="w-5 h-5 text-sky-400 shrink-0" />
-            {{ !editingCharge ? (vehicleStore.hasTeslaMate ? $t('expenses.expensesView.chargeOutsideTeslamate') : $t('expenses.chargeModal.newCharge')) : editingCharge.is_manual ? $t('expenses.chargeModal.editCharge') : $t('expenses.chargeModal.chargeCost') }}
+            {{ !editingCharge ? $t('expenses.chargeModal.newCharge') : editingCharge.is_manual ? $t('expenses.chargeModal.editCharge') : $t('expenses.chargeModal.chargeCost') }}
           </h3>
           <p v-if="editingCharge && !editingCharge.is_manual" class="text-[11px] text-slate-400 mt-1">
             {{ $t('expenses.chargeModal.teslamateChargeOfKwhThe', { date: formatDate(editingCharge.date), kwh_added: editingCharge.kwh_added }) }}

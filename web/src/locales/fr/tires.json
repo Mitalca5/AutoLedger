@@ -210,7 +210,7 @@
     "averageConsumption": "Conso moyenne",
     "peakRegeneration": "Pointe Régénération",
     "peakAcceleration": "Pointe Accélération",
-    "teslamateDrivingTelemetry": "Télémétrie Dynamique TeslaMate",
+    "teslamateDrivingTelemetry": "Télémétrie de conduite",
     "actualCostKm": "Coût réel / {unit}",
     "lifespanUsed": "Durée de vie consommée",
     "currentTread": "Sculpture actuelle",

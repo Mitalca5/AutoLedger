@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, Pencil, Trash2, AlertTriangle, Paperclip } from 'lucide-vue-next'
@@ -16,6 +17,7 @@ defineProps<{
 }>()
 const emit = defineEmits<{
   'toggle-missing-cost': []
+  'import-csv': []
   'load-more': []
   edit: [charge: any]
   delete: [charge: any]
@@ -61,7 +63,8 @@ const vehicleStore = useVehicleStore()
     </button>
     <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
     <div v-else-if="!charges.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
-      {{ vehicleStore.hasTeslaMate ? $t('expenses.chargesPanel.emptyWithTeslamate') : $t('expenses.chargesPanel.empty') }}
+      <p class="mb-3">{{ $t('expenses.chargesPanel.empty') }}</p>
+      <EmptySourceHints quick-kind="CHARGE" @import-csv="emit('import-csv')" />
     </div>
     <div v-else class="space-y-3">
       <div

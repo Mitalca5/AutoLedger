@@ -21,6 +21,7 @@ import TripEditModal from '@/components/drives/TripEditModal.vue'
 import AddToTripModal from '@/components/drives/AddToTripModal.vue'
 import ManualDriveModal from '@/components/drives/ManualDriveModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
+import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { downloadCsv } from '@/utils/csv'
 import { formatAmount } from '@/currency'
 import { Receipt, Layers, List, RotateCcw, Plus, UploadCloud } from 'lucide-vue-next'
@@ -825,6 +826,7 @@ async function handleBulkApplyToll() {
     <!-- EMPTY STATE -->
     <div v-else-if="!drives.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-3">
       <p>{{ $t('drives.drivesView.noDriveFoundForThis') }}</p>
+      <EmptySourceHints v-if="!(searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly)" @import-csv="openCSVImportModal" />
       <button
         v-if="searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly"
         @click="resetAllFilters"

@@ -210,7 +210,7 @@
     "averageConsumption": "Average consumption",
     "peakRegeneration": "Peak regeneration",
     "peakAcceleration": "Peak acceleration",
-    "teslamateDrivingTelemetry": "TeslaMate driving telemetry",
+    "teslamateDrivingTelemetry": "Driving telemetry",
     "actualCostKm": "Actual cost / {unit}",
     "lifespanUsed": "Lifespan used",
     "currentTread": "Current tread",

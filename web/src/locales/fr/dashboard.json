@@ -76,7 +76,7 @@
     "energyStoredInTheBattery": "Énergie stockée dans la batterie sur énergie tirée du réseau.",
     "chargingEfficiency": "Rendement de charge",
     "energyCost": "Coût de l'énergie",
-    "energyUsedWhileDrivingMeasured": "Énergie consommée en roulant, mesurée par TeslaMate.",
+    "energyUsedWhileDrivingMeasured": "Énergie consommée en roulant, telle que remontée par la source de données.",
     "actualConsumption": "Consommation réelle",
     "period": "Période",
     "whatTheCarUsesAnd": "Ce que consomme la voiture et ce que coûte réellement l'énergie.",

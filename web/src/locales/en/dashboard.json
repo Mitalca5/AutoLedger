@@ -76,7 +76,7 @@
     "energyStoredInTheBattery": "Energy stored in the battery over energy drawn from the grid.",
     "chargingEfficiency": "Charging efficiency",
     "energyCost": "Energy cost",
-    "energyUsedWhileDrivingMeasured": "Energy used while driving, measured by TeslaMate.",
+    "energyUsedWhileDrivingMeasured": "Energy used while driving, as reported by the data source.",
     "actualConsumption": "Actual consumption",
     "period": "Period",
     "whatTheCarUsesAnd": "What the car uses and what the energy really costs.",

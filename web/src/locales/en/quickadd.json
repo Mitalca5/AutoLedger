@@ -19,7 +19,7 @@
     "free": "Free",
     "cost": "Cost ({cur})",
     "energyAddedKwh": "Energy added (kWh)",
-    "chargeOutsideTeslamateThirdParty": "Charge outside TeslaMate (third-party charger, untracked socket).",
+    "chargeOutsideTeslamateThirdParty": "Charge the vehicle did not record itself (third-party charger, untracked socket).",
     "saveTheCharge": "Save the charge",
     "message": "Charge of {kwh} kWh",
     "saveFailed": "Could not save the charge."
@@ -54,7 +54,7 @@
     "cost": "Cost ({cur})",
     "costOfTheChargeOf": "Cost of the charge of {date} ({cur})",
     "kwh": "+{kwh_added} kWh",
-    "teslamateChargesWithoutARate": "TeslaMate charges without a rate. The cost entered here is not overwritten by the synchronizations.",
+    "teslamateChargesWithoutARate": "Charges without a rate. The cost entered here is not overwritten by the synchronizations.",
     "allHaveCost": "All charges have a cost.",
     "costAdded": "Cost of {cost} added",
     "saveFailed": "Could not save the cost.",

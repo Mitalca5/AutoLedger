@@ -447,7 +447,7 @@ async function openWebhookModal() {
             class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
           >
             <Plus class="w-3.5 h-3.5" />
-            {{ vehicleStore.hasTeslaMate ? $t('expenses.expensesView.chargeOutsideTeslamate') : $t('expenses.expensesView.addCharge') }}
+            {{ $t('expenses.expensesView.addCharge') }}
           </button>
         </template>
         <button
@@ -607,6 +607,7 @@ async function openWebhookModal() {
       :loading-more-charges="loadingMoreCharges"
       :missing-cost-only="missingCostOnly"
       @toggle-missing-cost="toggleMissingCostFilter"
+      @import-csv="openCSVImportModal"
       @load-more="loadMoreCharges"
       @edit="openEditChargeModal"
       @delete="handleDeleteCharge"

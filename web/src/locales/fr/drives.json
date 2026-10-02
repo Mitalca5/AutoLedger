@@ -23,7 +23,6 @@
     "deleteDriveTitle": "Supprimer le trajet",
     "deleteDriveMessage": "Êtes-vous sûr de vouloir supprimer ce trajet manuel ?",
     "setUpTheLink": "Configurer la liaison",
-    "drivesAreImportedFromTeslamate": "Les trajets sont importés depuis TeslaMate. Ce véhicule n'y est pas relié.",
     "deselectPage": "Désélectionner la page",
     "selectPage": "Sélectionner la page",
     "tagsUpdated": "Tags mis à jour pour {count} trajet(s).",

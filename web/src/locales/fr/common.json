@@ -20,5 +20,11 @@
   "atKm": "à {km} {unit}",
   "atKmCapitalized": "À {km} {unit}",
   "example": "ex : {value}",
-  "done": "Terminé"
+  "done": "Terminé",
+  "emptySources": {
+    "intro": "Alimentez cette page autrement :",
+    "quickAdd": "Ajout rapide",
+    "csv": "Importer un CSV",
+    "webhook": "Webhook / Home Assistant"
+  }
 }

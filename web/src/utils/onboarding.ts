@@ -24,8 +24,8 @@ export function emptyTeslaMateForm(): TeslaMateForm {
   return { enabled: false, url: '', authType: 'NONE', apiKey: '', user: '', pass: '' }
 }
 
-// Only electric vehicles can use TeslaMate; combustion vehicles skip the data sources step.
-export function offersDataSources(powertrain: Powertrain): boolean {
+// Only electric vehicles can use TeslaMate.
+export function supportsTeslaMate(powertrain: Powertrain): boolean {
   return powertrain === 'EV'
 }
 
@@ -38,7 +38,7 @@ export function teslaMateCredentials(tm: Pick<TeslaMateForm, 'authType' | 'apiKe
 // telemetry_mode is derived by the server from the connected sources, never sent by the client.
 export function buildVehiclePayload(form: OnboardingVehicleForm): Record<string, unknown> {
   const tm = form.teslamate
-  const withTeslaMate = offersDataSources(form.powertrain) && tm.enabled && tm.url.trim() !== ''
+  const withTeslaMate = supportsTeslaMate(form.powertrain) && tm.enabled && tm.url.trim() !== ''
   const payload: Record<string, unknown> = {
     name: form.name,
     powertrain: form.powertrain,
