@@ -3,7 +3,7 @@
 > **Self-hosted, open-source Total Cost of Ownership (TCO) ledger for electric, hybrid, and combustion vehicles.**  
 > Track every cent—energy, financing (cash, loan, lease/LOA/LLD), axle-level tire wear, maintenance, tolls, and carpooling—whether connected via telemetry, imported via CSV, or managed 100% standalone.
 
-[![CI / CD Pipeline](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml)
+[![CI](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Rem7474_TeslaCost&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Rem7474_TeslaCost)
 [![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Frem7474%2Fautoledger-blue?logo=docker)](https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger)
 
