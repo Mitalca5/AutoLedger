@@ -41,10 +41,10 @@ func (r *Repository) CreateOdometerCheckpoint(ctx context.Context, c *models.Odo
 	defer tx.Rollback(ctx)
 
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO odometer_checkpoints (vehicle_id, date, odometer, notes)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO odometer_checkpoints (vehicle_id, date, odometer, notes, source_batch_id)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, source, created_at, updated_at;
-	`, c.VehicleID, c.Date, c.Odometer, c.Notes).Scan(&c.ID, &c.Source, &c.CreatedAt, &c.UpdatedAt); err != nil {
+	`, c.VehicleID, c.Date, c.Odometer, c.Notes, c.SourceBatchID).Scan(&c.ID, &c.Source, &c.CreatedAt, &c.UpdatedAt); err != nil {
 		return err
 	}
 	if err := syncOdometerFromManualPoints(ctx, tx, c.VehicleID); err != nil {

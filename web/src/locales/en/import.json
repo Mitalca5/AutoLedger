@@ -47,5 +47,11 @@
   "profileSaveLabel": "Save these settings for files with the same columns",
   "profileNamePlaceholder": "Profile name",
   "profileSaveFailed": "Could not save the profile",
-  "profileDeleteFailed": "Could not delete the profile"
+  "profileDeleteFailed": "Could not delete the profile",
+  "historyTitle": "Import history",
+  "historyRows": "{remaining} of {total} rows still in place",
+  "undo": "Undo this import",
+  "undoTitle": "Undo this import?",
+  "undoMessage": "The {count} rows it created and that are still in place will be deleted, including any edits made to them since. This cannot be undone.",
+  "undoFailed": "Could not undo the import"
 }

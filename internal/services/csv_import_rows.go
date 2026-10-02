@@ -25,7 +25,7 @@ const (
 var currencyCode = regexp.MustCompile(`^[A-Z]{3}$`)
 
 type parsedRow struct {
-	insert      func(ctx context.Context, tx *database.Repository) error
+	insert      func(ctx context.Context, tx *database.Repository, batchID string) error
 	isDuplicate func(ctx context.Context, repo *database.Repository) (bool, error)
 }
 
@@ -179,7 +179,10 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 		Address:   optionalText(rc.col(row, "location", "address", "station", "place")),
 	}
 	return &parsedRow{
-		insert: func(ctx context.Context, tx *database.Repository) error { return tx.CreateManualCharge(ctx, charge) },
+		insert: func(ctx context.Context, tx *database.Repository, batchID string) error {
+			charge.SourceBatchID = &batchID
+			return tx.CreateManualCharge(ctx, charge)
+		},
 		isDuplicate: func(ctx context.Context, repo *database.Repository) (bool, error) {
 			return repo.HasDuplicateCharge(ctx, charge.VehicleID, date, kwh)
 		},
@@ -237,7 +240,10 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 		Origin:              "CSV",
 	}
 	return &parsedRow{
-		insert: func(ctx context.Context, tx *database.Repository) error { return tx.CreateManualDrive(ctx, drive) },
+		insert: func(ctx context.Context, tx *database.Repository, batchID string) error {
+			drive.SourceBatchID = &batchID
+			return tx.CreateManualDrive(ctx, drive)
+		},
 		isDuplicate: func(ctx context.Context, repo *database.Repository) (bool, error) {
 			return repo.HasDuplicateDrive(ctx, drive.VehicleID, startTime, dist)
 		},
@@ -330,7 +336,10 @@ func parseFuelRow(rc *rowContext, row []string, line int) (*parsedRow, *apierror
 		Notes:         optionalText(rc.col(row, "notes", "note", "comment")),
 	}
 	return &parsedRow{
-		insert: func(ctx context.Context, tx *database.Repository) error { return tx.CreateFuelLog(ctx, fuel) },
+		insert: func(ctx context.Context, tx *database.Repository, batchID string) error {
+			fuel.SourceBatchID = &batchID
+			return tx.CreateFuelLog(ctx, fuel)
+		},
 		isDuplicate: func(ctx context.Context, repo *database.Repository) (bool, error) {
 			return repo.HasDuplicateFuelLog(ctx, fuel.VehicleID, date, amount)
 		},
@@ -357,7 +366,8 @@ func parseOdometerRow(rc *rowContext, row []string, line int) (*parsedRow, *apie
 		Notes:     optionalText(rc.col(row, "notes", "note", "comment")),
 	}
 	return &parsedRow{
-		insert: func(ctx context.Context, tx *database.Repository) error {
+		insert: func(ctx context.Context, tx *database.Repository, batchID string) error {
+			checkpoint.SourceBatchID = &batchID
 			return tx.CreateOdometerCheckpoint(ctx, checkpoint)
 		},
 		isDuplicate: func(ctx context.Context, repo *database.Repository) (bool, error) {

@@ -3,7 +3,7 @@ import { formatAmount } from '@/currency'
 // AutoLedger API Service
 import { newIdempotencyKey } from '@/services/offlineQueue'
 import { apiErrorMessage } from '@/services/apiError'
-import { csvImportForm, type CSVExecuteResult, type CSVImportOptions, type CSVImportProfile, type CSVPreviewResult } from '@/services/csvImport'
+import { csvImportForm, type CSVExecuteResult, type CSVImportBatch, type CSVImportOptions, type CSVImportProfile, type CSVPreviewResult } from '@/services/csvImport'
 
 const BASE_URL = '/api'
 
@@ -262,6 +262,9 @@ export const api = {
     request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, { method: 'POST', body: csvImportForm(file, opts) }),
   executeCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>
     request<CSVExecuteResult>(`/vehicles/${vehicleId}/import/execute`, { method: 'POST', body: csvImportForm(file, opts) }),
+  listImportBatches: (vehicleId: string) => request<CSVImportBatch[]>(`/vehicles/${vehicleId}/import/batches`),
+  undoImportBatch: (vehicleId: string, batchId: string) =>
+    request<{ removed: number }>(`/vehicles/${vehicleId}/import/batches/${batchId}`, { method: 'DELETE' }),
   listImportProfiles: () => request<CSVImportProfile[]>('/import-profiles'),
   saveImportProfile: (profile: Omit<CSVImportProfile, 'id'>) =>
     request<CSVImportProfile>('/import-profiles', { method: 'POST', body: JSON.stringify(profile) }),

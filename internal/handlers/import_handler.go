@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -64,6 +65,7 @@ func (h *ImportHandler) importOptions(r *http.Request) (services.CSVImportOption
 		Type:           services.ImportType(r.URL.Query().Get("type")),
 		SkipDuplicates: r.URL.Query().Get("skip_duplicates") != "false", // default: true
 		DistanceUnit:   "km",
+		UserID:         middleware.GetUserID(r.Context()),
 	}
 	if r.MultipartForm != nil {
 		if t := r.MultipartForm.Value["type"]; len(t) > 0 && t[0] != "" {
@@ -157,4 +159,36 @@ func writeImportError(w http.ResponseWriter, err error, fallbackCode string) {
 	}
 	slog.Error("CSV import failed", "code", fallbackCode, "error", err)
 	writeAPIError(w, http.StatusInternalServerError, apierror.New(fallbackCode, "The import failed"))
+}
+
+// ListBatches returns the vehicle's CSV imports, newest first.
+func (h *ImportHandler) ListBatches(w http.ResponseWriter, r *http.Request) {
+	vehicle := requireVehicleAccess(w, r, h.repo, chi.URLParam(r, "vehicleId"), models.RoleViewer)
+	if vehicle == nil {
+		return
+	}
+	batches, err := h.repo.ListImportBatches(r.Context(), vehicle.ID)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, batches)
+}
+
+// UndoBatch deletes the rows of one CSV import that are still in place.
+func (h *ImportHandler) UndoBatch(w http.ResponseWriter, r *http.Request) {
+	vehicle := requireVehicleAccess(w, r, h.repo, chi.URLParam(r, "vehicleId"), models.RoleEditor)
+	if vehicle == nil {
+		return
+	}
+	removed, err := h.repo.UndoImportBatch(r.Context(), vehicle.ID, chi.URLParam(r, "batchId"))
+	if errors.Is(err, database.ErrNotFound) {
+		writeAPIError(w, http.StatusNotFound, apierror.New("import.batch_not_found", "This import does not exist"))
+		return
+	}
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"removed": removed})
 }

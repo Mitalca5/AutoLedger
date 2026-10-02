@@ -20,6 +20,7 @@ type FuelLog struct {
 	FuelType      *string     `json:"fuel_type,omitempty"`
 	IsFullTank    bool        `json:"is_full_tank"`
 	Notes         *string     `json:"notes,omitempty"`
+	SourceBatchID *string     `json:"-"`
 	CreatedAt     time.Time   `json:"created_at"`
 	UpdatedAt     time.Time   `json:"updated_at"`
 }

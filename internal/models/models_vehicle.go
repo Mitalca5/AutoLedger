@@ -104,9 +104,10 @@ type OdometerCheckpoint struct {
 	Odometer  float64   `json:"odometer"`
 	Notes     *string   `json:"notes,omitempty"`
 	// Source is "MANUAL" (entered by a user) or "HA" (reported by the Home Assistant integration).
-	Source    string    `json:"source"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Source        string    `json:"source"`
+	SourceBatchID *string   `json:"-"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 // Odometer checkpoint sources.

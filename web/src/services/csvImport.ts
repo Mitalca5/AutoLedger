@@ -58,6 +58,7 @@ export interface CSVExecuteResult {
   skipped_count: number
   error_count: number
   committed: boolean
+  batch_id?: string
   errors?: CSVRowError[]
   errors_truncated?: boolean
 }
@@ -85,4 +86,13 @@ export function profileMapping(headers: string[], columns: Record<string, string
     if (header in columns) mapping[index] = columns[header]
   })
   return mapping
+}
+
+export interface CSVImportBatch {
+  id: string
+  vehicle_id: string
+  import_type: CSVImportType
+  row_count: number
+  remaining: number
+  created_at: string
 }

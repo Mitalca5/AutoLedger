@@ -172,6 +172,7 @@
     "no_rows": "The CSV file must contain a header and at least one row",
     "unsupported_type": "Unrecognized or unsupported import type \"{p0}\"",
     "ice_charges": "A combustion vehicle has no charges to import: import its fill-ups instead",
+    "batch_not_found": "This import does not exist or was already undone",
     "profile_invalid_name": "The profile name must have 1 to 60 characters",
     "profile_limit": "At most {p0} import profiles can be saved",
     "invalid_mapping": "The column mapping is not valid",

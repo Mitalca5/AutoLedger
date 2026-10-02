@@ -42,6 +42,8 @@ type CSVImportOptions struct {
 	// DecimalSeparator ("." or ",") and DateOrder (dmy, mdy, ymd) override the detection.
 	DecimalSeparator string
 	DateOrder        string
+	// UserID is recorded on the import batch Execute creates.
+	UserID string
 }
 
 // ColumnMapping tells which field a column feeds: Field is empty when the column is ignored, Detected when the
@@ -82,7 +84,9 @@ type CSVExecuteResult struct {
 	SkippedCount  int        `json:"skipped_count"`
 	ErrorCount    int        `json:"error_count"`
 	// Committed is false when nothing was written: an invalid row or a database error cancels the whole file.
-	Committed       bool              `json:"committed"`
+	Committed bool `json:"committed"`
+	// BatchID identifies the import so it can be undone; empty when nothing was written.
+	BatchID         string            `json:"batch_id,omitempty"`
 	Errors          []*apierror.Error `json:"errors,omitempty"`
 	ErrorsTruncated bool              `json:"errors_truncated,omitempty"`
 }
@@ -235,7 +239,7 @@ func readCSVRecords(content []byte) (records [][]string, lines []int, err error)
 }
 
 type plannedRow struct {
-	insert func(ctx context.Context, tx *database.Repository) error
+	insert func(ctx context.Context, tx *database.Repository, batchID string) error
 	line   int
 }
 
@@ -421,9 +425,15 @@ func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle,
 	}
 
 	var failedLine int
+	var batchID string
 	err = s.repo.WithTx(ctx, func(tx *database.Repository) error {
+		id, err := tx.CreateImportBatch(ctx, vehicle.ID, opts.UserID, string(p.importType), len(p.rows))
+		if err != nil {
+			return err
+		}
+		batchID = id
 		for _, row := range p.rows {
-			if err := row.insert(ctx, tx); err != nil {
+			if err := row.insert(ctx, tx, batchID); err != nil {
 				failedLine = row.line
 				return err
 			}
@@ -440,6 +450,7 @@ func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle,
 		return res, nil
 	}
 	res.Committed = true
+	res.BatchID = batchID
 	res.ImportedCount = len(p.rows)
 	return res, nil
 }

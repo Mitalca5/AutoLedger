@@ -90,10 +90,10 @@ func (r *Repository) CreateFuelLog(ctx context.Context, f *models.FuelLog) error
 	defer tx.Rollback(ctx)
 
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO fuel_logs (vehicle_id, date, odometer, amount, liters, price_per_liter, fuel_type, is_full_tank, notes)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO fuel_logs (vehicle_id, date, odometer, amount, liters, price_per_liter, fuel_type, is_full_tank, notes, source_batch_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id, created_at, updated_at;
-	`, f.VehicleID, f.Date, f.Odometer, f.Amount, f.Liters, f.PricePerLiter, f.FuelType, f.IsFullTank, f.Notes,
+	`, f.VehicleID, f.Date, f.Odometer, f.Amount, f.Liters, f.PricePerLiter, f.FuelType, f.IsFullTank, f.Notes, f.SourceBatchID,
 	).Scan(&f.ID, &f.CreatedAt, &f.UpdatedAt); err != nil {
 		return err
 	}

@@ -621,15 +621,15 @@ func (r *Repository) CreateManualDrive(ctx context.Context, d *models.Drive) err
 			vehicle_id, start_time, end_time,
 			start_odometer, end_odometer, distance_km, duration_min,
 			start_address, end_address, energy_consumed_kwh,
-			consumption_kwh_100km, tags, is_manual, driver_id, energy_estimated, origin, external_id
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, COALESCE($13, (SELECT default_driver_id FROM vehicles WHERE id = $1)), $14, COALESCE(NULLIF($15, ''), 'MANUAL'), $16)
+			consumption_kwh_100km, tags, is_manual, driver_id, energy_estimated, origin, external_id, source_batch_id
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, TRUE, COALESCE($13, (SELECT default_driver_id FROM vehicles WHERE id = $1)), $14, COALESCE(NULLIF($15, ''), 'MANUAL'), $16, $17)
 		RETURNING id, created_at, updated_at;
 	`
 	return r.pool.QueryRow(ctx, query,
 		d.VehicleID, d.StartTime, d.EndTime,
 		d.StartOdometer, d.EndOdometer, d.DistanceKm, d.DurationMin,
 		d.StartAddress, d.EndAddress, d.EnergyConsumedKwh,
-		d.ConsumptionKwh100km, d.Tags, d.DriverID, d.EnergyEstimated, d.Origin, d.ExternalID,
+		d.ConsumptionKwh100km, d.Tags, d.DriverID, d.EnergyEstimated, d.Origin, d.ExternalID, d.SourceBatchID,
 	).Scan(&d.ID, &d.CreatedAt, &d.UpdatedAt)
 }
 

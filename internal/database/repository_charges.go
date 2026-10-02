@@ -125,12 +125,12 @@ func (r *Repository) CreateManualCharge(ctx context.Context, c *models.ChargeLog
 	err := r.pool.QueryRow(ctx, `
 		INSERT INTO charge_logs (
 			vehicle_id, date, end_date, address, kwh_added, cost, cost_source,
-			currency, fx_rate, odometer, is_manual, notes, document_id, origin
-		) VALUES ($1, $2, $3, $4, $5, $6, 'MANUAL', $7, $8, $9, TRUE, $10, $11, COALESCE(NULLIF($12, ''), 'MANUAL'))
+			currency, fx_rate, odometer, is_manual, notes, document_id, origin, source_batch_id
+		) VALUES ($1, $2, $3, $4, $5, $6, 'MANUAL', $7, $8, $9, TRUE, $10, $11, COALESCE(NULLIF($12, ''), 'MANUAL'), $13)
 		RETURNING id, created_at;
 	`,
 		c.VehicleID, c.Date, c.EndDate, c.Address, c.KwhAdded, c.Cost,
-		c.Currency, c.FxRate, c.Odometer, c.Notes, c.DocumentID, c.Origin,
+		c.Currency, c.FxRate, c.Odometer, c.Notes, c.DocumentID, c.Origin, c.SourceBatchID,
 	).Scan(&c.ID, &c.CreatedAt)
 	if err != nil {
 		return err

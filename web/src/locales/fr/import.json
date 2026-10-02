@@ -47,5 +47,11 @@
   "profileSaveLabel": "Enregistrer ces réglages pour les fichiers aux mêmes colonnes",
   "profileNamePlaceholder": "Nom du profil",
   "profileSaveFailed": "Impossible d’enregistrer le profil",
-  "profileDeleteFailed": "Impossible de supprimer le profil"
+  "profileDeleteFailed": "Impossible de supprimer le profil",
+  "historyTitle": "Historique des imports",
+  "historyRows": "{remaining} lignes sur {total} encore en place",
+  "undo": "Annuler cet import",
+  "undoTitle": "Annuler cet import ?",
+  "undoMessage": "Les {count} lignes qu’il a créées et qui sont encore en place seront supprimées, avec les modifications faites depuis. Cette action est irréversible.",
+  "undoFailed": "Impossible d’annuler l’import"
 }

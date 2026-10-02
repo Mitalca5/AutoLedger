@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { computed } from 'vue'
-import { currentLocale, t } from '@/i18n'
+import { currentLocale, intlLocale, t } from '@/i18n'
 import { CSV_COLUMNS, csvTemplate, csvTemplateFilename, csvTemplateTypes, type CsvTemplateType } from '@/utils/dataSources'
 import { downloadCsv } from '@/utils/csv'
 import { api } from '@/services/api'
-import { profileColumns, profileMapping, type CSVDateOrder, type CSVDecimalSeparator, type CSVExecuteResult, type CSVImportOptions, type CSVImportProfile, type CSVImportType, type CSVPreviewResult } from '@/services/csvImport'
+import { useConfirm } from '@/composables/useConfirm'
+import { profileColumns, profileMapping, type CSVDateOrder, type CSVDecimalSeparator, type CSVExecuteResult, type CSVImportBatch, type CSVImportOptions, type CSVImportProfile, type CSVImportType, type CSVPreviewResult } from '@/services/csvImport'
 import { apiErrorMessage } from '@/services/apiError'
 import { distanceUnit } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const vehicleStore = useVehicleStore()
+const { showConfirm } = useConfirm()
 
 const file = ref<File | null>(null)
 const selectedType = ref<CSVImportType | ''>(props.defaultType || '')
@@ -57,6 +59,7 @@ watch(
     mapping.value = {}
     profileName.value = ''
     void loadProfiles()
+    void loadBatches()
     loading.value = false
     error.value = ''
     previewResult.value = null
@@ -83,6 +86,33 @@ function onOptionsChange() {
 function setColumnField(index: number, field: string) {
   mapping.value = { ...mapping.value, [index]: field }
   void handlePreview()
+}
+
+const batches = ref<CSVImportBatch[]>([])
+
+async function loadBatches() {
+  try {
+    batches.value = await api.listImportBatches(props.vehicleId)
+  } catch {
+    batches.value = []
+  }
+}
+
+async function undoBatch(batch: CSVImportBatch) {
+  const ok = await showConfirm({
+    title: t('import.undoTitle'),
+    message: t('import.undoMessage', { count: batch.remaining }),
+    confirmText: t('import.undo'),
+    type: 'danger',
+  })
+  if (!ok) return
+  try {
+    await api.undoImportBatch(props.vehicleId, batch.id)
+    emit('imported')
+  } catch (err: any) {
+    error.value = err.message || t('import.undoFailed')
+  }
+  await loadBatches()
 }
 
 async function loadProfiles() {
@@ -276,6 +306,20 @@ async function handleExecute() {
                 <span v-if="CSV_COLUMNS[type].optional.length"> + <code>{{ CSV_COLUMNS[type].optional.join(', ') }}</code></span>
               </p>
             </div>
+          </details>
+
+          <details v-if="batches.length" class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-300">
+            <summary class="cursor-pointer font-semibold text-slate-200">{{ $t('import.historyTitle') }}</summary>
+            <ul class="mt-2 space-y-2">
+              <li v-for="batch in batches" :key="batch.id" class="flex items-center justify-between gap-2">
+                <span class="min-w-0 break-words">
+                  <span class="font-semibold text-white">{{ $t(`import.type${batch.import_type.charAt(0)}${batch.import_type.slice(1).toLowerCase()}`) }}</span>
+                  · {{ new Date(batch.created_at).toLocaleString(intlLocale(), { dateStyle: 'medium', timeStyle: 'short' }) }}
+                  · {{ $t('import.historyRows', { remaining: batch.remaining, total: batch.row_count }) }}
+                </span>
+                <button type="button" @click="undoBatch(batch)" class="shrink-0 text-rose-400 hover:text-rose-300 font-semibold">{{ $t('import.undo') }}</button>
+              </li>
+            </ul>
           </details>
 
           <!-- File selection -->

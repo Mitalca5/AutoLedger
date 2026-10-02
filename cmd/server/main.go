@@ -496,6 +496,8 @@ func main() {
 				// Import (CSV Charges & Drives)
 				r.Post("/{vehicleId}/import/preview", importHandler.Preview)
 				r.Post("/{vehicleId}/import/execute", importHandler.Execute)
+				r.Get("/{vehicleId}/import/batches", importHandler.ListBatches)
+				r.Delete("/{vehicleId}/import/batches/{batchId}", importHandler.UndoBatch)
 				r.Patch("/{vehicleId}/drives/{driveId}/tags", driveHandler.UpdateTags)
 				r.Patch("/{vehicleId}/drives/{driveId}/toll-review", driveHandler.SetTollReview)
 				r.Get("/{vehicleId}/drives/{driveId}/toll-detection", driveHandler.GetTollDetection)

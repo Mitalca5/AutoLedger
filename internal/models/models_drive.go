@@ -14,7 +14,9 @@ type Drive struct {
 	// Origin is the source that wrote the drive (TESLAMATE, WEBHOOK, CSV, MANUAL); empty means MANUAL on insert.
 	Origin string `json:"-"`
 	// ExternalID is the event id the source gave the drive, to recognise it when sent again.
-	ExternalID          *string   `json:"-"`
+	ExternalID *string `json:"-"`
+	// SourceBatchID is the CSV import that created the drive, if any.
+	SourceBatchID       *string   `json:"-"`
 	StartTime           time.Time `json:"start_time"`
 	EndTime             time.Time `json:"end_time"`
 	StartOdometer       *float64  `json:"start_odometer,omitempty"`
