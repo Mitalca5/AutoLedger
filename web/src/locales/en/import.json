@@ -17,5 +17,15 @@
   "linesFound": "rows detected",
   "columns": "columns",
   "importing": "Importing...",
-  "confirmImport": "Import rows"
+  "confirmImport": "Import rows",
+  "typeFuel": "Fill-ups",
+  "typeOdometer": "Odometer readings",
+  "validRows": "valid",
+  "duplicateRows": "duplicates",
+  "invalidRows": "invalid",
+  "moreErrors": "and more errors not listed",
+  "cancelledTitle": "Nothing was imported",
+  "cancelledHint": "Fix the lines below and import the file again: an import is all or nothing.",
+  "fixFirst": "Fix the invalid rows to import this file",
+  "distanceHint": "Distance columns without a _km or _mi suffix are read in {unit}."
 }

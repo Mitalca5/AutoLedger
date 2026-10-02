@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 
 	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/database"
+	"github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/services"
 )
@@ -54,69 +56,80 @@ func readCSVBody(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 	return data, nil
 }
 
-// Preview parses the uploaded CSV and returns diagnostic info without inserting records.
-func (h *ImportHandler) Preview(w http.ResponseWriter, r *http.Request) {
-	vehicleID := chi.URLParam(r, "vehicleId")
-	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
-	if vehicle == nil {
-		return
+// importOptions reads the import type and the duplicate policy from the query string or the multipart form,
+// and the distance unit from the signed-in user's setting.
+func (h *ImportHandler) importOptions(r *http.Request) services.CSVImportOptions {
+	opts := services.CSVImportOptions{
+		Type:           services.ImportType(r.URL.Query().Get("type")),
+		SkipDuplicates: r.URL.Query().Get("skip_duplicates") != "false", // default: true
+		DistanceUnit:   "km",
 	}
+	if r.MultipartForm != nil {
+		if t := r.MultipartForm.Value["type"]; len(t) > 0 && t[0] != "" {
+			opts.Type = services.ImportType(t[0])
+		}
+		if s := r.MultipartForm.Value["skip_duplicates"]; len(s) > 0 {
+			opts.SkipDuplicates = s[0] != "false"
+		}
+	}
+	if user, err := h.repo.GetUserByID(r.Context(), middleware.GetUserID(r.Context())); err == nil && user != nil && user.DistanceUnit == "mi" {
+		opts.DistanceUnit = "mi"
+	}
+	return opts
+}
 
+// prepare checks access and reads the file shared by Preview and Execute; it answers and returns nil on failure.
+func (h *ImportHandler) prepare(w http.ResponseWriter, r *http.Request) (*models.Vehicle, []byte) {
+	vehicle := requireVehicleAccess(w, r, h.repo, chi.URLParam(r, "vehicleId"), models.RoleEditor)
+	if vehicle == nil {
+		return nil, nil
+	}
 	data, err := readCSVBody(w, r)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, err)
-		return
+		return nil, nil
 	}
 	if len(data) == 0 {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("import.empty", "The CSV file is empty"))
+		return nil, nil
+	}
+	return vehicle, data
+}
+
+// Preview dry-runs the import: the counts it returns are those Execute would produce, nothing is written.
+func (h *ImportHandler) Preview(w http.ResponseWriter, r *http.Request) {
+	vehicle, data := h.prepare(w, r)
+	if vehicle == nil {
 		return
 	}
-
-	preview, err := h.importService.Preview(data)
+	preview, err := h.importService.Preview(r.Context(), vehicle, data, h.importOptions(r))
 	if err != nil {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("import.invalid_csv", err.Error()))
+		writeImportError(w, err, "import.invalid_csv")
 		return
 	}
-
 	writeJSON(w, http.StatusOK, preview)
 }
 
-// Execute parses the uploaded CSV and commits the records to the database.
+// Execute imports the file all or nothing.
 func (h *ImportHandler) Execute(w http.ResponseWriter, r *http.Request) {
-	vehicleID := chi.URLParam(r, "vehicleId")
-	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
+	vehicle, data := h.prepare(w, r)
 	if vehicle == nil {
 		return
 	}
-
-	targetType := services.ImportType(r.URL.Query().Get("type"))
-	skipDuplicates := r.URL.Query().Get("skip_duplicates") != "false" // default: true
-
-	data, err := readCSVBody(w, r)
+	result, err := h.importService.Execute(r.Context(), vehicle, data, h.importOptions(r))
 	if err != nil {
-		writeErr(w, http.StatusBadRequest, err)
+		writeImportError(w, err, "import.execute_failed")
 		return
 	}
-	if len(data) == 0 {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("import.empty", "The CSV file is empty"))
-		return
-	}
-
-	// Also check if type was passed in multipart form
-	if r.MultipartForm != nil {
-		if t := r.MultipartForm.Value["type"]; len(t) > 0 && t[0] != "" {
-			targetType = services.ImportType(t[0])
-		}
-		if s := r.MultipartForm.Value["skip_duplicates"]; len(s) > 0 {
-			skipDuplicates = s[0] != "false"
-		}
-	}
-
-	result, err := h.importService.Execute(r.Context(), vehicle, data, targetType, skipDuplicates)
-	if err != nil {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("import.execute_failed", err.Error()))
-		return
-	}
-
 	writeJSON(w, http.StatusOK, result)
+}
+
+// writeImportError passes coded errors through and hides the details of any other failure.
+func writeImportError(w http.ResponseWriter, err error, fallbackCode string) {
+	if apiErr, ok := apierror.As(err); ok {
+		writeAPIError(w, http.StatusBadRequest, apiErr)
+		return
+	}
+	slog.Error("CSV import failed", "code", fallbackCode, "error", err)
+	writeAPIError(w, http.StatusInternalServerError, apierror.New(fallbackCode, "The import failed"))
 }

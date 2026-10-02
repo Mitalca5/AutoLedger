@@ -4,33 +4,49 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
-	"fmt"
-	"math"
+	"errors"
+	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
-	"github.com/teslacost/teslacost/internal/money"
 )
 
 type ImportType string
 
 const (
-	ImportTypeCharges ImportType = "CHARGES"
-	ImportTypeDrives  ImportType = "DRIVES"
-	ImportTypeUnknown ImportType = "UNKNOWN"
+	ImportTypeCharges  ImportType = "CHARGES"
+	ImportTypeDrives   ImportType = "DRIVES"
+	ImportTypeFuel     ImportType = "FUEL"
+	ImportTypeOdometer ImportType = "ODOMETER"
+	ImportTypeUnknown  ImportType = "UNKNOWN"
 )
 
+// maxListedRowErrors bounds the row errors returned to the client; ErrorCount keeps the real total.
+const maxListedRowErrors = 50
+
+// CSVImportOptions are the choices of one import: the preview and the execution run the same pipeline with them.
+type CSVImportOptions struct {
+	Type           ImportType
+	SkipDuplicates bool
+	// DistanceUnit ("km" or "mi") is the unit of the distance columns that carry no _km / _mi suffix.
+	DistanceUnit string
+}
+
 type CSVPreviewResult struct {
-	Type             ImportType       `json:"type"`
-	TotalRows        int              `json:"total_rows"`
-	ValidRows        int              `json:"valid_rows"`
-	InvalidRows      int              `json:"invalid_rows"`
-	Headers          []string         `json:"headers"`
-	SampleRows       []map[string]any `json:"sample_rows"`
-	ValidationErrors []string         `json:"validation_errors,omitempty"`
+	Type            ImportType        `json:"type"`
+	TotalRows       int               `json:"total_rows"`
+	ValidRows       int               `json:"valid_rows"`
+	InvalidRows     int               `json:"invalid_rows"`
+	DuplicateRows   int               `json:"duplicate_rows"`
+	Headers         []string          `json:"headers"`
+	SampleRows      []map[string]any  `json:"sample_rows"`
+	Errors          []*apierror.Error `json:"errors,omitempty"`
+	ErrorsTruncated bool              `json:"errors_truncated,omitempty"`
 }
 
 type CSVExecuteResult struct {
@@ -39,15 +55,25 @@ type CSVExecuteResult struct {
 	ImportedCount int        `json:"imported_count"`
 	SkippedCount  int        `json:"skipped_count"`
 	ErrorCount    int        `json:"error_count"`
-	Errors        []string   `json:"errors,omitempty"`
+	// Committed is false when nothing was written: an invalid row or a database error cancels the whole file.
+	Committed       bool              `json:"committed"`
+	Errors          []*apierror.Error `json:"errors,omitempty"`
+	ErrorsTruncated bool              `json:"errors_truncated,omitempty"`
 }
 
 type CSVImportService struct {
 	repo *database.Repository
+	loc  *time.Location
 }
 
-func NewCSVImportService(repo *database.Repository) *CSVImportService {
-	return &CSVImportService{repo: repo}
+// NewCSVImportService reads the dates without an explicit offset in the given IANA timezone (APP_TIMEZONE).
+func NewCSVImportService(repo *database.Repository, timezone string) *CSVImportService {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		slog.Warn("unknown timezone for CSV imports, using UTC", "timezone", timezone, "error", err)
+		loc = time.UTC
+	}
+	return &CSVImportService{repo: repo, loc: loc}
 }
 
 // detectDelimiter inspects the first chunk of data to find the most probable delimiter.
@@ -65,8 +91,8 @@ func detectDelimiter(data []byte) rune {
 	return ','
 }
 
-// parseFlexibleTime tries common date and time layouts.
-func parseFlexibleTime(raw string) (time.Time, error) {
+// parseFlexibleTime tries common date and time layouts; a date without an offset is read in loc.
+func parseFlexibleTime(raw string, loc *time.Location) (time.Time, error) {
 	raw = strings.TrimSpace(raw)
 	layouts := []string{
 		time.RFC3339,
@@ -80,11 +106,11 @@ func parseFlexibleTime(raw string) (time.Time, error) {
 		"2006-01-02",
 	}
 	for _, l := range layouts {
-		if t, err := time.Parse(l, raw); err == nil {
+		if t, err := time.ParseInLocation(l, raw, loc); err == nil {
 			return t, nil
 		}
 	}
-	return time.Time{}, fmt.Errorf("unable to parse date %q", raw)
+	return time.Time{}, errors.New("unrecognized date")
 }
 
 // parseFlexibleFloat parses numbers allowing both '.' and ',' decimal separators.
@@ -95,280 +121,220 @@ func parseFlexibleFloat(raw string) (float64, error) {
 	return strconv.ParseFloat(cleaned, 64)
 }
 
+func normalizeHeader(h string) string {
+	return strings.ToLower(strings.TrimSpace(strings.TrimPrefix(h, "\ufeff")))
+}
+
 func detectTypeFromHeaders(headers []string) ImportType {
-	headerMap := make(map[string]bool)
+	has := make(map[string]bool, len(headers))
 	for _, h := range headers {
-		headerMap[strings.ToLower(strings.TrimSpace(h))] = true
+		has[normalizeHeader(h)] = true
+	}
+	any := func(names ...string) bool {
+		for _, n := range names {
+			if has[n] {
+				return true
+			}
+		}
+		return false
 	}
 
-	if headerMap["distance"] || headerMap["distance_km"] || headerMap["dist"] || headerMap["duration"] || headerMap["duration_min"] {
+	switch {
+	case any("distance", "distance_km", "distance_mi", "dist", "duration", "duration_min"):
 		return ImportTypeDrives
-	}
-	if headerMap["kwh"] || headerMap["kwh_added"] || headerMap["cost"] || headerMap["amount"] || headerMap["station"] {
+	case any("liters", "litres", "fuel_type", "price_per_liter", "price_per_litre", "volume"):
+		return ImportTypeFuel
+	case any("kwh", "kwh_added", "cost", "amount", "station"):
 		return ImportTypeCharges
+	case any("odometer", "odo", "odometer_km", "odometer_mi"):
+		return ImportTypeOdometer
 	}
 	return ImportTypeUnknown
 }
 
-func (s *CSVImportService) Preview(rawContent []byte) (*CSVPreviewResult, error) {
-	delimiter := detectDelimiter(rawContent)
-	reader := csv.NewReader(bytes.NewReader(rawContent))
-	reader.Comma = delimiter
+// readCSVRecords parses the file and returns, next to each record, its line number in the file.
+func readCSVRecords(content []byte) (records [][]string, lines []int, err error) {
+	content = bytes.TrimPrefix(content, []byte("\xef\xbb\xbf"))
+	reader := csv.NewReader(bytes.NewReader(content))
+	reader.Comma = detectDelimiter(content)
 	reader.LazyQuotes = true
 	reader.TrimLeadingSpace = true
+	reader.FieldsPerRecord = -1
 
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("failed to read CSV content: %w", err)
+	for {
+		record, err := reader.Read()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return nil, nil, apierror.Newf("import.invalid_csv", "Invalid CSV file: %v", err)
+		}
+		line, _ := reader.FieldPos(0)
+		records = append(records, record)
+		lines = append(lines, line)
 	}
 	if len(records) < 2 {
-		return nil, fmt.Errorf("CSV file must contain an en-tête and at least one row")
+		return nil, nil, apierror.New("import.no_rows", "The CSV file must contain a header and at least one row")
+	}
+	return records, lines, nil
+}
+
+type plannedRow struct {
+	insert func(ctx context.Context, tx *database.Repository) error
+	line   int
+}
+
+// csvPlan is the outcome of validating a whole file against a vehicle, before anything is written.
+type csvPlan struct {
+	importType ImportType
+	headers    []string
+	total      int
+	sample     []map[string]any
+	rows       []plannedRow
+	duplicates int
+	invalid    int
+	errors     []*apierror.Error
+}
+
+func (p *csvPlan) addError(e *apierror.Error) {
+	p.invalid++
+	if len(p.errors) < maxListedRowErrors {
+		p.errors = append(p.errors, e)
+	}
+}
+
+// plan validates every row and looks up the duplicates without writing anything: Preview reports it, Execute
+// writes it.
+func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, content []byte, opts CSVImportOptions) (*csvPlan, error) {
+	records, lines, err := readCSVRecords(content)
+	if err != nil {
+		return nil, err
 	}
 
 	headers := records[0]
-	importType := detectTypeFromHeaders(headers)
+	importType := opts.Type
+	if importType == ImportTypeUnknown || importType == "" {
+		importType = detectTypeFromHeaders(headers)
+	}
+	parse, ok := rowParsers[importType]
+	if !ok {
+		return nil, apierror.Newf("import.unsupported_type", "Unrecognized or unsupported import type %q", string(importType))
+	}
+	if importType == ImportTypeCharges && vehicle.Powertrain == models.PowertrainICE {
+		return nil, apierror.New("import.ice_charges", "A combustion vehicle has no charges to import: import its fill-ups instead")
+	}
 
-	headerIndex := make(map[string]int)
+	columns := make(map[string]int, len(headers))
 	for i, h := range headers {
-		norm := strings.ToLower(strings.TrimSpace(h))
-		headerIndex[norm] = i
+		if _, taken := columns[normalizeHeader(h)]; !taken {
+			columns[normalizeHeader(h)] = i
+		}
 	}
-
-	result := &CSVPreviewResult{
-		Type:       importType,
-		TotalRows:  len(records) - 1,
-		Headers:    headers,
-		SampleRows: make([]map[string]any, 0),
+	unit := opts.DistanceUnit
+	if unit != "mi" {
+		unit = "km"
 	}
+	rc := &rowContext{columns: columns, vehicle: vehicle, loc: s.loc, unit: unit}
 
+	p := &csvPlan{importType: importType, headers: headers}
 	for i := 1; i < len(records); i++ {
 		row := records[i]
 		if len(row) == 0 || (len(row) == 1 && strings.TrimSpace(row[0]) == "") {
 			continue
 		}
+		p.total++
+		if len(p.sample) < 5 {
+			p.sample = append(p.sample, sampleRow(headers, row))
+		}
 
-		rowMap := make(map[string]any)
-		for j, val := range row {
-			if j < len(headers) {
-				rowMap[headers[j]] = strings.TrimSpace(val)
+		parsed, rowErr := parse(rc, row, lines[i])
+		if rowErr != nil {
+			p.addError(rowErr)
+			continue
+		}
+		if opts.SkipDuplicates {
+			duplicate, err := parsed.isDuplicate(ctx, s.repo)
+			if err != nil {
+				return nil, err
+			}
+			if duplicate {
+				p.duplicates++
+				continue
 			}
 		}
-
-		if len(result.SampleRows) < 5 {
-			result.SampleRows = append(result.SampleRows, rowMap)
-		}
-		result.ValidRows++
+		p.rows = append(p.rows, plannedRow{insert: parsed.insert, line: lines[i]})
 	}
-
-	return result, nil
+	return p, nil
 }
 
-func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle, rawContent []byte, targetType ImportType, skipDuplicates bool) (*CSVExecuteResult, error) {
-	delimiter := detectDelimiter(rawContent)
-	reader := csv.NewReader(bytes.NewReader(rawContent))
-	reader.Comma = delimiter
-	reader.LazyQuotes = true
-	reader.TrimLeadingSpace = true
+func sampleRow(headers, row []string) map[string]any {
+	m := make(map[string]any, len(headers))
+	for j, val := range row {
+		if j < len(headers) {
+			m[headers[j]] = strings.TrimSpace(val)
+		}
+	}
+	return m
+}
 
-	records, err := reader.ReadAll()
+// Preview runs the import pipeline without writing: the rows it counts valid are the ones Execute imports.
+func (s *CSVImportService) Preview(ctx context.Context, vehicle *models.Vehicle, content []byte, opts CSVImportOptions) (*CSVPreviewResult, error) {
+	p, err := s.plan(ctx, vehicle, content, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse CSV: %w", err)
+		return nil, err
 	}
-	if len(records) < 2 {
-		return nil, fmt.Errorf("CSV has no data rows")
-	}
+	return &CSVPreviewResult{
+		Type:            p.importType,
+		TotalRows:       p.total,
+		ValidRows:       len(p.rows),
+		InvalidRows:     p.invalid,
+		DuplicateRows:   p.duplicates,
+		Headers:         p.headers,
+		SampleRows:      p.sample,
+		Errors:          p.errors,
+		ErrorsTruncated: p.invalid > len(p.errors),
+	}, nil
+}
 
-	headers := records[0]
-	headerMap := make(map[string]int)
-	for i, h := range headers {
-		headerMap[strings.ToLower(strings.TrimSpace(h))] = i
-	}
-
-	if targetType == ImportTypeUnknown || targetType == "" {
-		targetType = detectTypeFromHeaders(headers)
+// Execute imports the file all or nothing: one invalid row, or one database error, leaves the vehicle untouched.
+func (s *CSVImportService) Execute(ctx context.Context, vehicle *models.Vehicle, content []byte, opts CSVImportOptions) (*CSVExecuteResult, error) {
+	p, err := s.plan(ctx, vehicle, content, opts)
+	if err != nil {
+		return nil, err
 	}
 
 	res := &CSVExecuteResult{
-		Type:      targetType,
-		TotalRows: len(records) - 1,
+		Type:            p.importType,
+		TotalRows:       p.total,
+		SkippedCount:    p.duplicates,
+		ErrorCount:      p.invalid,
+		Errors:          p.errors,
+		ErrorsTruncated: p.invalid > len(p.errors),
+	}
+	if p.invalid > 0 {
+		return res, nil
 	}
 
-	getCol := func(row []string, names ...string) string {
-		for _, n := range names {
-			if idx, ok := headerMap[n]; ok && idx < len(row) {
-				return strings.TrimSpace(row[idx])
+	var failedLine int
+	err = s.repo.WithTx(ctx, func(tx *database.Repository) error {
+		for _, row := range p.rows {
+			if err := row.insert(ctx, tx); err != nil {
+				failedLine = row.line
+				return err
 			}
 		}
-		return ""
+		return nil
+	})
+	if err != nil {
+		if failedLine == 0 {
+			return nil, err
+		}
+		slog.Error("CSV import rolled back", "line", failedLine, "error", err)
+		res.ErrorCount = 1
+		res.Errors = []*apierror.Error{apierror.Newf("import.row.database_error", "Line %d: the row could not be saved, nothing was imported", failedLine)}
+		return res, nil
 	}
-
-	switch targetType {
-	case ImportTypeCharges:
-		for i := 1; i < len(records); i++ {
-			row := records[i]
-			if len(row) == 0 || (len(row) == 1 && strings.TrimSpace(row[0]) == "") {
-				continue
-			}
-
-			dateStr := getCol(row, "date", "time", "start_time", "datetime")
-			kwhStr := getCol(row, "kwh", "kwh_added", "energy", "energy_kwh")
-			costStr := getCol(row, "cost", "amount", "price", "total_cost")
-			odoStr := getCol(row, "odometer", "odo", "km")
-			addressStr := getCol(row, "location", "address", "station", "place")
-			currencyStr := getCol(row, "currency", "curr")
-
-			t, err := parseFlexibleTime(dateStr)
-			if err != nil {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: invalid date %q", i+1, dateStr))
-				continue
-			}
-
-			kwh, err := parseFlexibleFloat(kwhStr)
-			if err != nil || kwh <= 0 {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: invalid kWh %q", i+1, kwhStr))
-				continue
-			}
-
-			if skipDuplicates {
-				if hasDup, _ := s.repo.HasDuplicateCharge(ctx, vehicle.ID, t, kwh); hasDup {
-					res.SkippedCount++
-					continue
-				}
-			}
-
-			var costCents *money.Cents
-			if costStr != "" {
-				if costFloat, err := parseFlexibleFloat(costStr); err == nil && costFloat >= 0 {
-					cents := money.FromFloat(costFloat)
-					costCents = &cents
-				}
-			}
-
-			var odo *float64
-			if odoStr != "" {
-				if odoFloat, err := parseFlexibleFloat(odoStr); err == nil && odoFloat >= 0 {
-					odo = &odoFloat
-				}
-			}
-
-			curr := vehicle.Currency
-			if currencyStr != "" && len(currencyStr) == 3 {
-				curr = strings.ToUpper(currencyStr)
-			}
-
-			charge := &models.ChargeLog{
-				VehicleID: vehicle.ID,
-				Date:      t,
-				KwhAdded:  kwh,
-				Cost:      costCents,
-				Currency:  curr,
-				Odometer:  odo,
-				Address:   &addressStr,
-				IsManual:  true,
-			}
-
-			if err := s.repo.CreateManualCharge(ctx, charge); err != nil {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: database error: %v", i+1, err))
-			} else {
-				res.ImportedCount++
-			}
-		}
-
-	case ImportTypeDrives:
-		for i := 1; i < len(records); i++ {
-			row := records[i]
-			if len(row) == 0 || (len(row) == 1 && strings.TrimSpace(row[0]) == "") {
-				continue
-			}
-
-			startStr := getCol(row, "start_time", "date", "start", "datetime")
-			endStr := getCol(row, "end_time", "end")
-			distStr := getCol(row, "distance_km", "distance", "dist", "km")
-			kwhStr := getCol(row, "kwh", "energy", "energy_consumed_kwh")
-			startAddr := getCol(row, "start_address", "start_location", "origin")
-			endAddr := getCol(row, "end_address", "end_location", "destination")
-			tagStr := getCol(row, "tag", "tags", "purpose")
-
-			startTime, err := parseFlexibleTime(startStr)
-			if err != nil {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: invalid start time %q", i+1, startStr))
-				continue
-			}
-
-			dist, err := parseFlexibleFloat(distStr)
-			if err != nil || dist <= 0 || dist > 3000 {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: invalid distance %q", i+1, distStr))
-				continue
-			}
-
-			if skipDuplicates {
-				if hasDup, _ := s.repo.HasDuplicateDrive(ctx, vehicle.ID, startTime, dist); hasDup {
-					res.SkippedCount++
-					continue
-				}
-			}
-
-			endTime := startTime
-			if endStr != "" {
-				if et, err := parseFlexibleTime(endStr); err == nil && et.After(startTime) {
-					endTime = et
-				}
-			}
-			if endTime.Equal(startTime) {
-				duration := int(math.Max(1, math.Round((dist/50.0)*60)))
-				endTime = startTime.Add(time.Duration(duration) * time.Minute)
-			}
-			durationMin := int(math.Max(1, math.Round(endTime.Sub(startTime).Minutes())))
-
-			var energy float64
-			var cons100 float64
-			if kwhStr != "" {
-				if parsedKwh, err := parseFlexibleFloat(kwhStr); err == nil && parsedKwh > 0 {
-					energy = parsedKwh
-					cons100 = (energy / dist) * 100
-				}
-			}
-			estimated := energy == 0
-			if estimated {
-				energy, cons100 = EstimateDriveEnergy(vehicle.EstimatedKwh100km, dist)
-			}
-
-			tags := []string{}
-			if tagStr != "" {
-				tags = append(tags, tagStr)
-			}
-
-			drive := &models.Drive{
-				VehicleID:           vehicle.ID,
-				StartTime:           startTime,
-				EndTime:             endTime,
-				DistanceKm:          dist,
-				DurationMin:         durationMin,
-				StartAddress:        &startAddr,
-				EndAddress:          &endAddr,
-				EnergyConsumedKwh:   &energy,
-				ConsumptionKwh100km: &cons100,
-				Tags:                tags,
-				IsManual:            true,
-				EnergyEstimated:     estimated,
-			}
-
-			if err := s.repo.CreateManualDrive(ctx, drive); err != nil {
-				res.ErrorCount++
-				res.Errors = append(res.Errors, fmt.Sprintf("row %d: database error: %v", i+1, err))
-			} else {
-				res.ImportedCount++
-			}
-		}
-
-	default:
-		return nil, fmt.Errorf("unrecognized or unsupported import type %q", targetType)
-	}
-
+	res.Committed = true
+	res.ImportedCount = len(p.rows)
 	return res, nil
 }

@@ -168,7 +168,26 @@
     "read_failed": "Échec de lecture du fichier CSV",
     "empty": "Le fichier CSV est vide",
     "invalid_csv": "Format de fichier CSV invalide",
-    "execute_failed": "Échec du traitement de l'import CSV"
+    "execute_failed": "Échec du traitement de l'import CSV",
+    "no_rows": "Le fichier CSV doit contenir un en-tête et au moins une ligne",
+    "unsupported_type": "Type d’import non reconnu ou non pris en charge : « {p0} »",
+    "ice_charges": "Un véhicule thermique n’a pas de recharges à importer : importez plutôt ses pleins",
+    "row": {
+      "invalid_date": "Ligne {p0} : date invalide « {p1} »",
+      "invalid_kwh": "Ligne {p0} : énergie invalide « {p1} » (0 à {p2} kWh)",
+      "cost_required": "Ligne {p0} : le coût d’une recharge est obligatoire",
+      "invalid_cost": "Ligne {p0} : coût invalide « {p1} »",
+      "invalid_currency": "Ligne {p0} : devise invalide « {p1} »",
+      "fx_required": "Ligne {p0} : un taux de conversion vers {p1} est requis pour une recharge en {p2}",
+      "invalid_odometer": "Ligne {p0} : relevé kilométrique invalide",
+      "invalid_distance": "Ligne {p0} : distance invalide (0 à {p1} km)",
+      "invalid_liters": "Ligne {p0} : quantité invalide (0 à {p1} L)",
+      "invalid_price": "Ligne {p0} : prix au litre invalide (0 à {p1})",
+      "invalid_amount": "Ligne {p0} : montant invalide « {p1} »",
+      "amount_required": "Ligne {p0} : le montant d’un plein est obligatoire (ou litres et prix au litre)",
+      "invalid_fuel_type": "Ligne {p0} : carburant invalide « {p1} »",
+      "database_error": "Ligne {p0} : la ligne n’a pas pu être enregistrée, rien n’a été importé"
+    }
   },
   "toll": {
     "apply_failed": "Échec de l'application du tarif de péage",

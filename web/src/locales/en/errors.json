@@ -168,7 +168,26 @@
     "read_failed": "Failed to read CSV file",
     "empty": "The CSV file is empty",
     "invalid_csv": "Invalid CSV file format",
-    "execute_failed": "Failed to execute CSV import"
+    "execute_failed": "Failed to execute CSV import",
+    "no_rows": "The CSV file must contain a header and at least one row",
+    "unsupported_type": "Unrecognized or unsupported import type \"{p0}\"",
+    "ice_charges": "A combustion vehicle has no charges to import: import its fill-ups instead",
+    "row": {
+      "invalid_date": "Line {p0}: invalid date \"{p1}\"",
+      "invalid_kwh": "Line {p0}: invalid energy \"{p1}\" (0 to {p2} kWh)",
+      "cost_required": "Line {p0}: the cost of a charge is required",
+      "invalid_cost": "Line {p0}: invalid cost \"{p1}\"",
+      "invalid_currency": "Line {p0}: invalid currency \"{p1}\"",
+      "fx_required": "Line {p0}: a conversion rate to {p1} is required for a charge in {p2}",
+      "invalid_odometer": "Line {p0}: invalid odometer reading",
+      "invalid_distance": "Line {p0}: invalid distance (0 to {p1} km)",
+      "invalid_liters": "Line {p0}: invalid quantity (0 to {p1} L)",
+      "invalid_price": "Line {p0}: invalid price per litre (0 to {p1})",
+      "invalid_amount": "Line {p0}: invalid amount \"{p1}\"",
+      "amount_required": "Line {p0}: the amount of a fill-up is required (or litres and price per litre)",
+      "invalid_fuel_type": "Line {p0}: invalid fuel \"{p1}\"",
+      "database_error": "Line {p0}: the row could not be saved, nothing was imported"
+    }
   },
   "toll": {
     "apply_failed": "Could not apply the toll fare",

@@ -345,7 +345,7 @@ func main() {
 		fuelHandler := handlers.NewFuelHandler(repo)
 		reminderHandler := handlers.NewReminderHandler(repo, notificationService)
 		vehicleMemberHandler := handlers.NewVehicleMemberHandler(repo)
-		csvImportService := services.NewCSVImportService(repo)
+		csvImportService := services.NewCSVImportService(repo, cfg.ReportingTimezone)
 		importHandler := handlers.NewImportHandler(repo, csvImportService)
 
 		tariffService := services.NewTariffService()

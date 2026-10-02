@@ -3,6 +3,7 @@ import { formatAmount } from '@/currency'
 // AutoLedger API Service
 import { newIdempotencyKey } from '@/services/offlineQueue'
 import { apiErrorMessage } from '@/services/apiError'
+import type { CSVExecuteResult, CSVPreviewResult } from '@/services/csvImport'
 
 const BASE_URL = '/api'
 
@@ -254,10 +255,12 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ driver_id: driverId }),
     }),
-  previewCSVImport: (vehicleId: string, file: File) => {
+  previewCSVImport: (vehicleId: string, file: File, type?: string, skipDuplicates: boolean = true) => {
     const formData = new FormData()
     formData.append('file', file)
-    return request<any>(`/vehicles/${vehicleId}/import/preview`, {
+    if (type) formData.append('type', type)
+    formData.append('skip_duplicates', skipDuplicates ? 'true' : 'false')
+    return request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, {
       method: 'POST',
       body: formData,
     })
@@ -267,7 +270,7 @@ export const api = {
     formData.append('file', file)
     if (type) formData.append('type', type)
     formData.append('skip_duplicates', skipDuplicates ? 'true' : 'false')
-    return request<any>(`/vehicles/${vehicleId}/import/execute`, {
+    return request<CSVExecuteResult>(`/vehicles/${vehicleId}/import/execute`, {
       method: 'POST',
       body: formData,
     })

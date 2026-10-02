@@ -2,13 +2,16 @@
 import { ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
+import type { CSVExecuteResult, CSVImportType, CSVPreviewResult } from '@/services/csvImport'
+import { apiErrorMessage } from '@/services/apiError'
+import { distanceUnit } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
-import { X, UploadCloud, CheckCircle2, ArrowRight } from 'lucide-vue-next'
+import { X, UploadCloud, CheckCircle2, XCircle, ArrowRight } from 'lucide-vue-next'
 
 const props = defineProps<{
   open: boolean
   vehicleId: string
-  defaultType?: 'CHARGES' | 'DRIVES'
+  defaultType?: CSVImportType
 }>()
 
 const emit = defineEmits<{
@@ -19,13 +22,13 @@ const emit = defineEmits<{
 const vehicleStore = useVehicleStore()
 
 const file = ref<File | null>(null)
-const selectedType = ref<'CHARGES' | 'DRIVES' | ''>(props.defaultType || '')
+const selectedType = ref<CSVImportType | ''>(props.defaultType || '')
 const skipDuplicates = ref(true)
 const loading = ref(false)
 const error = ref('')
 
-const previewResult = ref<any | null>(null)
-const executeResult = ref<any | null>(null)
+const previewResult = ref<CSVPreviewResult | null>(null)
+const executeResult = ref<CSVExecuteResult | null>(null)
 
 watch(
   () => props.open,
@@ -41,6 +44,23 @@ watch(
   },
   { immediate: true },
 )
+
+watch([selectedType, skipDuplicates], () => {
+  previewResult.value = null
+})
+
+const rowErrors = (errors: CSVPreviewResult['errors'] | undefined) =>
+  (errors ?? []).map((e) => apiErrorMessage(e, e.message))
+
+function typeLabel(type: CSVPreviewResult['type']): string {
+  const keys: Record<string, string> = {
+    CHARGES: 'import.typeCharges',
+    DRIVES: 'import.typeDrives',
+    FUEL: 'import.typeFuel',
+    ODOMETER: 'import.typeOdometer',
+  }
+  return keys[type] ? t(keys[type]) : t('import.detected')
+}
 
 function close() {
   emit('update:open', false)
@@ -62,7 +82,7 @@ async function handlePreview() {
   loading.value = true
   error.value = ''
   try {
-    const res = await api.previewCSVImport(targetVehicleId, file.value)
+    const res = await api.previewCSVImport(targetVehicleId, file.value, selectedType.value || undefined, skipDuplicates.value)
     previewResult.value = res
     if (!selectedType.value && res.type !== 'UNKNOWN') {
       selectedType.value = res.type
@@ -116,12 +136,18 @@ async function handleExecute() {
           {{ error }}
         </div>
 
-        <!-- Success Result -->
-        <div v-if="executeResult" class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-3">
-          <div class="flex items-center gap-2.5 text-emerald-400 font-bold">
-            <CheckCircle2 class="w-5 h-5" />
-            <span>{{ $t('import.successTitle') }}</span>
+        <!-- Result -->
+        <div
+          v-if="executeResult"
+          class="p-4 rounded-2xl space-y-3 border"
+          :class="executeResult.committed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'"
+        >
+          <div class="flex items-center gap-2.5 font-bold" :class="executeResult.committed ? 'text-emerald-400' : 'text-rose-400'">
+            <CheckCircle2 v-if="executeResult.committed" class="w-5 h-5" />
+            <XCircle v-else class="w-5 h-5" />
+            <span>{{ executeResult.committed ? $t('import.successTitle') : $t('import.cancelledTitle') }}</span>
           </div>
+          <p v-if="!executeResult.committed" class="text-xs text-slate-300">{{ $t('import.cancelledHint') }}</p>
           <div class="grid grid-cols-3 gap-2 text-center pt-2">
             <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/50">
               <span class="text-xs text-slate-400 block">{{ $t('import.imported') }}</span>
@@ -137,7 +163,8 @@ async function handleExecute() {
             </div>
           </div>
           <div v-if="executeResult.errors?.length" class="text-xs text-rose-400 space-y-1 max-h-32 overflow-y-auto pt-2">
-            <div v-for="(err, idx) in executeResult.errors" :key="idx">• {{ err }}</div>
+            <div v-for="(msg, idx) in rowErrors(executeResult.errors)" :key="idx">• {{ msg }}</div>
+            <div v-if="executeResult.errors_truncated" class="text-slate-400">{{ $t('import.moreErrors') }}</div>
           </div>
           <div class="pt-2 flex justify-end">
             <button
@@ -189,6 +216,8 @@ async function handleExecute() {
                 <option value="">{{ $t('import.autoDetect') }}</option>
                 <option value="CHARGES">{{ $t('import.typeCharges') }}</option>
                 <option value="DRIVES">{{ $t('import.typeDrives') }}</option>
+                <option value="FUEL">{{ $t('import.typeFuel') }}</option>
+                <option value="ODOMETER">{{ $t('import.typeOdometer') }}</option>
               </select>
             </div>
             <div class="flex items-center pt-5">
@@ -208,10 +237,22 @@ async function handleExecute() {
           <div v-if="previewResult" class="space-y-3 pt-2">
             <div class="flex items-center justify-between text-xs text-slate-300 border-b border-slate-800 pb-2">
               <span class="font-semibold text-indigo-400">
-                {{ previewResult.type === 'CHARGES' ? $t('import.typeCharges') : previewResult.type === 'DRIVES' ? $t('import.typeDrives') : $t('import.detected') }}
+                {{ typeLabel(previewResult.type) }}
                 — {{ previewResult.total_rows }} {{ $t('import.linesFound') }}
               </span>
               <span class="text-slate-400">{{ previewResult.headers.length }} {{ $t('import.columns') }}</span>
+            </div>
+
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              <span class="text-emerald-400">{{ previewResult.valid_rows }} {{ $t('import.validRows') }}</span>
+              <span class="text-amber-400">{{ previewResult.duplicate_rows }} {{ $t('import.duplicateRows') }}</span>
+              <span class="text-rose-400">{{ previewResult.invalid_rows }} {{ $t('import.invalidRows') }}</span>
+            </div>
+            <p class="text-[11px] text-slate-500">{{ $t('import.distanceHint', { unit: distanceUnit() }) }}</p>
+
+            <div v-if="previewResult.errors?.length" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 space-y-1 max-h-32 overflow-y-auto">
+              <div v-for="(msg, idx) in rowErrors(previewResult.errors)" :key="idx">• {{ msg }}</div>
+              <div v-if="previewResult.errors_truncated" class="text-slate-400">{{ $t('import.moreErrors') }}</div>
             </div>
 
             <!-- Sample rows -->
@@ -243,7 +284,8 @@ async function handleExecute() {
               </button>
               <button
                 type="button"
-                :disabled="loading"
+                :disabled="loading || previewResult.invalid_rows > 0 || previewResult.valid_rows === 0"
+                :title="previewResult.invalid_rows > 0 ? $t('import.fixFirst') : undefined"
                 @click="handleExecute"
                 class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-1.5 disabled:opacity-50"
               >
