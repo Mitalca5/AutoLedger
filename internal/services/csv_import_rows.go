@@ -163,6 +163,7 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 
 	charge := &models.ChargeLog{
 		VehicleID: rc.vehicle.ID,
+		Origin:    "CSV",
 		Date:      date,
 		KwhAdded:  kwh,
 		Cost:      &cost,
@@ -231,6 +232,7 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 		ConsumptionKwh100km: &cons100,
 		Tags:                tags,
 		EnergyEstimated:     estimated,
+		Origin:              "CSV",
 	}
 	return &parsedRow{
 		insert: func(ctx context.Context, tx *database.Repository) error { return tx.CreateManualDrive(ctx, drive) },

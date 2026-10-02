@@ -8,9 +8,11 @@ import (
 
 // Drive represents a single vehicle trip.
 type Drive struct {
-	ID                  string    `json:"id"`
-	VehicleID           string    `json:"vehicle_id"`
-	TeslaMateDriveID    *int      `json:"teslamate_drive_id,omitempty"`
+	ID               string `json:"id"`
+	VehicleID        string `json:"vehicle_id"`
+	TeslaMateDriveID *int   `json:"teslamate_drive_id,omitempty"`
+	// Origin is the source that wrote the drive (TESLAMATE, WEBHOOK, CSV, MANUAL); empty means MANUAL on insert.
+	Origin              string    `json:"-"`
 	StartTime           time.Time `json:"start_time"`
 	EndTime             time.Time `json:"end_time"`
 	StartOdometer       *float64  `json:"start_odometer,omitempty"`

@@ -53,7 +53,9 @@ type ChargeLog struct {
 	Notes             *string  `json:"notes,omitempty"`
 	DocumentID        *string  `json:"document_id,omitempty"`
 	// ExternalID is the event_id an integration sent with the charge, to recognise a resent event.
-	ExternalID       *string   `json:"-"`
+	ExternalID *string `json:"-"`
+	// Origin is the source that wrote the charge (TESLAMATE, WEBHOOK, CSV, MANUAL); empty means MANUAL on insert.
+	Origin           string    `json:"-"`
 	DocumentFilename *string   `json:"document_filename,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 }

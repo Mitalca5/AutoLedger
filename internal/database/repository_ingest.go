@@ -34,8 +34,8 @@ func insertIngestedCharge(ctx context.Context, q rowQuerier, c *models.ChargeLog
 	return q.QueryRow(ctx, `
 		INSERT INTO charge_logs (
 			vehicle_id, date, end_date, address, kwh_added, cost, cost_source, currency, odometer,
-			start_battery_level, end_battery_level, is_manual, notes, external_id
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, TRUE, $12, $13)
+			start_battery_level, end_battery_level, is_manual, notes, external_id, origin
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, TRUE, $12, $13, 'WEBHOOK')
 		RETURNING id, created_at;
 	`,
 		c.VehicleID, c.Date, c.EndDate, c.Address, c.KwhAdded, c.Cost, c.CostSource, c.Currency, c.Odometer,

@@ -17,8 +17,8 @@ func (r *Repository) UpsertTeslaMateCharge(ctx context.Context, c *models.Charge
 		INSERT INTO charge_logs (
 			vehicle_id, teslamate_charge_id, date, end_date,
 			address, kwh_added, kwh_used, cost, cost_source, currency, odometer, is_manual,
-			start_battery_level, end_battery_level, outside_temp_c
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'TESLAMATE', $9, $10, FALSE, $11, $12, $13)
+			start_battery_level, end_battery_level, outside_temp_c, origin, external_id
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'TESLAMATE', $9, $10, FALSE, $11, $12, $13, 'TESLAMATE', ($2::int)::text)
 		ON CONFLICT (vehicle_id, teslamate_charge_id) DO UPDATE
 		SET date = EXCLUDED.date,
 		    end_date = EXCLUDED.end_date,
@@ -125,12 +125,12 @@ func (r *Repository) CreateManualCharge(ctx context.Context, c *models.ChargeLog
 	err := r.pool.QueryRow(ctx, `
 		INSERT INTO charge_logs (
 			vehicle_id, date, end_date, address, kwh_added, cost, cost_source,
-			currency, fx_rate, odometer, is_manual, notes, document_id
-		) VALUES ($1, $2, $3, $4, $5, $6, 'MANUAL', $7, $8, $9, TRUE, $10, $11)
+			currency, fx_rate, odometer, is_manual, notes, document_id, origin
+		) VALUES ($1, $2, $3, $4, $5, $6, 'MANUAL', $7, $8, $9, TRUE, $10, $11, COALESCE(NULLIF($12, ''), 'MANUAL'))
 		RETURNING id, created_at;
 	`,
 		c.VehicleID, c.Date, c.EndDate, c.Address, c.KwhAdded, c.Cost,
-		c.Currency, c.FxRate, c.Odometer, c.Notes, c.DocumentID,
+		c.Currency, c.FxRate, c.Odometer, c.Notes, c.DocumentID, c.Origin,
 	).Scan(&c.ID, &c.CreatedAt)
 	if err != nil {
 		return err
