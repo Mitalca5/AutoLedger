@@ -46,6 +46,8 @@ flowchart LR
 2. **📄 Semi-Automated CSV Import**: Flexible file importer for trips and charges. Features automatic separator detection (comma or semicolon), custom column mapping with live preview, and intelligent deduplication based on timestamps and start/end coordinates.
 3. **📱 Standalone & Manual (PWA)**: Full offline-first progressive web app. Quick-add modal for drives, charges, fuel, tolls, and maintenance, with smart odometer progression, photo receipt uploads, and IndexedDB queuing.
 
+Home Assistant, Node-RED, n8n or any script can also push charging sessions, drives, fill-ups and odometer readings: see the [ingestion API](docs/ingestion-api.md) ([FR](docs/ingestion-api.fr.md)).
+
 ---
 
 ## 🌟 Highlights & Features
