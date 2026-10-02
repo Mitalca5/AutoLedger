@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/teslacost/teslacost/internal/money"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 )
 
 var (
@@ -61,10 +62,10 @@ func (r *Repository) HasDuplicateCharge(ctx context.Context, vehicleID string, t
 	query := `
 		SELECT COUNT(*) FROM charge_logs
 		WHERE vehicle_id = $1
-		  AND ABS(EXTRACT(EPOCH FROM (date - $2))) <= 1800
-		  AND ABS(kwh_added - $3) <= 0.5;
+		  AND ABS(EXTRACT(EPOCH FROM (date - $2))) <= $4
+		  AND ABS(kwh_added - $3) <= $5;
 	`
-	err := r.pool.QueryRow(ctx, query, vehicleID, t, kwh).Scan(&count)
+	err := r.pool.QueryRow(ctx, query, vehicleID, t, kwh, ingest.ChargeTimeWindow.Seconds(), ingest.ChargeKwhDelta).Scan(&count)
 	return count > 0, err
 }
 
@@ -74,10 +75,10 @@ func (r *Repository) HasDuplicateDrive(ctx context.Context, vehicleID string, st
 	query := `
 		SELECT COUNT(*) FROM drives
 		WHERE vehicle_id = $1
-		  AND ABS(EXTRACT(EPOCH FROM (start_time - $2))) <= 900
-		  AND ABS(distance_km - $3) <= 1.0;
+		  AND ABS(EXTRACT(EPOCH FROM (start_time - $2))) <= $4
+		  AND ABS(distance_km - $3) <= $5;
 	`
-	err := r.pool.QueryRow(ctx, query, vehicleID, startTime, distanceKm).Scan(&count)
+	err := r.pool.QueryRow(ctx, query, vehicleID, startTime, distanceKm, ingest.DriveTimeWindow.Seconds(), ingest.DriveKmDelta).Scan(&count)
 	return count > 0, err
 }
 
@@ -87,9 +88,9 @@ func (r *Repository) HasDuplicateFuelLog(ctx context.Context, vehicleID string, 
 	err := r.pool.QueryRow(ctx, `
 		SELECT COUNT(*) FROM fuel_logs
 		WHERE vehicle_id = $1
-		  AND ABS(EXTRACT(EPOCH FROM (date - $2))) <= 1800
+		  AND ABS(EXTRACT(EPOCH FROM (date - $2))) <= $4
 		  AND amount = $3;
-	`, vehicleID, t, amount).Scan(&count)
+	`, vehicleID, t, amount, ingest.FuelTimeWindow.Seconds()).Scan(&count)
 	return count > 0, err
 }
 
@@ -99,8 +100,8 @@ func (r *Repository) HasDuplicateOdometerCheckpoint(ctx context.Context, vehicle
 	err := r.pool.QueryRow(ctx, `
 		SELECT COUNT(*) FROM odometer_checkpoints
 		WHERE vehicle_id = $1
-		  AND ABS(EXTRACT(EPOCH FROM (date::timestamptz - $2))) <= 86400
-		  AND ABS(odometer - $3) < 0.5;
-	`, vehicleID, t, odometer).Scan(&count)
+		  AND ABS(EXTRACT(EPOCH FROM (date::timestamptz - $2))) <= $4
+		  AND ABS(odometer - $3) < $5;
+	`, vehicleID, t, odometer, ingest.OdometerWindow.Seconds(), ingest.OdometerKmDelta).Scan(&count)
 	return count > 0, err
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 	"github.com/teslacost/teslacost/internal/services"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 )
 
 type DriveCostBreakdown struct {
@@ -568,40 +569,20 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.missing_start_time", "Start time is required"))
 		return
 	}
-	if req.DistanceKm <= 0 || req.DistanceKm > 3000 {
+	if !ingest.ValidDriveDistance(req.DistanceKm) {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.invalid_distance", "Distance must be between 0.1 and 3000 km"))
 		return
 	}
 
-	endTime := req.StartTime
-	if req.EndTime != nil && req.EndTime.After(req.StartTime) {
-		endTime = *req.EndTime
-	} else if req.DurationMin != nil && *req.DurationMin > 0 {
-		endTime = req.StartTime.Add(time.Duration(*req.DurationMin) * time.Minute)
-	} else {
-		// Default to 50 km/h average speed
-		duration := int(math.Max(1, math.Round((req.DistanceKm/50.0)*60)))
-		endTime = req.StartTime.Add(time.Duration(duration) * time.Minute)
-	}
-
-	durationMin := int(math.Max(1, math.Round(endTime.Sub(req.StartTime).Minutes())))
-
-	var energy, cons100 float64
-	estimated := req.EnergyConsumedKwh == nil || *req.EnergyConsumedKwh <= 0
-	if estimated {
-		energy, cons100 = services.EstimateDriveEnergy(vehicle.EstimatedKwh100km, req.DistanceKm)
-	} else {
-		energy = *req.EnergyConsumedKwh
-		cons100 = (energy / req.DistanceKm) * 100
-	}
-
-	if req.StartOdometer != nil && req.EndOdometer == nil {
-		endOdo := *req.StartOdometer + req.DistanceKm
-		req.EndOdometer = &endOdo
-	} else if req.EndOdometer != nil && req.StartOdometer == nil {
-		startOdo := *req.EndOdometer - req.DistanceKm
-		req.StartOdometer = &startOdo
-	}
+	timings := ingest.NormalizeDrive(ingest.DriveInput{
+		Start:           req.StartTime,
+		End:             req.EndTime,
+		DurationMin:     req.DurationMin,
+		DistanceKm:      req.DistanceKm,
+		EnergyKwh:       req.EnergyConsumedKwh,
+		VehicleKwh100km: vehicle.EstimatedKwh100km,
+	})
+	req.StartOdometer, req.EndOdometer = ingest.CompleteOdometers(req.StartOdometer, req.EndOdometer, req.DistanceKm)
 
 	tags := req.Tags
 	if tags == nil {
@@ -611,19 +592,19 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 	d := &models.Drive{
 		VehicleID:           vehicleID,
 		StartTime:           req.StartTime,
-		EndTime:             endTime,
+		EndTime:             timings.End,
 		StartOdometer:       req.StartOdometer,
 		EndOdometer:         req.EndOdometer,
 		DistanceKm:          req.DistanceKm,
-		DurationMin:         durationMin,
+		DurationMin:         timings.DurationMin,
 		StartAddress:        req.StartAddress,
 		EndAddress:          req.EndAddress,
-		EnergyConsumedKwh:   &energy,
-		ConsumptionKwh100km: &cons100,
+		EnergyConsumedKwh:   &timings.EnergyKwh,
+		ConsumptionKwh100km: &timings.Kwh100km,
 		Tags:                tags,
 		DriverID:            req.DriverID,
 		IsManual:            true,
-		EnergyEstimated:     estimated,
+		EnergyEstimated:     timings.EnergyEstimated,
 	}
 
 	if err := h.repo.CreateManualDrive(r.Context(), d); err != nil {
@@ -669,7 +650,7 @@ func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
 		existing.StartTime = req.StartTime
 	}
 	if req.DistanceKm > 0 {
-		if req.DistanceKm > 3000 {
+		if !ingest.ValidDriveDistance(req.DistanceKm) {
 			writeAPIError(w, http.StatusBadRequest, apierror.New("drive.invalid_distance", "Distance must be between 0.1 and 3000 km"))
 			return
 		}
@@ -681,22 +662,22 @@ func (h *DriveHandler) Update(w http.ResponseWriter, r *http.Request) {
 	} else if req.DurationMin != nil && *req.DurationMin > 0 {
 		existing.EndTime = existing.StartTime.Add(time.Duration(*req.DurationMin) * time.Minute)
 	}
-	existing.DurationMin = int(math.Max(1, math.Round(existing.EndTime.Sub(existing.StartTime).Minutes())))
+	existing.DurationMin = ingest.DurationMinutes(existing.StartTime, existing.EndTime)
 
 	if req.EnergyConsumedKwh != nil && *req.EnergyConsumedKwh > 0 {
 		energy := *req.EnergyConsumedKwh
-		cons100 := (energy / existing.DistanceKm) * 100
+		cons100 := ingest.Consumption100km(energy, existing.DistanceKm)
 		existing.EnergyConsumedKwh = &energy
 		existing.ConsumptionKwh100km = &cons100
 		existing.EnergyEstimated = false
 	} else if existing.EnergyEstimated {
 		// Keep an estimated energy in line with the (possibly edited) distance and the vehicle's current estimate
-		energy, cons100 := services.EstimateDriveEnergy(vehicle.EstimatedKwh100km, existing.DistanceKm)
+		energy, cons100 := ingest.EstimateDriveEnergy(vehicle.EstimatedKwh100km, existing.DistanceKm)
 		existing.EnergyConsumedKwh = &energy
 		existing.ConsumptionKwh100km = &cons100
 	} else if existing.EnergyConsumedKwh != nil && *existing.EnergyConsumedKwh > 0 {
 		// A typed energy stays, its consumption follows the distance
-		cons100 := (*existing.EnergyConsumedKwh / existing.DistanceKm) * 100
+		cons100 := ingest.Consumption100km(*existing.EnergyConsumedKwh, existing.DistanceKm)
 		existing.ConsumptionKwh100km = &cons100
 	}
 

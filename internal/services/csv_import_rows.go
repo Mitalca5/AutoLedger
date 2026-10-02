@@ -11,18 +11,15 @@ import (
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 )
 
 const (
-	kmPerMile      = 1.609344
-	maxOdometerKm  = 2_000_000
-	maxDriveKm     = 3000
-	maxChargeKwh   = 1000
-	maxFxRate      = 999_999
-	maxFuelLiters  = 500
-	maxFuelPrice   = 10
-	assumedAvgKmh  = 50.0
-	minutesPerHour = 60
+	kmPerMile     = 1.609344
+	maxOdometerKm = 2_000_000
+	maxFxRate     = 999_999
+	maxFuelLiters = 500
+	maxFuelPrice  = 10
 )
 
 var currencyCode = regexp.MustCompile(`^[A-Z]{3}$`)
@@ -126,8 +123,8 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 
 	kwhRaw := rc.col(row, "kwh", "kwh_added", "energy", "energy_kwh")
 	kwh, err := parseFlexibleFloat(kwhRaw)
-	if err != nil || kwh <= 0 || kwh > maxChargeKwh {
-		return nil, apierror.Newf("import.row.invalid_kwh", "Line %d: invalid energy %q (0 to %d kWh)", line, kwhRaw, maxChargeKwh)
+	if err != nil || !ingest.ValidChargeEnergy(kwh) {
+		return nil, apierror.Newf("import.row.invalid_kwh", "Line %d: invalid energy %q (0 to %d kWh)", line, kwhRaw, ingest.MaxChargeKwh)
 	}
 
 	costRaw := rc.col(row, "cost", "amount", "price", "total_cost")
@@ -187,33 +184,29 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 	}
 
 	dist, found, err := rc.distance(row, "distance", "dist")
-	if !found || err != nil || dist <= 0 || dist > maxDriveKm {
-		return nil, apierror.Newf("import.row.invalid_distance", "Line %d: invalid distance (0 to %d km)", line, maxDriveKm)
+	if !found || err != nil || !ingest.ValidDriveDistance(dist) {
+		return nil, apierror.Newf("import.row.invalid_distance", "Line %d: invalid distance (0 to %d km)", line, ingest.MaxDriveKm)
 	}
 
-	endTime := startTime
+	var endTime *time.Time
 	if endStr := rc.col(row, "end_time", "end"); endStr != "" {
-		if et, err := parseFlexibleTime(endStr, rc.loc); err == nil && et.After(startTime) {
-			endTime = et
+		if et, err := parseFlexibleTime(endStr, rc.loc); err == nil {
+			endTime = &et
 		}
 	}
-	if endTime.Equal(startTime) {
-		duration := int(math.Max(1, math.Round((dist/assumedAvgKmh)*minutesPerHour)))
-		endTime = startTime.Add(time.Duration(duration) * time.Minute)
-	}
-	durationMin := int(math.Max(1, math.Round(endTime.Sub(startTime).Minutes())))
-
-	var energy, cons100 float64
+	var typedEnergy *float64
 	if kwhStr := rc.col(row, "kwh", "energy", "energy_consumed_kwh"); kwhStr != "" {
-		if parsed, err := parseFlexibleFloat(kwhStr); err == nil && parsed > 0 {
-			energy = parsed
-			cons100 = (energy / dist) * 100
+		if parsed, err := parseFlexibleFloat(kwhStr); err == nil {
+			typedEnergy = &parsed
 		}
 	}
-	estimated := energy == 0
-	if estimated {
-		energy, cons100 = EstimateDriveEnergy(rc.vehicle.EstimatedKwh100km, dist)
-	}
+	timings := ingest.NormalizeDrive(ingest.DriveInput{
+		Start:           startTime,
+		End:             endTime,
+		DistanceKm:      dist,
+		EnergyKwh:       typedEnergy,
+		VehicleKwh100km: rc.vehicle.EstimatedKwh100km,
+	})
 
 	tags := []string{}
 	if tag := rc.col(row, "tag", "tags", "purpose"); tag != "" {
@@ -223,15 +216,15 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 	drive := &models.Drive{
 		VehicleID:           rc.vehicle.ID,
 		StartTime:           startTime,
-		EndTime:             endTime,
+		EndTime:             timings.End,
 		DistanceKm:          dist,
-		DurationMin:         durationMin,
+		DurationMin:         timings.DurationMin,
 		StartAddress:        optionalText(rc.col(row, "start_address", "start_location", "origin")),
 		EndAddress:          optionalText(rc.col(row, "end_address", "end_location", "destination")),
-		EnergyConsumedKwh:   &energy,
-		ConsumptionKwh100km: &cons100,
+		EnergyConsumedKwh:   &timings.EnergyKwh,
+		ConsumptionKwh100km: &timings.Kwh100km,
 		Tags:                tags,
-		EnergyEstimated:     estimated,
+		EnergyEstimated:     timings.EnergyEstimated,
 		Origin:              "CSV",
 	}
 	return &parsedRow{

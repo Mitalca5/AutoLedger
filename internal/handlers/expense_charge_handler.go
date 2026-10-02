@@ -10,6 +10,7 @@ import (
 	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 )
 
 func (h *ExpenseHandler) ListCharges(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +78,7 @@ func buildCharge(vehicleID, baseCurrency string, req *SaveChargeRequest) (*model
 	if endDate != nil && endDate.Before(date) {
 		return nil, apierror.New("charge.end_before_start", "The end of the charge is before its start")
 	}
-	if err := validateQuantity(req.KwhAdded, 1000); err != nil {
+	if err := validateQuantity(req.KwhAdded, ingest.MaxChargeKwh); err != nil {
 		return nil, apierror.New("charge.energy_invalid", "Invalid energy added")
 	}
 	if req.Cost != nil {
