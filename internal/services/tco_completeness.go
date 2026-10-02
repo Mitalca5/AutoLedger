@@ -79,20 +79,33 @@ func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 		key, label string
 		weight     float64
 		score      float64
+		neutral    bool
 	}{
-		{"energy", energyLabel, 0.30, energyScore},
-		{"distance", distanceLabel, 0.20, distance},
-		{"tolls", "Motorway drives qualified", 0.15, completion(float64(in.unqualifiedDrives), float64(in.highwayDrives))},
-		{"insurance", "Insurance entered", 0.10, boolScore(in.insurancePresent)},
-		{"acquisition", "Acquisition and depreciation entered", 0.10, boolScore(in.acquisitionComplete)},
-		{"odometer", "Odometer continuity", 0.10, completion(float64(in.odometerAnomalies), float64(in.drivesWithOdometer))},
-		{"currency", "Expenses converted to euros", 0.05, completion(float64(in.unconvertedEntries), float64(in.pricedEntries+in.unconvertedEntries))},
+		{"energy", energyLabel, 0.30, energyScore, false},
+		{"distance", distanceLabel, 0.20, distance, false},
+		{"tolls", "Motorway drives qualified", 0.15, completion(float64(in.unqualifiedDrives), float64(in.highwayDrives)), in.highwayDrives == 0},
+		{"insurance", "Insurance entered", 0.10, boolScore(in.insurancePresent), false},
+		{"acquisition", "Acquisition and depreciation entered", 0.10, boolScore(in.acquisitionComplete), false},
+		{"odometer", "Odometer continuity", 0.10, completion(float64(in.odometerAnomalies), float64(in.drivesWithOdometer)), false},
+		{"currency", "Expenses converted to euros", 0.05, completion(float64(in.unconvertedEntries), float64(in.pricedEntries+in.unconvertedEntries)), false},
+	}
+	// A dimension with nothing to evaluate (no motorway drive to qualify) is left out and the others share its
+	// weight, so it neither inflates nor deflates the score.
+	var applicable float64
+	for _, d := range dims {
+		if !d.neutral {
+			applicable += d.weight
+		}
 	}
 	var total float64
 	out := make([]CompletenessDimension, 0, len(dims))
 	for _, d := range dims {
-		total += d.weight * d.score
-		out = append(out, CompletenessDimension{Key: d.key, Label: d.label, ScorePct: int(math.Round(d.score * 100)), Weight: d.weight})
+		weight := 0.0
+		if !d.neutral {
+			weight = d.weight / applicable
+			total += weight * d.score
+		}
+		out = append(out, CompletenessDimension{Key: d.key, Label: d.label, ScorePct: int(math.Round(d.score * 100)), Weight: weight, Applicable: !d.neutral})
 	}
 	return int(math.Round(total * 100)), out
 }

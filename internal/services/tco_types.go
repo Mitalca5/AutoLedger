@@ -86,6 +86,8 @@ type CompletenessDimension struct {
 	Label    string  `json:"label"`
 	ScorePct int     `json:"score_pct"`
 	Weight   float64 `json:"weight"`
+	// Applicable is false when there is nothing to evaluate for the dimension; it then carries no weight.
+	Applicable bool `json:"applicable"`
 }
 
 // TCOSummary represents the global TCO calculation, built from the cost_ledger view.

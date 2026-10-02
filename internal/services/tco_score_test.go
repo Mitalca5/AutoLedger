@@ -20,6 +20,9 @@ func TestCompletenessScore(t *testing.T) {
 	if score != 68 {
 		t.Fatalf("expected 67.5 rounded to 68, got %d", score)
 	}
+	if !dims[2].Applicable || dims[2].Weight != 0.15 {
+		t.Fatalf("tolls apply with motorway drives and keep their weight, got %+v", dims[2])
+	}
 	if dims[0].Key != "energy" || dims[0].ScorePct != 50 {
 		t.Fatalf("unexpected energy dimension: %+v", dims[0])
 	}
@@ -49,8 +52,8 @@ func TestCompletenessScoreCombustionVehicle(t *testing.T) {
 	}
 
 	in.iceFillUps = 0
-	if score, _ := completenessScore(in); score != 70 {
-		t.Errorf("score without any fill-up = %d, want 70 (energy dimension lost)", score)
+	if score, _ := completenessScore(in); score != 65 {
+		t.Errorf("score without any fill-up = %d, want 65 (energy 0.30 of the 0.85 left without tolls)", score)
 	}
 }
 
@@ -102,5 +105,33 @@ func TestCompletenessScoreManualEV(t *testing.T) {
 		if d.ScorePct != 100 {
 			t.Errorf("expected dimension %s to be 100%%, got %d%%", d.Key, d.ScorePct)
 		}
+	}
+}
+
+func TestCompletenessScoreNeutralisesTollsWithoutMotorwayDrives(t *testing.T) {
+	in := completenessInputs{
+		kwhAdded: 100, kwhPriced: 100, trackedKm: 1000, basisKm: 1000,
+		insurancePresent: false, acquisitionComplete: true,
+	}
+	score, dims := completenessScore(in)
+	// 0.10 of the remaining 0.85 is missing: 1 - 0.10/0.85 = 88.2 %, not the 90 % the tolls weight would give.
+	if score != 88 {
+		t.Fatalf("score = %d, want 88 with the tolls weight shared by the other dimensions", score)
+	}
+	var sum float64
+	for _, d := range dims {
+		sum += d.Weight
+		if d.Key == "tolls" && (d.Applicable || d.Weight != 0) {
+			t.Errorf("tolls must be neutral without motorway drives, got %+v", d)
+		}
+	}
+	if sum < 0.999 || sum > 1.001 {
+		t.Errorf("weights must still add up to 1, got %v", sum)
+	}
+
+	in.highwayDrives, in.unqualifiedDrives = 2, 2
+	score, _ = completenessScore(in)
+	if score != 75 { // tolls 0 % (−15) and insurance missing (−10)
+		t.Errorf("score with two unqualified motorway drives = %d, want 75", score)
 	}
 }

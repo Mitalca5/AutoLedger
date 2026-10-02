@@ -43,7 +43,7 @@ const issueLabels: Record<string, () => string> = {
         <AlertTriangle v-else class="w-4 h-4" />
         <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
         <span
-          v-if="vehicleStore.activeVehicle?.telemetry_mode === 'MANUAL'"
+          v-if="['MANUAL', 'SEMI_AUTO'].includes(vehicleStore.activeVehicle?.telemetry_mode)"
           class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
         >
           {{ $t('dashboard.dataQualityCard.manualTrackingNotice') }}
@@ -95,10 +95,11 @@ const issueLabels: Record<string, () => string> = {
       </router-link>
       <router-link
         v-if="tco.powertrain !== 'ICE' && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
-        to="/vehicles"
+        to="/manual?tab=ENERGY"
+        :title="$t('dashboard.dataQualityCard.enterAverageConsumptionHint')"
         class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
       >
-        {{ $t('dashboard.dataQualityCard.estimateTheUntrackedEnergy') }}
+        {{ $t('dashboard.dataQualityCard.enterAverageConsumption') }}
       </router-link>
       <button
         v-if="tco.completeness.odometer_gaps > 0 || tco.completeness.odometer_anomalies > 0"

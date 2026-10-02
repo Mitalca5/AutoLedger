@@ -21,7 +21,8 @@
     "fixedVariableRatio": "{fixedPct}% fixed • {variablePct}% variable"
   },
   "dataQualityCard": {
-    "estimateTheUntrackedEnergy": "Estimate the untracked energy",
+    "enterAverageConsumption": "Enter average consumption",
+    "enterAverageConsumptionHint": "The distance driven without a recorded drive has no energy cost. Enter your average consumption and electricity rate to estimate it.",
     "enterAFillUp": "Enter a fill-up",
     "enterTheAcquisition": "Enter the acquisition",
     "enterTheInsurance": "Enter the insurance",

@@ -21,7 +21,8 @@
     "fixedVariableRatio": "{fixedPct} % fixes • {variablePct} % variables"
   },
   "dataQualityCard": {
-    "estimateTheUntrackedEnergy": "Estimer l'énergie non suivie",
+    "enterAverageConsumption": "Saisir la consommation moyenne",
+    "enterAverageConsumptionHint": "La distance parcourue sans trajet enregistré n'a pas de coût énergétique. Saisissez votre consommation moyenne et votre tarif d'électricité pour l'estimer.",
     "enterAFillUp": "Saisir un plein",
     "enterTheAcquisition": "Renseigner l'acquisition",
     "enterTheInsurance": "Renseigner l'assurance",
