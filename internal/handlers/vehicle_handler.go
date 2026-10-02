@@ -623,3 +623,23 @@ func (h *VehicleHandler) GetOdometerEstimate(w http.ResponseWriter, r *http.Requ
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"odometer": math.Round(km), "source": source})
 }
+
+// GetDataSources summarises where a vehicle's data comes from: whether a TeslaMate connection is set up
+// (visible to the owner only) and what each origin has written so far.
+func (h *VehicleHandler) GetDataSources(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	vehicle, err := h.repo.GetVehicleByID(r.Context(), chi.URLParam(r, "id"), userID)
+	if err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
+		return
+	}
+	activity, err := h.repo.ListSourceActivity(r.Context(), vehicle.ID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to load data sources")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"teslamate_configured": vehicle.Role == models.RoleOwner && vehicle.TeslaMateAPIURL != nil && strings.TrimSpace(*vehicle.TeslaMateAPIURL) != "",
+		"activity":             activity,
+	})
+}

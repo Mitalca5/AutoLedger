@@ -5,7 +5,7 @@ import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceVal
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
-import { Car, Plus, Trash2, Edit2, RefreshCw, CheckCircle2, AlertCircle, X, Gauge, Link2, FileText, Zap, Users, Pencil } from 'lucide-vue-next'
+import { Car, Plus, Trash2, Edit2, RefreshCw, CheckCircle2, AlertCircle, X, Gauge, Link2, FileText, Zap, Users, Pencil, Database } from 'lucide-vue-next'
 import { ownershipSummary, roleLabel } from '@/utils/vehicles'
 
 // One vehicle of the list, with its contract summary and a TeslaMate connection test of its own
@@ -15,6 +15,7 @@ const emit = defineEmits<{
   delete: [vehicleId: string]
   members: [vehicle: any]
   ownership: [vehicle: any]
+  dataSources: [vehicle: any]
 }>()
 const vehicleStore = useVehicleStore()
 
@@ -177,6 +178,13 @@ function clearCardTestResult() {
       >
         <FileText class="w-3.5 h-3.5 text-indigo-400" />
         <span>{{ $t('vehicles.vehicleCard.acquisitionAndFinancing') }}</span>
+      </button>
+      <button
+        @click="emit('dataSources', v)"
+        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+      >
+        <Database class="w-3.5 h-3.5 text-cyan-400" />
+        <span>{{ $t('vehicles.vehicleCard.dataSources') }}</span>
       </button>
       <router-link
         to="/manual"

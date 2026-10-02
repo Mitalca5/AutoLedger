@@ -174,6 +174,7 @@ export const api = {
   testTeslaMateRaw: (payload: any) =>
     request<any>('/vehicles/test-connection', { method: 'POST', body: JSON.stringify(payload) }),
   syncVehicle: (id: string) => request<any>(`/vehicles/${id}/sync`, { method: 'POST' }),
+  getDataSources: (id: string) => request<{ teslamate_configured: boolean; activity: any[] }>(`/vehicles/${id}/data-sources`),
   getSyncStatus: (id: string) => request<any>(`/vehicles/${id}/sync`),
   getOwnership: (id: string) => request<any>(`/vehicles/${id}/ownership`),
   saveOwnership: (id: string, data: any) =>

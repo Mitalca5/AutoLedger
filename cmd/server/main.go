@@ -456,6 +456,7 @@ func main() {
 				r.Put("/{id}/estimated-energy", vehicleHandler.UpdateEstimatedEnergy)
 				r.Get("/{id}/odometer-at", vehicleHandler.GetOdometerAtDate)
 				r.Get("/{id}/odometer-estimate", vehicleHandler.GetOdometerEstimate)
+				r.Get("/{id}/data-sources", vehicleHandler.GetDataSources)
 				r.Get("/{vehicleId}/data-quality", tcoHandler.GetDataQuality)
 
 				// Shared Vehicle Members

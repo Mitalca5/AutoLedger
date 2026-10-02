@@ -26,7 +26,8 @@
     "configured": "Configured",
     "managedByAdmin": "Managed by the administrator",
     "testing": "Testing...",
-    "testApi": "Test the API"
+    "testApi": "Test the API",
+    "dataSources": "Data sources"
   },
   "vehicleFormModal": {
     "connectionFailed": "Connection failed:",
@@ -208,5 +209,23 @@
   "testSuccess": "Connection successful! Status: {state} ({odometer} {unit})",
   "leaseSummary": "{rent}/month over {months} months",
   "homeChargerDefaultLabel": "Default EV for household home charger",
-  "homeChargerDefaultHint": "Automatically assign unassigned sessions from your home charger to this vehicle"
+  "homeChargerDefaultHint": "Automatically assign unassigned sessions from your home charger to this vehicle",
+  "vehicleDataSourcesModal": {
+    "title": "Data sources",
+    "teslamate": "TeslaMate",
+    "teslamateHint": "Drives and charging sessions are synchronized from the teslamateapi of your TeslaMate instance.",
+    "editConnection": "Edit connection",
+    "connect": "Connect TeslaMate",
+    "activity": "What each source has recorded",
+    "origin": {
+      "TESLAMATE": "TeslaMate synchronization",
+      "WEBHOOK": "Integration (Home Assistant, webhook)",
+      "CSV": "CSV import",
+      "MANUAL": "Manual entries"
+    },
+    "lastData": "Last: {date}",
+    "never": "never",
+    "counts": "{drives} drives · {charges} charges · {readings} odometer readings",
+    "empty": "Nothing recorded for this vehicle yet."
+  }
 }

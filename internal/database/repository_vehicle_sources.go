@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/models"
 )
@@ -108,4 +109,48 @@ func (r *Repository) loadTeslaMateSources(ctx context.Context, vehicles []*model
 		v.TeslaMateAPIKeyEncrypted, v.TeslaMateBasicPassEnc = s.secret, s.basicSec
 	}
 	return nil
+}
+
+// SourceActivity is what one origin (TESLAMATE, WEBHOOK, CSV, MANUAL) has written for a vehicle.
+type SourceActivity struct {
+	Origin           string     `json:"origin"`
+	Drives           int        `json:"drives"`
+	Charges          int        `json:"charges"`
+	OdometerReadings int        `json:"odometer_readings"`
+	LastAt           *time.Time `json:"last_at,omitempty"`
+}
+
+// ListSourceActivity counts the drives, charges and odometer readings each origin wrote for a vehicle.
+// An origin that wrote nothing is absent.
+func (r *Repository) ListSourceActivity(ctx context.Context, vehicleID string) ([]SourceActivity, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT origin,
+		       COUNT(*) FILTER (WHERE kind = 'drive'),
+		       COUNT(*) FILTER (WHERE kind = 'charge'),
+		       COUNT(*) FILTER (WHERE kind = 'odometer'),
+		       MAX(at)
+		FROM (
+			SELECT origin, 'drive' AS kind, start_time AS at FROM drives WHERE vehicle_id = $1
+			UNION ALL
+			SELECT origin, 'charge', date FROM charge_logs WHERE vehicle_id = $1
+			UNION ALL
+			SELECT CASE source WHEN 'HA' THEN 'WEBHOOK' ELSE 'MANUAL' END, 'odometer', date::timestamptz
+			FROM odometer_checkpoints WHERE vehicle_id = $1
+		) x
+		GROUP BY origin
+		ORDER BY origin;
+	`, vehicleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []SourceActivity{}
+	for rows.Next() {
+		var a SourceActivity
+		if err := rows.Scan(&a.Origin, &a.Drives, &a.Charges, &a.OdometerReadings, &a.LastAt); err != nil {
+			return nil, err
+		}
+		out = append(out, a)
+	}
+	return out, rows.Err()
 }

@@ -9,6 +9,7 @@ import VehicleCard from '@/components/vehicles/VehicleCard.vue'
 import VehicleFormModal from '@/components/vehicles/VehicleFormModal.vue'
 import OwnershipWizardModal from '@/components/vehicles/OwnershipWizardModal.vue'
 import VehicleMembersModal from '@/components/vehicles/VehicleMembersModal.vue'
+import VehicleDataSourcesModal from '@/components/vehicles/VehicleDataSourcesModal.vue'
 import { Plus } from 'lucide-vue-next'
 
 // The page owns the vehicle list, the acquisition contracts and which modal is open; each modal owns its form
@@ -30,6 +31,8 @@ const ownershipVehicle = ref<any | null>(null)
 // Shared vehicle members
 const showMembersModal = ref(false)
 const membersVehicle = ref<any | null>(null)
+const showDataSourcesModal = ref(false)
+const dataSourcesVehicle = ref<any | null>(null)
 
 async function loadOwnerships() {
   const entries = await Promise.all(
@@ -111,6 +114,11 @@ function onOwnershipDeleted() {
   vehicleStore.lastSyncTimestamp = Date.now()
 }
 
+function openDataSourcesModal(v: any) {
+  dataSourcesVehicle.value = v
+  showDataSourcesModal.value = true
+}
+
 function openMembersModal(v: any) {
   membersVehicle.value = v
   showMembersModal.value = true
@@ -145,6 +153,7 @@ function openMembersModal(v: any) {
         @edit="openEditModal"
         @delete="handleDelete"
         @members="openMembersModal"
+        @data-sources="openDataSourcesModal"
         @ownership="openOwnershipModal"
       />
     </div>
@@ -160,5 +169,7 @@ function openMembersModal(v: any) {
     />
 
     <VehicleMembersModal v-model:open="showMembersModal" :vehicle="membersVehicle" />
+
+    <VehicleDataSourcesModal v-model:open="showDataSourcesModal" :vehicle="dataSourcesVehicle" @edit="openEditModal" />
   </div>
 </template>

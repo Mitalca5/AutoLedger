@@ -26,7 +26,8 @@
     "configured": "Configurée",
     "managedByAdmin": "Gérée par l'administrateur",
     "testing": "Test...",
-    "testApi": "Tester l'API"
+    "testApi": "Tester l'API",
+    "dataSources": "Sources de données"
   },
   "vehicleFormModal": {
     "connectionFailed": "Échec de la connexion :",
@@ -208,5 +209,23 @@
   "testSuccess": "Connexion réussie ! Statut : {state} ({odometer} {unit})",
   "leaseSummary": "{rent}/mois sur {months} mois",
   "homeChargerDefaultLabel": "Véhicule principal pour la borne à domicile",
-  "homeChargerDefaultHint": "Attribue automatiquement les recharges de votre borne non qualifiées à ce véhicule"
+  "homeChargerDefaultHint": "Attribue automatiquement les recharges de votre borne non qualifiées à ce véhicule",
+  "vehicleDataSourcesModal": {
+    "title": "Sources de données",
+    "teslamate": "TeslaMate",
+    "teslamateHint": "Les trajets et les recharges sont synchronisés depuis le teslamateapi de votre instance TeslaMate.",
+    "editConnection": "Modifier la connexion",
+    "connect": "Connecter TeslaMate",
+    "activity": "Ce que chaque source a enregistré",
+    "origin": {
+      "TESLAMATE": "Synchronisation TeslaMate",
+      "WEBHOOK": "Intégration (Home Assistant, webhook)",
+      "CSV": "Import CSV",
+      "MANUAL": "Saisies manuelles"
+    },
+    "lastData": "Dernière : {date}",
+    "never": "jamais",
+    "counts": "{drives} trajets · {charges} recharges · {readings} relevés kilométriques",
+    "empty": "Rien d'enregistré pour ce véhicule pour l'instant."
+  }
 }
