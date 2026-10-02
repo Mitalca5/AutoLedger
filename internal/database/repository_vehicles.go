@@ -35,9 +35,10 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	} else if v.TeslaMateCarID == nil && v.TeslaMateAPIURL != nil && strings.TrimSpace(*v.TeslaMateAPIURL) != "" {
 		var nextCarID int
 		err := tx.QueryRow(ctx, `
-			SELECT COALESCE(MAX(teslamate_car_id), 0) + 1
-			FROM vehicles
-			WHERE user_id = $1
+			SELECT COALESCE(MAX((s.config->>'car_id')::int), 0) + 1
+			FROM vehicle_data_sources s
+			JOIN vehicles v ON v.id = s.vehicle_id
+			WHERE v.user_id = $1 AND s.provider = 'TESLAMATE'
 		`, v.UserID).Scan(&nextCarID)
 		if err == nil && nextCarID > 0 {
 			v.TeslaMateCarID = &nextCarID
@@ -49,21 +50,17 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	}
 	query := `
 		INSERT INTO vehicles (
-			user_id, name, vin, teslamate_car_id, current_odometer,
-			teslamate_api_url, teslamate_auth_type, teslamate_api_key_encrypted,
-			teslamate_basic_user, teslamate_basic_pass_encrypted,
+			user_id, name, vin, current_odometer,
 			estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain,
-			telemetry_mode, make, model, teslamate_grafana_url,
+			telemetry_mode, make, model,
 			default_driver_id, tariff_plan_id, is_home_charger_default
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 		RETURNING id, created_at, updated_at;
 	`
 	err = tx.QueryRow(ctx, query,
-		v.UserID, v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
-		v.TeslaMateAPIURL, v.TeslaMateAuthType, v.TeslaMateAPIKeyEncrypted,
-		v.TeslaMateBasicUser, v.TeslaMateBasicPassEnc,
+		v.UserID, v.Name, v.Vin, v.CurrentOdometer,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Currency, v.Powertrain,
-		v.TelemetryMode, v.Make, v.Model, v.TeslaMateGrafanaURL,
+		v.TelemetryMode, v.Make, v.Model,
 		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
 	).Scan(&v.ID, &v.CreatedAt, &v.UpdatedAt)
 	if err != nil {
@@ -123,11 +120,9 @@ func (r *Repository) loadSourcesInto(ctx context.Context, list []models.Vehicle)
 
 func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([]models.Vehicle, error) {
 	query := `
-		SELECT v.id, v.user_id, v.name, v.vin, v.teslamate_car_id, v.current_odometer,
-		       v.teslamate_api_url, v.teslamate_auth_type, v.teslamate_api_key_encrypted,
-		       v.teslamate_basic_user, v.teslamate_basic_pass_encrypted,
+		SELECT v.id, v.user_id, v.name, v.vin, v.current_odometer,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
-		       v.telemetry_mode, v.make, v.model, v.teslamate_grafana_url,
+		       v.telemetry_mode, v.make, v.model,
 		       v.default_driver_id, v.tariff_plan_id, v.is_home_charger_default,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $1 THEN 'OWNER' ELSE 'VIEWER' END) as role
@@ -147,11 +142,9 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 		var v models.Vehicle
 		var role string
 		if err := rows.Scan(
-			&v.ID, &v.UserID, &v.Name, &v.Vin, &v.TeslaMateCarID, &v.CurrentOdometer,
-			&v.TeslaMateAPIURL, &v.TeslaMateAuthType, &v.TeslaMateAPIKeyEncrypted,
-			&v.TeslaMateBasicUser, &v.TeslaMateBasicPassEnc,
+			&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 			&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
-			&v.TelemetryMode, &v.Make, &v.Model, &v.TeslaMateGrafanaURL,
+			&v.TelemetryMode, &v.Make, &v.Model,
 			&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault,
 			&v.CreatedAt, &v.UpdatedAt, &role,
 		); err != nil {
@@ -182,11 +175,9 @@ func (r *Repository) ListAllVehiclesWithTeslaMate(ctx context.Context) ([]models
 func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*models.Vehicle, error) {
 	var v models.Vehicle
 	query := `
-		SELECT v.id, v.user_id, v.name, v.vin, v.teslamate_car_id, v.current_odometer,
-		       v.teslamate_api_url, v.teslamate_auth_type, v.teslamate_api_key_encrypted,
-		       v.teslamate_basic_user, v.teslamate_basic_pass_encrypted,
+		SELECT v.id, v.user_id, v.name, v.vin, v.current_odometer,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
-		       v.telemetry_mode, v.make, v.model, v.teslamate_grafana_url,
+		       v.telemetry_mode, v.make, v.model,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $2 THEN 'OWNER' ELSE 'VIEWER' END) as role
 		FROM vehicles v
@@ -195,11 +186,9 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	`
 	var role string
 	err := r.pool.QueryRow(ctx, query, id, userID).Scan(
-		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.TeslaMateCarID, &v.CurrentOdometer,
-		&v.TeslaMateAPIURL, &v.TeslaMateAuthType, &v.TeslaMateAPIKeyEncrypted,
-		&v.TeslaMateBasicUser, &v.TeslaMateBasicPassEnc,
+		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
-		&v.TelemetryMode, &v.Make, &v.Model, &v.TeslaMateGrafanaURL,
+		&v.TelemetryMode, &v.Make, &v.Model,
 		&v.CreatedAt, &v.UpdatedAt, &role,
 	)
 	if err != nil {
@@ -236,16 +225,13 @@ func (r *Repository) GetVehicleByIDInternal(ctx context.Context, id string) (*mo
 func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error {
 	query := `
 		UPDATE vehicles
-		SET name = $1, vin = $2, teslamate_car_id = $3, current_odometer = $4,
-		    teslamate_api_url = $5, teslamate_auth_type = $6,
-		    teslamate_api_key_encrypted = $7, teslamate_basic_user = $8,
-		    teslamate_basic_pass_encrypted = $9,
-		    estimated_kwh_100km = $10, estimated_price_per_kwh = $11,
-		    powertrain = $12, telemetry_mode = $13, make = $14, model = $15,
-		    teslamate_grafana_url = $16, default_driver_id = $17, tariff_plan_id = $18,
-		    is_home_charger_default = $19,
+		SET name = $1, vin = $2, current_odometer = $3,
+		    estimated_kwh_100km = $4, estimated_price_per_kwh = $5,
+		    powertrain = $6, telemetry_mode = $7, make = $8, model = $9,
+		    default_driver_id = $10, tariff_plan_id = $11,
+		    is_home_charger_default = $12,
 		    updated_at = NOW()
-		WHERE id = $20;
+		WHERE id = $13;
 	`
 	v.TelemetryMode = v.DerivedTelemetryMode()
 	tx, err := r.pool.Begin(ctx)
@@ -254,11 +240,9 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 	}
 	defer tx.Rollback(ctx)
 	tag, err := tx.Exec(ctx, query,
-		v.Name, v.Vin, v.TeslaMateCarID, v.CurrentOdometer,
-		v.TeslaMateAPIURL, v.TeslaMateAuthType, v.TeslaMateAPIKeyEncrypted,
-		v.TeslaMateBasicUser, v.TeslaMateBasicPassEnc,
+		v.Name, v.Vin, v.CurrentOdometer,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Powertrain,
-		v.TelemetryMode, v.Make, v.Model, v.TeslaMateGrafanaURL,
+		v.TelemetryMode, v.Make, v.Model,
 		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
 		v.ID,
 	)

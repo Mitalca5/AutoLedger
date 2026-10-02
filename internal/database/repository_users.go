@@ -392,22 +392,18 @@ func (r *Repository) CleanupExpiredRefreshTokens(ctx context.Context) (int64, er
 // ============================================================================
 
 const vehicleColumns = `
-	id, user_id, name, vin, teslamate_car_id, current_odometer,
-	teslamate_api_url, teslamate_auth_type, teslamate_api_key_encrypted,
-	teslamate_basic_user, teslamate_basic_pass_encrypted,
+	id, user_id, name, vin, current_odometer,
 	estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain,
-	telemetry_mode, make, model, teslamate_grafana_url,
+	telemetry_mode, make, model,
 	default_driver_id, tariff_plan_id, is_home_charger_default,
 	created_at, updated_at
 `
 
 func scanVehicle(row pgx.Row, v *models.Vehicle) error {
 	return row.Scan(
-		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.TeslaMateCarID, &v.CurrentOdometer,
-		&v.TeslaMateAPIURL, &v.TeslaMateAuthType, &v.TeslaMateAPIKeyEncrypted,
-		&v.TeslaMateBasicUser, &v.TeslaMateBasicPassEnc,
+		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
-		&v.TelemetryMode, &v.Make, &v.Model, &v.TeslaMateGrafanaURL,
+		&v.TelemetryMode, &v.Make, &v.Model,
 		&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault,
 		&v.CreatedAt, &v.UpdatedAt,
 	)
