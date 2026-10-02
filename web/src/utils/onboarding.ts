@@ -1,0 +1,57 @@
+export type Powertrain = 'EV' | 'ICE'
+export type TeslaMateAuthType = 'BEARER' | 'BASIC' | 'NONE'
+
+export interface TeslaMateForm {
+  enabled: boolean
+  url: string
+  authType: TeslaMateAuthType
+  apiKey: string
+  user: string
+  pass: string
+}
+
+export interface OnboardingVehicleForm {
+  name: string
+  make: string
+  model: string
+  vin: string
+  powertrain: Powertrain
+  odometer: number | string
+  teslamate: TeslaMateForm
+}
+
+export function emptyTeslaMateForm(): TeslaMateForm {
+  return { enabled: false, url: '', authType: 'NONE', apiKey: '', user: '', pass: '' }
+}
+
+// Only electric vehicles can use TeslaMate; combustion vehicles skip the data sources step.
+export function offersDataSources(powertrain: Powertrain): boolean {
+  return powertrain === 'EV'
+}
+
+export function teslaMateCredentials(tm: Pick<TeslaMateForm, 'authType' | 'apiKey' | 'user' | 'pass'>) {
+  if (tm.authType === 'BEARER') return { teslamate_api_key: tm.apiKey }
+  if (tm.authType === 'BASIC') return { teslamate_basic_user: tm.user, teslamate_basic_pass: tm.pass }
+  return {}
+}
+
+// telemetry_mode is derived by the server from the connected sources, never sent by the client.
+export function buildVehiclePayload(form: OnboardingVehicleForm): Record<string, unknown> {
+  const tm = form.teslamate
+  const withTeslaMate = offersDataSources(form.powertrain) && tm.enabled && tm.url.trim() !== ''
+  const payload: Record<string, unknown> = {
+    name: form.name,
+    powertrain: form.powertrain,
+    make: form.make,
+    model: form.model,
+    vin: form.vin || undefined,
+    current_odometer: Number(form.odometer) || 0,
+    teslamate_auth_type: withTeslaMate ? tm.authType : 'NONE',
+  }
+  if (withTeslaMate) {
+    payload.teslamate_api_url = tm.url
+    payload.teslamate_car_id = 1
+    Object.assign(payload, teslaMateCredentials(tm))
+  }
+  return payload
+}

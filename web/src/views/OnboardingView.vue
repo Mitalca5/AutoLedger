@@ -2,13 +2,14 @@
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { APP_NAME } from '@/brand'
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2 } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import { buildVehiclePayload, emptyTeslaMateForm, offersDataSources, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -28,8 +29,7 @@ const vehicleMake = ref('')
 const vehicleModel = ref('')
 const vehicleName = ref('')
 const vehicleVin = ref('')
-const vehiclePowertrain = ref<'EV' | 'ICE'>('EV')
-const telemetryMode = ref<'CONNECTED' | 'SEMI_AUTO' | 'MANUAL'>('CONNECTED')
+const vehiclePowertrain = ref<Powertrain>('EV')
 const vehicleOdometer = ref(15000)
 
 function updateVehicleNameDefault() {
@@ -39,13 +39,8 @@ function updateVehicleNameDefault() {
   }
 }
 
-// Step 3: TeslaMate Connection (Optional)
-const enableTeslaMate = ref(true)
-const teslamateUrl = ref('')
-const teslamateAuthType = ref<'BEARER' | 'BASIC' | 'NONE'>('NONE')
-const teslamateApiKey = ref('')
-const teslamateUser = ref('')
-const teslamatePass = ref('')
+// Step 3: data sources (optional, nothing preselected)
+const teslamate = reactive(emptyTeslaMateForm())
 const testResult = ref<{ ok: boolean; message: string } | null>(null)
 
 onMounted(async () => {
@@ -88,8 +83,7 @@ async function handleStep2Submit() {
     error.value = t('onboarding.vehicleNameRequired')
     return
   }
-  if (vehiclePowertrain.value === 'ICE' || telemetryMode.value !== 'CONNECTED') {
-    enableTeslaMate.value = false
+  if (!offersDataSources(vehiclePowertrain.value)) {
     await handleFinalSubmit()
     return
   }
@@ -100,17 +94,12 @@ async function testConnection() {
   testResult.value = null
   loading.value = true
   try {
-    if (!teslamateUrl.value) throw new Error(t('onboarding.apiUrlRequired'))
-    const payload: any = {
-      teslamate_api_url: teslamateUrl.value,
-      teslamate_auth_type: teslamateAuthType.value,
+    if (!teslamate.url) throw new Error(t('onboarding.apiUrlRequired'))
+    const payload = {
+      teslamate_api_url: teslamate.url,
+      teslamate_auth_type: teslamate.authType,
       teslamate_car_id: 1,
-    }
-    if (teslamateAuthType.value === 'BEARER') {
-      payload.teslamate_api_key = teslamateApiKey.value
-    } else if (teslamateAuthType.value === 'BASIC') {
-      payload.teslamate_basic_user = teslamateUser.value
-      payload.teslamate_basic_pass = teslamatePass.value
+      ...teslaMateCredentials(teslamate),
     }
     const res = await api.testTeslaMateRaw(payload)
     const st = res.status
@@ -129,28 +118,15 @@ async function handleFinalSubmit() {
   error.value = ''
   loading.value = true
   try {
-    const isConn = enableTeslaMate.value && telemetryMode.value === 'CONNECTED'
-    const payload: any = {
+    const payload = buildVehiclePayload({
       name: vehicleName.value,
-      powertrain: vehiclePowertrain.value,
-      telemetry_mode: vehiclePowertrain.value === 'ICE' ? 'MANUAL' : telemetryMode.value,
       make: vehicleMake.value,
       model: vehicleModel.value,
-      vin: vehicleVin.value || undefined,
-      current_odometer: Number(vehicleOdometer.value) || 0,
-      teslamate_auth_type: isConn ? teslamateAuthType.value : 'NONE',
-    }
-
-    if (isConn && teslamateUrl.value) {
-      payload.teslamate_api_url = teslamateUrl.value
-      payload.teslamate_car_id = 1
-      if (teslamateAuthType.value === 'BEARER') {
-        payload.teslamate_api_key = teslamateApiKey.value
-      } else if (teslamateAuthType.value === 'BASIC') {
-        payload.teslamate_basic_user = teslamateUser.value
-        payload.teslamate_basic_pass = teslamatePass.value
-      }
-    }
+      vin: vehicleVin.value,
+      powertrain: vehiclePowertrain.value,
+      odometer: vehicleOdometer.value,
+      teslamate,
+    })
 
     await api.createVehicle(payload)
     await vehicleStore.fetchVehicles()
@@ -317,51 +293,6 @@ function finishOnboarding() {
             </select>
           </div>
 
-          <!-- Tracking Mode Selection (EV only) -->
-          <div v-if="vehiclePowertrain === 'EV'" class="space-y-2 pt-2">
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">{{ $t('onboarding.onboardingView.chooseTrackingMode') }}</label>
-            <div class="grid grid-cols-1 gap-2.5">
-              <label
-                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
-                :class="telemetryMode === 'CONNECTED'
-                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
-                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-              >
-                <input v-model="telemetryMode" type="radio" value="CONNECTED" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-                <div>
-                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeConnected') }}</span>
-                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeConnectedDesc') }}</span>
-                </div>
-              </label>
-
-              <label
-                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
-                :class="telemetryMode === 'SEMI_AUTO'
-                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
-                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-              >
-                <input v-model="telemetryMode" type="radio" value="SEMI_AUTO" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-                <div>
-                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeSemiAuto') }}</span>
-                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeSemiAutoDesc') }}</span>
-                </div>
-              </label>
-
-              <label
-                class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
-                :class="telemetryMode === 'MANUAL'
-                  ? 'bg-rose-500/10 border-rose-500/50 shadow-sm'
-                  : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
-              >
-                <input v-model="telemetryMode" type="radio" value="MANUAL" class="mt-1 text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
-                <div>
-                  <span class="text-sm font-semibold text-white block">{{ $t('onboarding.onboardingView.modeManual') }}</span>
-                  <span class="text-xs text-slate-400 block mt-0.5">{{ $t('onboarding.onboardingView.modeManualDesc') }}</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
               <label for="onboarding-vehicle-odometer" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.currentOdometerKm', { unit: distanceUnit() }) }}</label>
@@ -389,7 +320,7 @@ function finishOnboarding() {
             :disabled="loading"
             class="w-full py-3.5 px-4 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
-            <span>{{ (vehiclePowertrain === 'ICE' || telemetryMode !== 'CONNECTED') ? $t('onboarding.finish') : $t('onboarding.continueToTeslamate') }}</span>
+            <span>{{ offersDataSources(vehiclePowertrain) ? $t('onboarding.continueToSources') : $t('onboarding.finish') }}</span>
             <ArrowRight class="w-4 h-4" />
           </button>
         </form>
@@ -407,18 +338,18 @@ function finishOnboarding() {
 
         <div class="space-y-4">
           <label class="flex items-center gap-3 p-4 bg-slate-800/60 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-800 transition-colors">
-            <input v-model="enableTeslaMate" type="checkbox" class="w-5 h-5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+            <input v-model="teslamate.enabled" type="checkbox" class="w-5 h-5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
             <div>
               <span class="text-sm font-medium text-white block">{{ $t('onboarding.onboardingView.enableTheTeslamateapiLink') }}</span>
               <span class="text-xs text-slate-400 block">{{ $t('onboarding.onboardingView.automaticallySyncsDrivesChargesAnd') }}</span>
             </div>
           </label>
 
-          <div v-if="enableTeslaMate" class="p-4 bg-slate-800/40 border border-slate-800 rounded-2xl space-y-4">
+          <div v-if="teslamate.enabled" class="p-4 bg-slate-800/40 border border-slate-800 rounded-2xl space-y-4">
             <div>
               <label for="onboarding-teslamate-url" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.teslamateApiUrl') }}</label>
               <input id="onboarding-teslamate-url"
-                v-model="teslamateUrl"
+                v-model="teslamate.url"
                 type="url"
                 :placeholder="$t('onboarding.onboardingView.http192168150')"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
@@ -428,7 +359,7 @@ function finishOnboarding() {
             <div>
               <label for="onboarding-teslamate-auth-type" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.authenticationMode') }}</label>
               <select id="onboarding-teslamate-auth-type"
-                v-model="teslamateAuthType"
+                v-model="teslamate.authType"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
               >
                 <option value="NONE">{{ $t('onboarding.onboardingView.noAuthentication') }}</option>
@@ -437,21 +368,21 @@ function finishOnboarding() {
               </select>
             </div>
 
-            <div v-if="teslamateAuthType === 'BEARER'">
+            <div v-if="teslamate.authType === 'BEARER'">
               <label for="onboarding-teslamate-api-key" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.apiToken') }}</label>
               <input id="onboarding-teslamate-api-key"
-                v-model="teslamateApiKey"
+                v-model="teslamate.apiKey"
                 type="password"
                 :placeholder="$t('onboarding.onboardingView.yourSecretToken')"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
               />
             </div>
 
-            <div v-if="teslamateAuthType === 'BASIC'" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div v-if="teslamate.authType === 'BASIC'" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label for="onboarding-teslamate-user" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.user') }}</label>
                 <input id="onboarding-teslamate-user"
-                  v-model="teslamateUser"
+                  v-model="teslamate.user"
                   type="text"
                   placeholder="admin"
                   class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
@@ -460,7 +391,7 @@ function finishOnboarding() {
               <div>
                 <label for="onboarding-teslamate-pass" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.password') }}</label>
                 <input id="onboarding-teslamate-pass"
-                  v-model="teslamatePass"
+                  v-model="teslamate.pass"
                   type="password"
                   placeholder="••••••••"
                   class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
@@ -473,7 +404,7 @@ function finishOnboarding() {
               <button
                 type="button"
                 @click="testConnection"
-                :disabled="loading || !teslamateUrl"
+                :disabled="loading || !teslamate.url"
                 class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border border-slate-700 disabled:opacity-50 transition-colors"
               >
                 <RefreshCw v-if="loading" class="w-3.5 h-3.5 animate-spin text-rose-400" />
