@@ -64,17 +64,19 @@ type TagCostBreakdown struct {
 
 // TCOCompleteness lists the known gaps of the TCO figures.
 type TCOCompleteness struct {
-	IsComplete          bool     `json:"is_complete"`
-	ChargesWithoutCost  int      `json:"charges_without_cost"`
-	KwhWithoutCost      float64  `json:"kwh_without_cost"`
-	UnconvertedExpenses int      `json:"unconverted_expenses"`
-	UnqualifiedDrives   int      `json:"unqualified_drives"`
-	UntrackedDistanceKm float64  `json:"untracked_distance_km"`
-	OdometerGaps        int      `json:"odometer_gaps"`
-	OdometerAnomalies   int      `json:"odometer_anomalies"`
-	InsuranceMissing    bool     `json:"insurance_missing"`
-	AcquisitionMissing  bool     `json:"acquisition_missing"`
-	Warnings            []string `json:"warnings"`
+	IsComplete          bool    `json:"is_complete"`
+	ChargesWithoutCost  int     `json:"charges_without_cost"`
+	KwhWithoutCost      float64 `json:"kwh_without_cost"`
+	UnconvertedExpenses int     `json:"unconverted_expenses"`
+	UnqualifiedDrives   int     `json:"unqualified_drives"`
+	UntrackedDistanceKm float64 `json:"untracked_distance_km"`
+	OdometerGaps        int     `json:"odometer_gaps"`
+	OdometerAnomalies   int     `json:"odometer_anomalies"`
+	InsuranceMissing    bool    `json:"insurance_missing"`
+	AcquisitionMissing  bool    `json:"acquisition_missing"`
+	// StartOdometerMissing is true when the odometer at the start of ownership is not entered.
+	StartOdometerMissing bool     `json:"start_odometer_missing"`
+	Warnings             []string `json:"warnings"`
 	// ScorePct is a weighted completeness score (0-100) over the dimensions below.
 	ScorePct   int                     `json:"score_pct"`
 	Dimensions []CompletenessDimension `json:"dimensions"`

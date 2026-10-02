@@ -21,6 +21,8 @@
     "fixedVariableRatio": "{fixedPct}% fixed • {variablePct}% variable"
   },
   "dataQualityCard": {
+    "enterTheStartOdometer": "Enter the odometer at purchase",
+    "enterTheStartOdometerHint": "Mileage driven before your first reading is not counted. Enter the odometer at purchase (vehicle ownership) so it is spread over the months.",
     "enterAverageConsumption": "Enter average consumption",
     "enterAverageConsumptionHint": "The distance driven without a recorded drive has no energy cost. Enter your average consumption and electricity rate to estimate it.",
     "enterAFillUp": "Enter a fill-up",

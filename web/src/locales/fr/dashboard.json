@@ -21,6 +21,8 @@
     "fixedVariableRatio": "{fixedPct} % fixes • {variablePct} % variables"
   },
   "dataQualityCard": {
+    "enterTheStartOdometer": "Saisir le compteur à l'achat",
+    "enterTheStartOdometerHint": "Le kilométrage parcouru avant votre premier relevé n'est pas compté. Saisissez le compteur à l'achat (propriété du véhicule) pour le répartir sur les mois.",
     "enterAverageConsumption": "Saisir la consommation moyenne",
     "enterAverageConsumptionHint": "La distance parcourue sans trajet enregistré n'a pas de coût énergétique. Saisissez votre consommation moyenne et votre tarif d'électricité pour l'estimer.",
     "enterAFillUp": "Saisir un plein",

@@ -87,6 +87,14 @@ const issueLabels: Record<string, () => string> = {
         {{ $t('dashboard.dataQualityCard.enterTheAcquisition') }}
       </router-link>
       <router-link
+        v-if="tco.completeness.start_odometer_missing"
+        to="/vehicles"
+        :title="$t('dashboard.dataQualityCard.enterTheStartOdometerHint')"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+      >
+        {{ $t('dashboard.dataQualityCard.enterTheStartOdometer') }}
+      </router-link>
+      <router-link
         v-if="tco.powertrain === 'ICE' && !tco.fuel_fill_ups"
         to="/manual?tab=FUEL"
         class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"

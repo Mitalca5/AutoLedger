@@ -2288,3 +2288,49 @@ func TestIntegrationDismissedTripSuggestionIsNotProposedAgain(t *testing.T) {
 		t.Fatalf("a dismissed suggestion is not proposed again, got %d", n)
 	}
 }
+
+func TestIntegrationTCOCountsOdometerReadingsAndAsksForTheStartOdometer(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "readings@example.com")
+	tco := NewTCOService(db.Pool, "Europe/Paris")
+
+	day := func(daysAgo int) time.Time {
+		n := time.Now().UTC().AddDate(0, 0, -daysAgo)
+		return time.Date(n.Year(), n.Month(), n.Day(), 0, 0, 0, 0, time.UTC)
+	}
+	if err := repo.RecordIntegrationOdometer(ctx, v.ID, day(20), 37000); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.RecordIntegrationOdometer(ctx, v.ID, day(1), 37500); err != nil {
+		t.Fatal(err)
+	}
+
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.DistanceBasisKm != 500 {
+		t.Fatalf("expected the span of the readings as distance basis, got %.0f", sum.DistanceBasisKm)
+	}
+	if !sum.Completeness.StartOdometerMissing {
+		t.Fatal("expected the missing start odometer to be reported")
+	}
+
+	odo := 0.0
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: v.ID, AcquisitionType: models.AcquisitionCash, StartDate: day(400), StartOdometer: &odo,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err = tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.Completeness.StartOdometerMissing {
+		t.Fatal("expected no start odometer warning once it is entered")
+	}
+	if sum.DistanceBasisKm != 37500 {
+		t.Fatalf("expected the distance from the start odometer to the last reading, got %.0f", sum.DistanceBasisKm)
+	}
+}

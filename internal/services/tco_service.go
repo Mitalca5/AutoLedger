@@ -81,40 +81,48 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	basisKm := math.Max(trackedKm, odometerSpan)
 	var fuelStats FuelStats
 	var fuelSpanKm float64
+	readings, err := s.repo.ListOdometerCheckpoints(ctx, vehicleID)
+	if err != nil {
+		return nil, fmt.Errorf("odometer readings: %w", err)
+	}
+
+	// Mileage covered by odometer readings (manual or integration), the start of the ownership and, for a
+	// combustion vehicle, fill-ups that carry a mileage
+	minOdo, maxOdo, known := 0.0, 0.0, false
+	note := func(odo float64) {
+		if !known || odo < minOdo {
+			minOdo = odo
+		}
+		if !known || odo > maxOdo {
+			maxOdo = odo
+		}
+		known = true
+	}
+	for _, r := range readings {
+		note(r.Odometer)
+	}
+	if ownership != nil && ownership.StartOdometer != nil {
+		note(*ownership.StartOdometer)
+	}
 	if isICE {
 		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
 		if err != nil {
 			return nil, fmt.Errorf("fuel logs: %w", err)
 		}
-		readings, err := s.repo.ListOdometerCheckpoints(ctx, vehicleID)
-		if err != nil {
-			return nil, fmt.Errorf("odometer readings: %w", err)
-		}
 		fuelStats = ComputeFuelStats(fuelLogs, BuildOdometerRefs(readings, ownership))
-
-		// Mileage covered by manual odometer readings and fill-ups that carry a mileage
-		minOdo, maxOdo, known := 0.0, 0.0, false
-		note := func(odo float64) {
-			if !known || odo < minOdo {
-				minOdo = odo
-			}
-			if !known || odo > maxOdo {
-				maxOdo = odo
-			}
-			known = true
-		}
-		for _, r := range readings {
-			note(r.Odometer)
-		}
 		for _, f := range fuelLogs {
 			if f.Odometer != nil {
 				note(*f.Odometer)
 			}
 		}
-		if known {
-			fuelSpanKm = maxOdo - minOdo
-			basisKm = math.Max(basisKm, fuelSpanKm)
-		}
+	}
+	if known {
+		fuelSpanKm = maxOdo - minOdo
+		basisKm = math.Max(basisKm, fuelSpanKm)
+	}
+	comp.StartOdometerMissing = ownership == nil || ownership.StartOdometer == nil
+	if comp.StartOdometerMissing && known {
+		comp.Warnings = append(comp.Warnings, "The odometer at the start of ownership is not entered: the mileage before the first reading is not counted")
 	}
 	kmSinceStart := trackedSinceStart
 	if ownership != nil && ownership.StartOdometer != nil && currentOdometer > *ownership.StartOdometer {
