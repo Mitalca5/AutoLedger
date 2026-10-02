@@ -357,9 +357,6 @@ func main() {
 		fleetHandler := handlers.NewFleetHandler(fleetService)
 		haHandler := handlers.NewHomeAssistantHandler(repo, tariffService)
 
-		// Public Blueprint YAML for Home Assistant 1-click import
-		r.Get("/api/integrations/homeassistant/blueprint.yaml", haHandler.GetBlueprint)
-
 		// Public Auth
 		r.Route("/api/auth", func(r chi.Router) {
 			r.Get("/config", authHandler.GetConfig)
