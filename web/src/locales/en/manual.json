@@ -11,8 +11,8 @@
     "estimatedEnergy": "Estimated energy"
   },
   "estimatedEnergyPanel": {
-    "chargesOutsideTeslamate": "Charges outside TeslaMate",
-    "aChargeMadeOutsideTeslamate": "A charge made outside TeslaMate (public charger, external socket) is entered with its cost in the expenses.",
+    "chargesOutsideTeslamate": "Go to charges",
+    "aChargeMadeOutsideTeslamate": "This estimate only covers distance with no recorded charge. A real charge (public charger, home socket) is entered with its actual cost under Expenses › Charges, and replaces the estimate for that period.",
     "resetDisable": "Reset (disable)",
     "kmSpreadProRataAcross": "({cost}/{unit}) spread pro rata across each smoothed month.",
     "kwh": "{kwh} kWh",
@@ -22,7 +22,7 @@
     "averageConsumptionKwh100km": "Average consumption (kWh/100 {unit})",
     "notConfigured": "Not configured",
     "active": "Active",
-    "automaticallyFillInTheEnergy": "Automatically fill in the energy and cost of the untracked distance",
+    "automaticallyFillInTheEnergy": "Assumed consumption and electricity rate, used only for distance with no recorded charge",
     "energyEstimate": "Energy estimate",
     "saveEstimate": "Save the estimate",
     "invalidConsumption": "Invalid average consumption (must be between {min} and {max} kWh/100 {unit})",

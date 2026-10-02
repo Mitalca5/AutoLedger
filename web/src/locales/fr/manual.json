@@ -11,8 +11,8 @@
     "estimatedEnergy": "Énergie estimée"
   },
   "estimatedEnergyPanel": {
-    "chargesOutsideTeslamate": "Recharges hors TeslaMate",
-    "aChargeMadeOutsideTeslamate": "Une recharge faite hors TeslaMate (borne publique, prise externe) se saisit avec son coût dans les dépenses.",
+    "chargesOutsideTeslamate": "Aller aux recharges",
+    "aChargeMadeOutsideTeslamate": "Cette estimation ne couvre que la distance sans recharge enregistrée. Une recharge réelle (borne publique, prise à domicile) se saisit avec son coût réel dans Dépenses › Recharges et remplace l'estimation pour cette période.",
     "resetDisable": "Réinitialiser (désactiver)",
     "kmSpreadProRataAcross": "({cost}/{unit}) distribués au prorata dans chaque mois lissé.",
     "kwh": "{kwh} kWh",
@@ -22,7 +22,7 @@
     "averageConsumptionKwh100km": "Consommation moyenne (kWh/100 {unit})",
     "notConfigured": "Non configuré",
     "active": "Actif",
-    "automaticallyFillInTheEnergy": "Complétez automatiquement l'énergie et le coût de la distance non suivie",
+    "automaticallyFillInTheEnergy": "Consommation et tarif d'électricité supposés, utilisés uniquement pour la distance sans recharge enregistrée",
     "energyEstimate": "Estimation de l'énergie",
     "saveEstimate": "Enregistrer l'estimation",
     "invalidConsumption": "Consommation moyenne invalide (doit être comprise entre {min} et {max} kWh/100 {unit})",
