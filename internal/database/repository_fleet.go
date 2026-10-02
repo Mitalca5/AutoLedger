@@ -93,7 +93,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 	energyCostPer100KmByVeh := make(map[string]float64)
 	statsQuery := `
 		SELECT c.vehicle_id,
-		       COALESCE(SUM(c.amount_eur), 0),
+		       c.amount_eur,
 		       COALESCE(d.total_km, 0)
 		FROM (
 			SELECT vehicle_id, SUM(amount_eur) as amount_eur
@@ -109,17 +109,18 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 		) d ON d.vehicle_id = c.vehicle_id;
 	`
 	rows, err = r.pool.Query(ctx, statsQuery, vehicleIDs)
-	if err == nil {
-		for rows.Next() {
-			var vid string
-			var totalEnergyEur float64
-			var totalKm float64
-			if err := rows.Scan(&vid, &totalEnergyEur, &totalKm); err == nil && totalKm > 0 {
-				energyCostPer100KmByVeh[vid] = math.Round((totalEnergyEur/(totalKm/100.0))*100) / 100
-			}
-		}
-		rows.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch energy cost per distance: %w", err)
 	}
+	for rows.Next() {
+		var vid string
+		var totalEnergyEur float64
+		var totalKm float64
+		if err := rows.Scan(&vid, &totalEnergyEur, &totalKm); err == nil && totalKm > 0 {
+			energyCostPer100KmByVeh[vid] = math.Round((totalEnergyEur/(totalKm/100.0))*100) / 100
+		}
+	}
+	rows.Close()
 
 	// 4. Current month costs from cost_ledger
 	monthCostByVeh := make(map[string]money.Cents)
