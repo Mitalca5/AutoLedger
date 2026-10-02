@@ -3,9 +3,9 @@
 > **Self-hosted, open-source Total Cost of Ownership (TCO) ledger for electric, hybrid, and combustion vehicles.**  
 > Track every cent—energy, financing (cash, loan, lease/LOA/LLD), axle-level tire wear, maintenance, tolls, and carpooling—whether connected via telemetry, imported via CSV, or managed 100% standalone.
 
-[![CI / CD Pipeline](https://github.com/Rem7474/TeslaCost/actions/workflows/ci.yml/badge.svg)](https://github.com/Rem7474/TeslaCost/actions/workflows/ci.yml)
+[![CI / CD Pipeline](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Rem7474_TeslaCost&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Rem7474_TeslaCost)
-[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Frem7474%2Fautoledger-blue?logo=docker)](https://github.com/Rem7474/TeslaCost/pkgs/container/autoledger)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Frem7474%2Fautoledger-blue?logo=docker)](https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger)
 
 ---
 
@@ -117,8 +117,8 @@ AutoLedger/
 1. **Create an installation directory and download the configuration:**
    ```bash
    mkdir autoledger && cd autoledger
-   curl -O https://raw.githubusercontent.com/Rem7474/TeslaCost/main/docker-compose.yml
-   curl -o .env https://raw.githubusercontent.com/Rem7474/TeslaCost/main/.env.example
+   curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
+   curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
    ```
 
 2. **Generate your production encryption key and configure `.env`:**
@@ -166,19 +166,24 @@ docker run -d \
 
 ---
 
-## 🔄 Upgrading from TeslaCost (Zero-Downtime Migration)
+## 🔄 Upgrading from TeslaCost
 
-Upgrading an existing TeslaCost deployment to AutoLedger is completely seamless. No data migration or manual volume copy is required.
+An existing TeslaCost deployment upgrades in place: no data migration and no manual volume copy. The image is `ghcr.io/rem7474/autoledger`, and every TeslaCost variable (see the legacy column of the environment reference below) is still read, including `TESLACOST_VERSION`.
 
-In your existing `.env` file, simply map the volume names to your existing Docker volumes:
+New installations create `autoledger_*` volumes. Existing ones keep their data by pointing the compose file at the volumes they already have:
+
+| Data | New default volume | TeslaCost volume | Override variable |
+|---|---|---|---|
+| PostgreSQL | `autoledger_db_data` | `postgres_data` | `DB_VOLUME_NAME` |
+| Documents | `autoledger_documents` | `teslacost_documents` | `DOCUMENTS_VOLUME_NAME` |
+| Backups | `autoledger_backups` | `teslacost_backups` | `BACKUPS_VOLUME_NAME` |
 
 ```dotenv
-# Point AutoLedger to your existing TeslaCost volumes:
 DB_VOLUME_NAME=postgres_data
 DOCUMENTS_VOLUME_NAME=teslacost_documents
 BACKUPS_VOLUME_NAME=teslacost_backups
 
-# Retain your existing database credentials:
+# The database role and name stored in the existing volume:
 AUTOLEDGER_DB_USER=teslacost
 AUTOLEDGER_DB_NAME=teslacost
 ```
@@ -187,7 +192,7 @@ Then pull and restart:
 ```bash
 docker compose pull && docker compose up -d
 ```
-All historical vehicles, charges, expenses, invoices, and settings will remain instantly accessible.
+Vehicles, charges, expenses, invoices and settings are unchanged.
 
 ---
 
@@ -249,6 +254,8 @@ docker run --rm \
 | `AUTOLEDGER_VERSION` | `TESLACOST_VERSION` | Docker image tag to deploy | `latest` |
 | `AUTOLEDGER_BASE_URL` | `APP_BASE_URL` | Canonical public URL of the application | `http://localhost:8080` |
 | `AUTOLEDGER_DATABASE_URL`| `DATABASE_URL` | Full PostgreSQL connection URL | *Derived from DB_\** |
+| `AUTOLEDGER_DB_HOST` | `DB_HOST` | PostgreSQL host (when set, the URL is built from the `DB_*` variables) | *Unset* |
+| `AUTOLEDGER_DB_PORT` | `DB_PORT` | PostgreSQL port | `5432` |
 | `AUTOLEDGER_DB_USER` | `DB_USER` | PostgreSQL user | `autoledger` |
 | `AUTOLEDGER_DB_PASSWORD` | `DB_PASSWORD` | PostgreSQL password | `autoledger_dev_secret` |
 | `AUTOLEDGER_DB_NAME` | `DB_NAME` | PostgreSQL database name | `autoledger` |
@@ -264,6 +271,8 @@ docker run --rm \
 | `CONTENT_SECURITY_POLICY`| - | Override CSP policy (`off` to disable) | Built-in strict |
 | `BACKUP_INTERVAL_HOURS` | - | Interval between automated backup archives | `24` |
 | `BACKUP_RETENTION_DAYS` | - | Days to retain backup archives before pruning | `14` |
+
+Each primary variable wins when both are set; the legacy name is only read when the primary one is empty. The legacy names are the ones used by TeslaCost deployments, so an existing `.env` keeps working unchanged.
 
 ### OIDC / SSO Configuration (Optional)
 
