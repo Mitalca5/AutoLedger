@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { csvImportForm } from './csvImport'
+import { csvImportForm, profileColumns, profileMapping } from './csvImport'
 
 const file = new File(['a,b\n1,2\n'], 'x.csv', { type: 'text/csv' })
 
@@ -26,5 +26,21 @@ describe('csvImportForm', () => {
     expect(JSON.parse(String(form.get('mapping')))).toEqual({ '1': 'kwh', '2': '' })
     expect(form.get('date_order')).toBe('mdy')
     expect(form.get('decimal_separator')).toBe(',')
+  })
+})
+
+describe('import profiles', () => {
+  const mapping = [
+    { index: 0, header: 'Jour', field: 'date', detected: true },
+    { index: 1, header: 'Truc', field: 'kwh', detected: false },
+    { index: 2, header: 'Note', field: '', detected: false },
+  ]
+
+  it('keeps the field of every header', () => {
+    expect(profileColumns(mapping)).toEqual({ Jour: 'date', Truc: 'kwh', Note: '' })
+  })
+
+  it('maps the columns of another file by header, whatever their order', () => {
+    expect(profileMapping(['Note', 'Truc', 'Autre'], { Jour: 'date', Truc: 'kwh', Note: '' })).toEqual({ 0: '', 1: 'kwh' })
   })
 })

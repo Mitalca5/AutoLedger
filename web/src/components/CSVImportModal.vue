@@ -5,7 +5,7 @@ import { currentLocale, t } from '@/i18n'
 import { CSV_COLUMNS, csvTemplate, csvTemplateFilename, csvTemplateTypes, type CsvTemplateType } from '@/utils/dataSources'
 import { downloadCsv } from '@/utils/csv'
 import { api } from '@/services/api'
-import type { CSVDateOrder, CSVDecimalSeparator, CSVExecuteResult, CSVImportOptions, CSVImportType, CSVPreviewResult } from '@/services/csvImport'
+import { profileColumns, profileMapping, type CSVDateOrder, type CSVDecimalSeparator, type CSVExecuteResult, type CSVImportOptions, type CSVImportProfile, type CSVImportType, type CSVPreviewResult } from '@/services/csvImport'
 import { apiErrorMessage } from '@/services/apiError'
 import { distanceUnit } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -30,6 +30,8 @@ const skipDuplicates = ref(true)
 const dateOrder = ref<CSVDateOrder>('')
 const decimalSeparator = ref<CSVDecimalSeparator>('')
 const mapping = ref<Record<number, string>>({})
+const profiles = ref<CSVImportProfile[]>([])
+const profileName = ref('')
 const loading = ref(false)
 const error = ref('')
 
@@ -53,6 +55,8 @@ watch(
     dateOrder.value = ''
     decimalSeparator.value = ''
     mapping.value = {}
+    profileName.value = ''
+    void loadProfiles()
     loading.value = false
     error.value = ''
     previewResult.value = null
@@ -71,14 +75,62 @@ function importOptions(): CSVImportOptions {
   }
 }
 
-watch([selectedType, skipDuplicates], () => {
+function onOptionsChange() {
   previewResult.value = null
   mapping.value = {}
-})
+}
 
 function setColumnField(index: number, field: string) {
   mapping.value = { ...mapping.value, [index]: field }
   void handlePreview()
+}
+
+async function loadProfiles() {
+  try {
+    profiles.value = await api.listImportProfiles()
+  } catch {
+    profiles.value = []
+  }
+}
+
+const profilesForType = computed(() => profiles.value.filter((p) => !selectedType.value || p.import_type === selectedType.value))
+
+function applyProfile(id: string) {
+  const profile = profiles.value.find((p) => p.id === id)
+  if (!profile || !previewResult.value) return
+  selectedType.value = profile.import_type
+  mapping.value = profileMapping(previewResult.value.headers, profile.columns)
+  dateOrder.value = profile.date_order
+  decimalSeparator.value = profile.decimal_separator
+  profileName.value = profile.name
+  void handlePreview()
+}
+
+async function saveProfile() {
+  const name = profileName.value.trim()
+  if (!name || !previewResult.value || previewResult.value.type === 'UNKNOWN') return
+  error.value = ''
+  try {
+    await api.saveImportProfile({
+      name,
+      import_type: previewResult.value.type,
+      columns: profileColumns(previewResult.value.mapping),
+      date_order: dateOrder.value,
+      decimal_separator: decimalSeparator.value,
+    })
+    await loadProfiles()
+  } catch (err: any) {
+    error.value = err.message || t('import.profileSaveFailed')
+  }
+}
+
+async function deleteProfile(id: string) {
+  try {
+    await api.deleteImportProfile(id)
+    await loadProfiles()
+  } catch (err: any) {
+    error.value = err.message || t('import.profileDeleteFailed')
+  }
 }
 
 function resetFormat() {
@@ -260,6 +312,7 @@ async function handleExecute() {
               <select
                 id="csv-type-select"
                 v-model="selectedType"
+                @change="onOptionsChange"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value="">{{ $t('import.autoDetect') }}</option>
@@ -274,6 +327,7 @@ async function handleExecute() {
                 <input
                   id="csv-skip-duplicates"
                   v-model="skipDuplicates"
+                  @change="onOptionsChange"
                   type="checkbox"
                   class="rounded text-indigo-500 focus:ring-indigo-500/20 bg-slate-900 border-slate-700 w-4 h-4"
                 />
@@ -308,6 +362,15 @@ async function handleExecute() {
             <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-300">
               <summary class="cursor-pointer font-semibold text-slate-200">{{ $t('import.mappingTitle') }}</summary>
               <p class="mt-2 text-slate-400">{{ $t('import.mappingHint') }}</p>
+              <div v-if="profilesForType.length" class="mt-3">
+                <label for="csv-profile" class="block text-slate-400 mb-1">{{ $t('import.profileApply') }}</label>
+                <div class="flex items-center gap-2">
+                  <select id="csv-profile" class="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white" @change="applyProfile(($event.target as HTMLSelectElement).value)">
+                    <option value="">{{ $t('import.profileNone') }}</option>
+                    <option v-for="p in profilesForType" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </select>
+                </div>
+              </div>
               <div class="mt-3 space-y-2">
                 <div v-for="col in previewResult.mapping" :key="col.index" class="grid grid-cols-2 gap-2 items-center">
                   <label :for="`csv-col-${col.index}`" class="truncate font-mono text-[11px] text-slate-400" :title="col.header">{{ col.header }}</label>
@@ -343,6 +406,19 @@ async function handleExecute() {
                 </div>
               </div>
               <button type="button" @click="resetFormat" class="mt-3 text-rose-400 hover:text-rose-300 font-semibold">{{ $t('import.resetMapping') }}</button>
+              <div v-if="previewResult.type !== 'UNKNOWN'" class="mt-3 border-t border-slate-800 pt-3">
+                <label for="csv-profile-name" class="block text-slate-400 mb-1">{{ $t('import.profileSaveLabel') }}</label>
+                <div class="flex items-center gap-2">
+                  <input id="csv-profile-name" v-model="profileName" maxlength="60" type="text" :placeholder="$t('import.profileNamePlaceholder')" class="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white" />
+                  <button type="button" :disabled="!profileName.trim()" @click="saveProfile" class="shrink-0 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg disabled:opacity-50">{{ $t('common.save') }}</button>
+                </div>
+                <ul v-if="profilesForType.length" class="mt-2 space-y-1">
+                  <li v-for="p in profilesForType" :key="p.id" class="flex items-center justify-between gap-2 text-slate-400">
+                    <span class="truncate">{{ p.name }}</span>
+                    <button type="button" @click="deleteProfile(p.id)" class="shrink-0 text-rose-400 hover:text-rose-300">{{ $t('common.delete') }}</button>
+                  </li>
+                </ul>
+              </div>
             </details>
 
             <!-- Sample rows -->

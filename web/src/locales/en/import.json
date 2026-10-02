@@ -41,5 +41,11 @@
   "decimalSeparator": "Decimal separator",
   "decimalDot": "Dot (1,234.5)",
   "decimalComma": "Comma (1.234,5)",
-  "resetMapping": "Reset to detected values"
+  "resetMapping": "Reset to detected values",
+  "profileApply": "Saved profile",
+  "profileNone": "Choose a profile",
+  "profileSaveLabel": "Save these settings for files with the same columns",
+  "profileNamePlaceholder": "Profile name",
+  "profileSaveFailed": "Could not save the profile",
+  "profileDeleteFailed": "Could not delete the profile"
 }

@@ -340,22 +340,30 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 	return p, nil
 }
 
+// ValidImportField reports whether a column of that import type can feed the field; an empty field ignores it.
+func ValidImportField(importType ImportType, field string) bool {
+	return field == "" || slices.Contains(importFields[importType], field)
+}
+
+// ValidDateOrder and ValidDecimalSeparator tell whether a format choice is one the import understands.
+func ValidDateOrder(order string) bool {
+	return order == "" || order == DateOrderDMY || order == DateOrderMDY || order == DateOrderYMD
+}
+
+func ValidDecimalSeparator(sep string) bool { return sep == "" || sep == "." || sep == "," }
+
 func validateMapping(importType ImportType, columns int, opts CSVImportOptions) error {
-	switch opts.DecimalSeparator {
-	case "", ".", ",":
-	default:
+	if !ValidDecimalSeparator(opts.DecimalSeparator) {
 		return apierror.Newf("import.invalid_decimal_separator", "Unknown decimal separator %q", opts.DecimalSeparator)
 	}
-	switch opts.DateOrder {
-	case "", DateOrderDMY, DateOrderMDY, DateOrderYMD:
-	default:
+	if !ValidDateOrder(opts.DateOrder) {
 		return apierror.Newf("import.invalid_date_order", "Unknown date order %q", opts.DateOrder)
 	}
 	for index, field := range opts.Mapping {
 		if index < 0 || index >= columns {
 			return apierror.Newf("import.unknown_column", "Column %d does not exist", index+1)
 		}
-		if field != "" && !slices.Contains(importFields[importType], field) {
+		if !ValidImportField(importType, field) {
 			return apierror.Newf("import.unknown_field", "Field %q cannot be imported as %s", field, string(importType))
 		}
 	}

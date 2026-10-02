@@ -61,3 +61,28 @@ export interface CSVExecuteResult {
   errors?: CSVRowError[]
   errors_truncated?: boolean
 }
+
+export interface CSVImportProfile {
+  id: string
+  name: string
+  import_type: CSVImportType
+  columns: Record<string, string>
+  date_order: CSVDateOrder
+  decimal_separator: CSVDecimalSeparator
+}
+
+// What a profile holds: the field each header feeds, whether the header or the user chose it.
+export function profileColumns(mapping: CSVColumnMapping[]): Record<string, string> {
+  const columns: Record<string, string> = {}
+  for (const col of mapping) columns[col.header] = col.field
+  return columns
+}
+
+// Applies a profile to the headers of a file: the columns it names, by header text, keep its field.
+export function profileMapping(headers: string[], columns: Record<string, string>): Record<number, string> {
+  const mapping: Record<number, string> = {}
+  headers.forEach((header, index) => {
+    if (header in columns) mapping[index] = columns[header]
+  })
+  return mapping
+}

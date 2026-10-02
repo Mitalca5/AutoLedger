@@ -41,5 +41,11 @@
   "decimalSeparator": "Séparateur décimal",
   "decimalDot": "Point (1 234.5)",
   "decimalComma": "Virgule (1 234,5)",
-  "resetMapping": "Revenir aux valeurs détectées"
+  "resetMapping": "Revenir aux valeurs détectées",
+  "profileApply": "Profil enregistré",
+  "profileNone": "Choisir un profil",
+  "profileSaveLabel": "Enregistrer ces réglages pour les fichiers aux mêmes colonnes",
+  "profileNamePlaceholder": "Nom du profil",
+  "profileSaveFailed": "Impossible d’enregistrer le profil",
+  "profileDeleteFailed": "Impossible de supprimer le profil"
 }

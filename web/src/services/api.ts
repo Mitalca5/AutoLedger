@@ -3,7 +3,7 @@ import { formatAmount } from '@/currency'
 // AutoLedger API Service
 import { newIdempotencyKey } from '@/services/offlineQueue'
 import { apiErrorMessage } from '@/services/apiError'
-import { csvImportForm, type CSVExecuteResult, type CSVImportOptions, type CSVPreviewResult } from '@/services/csvImport'
+import { csvImportForm, type CSVExecuteResult, type CSVImportOptions, type CSVImportProfile, type CSVPreviewResult } from '@/services/csvImport'
 
 const BASE_URL = '/api'
 
@@ -262,6 +262,10 @@ export const api = {
     request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, { method: 'POST', body: csvImportForm(file, opts) }),
   executeCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>
     request<CSVExecuteResult>(`/vehicles/${vehicleId}/import/execute`, { method: 'POST', body: csvImportForm(file, opts) }),
+  listImportProfiles: () => request<CSVImportProfile[]>('/import-profiles'),
+  saveImportProfile: (profile: Omit<CSVImportProfile, 'id'>) =>
+    request<CSVImportProfile>('/import-profiles', { method: 'POST', body: JSON.stringify(profile) }),
+  deleteImportProfile: (id: string) => request<void>(`/import-profiles/${id}`, { method: 'DELETE' }),
   updateDriveTags: (vehicleId: string, driveId: string, tags: string[]) =>
     request<any>(`/vehicles/${vehicleId}/drives/${driveId}/tags`, { method: 'PATCH', body: JSON.stringify({ tags }) }),
   setDriveTollReview: (vehicleId: string, driveId: string, reviewed: boolean) =>

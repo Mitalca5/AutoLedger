@@ -172,6 +172,8 @@
     "no_rows": "Le fichier CSV doit contenir un en-tête et au moins une ligne",
     "unsupported_type": "Type d’import non reconnu ou non pris en charge : « {p0} »",
     "ice_charges": "Un véhicule thermique n’a pas de recharges à importer : importez plutôt ses pleins",
+    "profile_invalid_name": "Le nom du profil doit comporter de 1 à 60 caractères",
+    "profile_limit": "Vous pouvez enregistrer au plus {p0} profils d’import",
     "invalid_mapping": "Le mappage des colonnes n’est pas valide",
     "unknown_column": "La colonne {p0} n’existe pas",
     "unknown_field": "Le champ « {p0} » ne peut pas être importé comme {p1}",

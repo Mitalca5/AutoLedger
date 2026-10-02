@@ -347,6 +347,7 @@ func main() {
 		vehicleMemberHandler := handlers.NewVehicleMemberHandler(repo)
 		csvImportService := services.NewCSVImportService(repo, cfg.ReportingTimezone)
 		importHandler := handlers.NewImportHandler(repo, csvImportService)
+		importProfileHandler := handlers.NewImportProfileHandler(repo)
 
 		tariffService := services.NewTariffService()
 		fleetService := services.NewFleetService(repo)
@@ -424,6 +425,13 @@ func main() {
 				r.Get("/", pendingChargesHandler.List)
 				r.Post("/{id}/assign", pendingChargesHandler.Assign)
 				r.Delete("/{id}", pendingChargesHandler.Delete)
+			})
+
+			// Saved CSV import mappings
+			r.Route("/api/import-profiles", func(r chi.Router) {
+				r.Get("/", importProfileHandler.List)
+				r.Post("/", importProfileHandler.Save)
+				r.Delete("/{profileId}", importProfileHandler.Delete)
 			})
 
 			// Household Fleet Dashboard
