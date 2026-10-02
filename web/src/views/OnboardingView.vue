@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { intlLocale, t } from '@/i18n'
+import { currentLocale, intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { APP_NAME } from '@/brand'
 import { ref, reactive, onMounted } from 'vue'
@@ -50,7 +50,7 @@ const webhookFailed = ref(false)
 const copiedField = ref<'token' | 'snippet' | ''>('')
 
 function downloadTemplate(type: CsvTemplateType) {
-  const { headers, rows } = csvTemplate(type)
+  const { headers, rows } = csvTemplate(type, currentLocale())
   downloadCsv(csvTemplateFilename(type), headers, rows)
 }
 

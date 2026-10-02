@@ -27,5 +27,8 @@
   "cancelledTitle": "Nothing was imported",
   "cancelledHint": "Fix the lines below and import the file again: an import is all or nothing.",
   "fixFirst": "Fix the invalid rows to import this file",
-  "distanceHint": "Distance columns without a _km or _mi suffix are read in {unit}."
+  "distanceHint": "Distance columns without a _km or _mi suffix are read in {unit}.",
+  "helpTitle": "Templates and recognised columns",
+  "helpIntro": "The first line names the columns, in any order. Required columns are in green, optional ones follow. Upper or lower case, accents, spaces and unit suffixes such as (km) are ignored, and French names (date, cout, kilometrage...) are accepted. Other columns are ignored.",
+  "downloadTemplate": "Download a template"
 }

@@ -27,5 +27,8 @@
   "cancelledTitle": "Rien n’a été importé",
   "cancelledHint": "Corrigez les lignes ci-dessous puis réimportez le fichier : un import est tout ou rien.",
   "fixFirst": "Corrigez les lignes invalides pour importer ce fichier",
-  "distanceHint": "Les colonnes de distance sans suffixe _km ou _mi sont lues en {unit}."
+  "distanceHint": "Les colonnes de distance sans suffixe _km ou _mi sont lues en {unit}.",
+  "helpTitle": "Modèles et colonnes reconnues",
+  "helpIntro": "La première ligne nomme les colonnes, dans n'importe quel ordre. Les colonnes obligatoires sont en vert, les facultatives suivent. Majuscules, accents, espaces et suffixes d'unité comme (km) sont ignorés, et les noms anglais ou français (date, cout, kilometrage...) sont acceptés. Les autres colonnes sont ignorées.",
+  "downloadTemplate": "Télécharger un modèle"
 }

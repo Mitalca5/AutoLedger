@@ -16,6 +16,13 @@ describe('csvTemplate', () => {
       expect(rows[0]).toHaveLength(headers.length)
     }
   })
+  it('has a French variant of the same shape', () => {
+    for (const type of ['CHARGES', 'DRIVES', 'FUEL', 'ODOMETER'] as const) {
+      const fr = csvTemplate(type, 'fr')
+      expect(fr.rows[0]).toHaveLength(fr.headers.length)
+      expect(fr.headers).toHaveLength(csvTemplate(type).headers.length)
+    }
+  })
   it('names the file after its type', () => {
     expect(csvTemplateFilename('CHARGES')).toBe('charges-template.csv')
   })

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { t } from '@/i18n'
+import { computed } from 'vue'
+import { currentLocale, t } from '@/i18n'
+import { CSV_COLUMNS, csvTemplate, csvTemplateFilename, csvTemplateTypes, type CsvTemplateType } from '@/utils/dataSources'
+import { downloadCsv } from '@/utils/csv'
 import { api } from '@/services/api'
 import type { CSVExecuteResult, CSVImportType, CSVPreviewResult } from '@/services/csvImport'
 import { apiErrorMessage } from '@/services/apiError'
@@ -26,6 +29,13 @@ const selectedType = ref<CSVImportType | ''>(props.defaultType || '')
 const skipDuplicates = ref(true)
 const loading = ref(false)
 const error = ref('')
+
+const templateTypes = computed(() => csvTemplateTypes(vehicleStore.isIce ? 'ICE' : 'EV'))
+
+function downloadTemplate(type: CsvTemplateType) {
+  const { headers, rows } = csvTemplate(type, currentLocale())
+  downloadCsv(csvTemplateFilename(type), headers, rows)
+}
 
 const previewResult = ref<CSVPreviewResult | null>(null)
 const executeResult = ref<CSVExecuteResult | null>(null)
@@ -177,6 +187,21 @@ async function handleExecute() {
         </div>
 
         <div v-else class="space-y-4">
+          <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-300">
+            <summary class="cursor-pointer font-semibold text-slate-200">{{ $t('import.helpTitle') }}</summary>
+            <p class="mt-2 text-slate-400">{{ $t('import.helpIntro') }}</p>
+            <div v-for="type in templateTypes" :key="type" class="mt-3 space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-semibold text-white">{{ $t(`import.type${type.charAt(0)}${type.slice(1).toLowerCase()}`) }}</span>
+                <button type="button" @click="downloadTemplate(type)" class="shrink-0 text-rose-400 hover:text-rose-300 font-semibold">{{ $t('import.downloadTemplate') }}</button>
+              </div>
+              <p class="break-words text-slate-400">
+                <code class="text-emerald-300">{{ CSV_COLUMNS[type].required.join(', ') }}</code>
+                <span v-if="CSV_COLUMNS[type].optional.length"> + <code>{{ CSV_COLUMNS[type].optional.join(', ') }}</code></span>
+              </p>
+            </div>
+          </details>
+
           <!-- File selection -->
           <div>
             <label for="csv-file-input" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">

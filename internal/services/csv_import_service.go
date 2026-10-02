@@ -121,14 +121,10 @@ func parseFlexibleFloat(raw string) (float64, error) {
 	return strconv.ParseFloat(cleaned, 64)
 }
 
-func normalizeHeader(h string) string {
-	return strings.ToLower(strings.TrimSpace(strings.TrimPrefix(h, "\ufeff")))
-}
-
 func detectTypeFromHeaders(headers []string) ImportType {
 	has := make(map[string]bool, len(headers))
-	for _, h := range headers {
-		has[normalizeHeader(h)] = true
+	for _, h := range canonicalHeaders(headers) {
+		has[h] = true
 	}
 	any := func(names ...string) bool {
 		for _, n := range names {
@@ -224,10 +220,11 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 		return nil, apierror.New("import.ice_charges", "A combustion vehicle has no charges to import: import its fill-ups instead")
 	}
 
+	canonical := canonicalHeaders(headers)
 	columns := make(map[string]int, len(headers))
-	for i, h := range headers {
-		if _, taken := columns[normalizeHeader(h)]; !taken {
-			columns[normalizeHeader(h)] = i
+	for i, name := range canonical {
+		if _, taken := columns[name]; !taken {
+			columns[name] = i
 		}
 	}
 	unit := opts.DistanceUnit
