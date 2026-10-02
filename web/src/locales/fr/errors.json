@@ -172,6 +172,11 @@
     "no_rows": "Le fichier CSV doit contenir un en-tête et au moins une ligne",
     "unsupported_type": "Type d’import non reconnu ou non pris en charge : « {p0} »",
     "ice_charges": "Un véhicule thermique n’a pas de recharges à importer : importez plutôt ses pleins",
+    "invalid_mapping": "Le mappage des colonnes n’est pas valide",
+    "unknown_column": "La colonne {p0} n’existe pas",
+    "unknown_field": "Le champ « {p0} » ne peut pas être importé comme {p1}",
+    "invalid_decimal_separator": "Séparateur décimal inconnu : « {p0} »",
+    "invalid_date_order": "Ordre de date inconnu : « {p0} »",
     "row": {
       "invalid_date": "Ligne {p0} : date invalide « {p1} »",
       "invalid_kwh": "Ligne {p0} : énergie invalide « {p1} » (0 à {p2} kWh)",

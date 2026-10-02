@@ -3,7 +3,7 @@ import { formatAmount } from '@/currency'
 // AutoLedger API Service
 import { newIdempotencyKey } from '@/services/offlineQueue'
 import { apiErrorMessage } from '@/services/apiError'
-import type { CSVExecuteResult, CSVPreviewResult } from '@/services/csvImport'
+import { csvImportForm, type CSVExecuteResult, type CSVImportOptions, type CSVPreviewResult } from '@/services/csvImport'
 
 const BASE_URL = '/api'
 
@@ -258,26 +258,10 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ driver_id: driverId }),
     }),
-  previewCSVImport: (vehicleId: string, file: File, type?: string, skipDuplicates: boolean = true) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    if (type) formData.append('type', type)
-    formData.append('skip_duplicates', skipDuplicates ? 'true' : 'false')
-    return request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, {
-      method: 'POST',
-      body: formData,
-    })
-  },
-  executeCSVImport: (vehicleId: string, file: File, type?: string, skipDuplicates: boolean = true) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    if (type) formData.append('type', type)
-    formData.append('skip_duplicates', skipDuplicates ? 'true' : 'false')
-    return request<CSVExecuteResult>(`/vehicles/${vehicleId}/import/execute`, {
-      method: 'POST',
-      body: formData,
-    })
-  },
+  previewCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>
+    request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, { method: 'POST', body: csvImportForm(file, opts) }),
+  executeCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>
+    request<CSVExecuteResult>(`/vehicles/${vehicleId}/import/execute`, { method: 'POST', body: csvImportForm(file, opts) }),
   updateDriveTags: (vehicleId: string, driveId: string, tags: string[]) =>
     request<any>(`/vehicles/${vehicleId}/drives/${driveId}/tags`, { method: 'PATCH', body: JSON.stringify({ tags }) }),
   setDriveTollReview: (vehicleId: string, driveId: string, reviewed: boolean) =>

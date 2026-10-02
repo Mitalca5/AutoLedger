@@ -172,6 +172,11 @@
     "no_rows": "The CSV file must contain a header and at least one row",
     "unsupported_type": "Unrecognized or unsupported import type \"{p0}\"",
     "ice_charges": "A combustion vehicle has no charges to import: import its fill-ups instead",
+    "invalid_mapping": "The column mapping is not valid",
+    "unknown_column": "Column {p0} does not exist",
+    "unknown_field": "The field \"{p0}\" cannot be imported as {p1}",
+    "invalid_decimal_separator": "Unknown decimal separator \"{p0}\"",
+    "invalid_date_order": "Unknown date order \"{p0}\"",
     "row": {
       "invalid_date": "Line {p0}: invalid date \"{p1}\"",
       "invalid_kwh": "Line {p0}: invalid energy \"{p1}\" (0 to {p2} kWh)",

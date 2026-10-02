@@ -1,7 +1,9 @@
 package services
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/models"
 )
@@ -73,5 +75,80 @@ func TestImportReadsFrenchHeaders(t *testing.T) {
 	res = previewOf(t, ice, "Date;Litres;Prix par litre;Carburant\n15/09/2026;40;1,80;SP95_E10\n", CSVImportOptions{})
 	if res.Type != ImportTypeFuel || res.ValidRows != 1 {
 		t.Errorf("unexpected fuel preview: %+v (%v)", res, rowCodes(res))
+	}
+}
+
+func TestPreviewReportsTheDetectedMapping(t *testing.T) {
+	ev := testVehicle(models.PowertrainEV)
+	res := previewOf(t, ev, "Date,Energie,Bonus\n2026-09-15,42.5,x\n", CSVImportOptions{Type: ImportTypeCharges})
+	if len(res.Mapping) != 3 || res.Mapping[1].Field != "kwh" || !res.Mapping[1].Detected {
+		t.Fatalf("unexpected mapping: %+v", res.Mapping)
+	}
+	if len(res.Fields) == 0 {
+		t.Error("the preview lists the fields a column can feed")
+	}
+}
+
+func TestMappingOverridesTheHeaders(t *testing.T) {
+	ev := testVehicle(models.PowertrainEV)
+	data := "Jour,Truc,Machin\n2026-09-15,42.5,18.5\n"
+	if res := previewOf(t, ev, data, CSVImportOptions{Type: ImportTypeCharges}); res.ValidRows != 0 {
+		t.Fatalf("columns with unknown names are not readable: %+v", res)
+	}
+	res := previewOf(t, ev, data, CSVImportOptions{Type: ImportTypeCharges, Mapping: map[int]string{1: "kwh", 2: "cost"}})
+	if res.ValidRows != 1 || res.Mapping[1].Detected || res.Mapping[2].Field != "cost" {
+		t.Errorf("mapped columns are imported: %+v (%v)", res, rowCodes(res))
+	}
+	res = previewOf(t, ev, "Date,kWh,Cost\n2026-09-15,42.5,18.5\n", CSVImportOptions{Type: ImportTypeCharges, Mapping: map[int]string{2: ""}})
+	if res.ValidRows != 0 {
+		t.Errorf("an ignored column is not read: %+v", res)
+	}
+}
+
+func TestMappingUnitPerColumn(t *testing.T) {
+	ev := testVehicle(models.PowertrainEV)
+	res := previewOf(t, ev, "Date,Dist\n2026-09-15 08:00,10\n", CSVImportOptions{Type: ImportTypeDrives, Mapping: map[int]string{1: "distance_mi"}})
+	if res.ValidRows != 1 {
+		t.Fatalf("a mapped distance_mi column is valid: %+v (%v)", res, rowCodes(res))
+	}
+}
+
+func TestDecimalSeparatorAndDateOrder(t *testing.T) {
+	if v, err := parseFloatWith("1,234.5", "."); err != nil || v != 1234.5 {
+		t.Errorf("dot decimal: %v %v", v, err)
+	}
+	if v, err := parseFloatWith("1.234,5", ","); err != nil || v != 1234.5 {
+		t.Errorf("comma decimal: %v %v", v, err)
+	}
+	if v, err := parseFloatWith("1,5", ""); err != nil || v != 1.5 {
+		t.Errorf("detected: %v %v", v, err)
+	}
+	mdy, err := parseTimeWith("03/04/2026", time.UTC, DateOrderMDY)
+	if err != nil || mdy.Month() != time.March {
+		t.Errorf("mdy: %v %v", mdy, err)
+	}
+	dmy, _ := parseTimeWith("03/04/2026", time.UTC, "")
+	if dmy.Month() != time.April {
+		t.Errorf("day first by default: %v", dmy)
+	}
+	ymd, err := parseTimeWith("2026.04.03", time.UTC, DateOrderYMD)
+	if err != nil || ymd.Month() != time.April {
+		t.Errorf("ymd with dots: %v %v", ymd, err)
+	}
+}
+
+func TestMappingIsValidated(t *testing.T) {
+	ev := testVehicle(models.PowertrainEV)
+	for name, opts := range map[string]CSVImportOptions{
+		"unknown field":  {Type: ImportTypeCharges, Mapping: map[int]string{0: "nope"}},
+		"unknown column": {Type: ImportTypeCharges, Mapping: map[int]string{9: "kwh"}},
+		"bad decimal":    {Type: ImportTypeCharges, DecimalSeparator: ";"},
+		"bad date order": {Type: ImportTypeCharges, DateOrder: "xyz"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := NewCSVImportService(nil, "UTC").Preview(context.Background(), ev, []byte("Date,kWh\n2026-09-15,1\n"), opts); err == nil {
+				t.Error("expected an error")
+			}
+		})
 	}
 }

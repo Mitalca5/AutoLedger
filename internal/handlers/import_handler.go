@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"log/slog"
 	"net/http"
@@ -58,7 +59,7 @@ func readCSVBody(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 
 // importOptions reads the import type and the duplicate policy from the query string or the multipart form,
 // and the distance unit from the signed-in user's setting.
-func (h *ImportHandler) importOptions(r *http.Request) services.CSVImportOptions {
+func (h *ImportHandler) importOptions(r *http.Request) (services.CSVImportOptions, error) {
 	opts := services.CSVImportOptions{
 		Type:           services.ImportType(r.URL.Query().Get("type")),
 		SkipDuplicates: r.URL.Query().Get("skip_duplicates") != "false", // default: true
@@ -71,11 +72,25 @@ func (h *ImportHandler) importOptions(r *http.Request) services.CSVImportOptions
 		if s := r.MultipartForm.Value["skip_duplicates"]; len(s) > 0 {
 			opts.SkipDuplicates = s[0] != "false"
 		}
+		opts.DecimalSeparator = multipartValue(r, "decimal_separator")
+		opts.DateOrder = multipartValue(r, "date_order")
+		if raw := multipartValue(r, "mapping"); raw != "" {
+			if err := json.Unmarshal([]byte(raw), &opts.Mapping); err != nil {
+				return opts, apierror.New("import.invalid_mapping", "The column mapping is not valid")
+			}
+		}
 	}
 	if user, err := h.repo.GetUserByID(r.Context(), middleware.GetUserID(r.Context())); err == nil && user != nil && user.DistanceUnit == "mi" {
 		opts.DistanceUnit = "mi"
 	}
-	return opts
+	return opts, nil
+}
+
+func multipartValue(r *http.Request, name string) string {
+	if v := r.MultipartForm.Value[name]; len(v) > 0 {
+		return strings.TrimSpace(v[0])
+	}
+	return ""
 }
 
 // prepare checks access and reads the file shared by Preview and Execute; it answers and returns nil on failure.
@@ -102,7 +117,12 @@ func (h *ImportHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	if vehicle == nil {
 		return
 	}
-	preview, err := h.importService.Preview(r.Context(), vehicle, data, h.importOptions(r))
+	opts, err := h.importOptions(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	preview, err := h.importService.Preview(r.Context(), vehicle, data, opts)
 	if err != nil {
 		writeImportError(w, err, "import.invalid_csv")
 		return
@@ -116,7 +136,12 @@ func (h *ImportHandler) Execute(w http.ResponseWriter, r *http.Request) {
 	if vehicle == nil {
 		return
 	}
-	result, err := h.importService.Execute(r.Context(), vehicle, data, h.importOptions(r))
+	opts, err := h.importOptions(r)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	result, err := h.importService.Execute(r.Context(), vehicle, data, opts)
 	if err != nil {
 		writeImportError(w, err, "import.execute_failed")
 		return

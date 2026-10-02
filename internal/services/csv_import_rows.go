@@ -43,6 +43,15 @@ type rowContext struct {
 	vehicle *models.Vehicle
 	loc     *time.Location
 	unit    string
+	// decimal and dateOrder override the detection of numbers and slash dates; empty means detect.
+	decimal   string
+	dateOrder string
+}
+
+func (rc *rowContext) float(raw string) (float64, error) { return parseFloatWith(raw, rc.decimal) }
+
+func (rc *rowContext) time(raw string) (time.Time, error) {
+	return parseTimeWith(raw, rc.loc, rc.dateOrder)
 }
 
 // col returns the first non-empty cell among the named columns.
@@ -75,7 +84,7 @@ func (rc *rowContext) distance(row []string, bases ...string) (km float64, found
 		if raw == "" {
 			continue
 		}
-		v, err := parseFlexibleFloat(raw)
+		v, err := rc.float(raw)
 		if err != nil || math.IsNaN(v) || math.IsInf(v, 0) {
 			return 0, true, err
 		}
@@ -89,7 +98,7 @@ func (rc *rowContext) distance(row []string, bases ...string) (km float64, found
 
 func (rc *rowContext) date(row []string, names ...string) (time.Time, bool) {
 	raw := rc.col(row, names...)
-	t, err := parseFlexibleTime(raw, rc.loc)
+	t, err := rc.time(raw)
 	return t, err == nil
 }
 
@@ -122,7 +131,7 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 	}
 
 	kwhRaw := rc.col(row, "kwh", "kwh_added", "energy", "energy_kwh")
-	kwh, err := parseFlexibleFloat(kwhRaw)
+	kwh, err := rc.float(kwhRaw)
 	if err != nil || !ingest.ValidChargeEnergy(kwh) {
 		return nil, apierror.Newf("import.row.invalid_kwh", "Line %d: invalid energy %q (0 to %d kWh)", line, kwhRaw, ingest.MaxChargeKwh)
 	}
@@ -131,7 +140,7 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 	if costRaw == "" {
 		return nil, apierror.Newf("import.row.cost_required", "Line %d: the cost of a charge is required", line)
 	}
-	costValue, err := parseFlexibleFloat(costRaw)
+	costValue, err := rc.float(costRaw)
 	if err != nil || costValue < 0 || money.FromFloat(costValue) > money.Max {
 		return nil, apierror.Newf("import.row.invalid_cost", "Line %d: invalid cost %q", line, costRaw)
 	}
@@ -146,7 +155,7 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 	}
 	var fxRate *float64
 	if currency != rc.vehicle.Currency {
-		fx, err := parseFlexibleFloat(rc.col(row, "fx_rate", "fx", "rate"))
+		fx, err := rc.float(rc.col(row, "fx_rate", "fx", "rate"))
 		if err != nil || fx <= 0 || fx > maxFxRate || math.IsNaN(fx) {
 			return nil, apierror.Newf("import.row.fx_required", "Line %d: a conversion rate to %s is required for a charge in %s", line, rc.vehicle.Currency, currency)
 		}
@@ -190,13 +199,13 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 
 	var endTime *time.Time
 	if endStr := rc.col(row, "end_time", "end"); endStr != "" {
-		if et, err := parseFlexibleTime(endStr, rc.loc); err == nil {
+		if et, err := rc.time(endStr); err == nil {
 			endTime = &et
 		}
 	}
 	var typedEnergy *float64
 	if kwhStr := rc.col(row, "kwh", "energy", "energy_consumed_kwh"); kwhStr != "" {
-		if parsed, err := parseFlexibleFloat(kwhStr); err == nil {
+		if parsed, err := rc.float(kwhStr); err == nil {
 			typedEnergy = &parsed
 		}
 	}
@@ -235,11 +244,11 @@ func parseDriveRow(rc *rowContext, row []string, line int) (*parsedRow, *apierro
 	}, nil
 }
 
-func parseOptionalPositive(raw string, max float64) (value *float64, valid bool) {
+func (rc *rowContext) optionalPositive(raw string, max float64) (value *float64, valid bool) {
 	if raw == "" {
 		return nil, true
 	}
-	v, err := parseFlexibleFloat(raw)
+	v, err := rc.float(raw)
 	if err != nil || math.IsNaN(v) || v < 0 || v > max {
 		return nil, false
 	}
@@ -265,18 +274,18 @@ func parseFuelRow(rc *rowContext, row []string, line int) (*parsedRow, *apierror
 		return nil, apierror.Newf("import.row.invalid_date", "Line %d: invalid date %q", line, rc.col(row, "date", "time", "datetime"))
 	}
 
-	liters, ok := parseOptionalPositive(rc.col(row, "liters", "litres", "volume", "quantity"), maxFuelLiters)
+	liters, ok := rc.optionalPositive(rc.col(row, "liters", "litres", "volume", "quantity"), maxFuelLiters)
 	if !ok {
 		return nil, apierror.Newf("import.row.invalid_liters", "Line %d: invalid quantity (0 to %d L)", line, maxFuelLiters)
 	}
-	price, ok := parseOptionalPositive(rc.col(row, "price_per_liter", "price_per_litre", "unit_price", "price"), maxFuelPrice)
+	price, ok := rc.optionalPositive(rc.col(row, "price_per_liter", "price_per_litre", "unit_price", "price"), maxFuelPrice)
 	if !ok {
 		return nil, apierror.Newf("import.row.invalid_price", "Line %d: invalid price per litre (0 to %d)", line, maxFuelPrice)
 	}
 
 	var amount money.Cents
 	if raw := rc.col(row, "amount", "cost", "total", "total_cost"); raw != "" {
-		v, err := parseFlexibleFloat(raw)
+		v, err := rc.float(raw)
 		if err != nil || v < 0 || money.FromFloat(v) > money.Max {
 			return nil, apierror.Newf("import.row.invalid_amount", "Line %d: invalid amount %q", line, raw)
 		}

@@ -5,7 +5,7 @@ import { currentLocale, t } from '@/i18n'
 import { CSV_COLUMNS, csvTemplate, csvTemplateFilename, csvTemplateTypes, type CsvTemplateType } from '@/utils/dataSources'
 import { downloadCsv } from '@/utils/csv'
 import { api } from '@/services/api'
-import type { CSVExecuteResult, CSVImportType, CSVPreviewResult } from '@/services/csvImport'
+import type { CSVDateOrder, CSVDecimalSeparator, CSVExecuteResult, CSVImportOptions, CSVImportType, CSVPreviewResult } from '@/services/csvImport'
 import { apiErrorMessage } from '@/services/apiError'
 import { distanceUnit } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -27,6 +27,9 @@ const vehicleStore = useVehicleStore()
 const file = ref<File | null>(null)
 const selectedType = ref<CSVImportType | ''>(props.defaultType || '')
 const skipDuplicates = ref(true)
+const dateOrder = ref<CSVDateOrder>('')
+const decimalSeparator = ref<CSVDecimalSeparator>('')
+const mapping = ref<Record<number, string>>({})
 const loading = ref(false)
 const error = ref('')
 
@@ -47,6 +50,9 @@ watch(
     file.value = null
     selectedType.value = props.defaultType || ''
     skipDuplicates.value = true
+    dateOrder.value = ''
+    decimalSeparator.value = ''
+    mapping.value = {}
     loading.value = false
     error.value = ''
     previewResult.value = null
@@ -55,9 +61,32 @@ watch(
   { immediate: true },
 )
 
+function importOptions(): CSVImportOptions {
+  return {
+    type: selectedType.value,
+    skipDuplicates: skipDuplicates.value,
+    mapping: mapping.value,
+    dateOrder: dateOrder.value,
+    decimalSeparator: decimalSeparator.value,
+  }
+}
+
 watch([selectedType, skipDuplicates], () => {
   previewResult.value = null
+  mapping.value = {}
 })
+
+function setColumnField(index: number, field: string) {
+  mapping.value = { ...mapping.value, [index]: field }
+  void handlePreview()
+}
+
+function resetFormat() {
+  mapping.value = {}
+  dateOrder.value = ''
+  decimalSeparator.value = ''
+  void handlePreview()
+}
 
 const rowErrors = (errors: CSVPreviewResult['errors'] | undefined) =>
   (errors ?? []).map((e) => apiErrorMessage(e, e.message))
@@ -92,7 +121,7 @@ async function handlePreview() {
   loading.value = true
   error.value = ''
   try {
-    const res = await api.previewCSVImport(targetVehicleId, file.value, selectedType.value || undefined, skipDuplicates.value)
+    const res = await api.previewCSVImport(targetVehicleId, file.value, importOptions())
     previewResult.value = res
     if (!selectedType.value && res.type !== 'UNKNOWN') {
       selectedType.value = res.type
@@ -110,12 +139,7 @@ async function handleExecute() {
   loading.value = true
   error.value = ''
   try {
-    const res = await api.executeCSVImport(
-      targetVehicleId,
-      file.value,
-      selectedType.value || undefined,
-      skipDuplicates.value,
-    )
+    const res = await api.executeCSVImport(targetVehicleId, file.value, importOptions())
     executeResult.value = res
     emit('imported')
   } catch (err: any) {
@@ -279,6 +303,47 @@ async function handleExecute() {
               <div v-for="(msg, idx) in rowErrors(previewResult.errors)" :key="idx">• {{ msg }}</div>
               <div v-if="previewResult.errors_truncated" class="text-slate-400">{{ $t('import.moreErrors') }}</div>
             </div>
+
+            <!-- Column mapping -->
+            <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-300">
+              <summary class="cursor-pointer font-semibold text-slate-200">{{ $t('import.mappingTitle') }}</summary>
+              <p class="mt-2 text-slate-400">{{ $t('import.mappingHint') }}</p>
+              <div class="mt-3 space-y-2">
+                <div v-for="col in previewResult.mapping" :key="col.index" class="grid grid-cols-2 gap-2 items-center">
+                  <label :for="`csv-col-${col.index}`" class="truncate font-mono text-[11px] text-slate-400" :title="col.header">{{ col.header }}</label>
+                  <select
+                    :id="`csv-col-${col.index}`"
+                    :value="col.field"
+                    @change="setColumnField(col.index, ($event.target as HTMLSelectElement).value)"
+                    class="min-w-0 w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="">{{ $t('import.ignoreColumn') }}</option>
+                    <option v-if="col.field && !previewResult.fields.includes(col.field)" :value="col.field" disabled>{{ col.field }}</option>
+                    <option v-for="f in previewResult.fields" :key="f" :value="f">{{ f }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label for="csv-date-order" class="block text-slate-400 mb-1">{{ $t('import.dateOrder') }}</label>
+                  <select id="csv-date-order" v-model="dateOrder" @change="handlePreview" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                    <option value="">{{ $t('import.autoDetect') }}</option>
+                    <option value="dmy">{{ $t('import.dateDmy') }}</option>
+                    <option value="mdy">{{ $t('import.dateMdy') }}</option>
+                    <option value="ymd">{{ $t('import.dateYmd') }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="csv-decimal" class="block text-slate-400 mb-1">{{ $t('import.decimalSeparator') }}</label>
+                  <select id="csv-decimal" v-model="decimalSeparator" @change="handlePreview" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                    <option value="">{{ $t('import.autoDetect') }}</option>
+                    <option value=".">{{ $t('import.decimalDot') }}</option>
+                    <option value=",">{{ $t('import.decimalComma') }}</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" @click="resetFormat" class="mt-3 text-rose-400 hover:text-rose-300 font-semibold">{{ $t('import.resetMapping') }}</button>
+            </details>
 
             <!-- Sample rows -->
             <div class="overflow-x-auto border border-slate-800 rounded-xl">

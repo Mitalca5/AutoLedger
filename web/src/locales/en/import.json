@@ -30,5 +30,16 @@
   "distanceHint": "Distance columns without a _km or _mi suffix are read in {unit}.",
   "helpTitle": "Templates and recognised columns",
   "helpIntro": "The first line names the columns, in any order. Required columns are in green, optional ones follow. Upper or lower case, accents, spaces and unit suffixes such as (km) are ignored, and French names (date, cout, kilometrage...) are accepted. Other columns are ignored.",
-  "downloadTemplate": "Download a template"
+  "downloadTemplate": "Download a template",
+  "mappingTitle": "Adjust columns and formats",
+  "mappingHint": "Choose what each column holds, or ignore it. Distance columns come in km or mi.",
+  "ignoreColumn": "Ignore",
+  "dateOrder": "Date format",
+  "dateDmy": "Day / month / year",
+  "dateMdy": "Month / day / year",
+  "dateYmd": "Year / month / day",
+  "decimalSeparator": "Decimal separator",
+  "decimalDot": "Dot (1,234.5)",
+  "decimalComma": "Comma (1.234,5)",
+  "resetMapping": "Reset to detected values"
 }

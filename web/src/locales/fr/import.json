@@ -30,5 +30,16 @@
   "distanceHint": "Les colonnes de distance sans suffixe _km ou _mi sont lues en {unit}.",
   "helpTitle": "Modèles et colonnes reconnues",
   "helpIntro": "La première ligne nomme les colonnes, dans n'importe quel ordre. Les colonnes obligatoires sont en vert, les facultatives suivent. Majuscules, accents, espaces et suffixes d'unité comme (km) sont ignorés, et les noms anglais ou français (date, cout, kilometrage...) sont acceptés. Les autres colonnes sont ignorées.",
-  "downloadTemplate": "Télécharger un modèle"
+  "downloadTemplate": "Télécharger un modèle",
+  "mappingTitle": "Ajuster les colonnes et les formats",
+  "mappingHint": "Choisissez ce que contient chaque colonne, ou ignorez-la. Les colonnes de distance existent en km ou en mi.",
+  "ignoreColumn": "Ignorer",
+  "dateOrder": "Format de date",
+  "dateDmy": "Jour / mois / année",
+  "dateMdy": "Mois / jour / année",
+  "dateYmd": "Année / mois / jour",
+  "decimalSeparator": "Séparateur décimal",
+  "decimalDot": "Point (1 234.5)",
+  "decimalComma": "Virgule (1 234,5)",
+  "resetMapping": "Revenir aux valeurs détectées"
 }

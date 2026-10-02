@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -35,6 +36,29 @@ type CSVImportOptions struct {
 	SkipDuplicates bool
 	// DistanceUnit ("km" or "mi") is the unit of the distance columns that carry no _km / _mi suffix.
 	DistanceUnit string
+	// Mapping assigns a field to a column by its index; an empty field ignores the column. Columns it does not
+	// name keep the field detected from their header.
+	Mapping map[int]string
+	// DecimalSeparator ("." or ",") and DateOrder (dmy, mdy, ymd) override the detection.
+	DecimalSeparator string
+	DateOrder        string
+}
+
+// ColumnMapping tells which field a column feeds: Field is empty when the column is ignored, Detected when the
+// header (not the user) chose it.
+type ColumnMapping struct {
+	Index    int    `json:"index"`
+	Header   string `json:"header"`
+	Field    string `json:"field"`
+	Detected bool   `json:"detected"`
+}
+
+// importFields lists, per type, the fields a column can feed; the distance ones come in km and mi.
+var importFields = map[ImportType][]string{
+	ImportTypeCharges:  {"date", "kwh", "cost", "currency", "fx_rate", "odometer_km", "odometer_mi", "location"},
+	ImportTypeDrives:   {"start_time", "end_time", "distance_km", "distance_mi", "kwh", "start_address", "end_address", "tag"},
+	ImportTypeFuel:     {"date", "liters", "price_per_liter", "amount", "fuel_type", "is_full_tank", "odometer_km", "odometer_mi", "notes"},
+	ImportTypeOdometer: {"date", "odometer_km", "odometer_mi", "notes"},
 }
 
 type CSVPreviewResult struct {
@@ -44,6 +68,8 @@ type CSVPreviewResult struct {
 	InvalidRows     int               `json:"invalid_rows"`
 	DuplicateRows   int               `json:"duplicate_rows"`
 	Headers         []string          `json:"headers"`
+	Mapping         []ColumnMapping   `json:"mapping"`
+	Fields          []string          `json:"fields"`
 	SampleRows      []map[string]any  `json:"sample_rows"`
 	Errors          []*apierror.Error `json:"errors,omitempty"`
 	ErrorsTruncated bool              `json:"errors_truncated,omitempty"`
@@ -91,8 +117,20 @@ func detectDelimiter(data []byte) rune {
 	return ','
 }
 
+// Date orders and decimal separators a file can be read with; empty means detect (day first, either separator).
+const (
+	DateOrderDMY = "dmy"
+	DateOrderMDY = "mdy"
+	DateOrderYMD = "ymd"
+)
+
 // parseFlexibleTime tries common date and time layouts; a date without an offset is read in loc.
 func parseFlexibleTime(raw string, loc *time.Location) (time.Time, error) {
+	return parseTimeWith(raw, loc, "")
+}
+
+// parseTimeWith reads a date in the given order (dmy by default) for the slash and dot forms; ISO forms always work.
+func parseTimeWith(raw string, loc *time.Location, order string) (time.Time, error) {
 	raw = strings.TrimSpace(raw)
 	layouts := []string{
 		time.RFC3339,
@@ -100,10 +138,19 @@ func parseFlexibleTime(raw string, loc *time.Location) (time.Time, error) {
 		"2006-01-02 15:04",
 		"2006-01-02T15:04:05",
 		"2006-01-02T15:04",
-		"02/01/2006 15:04:05",
-		"02/01/2006 15:04",
-		"02/01/2006",
 		"2006-01-02",
+	}
+	for _, sep := range []string{"/", "."} {
+		var d string
+		switch order {
+		case DateOrderMDY:
+			d = "01" + sep + "02" + sep + "2006"
+		case DateOrderYMD:
+			d = "2006" + sep + "01" + sep + "02"
+		default:
+			d = "02" + sep + "01" + sep + "2006"
+		}
+		layouts = append(layouts, d+" 15:04:05", d+" 15:04", d)
 	}
 	for _, l := range layouts {
 		if t, err := time.ParseInLocation(l, raw, loc); err == nil {
@@ -115,9 +162,21 @@ func parseFlexibleTime(raw string, loc *time.Location) (time.Time, error) {
 
 // parseFlexibleFloat parses numbers allowing both '.' and ',' decimal separators.
 func parseFlexibleFloat(raw string) (float64, error) {
-	cleaned := strings.TrimSpace(raw)
-	cleaned = strings.ReplaceAll(cleaned, " ", "")
-	cleaned = strings.ReplaceAll(cleaned, ",", ".")
+	return parseFloatWith(raw, "")
+}
+
+// parseFloatWith reads a number whose decimal separator is decimal ("." or ","; the other one then groups
+// thousands), or either one when decimal is empty.
+func parseFloatWith(raw, decimal string) (float64, error) {
+	cleaned := strings.ReplaceAll(strings.TrimSpace(raw), " ", "")
+	switch decimal {
+	case ".":
+		cleaned = strings.ReplaceAll(cleaned, ",", "")
+	case ",":
+		cleaned = strings.ReplaceAll(strings.ReplaceAll(cleaned, ".", ""), ",", ".")
+	default:
+		cleaned = strings.ReplaceAll(cleaned, ",", ".")
+	}
 	return strconv.ParseFloat(cleaned, 64)
 }
 
@@ -184,6 +243,7 @@ type plannedRow struct {
 type csvPlan struct {
 	importType ImportType
 	headers    []string
+	mapping    []ColumnMapping
 	total      int
 	sample     []map[string]any
 	rows       []plannedRow
@@ -220,7 +280,23 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 		return nil, apierror.New("import.ice_charges", "A combustion vehicle has no charges to import: import its fill-ups instead")
 	}
 
+	if err := validateMapping(importType, len(headers), opts); err != nil {
+		return nil, err
+	}
+
 	canonical := canonicalHeaders(headers)
+	mapping := make([]ColumnMapping, len(headers))
+	for i, h := range headers {
+		field, detected := canonical[i], true
+		if chosen, ok := opts.Mapping[i]; ok {
+			field, detected = chosen, false
+			canonical[i] = chosen
+			if chosen == "" {
+				canonical[i] = "\x00ignored"
+			}
+		}
+		mapping[i] = ColumnMapping{Index: i, Header: h, Field: field, Detected: detected}
+	}
 	columns := make(map[string]int, len(headers))
 	for i, name := range canonical {
 		if _, taken := columns[name]; !taken {
@@ -231,9 +307,9 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 	if unit != "mi" {
 		unit = "km"
 	}
-	rc := &rowContext{columns: columns, vehicle: vehicle, loc: s.loc, unit: unit}
+	rc := &rowContext{columns: columns, vehicle: vehicle, loc: s.loc, unit: unit, decimal: opts.DecimalSeparator, dateOrder: opts.DateOrder}
 
-	p := &csvPlan{importType: importType, headers: headers}
+	p := &csvPlan{importType: importType, headers: headers, mapping: mapping}
 	for i := 1; i < len(records); i++ {
 		row := records[i]
 		if len(row) == 0 || (len(row) == 1 && strings.TrimSpace(row[0]) == "") {
@@ -264,6 +340,28 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 	return p, nil
 }
 
+func validateMapping(importType ImportType, columns int, opts CSVImportOptions) error {
+	switch opts.DecimalSeparator {
+	case "", ".", ",":
+	default:
+		return apierror.Newf("import.invalid_decimal_separator", "Unknown decimal separator %q", opts.DecimalSeparator)
+	}
+	switch opts.DateOrder {
+	case "", DateOrderDMY, DateOrderMDY, DateOrderYMD:
+	default:
+		return apierror.Newf("import.invalid_date_order", "Unknown date order %q", opts.DateOrder)
+	}
+	for index, field := range opts.Mapping {
+		if index < 0 || index >= columns {
+			return apierror.Newf("import.unknown_column", "Column %d does not exist", index+1)
+		}
+		if field != "" && !slices.Contains(importFields[importType], field) {
+			return apierror.Newf("import.unknown_field", "Field %q cannot be imported as %s", field, string(importType))
+		}
+	}
+	return nil
+}
+
 func sampleRow(headers, row []string) map[string]any {
 	m := make(map[string]any, len(headers))
 	for j, val := range row {
@@ -287,6 +385,8 @@ func (s *CSVImportService) Preview(ctx context.Context, vehicle *models.Vehicle,
 		InvalidRows:     p.invalid,
 		DuplicateRows:   p.duplicates,
 		Headers:         p.headers,
+		Mapping:         p.mapping,
+		Fields:          importFields[p.importType],
 		SampleRows:      p.sample,
 		Errors:          p.errors,
 		ErrorsTruncated: p.invalid > len(p.errors),
