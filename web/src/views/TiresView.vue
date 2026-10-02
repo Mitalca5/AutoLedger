@@ -156,7 +156,7 @@ async function loadTires() {
   if (!vehicleStore.activeVehicle) return
   loading.value = true
   try {
-    tires.value = await api.getTires(vehicleStore.activeVehicle.id)
+    tires.value = (await api.getTires(vehicleStore.activeVehicle.id)) ?? []
   } catch (err) {
     console.error('Failed to load tires', err)
   } finally {

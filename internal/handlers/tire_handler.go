@@ -40,7 +40,7 @@ func (h *TireHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var statsList []services.TireWearStats
+	statsList := []services.TireWearStats{}
 	for i := range tires {
 		stats, err := h.tireWearService.CalculateTireWear(r.Context(), &tires[i], v.CurrentOdometer)
 		if err == nil && stats != nil {
