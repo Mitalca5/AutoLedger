@@ -356,6 +356,7 @@ func main() {
 		pendingChargesHandler := handlers.NewPendingChargesHandler(repo, tariffService)
 		fleetHandler := handlers.NewFleetHandler(fleetService)
 		haHandler := handlers.NewHomeAssistantHandler(repo, tariffService)
+		haHandler.SetTimezone(cfg.ReportingTimezone)
 
 		// Public Auth
 		r.Route("/api/auth", func(r chi.Router) {

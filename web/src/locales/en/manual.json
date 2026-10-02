@@ -1,7 +1,7 @@
 {
   "manualTrackingView": {
     "addAVehicleFirst": "Add a vehicle first.",
-    "manualTracking": "Manual tracking",
+    "manualTracking": "Tracking",
     "subtitle": "Mileage and {what} entered by hand",
     "fillUps": "fill-ups",
     "energy": "energy",
@@ -72,7 +72,9 @@
     "saving": "Saving…"
   },
   "odometerReadingsPanel": {
-    "noManualReadingYet": "No manual reading yet.",
+    "noManualReadingYet": "No reading yet.",
+    "fromHomeAssistant": "Home Assistant",
+    "fromHomeAssistantHint": "Reported by the Home Assistant integration, one point per day. It cannot be edited, only deleted.",
     "loadingTheReadings": "Loading the readings...",
     "readingS": "{length} reading(s)",
     "historyOfRecordedReadings": "History of recorded readings",

@@ -103,9 +103,17 @@ type OdometerCheckpoint struct {
 	Date      time.Time `json:"date"`
 	Odometer  float64   `json:"odometer"`
 	Notes     *string   `json:"notes,omitempty"`
+	// Source is "MANUAL" (entered by a user) or "HA" (reported by the Home Assistant integration).
+	Source    string    `json:"source"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+// Odometer checkpoint sources.
+const (
+	OdometerSourceManual = "MANUAL"
+	OdometerSourceHA     = "HA"
+)
 
 // Acquisition types of a vehicle.
 const (

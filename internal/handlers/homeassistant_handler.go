@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"math"
 	"net/http"
 	"strings"
@@ -20,12 +21,21 @@ import (
 type HomeAssistantHandler struct {
 	repo          *database.Repository
 	tariffService *services.TariffService
+	loc           *time.Location
+}
+
+// SetTimezone sets the timezone that decides which day an odometer reading belongs to (UTC by default).
+func (h *HomeAssistantHandler) SetTimezone(name string) {
+	if loc, err := time.LoadLocation(name); err == nil {
+		h.loc = loc
+	}
 }
 
 func NewHomeAssistantHandler(repo *database.Repository, tariffService *services.TariffService) *HomeAssistantHandler {
 	return &HomeAssistantHandler{
 		repo:          repo,
 		tariffService: tariffService,
+		loc:           time.UTC,
 	}
 }
 
@@ -285,11 +295,35 @@ func (h *HomeAssistantHandler) recordOdometer(w http.ResponseWriter, r *http.Req
 			return
 		}
 	}
+	h.recordOdometerPoint(r, vehicle.ID, req.Timestamp, odometer)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"status":           "recorded",
 		"vehicle_id":       vehicle.ID,
 		"current_odometer": math.Max(vehicle.CurrentOdometer, odometer),
 	})
+}
+
+// recordOdometerPoint keeps the reading in the vehicle's mileage history. A reading that contradicts the readings
+// and fill-ups around it still raises the current odometer but is not kept as a point: it would make the history
+// inconsistent and block later manual entries.
+func (h *HomeAssistantHandler) recordOdometerPoint(r *http.Request, vehicleID string, at *time.Time, odometer float64) {
+	when := time.Now()
+	if at != nil && !at.IsZero() && !at.After(when) {
+		when = *at
+	}
+	local := when.In(h.loc)
+	day := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, time.UTC)
+
+	points, err := h.repo.ListManualOdometerPoints(r.Context(), vehicleID)
+	if err == nil {
+		err = checkOdometerOrder(points, "", day, odometer)
+	}
+	if err == nil {
+		err = h.repo.RecordIntegrationOdometer(r.Context(), vehicleID, day, odometer)
+	}
+	if err != nil {
+		slog.Warn("odometer reading not kept in the history", "vehicle_id", vehicleID, "error", err)
+	}
 }
 
 // IntegrationVehicle is the view of a vehicle given to Home Assistant and scripts: what an integration needs to

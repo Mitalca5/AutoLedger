@@ -1,7 +1,7 @@
 {
   "manualTrackingView": {
     "addAVehicleFirst": "Ajoutez d'abord un véhicule.",
-    "manualTracking": "Suivi manuel",
+    "manualTracking": "Suivi",
     "subtitle": "Kilométrage et {what} saisis à la main",
     "fillUps": "pleins",
     "energy": "énergie",
@@ -72,7 +72,9 @@
     "saving": "Enregistrement…"
   },
   "odometerReadingsPanel": {
-    "noManualReadingYet": "Aucun relevé manuel pour l'instant.",
+    "noManualReadingYet": "Aucun relevé pour l'instant.",
+    "fromHomeAssistant": "Home Assistant",
+    "fromHomeAssistantHint": "Relevé remonté par l'intégration Home Assistant, un point par jour. Il ne peut pas être modifié, seulement supprimé.",
     "loadingTheReadings": "Chargement des relevés...",
     "readingS": "{length} relevé(s)",
     "historyOfRecordedReadings": "Historique des relevés enregistrés",
