@@ -31,7 +31,7 @@ import (
 )
 
 // AppVersion is the application version, injected at build time via -ldflags "-X main.AppVersion=...".
-var AppVersion = "1.21.0"
+var AppVersion = "1.22.0"
 
 // requestIDHandler wraps a slog.Handler to attach the chi request ID (if any is present on the
 // context) to every log record. This is what lets a "request_id" field emitted by a *Context
