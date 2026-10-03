@@ -214,7 +214,8 @@
     "includingDepreciation": "(including {depreciation_cost} depreciation)",
     "fullCost": "Full cost: {full_cost}",
     "fuel": "Fuel (fill-ups)",
-    "energy": "Energy (charges)"
+    "energy": "Energy (charges)",
+    "kwhOnly": "{total_kwh_added} kWh charged"
   },
   "urgentRemindersBanner": {
     "viewTheReminders": "View the reminders",

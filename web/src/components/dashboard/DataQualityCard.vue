@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { intlLocale, t } from '@/i18n'
 import { formatDistance } from '@/units'
-import { canCharge, canRefuel } from '@/utils/vehicles'
+import { canRefuel, isElectricOnly } from '@/utils/vehicles'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -103,7 +103,7 @@ const issueLabels: Record<string, () => string> = {
         {{ $t('dashboard.dataQualityCard.enterAFillUp') }}
       </router-link>
       <router-link
-        v-if="canCharge(tco.powertrain) && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
+        v-if="isElectricOnly(tco.powertrain) && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
         to="/manual?tab=ENERGY"
         :title="$t('dashboard.dataQualityCard.enterAverageConsumptionHint')"
         class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"

@@ -314,8 +314,7 @@ function finishOnboarding() {
               v-model="vehiclePowertrain"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
             >
-              <option value="EV">{{ $t('onboarding.onboardingView.electricTeslamateTrackingAvailable') }}</option>
-              <option value="ICE">{{ $t('onboarding.onboardingView.combustionFillUpsEnteredBy') }}</option>
+              <option v-for="p in ['EV', 'PHEV', 'REEV', 'ICE']" :key="p" :value="p">{{ $t(`vehicles.powertrainOptions.${p}`) }}</option>
             </select>
           </div>
 

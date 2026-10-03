@@ -214,7 +214,8 @@
     "includingDepreciation": "(dont décote {depreciation_cost})",
     "fullCost": "Coût complet : {full_cost}",
     "fuel": "Carburant (pleins)",
-    "energy": "Énergie (Charges)"
+    "energy": "Énergie (Charges)",
+    "kwhOnly": "{total_kwh_added} kWh rechargés"
   },
   "urgentRemindersBanner": {
     "viewTheReminders": "Consulter les rappels",

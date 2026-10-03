@@ -227,5 +227,17 @@
     "never": "jamais",
     "counts": "{drives} trajets · {charges} recharges · {readings} relevés kilométriques",
     "empty": "Rien d'enregistré pour ce véhicule pour l'instant."
+  },
+  "powertrains": {
+    "EV": "Électrique",
+    "ICE": "Thermique",
+    "PHEV": "Hybride rechargeable",
+    "REEV": "Prolongateur d'autonomie"
+  },
+  "powertrainOptions": {
+    "EV": "Électrique (recharges, synchro TeslaMate possible)",
+    "ICE": "Thermique (pleins saisis à la main)",
+    "PHEV": "Hybride rechargeable (recharges et pleins)",
+    "REEV": "Prolongateur d'autonomie (recharges et pleins)"
   }
 }

@@ -227,5 +227,17 @@
     "never": "never",
     "counts": "{drives} drives · {charges} charges · {readings} odometer readings",
     "empty": "Nothing recorded for this vehicle yet."
+  },
+  "powertrains": {
+    "EV": "Electric",
+    "ICE": "Combustion",
+    "PHEV": "Plug-in hybrid",
+    "REEV": "Range extender"
+  },
+  "powertrainOptions": {
+    "EV": "Electric (charges, TeslaMate sync possible)",
+    "ICE": "Combustion (fill-ups entered by hand)",
+    "PHEV": "Plug-in hybrid (charges and fill-ups)",
+    "REEV": "Range extender (charges and fill-ups)"
   }
 }

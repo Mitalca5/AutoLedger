@@ -66,7 +66,9 @@ function copyConnectionFrom(source: any) {
   form.value.teslamate_basic_user = source.teslamate_basic_user || ''
 }
 
-function setPowertrain(p: 'EV' | 'ICE') {
+const powertrainChoices = ['EV', 'PHEV', 'REEV', 'ICE'] as const
+
+function setPowertrain(p: (typeof powertrainChoices)[number]) {
   if (isEditing.value) return
   form.value.powertrain = p
   if (p === 'ICE') {
@@ -199,26 +201,19 @@ async function testModalConnection() {
         <!-- Motorisation (Boutons visuels au lieu d'un simple select) -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">{{ $t('vehicles.vehicleFormModal.powertrain') }}</label>
-          <div class="grid grid-cols-2 gap-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button
+              v-for="p in powertrainChoices"
+              :key="p"
               type="button"
               :disabled="isEditing"
-              @click="setPowertrain('EV')"
+              @click="setPowertrain(p)"
               class="p-2.5 rounded-xl border flex items-center gap-2.5 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="form.powertrain === 'EV' ? 'bg-rose-500/10 border-rose-500/50 text-white shadow-sm ring-1 ring-rose-500/20' : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
+              :class="form.powertrain === p ? 'bg-rose-500/10 border-rose-500/50 text-white shadow-sm ring-1 ring-rose-500/20' : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
             >
-              <Zap class="w-4 h-4 text-amber-400 shrink-0" />
-              <span class="text-xs font-semibold leading-tight">{{ $t('onboarding.onboardingView.electricTeslamateTrackingAvailable') }}</span>
-            </button>
-            <button
-              type="button"
-              :disabled="isEditing"
-              @click="setPowertrain('ICE')"
-              class="p-2.5 rounded-xl border flex items-center gap-2.5 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="form.powertrain === 'ICE' ? 'bg-rose-500/10 border-rose-500/50 text-white shadow-sm ring-1 ring-rose-500/20' : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
-            >
-              <Flame class="w-4 h-4 text-orange-400 shrink-0" />
-              <span class="text-xs font-semibold leading-tight">{{ $t('onboarding.onboardingView.combustionFillUpsEnteredBy') }}</span>
+              <Flame v-if="p === 'ICE'" class="w-4 h-4 text-orange-400 shrink-0" />
+              <Zap v-else class="w-4 h-4 text-amber-400 shrink-0" />
+              <span class="text-xs font-semibold leading-tight">{{ $t(`vehicles.powertrainOptions.${p}`) }}</span>
             </button>
           </div>
         </div>

@@ -4,6 +4,8 @@ import {
   canCharge,
   canLinkTeslaMate,
   canRefuel,
+  isElectricOnly,
+  isFuelOnly,
   emptyOwnership,
   emptyVehicleForm,
   hasTeslaMate,
@@ -237,5 +239,6 @@ describe('powertrain capabilities', () => {
     expect([canCharge(undefined), canRefuel(undefined)]).toEqual([true, false])
     expect([canCharge('PHEV'), canRefuel('PHEV'), canLinkTeslaMate('PHEV')]).toEqual([true, true, true])
     expect([canCharge('REEV'), canRefuel('REEV')]).toEqual([true, true])
+    expect(['EV', 'ICE', 'PHEV'].map((p) => [isElectricOnly(p), isFuelOnly(p)])).toEqual([[true, false], [false, true], [false, false]])
   })
 })

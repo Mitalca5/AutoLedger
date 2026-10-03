@@ -42,9 +42,9 @@ type TabType = typeof validTabs[number]
 const initialTab = (route.query.tab as string)?.toUpperCase()
 const activeTab = ref<TabType>(validTabs.includes(initialTab as TabType) ? (initialTab as TabType) : 'TOLLS')
 
-// A combustion vehicle has no charges: its fill-ups live in the manual tracking page
-watch([() => vehicleStore.canRefuel, activeTab], ([ice, tab]) => {
-  if (ice && tab === 'CHARGES') router.replace('/manual?tab=FUEL')
+// A fuel-only vehicle has no charges: its fill-ups live in the manual tracking page
+watch([() => vehicleStore.canCharge, activeTab], ([charges, tab]) => {
+  if (!charges && tab === 'CHARGES') router.replace('/manual?tab=FUEL')
 }, { immediate: true })
 
 watch(activeTab, (newTab) => {

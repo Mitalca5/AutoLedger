@@ -62,6 +62,16 @@ export function canRefuel(powertrain: PowertrainLike): boolean {
   return powertrain === 'ICE' || powertrain === 'PHEV' || powertrain === 'REEV'
 }
 
+/** Fuel only: fill-ups and no charging. */
+export function isFuelOnly(powertrain: PowertrainLike): boolean {
+  return canRefuel(powertrain) && !canCharge(powertrain)
+}
+
+/** Battery only: charging sessions and no fill-ups. */
+export function isElectricOnly(powertrain: PowertrainLike): boolean {
+  return canCharge(powertrain) && !canRefuel(powertrain)
+}
+
 /** A teslamateapi connection makes sense for the powertrain. */
 export function canLinkTeslaMate(powertrain: PowertrainLike): boolean {
   return canCharge(powertrain)

@@ -5,6 +5,7 @@ describe('csvTemplateTypes', () => {
   it('offers charges and drives to an electric vehicle, fill-ups to a combustion one', () => {
     expect(csvTemplateTypes('EV')).toEqual(['CHARGES', 'DRIVES', 'ODOMETER'])
     expect(csvTemplateTypes('ICE')).toEqual(['FUEL', 'ODOMETER'])
+    expect(csvTemplateTypes('PHEV')).toEqual(['CHARGES', 'DRIVES', 'FUEL', 'ODOMETER'])
   })
 })
 
