@@ -3,135 +3,431 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#020617">
 <title>AutoLedger</title>
 <meta name="description" content="Self-hosted total cost of ownership ledger for electric, hybrid and combustion vehicles. Any brand: manual entry, CSV, API or telemetry.">
+<meta property="og:title" content="AutoLedger">
+<meta property="og:description" content="What does your vehicle really cost you? A self-hosted ledger for the total cost of ownership of any vehicle.">
+<meta property="og:image" content="https://rem7474.github.io/AutoLedger/img/dashboard.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#f8fafc;--fg:#0f172a;--muted:#475569;--card:#fff;--line:#e2e8f0;--accent:#e11d48;--code:#0f172a;--codefg:#e2e8f0}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1120;--fg:#e2e8f0;--muted:#94a3b8;--card:#111a2e;--line:#1e293b;--accent:#fb7185;--code:#020617;--codefg:#e2e8f0}}
+:root{
+  --bg:#020617;--surface:#0b1224;--surface2:#111b33;--line:#1e293b;--line2:#334155;
+  --fg:#f1f5f9;--muted:#aab6c9;--accent:#f43f5e;--accent-deep:#e11d48;--accent-text:#fda4af;
+  --btn-from:#e11d48;--btn-to:#be123c;--ok:#6ee7b7;
+  --radius:18px;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
-header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.15rem}
-.brand img{width:32px;height:32px;border-radius:8px}
-nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-size:.95rem}
-nav a:hover{color:var(--fg)}
-.hero{padding:48px 0 32px}
-h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.15;margin:0 0 16px;letter-spacing:-.02em}
-h1 span{color:var(--accent)}
-.lead{font-size:1.15rem;color:var(--muted);max-width:680px;margin:0 0 28px}
-.btn{display:inline-block;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--card);margin:0 8px 8px 0}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-section{padding:36px 0}
-h2{font-size:1.6rem;margin:0 0 8px;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:0 0 24px;max-width:680px}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
-.card h3{margin:0 0 6px;font-size:1.05rem}
-.card p{margin:0;color:var(--muted);font-size:.95rem}
-.table-wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:560px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:.93rem}
-th{color:var(--muted);font-weight:600}
-tr:last-child td{border-bottom:0}
-pre{background:var(--code);color:var(--codefg);padding:16px;border-radius:12px;overflow-x:auto;font-size:.88rem;line-height:1.5}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
-.lang{margin-left:16px;display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;vertical-align:middle}
-.lang button{background:none;border:0;color:var(--muted);padding:3px 10px;font:inherit;font-size:.85rem;cursor:pointer}
-.lang button[aria-pressed=true]{background:var(--accent);color:#fff}
-footer{padding:32px 0 48px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);margin-top:24px}
-footer a{color:var(--muted)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(900px 480px at 78% -8%,rgba(244,63,94,.16),transparent 60%),radial-gradient(700px 420px at 4% 8%,rgba(225,29,72,.09),transparent 60%)}
+a{color:var(--accent-text);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:#fff}
+:focus-visible{outline:3px solid #fff;outline-offset:3px;border-radius:6px;box-shadow:0 0 0 6px var(--accent-deep)}
+.skip{position:absolute;left:12px;top:-60px;background:#fff;color:#000;padding:10px 16px;border-radius:10px;z-index:100;font-weight:700}
+.skip:focus{top:12px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* navbar */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(2,6,23,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;color:var(--fg);text-decoration:none;letter-spacing:-.01em}
+.brand img{width:34px;height:34px;border-radius:9px}
+.links{display:flex;gap:4px;margin-left:12px}
+.links a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;font-size:.95rem;font-weight:500}
+.links a:hover{color:#fff;background:var(--surface2)}
+.spacer{flex:1}
+.ver{font:600 .78rem ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent-text);border:1px solid rgba(244,63,94,.45);background:rgba(244,63,94,.1);padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap}
+.lang{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+.lang button{background:none;border:0;color:var(--muted);padding:6px 11px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--btn-from);color:#fff}
+.gh{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--surface);color:var(--fg);text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:.9rem}
+.gh:hover{border-color:var(--accent);color:#fff}
+.gh .count{border-left:1px solid var(--line2);padding-left:8px;color:var(--accent-text);display:inline-flex;align-items:center;gap:4px}
+.gh .count[hidden]{display:none}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 24px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;border:1px solid var(--line2);color:var(--fg);background:var(--surface);cursor:pointer;font-family:inherit;transition:transform .15s,border-color .15s}
+.btn:hover{transform:translateY(-2px);border-color:var(--accent);color:#fff}
+.btn.primary{background:linear-gradient(135deg,var(--btn-from),var(--btn-to));border-color:transparent;color:#fff;box-shadow:0 10px 30px -8px rgba(225,29,72,.65)}
+
+/* hero */
+.hero{padding:132px 0 24px;text-align:center}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:7px 16px;border-radius:999px;border:1px solid rgba(244,63,94,.4);background:rgba(244,63,94,.1);color:var(--accent-text);font-weight:600;font-size:.88rem}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(244,63,94,.7);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(244,63,94,0)}100%{box-shadow:0 0 0 0 rgba(244,63,94,0)}}
+h1{font-size:clamp(2.4rem,6.4vw,4.6rem);line-height:1.05;margin:24px auto 20px;letter-spacing:-.035em;font-weight:800;max-width:880px}
+.grad{background:linear-gradient(100deg,#fb7185,#f43f5e 45%,#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.lead{font-size:clamp(1.05rem,2.2vw,1.25rem);color:var(--muted);max-width:720px;margin:0 auto 32px}
+.cta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.trust{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin:26px 0 0;padding:0;list-style:none;color:var(--muted);font-size:.9rem}
+.trust li{display:inline-flex;align-items:center;gap:7px}
+.trust svg{color:var(--ok)}
+
+/* mockups */
+.stage{position:relative;max-width:1000px;margin:56px auto 0;padding:0 0 40px}
+.stage::before{content:"";position:absolute;inset:8% 6% 0;background:radial-gradient(closest-side,rgba(244,63,94,.35),transparent);filter:blur(60px);z-index:-1}
+.browser{border:1px solid var(--line2);border-radius:16px;background:var(--surface);overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.9)}
+.browser .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:#0a1020;border-bottom:1px solid var(--line)}
+.browser .bar i{width:11px;height:11px;border-radius:50%;background:var(--line2)}
+.browser .bar span{margin-left:10px;font:.78rem ui-monospace,Menlo,monospace;color:var(--muted);background:var(--bg);padding:3px 14px;border-radius:7px}
+.browser img{display:block;width:100%;height:auto}
+.phone{position:absolute;right:-8px;bottom:0;width:23%;min-width:130px;border:6px solid #1b2742;border-radius:30px;background:#000;overflow:hidden;box-shadow:0 30px 70px -20px rgba(0,0,0,.95)}
+.phone img{display:block;width:100%;height:auto}
+
+section{padding:88px 0 8px}
+.kicker{color:var(--accent-text);font-weight:700;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 10px}
+h2{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.12;margin:0 0 14px;letter-spacing:-.025em;font-weight:800}
+.sub{color:var(--muted);max-width:660px;margin:0 0 36px;font-size:1.08rem}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.cell{background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:var(--radius);padding:26px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.cell:hover{border-color:rgba(244,63,94,.55);transform:translateY(-3px)}
+.cell h3{margin:14px 0 8px;font-size:1.2rem;letter-spacing:-.01em}
+.cell p{margin:0;color:var(--muted);font-size:.98rem}
+.ico{display:inline-flex;width:46px;height:46px;border-radius:13px;align-items:center;justify-content:center;font-size:23px;background:rgba(244,63,94,.14);color:var(--accent-text);border:1px solid rgba(244,63,94,.35)}
+.c-tco{grid-column:span 7;grid-row:span 2}
+.c-src{grid-column:span 5}
+.c-energy{grid-column:span 5}
+.c-fleet,.c-remind,.c-own{grid-column:span 4}
+.bars{margin:22px 0 0;display:grid;gap:11px}
+.bars div{display:grid;grid-template-columns:104px 1fr;align-items:center;gap:12px;font-size:.85rem;color:var(--muted)}
+.bars b{display:block;height:11px;border-radius:99px;background:linear-gradient(90deg,var(--accent-deep),#fb923c)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;list-style:none}
+.chips li{border:1px solid var(--line2);background:var(--bg);color:var(--fg);font-size:.84rem;font-weight:600;padding:5px 12px;border-radius:999px}
+.also{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+.also li{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-size:.92rem;border:1px dashed var(--line2);padding:6px 14px;border-radius:999px}
+.also svg{color:var(--accent-text)}
+
+/* screens */
+.split{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:center}
+.ticks{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:14px}
+.ticks li{display:flex;gap:12px;color:var(--muted)}
+.ticks svg{color:var(--ok);margin-top:5px;font-size:18px}
+.ticks strong{color:var(--fg)}
+
+/* table */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.table-wrap:focus-visible{outline-offset:2px}
+table{border-collapse:collapse;width:100%;min-width:620px}
+th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:.95rem}
+thead th{color:var(--muted);font-weight:600;background:#0a1020}
+th[scope=row]{font-weight:500;color:var(--fg)}
+tr:last-child>*{border-bottom:0}
+td.us{color:var(--ok);font-weight:700;background:rgba(110,231,183,.05)}
+caption{position:absolute;left:-9999px}
+
+/* quickstart */
+.term{border:1px solid var(--line2);border-radius:16px;background:#050a18;overflow:hidden;box-shadow:0 30px 70px -30px rgba(0,0,0,.9)}
+.term .bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:#0a1020;border-bottom:1px solid var(--line)}
+.term .bar i{width:11px;height:11px;border-radius:50%;background:var(--line2)}
+.term .bar span{margin-left:8px;color:var(--muted);font:.8rem ui-monospace,Menlo,monospace}
+.term .bar button{margin-left:auto}
+.copy{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);color:var(--fg);border:1px solid var(--line2);border-radius:9px;padding:6px 13px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.copy:hover{border-color:var(--accent)}
+.term pre{margin:0;padding:22px;overflow-x:auto;font:.95rem/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#e2e8f0}
+.term .p{color:var(--accent-text);user-select:none}
+.term .c{color:#8a98ad}
+.note{color:var(--muted);margin:18px 0 0;max-width:760px}
+code{font:.9em ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);border:1px solid var(--line);padding:1px 7px;border-radius:6px;color:#fff}
+
+footer{margin-top:96px;border-top:1px solid var(--line);background:#030818;padding:44px 0 56px}
+.foot{display:flex;flex-wrap:wrap;gap:28px 48px;justify-content:space-between}
+.foot ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.foot h3{margin:0;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foot a{color:var(--fg);text-decoration:none}
+.foot a:hover{color:var(--accent-text);text-decoration:underline}
+.copyright{margin-top:36px;color:var(--muted);font-size:.9rem}
+
+@media (max-width:900px){
+  .links{display:none}
+  .c-tco,.c-src,.c-energy,.c-fleet,.c-remind,.c-own{grid-column:span 12;grid-row:auto}
+  .split{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .nav .wrap{gap:10px}
+  .ver{display:none}
+  .gh .label{display:none}
+  .hero{padding-top:108px}
+  section{padding-top:64px}
+  .phone{right:4px;width:30%}
+  .bars div{grid-template-columns:84px 1fr}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
+
 <body>
-<div class="wrap">
-<header>
-  <div class="brand"><img src="icon.png" alt="" width="32" height="32">AutoLedger</div>
-  <nav><a href="#features" data-i18n="nav_f">Features</a><a href="#ingestion" data-i18n="nav_i">Data in</a><a href="#install" data-i18n="nav_s">Install</a><a href="https://github.com/Rem7474/AutoLedger">GitHub</a><span class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></span></nav>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></symbol>
+<symbol id="i-calculator" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+<symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></symbol>
+<symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+<symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+<symbol id="i-battery-charging" viewBox="0 0 24 24"><path d="M15 7h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><path d="M6 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h1"/><path d="m11 7-3 5h4l-3 5"/><line x1="22" x2="22" y1="11" y2="13"/></symbol>
+<symbol id="i-trending-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+<symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol>
+
+</defs></svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="icon.png" alt="" width="34" height="34">AutoLedger</a>
+    <nav class="links" aria-label="Sections">
+      <a href="#features" data-i18n="nav_f">Features</a>
+      <a href="#screens" data-i18n="nav_sc">Screens</a>
+      <a href="#compare" data-i18n="nav_c">Compare</a>
+      <a href="#install" data-i18n="nav_s">Install</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="ver" id="ver" href="https://github.com/Rem7474/AutoLedger/releases" aria-label="Latest release">latest</a>
+    <span class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></span>
+    <a class="gh" href="https://github.com/Rem7474/AutoLedger"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="label" data-i18n="star">Star on GitHub</span><span class="count" id="stars" hidden><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span></span></span></a>
+  </div>
 </header>
 
-<div class="hero">
-  <h1 data-i18n="h1">What does your vehicle <span>really</span> cost you?</h1>
-  <p class="lead" data-i18n="lead">AutoLedger is a self-hosted ledger that adds up everything a vehicle costs, to the cent: fuel and electricity, financing, depreciation, tires, tolls, maintenance and insurance. Electric, hybrid or combustion, any brand, on your own server.</p>
-  <a href="#install" class="btn primary" data-i18n="cta1">Install with Docker</a>
-  <a href="https://github.com/Rem7474/AutoLedger" class="btn" data-i18n="cta2">View on GitHub</a>
-  <div style="margin-top:12px"><span class="pill" data-i18n="p1">Self-hosted</span><span class="pill" data-i18n="p2">Open source</span><span class="pill" data-i18n="p3">No telemetry</span><span class="pill" data-i18n="p4">Go + Vue 3</span><span class="pill" data-i18n="p5">PostgreSQL</span><span class="pill" data-i18n="p6">PWA</span></div>
+<main id="main">
+<div class="hero" id="top">
+  <div class="wrap">
+    <span class="pill"><span class="dot" aria-hidden="true"></span><span data-i18n="pill">Self-hosted · Open source · Any brand</span></span>
+    <h1><span data-i18n="h1">What does your vehicle <span class="grad">really</span> cost you?</span></h1>
+    <p class="lead" data-i18n="lead">AutoLedger adds up everything a vehicle costs, to the cent: fuel and electricity, financing, depreciation, tires, tolls, maintenance and insurance. Electric, hybrid or combustion, on your own server.</p>
+    <div class="cta">
+      <a href="#install" class="btn primary"><svg class="i" aria-hidden="true"><use href="#i-server"/></svg><span data-i18n="cta1">Install with Docker</span></a>
+      <a href="https://github.com/Rem7474/AutoLedger" class="btn"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span data-i18n="cta2">View on GitHub</span></a>
+    </div>
+    <ul class="trust">
+      <li><svg class="i" aria-hidden="true"><use href="#i-shield-check"/></svg><span data-i18n="t1">No telemetry, your data stays with you</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-smartphone"/></svg><span data-i18n="t2">Installable PWA, works offline</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-layers"/></svg><span data-i18n="t3">Go, Vue 3 and PostgreSQL</span></li>
+    </ul>
+
+    <div class="stage">
+      <div class="browser">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>autoledger.local</span></div>
+        <img src="img/dashboard.png" width="1280" height="800" alt="TCO dashboard of a diesel station wagon: total cost, full cost per km, fuel and tolls, monthly trend" data-i18n-alt="alt_dash" fetchpriority="high">
+      </div>
+      <div class="phone">
+        <img src="img/mobile-quickadd.png" width="780" height="1560" alt="Quick add of a fill-up on a phone" data-i18n-alt="alt_mobile">
+      </div>
+    </div>
+  </div>
 </div>
+
 <section id="features">
-  <h2 data-i18n="f_h">What it does</h2>
-  <p class="sub" data-i18n="f_sub">One cost ledger feeds every figure you see, so the cost per km on the dashboard is the sum of what you actually paid.</p>
-  <div class="grid">
-    <div class="card"><h3 data-i18n="c1_h">Full TCO engine</h3><p data-i18n="c1_p">Cash purchase, loan or lease (LOA/LLD) with fees, deposit, mileage allowance and resale value. Real cost per km, net of carpooling revenue, with a completeness score.</p></div>
-    <div class="card"><h3 data-i18n="c2_h">Fuel and electricity</h3><p data-i18n="c2_p">Fill-ups and charging sessions in one place: L/100 km or kWh/100 km, price paid per unit, and the real cost per km of each energy.</p></div>
-    <div class="card"><h3 data-i18n="c3_h">Electricity tariffs</h3><p data-i18n="c3_p">For vehicles that charge: flat or time-of-use plans with public presets, applied to each session when it is recorded.</p></div>
-    <div class="card"><h3 data-i18n="c4_h">Tires by axle</h3><p data-i18n="c4_p">Mount, swap and store tires per position, log tread depth and project the remaining mileage.</p></div>
-    <div class="card"><h3 data-i18n="c5_h">Carpooling</h3><p data-i18n="c5_p">Split a trip fairly using the real energy price and a per-km insurance share.</p></div>
-    <div class="card"><h3 data-i18n="c6_h">Maintenance reminders</h3><p data-i18n="c6_p">Date or mileage triggers, delivered to Discord, Telegram, Gotify or any JSON webhook such as Home Assistant, Node-RED or n8n.</p></div>
-    <div class="card"><h3 data-i18n="c7_h">Fleet and comparison</h3><p data-i18n="c7_p">Several vehicles in one account, a fleet dashboard, and electric vs combustion scenarios built from your own data.</p></div>
-    <div class="card"><h3 data-i18n="c8_h">Documents</h3><p data-i18n="c8_p">Attach invoices, receipts and registration cards to your records, stored on your own volume.</p></div>
-    <div class="card"><h3 data-i18n="c9_h">Secure by default</h3><p data-i18n="c9_p">Local accounts or OIDC single sign-on (Authentik, Keycloak, Authelia, Kanidm), encrypted stored credentials, rate limiting and security headers.</p></div>
+  <div class="wrap">
+    <p class="kicker" data-i18n="f_k">Features</p>
+    <h2 data-i18n="f_h">One ledger, every cost</h2>
+    <p class="sub" data-i18n="f_sub">One cost ledger feeds every figure you see, so the cost per km on the dashboard is the sum of what you actually paid.</p>
+    <div class="bento">
+      <article class="cell c-tco">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-calculator"/></svg></span>
+        <h3 data-i18n="c1_h">A full TCO engine</h3>
+        <p data-i18n="c1_p">Cash purchase, loan or lease with fees, deposit, mileage allowance and resale value. Real cost per km, net of carpooling revenue, with a completeness score. Battery health and a resale value projection come from your own figures.</p>
+        <div class="bars" aria-hidden="true">
+          <div><span data-i18n="b1">Energy</span><b style="width:92%"></b></div>
+          <div><span data-i18n="b2">Financing</span><b style="width:78%"></b></div>
+          <div><span data-i18n="b3">Depreciation</span><b style="width:68%"></b></div>
+          <div><span data-i18n="b4">Insurance</span><b style="width:44%"></b></div>
+          <div><span data-i18n="b5">Maintenance</span><b style="width:32%"></b></div>
+          <div><span data-i18n="b6">Tires</span><b style="width:22%"></b></div>
+          <div><span data-i18n="b7">Tolls</span><b style="width:14%"></b></div>
+        </div>
+      </article>
+      <article class="cell c-src">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg></span>
+        <h3 data-i18n="i_h">Bring your data your way</h3>
+        <p data-i18n="i_p">Described by what you actually have, never tied to a brand or a powertrain. An <a href="https://github.com/Rem7474/autoledger-homeassistant">official Home Assistant integration</a> (HACS) detects wallbox sessions for you.</p>
+        <ul class="chips"><li data-i18n="s1">Offline PWA</li><li data-i18n="s2">CSV import</li><li data-i18n="s3">Ingestion API</li><li data-i18n="s4">OBD2 logger</li><li>Home Assistant</li><li>TeslaMate</li></ul>
+      </article>
+      <article class="cell c-energy">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-zap"/></svg></span>
+        <h3 data-i18n="c2_h">Fuel and electricity</h3>
+        <p data-i18n="c2_p">Fill-ups and charging sessions in one place: L/100 km or kWh/100 km, price per unit, and flat or time-of-use tariffs applied to each session.</p>
+      </article>
+      <article class="cell c-fleet">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-car"/></svg></span>
+        <h3 data-i18n="c7_h">Fleet and comparison</h3>
+        <p data-i18n="c7_p">Several vehicles in one account, a fleet dashboard, and electric vs combustion scenarios built from your own data.</p>
+      </article>
+      <article class="cell c-remind">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg></span>
+        <h3 data-i18n="c6_h">Reminders and documents</h3>
+        <p data-i18n="c6_p">Date or mileage triggers sent to Discord, Telegram, Gotify or any JSON webhook. Invoices and registration cards stay on your own volume.</p>
+      </article>
+      <article class="cell c-own">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-shield-check"/></svg></span>
+        <h3 data-i18n="c9_h">Private and secure</h3>
+        <p data-i18n="c9_p">Local accounts or OIDC single sign-on, encrypted stored credentials, rate limiting and security headers.</p>
+      </article>
+    </div>
+    <ul class="also">
+      <li><svg class="i" aria-hidden="true"><use href="#i-gauge"/></svg><span data-i18n="a1">Tires by axle</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-users"/></svg><span data-i18n="a2">Carpooling</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-route"/></svg><span data-i18n="a3">Tolls and mileage allowance report</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-battery-charging"/></svg><span data-i18n="a4">Battery health</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-wrench"/></svg><span data-i18n="a5">Reminder templates</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-database"/></svg><span data-i18n="a6">Scheduled backups</span></li>
+    </ul>
   </div>
 </section>
-<section id="ingestion">
-  <h2 data-i18n="i_h">Bring your data your way</h2>
-  <p class="sub" data-i18n="i_sub">The vehicle is described by what you actually have. Nothing is tied to one brand or one powertrain.</p>
-  <div class="grid">
-    <div class="card"><h3 data-i18n="i1_h">Manual PWA</h3><p data-i18n="i1_p">Add a fill-up, a charge, a toll or an odometer reading in a few taps on your phone. Entries made offline are queued and sent when you are back online.</p></div>
-    <div class="card"><h3 data-i18n="i2_h">CSV import</h3><p data-i18n="i2_p">Column mapping with preview, saved profiles, deduplication, and one-click undo of a whole import batch. Works for fill-ups, charges, trips and odometer readings.</p></div>
-    <div class="card"><h3 data-i18n="i3_h">Ingestion API and Home Assistant</h3><p data-i18n="i3_p">Push drives, charges, fill-ups and odometer readings with scoped tokens, from an OBD2 logger, a script or Home Assistant. The <a href="https://github.com/Rem7474/autoledger-homeassistant">official Home Assistant integration</a> (HACS) detects wallbox sessions for you.</p></div>
-    <div class="card"><h3 data-i18n="i4_h">Telemetry sync</h3><p data-i18n="i4_p">Optional continuous sync with <a href="https://github.com/teslamate-org/teslamate">TeslaMate</a> for vehicles it supports: odometer, drives and charges.</p></div>
+
+<section id="screens">
+  <div class="wrap">
+    <div class="split">
+      <div class="browser">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>autoledger.local/fleet</span></div>
+        <img src="img/fleet.png" width="1280" height="800" loading="lazy" alt="Household fleet comparing a diesel, a hybrid and an electric car" data-i18n-alt="alt_fleet">
+      </div>
+      <div>
+        <p class="kicker" data-i18n="sc_k">Screens</p>
+        <h2 data-i18n="sc_h">Clear on a desk, quick in a pocket</h2>
+        <ul class="ticks">
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="sc1"><strong>Compare every vehicle</strong> of the household on the same real cost per distance.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="sc2"><strong>Add a fill-up in a few taps</strong> from your phone, even without a network: entries are queued and sent later.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="sc3"><strong>See what is missing</strong>: a completeness score tells you which data would sharpen the result.</span></li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
-<section>
-  <h2 data-i18n="t_h">How it compares</h2>
-<div class="table-wrap">
-  <table>
-    <thead><tr><th></th><th><span data-i18n="th1">AutoLedger</span></th><th><span data-i18n="th2">Spreadsheet</span></th><th><span data-i18n="th3">Paid SaaS</span></th><th><span data-i18n="th4">Manufacturer app</span></th></tr></thead>
-    <tbody>
-      <tr><td><span data-i18n="r0_0">Self-hosted, private</span></td><td><span data-i18n="r0_1">Yes</span></td><td><span data-i18n="r0_2">Yes</span></td><td><span data-i18n="r0_3">No</span></td><td><span data-i18n="r0_4">No</span></td></tr>
-      <tr><td><span data-i18n="r1_0">Any brand and powertrain</span></td><td><span data-i18n="r1_1">Yes</span></td><td><span data-i18n="r1_2">Manual</span></td><td><span data-i18n="r1_3">Often one powertrain</span></td><td><span data-i18n="r1_4">One brand</span></td></tr>
-      <tr><td><span data-i18n="r2_0">Financing, depreciation, tires, tolls</span></td><td><span data-i18n="r2_1">Yes</span></td><td><span data-i18n="r2_2">Manual</span></td><td><span data-i18n="r2_3">Energy only</span></td><td><span data-i18n="r2_4">No</span></td></tr>
-      <tr><td><span data-i18n="r3_0">Documents and reminders</span></td><td><span data-i18n="r3_1">Yes</span></td><td><span data-i18n="r3_2">No</span></td><td><span data-i18n="r3_3">Limited</span></td><td><span data-i18n="r3_4">No</span></td></tr>
-    </tbody>
-  </table>
+
+<section id="compare">
+  <div class="wrap">
+    <p class="kicker" data-i18n="t_k">Why AutoLedger</p>
+    <h2 data-i18n="t_h">How it compares</h2>
+    <div class="table-wrap" role="region" aria-labelledby="cmp-cap" tabindex="0">
+      <table>
+        <caption id="cmp-cap" data-i18n="t_cap">Comparison of AutoLedger with a spreadsheet, a paid service and a manufacturer app</caption>
+        <thead><tr><th scope="col"><span class="sr" data-i18n="t_crit">Criterion</span></th><th scope="col" data-i18n="th1">AutoLedger</th><th scope="col" data-i18n="th2">Spreadsheet</th><th scope="col" data-i18n="th3">Paid SaaS</th><th scope="col" data-i18n="th4">Manufacturer app</th></tr></thead>
+        <tbody>
+          <tr><th scope="row" data-i18n="r0_0">Self-hosted, private</th><td class="us" data-i18n="r0_1">Yes</td><td data-i18n="r0_2">Yes</td><td data-i18n="r0_3">No</td><td data-i18n="r0_4">No</td></tr>
+          <tr><th scope="row" data-i18n="r1_0">Any brand and powertrain</th><td class="us" data-i18n="r1_1">Yes</td><td data-i18n="r1_2">Manual</td><td data-i18n="r1_3">Often one powertrain</td><td data-i18n="r1_4">One brand</td></tr>
+          <tr><th scope="row" data-i18n="r2_0">Financing, depreciation, tires, tolls</th><td class="us" data-i18n="r2_1">Yes</td><td data-i18n="r2_2">Manual</td><td data-i18n="r2_3">Energy only</td><td data-i18n="r2_4">No</td></tr>
+          <tr><th scope="row" data-i18n="r3_0">Documents and reminders</th><td class="us" data-i18n="r3_1">Yes</td><td data-i18n="r3_2">No</td><td data-i18n="r3_3">Limited</td><td data-i18n="r3_4">No</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
+
 <section id="install">
-  <h2 data-i18n="s_h">Run it in two minutes</h2>
-  <p class="sub" data-i18n="s_sub">Multi-architecture image (amd64 and arm64) with a bundled PostgreSQL and optional backup service.</p>
-<pre><code>mkdir autoledger &amp;&amp; cd autoledger
-curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
-curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
-openssl rand -hex 32   # AUTOLEDGER_ENCRYPTION_KEY
-docker compose up -d   # http://localhost:8080</code></pre>
-  <p class="sub" data-i18n="s_note">Set <code>AUTOLEDGER_ENCRYPTION_KEY</code>, <code>AUTOLEDGER_DB_PASSWORD</code> and <code>AUTOLEDGER_JWT_SECRET</code> in <code>.env</code> first. Full variable reference and upgrade notes are in the <a href="https://github.com/Rem7474/AutoLedger#readme">README</a>.</p>
+  <div class="wrap">
+    <p class="kicker" data-i18n="s_k">Quickstart</p>
+    <h2 data-i18n="s_h">Up and running in two commands</h2>
+    <p class="sub" data-i18n="s_sub">Multi-architecture image (amd64 and arm64) with a bundled PostgreSQL and an optional backup service.</p>
+    <div class="term">
+      <div class="bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span>bash</span>
+        <button type="button" class="copy" id="copy"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span id="copy-label" data-i18n="copy">Copy</span></button></div>
+<pre><code id="cmds"><span class="p">$ </span>git clone https://github.com/Rem7474/AutoLedger.git &amp;&amp; cd AutoLedger &amp;&amp; cp .env.example .env
+<span class="c"># edit .env: AUTOLEDGER_ENCRYPTION_KEY, AUTOLEDGER_JWT_SECRET, AUTOLEDGER_DB_PASSWORD</span>
+<span class="p">$ </span>docker compose up -d   <span class="c"># http://localhost:8080</span></code></pre>
+    </div>
+    <p class="note" id="copy-status" role="status" aria-live="polite" hidden></p>
+    <p class="note" data-i18n="s_note">Generate each secret with <code>openssl rand -hex 32</code>. The server refuses to start in production with the published defaults. Full variable reference and upgrade notes are in the <a href="https://github.com/Rem7474/AutoLedger#readme">README</a>.</p>
+  </div>
 </section>
-<footer><span data-i18n="ft">AutoLedger is open source.</span> <a href="https://github.com/Rem7474/AutoLedger">Source</a> · <a href="https://github.com/Rem7474/AutoLedger/issues">Issues</a> · <a href="https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger">Docker</a></footer>
-</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top"><img src="icon.png" alt="" width="34" height="34">AutoLedger</a>
+        <p style="color:var(--muted);max-width:320px;margin:12px 0 0" data-i18n="ft_tag">The self-hosted ledger for what your vehicle really costs.</p>
+      </div>
+      <div><h3 data-i18n="ft_p">Project</h3><ul>
+        <li><a href="https://github.com/Rem7474/AutoLedger" data-i18n="ft_gh">GitHub repository</a></li>
+        <li><a href="https://github.com/Rem7474/AutoLedger/releases" data-i18n="ft_rel">Releases</a></li>
+        <li><a href="https://github.com/Rem7474/AutoLedger/issues" data-i18n="ft_iss">Issues</a></li>
+        <li><a href="https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger">Docker</a></li></ul></div>
+      <div><h3 data-i18n="ft_d">Documentation</h3><ul>
+        <li><a href="https://github.com/Rem7474/AutoLedger#readme">README</a></li>
+        <li><a href="https://github.com/Rem7474/AutoLedger/blob/main/docs/csv-import.md" data-i18n="ft_csv">CSV import</a></li>
+        <li><a href="https://github.com/Rem7474/autoledger-homeassistant">Home Assistant (HACS)</a></li></ul></div>
+      <div><h3 data-i18n="ft_l">Legal</h3><ul>
+        <li><a href="https://github.com/Rem7474/AutoLedger#-license" data-i18n="ft_lic">MIT license</a></li>
+        <li><a href="https://github.com/Rem7474" data-i18n="ft_auth">Author: Rem7474</a></li></ul></div>
+    </div>
+    <p class="copyright" data-i18n="ft_c">AutoLedger is open source, made by Rem7474.</p>
+  </div>
+</footer>
+
 <script>
 (function(){
-  var FR = {"h1": "Combien vous coûte <span>vraiment</span> votre véhicule ?", "lead": "AutoLedger est un registre auto-hébergé qui additionne tout ce que coûte un véhicule, au centime près : carburant et électricité, financement, dépréciation, pneus, péages, entretien et assurance. Électrique, hybride ou thermique, toutes marques, sur votre propre serveur.", "cta1": "Installer avec Docker", "cta2": "Voir sur GitHub", "p1": "Auto-hébergé", "p2": "Open source", "p3": "Aucune télémétrie", "p4": "Go + Vue 3", "p5": "PostgreSQL", "p6": "PWA", "f_h": "Ce que ça fait", "f_sub": "Un seul registre de coûts alimente tous les chiffres : le coût au km du tableau de bord est la somme de ce que vous avez réellement payé.", "c1_h": "Moteur TCO complet", "c1_p": "Achat comptant, crédit ou location (LOA/LLD) avec frais, dépôt de garantie, kilométrage inclus et valeur de revente. Coût réel au km, net des revenus de covoiturage, avec un score de complétude.", "c2_h": "Carburant et électricité", "c2_p": "Pleins et recharges au même endroit : L/100 km ou kWh/100 km, prix payé par unité, et coût réel au km de chaque énergie.", "c3_h": "Tarifs d’électricité", "c3_p": "Pour les véhicules qui se rechargent : forfaits fixes ou heures creuses/pleines avec préréglages publics, appliqués à chaque session à son enregistrement.", "c4_h": "Pneus par essieu", "c4_p": "Montez, permutez et stockez les pneus par position, relevez la profondeur de sculpture et projetez le kilométrage restant.", "c5_h": "Covoiturage", "c5_p": "Partagez un trajet équitablement avec le prix réel de l’énergie et une part d’assurance au km.", "c6_h": "Rappels d’entretien", "c6_p": "Échéances par date ou kilométrage, envoyées vers Discord, Telegram, Gotify ou tout webhook JSON (Home Assistant, Node-RED, n8n).", "c7_h": "Flotte et comparaison", "c7_p": "Plusieurs véhicules dans un compte, un tableau de bord de flotte, et des scénarios électrique contre thermique construits sur vos propres données.", "c8_h": "Documents", "c8_p": "Joignez factures, tickets et cartes grises à vos enregistrements, stockés sur votre propre volume.", "c9_h": "Sécurisé par défaut", "c9_p": "Comptes locaux ou SSO OIDC (Authentik, Keycloak, Authelia, Kanidm), identifiants chiffrés, limitation de débit et en-têtes de sécurité.", "i_h": "Vos données, à votre façon", "i_sub": "Le véhicule est décrit par ce que vous avez vraiment. Rien n’est lié à une marque ou à une motorisation.", "i1_h": "PWA en saisie manuelle", "i1_p": "Ajoutez un plein, une recharge, un péage ou un relevé kilométrique en quelques appuis. Les saisies hors ligne sont mises en file et envoyées au retour du réseau.", "i2_h": "Import CSV", "i2_p": "Mappage des colonnes avec aperçu, profils enregistrés, dédoublonnage et annulation d’un lot entier en un clic. Pour les pleins, recharges, trajets et relevés kilométriques.", "i3_h": "API d’ingestion et Home Assistant", "i3_p": "Envoyez trajets, recharges, pleins et relevés avec des jetons à portée limitée, depuis un boîtier OBD2, un script ou Home Assistant. L’<a href=\"https://github.com/Rem7474/autoledger-homeassistant\">intégration Home Assistant officielle</a> (HACS) détecte les sessions de wallbox pour vous.", "i4_h": "Synchronisation télémétrie", "i4_p": "Synchronisation continue optionnelle avec <a href=\"https://github.com/teslamate-org/teslamate\">TeslaMate</a> pour les véhicules qu’il prend en charge : kilométrage, trajets et recharges.", "t_h": "Comparaison", "th1": "AutoLedger", "th2": "Tableur", "th3": "SaaS payant", "th4": "App constructeur", "r0_0": "Auto-hébergé, privé", "r0_1": "Oui", "r0_2": "Oui", "r0_3": "Non", "r0_4": "Non", "r1_0": "Toutes marques et motorisations", "r1_1": "Oui", "r1_2": "Manuel", "r1_3": "Souvent une seule motorisation", "r1_4": "Une marque", "r2_0": "Financement, dépréciation, pneus, péages", "r2_1": "Oui", "r2_2": "Manuel", "r2_3": "Énergie seule", "r2_4": "Non", "r3_0": "Documents et rappels", "r3_1": "Oui", "r3_2": "Non", "r3_3": "Limité", "r3_4": "Non", "s_h": "En ligne en deux minutes", "s_sub": "Image multi-architecture (amd64 et arm64) avec PostgreSQL inclus et service de sauvegarde optionnel.", "s_note": "Renseignez d’abord <code>AUTOLEDGER_ENCRYPTION_KEY</code>, <code>AUTOLEDGER_DB_PASSWORD</code> et <code>AUTOLEDGER_JWT_SECRET</code> dans <code>.env</code>. La référence des variables et les notes de mise à jour sont dans le <a href=\"https://github.com/Rem7474/AutoLedger#readme\">README</a>.", "ft": "AutoLedger est open source.", "title": "AutoLedger", "nav_f": "Fonctionnalités", "nav_i": "Données", "nav_s": "Installation"};
+  var FR = {"h1":"Combien vous coûte <span class=\"grad\">vraiment</span> votre véhicule ?","lead":"AutoLedger est un registre auto-hébergé qui additionne tout ce que coûte un véhicule, au centime près : carburant et électricité, financement, dépréciation, pneus, péages, entretien et assurance. Électrique, hybride ou thermique, toutes marques, sur votre propre serveur.","cta1":"Installer avec Docker","cta2":"Voir sur GitHub","p1":"Auto-hébergé","p2":"Open source","p3":"Aucune télémétrie","p4":"Go + Vue 3","p5":"PostgreSQL","p6":"PWA","f_h":"Un registre, tous les coûts","f_sub":"Un seul registre de coûts alimente tous les chiffres : le coût au km du tableau de bord est la somme de ce que vous avez réellement payé.","c1_h":"Moteur TCO complet","c1_p":"Achat comptant, crédit ou location avec frais, dépôt de garantie, kilométrage inclus et valeur de revente. Coût réel au km, net des revenus de covoiturage, avec un score de complétude. Santé de la batterie et projection de valeur de revente à partir de vos propres relevés.","c2_h":"Carburant et électricité","c2_p":"Pleins et recharges au même endroit : L/100 km ou kWh/100 km, prix par unité, et tarifs fixes ou heures creuses/pleines appliqués à chaque session.","c3_h":"Tarifs d’électricité","c3_p":"Pour les véhicules qui se rechargent : forfaits fixes ou heures creuses/pleines avec préréglages publics, appliqués à chaque session à son enregistrement.","c4_h":"Pneus par essieu","c4_p":"Montez, permutez et stockez les pneus par position, relevez la profondeur de sculpture et projetez le kilométrage restant.","c5_h":"Covoiturage","c5_p":"Partagez un trajet équitablement avec le prix réel de l’énergie et une part d’assurance au km.","c6_h":"Rappels et documents","c6_p":"Échéances par date ou kilométrage envoyées vers Discord, Telegram, Gotify ou tout webhook JSON. Factures et cartes grises restent sur votre propre volume.","c7_h":"Flotte et comparaison","c7_p":"Plusieurs véhicules dans un compte, un tableau de bord de flotte, et des scénarios électrique contre thermique construits sur vos propres données.","c8_h":"Documents","c8_p":"Joignez factures, tickets et cartes grises à vos enregistrements, stockés sur votre propre volume.","c9_h":"Privé et sécurisé","c9_p":"Comptes locaux ou SSO OIDC, identifiants chiffrés, limitation de débit et en-têtes de sécurité.","i_h":"Vos données, à votre façon","i_sub":"Le véhicule est décrit par ce que vous avez vraiment. Rien n’est lié à une marque ou à une motorisation.","i1_h":"PWA en saisie manuelle","i1_p":"Ajoutez un plein, une recharge, un péage ou un relevé kilométrique en quelques appuis. Les saisies hors ligne sont mises en file et envoyées au retour du réseau.","i2_h":"Import CSV","i2_p":"Mappage des colonnes avec aperçu, profils enregistrés, dédoublonnage et annulation d’un lot entier en un clic. Pour les pleins, recharges, trajets et relevés kilométriques.","i3_h":"API d’ingestion et Home Assistant","i3_p":"Envoyez trajets, recharges, pleins et relevés avec des jetons à portée limitée, depuis un boîtier OBD2, un script ou Home Assistant. L’<a href=\"https://github.com/Rem7474/autoledger-homeassistant\">intégration Home Assistant officielle</a> (HACS) détecte les sessions de wallbox pour vous.","i4_h":"Synchronisation télémétrie","i4_p":"Synchronisation continue optionnelle avec <a href=\"https://github.com/teslamate-org/teslamate\">TeslaMate</a> pour les véhicules qu’il prend en charge : kilométrage, trajets et recharges.","t_h":"Comparaison","th1":"AutoLedger","th2":"Tableur","th3":"SaaS payant","th4":"App constructeur","r0_0":"Auto-hébergé, privé","r0_1":"Oui","r0_2":"Oui","r0_3":"Non","r0_4":"Non","r1_0":"Toutes marques et motorisations","r1_1":"Oui","r1_2":"Manuel","r1_3":"Souvent une seule motorisation","r1_4":"Une marque","r2_0":"Financement, dépréciation, pneus, péages","r2_1":"Oui","r2_2":"Manuel","r2_3":"Énergie seule","r2_4":"Non","r3_0":"Documents et rappels","r3_1":"Oui","r3_2":"Non","r3_3":"Limité","r3_4":"Non","s_h":"En ligne en deux commandes","s_sub":"Image multi-architecture (amd64 et arm64) avec PostgreSQL inclus et service de sauvegarde optionnel.","s_note":"Générez chaque secret avec <code>openssl rand -hex 32</code>. Le serveur refuse de démarrer en production avec les valeurs par défaut publiées. La référence des variables et les notes de mise à jour sont dans le <a href=\"https://github.com/Rem7474/AutoLedger#readme\">README</a>.","ft":"AutoLedger est open source.","title":"AutoLedger : le vrai coût de votre véhicule","nav_f":"Fonctionnalités","nav_i":"Données","nav_s":"Installation","skip":"Aller au contenu","nav_c":"Comparatif","nav_sc":"Aperçus","star":"Suivre sur GitHub","pill":"Auto-hébergé · Open source · Toutes marques","t1":"Aucune télémétrie, vos données restent chez vous","t2":"PWA installable, fonctionne hors ligne","t3":"Go, Vue 3 et PostgreSQL","alt_dash":"Tableau de bord TCO d’un break diesel : coût total, coût complet au km, carburant et péages, tendance mensuelle","alt_mobile":"Saisie rapide d’un plein sur téléphone","alt_fleet":"Flotte du foyer comparant une voiture diesel, une hybride et une électrique","f_k":"Fonctionnalités","b1":"Énergie","b2":"Financement","b3":"Dépréciation","b4":"Assurance","b5":"Entretien","b6":"Pneus","b7":"Péages","i_p":"Décrit par ce que vous avez vraiment, jamais lié à une marque ou une motorisation. Une <a href=\"https://github.com/Rem7474/autoledger-homeassistant\">intégration Home Assistant officielle</a> (HACS) détecte les sessions de wallbox pour vous.","s1":"PWA hors ligne","s2":"Import CSV","s3":"API d’ingestion","s4":"Boîtier OBD2","a1":"Pneus par essieu","a2":"Covoiturage","a3":"Péages et indemnités kilométriques","a4":"Santé de la batterie","a5":"Modèles de rappels","a6":"Sauvegardes planifiées","sc_k":"Aperçus","sc_h":"Lisible sur un bureau, rapide dans la poche","sc1":"<strong>Comparez chaque véhicule</strong> du foyer sur le même coût réel au kilomètre.","sc2":"<strong>Ajoutez un plein en quelques appuis</strong> depuis votre téléphone, même sans réseau : les saisies sont mises en file puis envoyées.","sc3":"<strong>Voyez ce qui manque</strong> : un score de complétude indique quelles données affineraient le résultat.","t_k":"Pourquoi AutoLedger","t_cap":"Comparaison d’AutoLedger avec un tableur, un service payant et une application constructeur","t_crit":"Critère","s_k":"Démarrage rapide","copy":"Copier","copied":"Copié","copy_fail":"Copie impossible, sélectionnez le texte à la main.","ft_tag":"Le registre auto-hébergé de ce que coûte vraiment votre véhicule.","ft_p":"Projet","ft_gh":"Dépôt GitHub","ft_rel":"Versions","ft_iss":"Tickets","ft_d":"Documentation","ft_csv":"Import CSV","ft_l":"Légal","ft_lic":"Licence MIT","ft_auth":"Auteur : Rem7474","ft_c":"AutoLedger est open source, créé par Rem7474."};
+  var EN = {}, ENA = {};
   var nodes = document.querySelectorAll('[data-i18n]');
-  var EN = {};
+  var anodes = document.querySelectorAll('[data-i18n-alt]');
   nodes.forEach(function(n){ EN[n.getAttribute('data-i18n')] = n.innerHTML; });
-  var metaEN = document.querySelector('meta[name=description]').content;
+  anodes.forEach(function(n){ ENA[n.getAttribute('data-i18n-alt')] = n.getAttribute('alt'); });
+  var meta = document.querySelector('meta[name=description]');
+  var metaEN = meta.content, titleEN = document.title;
   var metaFR = "Registre TCO auto-hébergé pour véhicules électriques, hybrides et thermiques. Toutes marques : saisie manuelle, CSV, API ou télémétrie.";
+  var cur = 'en';
+  function t(k){ return (cur === 'fr' ? FR : EN)[k]; }
   function apply(lang){
-    var dict = lang === 'fr' ? FR : EN;
-    nodes.forEach(function(n){ var v = dict[n.getAttribute('data-i18n')]; if (v !== undefined) n.innerHTML = v; });
+    cur = lang;
+    var d = lang === 'fr' ? FR : EN, da = lang === 'fr' ? FR : ENA;
+    nodes.forEach(function(n){ var v = d[n.getAttribute('data-i18n')]; if (v !== undefined) n.innerHTML = v; });
+    anodes.forEach(function(n){ var v = da[n.getAttribute('data-i18n-alt')]; if (v !== undefined) n.setAttribute('alt', v); });
     document.documentElement.lang = lang;
-    document.querySelector('meta[name=description]').content = lang === 'fr' ? metaFR : metaEN;
+    meta.content = lang === 'fr' ? metaFR : metaEN;
+    document.title = lang === 'fr' ? FR.title : titleEN;
     document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
   }
-  var lang = 'en';
+  var lang = '';
   try { lang = localStorage.getItem('al-lang') || ''; } catch (e) {}
   if (lang !== 'en' && lang !== 'fr') lang = (navigator.language || '').toLowerCase().indexOf('fr') === 0 ? 'fr' : 'en';
   apply(lang);
   document.querySelectorAll('.lang button').forEach(function(b){
     b.addEventListener('click', function(){ apply(b.dataset.lang); try { localStorage.setItem('al-lang', b.dataset.lang); } catch (e) {} });
   });
+
+  var copy = document.getElementById('copy'), status = document.getElementById('copy-status'), label = document.getElementById('copy-label'), timer;
+  copy.addEventListener('click', function(){
+    var text = 'git clone https://github.com/Rem7474/AutoLedger.git && cd AutoLedger && cp .env.example .env\n# edit .env: AUTOLEDGER_ENCRYPTION_KEY, AUTOLEDGER_JWT_SECRET, AUTOLEDGER_DB_PASSWORD\ndocker compose up -d';
+    function done(ok){
+      status.hidden = false; status.textContent = ok ? t('copied') : t('copy_fail');
+      if (ok) { label.textContent = t('copied'); clearTimeout(timer); timer = setTimeout(function(){ label.textContent = t('copy'); status.hidden = true; }, 2000); }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    else done(false);
+  });
+
+  var api = 'https://api.github.com/repos/Rem7474/AutoLedger';
+  fetch(api + '/releases/latest').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if (j && j.tag_name) { var v = document.getElementById('ver'); v.textContent = j.tag_name; v.setAttribute('aria-label', 'Latest release ' + j.tag_name); }
+  }).catch(function(){});
+  fetch(api).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if (j && j.stargazers_count > 0) { var s = document.getElementById('stars'); s.querySelector('span').textContent = j.stargazers_count; s.hidden = false; }
+  }).catch(function(){});
 })();
 </script>
 </body>
