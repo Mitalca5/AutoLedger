@@ -141,22 +141,18 @@ AutoLedger/
 
 ### Option 1: Docker Compose (Recommended)
 
-1. **Create an installation directory and download the configuration:**
+1. **Download the compose file:**
    ```bash
    mkdir autoledger && cd autoledger
    curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
-   curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
    ```
 
-2. **Configure `.env`:**
-   - `AUTOLEDGER_DB_PASSWORD`: a strong database password (`openssl rand -hex 32`)
-   - `AUTOLEDGER_JWT_SECRET` and `AUTOLEDGER_ENCRYPTION_KEY`: leave unset and random values are generated on first start, stored in `.autoledger-secrets.json` on the documents volume (mode 0600). Back that volume up with the database: the encryption key is needed to read stored credentials. Set them explicitly to manage them yourself.
-   - *(Optional)* OIDC / SSO parameters if using Authentik, Keycloak, etc.
-
-3. **Start the stack:**
+2. **Start the stack:**
    ```bash
    docker compose up -d
    ```
+
+No configuration is required. The database password, the session signing secret and the credential encryption key are generated on first start and kept in the `autoledger_secrets` volume (the backup service archives it next to the database dump, as `autoledger-secrets-<timestamp>.tar.gz`). Keep it with your database backups: the encryption key is needed to read stored credentials. Outside Docker Compose (plain `docker run`), the image generates the session secret and the encryption key itself into `.autoledger-secrets.json` on the documents volume. To manage a value yourself, set `AUTOLEDGER_DB_PASSWORD`, `AUTOLEDGER_JWT_SECRET` or `AUTOLEDGER_ENCRYPTION_KEY` in a `.env` file (template: `.env.example`); an explicit value always wins. Optional settings such as OIDC / SSO also go in `.env`.
 
 The application is now live at **`http://localhost:8080`**.
 
@@ -198,6 +194,7 @@ New installations create `autoledger_*` volumes. Existing ones keep their data b
 | PostgreSQL | `autoledger_db_data` | `postgres_data` | `DB_VOLUME_NAME` |
 | Documents | `autoledger_documents` | `teslacost_documents` | `DOCUMENTS_VOLUME_NAME` |
 | Backups | `autoledger_backups` | `teslacost_backups` | `BACKUPS_VOLUME_NAME` |
+| Generated secrets (database password, session secret, encryption key) | `autoledger_secrets` | - | `SECRETS_VOLUME_NAME` |
 
 ```dotenv
 DB_VOLUME_NAME=postgres_data
@@ -278,10 +275,10 @@ docker run --rm \
 | `AUTOLEDGER_DB_HOST` | `DB_HOST` | PostgreSQL host (when set, the URL is built from the `DB_*` variables) | *Unset* |
 | `AUTOLEDGER_DB_PORT` | `DB_PORT` | PostgreSQL port | `5432` |
 | `AUTOLEDGER_DB_USER` | `DB_USER` | PostgreSQL user | `autoledger` |
-| `AUTOLEDGER_DB_PASSWORD` | `DB_PASSWORD` | PostgreSQL password | `autoledger_dev_secret` |
+| `AUTOLEDGER_DB_PASSWORD` | `DB_PASSWORD` | PostgreSQL password (`DB_PASSWORD_FILE` reads it from a file) | *Generated* |
 | `AUTOLEDGER_DB_NAME` | `DB_NAME` | PostgreSQL database name | `autoledger` |
-| `AUTOLEDGER_ENCRYPTION_KEY`| `APP_ENCRYPTION_KEY` | 32-byte AES-256 key for sensitive credentials | *Required in prod* |
-| `AUTOLEDGER_JWT_SECRET` | `JWT_SECRET` | Secret key for signing user sessions | *Required in prod* |
+| `AUTOLEDGER_ENCRYPTION_KEY`| `APP_ENCRYPTION_KEY` | 32-byte AES-256 key for sensitive credentials | *Generated* |
+| `AUTOLEDGER_JWT_SECRET` | `JWT_SECRET` | Secret key for signing user sessions | *Generated* |
 | `AUTOLEDGER_STORAGE_DIR` | `STORAGE_DIR` | Filesystem path for document attachments | `/data/documents` |
 | `APP_TIMEZONE` | - | IANA timezone for reports and aggregations | `Europe/Paris` |
 | `DISABLE_REGISTRATION` | - | Set to `true` to disable public user registration | `false` |

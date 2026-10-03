@@ -67,6 +67,9 @@ func Load() *Config {
 		dbPort := getEnvWithFallback("AUTOLEDGER_DB_PORT", "DB_PORT", "5432")
 		dbUser := getEnvWithFallback("AUTOLEDGER_DB_USER", "DB_USER", "teslacost")
 		dbPass := getEnvWithFallback("AUTOLEDGER_DB_PASSWORD", "DB_PASSWORD", "")
+		if dbPass == "" {
+			dbPass = readSecretFile(getEnvWithFallback("AUTOLEDGER_DB_PASSWORD_FILE", "DB_PASSWORD_FILE", ""))
+		}
 		dbName := getEnvWithFallback("AUTOLEDGER_DB_NAME", "DB_NAME", "teslacost")
 		dbSSL := getEnv("DB_SSLMODE", "disable")
 
@@ -85,7 +88,13 @@ func Load() *Config {
 	}
 
 	encKey := getEnvWithFallback("AUTOLEDGER_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY", "")
+	if encKey == "" {
+		encKey = readSecretFile(getEnv("AUTOLEDGER_ENCRYPTION_KEY_FILE", ""))
+	}
 	jwtSecret := getEnvWithFallback("AUTOLEDGER_JWT_SECRET", "JWT_SECRET", "")
+	if jwtSecret == "" {
+		jwtSecret = readSecretFile(getEnv("AUTOLEDGER_JWT_SECRET_FILE", ""))
+	}
 	jwtAccessExpMinutes, _ := strconv.Atoi(getEnv("JWT_ACCESS_EXPIRATION_MINUTES", "15"))
 	if jwtAccessExpMinutes <= 0 {
 		jwtAccessExpMinutes = 15
@@ -350,4 +359,17 @@ func NormalizeDatabaseURL(rawURL string) string {
 	}
 
 	return u.String() + pathAndQuery
+}
+
+// readSecretFile returns the trimmed content of a secret mounted as a file (Docker secrets, shared volume).
+func readSecretFile(path string) string {
+	if path == "" {
+		return ""
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		slog.Error("cannot read secret file", "component", "config", "path", path, "error", err)
+		return ""
+	}
+	return strings.TrimSpace(string(raw))
 }

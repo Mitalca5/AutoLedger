@@ -9,6 +9,10 @@ INTERVAL_HOURS="${BACKUP_INTERVAL_HOURS:-24}"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-14}"
 BACKUP_DIR="/backups"
 
+if [ -z "${DB_PASSWORD:-}" ] && [ -n "${DB_PASSWORD_FILE:-}" ]; then
+	DB_PASSWORD="$(cat "${DB_PASSWORD_FILE}")"
+fi
+
 log() {
 	echo "[backup] $(date -u +%FT%TZ) $*"
 }
@@ -34,6 +38,17 @@ run_backup() {
 	else
 		rm -f "${docs_archive}.tmp"
 		log "ERROR: documents archive failed this cycle"
+	fi
+
+	if [ -d /secrets ]; then
+		secrets_archive="${BACKUP_DIR}/autoledger-secrets-${ts}.tar.gz"
+		if (umask 077 && tar -czf "${secrets_archive}.tmp" -C / secrets 2>/dev/null); then
+			mv "${secrets_archive}.tmp" "${secrets_archive}"
+			log "secrets archive OK -> ${secrets_archive}"
+		else
+			rm -f "${secrets_archive}.tmp"
+			log "ERROR: secrets archive failed this cycle"
+		fi
 	fi
 
 	log "pruning backups older than ${RETENTION_DAYS} day(s)..."
