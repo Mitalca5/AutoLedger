@@ -119,7 +119,7 @@
     "grafana_url_base": "The Grafana URL must be a base address, without parameters",
     "grafana_url_invalid": "Invalid Grafana URL (http:// or https:// required)",
     "grafana_url_credentials": "The Grafana URL must not contain credentials",
-    "powertrain_invalid": "Invalid powertrain (EV or ICE)",
+    "powertrain_invalid": "Invalid powertrain (EV, ICE, PHEV or REEV)",
     "currency_invalid": "Invalid currency: {p0}",
     "not_specified": "The event must name its vehicle"
   },
@@ -131,7 +131,7 @@
     "cannot_delete_synced": "Only manually logged drives can be deleted"
   },
   "fuel": {
-    "combustion_only": "Fuel fill-ups only apply to combustion vehicles",
+    "combustion_only": "Fuel fill-ups do not apply to electric vehicles",
     "liters_range": "Invalid quantity (0.01 to 500 L)",
     "price_range": "Invalid price per litre (0 to 10)",
     "type_invalid": "Invalid fuel",

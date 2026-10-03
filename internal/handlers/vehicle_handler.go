@@ -106,17 +106,16 @@ func normalizeVehicleCurrency(raw string) (string, error) {
 // validatePowertrain checks the powertrain of a vehicle payload and that an ICE vehicle has no TeslaMate link.
 // An empty value is accepted and left to the caller's default.
 func validatePowertrain(powertrain string, teslamateURL *string) error {
-	switch powertrain {
-	case "", models.PowertrainEV:
+	if powertrain == "" {
 		return nil
-	case models.PowertrainICE:
-		if teslamateURL != nil && strings.TrimSpace(*teslamateURL) != "" {
-			return apierror.New("vehicle.ice_no_teslamate", "A combustion vehicle cannot be linked to TeslaMate")
-		}
-		return nil
-	default:
-		return apierror.New("vehicle.powertrain_invalid", "Invalid powertrain (EV or ICE)")
 	}
+	if !models.ValidPowertrain(powertrain) {
+		return apierror.New("vehicle.powertrain_invalid", "Invalid powertrain (EV, ICE, PHEV or REEV)")
+	}
+	if !models.PowertrainCanLinkTeslaMate(powertrain) && teslamateURL != nil && strings.TrimSpace(*teslamateURL) != "" {
+		return apierror.New("vehicle.ice_no_teslamate", "A combustion vehicle cannot be linked to TeslaMate")
+	}
+	return nil
 }
 
 func (h *VehicleHandler) List(w http.ResponseWriter, r *http.Request) {

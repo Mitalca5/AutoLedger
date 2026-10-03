@@ -181,3 +181,18 @@ func TestHomeAssistantEventsRefuseOtherAccountVehicle(t *testing.T) {
 		t.Errorf("drive without vehicle: got %d %q", status, code)
 	}
 }
+
+func TestHomeAssistantEventsOnHybrids(t *testing.T) {
+	env, u := newHAEventEnv(t, "ha-hybrid@example.com")
+	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV} {
+		v := env.vehicle(u.ID, powertrain, powertrain, 10000)
+		body := `{"vehicle_id":"` + v.ID + `","event_type":"fuel","timestamp":"2026-05-01T10:00:00Z","data":{"amount":60,"liters":40,"odometer_km":10500}}`
+		if status, code := env.post(u.ID, body); status != http.StatusCreated || code != "recorded" {
+			t.Fatalf("%s fuel: got %d %q", powertrain, status, code)
+		}
+		got, err := env.repo.GetVehicleByID(context.Background(), v.ID, u.ID)
+		if err != nil || got.Powertrain != powertrain || got.CurrentOdometer != 10500 {
+			t.Errorf("%s after fill-up: %+v, %v", powertrain, got, err)
+		}
+	}
+}

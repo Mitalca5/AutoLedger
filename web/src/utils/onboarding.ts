@@ -1,6 +1,6 @@
 import { canLinkTeslaMate } from './vehicles'
 
-export type Powertrain = 'EV' | 'ICE'
+export type Powertrain = 'EV' | 'ICE' | 'PHEV' | 'REEV'
 export type TeslaMateAuthType = 'BEARER' | 'BASIC' | 'NONE'
 
 export interface TeslaMateForm {

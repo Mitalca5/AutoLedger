@@ -235,5 +235,7 @@ describe('powertrain capabilities', () => {
     expect([canCharge('EV'), canRefuel('EV'), canLinkTeslaMate('EV')]).toEqual([true, false, true])
     expect([canCharge('ICE'), canRefuel('ICE'), canLinkTeslaMate('ICE')]).toEqual([false, true, false])
     expect([canCharge(undefined), canRefuel(undefined)]).toEqual([true, false])
+    expect([canCharge('PHEV'), canRefuel('PHEV'), canLinkTeslaMate('PHEV')]).toEqual([true, true, true])
+    expect([canCharge('REEV'), canRefuel('REEV')]).toEqual([true, true])
   })
 })

@@ -128,14 +128,14 @@ func checkOdometerOrder(others []models.OdometerPoint, id string, date time.Time
 	return nil
 }
 
-// requireICE loads the vehicle for a write and checks that it is a combustion vehicle.
-func (h *FuelHandler) requireICE(w http.ResponseWriter, r *http.Request, vehicleID string) bool {
+// requireRefuelable loads the vehicle for a write and checks that it can be refuelled.
+func (h *FuelHandler) requireRefuelable(w http.ResponseWriter, r *http.Request, vehicleID string) bool {
 	v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
 	if v == nil {
 		return false
 	}
 	if !v.CanRefuel() {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups only apply to combustion vehicles"))
+		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups do not apply to electric vehicles"))
 		return false
 	}
 	return true
@@ -193,7 +193,7 @@ func (h *FuelHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (h *FuelHandler) Create(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")
-	if !h.requireICE(w, r, vehicleID) {
+	if !h.requireRefuelable(w, r, vehicleID) {
 		return
 	}
 	f, ok := h.buildChecked(w, r, vehicleID, "")
@@ -209,7 +209,7 @@ func (h *FuelHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *FuelHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")
-	if !h.requireICE(w, r, vehicleID) {
+	if !h.requireRefuelable(w, r, vehicleID) {
 		return
 	}
 	id := chi.URLParam(r, "fuelLogId")

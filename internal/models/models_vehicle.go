@@ -41,7 +41,7 @@ type Vehicle struct {
 	EstimatedKwh100km        *float64    `json:"estimated_kwh_100km,omitempty"`
 	EstimatedPricePerKwh     *float64    `json:"estimated_price_per_kwh,omitempty"`
 	Currency                 string      `json:"currency"`                        // ISO 4217 code, fixed at creation: see CLAUDE.md
-	Powertrain               string      `json:"powertrain"`                      // PowertrainEV | PowertrainICE
+	Powertrain               string      `json:"powertrain"`                      // PowertrainEV | PowertrainICE | PowertrainPHEV | PowertrainREEV
 	TelemetryMode            string      `json:"telemetry_mode"`                  // Derived by DerivedTelemetryMode, never entered
 	Make                     string      `json:"make"`                            // Free text, empty when not given
 	Model                    string      `json:"model"`                           // Free text, empty when not given
@@ -71,10 +71,22 @@ func (v *Vehicle) DerivedTelemetryMode() string {
 }
 
 // Vehicle powertrains. ICE vehicles are tracked manually (fuel fill-ups) and have no TeslaMate link.
+// PHEV (plug-in hybrid) and REEV (range extender) record both charging sessions and fill-ups.
 const (
-	PowertrainEV  = "EV"
-	PowertrainICE = "ICE"
+	PowertrainEV   = "EV"
+	PowertrainICE  = "ICE"
+	PowertrainPHEV = "PHEV"
+	PowertrainREEV = "REEV"
 )
+
+// ValidPowertrain reports whether the value is a known powertrain.
+func ValidPowertrain(powertrain string) bool {
+	switch powertrain {
+	case PowertrainEV, PowertrainICE, PowertrainPHEV, PowertrainREEV:
+		return true
+	}
+	return false
+}
 
 // What a powertrain can record. Callers ask for a capability instead of comparing the powertrain, so a new
 // powertrain only has to be described here.
@@ -83,7 +95,14 @@ const (
 func PowertrainCanCharge(powertrain string) bool { return powertrain != PowertrainICE }
 
 // PowertrainCanRefuel reports whether the powertrain burns fuel and so records fill-ups.
-func PowertrainCanRefuel(powertrain string) bool { return powertrain == PowertrainICE }
+func PowertrainCanRefuel(powertrain string) bool {
+	return powertrain == PowertrainICE || powertrain == PowertrainPHEV || powertrain == PowertrainREEV
+}
+
+// PowertrainIsFuelOnly reports whether fill-ups are the only energy the vehicle records.
+func PowertrainIsFuelOnly(powertrain string) bool {
+	return PowertrainCanRefuel(powertrain) && !PowertrainCanCharge(powertrain)
+}
 
 // PowertrainCanLinkTeslaMate reports whether a teslamateapi connection makes sense for the powertrain.
 func PowertrainCanLinkTeslaMate(powertrain string) bool { return PowertrainCanCharge(powertrain) }

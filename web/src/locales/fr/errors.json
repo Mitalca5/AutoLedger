@@ -119,7 +119,7 @@
     "grafana_url_base": "L'URL Grafana doit être une adresse de base, sans paramètres",
     "grafana_url_invalid": "URL Grafana invalide (http:// ou https:// requis)",
     "grafana_url_credentials": "L'URL Grafana ne doit pas contenir d'identifiants",
-    "powertrain_invalid": "Motorisation invalide (EV ou ICE)",
+    "powertrain_invalid": "Motorisation invalide (EV, ICE, PHEV ou REEV)",
     "currency_invalid": "Devise invalide : {p0}",
     "not_specified": "L'événement doit indiquer son véhicule"
   },
@@ -131,7 +131,7 @@
     "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés"
   },
   "fuel": {
-    "combustion_only": "Les pleins de carburant ne concernent que les véhicules thermiques",
+    "combustion_only": "Les pleins de carburant ne concernent pas les véhicules électriques",
     "liters_range": "Quantité invalide (0,01 à 500 L)",
     "price_range": "Prix au litre invalide (0 à 10)",
     "type_invalid": "Carburant invalide",

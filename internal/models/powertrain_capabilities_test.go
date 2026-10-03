@@ -15,6 +15,8 @@ func TestPowertrainCapabilities(t *testing.T) {
 	}{
 		{PowertrainEV, true, false, true},
 		{PowertrainICE, false, true, false},
+		{PowertrainPHEV, true, true, true},
+		{PowertrainREEV, true, true, true},
 		{"", true, false, true},
 	}
 	for _, c := range cases {

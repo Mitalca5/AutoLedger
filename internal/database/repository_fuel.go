@@ -41,7 +41,7 @@ func (r *Repository) ListFuelLogs(ctx context.Context, vehicleID string) ([]mode
 	return list, rows.Err()
 }
 
-// syncOdometerFromManualPoints raises the current odometer of a combustion vehicle to the highest
+// syncOdometerFromManualPoints raises the current odometer of a vehicle that records fill-ups to the highest
 // manual reading or fill-up mileage. It never lowers it: the value may come from another source
 // (odometer edit). Electric vehicles are left to the TeslaMate synchronization.
 func syncOdometerFromManualPoints(ctx context.Context, tx pgx.Tx, vehicleID string) error {
@@ -52,7 +52,7 @@ func syncOdometerFromManualPoints(ctx context.Context, tx pgx.Tx, vehicleID stri
 		        COALESCE((SELECT MAX(odometer) FROM fuel_logs WHERE vehicle_id = $1), 0),
 		        COALESCE((SELECT MAX(odometer) FROM odometer_checkpoints WHERE vehicle_id = $1), 0)),
 		    updated_at = NOW()
-		WHERE id = $1 AND powertrain = 'ICE';
+		WHERE id = $1 AND powertrain <> 'EV';
 	`, vehicleID)
 	return err
 }

@@ -145,7 +145,7 @@ func (h *HomeAssistantHandler) recordFuel(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if !vehicle.CanRefuel() {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups only apply to combustion vehicles"))
+		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups do not apply to electric vehicles"))
 		return
 	}
 	factor, ok := distanceFactor(w, req.DistanceUnit)

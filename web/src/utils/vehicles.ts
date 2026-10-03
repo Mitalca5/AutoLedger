@@ -59,7 +59,7 @@ export function canCharge(powertrain: PowertrainLike): boolean {
 
 /** Fuel burned: the vehicle has fill-ups. */
 export function canRefuel(powertrain: PowertrainLike): boolean {
-  return powertrain === 'ICE'
+  return powertrain === 'ICE' || powertrain === 'PHEV' || powertrain === 'REEV'
 }
 
 /** A teslamateapi connection makes sense for the powertrain. */

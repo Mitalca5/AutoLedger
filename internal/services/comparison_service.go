@@ -164,7 +164,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 	}
 	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum)
 	d.Powertrain = sum.Powertrain
-	if models.PowertrainCanRefuel(sum.Powertrain) {
+	if models.PowertrainIsFuelOnly(sum.Powertrain) {
 		d.ICELPer100Km = sum.ConsumptionL100km
 		if sum.AvgCostPerLiter > 0 {
 			v := sum.AvgCostPerLiter

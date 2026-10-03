@@ -57,7 +57,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	if err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain, telemetry_mode FROM vehicles WHERE id = $1;`, vehicleID).Scan(&currentOdometer, &estKwh100km, &estPricePerKwh, &powertrain, &telemetryMode); err != nil {
 		return nil, fmt.Errorf("vehicle: %w", err)
 	}
-	usesFuel := models.PowertrainCanRefuel(powertrain)
+	usesFuel := models.PowertrainIsFuelOnly(powertrain)
 	isManual := telemetryMode == models.TelemetryManual || telemetryMode == models.TelemetrySemiAuto
 	sum.Powertrain = powertrain
 	sum.EstimatedKwh100km = estKwh100km

@@ -158,6 +158,8 @@ func TestValidatePowertrain(t *testing.T) {
 		{"ICE without TeslaMate", "ICE", nil, ""},
 		{"ICE with blank URL", "ICE", &empty, ""},
 		{"ICE with TeslaMate", "ICE", &url, "vehicle.ice_no_teslamate"},
+		{"PHEV with TeslaMate", "PHEV", &url, ""},
+		{"REEV without TeslaMate", "REEV", nil, ""},
 		{"unknown", "HYBRID", nil, "vehicle.powertrain_invalid"},
 	}
 	for _, tt := range tests {
