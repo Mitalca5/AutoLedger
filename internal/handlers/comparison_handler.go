@@ -147,7 +147,7 @@ func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Reques
 		if v == nil {
 			return nil, false
 		}
-		if !v.CanCharge() {
+		if !models.PowertrainIsElectricOnly(v.Powertrain) {
 			writeAPIError(w, http.StatusBadRequest, apierror.New("comparison.needs_ev", "The “tracked vehicle” comparison relies on an electric vehicle; use the projection mode"))
 			return nil, false
 		}

@@ -2334,3 +2334,90 @@ func TestIntegrationTCOCountsOdometerReadingsAndAsksForTheStartOdometer(t *testi
 		t.Fatalf("expected the distance from the start odometer to the last reading, got %.0f", sum.DistanceBasisKm)
 	}
 }
+
+func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	u, err := repo.CreateUser(ctx, "phev@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	newHybrid := func(name string) *models.Vehicle {
+		v := &models.Vehicle{UserID: u.ID, Name: name, Powertrain: models.PowertrainPHEV, TeslaMateAuthType: models.AuthModeNone, CurrentOdometer: 10000}
+		if err := repo.CreateVehicle(ctx, v); err != nil {
+			t.Fatal(err)
+		}
+		return v
+	}
+	tco := NewTCOService(db.Pool, "Europe/Paris")
+	now := time.Now().UTC()
+	l := func(v float64) *float64 { return &v }
+	addFuel := func(v *models.Vehicle) {
+		for i, odo := range []float64{10000, 10600} {
+			f := &models.FuelLog{VehicleID: v.ID, Date: now.AddDate(0, -2+i, 0), Odometer: l(odo), Amount: money.FromFloat(60), Liters: l(35), IsFullTank: true}
+			if err := repo.CreateFuelLog(ctx, f); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	addCharge := func(v *models.Vehicle) {
+		cost := money.FromFloat(10)
+		c := &models.ChargeLog{VehicleID: v.ID, Date: now.AddDate(0, -1, 0), KwhAdded: 50, Cost: &cost, Currency: "EUR"}
+		if err := repo.CreateManualCharge(ctx, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	both := newHybrid("both")
+	addFuel(both)
+	addCharge(both)
+	sum, err := tco.ComputeVehicleTCO(ctx, both.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.EnergyCost != money.FromFloat(130) {
+		t.Errorf("energy cost = %v, want 120 of fuel + 10 of electricity", sum.EnergyCost)
+	}
+	if sum.FuelFillUps != 2 || sum.TotalLiters != 70 || sum.TotalKwhAdded != 50 {
+		t.Errorf("volumes: fills=%d liters=%v kwh=%v", sum.FuelFillUps, sum.TotalLiters, sum.TotalKwhAdded)
+	}
+	if sum.EstimatedEnergyDistanceKm != 0 || sum.EnergyCostPerKm <= 0 {
+		t.Errorf("estimated distance=%v cost per km=%v", sum.EstimatedEnergyDistanceKm, sum.EnergyCostPerKm)
+	}
+	for _, w := range sum.Completeness.Warnings {
+		if strings.Contains(w, "fill-up recorded") || strings.Contains(w, "without a cost") {
+			t.Errorf("unexpected warning on a hybrid with both energies: %q", w)
+		}
+	}
+
+	fuelOnly := newHybrid("fuel only")
+	addFuel(fuelOnly)
+	if sum, err = tco.ComputeVehicleTCO(ctx, fuelOnly.ID); err != nil || sum.EnergyCost != money.FromFloat(120) || sum.TotalKwhAdded != 0 {
+		t.Errorf("fuel-only hybrid: %+v (%v)", sum, err)
+	}
+	for _, w := range sum.Completeness.Warnings {
+		if strings.Contains(w, "fill-up recorded") {
+			t.Errorf("a hybrid with fill-ups must not warn about missing fuel: %q", w)
+		}
+	}
+
+	chargeOnly := newHybrid("charges only")
+	addCharge(chargeOnly)
+	if sum, err = tco.ComputeVehicleTCO(ctx, chargeOnly.ID); err != nil || sum.EnergyCost != money.FromFloat(10) || sum.FuelFillUps != 0 {
+		t.Errorf("charge-only hybrid: %+v (%v)", sum, err)
+	}
+	for _, w := range sum.Completeness.Warnings {
+		if strings.Contains(w, "No fill-up recorded") {
+			t.Errorf("a hybrid that charges must not warn about missing fuel: %q", w)
+		}
+	}
+
+	svc := NewComparisonService(tco)
+	if _, err := svc.Compare(ctx, &models.ComparisonScenario{Mode: models.ComparisonModeRetrospective, VehicleID: &both.ID, AnnualKm: 10000, Years: 3}); !errors.Is(err, ErrComparisonNeedsEV) {
+		t.Errorf("retrospective on a hybrid = %v, want ErrComparisonNeedsEV", err)
+	}
+	d, err := svc.Defaults(ctx, both.ID)
+	if err != nil || d.EVKwhPer100Km != nil || d.ICELPer100Km != nil {
+		t.Errorf("hybrid defaults must not mix energies: %+v (%v)", d, err)
+	}
+}

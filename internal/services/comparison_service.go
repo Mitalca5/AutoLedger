@@ -19,7 +19,7 @@ const minMonthsForAnnualKm = 3
 // ErrComparisonNeedsVehicle is returned when a RETROSPECTIVE comparison has no reference vehicle.
 var ErrComparisonNeedsVehicle = errors.New("comparison: retrospective mode requires a vehicle")
 
-// ErrComparisonNeedsEV is returned when a RETROSPECTIVE comparison references a combustion vehicle.
+// ErrComparisonNeedsEV is returned when a RETROSPECTIVE comparison references a vehicle that is not purely electric.
 var ErrComparisonNeedsEV = errors.New("comparison: retrospective mode requires an electric vehicle")
 
 // ICEDefault is an indicative starting point for the equivalent combustion vehicle of a given fuel.
@@ -120,7 +120,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		if err != nil {
 			return nil, err
 		}
-		if !models.PowertrainCanCharge(sum.Powertrain) {
+		if !models.PowertrainIsElectricOnly(sum.Powertrain) {
 			return nil, ErrComparisonNeedsEV
 		}
 		ev, notes = evBaselineFromTCO(sum, sc.AnnualKm, sc.Years)
@@ -170,6 +170,9 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 			v := sum.AvgCostPerLiter
 			d.ICEFuelPrice = &v
 		}
+		return d, nil
+	}
+	if !models.PowertrainIsElectricOnly(sum.Powertrain) {
 		return d, nil
 	}
 	if sum.TotalKwhAdded > 0 && sum.DistanceBasisKm > 0 {

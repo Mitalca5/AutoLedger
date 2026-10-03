@@ -57,7 +57,8 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	if err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain, telemetry_mode FROM vehicles WHERE id = $1;`, vehicleID).Scan(&currentOdometer, &estKwh100km, &estPricePerKwh, &powertrain, &telemetryMode); err != nil {
 		return nil, fmt.Errorf("vehicle: %w", err)
 	}
-	usesFuel := models.PowertrainIsFuelOnly(powertrain)
+	refuels := models.PowertrainCanRefuel(powertrain)
+	fuelOnly := models.PowertrainIsFuelOnly(powertrain)
 	isManual := telemetryMode == models.TelemetryManual || telemetryMode == models.TelemetrySemiAuto
 	sum.Powertrain = powertrain
 	sum.EstimatedKwh100km = estKwh100km
@@ -104,7 +105,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	if ownership != nil && ownership.StartOdometer != nil {
 		note(*ownership.StartOdometer)
 	}
-	if usesFuel {
+	if refuels {
 		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
 		if err != nil {
 			return nil, fmt.Errorf("fuel logs: %w", err)
@@ -129,7 +130,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		kmSinceStart = math.Max(kmSinceStart, currentOdometer-*ownership.StartOdometer)
 		basisKm = math.Max(basisKm, kmSinceStart)
 	}
-	if untracked := basisKm - trackedKm; !usesFuel && untracked > 50 && untracked > 0.01*basisKm {
+	if untracked := basisKm - trackedKm; !refuels && untracked > 50 && untracked > 0.01*basisKm {
 		comp.UntrackedDistanceKm = round1(untracked)
 	}
 	owned := ComputeOwnershipCosts(ownership, now, kmSinceStart)
@@ -175,12 +176,12 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 			"%d charge(s) without a cost (%.0f kWh): energy cost underestimated", comp.ChargesWithoutCost, comp.KwhWithoutCost))
 	}
 
-	if usesFuel {
+	if refuels {
 		sum.FuelFillUps = fuelStats.FillUps
 		sum.TotalLiters = fuelStats.TotalLiters
 		sum.AvgCostPerLiter = fuelStats.AvgPricePerLiter
 		sum.ConsumptionL100km = fuelStats.ConsumptionL100
-		if fuelStats.FillUps == 0 {
+		if fuelStats.FillUps == 0 && (fuelOnly || kwhAdded == 0) {
 			comp.Warnings = append(comp.Warnings, "No fill-up recorded: fuel cost unknown")
 		}
 	}
@@ -337,8 +338,9 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		unconvertedEntries:  comp.UnconvertedExpenses,
 		drivesWithOdometer:  drivesWithOdometer,
 		odometerAnomalies:   comp.OdometerAnomalies + comp.OdometerGaps,
-		ice:                 usesFuel,
-		iceFillUps:          fuelStats.FillUps,
+		fuelOnly:            fuelOnly,
+		hybrid:              refuels && !fuelOnly,
+		fillUps:             fuelStats.FillUps,
 		telemetryMode:       telemetryMode,
 		daysSinceOdometer:   daysSinceCheckpoint,
 		hasCheckpoints:      checkpointCount > 0,

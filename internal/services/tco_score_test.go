@@ -36,7 +36,7 @@ func TestCompletenessScore(t *testing.T) {
 
 func TestCompletenessScoreCombustionVehicle(t *testing.T) {
 	in := completenessInputs{
-		ice: true, iceFillUps: 5, trackedKm: 1000, basisKm: 1000, pricedEntries: 5,
+		fuelOnly: true, fillUps: 5, trackedKm: 1000, basisKm: 1000, pricedEntries: 5,
 		insurancePresent: true, acquisitionComplete: true,
 	}
 	score, dims := completenessScore(in)
@@ -51,9 +51,28 @@ func TestCompletenessScoreCombustionVehicle(t *testing.T) {
 		t.Errorf("combustion labels: %+v / %+v", byKey["energy"], byKey["distance"])
 	}
 
-	in.iceFillUps = 0
+	in.fillUps = 0
 	if score, _ := completenessScore(in); score != 65 {
 		t.Errorf("score without any fill-up = %d, want 65 (energy 0.30 of the 0.85 left without tolls)", score)
+	}
+}
+
+func TestHybridEnergyScore(t *testing.T) {
+	cases := []struct {
+		name string
+		in   completenessInputs
+		want float64
+	}{
+		{"nothing recorded", completenessInputs{hybrid: true}, 0},
+		{"fill-ups only", completenessInputs{hybrid: true, fillUps: 3}, 1},
+		{"charges all priced only", completenessInputs{hybrid: true, kwhAdded: 40, kwhPriced: 40}, 1},
+		{"charges half priced only", completenessInputs{hybrid: true, kwhAdded: 40, kwhPriced: 20}, 0.5},
+		{"both, charges half priced", completenessInputs{hybrid: true, kwhAdded: 40, kwhPriced: 20, fillUps: 2}, 0.75},
+	}
+	for _, c := range cases {
+		if got := hybridEnergyScore(c.in); got != c.want {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
 	}
 }
 

@@ -16,8 +16,9 @@ type completenessInputs struct {
 	unconvertedEntries  int
 	drivesWithOdometer  int
 	odometerAnomalies   int
-	ice                 bool // Combustion vehicle: energy and distance come from fuel fill-ups
-	iceFillUps          int
+	fuelOnly            bool // Combustion vehicle: energy and distance come from fuel fill-ups
+	hybrid              bool // Records both charges and fill-ups
+	fillUps             int
 	telemetryMode       string // CONNECTED, SEMI_AUTO, MANUAL
 	daysSinceOdometer   int    // Days since last odometer checkpoint
 	hasCheckpoints      bool   // Vehicle has odometer checkpoints recorded
@@ -69,10 +70,14 @@ func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 	}
 	energyLabel, energyScore := "Charges with a cost (kWh)", ratio(in.kwhPriced, in.kwhAdded)
 	distanceLabel := "Kilometres covered by drives"
-	if in.ice {
-		energyLabel, energyScore = "Fuel fill-ups recorded", boolScore(in.iceFillUps > 0)
+	switch {
+	case in.fuelOnly:
+		energyLabel, energyScore = "Fuel fill-ups recorded", boolScore(in.fillUps > 0)
 		distanceLabel = "Kilometres covered by readings and fill-ups"
-	} else if isManual {
+	case in.hybrid:
+		energyLabel, energyScore = "Charges with a cost and fill-ups recorded", hybridEnergyScore(in)
+		distanceLabel = "Kilometres covered by readings, drives and fill-ups"
+	case isManual:
 		distanceLabel = "Kilometres covered by readings and drives"
 	}
 	dims := []struct {
@@ -108,4 +113,23 @@ func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 		out = append(out, CompletenessDimension{Key: d.key, Label: d.label, ScorePct: int(math.Round(d.score * 100)), Weight: weight, Applicable: !d.neutral})
 	}
 	return int(math.Round(total * 100)), out
+}
+
+// hybridEnergyScore averages the energies the vehicle actually recorded: the priced share of its charges and
+// the presence of fill-ups. A hybrid that only charges, or only refuels, is not penalised for the other energy.
+func hybridEnergyScore(in completenessInputs) float64 {
+	var sum float64
+	var parts int
+	if in.kwhAdded > 0 {
+		sum += ratio(in.kwhPriced, in.kwhAdded)
+		parts++
+	}
+	if in.fillUps > 0 {
+		sum++
+		parts++
+	}
+	if parts == 0 {
+		return 0
+	}
+	return sum / float64(parts)
 }

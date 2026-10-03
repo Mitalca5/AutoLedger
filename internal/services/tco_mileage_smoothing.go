@@ -30,9 +30,9 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 	if err := s.pool.QueryRow(ctx, `SELECT powertrain FROM vehicles WHERE id = $1;`, vehicleID).Scan(&powertrain); err != nil {
 		return nil, nil, err
 	}
-	usesFuel := models.PowertrainIsFuelOnly(powertrain)
+	usesFuel := models.PowertrainCanRefuel(powertrain)
 	if usesFuel {
-		// Fill-ups are odometer readings of a combustion vehicle, like manual checkpoints.
+		// Fill-ups are odometer readings of a vehicle that refuels, like manual checkpoints.
 		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
 		if err != nil {
 			return nil, nil, err

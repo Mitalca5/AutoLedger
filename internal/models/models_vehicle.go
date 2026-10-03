@@ -99,6 +99,11 @@ func PowertrainCanRefuel(powertrain string) bool {
 	return powertrain == PowertrainICE || powertrain == PowertrainPHEV || powertrain == PowertrainREEV
 }
 
+// PowertrainIsElectricOnly reports whether charging sessions are the only energy the vehicle records.
+func PowertrainIsElectricOnly(powertrain string) bool {
+	return PowertrainCanCharge(powertrain) && !PowertrainCanRefuel(powertrain)
+}
+
 // PowertrainIsFuelOnly reports whether fill-ups are the only energy the vehicle records.
 func PowertrainIsFuelOnly(powertrain string) bool {
 	return PowertrainCanRefuel(powertrain) && !PowertrainCanCharge(powertrain)
