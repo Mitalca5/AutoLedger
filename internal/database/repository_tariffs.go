@@ -13,11 +13,50 @@ import (
 
 // Tariff Plans
 
-func (r *Repository) CreateTariffPlan(ctx context.Context, p *models.TariffPlan) error {
-	windowsJSON, err := json.Marshal(p.TimeWindows)
-	if err != nil {
-		windowsJSON = []byte("[]")
+const tariffPlanColumns = `id, user_id, name, plan_type, currency, flat_rate_cents,
+	peak_rate_cents, offpeak_rate_cents, time_windows, bands, rules, default_band,
+	standing_charge_cents, to_char(valid_from, 'YYYY-MM-DD'), to_char(valid_to, 'YYYY-MM-DD'),
+	is_default, created_at, updated_at`
+
+func scanTariffPlan(row pgx.Row) (*models.TariffPlan, error) {
+	var p models.TariffPlan
+	var windowsJSON, bandsJSON, rulesJSON []byte
+	if err := row.Scan(
+		&p.ID, &p.UserID, &p.Name, &p.PlanType, &p.Currency, &p.FlatRateCents,
+		&p.PeakRateCents, &p.OffpeakRateCents, &windowsJSON, &bandsJSON, &rulesJSON, &p.DefaultBand,
+		&p.StandingChargeCents, &p.ValidFrom, &p.ValidTo,
+		&p.IsDefault, &p.CreatedAt, &p.UpdatedAt,
+	); err != nil {
+		return nil, err
 	}
+	_ = json.Unmarshal(windowsJSON, &p.TimeWindows)
+	_ = json.Unmarshal(bandsJSON, &p.Bands)
+	_ = json.Unmarshal(rulesJSON, &p.Rules)
+	if p.TimeWindows == nil {
+		p.TimeWindows = []models.TimeWindow{}
+	}
+	if p.Bands == nil {
+		p.Bands = []models.TariffBand{}
+	}
+	if p.Rules == nil {
+		p.Rules = []models.TariffRule{}
+	}
+	return &p, nil
+}
+
+func marshalTariffJSON(p *models.TariffPlan) (windows, bands, rules []byte) {
+	encode := func(v any) []byte {
+		out, err := json.Marshal(v)
+		if err != nil {
+			return []byte("[]")
+		}
+		return out
+	}
+	return encode(p.TimeWindows), encode(p.Bands), encode(p.Rules)
+}
+
+func (r *Repository) CreateTariffPlan(ctx context.Context, p *models.TariffPlan) error {
+	windowsJSON, bandsJSON, rulesJSON := marshalTariffJSON(p)
 
 	if p.IsDefault {
 		// Reset other defaults for this user
@@ -27,48 +66,29 @@ func (r *Repository) CreateTariffPlan(ctx context.Context, p *models.TariffPlan)
 	query := `
 		INSERT INTO tariff_plans (
 			user_id, name, plan_type, currency, flat_rate_cents,
-			peak_rate_cents, offpeak_rate_cents, time_windows, is_default
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			peak_rate_cents, offpeak_rate_cents, time_windows, bands, rules, default_band,
+			standing_charge_cents, valid_from, valid_to, is_default
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::date, $14::date, $15)
 		RETURNING id, created_at, updated_at;
 	`
 	return r.pool.QueryRow(ctx, query,
 		p.UserID, p.Name, p.PlanType, p.Currency, p.FlatRateCents,
-		p.PeakRateCents, p.OffpeakRateCents, windowsJSON, p.IsDefault,
+		p.PeakRateCents, p.OffpeakRateCents, windowsJSON, bandsJSON, rulesJSON, p.DefaultBand,
+		p.StandingChargeCents, p.ValidFrom, p.ValidTo, p.IsDefault,
 	).Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt)
 }
 
 func (r *Repository) GetTariffPlanByID(ctx context.Context, id, userID string) (*models.TariffPlan, error) {
-	query := `
-		SELECT id, user_id, name, plan_type, currency, flat_rate_cents,
-		       peak_rate_cents, offpeak_rate_cents, time_windows, is_default,
-		       created_at, updated_at
-		FROM tariff_plans
-		WHERE id = $1 AND user_id = $2;
-	`
-	var p models.TariffPlan
-	var windowsJSON []byte
-	err := r.pool.QueryRow(ctx, query, id, userID).Scan(
-		&p.ID, &p.UserID, &p.Name, &p.PlanType, &p.Currency, &p.FlatRateCents,
-		&p.PeakRateCents, &p.OffpeakRateCents, &windowsJSON, &p.IsDefault,
-		&p.CreatedAt, &p.UpdatedAt,
-	)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNotFound
-		}
-		return nil, err
+	p, err := scanTariffPlan(r.pool.QueryRow(ctx,
+		`SELECT `+tariffPlanColumns+` FROM tariff_plans WHERE id = $1 AND user_id = $2;`, id, userID))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
 	}
-	if len(windowsJSON) > 0 {
-		_ = json.Unmarshal(windowsJSON, &p.TimeWindows)
-	}
-	if p.TimeWindows == nil {
-		p.TimeWindows = []models.TimeWindow{}
-	}
-	return &p, nil
+	return p, err
 }
 
+// GetVehicleTariffPlan returns the plan assigned to the vehicle, or the default plan of its owner.
 func (r *Repository) GetVehicleTariffPlan(ctx context.Context, vehicleID string) (*models.TariffPlan, error) {
-	// First check if the vehicle has an assigned tariff_plan_id
 	var tariffID *string
 	var userID string
 	err := r.pool.QueryRow(ctx, `SELECT tariff_plan_id, user_id FROM vehicles WHERE id = $1;`, vehicleID).Scan(&tariffID, &userID)
@@ -86,83 +106,59 @@ func (r *Repository) GetVehicleTariffPlan(ctx context.Context, vehicleID string)
 	return r.GetDefaultTariffPlan(ctx, userID)
 }
 
-func (r *Repository) GetDefaultTariffPlan(ctx context.Context, userID string) (*models.TariffPlan, error) {
-	query := `
-		SELECT id, user_id, name, plan_type, currency, flat_rate_cents,
-		       peak_rate_cents, offpeak_rate_cents, time_windows, is_default,
-		       created_at, updated_at
-		FROM tariff_plans
-		WHERE user_id = $1
-		ORDER BY is_default DESC, created_at ASC
-		LIMIT 1;
-	`
-	var p models.TariffPlan
-	var windowsJSON []byte
-	err := r.pool.QueryRow(ctx, query, userID).Scan(
-		&p.ID, &p.UserID, &p.Name, &p.PlanType, &p.Currency, &p.FlatRateCents,
-		&p.PeakRateCents, &p.OffpeakRateCents, &windowsJSON, &p.IsDefault,
-		&p.CreatedAt, &p.UpdatedAt,
-	)
+// GetVehicleTariffPlanAt returns the version of the vehicle's tariff that covers day (YYYY-MM-DD): the plans of the
+// owner sharing the name of the assigned plan are its versions. When none covers the day, the assigned plan is returned.
+func (r *Repository) GetVehicleTariffPlanAt(ctx context.Context, vehicleID, day string) (*models.TariffPlan, error) {
+	plan, err := r.GetVehicleTariffPlan(ctx, vehicleID)
+	if err != nil || plan == nil {
+		return plan, err
+	}
+	version, err := scanTariffPlan(r.pool.QueryRow(ctx, `
+		SELECT `+tariffPlanColumns+` FROM tariff_plans
+		WHERE user_id = $1 AND lower(name) = lower($2)
+		  AND (valid_from IS NULL OR valid_from <= $3::date)
+		  AND (valid_to IS NULL OR valid_to >= $3::date)
+		ORDER BY valid_from DESC NULLS LAST, created_at DESC
+		LIMIT 1;`, plan.UserID, plan.Name, day))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return plan, nil
+	}
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNotFound
-		}
 		return nil, err
 	}
-	if len(windowsJSON) > 0 {
-		_ = json.Unmarshal(windowsJSON, &p.TimeWindows)
+	return version, nil
+}
+
+func (r *Repository) GetDefaultTariffPlan(ctx context.Context, userID string) (*models.TariffPlan, error) {
+	p, err := scanTariffPlan(r.pool.QueryRow(ctx,
+		`SELECT `+tariffPlanColumns+` FROM tariff_plans WHERE user_id = $1 ORDER BY is_default DESC, created_at ASC LIMIT 1;`, userID))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
 	}
-	if p.TimeWindows == nil {
-		p.TimeWindows = []models.TimeWindow{}
-	}
-	return &p, nil
+	return p, err
 }
 
 func (r *Repository) ListTariffPlans(ctx context.Context, userID string) ([]models.TariffPlan, error) {
-	query := `
-		SELECT id, user_id, name, plan_type, currency, flat_rate_cents,
-		       peak_rate_cents, offpeak_rate_cents, time_windows, is_default,
-		       created_at, updated_at
-		FROM tariff_plans
-		WHERE user_id = $1
-		ORDER BY is_default DESC, name ASC;
-	`
-	rows, err := r.pool.Query(ctx, query, userID)
+	rows, err := r.pool.Query(ctx,
+		`SELECT `+tariffPlanColumns+` FROM tariff_plans WHERE user_id = $1 ORDER BY is_default DESC, name ASC, valid_from DESC NULLS LAST;`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tariff plans: %w", err)
 	}
 	defer rows.Close()
 
-	var list []models.TariffPlan
+	list := []models.TariffPlan{}
 	for rows.Next() {
-		var p models.TariffPlan
-		var windowsJSON []byte
-		if err := rows.Scan(
-			&p.ID, &p.UserID, &p.Name, &p.PlanType, &p.Currency, &p.FlatRateCents,
-			&p.PeakRateCents, &p.OffpeakRateCents, &windowsJSON, &p.IsDefault,
-			&p.CreatedAt, &p.UpdatedAt,
-		); err != nil {
+		p, err := scanTariffPlan(rows)
+		if err != nil {
 			return nil, err
 		}
-		if len(windowsJSON) > 0 {
-			_ = json.Unmarshal(windowsJSON, &p.TimeWindows)
-		}
-		if p.TimeWindows == nil {
-			p.TimeWindows = []models.TimeWindow{}
-		}
-		list = append(list, p)
-	}
-	if list == nil {
-		list = []models.TariffPlan{}
+		list = append(list, *p)
 	}
 	return list, rows.Err()
 }
 
 func (r *Repository) UpdateTariffPlan(ctx context.Context, p *models.TariffPlan) error {
-	windowsJSON, err := json.Marshal(p.TimeWindows)
-	if err != nil {
-		windowsJSON = []byte("[]")
-	}
+	windowsJSON, bandsJSON, rulesJSON := marshalTariffJSON(p)
 
 	if p.IsDefault {
 		_, _ = r.pool.Exec(ctx, `UPDATE tariff_plans SET is_default = FALSE WHERE user_id = $1 AND id <> $2;`, p.UserID, p.ID)
@@ -172,12 +168,16 @@ func (r *Repository) UpdateTariffPlan(ctx context.Context, p *models.TariffPlan)
 		UPDATE tariff_plans
 		SET name = $1, plan_type = $2, currency = $3, flat_rate_cents = $4,
 		    peak_rate_cents = $5, offpeak_rate_cents = $6, time_windows = $7,
-		    is_default = $8, updated_at = NOW()
-		WHERE id = $9 AND user_id = $10;
+		    bands = $8, rules = $9, default_band = $10, standing_charge_cents = $11,
+		    valid_from = $12::date, valid_to = $13::date,
+		    is_default = $14, updated_at = NOW()
+		WHERE id = $15 AND user_id = $16;
 	`
 	tag, err := r.pool.Exec(ctx, query,
 		p.Name, p.PlanType, p.Currency, p.FlatRateCents,
 		p.PeakRateCents, p.OffpeakRateCents, windowsJSON,
+		bandsJSON, rulesJSON, p.DefaultBand, p.StandingChargeCents,
+		p.ValidFrom, p.ValidTo,
 		p.IsDefault, p.ID, p.UserID,
 	)
 	if err != nil {

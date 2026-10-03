@@ -71,7 +71,7 @@ func (h *PendingChargesHandler) Assign(w http.ResponseWriter, r *http.Request) {
 	} else if event.Data.CostCents != nil {
 		c := money.Cents(*event.Data.CostCents)
 		cost = &c
-	} else if plan, _ := h.repo.GetVehicleTariffPlan(r.Context(), vehicle.ID); plan != nil {
+	} else if plan, _ := h.repo.GetVehicleTariffPlanAt(r.Context(), vehicle.ID, h.tariffService.DayOf(pc.StartTime)); plan != nil {
 		if computed, err := h.tariffService.CalculateSessionCost(plan, pc.StartTime, pc.EndTime, pc.EnergyKwh); err == nil && computed > 0 {
 			cost = &computed
 		}

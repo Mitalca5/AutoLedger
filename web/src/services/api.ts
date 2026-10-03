@@ -582,12 +582,30 @@ export interface TimeWindow {
   days_of_week?: number[]
 }
 
+export interface TariffBand {
+  name: string
+  rate_cents: number
+}
+
+export interface TariffRule {
+  days?: number[] | null
+  start: string
+  end: string
+  band: string
+}
+
 export interface TariffPlan {
   id: string
   user_id: string
   name: string
-  plan_type: 'FLAT' | 'TIME_OF_USE'
+  plan_type: 'FLAT' | 'TIME_OF_USE' | 'BANDS'
   currency: string
+  bands?: TariffBand[] | null
+  rules?: TariffRule[] | null
+  default_band?: string | null
+  standing_charge_cents?: number | null
+  valid_from?: string | null
+  valid_to?: string | null
   flat_rate_cents?: number | null
   peak_rate_cents?: number | null
   offpeak_rate_cents?: number | null

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -47,6 +48,67 @@ type SaveTariffPlanRequest struct {
 	OffpeakRateCents *money.Cents        `json:"offpeak_rate_cents"`
 	TimeWindows      []models.TimeWindow `json:"time_windows"`
 	IsDefault        bool                `json:"is_default"`
+
+	Bands               []models.TariffBand `json:"bands"`
+	Rules               []models.TariffRule `json:"rules"`
+	DefaultBand         string              `json:"default_band"`
+	StandingChargeCents *money.Cents        `json:"standing_charge_cents"`
+	ValidFrom           *string             `json:"valid_from"`
+	ValidTo             *string             `json:"valid_to"`
+}
+
+var hhmmPattern = regexp.MustCompile(`^([01]\d|2[0-3]):[0-5]\d$|^24:00$`)
+
+func validDay(s *string) bool {
+	if s == nil || *s == "" {
+		return true
+	}
+	_, err := time.Parse("2006-01-02", *s)
+	return err == nil
+}
+
+// validateBands checks a band grid: named bands, rules that point at an existing band with valid days and times,
+// and a validity range in the right order.
+func validateBands(req *SaveTariffPlanRequest) *apierror.Error {
+	if len(req.Bands) == 0 {
+		return apierror.New("tariff.bands_required", "At least one band is required")
+	}
+	names := map[string]bool{}
+	for i := range req.Bands {
+		req.Bands[i].Name = strings.TrimSpace(req.Bands[i].Name)
+		n := req.Bands[i].Name
+		if n == "" || names[n] || req.Bands[i].RateCents < 0 {
+			return apierror.New("tariff.band_invalid", "Invalid band")
+		}
+		names[n] = true
+	}
+	if req.DefaultBand != "" && !names[req.DefaultBand] {
+		return apierror.New("tariff.band_invalid", "Invalid band")
+	}
+	for _, r := range req.Rules {
+		if !names[r.Band] || !hhmmPattern.MatchString(r.Start) || !hhmmPattern.MatchString(r.End) {
+			return apierror.New("tariff.rule_invalid", "Invalid rule")
+		}
+		for _, d := range r.Days {
+			if d < 0 || d > 6 {
+				return apierror.New("tariff.rule_invalid", "Invalid rule")
+			}
+		}
+	}
+	if !validDay(req.ValidFrom) || !validDay(req.ValidTo) {
+		return apierror.New("tariff.validity_invalid", "Invalid validity range")
+	}
+	if req.ValidFrom != nil && req.ValidTo != nil && *req.ValidFrom != "" && *req.ValidTo != "" && *req.ValidTo < *req.ValidFrom {
+		return apierror.New("tariff.validity_invalid", "Invalid validity range")
+	}
+	return nil
+}
+
+func blankToNil(s *string) *string {
+	if s == nil || *s == "" {
+		return nil
+	}
+	return s
 }
 
 func (h *TariffHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -65,8 +127,18 @@ func (h *TariffHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	planType := req.PlanType
-	if planType != models.TariffTypeFlat && planType != models.TariffTypeTimeOfUse {
+	if planType != models.TariffTypeFlat && planType != models.TariffTypeTimeOfUse && planType != models.TariffTypeBands {
 		planType = models.TariffTypeTimeOfUse
+	}
+	if planType == models.TariffTypeBands {
+		if e := validateBands(&req); e != nil {
+			writeAPIError(w, http.StatusBadRequest, e)
+			return
+		}
+	}
+	if !validDay(req.ValidFrom) || !validDay(req.ValidTo) {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("tariff.validity_invalid", "Invalid validity range"))
+		return
 	}
 
 	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
@@ -84,6 +156,13 @@ func (h *TariffHandler) Create(w http.ResponseWriter, r *http.Request) {
 		OffpeakRateCents: req.OffpeakRateCents,
 		TimeWindows:      req.TimeWindows,
 		IsDefault:        req.IsDefault,
+
+		Bands:               req.Bands,
+		Rules:               req.Rules,
+		DefaultBand:         req.DefaultBand,
+		StandingChargeCents: req.StandingChargeCents,
+		ValidFrom:           blankToNil(req.ValidFrom),
+		ValidTo:             blankToNil(req.ValidTo),
 	}
 
 	if err := h.repo.CreateTariffPlan(r.Context(), plan); err != nil {
@@ -127,6 +206,19 @@ func (h *TariffHandler) Update(w http.ResponseWriter, r *http.Request) {
 		existing.TimeWindows = req.TimeWindows
 	}
 	existing.IsDefault = req.IsDefault
+	if existing.PlanType == models.TariffTypeBands {
+		if e := validateBands(&req); e != nil {
+			writeAPIError(w, http.StatusBadRequest, e)
+			return
+		}
+		existing.Bands, existing.Rules, existing.DefaultBand = req.Bands, req.Rules, req.DefaultBand
+	}
+	if !validDay(req.ValidFrom) || !validDay(req.ValidTo) {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("tariff.validity_invalid", "Invalid validity range"))
+		return
+	}
+	existing.StandingChargeCents = req.StandingChargeCents
+	existing.ValidFrom, existing.ValidTo = blankToNil(req.ValidFrom), blankToNil(req.ValidTo)
 
 	if err := h.repo.UpdateTariffPlan(r.Context(), existing); err != nil {
 		writeRepoError(w, r, err, "Failed to update tariff plan")

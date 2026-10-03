@@ -240,8 +240,12 @@
     "electric_only": "Charging sessions only apply to electric vehicles"
   },
   "tariff": {
+    "band_invalid": "Invalid band",
+    "bands_required": "At least one band is required",
     "name_required": "Tariff plan name is required",
-    "not_found": "Tariff plan not found"
+    "not_found": "Tariff plan not found",
+    "rule_invalid": "Invalid rule: use an existing band, HH:MM times and days 0 to 6",
+    "validity_invalid": "Invalid validity range"
   },
   "preset": {
     "name_required": "Preset name is required"

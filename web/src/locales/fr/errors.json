@@ -240,8 +240,12 @@
     "electric_only": "Les sessions de recharge ne concernent que les véhicules électriques"
   },
   "tariff": {
+    "band_invalid": "Tranche invalide",
+    "bands_required": "Au moins une tranche est requise",
     "name_required": "Le nom de la grille tarifaire est requis",
-    "not_found": "Grille tarifaire introuvable"
+    "not_found": "Grille tarifaire introuvable",
+    "rule_invalid": "Règle invalide : utilisez une tranche existante, des heures HH:MM et des jours de 0 à 6",
+    "validity_invalid": "Période de validité invalide"
   },
   "preset": {
     "name_required": "Le nom du préréglage est requis"

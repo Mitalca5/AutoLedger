@@ -350,7 +350,7 @@ func main() {
 		importProfileHandler := handlers.NewImportProfileHandler(repo)
 		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo))
 
-		tariffService := services.NewTariffService()
+		tariffService := services.NewTariffServiceIn(cfg.ReportingTimezone)
 		fleetService := services.NewFleetService(repo)
 
 		tokenHandler := handlers.NewTokenHandler(repo)
