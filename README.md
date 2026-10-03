@@ -9,22 +9,39 @@
 
 ---
 
-## 💡 Why AutoLedger? (Unfair Advantage)
+## 🚀 No Tesla? Start here
 
-Most vehicle tools force a frustrating compromise: proprietary mobile apps only show battery or fuel status, cloud SaaS charge high monthly fees and lock you into a single brand, and spreadsheets quickly degenerate into unmaintainable formula webs.
+AutoLedger does not need any telemetry source. Any car, any brand, electric, hybrid or combustion:
 
-**AutoLedger** bridges this gap as a dedicated, self-hosted financial and telemetry companion.
+1. **Add a vehicle**: name, powertrain (electric, hybrid, range-extender or combustion), optional make and model.
+2. **Enter or import**: log fill-ups and charges from the phone in a few taps, or import a CSV ([format](docs/csv-import.md)): a spreadsheet or an OBD2 logger export.
+3. **See the cost per km**: energy, tolls, maintenance, tires, insurance and financing roll up into one real cost per km, with a completeness score telling what is still missing.
 
-| Feature / Capability | AutoLedger | Spreadsheets (Excel / Sheets) | Paid SaaS (Tronity, Tessie...) | OEM Apps (MyRenault, MyPeugeot...) |
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="TCO dashboard of a diesel station wagon" width="62%">
+  <img src="docs/screenshots/mobile-quickadd.png" alt="Quick add of a fill-up on a phone" width="22%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/fleet.png" alt="Household fleet comparing a diesel, a hybrid and an electric car" width="86%">
+</p>
+
+### Works with
+
+| Source | What it brings | Setup |
+| :--- | :--- | :--- |
+| **Manual / PWA** | Quick add of fill-ups, charges, expenses and odometer readings, offline queue, receipt photos | none |
+| **CSV import and export** | Charges, drives, fill-ups, odometer; saved column profiles; round-trip export | [docs/csv-import.md](docs/csv-import.md) |
+| **Home Assistant** | Wallbox or energy-meter charging sessions sent automatically | [HACS integration](https://github.com/Rem7474/autoledger-homeassistant) |
+| **Ingestion API** | Any script, Node-RED or n8n pushing events with a token | [docs/ingestion-api.md](docs/ingestion-api.md) |
+| **TeslaMate** (optional) | Live odometer, charge and drive history for a Tesla | [TeslaMate](https://github.com/teslamate-org/teslamate) |
+
+### Compatibility
+
+| Powertrain | Charges | Fill-ups | Drives and efficiency | TeslaMate link |
 | :--- | :---: | :---: | :---: | :---: |
-| **Self-Hosted & Private** | ✅ 100% Local / Open Source | ✅ Local | ❌ Proprietary Cloud ($$) | ❌ OEM Cloud |
-| **Universal Multi-Brand** | ✅ EV, Hybrid & Combustion | ⚠️ Manual setup | ❌ Brand-locked / EV-only | ❌ Single brand only |
-| **Full TCO Engine** | ✅ To the cent (Financing, Depr., Tires, Tolls) | ⚠️ Manual formula hell | ❌ Energy/Charges only | ❌ Very basic |
-| **Ingestion Flexibility** | ✅ 3 modes (Live API, CSV, Manual) | ❌ Manual typing | ❌ Telemetry API only | ❌ App only |
-| **Tire Lifecycle by Axle** | ✅ Tread depth & mileage projection | ❌ Manual | ❌ No | ❌ No |
-| **Fair Carpooling Module** | ✅ Weighted energy + insurance split | ❌ Manual math | ❌ No | ❌ No |
-| **Invoice & Document Storage** | ✅ Built-in encrypted volume | ❌ Separate folders | ❌ No | ❌ No |
-| **Homelab Webhooks & OIDC** | ✅ Discord, Telegram, Gotify, SSO | ❌ No | ⚠️ Limited webhooks | ❌ No |
+| Electric | ✅ | | kWh/100 km | ✅ |
+| Plug-in hybrid / range-extender | ✅ | ✅ | electricity and fuel combined | ✅ |
+| Combustion | | ✅ | L/100 km | |
 
 ---
 
