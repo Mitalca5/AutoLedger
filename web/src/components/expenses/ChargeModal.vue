@@ -132,7 +132,7 @@ async function handleSaveCharge() {
             <Zap class="w-5 h-5 text-sky-400 shrink-0" />
             {{ !editingCharge ? $t('expenses.chargeModal.newCharge') : editingCharge.is_manual ? $t('expenses.chargeModal.editCharge') : $t('expenses.chargeModal.chargeCost') }}
           </h3>
-          <p v-if="editingCharge && !editingCharge.is_manual" class="text-[11px] text-slate-400 mt-1">
+          <p v-if="editingCharge && !editingCharge.is_manual" class="text-xs text-slate-400 mt-1">
             {{ $t('expenses.chargeModal.teslamateChargeOfKwhThe', { date: formatDate(editingCharge.date), kwh_added: editingCharge.kwh_added }) }}
           </p>
         </div>
@@ -171,7 +171,7 @@ async function handleSaveCharge() {
             <button
               type="button"
               @click="showPublicCalc = true"
-              class="inline-flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 font-medium"
+              class="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 font-medium"
             >
               <Calculator class="w-3.5 h-3.5" />
               {{ $t('tariffs.publicModal.openCalculator') }}
@@ -201,7 +201,7 @@ async function handleSaveCharge() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.chargeModal.receiptInvoice') }}
             </span>
-            <span v-if="chargeForm.document_id" class="text-[11px] text-emerald-400 font-medium">{{ $t('expenses.chargeModal.linked') }}</span>
+            <span v-if="chargeForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.chargeModal.linked') }}</span>
           </div>
 
           <div v-if="chargeForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">
@@ -256,7 +256,7 @@ async function handleSaveCharge() {
                 />
               </label>
             </div>
-            <p class="text-[10px] text-slate-400">
+            <p class="text-xs text-slate-400">
               {{ $t('expenses.chargeModal.pdfOrImageSuperchargerReceipt') }}
             </p>
           </div>

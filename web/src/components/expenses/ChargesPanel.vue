@@ -79,8 +79,8 @@ const vehicleStore = useVehicleStore()
               {{ $t('expenses.chargesPanel.kwh2', { kwh_added: c.kwh_added }) }}
             </span>
             <span class="text-xs text-slate-400 shrink-0">{{ formatDate(c.date) }}</span>
-            <span v-if="c.is_manual" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
-            <span v-else-if="c.cost_source === 'MANUAL'" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
+            <span v-if="c.is_manual" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
+            <span v-else-if="c.cost_source === 'MANUAL'" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
             <button
               v-if="c.document_id"
               @click="emit('view-document', c.document_id, c.document_filename, false)"
@@ -97,7 +97,7 @@ const vehicleStore = useVehicleStore()
           <div class="text-left sm:text-right">
             <template v-if="c.cost !== null">
               <span class="text-lg font-extrabold text-sky-400">{{ formatAmount(c.cost, c.currency || vehicleStore.currency) }}</span>
-              <p v-if="c.kwh_added > 0" class="text-[11px] text-slate-400">
+              <p v-if="c.kwh_added > 0" class="text-xs text-slate-400">
                 {{ $t('expenses.chargesPanel.kwh', { cost: formatAmount(c.cost / c.kwh_added, c.currency || vehicleStore.currency, 3) }) }}
               </p>
             </template>

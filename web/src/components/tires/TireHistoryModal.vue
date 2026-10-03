@@ -101,15 +101,15 @@ useEscapeToClose(open, () => (open.value = false))
 
         <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500">{{ $t('tires.tireHistoryModal.currentTread') }}</div>
+            <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.currentTread') }}</div>
             <div class="font-bold text-emerald-400">{{ selectedTireStats?.current_depth_mm }} mm</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500">{{ $t('tires.tireHistoryModal.lifespanUsed') }}</div>
+            <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.lifespanUsed') }}</div>
             <div class="font-bold text-slate-200">{{ selectedTireStats?.life_progress_pct }}%</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>
+            <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>
             <div class="font-bold text-amber-400">{{ formatAmount(perDistance(Number(selectedTireStats?.cost_per_km)), vehicleStore.currency, 4) }}</div>
           </div>
         </div>
@@ -138,19 +138,19 @@ useEscapeToClose(open, () => (open.value = false))
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireHistoryModal.peakAcceleration') }}</div>
+            <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.peakAcceleration') }}</div>
             <div class="font-bold text-rose-400 text-sm mt-0.5">+{{ selectedTireStats.avg_power_max_kw }} kW</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireHistoryModal.peakRegeneration') }}</div>
+            <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.peakRegeneration') }}</div>
             <div class="font-bold text-emerald-400 text-sm mt-0.5">{{ selectedTireStats.avg_power_min_kw }} kW</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireHistoryModal.averageConsumption') }}</div>
+            <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.averageConsumption') }}</div>
             <div class="font-bold text-sky-400 text-sm mt-0.5">{{ $t('tires.tireHistoryModal.kwh', { unit: distanceUnit(), avg_consumption_kwh_100km: formatPerDistanceValue(Number(selectedTireStats.avg_consumption_kwh_100km)) }) }}</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-            <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireHistoryModal.adjustedLongevity') }}</div>
+            <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.adjustedLongevity') }}</div>
             <div class="font-bold text-indigo-300 text-sm mt-0.5">~{{ formatDistance(selectedTireStats.dynamic_lifespan_km || selectedTire.estimated_lifespan_km) }}</div>
           </div>
         </div>
@@ -187,7 +187,7 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
         </div>
 
-        <div v-if="tireSessions.length === 0" class="p-6 text-center bg-slate-950/40 rounded-2xl text-xs text-slate-500">
+        <div v-if="tireSessions.length === 0" class="p-6 text-center bg-slate-950/40 rounded-2xl text-xs text-slate-400">
           {{ $t('tires.tireHistoryModal.noSessionRecordedForThis') }}
         </div>
 
@@ -200,7 +200,7 @@ useEscapeToClose(open, () => (open.value = false))
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span
-                  class="px-2 py-0.5 rounded-md font-bold text-[10px]"
+                  class="px-2 py-0.5 rounded-md font-bold text-xs"
                   :class="s.dismounted_date ? 'bg-slate-800 text-slate-300' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'"
                 >
                   {{ s.dismounted_date ? $t('tires.tireHistoryModal.sessionOver') : $t('tires.tireHistoryModal.currentlyFitted') }}
@@ -242,20 +242,20 @@ useEscapeToClose(open, () => (open.value = false))
             </div>
 
             <!-- Session Details -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
               <div>
-                <div class="text-slate-500">{{ $t('tires.tireHistoryModal.fitting') }}</div>
+                <div class="text-slate-400">{{ $t('tires.tireHistoryModal.fitting') }}</div>
                 <div class="text-slate-200 font-medium">{{ $t('tires.tireHistoryModal.dateAtKm', { unit: distanceUnit(), date: formatDate(s.mounted_date), km: formatDistanceValue(s.mounted_odometer) }) }}</div>
               </div>
               <div>
-                <div class="text-slate-500">{{ $t('tires.tireHistoryModal.removal') }}</div>
+                <div class="text-slate-400">{{ $t('tires.tireHistoryModal.removal') }}</div>
                 <div class="text-slate-200 font-medium">
                   {{ s.dismounted_date ? $t('tires.tireHistoryModal.removedAt', { unit: distanceUnit(), date: formatDate(s.dismounted_date), odometer: formatDistanceValue(s.dismounted_odometer) }) : $t('tires.tireHistoryModal.currentlyOnVehicle') }}
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-between text-[11px] pt-1">
+            <div class="flex items-center justify-between text-xs pt-1">
               <span v-if="s.notes" class="text-slate-400 italic">"{{ s.notes }}"</span>
               <span v-else></span>
               <span class="font-bold text-rose-400">{{ $t('tires.tireHistoryModal.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(s.distance_km) }) }}</span>
@@ -288,15 +288,15 @@ useEscapeToClose(open, () => (open.value = false))
           >
             <div class="flex items-center justify-between">
               <span class="font-bold text-emerald-400">{{ l.depth_mm }} mm</span>
-              <span class="text-[10px] text-slate-500">{{ formatDate(l.date) }}</span>
+              <span class="text-xs text-slate-400">{{ formatDate(l.date) }}</span>
             </div>
-            <div class="flex items-center justify-between text-[10px] text-slate-400">
+            <div class="flex items-center justify-between text-xs text-slate-400">
               <span>{{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(l.odometer) }) }}</span>
               <span class="flex items-center gap-1">
-                <button @click="emit('edit-log', l)" class="text-slate-500 hover:text-emerald-400" :title="$t('tires.tireHistoryModal.editTheReading')">
+                <button @click="emit('edit-log', l)" class="text-slate-400 hover:text-emerald-400" :title="$t('tires.tireHistoryModal.editTheReading')">
                   <Pencil class="w-3 h-3" />
                 </button>
-                <button @click="emit('delete-log', l)" class="text-slate-500 hover:text-rose-400" :title="$t('tires.tireHistoryModal.deleteTheReading')">
+                <button @click="emit('delete-log', l)" class="text-slate-400 hover:text-rose-400" :title="$t('tires.tireHistoryModal.deleteTheReading')">
                   <Trash2 class="w-3 h-3" />
                 </button>
               </span>

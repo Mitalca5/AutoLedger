@@ -103,7 +103,7 @@ onMounted(() => {
           </div>
           <div>
             <h2 class="text-sm font-bold text-white">{{ t('pendingCharges.modalTitle') }}</h2>
-            <p class="text-[11px] text-slate-400">{{ t('pendingCharges.modalSubtitle') }}</p>
+            <p class="text-xs text-slate-400">{{ t('pendingCharges.modalSubtitle') }}</p>
           </div>
         </div>
         <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -117,7 +117,7 @@ onMounted(() => {
           {{ t('pendingCharges.loading') }}
         </div>
 
-        <div v-else-if="pendingCharges.length === 0" class="text-center py-8 text-xs text-slate-500">
+        <div v-else-if="pendingCharges.length === 0" class="text-center py-8 text-xs text-slate-400">
           {{ t('pendingCharges.empty') }}
         </div>
 
@@ -136,14 +136,14 @@ onMounted(() => {
                 <span v-if="charge.charger_name" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
                   {{ charge.charger_name }}
                 </span>
-                <span v-if="charge.location" class="text-[11px] text-slate-400">
+                <span v-if="charge.location" class="text-xs text-slate-400">
                   {{ charge.location }}
                 </span>
               </div>
 
               <div class="flex items-center gap-3 text-xs text-slate-400">
                 <span class="flex items-center gap-1">
-                  <Calendar class="w-3 h-3 text-slate-500" />
+                  <Calendar class="w-3 h-3 text-slate-400" />
                   {{ formatDate(charge.start_time) }}
                 </span>
               </div>

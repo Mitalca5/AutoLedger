@@ -43,7 +43,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
         {{ $t('drives.drivesPagination.display') }} <strong class="text-white">{{ itemRangeStart }}</strong>–<strong class="text-white">{{ itemRangeEnd }}</strong> {{ $t('drives.drivesPagination.of') }} <strong class="text-white">{{ total }}</strong> {{ $t('drives.drivesPagination.drives') }}
       </span>
       <div class="flex items-center gap-1.5 border-l border-slate-800 pl-3">
-        <span class="text-slate-500">{{ $t('drives.drivesPagination.perPage') }}</span>
+        <span class="text-slate-400">{{ $t('drives.drivesPagination.perPage') }}</span>
         <button
           v-for="s in [20, 50, 100]"
           :key="s"
@@ -79,7 +79,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
 
       <!-- Numbered pages with ellipses -->
       <template v-for="(p, idx) in paginationPages" :key="idx">
-        <span v-if="p === '...'" class="px-1 text-xs text-slate-500 font-bold">...</span>
+        <span v-if="p === '...'" class="px-1 text-xs text-slate-400 font-bold">...</span>
         <button
           v-else
           @click="goToPage(p as number)"
@@ -111,7 +111,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
 
       <!-- Direct jump input -->
       <div v-if="totalPages > 1" class="flex items-center gap-1 ml-2 border-l border-slate-800 pl-2">
-        <label for="drives-jump-page" class="text-xs text-slate-500">{{ $t('drives.drivesPagination.page') }}</label>
+        <label for="drives-jump-page" class="text-xs text-slate-400">{{ $t('drives.drivesPagination.page') }}</label>
         <input
           id="drives-jump-page"
           type="number"

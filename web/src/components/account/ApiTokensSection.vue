@@ -121,7 +121,7 @@ onMounted(() => {
         <Sparkles class="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
         <div>
           <h3 class="text-xs font-semibold text-blue-200">{{ t('account.tokens.haIntegrationTitle') }}</h3>
-          <p class="text-[11px] text-blue-300/80 mt-0.5">
+          <p class="text-xs text-blue-300/80 mt-0.5">
             {{ t('account.tokens.haIntegrationSubtitle') }}
           </p>
         </div>
@@ -141,7 +141,7 @@ onMounted(() => {
     <div v-if="loading" class="text-sm text-slate-400 py-2">
       {{ t('account.tokens.loading') }}
     </div>
-    <div v-else-if="tokens.length === 0" class="text-center py-6 text-xs text-slate-500">
+    <div v-else-if="tokens.length === 0" class="text-center py-6 text-xs text-slate-400">
       {{ t('account.tokens.noTokens') }}
     </div>
     <ul v-else class="space-y-2">
@@ -153,7 +153,7 @@ onMounted(() => {
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold text-white truncate">{{ tok.name }}</span>
-            <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+            <span class="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
               {{ tok.token_prefix }}...
             </span>
           </div>
@@ -162,7 +162,7 @@ onMounted(() => {
             <span v-if="tok.last_used_at">
               {{ t('account.tokens.lastUsed', { date: describeRelativeTime(tok.last_used_at) }) }}
             </span>
-            <span v-else class="text-slate-500">{{ t('account.tokens.neverUsed') }}</span>
+            <span v-else class="text-slate-400">{{ t('account.tokens.neverUsed') }}</span>
             <span v-if="tok.expires_at" class="text-amber-400/80">
               {{ t('account.tokens.expires', { date: describeRelativeTime(tok.expires_at) }) }}
             </span>

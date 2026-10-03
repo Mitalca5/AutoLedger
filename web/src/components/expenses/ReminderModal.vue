@@ -137,7 +137,7 @@ async function handleSaveReminder() {
               :key="preset.title"
               type="button"
               @click="applyReminderPreset(preset)"
-              class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium rounded-lg border border-slate-700 transition-colors flex items-center gap-1"
+              class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition-colors flex items-center gap-1"
             >
               <Sparkles class="w-3 h-3 text-violet-400" />
               {{ preset.title }}

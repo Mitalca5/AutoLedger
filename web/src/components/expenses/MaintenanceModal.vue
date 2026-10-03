@@ -250,11 +250,11 @@ async function handleCreateMaint() {
               {{ $t('expenses.maintenanceModal.spreadMonthly') }}
             </button>
           </div>
-          <p class="text-[11px] text-indigo-200/80">
+          <p class="text-xs text-indigo-200/80">
             {{ $t('expenses.maintenanceModal.createsAMonthlyRecurringExpense') }}
           </p>
         </div>
-        <p v-else-if="maintForm.category === 'FINANCING'" class="text-[11px] text-amber-300/90">
+        <p v-else-if="maintForm.category === 'FINANCING'" class="text-xs text-amber-300/90">
           {{ $t('expenses.maintenanceModal.leasePaymentsTheDownPayment') }}
         </p>
 
@@ -287,10 +287,10 @@ async function handleCreateMaint() {
         <div>
           <div class="flex items-center justify-between mb-1">
             <label for="expense-maint-odometer" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.maintenanceModal.odometerKm', { unit: distanceUnit() }) }}</label>
-            <span v-if="detectingOdometer" class="text-[11px] text-slate-400">{{ $t('expenses.maintenanceModal.detectingTheMileage') }}</span>
+            <span v-if="detectingOdometer" class="text-xs text-slate-400">{{ $t('expenses.maintenanceModal.detectingTheMileage') }}</span>
           </div>
           <DistanceInput id="expense-maint-odometer" v-model="maintForm.odometer" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
-          <div v-if="detectedOdometer !== null && detectedOdometer > 0" class="flex items-center justify-between text-[11px] text-emerald-400 mt-1">
+          <div v-if="detectedOdometer !== null && detectedOdometer > 0" class="flex items-center justify-between text-xs text-emerald-400 mt-1">
             <span>{{ $t('expenses.maintenanceModal.mileageDetectedKm', { unit: distanceUnit(), detectedOdometer: formatDistanceValue(detectedOdometer) }) }}</span>
             <button
               type="button"
@@ -382,7 +382,7 @@ async function handleCreateMaint() {
               />
               <label for="close-candidate" class="text-xs text-slate-300 leading-snug cursor-pointer">
                 {{ $t('expenses.maintenanceModal.closeThePreviousServiceIn') }}
-                <span class="block text-[11px] text-amber-400 font-normal">
+                <span class="block text-xs text-amber-400 font-normal">
                   {{ closeCandidateMaintenance.description }} ({{ formatDate(closeCandidateMaintenance.date) }} — {{ formatAmount(Number(closeCandidateMaintenance.amount), baseCurrency) }})
                 </span>
               </label>
@@ -414,7 +414,7 @@ async function handleCreateMaint() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.maintenanceModal.receiptInvoice') }}
             </span>
-            <span v-if="maintForm.document_id" class="text-[11px] text-emerald-400 font-medium">{{ $t('expenses.maintenanceModal.linked') }}</span>
+            <span v-if="maintForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.maintenanceModal.linked') }}</span>
           </div>
 
           <div v-if="maintForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">
@@ -444,7 +444,7 @@ async function handleCreateMaint() {
 
           <div v-else class="space-y-2.5">
             <div v-if="documents.length > 0">
-              <label for="maint-existing-doc" class="block text-[11px] text-slate-400 mb-1">{{ $t('expenses.maintenanceModal.attachAnExistingInvoice') }}</label>
+              <label for="maint-existing-doc" class="block text-xs text-slate-400 mb-1">{{ $t('expenses.maintenanceModal.attachAnExistingInvoice') }}</label>
               <select
                 id="maint-existing-doc"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300"
@@ -458,7 +458,7 @@ async function handleCreateMaint() {
             </div>
 
             <div>
-              <span class="block text-[11px] text-slate-400 mb-1">{{ $t('expenses.maintenanceModal.orDropANewInvoice') }}</span>
+              <span class="block text-xs text-slate-400 mb-1">{{ $t('expenses.maintenanceModal.orDropANewInvoice') }}</span>
               <AppDropzone
                 :model-value="null"
                 :disabled="isUploadingDocument"

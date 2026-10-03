@@ -99,7 +99,7 @@ async function handleCopyHistorySubmit() {
       <div class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4 text-xs">
         <!-- Source selection -->
         <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-2">
-          <label for="copy-history-source-select" class="text-[11px] text-indigo-400 font-semibold uppercase tracking-wider block">{{ $t('tires.tireCopyHistoryModal.sourceTireToClone') }}</label>
+          <label for="copy-history-source-select" class="text-xs text-indigo-400 font-semibold uppercase tracking-wider block">{{ $t('tires.tireCopyHistoryModal.sourceTireToClone') }}</label>
           <select
             id="copy-history-source-select"
             :value="copyHistorySourceTire.id"
@@ -123,7 +123,7 @@ async function handleCopyHistorySubmit() {
             />
             <div>
               <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.fittingAndRemovalSessions') }}</span>
-              <span class="block text-[11px] text-slate-400">{{ $t('tires.tireCopyHistoryModal.copiesThePeriodsDatesOdometers') }}</span>
+              <span class="block text-xs text-slate-400">{{ $t('tires.tireCopyHistoryModal.copiesThePeriodsDatesOdometers') }}</span>
             </div>
           </label>
 
@@ -136,7 +136,7 @@ async function handleCopyHistorySubmit() {
             />
             <div>
               <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.adaptTheFittingPositionTo') }}</span>
-              <span class="block text-[11px] text-slate-400">{{ $t('tires.tireCopyHistoryModal.whenEnabledEachTargetTire') }}</span>
+              <span class="block text-xs text-slate-400">{{ $t('tires.tireCopyHistoryModal.whenEnabledEachTargetTire') }}</span>
             </div>
           </label>
 
@@ -148,7 +148,7 @@ async function handleCopyHistorySubmit() {
             />
             <div>
               <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.wearAndTreadMeasurementsLogs') }}</span>
-              <span class="block text-[11px] text-slate-400">{{ $t('tires.tireCopyHistoryModal.copiesTheTreadDepthReadings') }}</span>
+              <span class="block text-xs text-slate-400">{{ $t('tires.tireCopyHistoryModal.copiesTheTreadDepthReadings') }}</span>
             </div>
           </label>
         </div>
@@ -157,7 +157,7 @@ async function handleCopyHistorySubmit() {
         <div>
           <div class="flex items-center justify-between mb-2">
             <span class="font-semibold text-slate-300">{{ $t('tires.tireCopyHistoryModal.applyToTheTargetTires') }}</span>
-            <div class="flex items-center gap-2 text-[11px]">
+            <div class="flex items-center gap-2 text-xs">
               <button
                 type="button"
                 @click="copyHistoryTargetTireIds = tires.filter(x => x.tire.id !== copyHistorySourceTire?.id).map(x => x.tire.id)"
@@ -165,7 +165,7 @@ async function handleCopyHistorySubmit() {
               >
                 {{ $t('tires.tireCopyHistoryModal.tickAll') }}
               </button>
-              <span class="text-slate-600">|</span>
+              <span class="text-slate-400">|</span>
               <button
                 type="button"
                 @click="copyHistoryTargetTireIds = []"
@@ -191,13 +191,13 @@ async function handleCopyHistorySubmit() {
               <div class="min-w-0 flex-1">
                 <div class="font-bold truncate text-white flex items-center justify-between gap-2">
                   <span class="truncate">{{ t.tire.brand }} {{ t.tire.model }}</span>
-                  <span class="text-[10px] font-normal text-indigo-300 shrink-0">
+                  <span class="text-xs font-normal text-indigo-300 shrink-0">
                     {{ formatDistance(t.total_distance_km ?? t.tire.accumulated_distance_km ?? 0) }} • {{ (t.sessions?.length || 0) }} {{ (t.sessions?.length || 0) > 1 ? 'sessions' : 'session' }}
                   </span>
                 </div>
-                <div class="text-[10px] text-slate-400 truncate">
+                <div class="text-xs text-slate-400 truncate">
                   {{ t.tire.dimension }} — {{ t.tire.current_position === 'STORAGE' ? $t('tires.inStorage') : t.tire.current_position === 'DISPOSED' ? $t('tires.scrapped') : $t('tires.wheel', { position: t.tire.current_position }) }}
-                  <span v-if="t.tire.dot_code" class="text-slate-500">{{ $t('tires.tireCopyHistoryModal.dot', { dot_code: t.tire.dot_code }) }}</span>
+                  <span v-if="t.tire.dot_code" class="text-slate-400">{{ $t('tires.tireCopyHistoryModal.dot', { dot_code: t.tire.dot_code }) }}</span>
                 </div>
               </div>
             </label>

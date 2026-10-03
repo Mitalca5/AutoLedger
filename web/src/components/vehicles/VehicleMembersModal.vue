@@ -138,7 +138,7 @@ async function handleRemoveMember(m: any) {
             <UserPlus class="w-4 h-4 text-violet-400" />
             <h4 class="text-xs font-bold text-white uppercase tracking-wider">{{ $t('vehicles.vehicleMembersModal.addAMember') }}</h4>
           </div>
-          <p class="text-[11px] text-slate-400">
+          <p class="text-xs text-slate-400">
             {{ $t('vehicles.vehicleMembersModal.inviteACoDriverOr') }}
           </p>
 
@@ -169,7 +169,7 @@ async function handleRemoveMember(m: any) {
             </div>
 
             <div class="flex items-center justify-between gap-3 pt-1">
-              <p class="text-[10px] text-slate-500 leading-tight">
+              <p class="text-xs text-slate-400 leading-tight">
                 <ShieldCheck class="w-3 h-3 text-emerald-400 inline mr-0.5 -mt-0.5" />
                 {{ $t('vehicles.vehicleMembersModal.yourTeslamateApiKeysAnd') }}
               </p>
@@ -197,7 +197,7 @@ async function handleRemoveMember(m: any) {
             {{ $t('vehicles.vehicleMembersModal.loadingTheAccess') }}
           </div>
 
-          <div v-else-if="members.length === 0" class="py-6 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800">
+          <div v-else-if="members.length === 0" class="py-6 text-center text-xs text-slate-400 bg-slate-950/40 rounded-xl border border-slate-800">
             {{ $t('vehicles.vehicleMembersModal.noMemberFound') }}
           </div>
 
@@ -219,14 +219,14 @@ async function handleRemoveMember(m: any) {
                     <span class="text-xs font-semibold text-white truncate">{{ m.user_email }}</span>
                     <span
                       v-if="m.user_id === authStore.user?.id"
-                      class="text-[10px] px-1.5 py-0.2 bg-slate-800 text-slate-400 rounded"
+                      class="text-xs px-1.5 py-0.2 bg-slate-800 text-slate-400 rounded"
                     >
                       {{ $t('vehicles.vehicleMembersModal.you') }}
                     </span>
                   </div>
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
-                      class="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider"
+                      class="text-xs px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider"
                       :class="{
                         'bg-amber-500/10 text-amber-400 border border-amber-500/20': m.role === 'OWNER',
                         'bg-sky-500/10 text-sky-400 border border-sky-500/20': m.role === 'EDITOR',

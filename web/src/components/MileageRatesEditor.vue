@@ -65,7 +65,7 @@ onMounted(load)
     <ul v-if="rates.length" class="space-y-1 text-xs text-slate-300">
       <li v-for="r in rates" :key="r.id" class="flex items-center justify-between gap-2">
         <span>{{ r.label }} · {{ r.year }} · {{ describe(r) }}</span>
-        <button type="button" class="text-slate-500 hover:text-rose-400" :aria-label="$t('import.rateDelete')" @click="remove(r.id)">
+        <button type="button" class="text-slate-400 hover:text-rose-400" :aria-label="$t('import.rateDelete')" @click="remove(r.id)">
           <Trash2 class="w-4 h-4" />
         </button>
       </li>

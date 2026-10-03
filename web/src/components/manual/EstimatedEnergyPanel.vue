@@ -99,16 +99,16 @@ onMounted(() => {
           </div>
           <div>
             <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">{{ $t('manual.estimatedEnergyPanel.energyEstimate') }}</h4>
-            <p class="text-[11px] text-slate-400">{{ $t('manual.estimatedEnergyPanel.automaticallyFillInTheEnergy') }}</p>
+            <p class="text-xs text-slate-400">{{ $t('manual.estimatedEnergyPanel.automaticallyFillInTheEnergy') }}</p>
           </div>
         </div>
         <span
           v-if="vehicle?.estimated_kwh_100km && vehicle?.estimated_price_per_kwh"
-          class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1"
+          class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('manual.estimatedEnergyPanel.active') }}
         </span>
-        <span v-else class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{{ $t('manual.estimatedEnergyPanel.notConfigured') }}</span>
+        <span v-else class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{{ $t('manual.estimatedEnergyPanel.notConfigured') }}</span>
       </div>
 
       <form class="space-y-3" @submit.prevent="save">
@@ -149,7 +149,7 @@ onMounted(() => {
               ≈ {{ formatAmount(preview.cost, vehicleStore.currency) }}
             </span>
           </div>
-          <p class="text-slate-400 text-[11px]">
+          <p class="text-slate-400 text-xs">
             {{ $t('manual.estimatedEnergyPanel.estimatedVolume') }}
             <strong class="text-slate-200 font-mono">{{ $t('manual.estimatedEnergyPanel.kwh', { kwh: Math.round(preview.kwh).toLocaleString(intlLocale()) }) }}</strong>
             {{ $t('manual.estimatedEnergyPanel.kmSpreadProRataAcross', { unit: distanceUnit(), cost: formatAmount(perDistance(preview.cost / (preview.distance || 1)), vehicleStore.currency, 3) }) }}

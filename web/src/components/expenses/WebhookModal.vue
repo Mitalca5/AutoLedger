@@ -141,7 +141,7 @@ async function handleDeleteWebhook() {
             :placeholder="$t('expenses.webhookModal.httpsDiscordComApiWebhooks')"
             class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
           />
-          <p class="text-[11px] text-slate-400 mt-1">
+          <p class="text-xs text-slate-400 mt-1">
             {{ $t('expenses.webhookModal.forTelegramTheUrlMust') }}
           </p>
         </div>

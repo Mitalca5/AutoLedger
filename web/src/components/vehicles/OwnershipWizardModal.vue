@@ -133,7 +133,7 @@ async function handleDeleteOwnership() {
                 ? 'bg-indigo-500/15 border border-indigo-500/40 text-indigo-300'
                 : currentOwnershipStep > s.step
                 ? 'bg-slate-800/60 text-slate-300 hover:bg-slate-800 cursor-pointer'
-                : 'bg-slate-900/40 text-slate-500 opacity-60 cursor-not-allowed'
+                : 'bg-slate-900/40 text-slate-400 opacity-60 cursor-not-allowed'
             ]"
           >
             <div
@@ -143,7 +143,7 @@ async function handleDeleteOwnership() {
                   ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/40'
                   : currentOwnershipStep > s.step
                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                  : 'bg-slate-800 text-slate-500 border border-slate-700'
+                  : 'bg-slate-800 text-slate-400 border border-slate-700'
               ]"
             >
               <Check v-if="currentOwnershipStep > s.step" class="w-3.5 h-3.5" />
@@ -151,7 +151,7 @@ async function handleDeleteOwnership() {
             </div>
             <div class="min-w-0 hidden sm:block">
               <div class="text-xs font-semibold truncate">{{ s.title }}</div>
-              <div class="text-[10px] text-slate-400 truncate">{{ s.description }}</div>
+              <div class="text-xs text-slate-400 truncate">{{ s.description }}</div>
             </div>
           </button>
         </div>
@@ -180,7 +180,7 @@ async function handleDeleteOwnership() {
                 </div>
                 <div>
                   <div class="text-xs font-bold text-white">{{ $t('vehicles.ownershipWizardModal.cash') }}</div>
-                  <div class="text-[10px] text-slate-400">{{ $t('vehicles.ownershipWizardModal.directPurchase') }}</div>
+                  <div class="text-xs text-slate-400">{{ $t('vehicles.ownershipWizardModal.directPurchase') }}</div>
                 </div>
               </button>
 
@@ -200,7 +200,7 @@ async function handleDeleteOwnership() {
                 </div>
                 <div>
                   <div class="text-xs font-bold text-white">{{ $t('vehicles.ownershipWizardModal.loan') }}</div>
-                  <div class="text-[10px] text-slate-400">{{ $t('vehicles.ownershipWizardModal.bankLoan') }}</div>
+                  <div class="text-xs text-slate-400">{{ $t('vehicles.ownershipWizardModal.bankLoan') }}</div>
                 </div>
               </button>
 
@@ -220,7 +220,7 @@ async function handleDeleteOwnership() {
                 </div>
                 <div>
                   <div class="text-xs font-bold text-white">{{ $t('vehicles.ownershipWizardModal.loa') }}</div>
-                  <div class="text-[10px] text-slate-400">{{ $t('vehicles.ownershipWizardModal.purchaseOption') }}</div>
+                  <div class="text-xs text-slate-400">{{ $t('vehicles.ownershipWizardModal.purchaseOption') }}</div>
                 </div>
               </button>
 
@@ -240,7 +240,7 @@ async function handleDeleteOwnership() {
                 </div>
                 <div>
                   <div class="text-xs font-bold text-white">{{ $t('vehicles.ownershipWizardModal.lld') }}</div>
-                  <div class="text-[10px] text-slate-400">{{ $t('vehicles.ownershipWizardModal.longTerm') }}</div>
+                  <div class="text-xs text-slate-400">{{ $t('vehicles.ownershipWizardModal.longTerm') }}</div>
                 </div>
               </button>
             </div>
@@ -319,11 +319,11 @@ async function handleDeleteOwnership() {
                 <span>{{ $t('vehicles.ownershipWizardModal.estimatedMonthlyPayment') }}</span>
                 <span class="text-indigo-300 font-bold text-sm">{{ $t('vehicles.ownershipWizardModal.month2', { payment: formatAmount(loanPreview.payment, currency) }) }}</span>
               </div>
-              <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
                 <span>{{ $t('vehicles.ownershipWizardModal.totalBankInterest') }}</span>
                 <span>{{ formatAmount(loanPreview.totalInterest, currency) }}</span>
               </div>
-              <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
                 <span>{{ $t('vehicles.ownershipWizardModal.totalCostOfTheLoan') }}</span>
                 <span class="text-slate-200 font-medium">{{ formatAmount(loanPreview.totalCost, currency) }}</span>
               </div>
@@ -365,11 +365,11 @@ async function handleDeleteOwnership() {
                 <span>{{ $t('vehicles.ownershipWizardModal.totalRentCommitted') }}</span>
                 <span class="text-indigo-300 font-bold text-sm">{{ formatAmount(leasePreview.total, currency) }}</span>
               </div>
-              <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <div class="flex items-center justify-between text-slate-400 text-xs">
                 <span>{{ $t('vehicles.ownershipWizardModal.averageSmoothedOverTheTerm') }}</span>
                 <span>{{ $t('vehicles.ownershipWizardModal.month', { perMonth: formatAmount(leasePreview.perMonth, currency) }) }}</span>
               </div>
-              <div v-if="leasePreview.totalKm" class="flex items-center justify-between text-slate-400 text-[11px]">
+              <div v-if="leasePreview.totalKm" class="flex items-center justify-between text-slate-400 text-xs">
                 <span>{{ $t('vehicles.ownershipWizardModal.totalMileageIncludedInThe') }}</span>
                 <span class="text-slate-200 font-medium">{{ formatDistance(leasePreview.totalKm) }}</span>
               </div>

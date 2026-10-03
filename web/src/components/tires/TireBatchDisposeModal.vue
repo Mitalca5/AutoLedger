@@ -101,9 +101,9 @@ async function handleBatchDisposeSubmit() {
           >
             <div>
               <span class="font-bold text-white">{{ t.tire.brand }} {{ t.tire.model }}</span>
-              <span class="text-[10px] text-slate-400 ml-1.5">({{ t.tire.dimension }})</span>
+              <span class="text-xs text-slate-400 ml-1.5">({{ t.tire.dimension }})</span>
             </div>
-            <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-slate-800 text-slate-300">
+            <span class="text-xs px-2 py-0.5 rounded font-mono bg-slate-800 text-slate-300">
               {{ ['FL', 'FR', 'RL', 'RR'].includes(t.tire.current_position) ? $t('tires.wheel', { position: t.tire.current_position }) : $t('tires.garage') }}
             </span>
           </div>
@@ -118,7 +118,7 @@ async function handleBatchDisposeSubmit() {
               type="date"
               class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none"
             />
-            <p class="text-[10px] text-slate-500 mt-1">{{ $t('tires.tireBatchDisposeModal.defaultDateOfTheLast') }}</p>
+            <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.defaultDateOfTheLast') }}</p>
           </div>
           <div>
             <label for="batch-dispose-odo" class="block text-slate-300 mb-1 font-semibold">{{ $t('tires.tireBatchDisposeModal.vehicleMileage') }}</label>
@@ -128,7 +128,7 @@ async function handleBatchDisposeSubmit() {
               :placeholder="$t('tires.tireBatchDisposeModal.optionalForAGarageTire')"
               class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none"
             />
-            <p class="text-[10px] text-slate-500 mt-1">{{ $t('tires.tireBatchDisposeModal.finalOdometerIfRemovedOn') }}</p>
+            <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.finalOdometerIfRemovedOn') }}</p>
           </div>
         </div>
       </div>

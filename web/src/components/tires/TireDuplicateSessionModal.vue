@@ -100,7 +100,7 @@ async function handleDuplicateSessionSubmit() {
         <div>
           <div class="flex items-center justify-between mb-2">
             <span class="font-semibold text-slate-300">{{ $t('tires.tireDuplicateSessionModal.selectTheTargetTires') }}</span>
-            <div class="flex items-center gap-2 text-[11px]">
+            <div class="flex items-center gap-2 text-xs">
               <button
                 type="button"
                 @click="duplicateTargetTireIds = tires.filter(x => x.tire.id !== selectedTire?.id).map(x => x.tire.id)"
@@ -108,7 +108,7 @@ async function handleDuplicateSessionSubmit() {
               >
                 {{ $t('tires.tireDuplicateSessionModal.tickAll') }}
               </button>
-              <span class="text-slate-600">|</span>
+              <span class="text-slate-400">|</span>
               <button
                 type="button"
                 @click="duplicateTargetTireIds = []"
@@ -132,7 +132,7 @@ async function handleDuplicateSessionSubmit() {
               />
               <div class="min-w-0 flex-1">
                 <div class="font-bold truncate text-white">{{ t.tire.brand }} {{ t.tire.model }}</div>
-                <div class="text-[10px] text-slate-400 truncate">{{ t.tire.dimension }} — {{ t.tire.current_position === 'STORAGE' ? $t('tires.inStorage') : $t('tires.wheel', { position: t.tire.current_position }) }}</div>
+                <div class="text-xs text-slate-400 truncate">{{ t.tire.dimension }} — {{ t.tire.current_position === 'STORAGE' ? $t('tires.inStorage') : $t('tires.wheel', { position: t.tire.current_position }) }}</div>
               </div>
             </label>
           </div>

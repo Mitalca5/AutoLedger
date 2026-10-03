@@ -104,6 +104,6 @@ onBeforeUnmount(() => chart?.destroy())
         </tbody>
       </table>
     </div>
-    <p class="text-[11px] text-slate-500">{{ $t('dashboard.energyTemperatureSection.drivesOfAtLeast5', { min: formatDistance(5), band: formatDistance(50) }) }}</p>
+    <p class="text-xs text-slate-400">{{ $t('dashboard.energyTemperatureSection.drivesOfAtLeast5', { min: formatDistance(5), band: formatDistance(50) }) }}</p>
   </div>
 </template>

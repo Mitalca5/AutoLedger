@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
           @click="activeKind = t.key"
         >
           {{ $t(t.label) }}
-          <span v-if="t.badge" class="rounded-full bg-amber-500/20 px-1.5 text-[11px] font-bold text-amber-300">{{ t.badge }}</span>
+          <span v-if="t.badge" class="rounded-full bg-amber-500/20 px-1.5 text-xs font-bold text-amber-300">{{ t.badge }}</span>
         </button>
       </div>
 

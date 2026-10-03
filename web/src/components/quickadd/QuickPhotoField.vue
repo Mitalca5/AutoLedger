@@ -66,7 +66,7 @@ function clear() {
         {{ uploading ? $t('quickadd.quickPhotoField.uploading') : $t('quickadd.quickPhotoField.photo') }}
         <input type="file" accept="image/*" capture="environment" class="sr-only" :disabled="!offlineStore.isOnline || uploading" @change="onFile" />
       </label>
-      <p v-if="!offlineStore.isOnline" class="mt-1 text-[11px] text-slate-400">{{ $t('quickadd.quickPhotoField.photoUnavailableOfflineAttachIt') }}</p>
+      <p v-if="!offlineStore.isOnline" class="mt-1 text-xs text-slate-400">{{ $t('quickadd.quickPhotoField.photoUnavailableOfflineAttachIt') }}</p>
     </template>
     <p v-if="error" role="alert" class="mt-1 text-xs text-rose-300">{{ error }}</p>
   </div>

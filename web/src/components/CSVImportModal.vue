@@ -395,7 +395,7 @@ async function handleExecute() {
               <span class="text-amber-400">{{ previewResult.duplicate_rows }} {{ $t('import.duplicateRows') }}</span>
               <span class="text-rose-400">{{ previewResult.invalid_rows }} {{ $t('import.invalidRows') }}</span>
             </div>
-            <p class="text-[11px] text-slate-500">{{ $t('import.distanceHint', { unit: distanceUnit() }) }}</p>
+            <p class="text-xs text-slate-400">{{ $t('import.distanceHint', { unit: distanceUnit() }) }}</p>
 
             <div v-if="previewResult.errors?.length" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 space-y-1 max-h-32 overflow-y-auto">
               <div v-for="(msg, idx) in rowErrors(previewResult.errors)" :key="idx">• {{ msg }}</div>
@@ -417,7 +417,7 @@ async function handleExecute() {
               </div>
               <div class="mt-3 space-y-2">
                 <div v-for="col in previewResult.mapping" :key="col.index" class="grid grid-cols-2 gap-2 items-center">
-                  <label :for="`csv-col-${col.index}`" class="truncate font-mono text-[11px] text-slate-400" :title="col.header">{{ col.header }}</label>
+                  <label :for="`csv-col-${col.index}`" class="truncate font-mono text-xs text-slate-400" :title="col.header">{{ col.header }}</label>
                   <select
                     :id="`csv-col-${col.index}`"
                     :value="col.field"
@@ -467,7 +467,7 @@ async function handleExecute() {
 
             <!-- Sample rows -->
             <div class="overflow-x-auto border border-slate-800 rounded-xl">
-              <table class="w-full text-left text-[11px] text-slate-300">
+              <table class="w-full text-left text-xs text-slate-300">
                 <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-700/60">
                   <tr>
                     <th v-for="h in previewResult.headers" :key="h" class="px-3 py-2 whitespace-nowrap">{{ h }}</th>
@@ -475,7 +475,7 @@ async function handleExecute() {
                 </thead>
                 <tbody class="divide-y divide-slate-800/60">
                   <tr v-for="(row, idx) in previewResult.sample_rows" :key="idx" class="hover:bg-slate-800/40">
-                    <td v-for="h in previewResult.headers" :key="h" class="px-3 py-2 whitespace-nowrap font-mono text-[10px]">
+                    <td v-for="h in previewResult.headers" :key="h" class="px-3 py-2 whitespace-nowrap font-mono text-xs">
                       {{ row[h] }}
                     </td>
                   </tr>

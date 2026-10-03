@@ -88,20 +88,20 @@ onBeforeUnmount(() => chart?.destroy())
 
     <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.healthAccordingToTeslamate') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.healthAccordingToTeslamate') }}</dt>
         <dd v-if="latest" class="mt-1 text-xl font-bold text-white">
           {{ fmt(latest.health_percent, 1) }} <span class="text-xs font-medium text-slate-400">%</span>
         </dd>
         <dd v-else class="mt-1 text-sm text-slate-400">{{ $t('dashboard.energyBatterySection.noMeasurementYet') }}</dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">
+        <p class="mt-0.5 text-xs text-slate-400">
           <template v-if="latest">{{ $t('dashboard.energyBatterySection.kwhOutOfKwhThe', { value: fmt(latest.current_capacity_kwh, 1), value2: fmt(latest.max_capacity_kwh, 1) }) }}</template>
           <template v-else>{{ $t('dashboard.energyBatterySection.readAtEachSynchronizationIf') }} <code>battery-health</code>.</template>
         </p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.estimatedCapacity') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.estimatedCapacity') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(stats.summary.estimated_capacity_kwh, 1) }} <span class="text-xs font-medium text-slate-400">kWh</span></dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">
+        <p class="mt-0.5 text-xs text-slate-400">
           {{ $t('dashboard.energyBatterySection.medianOfTheLastCharges', { capacity_samples: stats.summary.capacity_samples ?? 0 }) }}
         </p>
       </div>
@@ -122,7 +122,7 @@ onBeforeUnmount(() => chart?.destroy())
       </table>
     </div>
 
-    <p v-if="grafanaUrl" class="text-[11px] text-slate-400">
+    <p v-if="grafanaUrl" class="text-xs text-slate-400">
       {{ $t('dashboard.energyBatterySection.detailedCurvesIn') }}
       <a :href="grafanaUrl" target="_blank" rel="noopener noreferrer" class="font-semibold text-indigo-300 underline">{{ $t('dashboard.energyBatterySection.teslamateGrafana') }}</a>.
     </p>

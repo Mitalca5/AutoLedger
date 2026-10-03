@@ -87,10 +87,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
   <div ref="root" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h3 class="text-sm font-bold text-white">{{ $t('tires.tireOdometerTimeline.tiresFittedByMileage') }}</h3>
-      <span class="text-[11px] text-slate-400">0 → {{ fmtKm(timeline.maxKm) }}</span>
+      <span class="text-xs text-slate-400">0 → {{ fmtKm(timeline.maxKm) }}</span>
     </div>
 
-    <div v-if="!hasData" class="p-6 text-center text-xs text-slate-500 bg-slate-950/40 rounded-2xl">
+    <div v-if="!hasData" class="p-6 text-center text-xs text-slate-400 bg-slate-950/40 rounded-2xl">
       {{ $t('tires.tireOdometerTimeline.noFittingSessionWithMileage') }}
     </div>
 
@@ -99,7 +99,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
         <div v-for="lane in timeline.lanes" :key="lane.id" class="flex items-center gap-3">
           <span
             v-if="multiLane"
-            class="w-9 sm:w-32 shrink-0 text-[11px] text-slate-400 truncate"
+            class="w-9 sm:w-32 shrink-0 text-xs text-slate-400 truncate"
             :title="lane.label"
           >
             <span class="sm:hidden">{{ lane.shortLabel }}</span>
@@ -149,7 +149,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
       </div>
 
       <!-- Axis; the detail card hangs from it, under the segment it describes -->
-      <div class="relative h-4 text-[10px] text-slate-500" :class="multiLane ? 'ml-12 sm:ml-[8.75rem]' : ''">
+      <div class="relative h-4 text-xs text-slate-400" :class="multiLane ? 'ml-12 sm:ml-[8.75rem]' : ''">
         <span v-for="km in ticks" :key="km" class="absolute -translate-x-1/2 first:translate-x-0" :style="{ left: pct(km) + '%' }">
           {{ (km / 1000).toLocaleString(intlLocale()) }}k
         </span>
@@ -168,13 +168,13 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
                 {{ fmtKm(shown.startKm) }} → {{ fmtKm(shown.endKm) }}
                 <span class="text-slate-400 font-normal">({{ fmtKm(shown.endKm - shown.startKm) }})</span>
               </div>
-              <div v-if="shared" class="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-400">
+              <div v-if="shared" class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
                 <component :is="getSeasonIcon(shared.season).icon" class="w-3 h-3" :class="getSeasonIcon(shared.season).color" />
                 {{ getSeasonIcon(shared.season).label }} · {{ period(shared) }}
                 <span v-if="shared.ongoing" class="text-emerald-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
               </div>
             </div>
-            <button v-if="pinned" type="button" class="p-0.5 text-slate-500 hover:text-white shrink-0" :title="$t('common.close')" @click="unpin">
+            <button v-if="pinned" type="button" class="p-0.5 text-slate-400 hover:text-white shrink-0" :title="$t('common.close')" @click="unpin">
               <X class="w-3.5 h-3.5" />
             </button>
           </div>
@@ -183,13 +183,13 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0">
                   <span class="font-mono text-rose-400 mr-1">{{ t.position }}</span>{{ t.label }}
-                  <span class="text-slate-500 font-mono">{{ t.dimension }}</span>
+                  <span class="text-slate-400 font-mono">{{ t.dimension }}</span>
                 </span>
                 <button v-if="pinned" type="button" class="text-rose-400 hover:text-rose-300 font-semibold shrink-0" @click="selectTire(t.tireId)">
                   {{ $t('tires.tireOdometerTimeline.details') }}
                 </button>
               </div>
-              <div v-if="!shared" class="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <div v-if="!shared" class="flex items-center gap-1.5 text-xs text-slate-400">
                 <component :is="getSeasonIcon(t.season).icon" class="w-3 h-3" :class="getSeasonIcon(t.season).color" />
                 {{ period(t) }}
                 <span v-if="t.ongoing" class="text-emerald-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
@@ -200,10 +200,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
       </div>
 
       <div class="flex flex-wrap gap-x-4 gap-y-1 pt-1">
-        <span v-for="l in timeline.legend" :key="l.key" class="flex items-center gap-1.5 text-[11px] text-slate-300">
+        <span v-for="l in timeline.legend" :key="l.key" class="flex items-center gap-1.5 text-xs text-slate-300">
           <span class="w-2.5 h-2.5 rounded-sm" :style="{ backgroundColor: l.color }"></span>{{ l.key }}
         </span>
-        <span v-if="hasGaps" class="flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span v-if="hasGaps" class="flex items-center gap-1.5 text-xs text-slate-400">
           <span class="w-2.5 h-2.5 rounded-sm bg-slate-600"></span>{{ $t('tires.tireOdometerTimeline.noTireRecorded') }}
         </span>
       </div>

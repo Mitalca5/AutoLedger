@@ -52,7 +52,7 @@ function openInNewTab() {
             <h3 class="text-sm font-bold text-white truncate" :title="previewDoc.filename">
               {{ previewDoc.filename }}
             </h3>
-            <p class="text-[11px] text-slate-400 flex items-center gap-1.5">
+            <p class="text-xs text-slate-400 flex items-center gap-1.5">
               <span v-if="previewDoc.isPdf" class="text-indigo-400 font-semibold">{{ $t('expenses.documentPreviewModal.pdfDocument') }}</span>
               <span v-else-if="previewDoc.isImage" class="text-emerald-400 font-semibold">{{ $t('expenses.documentPreviewModal.image') }}</span>
               <span v-else class="text-slate-400 font-semibold">{{ $t('expenses.documentPreviewModal.file') }}</span>
@@ -119,7 +119,7 @@ function openInNewTab() {
 
         <!-- Unsupported preview fallback -->
         <div v-else class="p-8 text-center space-y-3">
-          <FileText class="w-12 h-12 text-slate-500 mx-auto" />
+          <FileText class="w-12 h-12 text-slate-400 mx-auto" />
           <p class="text-sm text-slate-300">{{ $t('expenses.documentPreviewModal.thisFileFormatCannotBe') }}</p>
           <button
             type="button"

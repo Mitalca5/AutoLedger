@@ -32,20 +32,20 @@ const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string] }>()
           </label>
           {{ t.tire.brand }} {{ t.tire.model }}
         </h4>
-        <div class="text-[11px] text-slate-400 font-mono">{{ t.tire.dimension }}</div>
+        <div class="text-xs text-slate-400 font-mono">{{ t.tire.dimension }}</div>
       </div>
-      <span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-full border border-slate-700 font-medium">
+      <span class="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full border border-slate-700 font-medium">
         {{ $t('tires.tireStorageCard.inStorage') }}
       </span>
     </div>
 
     <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-center text-xs">
       <div>
-        <div class="text-[10px] text-slate-500">{{ $t('tires.tireStorageCard.totalDriven') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('tires.tireStorageCard.totalDriven') }}</div>
         <div class="font-bold text-white">{{ formatDistance(t.total_distance_km) }}</div>
       </div>
       <div>
-        <div class="text-[10px] text-slate-500">{{ $t('tires.tireStorageCard.estimatedWear') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('tires.tireStorageCard.estimatedWear') }}</div>
         <div class="font-bold" :class="t.life_progress_pct > 80 ? 'text-rose-400' : 'text-emerald-400'">{{ t.life_progress_pct }}%</div>
       </div>
     </div>

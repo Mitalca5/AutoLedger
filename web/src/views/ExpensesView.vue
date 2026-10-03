@@ -475,7 +475,7 @@ async function openWebhookModal() {
       <div class="flex min-w-0 max-w-full flex-wrap items-center gap-3">
         <!-- Groupe 1: Route & Trajets -->
         <div class="flex max-w-full items-center overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
             <Navigation class="w-3 h-3 text-amber-400" />
             <span class="hidden sm:inline">{{ $t('expenses.expensesView.roadAndDrives') }}</span>
           </span>
@@ -495,7 +495,7 @@ async function openWebhookModal() {
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.charges') }}</span>
-            <span v-if="chargesWithoutCost > 0" class="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span v-if="chargesWithoutCost > 0" class="px-1.5 py-0.2 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
               {{ chargesWithoutCost }}
             </span>
           </button>
@@ -503,7 +503,7 @@ async function openWebhookModal() {
 
         <!-- Groupe 2: Flotte & Entretien -->
         <div class="flex max-w-full items-center overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
             <Wrench class="w-3 h-3 text-pink-400" />
             <span class="hidden sm:inline">{{ $t('expenses.expensesView.fleetAndVehicle') }}</span>
           </span>
@@ -524,7 +524,7 @@ async function openWebhookModal() {
             <span>{{ $t('expenses.expensesView.reminders') }}</span>
             <span
               v-if="urgentRemindersCount > 0"
-              class="px-1.5 py-0.2 text-[10px] font-bold rounded-full"
+              class="px-1.5 py-0.2 text-xs font-bold rounded-full"
               :class="overdueReminders.length > 0 ? 'bg-rose-500 text-white' : 'bg-amber-500 text-slate-950'"
             >
               {{ urgentRemindersCount }}
@@ -537,7 +537,7 @@ async function openWebhookModal() {
           >
             <Paperclip class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.receipts') }}</span>
-            <span v-if="documents.length > 0" class="px-1.5 py-0.2 text-[10px] font-medium rounded-full bg-slate-800 text-slate-400">
+            <span v-if="documents.length > 0" class="px-1.5 py-0.2 text-xs font-medium rounded-full bg-slate-800 text-slate-400">
               {{ documents.length }}
             </span>
           </button>

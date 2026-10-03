@@ -40,7 +40,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
           {{ formatAmount(Number(leaseContract.monthlyRent), currency) }}
         </span>
         <span class="text-xs text-slate-400 font-normal"> {{ $t('dashboard.leaseContractCard.month') }}</span>
-        <span v-if="leaseContract.downPayment && leaseContract.downPayment > 0" class="block text-[11px] text-slate-400">
+        <span v-if="leaseContract.downPayment && leaseContract.downPayment > 0" class="block text-xs text-slate-400">
           {{ $t('dashboard.leaseContractCard.downPayment', { downPayment: formatAmount(Number(leaseContract.downPayment), currency, 0) }) }}
         </span>
       </div>
@@ -73,7 +73,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         </div>
 
         <!-- Sub-info: start date, remaining, end date -->
-        <div class="flex items-center justify-between text-[11px] text-slate-400 flex-wrap gap-1">
+        <div class="flex items-center justify-between text-xs text-slate-400 flex-wrap gap-1">
           <span v-if="leaseContract.startDate">
             {{ $t('dashboard.leaseContractCard.start', { startDate: leaseContract.startDate.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) }) }}
           </span>
@@ -114,7 +114,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         </div>
 
         <!-- Sub-info: Pace & Diff -->
-        <div class="flex items-center justify-between text-[11px] flex-wrap gap-1">
+        <div class="flex items-center justify-between text-xs flex-wrap gap-1">
           <span class="text-slate-400">
             {{ $t('dashboard.leaseContractCard.pace') }} <strong>{{ $t('dashboard.leaseContractCard.kmMonth', { unit: distanceUnit(), actualPaceKmMonth: formatDistanceValue(leaseContract.actualPaceKmMonth) }) }}</strong>
             <template v-if="leaseContract.contractualPaceKmMonth"> {{ $t('dashboard.leaseContractCard.plannedKmMonth', { unit: distanceUnit(), contractualPaceKmMonth: formatDistanceValue(leaseContract.contractualPaceKmMonth) }) }}</template>
@@ -144,19 +144,19 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         <!-- Included Services Badges -->
         <span
           v-if="leaseContract.includesMaintenance"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.maintenanceIncluded') }}
         </span>
         <span
           v-if="leaseContract.includesInsurance"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.insuranceIncluded') }}
         </span>
         <span
           v-if="leaseContract.includesTires"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.tiresIncluded') }}
         </span>

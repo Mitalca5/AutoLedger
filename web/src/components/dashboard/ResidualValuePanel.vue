@@ -108,7 +108,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
           {{ health.health_percent }} <span class="text-xs font-medium text-slate-400">% · {{ sourceLabel }}</span>
         </p>
         <p v-else class="text-slate-400">{{ $t('dashboard.residualPanel.noHealth') }}</p>
-        <p class="text-slate-500">{{ $t('dashboard.residualPanel.healthHint') }}</p>
+        <p class="text-slate-400">{{ $t('dashboard.residualPanel.healthHint') }}</p>
         <form class="flex flex-wrap gap-2 items-end" @submit.prevent="saveReading">
           <input v-model="readingDate" type="date" :aria-label="$t('dashboard.residualPanel.date')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
           <input v-model="readingPercent" type="number" min="1" max="100" step="0.1" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
@@ -119,7 +119,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
         <ul v-if="health?.readings.length" class="space-y-1">
           <li v-for="r in [...health.readings].reverse().slice(0, 6)" :key="r.date" class="flex items-center justify-between text-slate-300">
             <span>{{ r.date }} · <template v-if="r.health_percent !== undefined">{{ r.health_percent }} %</template><template v-else-if="r.current_capacity_kwh !== undefined">{{ r.current_capacity_kwh }} kWh</template><template v-else>{{ r.max_capacity_kwh }} kWh</template></span>
-            <button type="button" class="text-slate-500 hover:text-rose-400" :aria-label="$t('dashboard.residualPanel.deleteReading', { date: r.date })" @click="removeReading(r.date)"><Trash2 class="w-4 h-4" /></button>
+            <button type="button" class="text-slate-400 hover:text-rose-400" :aria-label="$t('dashboard.residualPanel.deleteReading', { date: r.date })" @click="removeReading(r.date)"><Trash2 class="w-4 h-4" /></button>
           </li>
         </ul>
       </div>
@@ -146,7 +146,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
             <path :d="curvePath" fill="none" stroke="#a78bfa" stroke-width="1.5" />
             <circle v-if="marker" :cx="marker.x" :cy="marker.y" r="3" fill="#34d399" />
           </svg>
-          <p class="text-slate-500">{{ $t('dashboard.residualPanel.curveHint', { months: residual.holding_months, value: formatAmount(residual.expected_resale_value, vehicleStore.currency) }) }}</p>
+          <p class="text-slate-400">{{ $t('dashboard.residualPanel.curveHint', { months: residual.holding_months, value: formatAmount(residual.expected_resale_value, vehicleStore.currency) }) }}</p>
         </template>
         <p v-else-if="residualError" class="text-slate-400" role="status">{{ residualError }}</p>
       </div>

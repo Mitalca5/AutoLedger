@@ -19,7 +19,7 @@ import {
   Plus,
   Ellipsis,
   X,
-  LayoutGrid,
+  Gauge,
 } from 'lucide-vue-next'
 import { APP_NAME } from '@/brand'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
@@ -33,7 +33,7 @@ const quickAdd = useQuickAddStore()
 
 const allNavItems = [
   { name: 'dashboard', labelKey: 'shell.nav.dashboard', mobileLabelKey: 'shell.nav.home', path: '/', icon: LayoutDashboard },
-  { name: 'fleet', labelKey: 'shell.nav.fleet', path: '/fleet', icon: LayoutGrid },
+  { name: 'fleet', labelKey: 'shell.nav.fleet', path: '/fleet', icon: Gauge },
   { name: 'drives', labelKey: 'shell.nav.drives', path: '/drives', icon: NavIcon },
   { name: 'carpools', labelKey: 'shell.nav.carpools', path: '/carpools', icon: Users },
   { name: 'tires', labelKey: 'shell.nav.tires', path: '/tires', icon: Disc },
@@ -98,9 +98,6 @@ function handleLogout() {
           <p class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
             {{ APP_NAME }}
           </p>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">
-            {{ APP_VERSION }}
-          </span>
         </div>
         <p class="text-xs text-slate-400">TCO & Fleet Manager</p>
       </div>
@@ -137,7 +134,7 @@ function handleLogout() {
       <div class="flex items-center justify-between px-3 py-1">
         <div class="truncate">
           <p class="text-xs font-semibold text-slate-200 truncate">{{ authStore.user?.email }}</p>
-          <p class="text-[10px] text-slate-400">{{ $t('shell.navigation.signedIn') }}</p>
+          <p class="text-xs text-slate-400">{{ $t('shell.navigation.signedIn') }}</p>
         </div>
         <button
           @click="handleLogout"
@@ -147,7 +144,7 @@ function handleLogout() {
           <LogOut class="w-4 h-4" />
         </button>
       </div>
-      <div class="px-3 pt-2 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-800/60">
+      <div class="px-3 pt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800/60">
         <span>{{ $t('shell.navigation.version') }}</span>
         <span class="font-mono text-slate-400 font-medium">{{ APP_VERSION }}</span>
       </div>
@@ -163,7 +160,7 @@ function handleLogout() {
       <li v-for="item in leftItems" :key="item.name" class="flex-1">
         <router-link
           :to="item.path"
-          class="flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-medium transition-colors"
+          class="flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-medium transition-colors"
           :class="currentRouteName === item.name ? 'text-rose-400 font-semibold' : 'text-slate-400 hover:text-slate-200'"
           :aria-current="currentRouteName === item.name ? 'page' : undefined"
         >
@@ -187,7 +184,7 @@ function handleLogout() {
       <li v-for="item in rightItems" :key="item.name" class="flex-1">
         <router-link
           :to="item.path"
-          class="flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-medium transition-colors"
+          class="flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-medium transition-colors"
           :class="currentRouteName === item.name ? 'text-rose-400 font-semibold' : 'text-slate-400 hover:text-slate-200'"
           :aria-current="currentRouteName === item.name ? 'page' : undefined"
         >
@@ -199,7 +196,7 @@ function handleLogout() {
       <li class="flex-1">
         <button
           type="button"
-          class="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-medium transition-colors"
+          class="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-medium transition-colors"
           :class="moreActive || showMore ? 'text-rose-400 font-semibold' : 'text-slate-400 hover:text-slate-200'"
           aria-haspopup="dialog"
           :aria-expanded="showMore"
@@ -250,7 +247,7 @@ function handleLogout() {
           </button>
         </li>
       </ul>
-      <p class="mt-3 text-center font-mono text-[11px] text-slate-500">{{ APP_NAME }} {{ APP_VERSION }}</p>
+      <p class="mt-3 text-center font-mono text-xs text-slate-400">{{ APP_NAME }} {{ APP_VERSION }}</p>
     </div>
   </div>
 </template>

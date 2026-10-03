@@ -272,7 +272,7 @@ async function handleCreateToll() {
           <div v-if="associationMode === 'MULTI'" class="pt-2 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-xs text-slate-400">{{ $t('expenses.tollModal.tickTheLegsThatMake') }}</span>
-              <span class="text-[11px] text-amber-400 font-semibold">
+              <span class="text-xs text-amber-400 font-semibold">
                 {{ $t('expenses.tollModal.legS', { length: selectedDriveIds.length }) }}<template v-if="selectedDrivesNotListed"> {{ $t('expenses.tollModal.ofWhichOlderThanThe', { selectedDrivesNotListed }) }}</template>
               </span>
             </div>
@@ -286,10 +286,10 @@ async function handleCreateToll() {
               >
                 <div class="flex items-center gap-2">
                   <CheckSquare v-if="selectedDriveIds.includes(d.id)" class="w-4 h-4 text-amber-400" />
-                  <Square v-else class="w-4 h-4 text-slate-500" />
+                  <Square v-else class="w-4 h-4 text-slate-400" />
                   <span>{{ formatDayTime(d.start_time) }}{{ $t('expenses.tollModal.dateSeparator') }}{{ (d.start_address || $t('expenses.tollModal.start')).split(',')[0] }} → {{ (d.end_address || $t('expenses.tollModal.destination')).split(',')[0] }}</span>
                 </div>
-                <span class="font-mono text-[11px] text-slate-400">{{ formatDistance(d.distance_km) }}</span>
+                <span class="font-mono text-xs text-slate-400">{{ formatDistance(d.distance_km) }}</span>
               </div>
             </div>
           </div>
@@ -313,7 +313,7 @@ async function handleCreateToll() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.tollModal.receiptInvoice') }}
             </span>
-            <span v-if="tollForm.document_id" class="text-[11px] text-emerald-400 font-medium">{{ $t('expenses.tollModal.linked') }}</span>
+            <span v-if="tollForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.tollModal.linked') }}</span>
           </div>
 
           <div v-if="tollForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">
@@ -343,7 +343,7 @@ async function handleCreateToll() {
 
           <div v-else class="space-y-2.5">
             <div v-if="documents.length > 0">
-              <label for="toll-existing-doc" class="block text-[11px] text-slate-400 mb-1">{{ $t('expenses.tollModal.attachAnExistingInvoice') }}</label>
+              <label for="toll-existing-doc" class="block text-xs text-slate-400 mb-1">{{ $t('expenses.tollModal.attachAnExistingInvoice') }}</label>
               <select
                 id="toll-existing-doc"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300"
@@ -357,7 +357,7 @@ async function handleCreateToll() {
             </div>
 
             <div>
-              <span class="block text-[11px] text-slate-400 mb-1">{{ $t('expenses.tollModal.orDropANewInvoice') }}</span>
+              <span class="block text-xs text-slate-400 mb-1">{{ $t('expenses.tollModal.orDropANewInvoice') }}</span>
               <AppDropzone
                 :model-value="null"
                 :disabled="isUploadingDocument"

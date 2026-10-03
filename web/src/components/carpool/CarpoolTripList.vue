@@ -113,7 +113,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
             <div class="flex items-center gap-2 text-xs text-slate-400 min-w-0">
               <Calendar class="w-3.5 h-3.5 shrink-0" />
               <span class="shrink-0">{{ formatDate(trip.date) }}</span>
-              <span v-if="trip.notes" class="text-slate-500 truncate">• {{ trip.notes }}</span>
+              <span v-if="trip.notes" class="text-slate-400 truncate">• {{ trip.notes }}</span>
             </div>
           </div>
         </div>
@@ -148,7 +148,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
             {{ $t('carpool.carpoolTripList.leftToTheDriver') }} {{ fmt(trip.net_cost) }}
           </span>
           <span v-else class="font-semibold text-emerald-400">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
-          <ChevronRight class="w-4 h-4 text-slate-500" />
+          <ChevronRight class="w-4 h-4 text-slate-400" />
         </div>
       </div>
     </div>

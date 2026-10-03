@@ -71,19 +71,19 @@ const formatDate = formatDayTime
           <!-- Clean tag pills -->
           <span
             v-if="prefs.proPersoEnabled && d.tags?.includes('Pro')"
-            class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40 shrink-0"
+            class="text-xs px-2 py-0.5 rounded-full font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40 shrink-0"
           >
             {{ $t('drives.driveCard.work') }}
           </span>
           <span
             v-if="prefs.proPersoEnabled && d.tags?.includes('Perso')"
-            class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0"
+            class="text-xs px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0"
           >
             {{ $t('drives.driveCard.personal') }}
           </span>
           <span
             v-if="d.is_manual"
-            class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0"
+            class="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0"
           >
             {{ $t('drives.drivesView.manual') }}
           </span>
@@ -93,7 +93,7 @@ const formatDate = formatDayTime
         <div class="text-sm text-slate-300 flex items-center gap-1.5 flex-wrap min-w-0">
           <MapPin class="w-3.5 h-3.5 text-rose-400 shrink-0" />
           <span class="truncate max-w-[140px] sm:max-w-[220px] md:max-w-xs font-medium" :title="d.start_address">{{ d.start_address || $t('drives.driveCard.unknownStart') }}</span>
-          <span class="text-slate-500 shrink-0">→</span>
+          <span class="text-slate-400 shrink-0">→</span>
           <span class="truncate max-w-[140px] sm:max-w-[220px] md:max-w-xs font-medium" :title="d.end_address">{{ d.end_address || $t('drives.driveCard.unknownEnd') }}</span>
         </div>
       </div>
@@ -123,7 +123,7 @@ const formatDate = formatDayTime
         <div>
           <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
             <span>{{ d.costs?.has_estimates ? '~' : '' }}{{ formatAmount(d.costs?.total_cost || 0, vehicleStore.currency) }}</span>
-            <span class="text-[10px] font-normal text-emerald-400 font-mono">
+            <span class="text-xs font-normal text-emerald-400 font-mono">
               {{ formatAmount(perDistance(d.costs?.cost_per_km || 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}
             </span>
           </div>

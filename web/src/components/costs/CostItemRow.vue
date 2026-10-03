@@ -30,12 +30,12 @@ const TONES: Record<Tone, { box: string; text: string }> = {
           {{ label }}
           <slot name="badge" />
         </div>
-        <div v-if="sub" class="text-[11px] text-slate-400 font-mono">{{ sub }}</div>
+        <div v-if="sub" class="text-xs text-slate-400 font-mono">{{ sub }}</div>
       </div>
     </div>
     <div class="text-right">
       <div class="text-sm font-bold font-mono" :class="TONES[tone].text">{{ formatAmount(amount, currency) }}</div>
-      <div class="text-[10px] text-slate-400 font-normal font-sans">({{ sharePct.toFixed(1) }}%) · <span class="text-emerald-400">{{ formatAmount(perDistance(costPerKm), currency, 3) }}/{{ distanceUnit() }}</span></div>
+      <div class="text-xs text-slate-400 font-normal font-sans">({{ sharePct.toFixed(1) }}%) · <span class="text-emerald-400">{{ formatAmount(perDistance(costPerKm), currency, 3) }}/{{ distanceUnit() }}</span></div>
     </div>
   </div>
 </template>

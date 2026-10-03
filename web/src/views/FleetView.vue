@@ -336,7 +336,7 @@ onBeforeUnmount(() => {
           <!-- Economical Badge -->
           <div
             v-if="v.vehicle_id === mostEconomicalVehicleId && v.energy_cost_per_100km > 0"
-            class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold tracking-wide uppercase"
+            class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold tracking-wide uppercase"
           >
             <Award class="w-3 h-3" />
             {{ t('fleet.vehicles.mostEconomical') }}
@@ -349,8 +349,8 @@ onBeforeUnmount(() => {
 
           <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800/60">
             <div>
-              <span class="text-[11px] text-slate-400 block">{{ t('fleet.vehicles.energyCostPer100') }}</span>
-              <span class="text-sm font-bold block mt-0.5" :class="v.energy_cost_per_100km > 0 ? 'text-emerald-400' : 'text-slate-500'">
+              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.energyCostPer100') }}</span>
+              <span class="text-sm font-bold block mt-0.5" :class="v.energy_cost_per_100km > 0 ? 'text-emerald-400' : 'text-slate-400'">
                 <template v-if="v.energy_cost_per_100km > 0">
                   {{ formatAmount(perDistance(v.energy_cost_per_100km), v.currency) }} / 100 {{ distanceUnitLabel }}
                 </template>
@@ -361,21 +361,21 @@ onBeforeUnmount(() => {
             </div>
 
             <div>
-              <span class="text-[11px] text-slate-400 block">{{ t('fleet.vehicles.currentMonthCost') }}</span>
+              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.currentMonthCost') }}</span>
               <span class="text-sm font-semibold text-white block mt-0.5">
                 {{ formatAmount(v.month_cost, v.currency) }}
               </span>
             </div>
 
             <div>
-              <span class="text-[11px] text-slate-400 block">{{ t('fleet.vehicles.currentMonthDistance') }}</span>
+              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.currentMonthDistance') }}</span>
               <span class="text-xs font-medium text-slate-300 block mt-0.5">
                 {{ formatDistance(v.month_distance_km) }}
               </span>
             </div>
 
             <div>
-              <span class="text-[11px] text-slate-400 block">{{ t('fleet.vehicles.odometer') }}</span>
+              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.odometer') }}</span>
               <span class="text-xs font-medium text-slate-300 block mt-0.5">
                 {{ formatDistance(v.current_odometer) }}
               </span>
@@ -397,7 +397,7 @@ onBeforeUnmount(() => {
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-400">
+            <tr class="text-left text-xs uppercase tracking-wider text-slate-400">
               <th class="py-2 pr-4 font-medium">{{ t('fleet.compare.vehicle') }}</th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</th>
@@ -410,10 +410,10 @@ onBeforeUnmount(() => {
             <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60" :class="{ 'opacity-70': !v.comparable }">
               <td class="py-2 pr-4">
                 <span class="font-semibold text-white">{{ v.name }}</span>
-                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase text-emerald-400">
+                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-emerald-400">
                   <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
                 </span>
-                <span v-else-if="!v.comparable" class="ml-2 text-[10px] uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</span>
+                <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</span>
               </td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</td>
               <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>
@@ -472,7 +472,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-8 text-xs text-slate-500">
+        <div v-else class="text-center py-8 text-xs text-slate-400">
           {{ t('fleet.drivers.noData') }}
         </div>
       </div>

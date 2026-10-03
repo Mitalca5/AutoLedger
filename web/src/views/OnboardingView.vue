@@ -193,7 +193,7 @@ function finishOnboarding() {
               ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 ring-4 ring-rose-500/20'
               : currentStep > step
               ? 'bg-emerald-500 text-white'
-              : 'bg-slate-800 text-slate-500 border border-slate-700'
+              : 'bg-slate-800 text-slate-400 border border-slate-700'
           ]"
         >
           <CheckCircle2 v-if="currentStep > step" class="w-5 h-5" />
@@ -482,7 +482,7 @@ function finishOnboarding() {
             </div>
           </div>
 
-          <p class="text-xs text-slate-500">{{ $t('onboarding.dataSourcesLater') }}</p>
+          <p class="text-xs text-slate-400">{{ $t('onboarding.dataSourcesLater') }}</p>
 
           <div class="flex gap-3 pt-2">
             <button
@@ -533,7 +533,7 @@ function finishOnboarding() {
                 <Copy class="w-3.5 h-3.5" />{{ copiedField === 'snippet' ? $t('onboarding.copied') : $t('onboarding.copy') }}
               </button>
             </div>
-            <pre class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-[11px] text-slate-300 overflow-x-auto whitespace-pre">{{ webhook.snippet }}</pre>
+            <pre class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 overflow-x-auto whitespace-pre">{{ webhook.snippet }}</pre>
           </div>
         </div>
         <p v-else-if="webhookFailed" class="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-6">{{ $t('onboarding.webhookTokenFailed') }}</p>

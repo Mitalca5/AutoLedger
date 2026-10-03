@@ -159,11 +159,11 @@ async function handleSaveBatchSession() {
             <span class="font-semibold text-slate-300">
               {{ $t('tires.tireBatchSessionModal.garageTiresConcerned', { length: batchSessionTireIds.length, length2: storageTires.length }) }}
             </span>
-            <div class="flex items-center gap-2 text-[11px]">
+            <div class="flex items-center gap-2 text-xs">
               <button type="button" @click="selectAllBatchSessionTires()" class="text-rose-400 hover:text-rose-300 font-semibold">
                 {{ $t('tires.tireBatchSessionModal.tickAll') }}
               </button>
-              <span class="text-slate-600">|</span>
+              <span class="text-slate-400">|</span>
               <button type="button" @click="deselectAllBatchSessionTires()" class="text-slate-400 hover:text-slate-200">
                 {{ $t('tires.tireBatchSessionModal.untickAll') }}
               </button>
@@ -184,7 +184,7 @@ async function handleSaveBatchSession() {
               />
               <div class="min-w-0 flex-1">
                 <div class="font-bold truncate text-white">{{ t.tire.brand }} {{ t.tire.model }}</div>
-                <div class="text-[10px] text-slate-400 truncate">{{ t.tire.dimension }}</div>
+                <div class="text-xs text-slate-400 truncate">{{ t.tire.dimension }}</div>
               </div>
             </label>
           </div>

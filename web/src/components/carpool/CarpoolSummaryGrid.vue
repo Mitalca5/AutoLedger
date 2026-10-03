@@ -24,7 +24,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <span class="text-2xl font-bold text-white">{{ summary.total_trips }}</span>
         <span class="text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.trips') }}</span>
       </div>
-      <div class="mt-1 text-[11px] text-slate-400">{{ $t('carpool.carpoolSummaryGrid.kmShared', { unit: distanceUnit(), total_distance_km: formatDistanceValue(summary.total_distance_km || 0) }) }}</div>
+      <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.kmShared', { unit: distanceUnit(), total_distance_km: formatDistanceValue(summary.total_distance_km || 0) }) }}</div>
     </div>
 
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
@@ -36,7 +36,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <span class="text-2xl font-bold text-blue-400">{{ summary.total_passengers }}</span>
         <span class="text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.people') }}</span>
       </div>
-      <div class="mt-1 text-[11px] text-slate-400">{{ $t('carpool.carpoolSummaryGrid.fairShareDue', { total_passengers_share: fmt(summary.total_passengers_share) }) }}</div>
+      <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.fairShareDue', { total_passengers_share: fmt(summary.total_passengers_share) }) }}</div>
     </div>
 
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
@@ -45,7 +45,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400"><CreditCard class="w-4 h-4" /></div>
       </div>
       <div class="mt-2"><span class="text-2xl font-bold text-emerald-400">{{ fmt(summary.total_revenue) }}</span></div>
-      <div class="mt-1 text-[11px]" :class="summary.total_revenue >= summary.total_passengers_share ? 'text-emerald-500/80' : 'text-amber-400'">
+      <div class="mt-1 text-xs" :class="summary.total_revenue >= summary.total_passengers_share ? 'text-emerald-500/80' : 'text-amber-400'">
         {{ summary.total_revenue >= summary.total_passengers_share ? $t('carpool.carpoolSummaryGrid.covered') : $t('carpool.carpoolSummaryGrid.below', { amount: fmt(summary.total_passengers_share - summary.total_revenue) }) }}
       </div>
     </div>
@@ -56,7 +56,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <div class="p-2 bg-rose-500/10 rounded-xl text-rose-400"><TrendingUp class="w-4 h-4" /></div>
       </div>
       <div class="mt-2"><span class="text-2xl font-bold text-rose-400">{{ summary.coverage_rate_pct || 0 }} %</span></div>
-      <div class="mt-1 text-[11px] text-slate-400">{{ $t('carpool.carpoolSummaryGrid.ofTheTotalActualCost', { total_real_cost: fmt(summary.total_real_cost) }) }}</div>
+      <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.ofTheTotalActualCost', { total_real_cost: fmt(summary.total_real_cost) }) }}</div>
     </div>
 
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
@@ -68,7 +68,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <span class="text-2xl font-bold text-amber-400">{{ formatAmount(perDistance(Number(summary.net_cost_per_km || 0)), vehicleStore.currency, 3) }}</span>
         <span class="text-xs text-slate-400">/ {{ distanceUnit() }}</span>
       </div>
-      <div class="mt-1 text-[11px] text-slate-400">{{ $t('carpool.carpoolSummaryGrid.driverSFairShare', { total_driver_share: fmt(summary.total_driver_share) }) }}</div>
+      <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.driverSFairShare', { total_driver_share: fmt(summary.total_driver_share) }) }}</div>
     </div>
   </div>
 </template>

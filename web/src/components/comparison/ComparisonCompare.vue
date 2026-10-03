@@ -119,13 +119,13 @@ onBeforeUnmount(() => chart?.destroy())
           <tr v-for="r in rows" :key="r.id" class="border-t border-slate-800 text-right">
             <th scope="row" class="text-left font-normal py-2">
               <div class="font-semibold text-white">{{ r.name }}</div>
-              <div class="text-[11px] text-slate-500">{{ r.mode }} · {{ $t('comparison.comparisonCompare.usage', { unit: distanceUnit(), km: formatDistanceValue(r.km), years: r.years }) }}</div>
+              <div class="text-xs text-slate-400">{{ r.mode }} · {{ $t('comparison.comparisonCompare.usage', { unit: distanceUnit(), km: formatDistanceValue(r.km), years: r.years }) }}</div>
             </th>
-            <td>{{ fmtMoney(r.ev) }}<div class="text-[11px] text-slate-500">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
-            <td>{{ fmtMoney(r.ice) }}<div class="text-[11px] text-slate-500">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
+            <td>{{ fmtMoney(r.ev) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
+            <td>{{ fmtMoney(r.ice) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
             <td :class="r.savings >= 0 ? 'text-emerald-400' : 'text-amber-400'">
               {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings)) }}
-              <div class="text-[11px] text-slate-500">{{ r.savings >= 0 ? $t('comparison.compare.saves') : $t('comparison.compare.costsMore') }}</div>
+              <div class="text-xs text-slate-400">{{ r.savings >= 0 ? $t('comparison.compare.saves') : $t('comparison.compare.costsMore') }}</div>
             </td>
             <td>{{ r.breakEven }}</td>
           </tr>

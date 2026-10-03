@@ -237,7 +237,7 @@ async function handleCreateTires() {
             <button
               type="button"
               @click="isTotalPrice = !isTotalPrice"
-              class="text-[10px] text-rose-400 hover:text-rose-300 underline"
+              class="text-xs text-rose-400 hover:text-rose-300 underline"
             >
               {{ $t('tires.tireAddModal.switchTo', { mode: isTotalPrice ? $t('tires.tireAddModal.unitPrice') : $t('tires.tireAddModal.totalPriceMode') }) }}
             </button>
@@ -280,7 +280,7 @@ async function handleCreateTires() {
       <!-- Date & Sculptures -->
       <div class="grid grid-cols-3 gap-3">
         <div>
-          <label for="tire-add-tire-purchase-date" class="block text-[11px] text-slate-400 mb-1">{{ $t('tires.tireAddModal.purchaseDate') }}</label>
+          <label for="tire-add-tire-purchase-date" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.purchaseDate') }}</label>
           <AppDatePicker
             id="tire-add-tire-purchase-date"
             v-model="addTireForm.purchase_date"
@@ -289,7 +289,7 @@ async function handleCreateTires() {
           />
         </div>
         <div>
-          <label for="tire-add-tire-initial-depth-mm" class="block text-[11px] text-slate-400 mb-1">{{ $t('tires.tireAddModal.newTreadMm') }}</label>
+          <label for="tire-add-tire-initial-depth-mm" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.newTreadMm') }}</label>
           <input id="tire-add-tire-initial-depth-mm"
             v-model.number="addTireForm.initial_depth_mm"
             type="number"
@@ -298,7 +298,7 @@ async function handleCreateTires() {
           />
         </div>
         <div>
-          <label for="tire-add-tire-min-legal-depth-mm" class="block text-[11px] text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>
+          <label for="tire-add-tire-min-legal-depth-mm" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>
           <input id="tire-add-tire-min-legal-depth-mm"
             v-model.number="addTireForm.min_legal_depth_mm"
             type="number"

@@ -202,7 +202,7 @@ function removeFile() {
         <p class="text-xs font-semibold text-slate-200 group-hover:text-white">
           {{ isDragging ? $t('shell.appDropzone.dropHere') : (label ?? $t('shell.appDropzone.defaultLabel')) }}
         </p>
-        <p class="text-[11px] text-slate-400 mt-0.5">
+        <p class="text-xs text-slate-400 mt-0.5">
           {{ helperText ?? $t('shell.appDropzone.defaultHelper', { max: maxSizeMb }) }}
         </p>
       </div>
@@ -231,10 +231,10 @@ function removeFile() {
           <p class="text-xs font-semibold text-white truncate" :title="modelValue.name">
             {{ modelValue.name }}
           </p>
-          <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+          <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
             <span>{{ formatBytes(modelValue.size) }}</span>
-            <span class="text-slate-600">•</span>
-            <span class="uppercase text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300">
+            <span class="text-slate-400">•</span>
+            <span class="uppercase text-xs font-mono px-1.5 py-0.5 rounded bg-slate-700/80 text-slate-300">
               {{ modelValue.name.split('.').pop() || 'FILE' }}
             </span>
           </div>
@@ -246,7 +246,7 @@ function removeFile() {
           type="button"
           @click="triggerFileInput"
           :disabled="disabled"
-          class="px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-700/70 hover:bg-slate-700 rounded-lg transition-colors"
+          class="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-700/70 hover:bg-slate-700 rounded-lg transition-colors"
         >
           {{ $t('shell.appDropzone.replace') }}
         </button>

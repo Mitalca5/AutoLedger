@@ -67,7 +67,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           <div class="text-sm font-semibold text-white flex items-center gap-2">
             <MapPin class="w-4 h-4 text-rose-400 shrink-0" />
             <span class="truncate">{{ stops[0] }}</span>
-            <span class="text-slate-500">→</span>
+            <span class="text-slate-400">→</span>
             <span class="truncate">{{ stops[stops.length - 1] }}</span>
           </div>
           <div class="flex items-center gap-3 text-xs text-slate-300 flex-wrap">
@@ -95,14 +95,14 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           >
             <div class="min-w-0">
               <div class="text-xs text-slate-200 truncate">{{ stops[Number(i)] }} → {{ stops[Number(i) + 1] }}</div>
-              <div class="text-[11px] text-slate-400">
+              <div class="text-xs text-slate-400">
                 {{ $t('carpool.carpoolDetailModal.onBoard', { count: 1 + leg.passenger_seats }) }} · {{ $t('carpool.carpoolDetailModal.perPerson', { amount: fmt(leg.cost_per_person) }) }}
               </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
-              <span class="text-[11px] font-bold text-rose-400">{{ formatDistance(leg.distance_km, 1) }}</span>
+              <span class="text-xs font-bold text-rose-400">{{ formatDistance(leg.distance_km, 1) }}</span>
               <span class="text-xs font-mono font-bold text-white">{{ fmt(leg.total_cost) }}</span>
-              <ChevronRight v-if="leg.drive_id" class="w-4 h-4 text-slate-500" />
+              <ChevronRight v-if="leg.drive_id" class="w-4 h-4 text-slate-400" />
             </div>
           </component>
         </div>
@@ -150,10 +150,10 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
               <span class="font-semibold text-slate-200 truncate">{{ p.passenger_name }}</span>
               <span class="font-bold text-emerald-400 shrink-0">+{{ fmt(p.amount_paid) }}</span>
             </div>
-            <div class="text-[11px] text-slate-400 truncate">
+            <div class="text-xs text-slate-400 truncate">
               {{ stops[p.board_stop_index] }} → {{ stops[p.alight_stop_index] }} • {{ $t('carpool.carpoolTripList.seats', p.seats) }}
             </div>
-            <div v-if="trip.passengers.length > 1" class="flex items-center justify-between text-[11px]">
+            <div v-if="trip.passengers.length > 1" class="flex items-center justify-between text-xs">
               <span class="text-slate-400">{{ $t('carpool.carpoolTripList.share', { cost_share: fmt(p.cost_share) }) }}</span>
               <span :class="p.balance >= 0 ? 'text-emerald-400' : 'text-amber-400'">
                 {{ p.balance >= 0 ? $t('carpool.above', { amount: fmt(p.balance) }) : $t('carpool.below', { amount: fmt(-p.balance) }) }}
@@ -202,7 +202,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
                 :title="$t('carpool.carpoolDetailModal.fairShare', { percent: coverage.fairPct.toFixed(0) })"
               ></div>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-x-3 gap-y-0.5 text-xs text-slate-400">
               <span>
                 {{ $t('carpool.carpoolDetailModal.received', { amount: fmt(coverage.paid) }) }} ·
                 {{ $t('carpool.carpoolDetailModal.fairShareAmount', { percent: coverage.fairPct.toFixed(0), amount: fmt(coverage.fair) }) }}

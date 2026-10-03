@@ -45,7 +45,7 @@ const issueLabels: Record<string, () => string> = {
         <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
         <span
           v-if="['MANUAL', 'SEMI_AUTO'].includes(vehicleStore.activeVehicle?.telemetry_mode)"
-          class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
+          class="ml-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
         >
           {{ $t('dashboard.dataQualityCard.manualTrackingNotice') }}
         </span>
@@ -122,7 +122,7 @@ const issueLabels: Record<string, () => string> = {
       <div
         v-for="issue in dataQuality.issues"
         :key="issue.type + issue.drive_id"
-        class="text-[11px] text-amber-100/90 flex items-center justify-between gap-3 bg-slate-950/40 rounded-lg px-2.5 py-1.5"
+        class="text-xs text-amber-100/90 flex items-center justify-between gap-3 bg-slate-950/40 rounded-lg px-2.5 py-1.5"
       >
         <span>{{ new Date(issue.date).toLocaleString(intlLocale(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }} — {{ issueLabels[issue.type]?.() || issue.type }}</span>
         <span class="font-mono">{{ issue.km > 0 ? '+' : '' }}{{ formatDistance(issue.km, 1) }}</span>

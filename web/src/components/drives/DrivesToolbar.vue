@@ -132,7 +132,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           <button
             v-if="!isCurrentMonth"
             @click="resetToCurrentMonth"
-            class="text-[11px] text-rose-400 hover:text-rose-300 font-medium ml-1 px-1.5 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20"
+            class="text-xs text-rose-400 hover:text-rose-300 font-medium ml-1 px-1.5 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20"
             :title="$t('drives.drivesToolbar.backToTheCurrentMonth')"
           >
             {{ $t('drives.drivesToolbar.thisMonth') }}
@@ -191,7 +191,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
         <strong class="text-white">{{ total }}</strong> {{ $t('drives.drivesToolbar.tripSFound') }}
         <i18n-t v-if="periodMode === 'MONTH'" keypath="drives.drivesToolbar.inMonth" tag="span"><template #month><span class="text-rose-400 font-semibold">{{ formattedSelectedMonth }}</span></template></i18n-t>
       </span>
-      <span class="text-slate-600">•</span>
+      <span class="text-slate-400">•</span>
       <span>{{ $t('drives.drivesToolbar.totalDistance') }} <strong class="text-white">{{ formatDistance(pageDistance) }}</strong></span>
     </div>
     <div v-else-if="total > 0 && !loading" class="flex flex-wrap items-center gap-3 text-xs text-slate-400 px-1">
@@ -199,11 +199,11 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
         <strong class="text-white">{{ total }}</strong> {{ $t('drives.drivesToolbar.driveSFound') }}
         <i18n-t v-if="periodMode === 'MONTH'" keypath="drives.drivesToolbar.inMonth" tag="span"><template #month><span class="text-rose-400 font-semibold">{{ formattedSelectedMonth }}</span></template></i18n-t>
       </span>
-      <span class="text-slate-600">•</span>
+      <span class="text-slate-400">•</span>
       <span>{{ $t('drives.drivesToolbar.pageDistance') }} <strong class="text-white">{{ formatDistance(pageDistance) }}</strong></span>
-      <span class="text-slate-600">•</span>
+      <span class="text-slate-400">•</span>
       <span>{{ $t('drives.drivesToolbar.pageEnergy') }} <strong class="text-white">{{ $t('drives.drivesToolbar.kwh', { pageEnergy: Math.round(pageEnergy).toLocaleString(intlLocale()) }) }}</strong></span>
-      <span class="text-slate-600">•</span>
+      <span class="text-slate-400">•</span>
       <span>{{ $t('drives.drivesToolbar.pageCost') }} <strong class="text-white">{{ formatAmount(pageCost, vehicleStore.currency) }}</strong></span>
     </div>
   </div>

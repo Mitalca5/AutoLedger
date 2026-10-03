@@ -151,7 +151,7 @@ onUnmounted(() => {
           v-if="filteredMileageCosts.length"
           type="button"
           @click="emit('open-month', filteredMileageCosts[filteredMileageCosts.length - 1])"
-          class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-colors"
+          class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
         >
           <PieChart class="w-3.5 h-3.5" />
           <span>{{ $t('dashboard.mileageCostChart.lastMonthSDetail') }}</span>

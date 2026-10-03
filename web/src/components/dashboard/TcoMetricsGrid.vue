@@ -30,9 +30,9 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
       <div class="mt-2 space-y-0.5">
         <p class="text-xs text-slate-300">
           {{ $t('dashboard.tcoMetricsGrid.fullCost', { full_cost: money(tco?.full_cost) }) }}
-          <span v-if="tco?.depreciation_cost" class="text-slate-400 text-[11px]"> {{ $t('dashboard.tcoMetricsGrid.includingDepreciation', { depreciation_cost: money(tco.depreciation_cost, 0) }) }}</span>
+          <span v-if="tco?.depreciation_cost" class="text-slate-400 text-xs"> {{ $t('dashboard.tcoMetricsGrid.includingDepreciation', { depreciation_cost: money(tco.depreciation_cost, 0) }) }}</span>
         </p>
-        <p v-if="tco?.carpool_revenue" class="text-[11px] text-emerald-400">
+        <p v-if="tco?.carpool_revenue" class="text-xs text-emerald-400">
           {{ $t('dashboard.tcoMetricsGrid.netOfCarpooling', { full_cost_net: money(tco.full_cost_net) }) }}
         </p>
       </div>
@@ -53,7 +53,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         <p class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.directRunningCostKm', { unit: distanceUnit(), usage_cost_per_km: perUnit(tco?.usage_cost_per_km) }) }}
         </p>
-        <p class="text-[11px] text-slate-500">
+        <p class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.overKm', { unit: distanceUnit(), distance_basis_km: formatDistanceValue(tco?.distance_basis_km || 0) }) }}
           <template v-if="tco?.depreciation_cost_per_km"> {{ $t('dashboard.tcoMetricsGrid.depreciationKm', { unit: distanceUnit(), value: perUnit(tco.depreciation_cost_per_km) }) }}</template>
         </p>
@@ -81,7 +81,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         <p v-else-if="!canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.kmKwh', { unit: distanceUnit(), energy_cost_per_km: perUnit(tco?.energy_cost_per_km), total_kwh_added: Math.round(tco?.total_kwh_added || 0).toLocaleString(intlLocale()) }) }}
         </p>
-        <p v-if="tco?.completeness?.charges_without_cost" class="text-[11px] text-amber-400">
+        <p v-if="tco?.completeness?.charges_without_cost" class="text-xs text-amber-400">
           {{ $t('dashboard.tcoMetricsGrid.chargeSWithoutACost', { charges_without_cost: tco.completeness.charges_without_cost }) }}
         </p>
       </div>

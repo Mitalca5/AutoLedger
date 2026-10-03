@@ -229,7 +229,7 @@ async function testModalConnection() {
               :disabled="!!form.teslamate_api_url && connectTeslaMate"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-rose-500"
             />
-            <p class="mt-1 text-[11px] text-slate-500">{{ $t('vehicles.vehicleFormModal.currentMileageHelp') }}</p>
+            <p class="mt-1 text-xs text-slate-400">{{ $t('vehicles.vehicleFormModal.currentMileageHelp') }}</p>
           </div>
           <div>
             <label for="vehicle-currency" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.currency') }}</label>
@@ -241,7 +241,7 @@ async function testModalConnection() {
             >
               <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
             </select>
-            <p v-if="isEditing" class="mt-1 text-[11px] text-slate-500">{{ $t('vehicles.vehicleFormModal.currencyFixed') }}</p>
+            <p v-if="isEditing" class="mt-1 text-xs text-slate-400">{{ $t('vehicles.vehicleFormModal.currencyFixed') }}</p>
           </div>
         </div>
 
@@ -268,7 +268,7 @@ async function testModalConnection() {
             <input id="vehicle-connect-teslamate" v-model="connectTeslaMate" type="checkbox" class="mt-0.5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
             <div>
               <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.teslamateSync') }}</span>
-              <span class="text-[11px] text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.teslamateSyncDesc') }}</span>
+              <span class="text-xs text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.teslamateSyncDesc') }}</span>
             </div>
           </label>
         </div>
@@ -277,12 +277,12 @@ async function testModalConnection() {
         <div v-if="canLinkTeslaMate(form.powertrain) && connectTeslaMate" class="pt-3 border-t border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider">{{ $t('vehicles.vehicleFormModal.telemetrySettings') }}</h4>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">TeslaMate</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">TeslaMate</span>
           </div>
 
           <!-- Bouton de réutilisation pratique depuis un autre véhicule connecté -->
           <div v-if="existingConnectedVehicles.length > 0 && !isEditing" class="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-wrap items-center gap-2 text-xs">
-            <span class="text-slate-400 text-[11px]">{{ $t('vehicles.vehicleFormModal.copyFromExisting', { name: '' }) }}:</span>
+            <span class="text-slate-400 text-xs">{{ $t('vehicles.vehicleFormModal.copyFromExisting', { name: '' }) }}:</span>
             <button
               v-for="ev in existingConnectedVehicles"
               :key="ev.id"
@@ -314,7 +314,7 @@ async function testModalConnection() {
               :placeholder="$t('vehicles.vehicleFormModal.eGHttp192168')"
               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
             />
-            <p class="text-[11px] text-slate-500 mt-1">{{ $t('vehicles.vehicleFormModal.addsAnOpenInTeslamate') }}</p>
+            <p class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleFormModal.addsAnOpenInTeslamate') }}</p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -398,13 +398,13 @@ async function testModalConnection() {
               <div class="flex-1">
                 <div v-if="modalTestResult.success">
                   <strong class="font-semibold">{{ $t('vehicles.vehicleFormModal.connectionSuccessful') }}</strong>
-                  <p class="text-[11px] text-emerald-200/80 mt-0.5">
+                  <p class="text-xs text-emerald-200/80 mt-0.5">
                     {{ $t('vehicles.vehicleFormModal.testStatus', { unit: distanceUnit(), state: modalTestResult.status?.state || $t('vehicles.vehicleCard.online'), odometer: formatDistanceValue(modalTestResult.status?.odometer || 0) }) }}
                   </p>
                 </div>
                 <div v-else>
                   <strong class="font-semibold">{{ $t('vehicles.vehicleFormModal.connectionFailed') }}</strong>
-                  <p class="text-[11px] text-rose-200/90 mt-0.5">{{ modalTestResult.error }}</p>
+                  <p class="text-xs text-rose-200/90 mt-0.5">{{ modalTestResult.error }}</p>
                 </div>
               </div>
             </div>
@@ -425,7 +425,7 @@ async function testModalConnection() {
             <ChevronDown v-if="showAdvanced" class="w-4 h-4 text-slate-400" />
             <ChevronRight v-else class="w-4 h-4 text-slate-400" />
           </button>
-          <p class="text-[11px] text-slate-400 mb-2">{{ $t('vehicles.vehicleFormModal.advancedOptionsDesc') }}</p>
+          <p class="text-xs text-slate-400 mb-2">{{ $t('vehicles.vehicleFormModal.advancedOptionsDesc') }}</p>
 
           <div v-if="showAdvanced" class="space-y-3.5 pt-2">
             <!-- Tarifs & Borne -->
@@ -437,7 +437,7 @@ async function testModalConnection() {
                   {{ p.name }} ({{ p.plan_type }})
                 </option>
               </select>
-              <p class="text-[11px] text-slate-400 mt-1">{{ $t('tariffs.planSelectHint') }}</p>
+              <p class="text-xs text-slate-400 mt-1">{{ $t('tariffs.planSelectHint') }}</p>
             </div>
 
             <label for="vehicle-home-charger-default" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">

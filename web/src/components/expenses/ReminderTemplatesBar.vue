@@ -73,11 +73,11 @@ onMounted(load)
         <button type="button" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!selected" @click="apply">
           {{ $t('expenses.remindersPanel.templates.apply') }}
         </button>
-        <button type="button" class="text-slate-500 hover:text-rose-400 disabled:opacity-40" :disabled="!selected" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
+        <button type="button" class="text-slate-400 hover:text-rose-400 disabled:opacity-40" :disabled="!selected" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
           <Trash2 class="w-4 h-4" />
         </button>
       </div>
-      <p v-else class="text-slate-500 italic">{{ $t('expenses.remindersPanel.templates.none') }}</p>
+      <p v-else class="text-slate-400 italic">{{ $t('expenses.remindersPanel.templates.none') }}</p>
       <div v-if="hasReminders" class="flex flex-wrap gap-2 items-center">
         <input v-model="newName" maxlength="100" :placeholder="$t('expenses.remindersPanel.templates.saveName')" :aria-label="$t('expenses.remindersPanel.templates.saveName')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
         <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-semibold disabled:opacity-50" :disabled="!newName.trim()" @click="save">

@@ -22,12 +22,12 @@ const selected = computed({
 </script>
 
 <template>
-  <label class="flex items-center gap-1.5 text-[11px] text-slate-400">
+  <label class="flex items-center gap-1.5 text-xs text-slate-400">
     <Languages class="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
     <span class="sr-only">{{ $t('shell.language.label') }}</span>
     <select
       v-model="selected"
-      class="bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-[11px] text-slate-200 focus:outline-none focus:border-rose-500"
+      class="bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
     >
       <option v-for="locale in SUPPORTED_LOCALES" :key="locale" :value="locale">{{ LANGUAGE_NAMES[locale] }}</option>
     </select>

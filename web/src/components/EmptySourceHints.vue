@@ -15,7 +15,7 @@ const vehicleStore = useVehicleStore()
 
 <template>
   <div v-if="vehicleStore.canEdit" class="space-y-2">
-    <p class="text-xs text-slate-500">{{ $t('common.emptySources.intro') }}</p>
+    <p class="text-xs text-slate-400">{{ $t('common.emptySources.intro') }}</p>
     <div class="flex flex-wrap justify-center gap-2">
       <button v-if="props.quickKind" type="button" class="empty-hint-btn" @click="quickAdd.open(props.quickKind)">
         <Plus class="w-3.5 h-3.5 text-rose-400" />{{ $t('common.emptySources.quickAdd') }}

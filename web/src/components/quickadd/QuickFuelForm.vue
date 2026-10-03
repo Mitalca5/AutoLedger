@@ -68,7 +68,7 @@ async function submit() {
     <div>
       <label for="qf-liters" class="quick-label">{{ $t('quickadd.quickFuelForm.quantityL') }}</label>
       <input id="qf-liters" v-model="form.liters" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
-      <p class="mt-1.5 min-h-4 text-[11px] text-slate-400" aria-live="polite">
+      <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
         <template v-if="pricePerLiter !== null">{{ $t('quickadd.quickFuelForm.thatIsL', { pricePerLiter: fmtPrice(pricePerLiter) }) }}</template>
       </p>
     </div>

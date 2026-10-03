@@ -98,9 +98,9 @@ watch(
       <button type="button" @click="shiftWindow(2 * DRIVE_WINDOW_DAYS)" class="p-1 rounded-lg hover:bg-slate-800 hover:text-white" :title="$t('drives.drivePicker.laterDrives')">
         <ChevronRight class="w-4 h-4" />
       </button>
-      <span v-if="pickerDate" class="text-[11px] text-slate-500">{{ $t('drives.drivePicker.aroundTheDate', { days: DRIVE_WINDOW_DAYS }) }}</span>
+      <span v-if="pickerDate" class="text-xs text-slate-400">{{ $t('drives.drivePicker.aroundTheDate', { days: DRIVE_WINDOW_DAYS }) }}</span>
     </div>
-    <p v-if="!drives.length" class="text-[11px] text-slate-500">{{ $t('drives.drivePicker.noDriveInThisPeriod') }}</p>
+    <p v-if="!drives.length" class="text-xs text-slate-400">{{ $t('drives.drivePicker.noDriveInThisPeriod') }}</p>
     <div class="max-h-44 overflow-y-auto space-y-1 pr-1">
       <label
         v-for="d in drives"
@@ -112,7 +112,7 @@ watch(
           <input type="checkbox" class="select-box" :checked="selectedIds.includes(d.id)" @change="emit('toggle', d.id)" />
           <span class="truncate">{{ formatDriveTime(d.start_time) }}{{ $t('drives.tripGroupsPanel.dateSeparator') }}{{ (d.start_address || $t('drives.driveCostModal.start')).split(',')[0] }} → {{ (d.end_address || $t('drives.driveCostModal.end')).split(',')[0] }}</span>
         </span>
-        <span class="font-mono text-[11px] text-slate-400 shrink-0">{{ formatDistance(Number(d.distance_km)) }}</span>
+        <span class="font-mono text-xs text-slate-400 shrink-0">{{ formatDistance(Number(d.distance_km)) }}</span>
       </label>
     </div>
   </div>

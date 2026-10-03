@@ -581,13 +581,13 @@ onBeforeUnmount(destroyChart)
             </option>
             <option value="PROJECTION">{{ $t('comparison.comparisonView.projectionICompareTwoVehicles') }}</option>
           </select>
-          <p v-if="isRetro" class="text-[11px] text-slate-500 mt-1">{{ $t('comparison.comparisonView.theElectricVehicleSCosts') }}</p>
+          <p v-if="isRetro" class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.theElectricVehicleSCosts') }}</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label for="cmp-km" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.kilometresPerYear', { unit: distanceUnit() }) }}</label>
             <DistanceInput id="cmp-km" v-model="form.annual_km" :digits="0" min="1" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
-            <p v-if="defaults && isRetro" class="text-[11px] text-slate-500 mt-1">
+            <p v-if="defaults && isRetro" class="text-xs text-slate-400 mt-1">
               {{ defaults.annual_km_from_data ? $t('comparison.comparisonView.fromHistory') : $t('comparison.comparisonView.defaultValue') }}
             </p>
           </div>
@@ -617,7 +617,7 @@ onBeforeUnmount(destroyChart)
               <input id="cmp-ice-price" v-model.number="form.ice.fuel_price" type="number" min="0" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
             </div>
           </div>
-          <p class="text-[11px] text-slate-500 flex items-center gap-1"><Info class="w-3 h-3" /> {{ defaults?.source ? apiMessageText(defaults.source) : $t('comparison.comparisonView.indicative') }}</p>
+          <p class="text-xs text-slate-400 flex items-center gap-1"><Info class="w-3 h-3" /> {{ defaults?.source ? apiMessageText(defaults.source) : $t('comparison.comparisonView.indicative') }}</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in iceFields" :key="f.key">
               <label :for="`cmp-ice-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
@@ -658,7 +658,7 @@ onBeforeUnmount(destroyChart)
           <ChevronDown class="w-4 h-4 transition-transform" :class="showAdvanced ? 'rotate-180' : ''" /> {{ $t('comparison.comparisonView.fineTuneInflationGrants') }}
         </button>
         <div v-show="showAdvanced" id="cmp-advanced" class="mt-3 space-y-3">
-          <p class="text-[11px] text-slate-500">{{ $t('comparison.comparisonView.averageYearlyPriceChangeApplied') }}</p>
+          <p class="text-xs text-slate-400">{{ $t('comparison.comparisonView.averageYearlyPriceChangeApplied') }}</p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label for="cmp-infl-fuel" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuelYear') }}</label>
@@ -725,7 +725,7 @@ onBeforeUnmount(destroyChart)
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
               <h2 class="text-sm font-semibold text-sky-300">{{ $t('comparison.comparisonView.electric') }}</h2>
-              <span class="text-[10px] px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-emerald-500/40 text-emerald-300' : 'border-slate-600 text-slate-400'">
+              <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-emerald-500/40 text-emerald-300' : 'border-slate-600 text-slate-400'">
                 {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.actual') : $t('comparison.comparisonView.estimated') }}
               </span>
             </div>
@@ -735,7 +735,7 @@ onBeforeUnmount(destroyChart)
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
               <h2 class="text-sm font-semibold text-amber-300">{{ $t('comparison.comparisonView.combustion') }}</h2>
-              <span class="text-[10px] px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('comparison.comparisonView.estimated') }}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('comparison.comparisonView.estimated') }}</span>
             </div>
             <div class="text-2xl font-bold text-white">{{ fmtMoney(result.ice.total) }}</div>
             <div class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.ice.per_month), cost_per_km: fmtMoney(perDistance(result.ice.cost_per_km), 3) }) }}</div>

@@ -85,7 +85,7 @@ async function handleSubmit() {
       <!-- Separator: shown only when OIDC is enabled AND local form is still visible -->
       <div v-if="oidcEnabled" class="relative my-4 flex items-center">
         <div class="flex-grow border-t border-slate-700" />
-        <span class="mx-3 text-xs text-slate-500">{{ $t('common.or') }}</span>
+        <span class="mx-3 text-xs text-slate-400">{{ $t('common.or') }}</span>
         <div class="flex-grow border-t border-slate-700" />
       </div>
 
@@ -93,7 +93,7 @@ async function handleSubmit() {
         <div>
           <label for="login-email" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('auth.loginView.email') }}</label>
           <div class="relative">
-            <Mail class="w-5 h-5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Mail class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input id="login-email"
               v-model="email"
               type="email"
@@ -107,7 +107,7 @@ async function handleSubmit() {
         <div>
           <label for="login-password" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('auth.loginView.password') }}</label>
           <div class="relative">
-            <Lock class="w-5 h-5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Lock class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input id="login-password"
               v-model="password"
               type="password"
@@ -134,7 +134,7 @@ async function handleSubmit() {
 
       <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col items-center gap-2">
         <LanguageSwitcher />
-        <span class="text-[11px] font-mono text-slate-400">{{ APP_NAME }} {{ APP_VERSION }}</span>
+        <span class="text-xs font-mono text-slate-400">{{ APP_NAME }} {{ APP_VERSION }}</span>
       </div>
     </div>
   </div>

@@ -212,7 +212,7 @@ onMounted(load)
         <div>
           <label for="pw-new" class="quick-label">{{ $t('account.accountView.newPassword') }}</label>
           <input id="pw-new" v-model="next" type="password" autocomplete="new-password" class="quick-input" aria-describedby="pw-hint" />
-          <p id="pw-hint" class="mt-1 text-[11px] text-slate-400">{{ $t('account.accountView.8CharactersMinimum72Bytes') }}</p>
+          <p id="pw-hint" class="mt-1 text-xs text-slate-400">{{ $t('account.accountView.8CharactersMinimum72Bytes') }}</p>
         </div>
         <div>
           <label for="pw-confirm" class="quick-label">{{ $t('account.accountView.confirmTheNewPassword') }}</label>
@@ -227,7 +227,7 @@ onMounted(load)
         >
           {{ saving ? $t('account.saving') : $t('account.changePassword') }}
         </button>
-        <p class="text-[11px] text-slate-400">{{ $t('account.accountView.otherDevicesAreSignedOut') }}</p>
+        <p class="text-xs text-slate-400">{{ $t('account.accountView.otherDevicesAreSignedOut') }}</p>
       </form>
     </section>
 
@@ -263,12 +263,12 @@ onMounted(load)
             <div class="min-w-0">
               <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
                 {{ describeUserAgent(s.user_agent) }}
-                <span v-if="s.current" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300">{{ $t('account.accountView.thisDevice') }}</span>
+                <span v-if="s.current" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-300">{{ $t('account.accountView.thisDevice') }}</span>
               </p>
               <p class="text-xs text-slate-400">
                 {{ $t('account.accountView.active', { value: describeRelativeTime(s.last_used_at) }) }}<template v-if="s.ip"> · {{ s.ip }}</template>
               </p>
-              <p class="text-[11px] text-slate-500">{{ $t('account.accountView.signedIn', { value: describeRelativeTime(s.started_at) }) }}</p>
+              <p class="text-xs text-slate-400">{{ $t('account.accountView.signedIn', { value: describeRelativeTime(s.started_at) }) }}</p>
             </div>
           </div>
           <button
@@ -285,7 +285,7 @@ onMounted(load)
         <li v-if="sessions.length === 0" class="text-sm text-slate-400">{{ $t('account.accountView.noActiveSession') }}</li>
       </ul>
       <p v-if="sessionError" role="alert" class="mt-3 text-xs text-rose-300">{{ sessionError }}</p>
-      <p class="mt-3 text-[11px] text-slate-500">{{ $t('account.accountView.aSignedOutDeviceKeeps') }}</p>
+      <p class="mt-3 text-xs text-slate-400">{{ $t('account.accountView.aSignedOutDeviceKeeps') }}</p>
     </section>
   </div>
 </template>

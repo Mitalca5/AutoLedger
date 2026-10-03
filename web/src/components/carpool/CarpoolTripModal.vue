@@ -412,7 +412,7 @@ async function handleModalRecalculate() {
         <div>
           <div class="flex items-center justify-between mb-1">
             <label for="carpool-date" class="block text-xs font-semibold text-slate-400">{{ $t('common.date') }}</label>
-            <span v-if="isDateDisabled" class="text-[10px] text-slate-400 flex items-center gap-1 font-normal" :title="$t('carpool.carpoolTripModal.theDateIsAutomaticallyLinked')">
+            <span v-if="isDateDisabled" class="text-xs text-slate-400 flex items-center gap-1 font-normal" :title="$t('carpool.carpoolTripModal.theDateIsAutomaticallyLinked')">
               <Lock class="w-3 h-3 text-slate-400" />
               {{ $t('carpool.carpoolTripModal.tripDate') }}
             </span>
@@ -455,7 +455,7 @@ async function handleModalRecalculate() {
             </button>
           </div>
         </div>
-        <p v-if="!form.legs.length" class="text-xs text-slate-500">{{ $t('carpool.carpoolTripModal.selectAtLeastOneDrive') }}</p>
+        <p v-if="!form.legs.length" class="text-xs text-slate-400">{{ $t('carpool.carpoolTripModal.selectAtLeastOneDrive') }}</p>
 
         <div v-for="(leg, i) in form.legs" :key="i" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
           <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -467,7 +467,7 @@ async function handleModalRecalculate() {
               :placeholder="$t('carpool.carpoolTripModal.start')"
               class="w-36 bg-slate-800 text-slate-100 rounded-lg px-2 py-1 border border-slate-700"
             />
-            <span class="text-slate-500">→</span>
+            <span class="text-slate-400">→</span>
             <label :for="`leg-end-${i}`" class="sr-only">{{ $t('carpool.carpoolTripModal.endOfLeg', { i: i + 1 }) }}</label>
             <input
               :id="`leg-end-${i}`"
@@ -488,7 +488,7 @@ async function handleModalRecalculate() {
               v-if="!leg.drive_id"
               type="button"
               @click="estimateManualLeg(i)"
-              class="flex items-center gap-1 text-[11px] text-indigo-400 hover:text-indigo-300"
+              class="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300"
               :title="$t('carpool.carpoolTripModal.estimateElectricityTiresMaintenanceAnd')"
             >
               <Calculator class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.estimate') }}
@@ -497,13 +497,13 @@ async function handleModalRecalculate() {
               {{ $t('carpool.carpoolTripModal.onBoard', { legDetails: fmt(euros(live.legDetails[i]?.total || 0)), legDetails2: 1 + (live.legDetails[i]?.seats || 0) }) }}
               <strong>{{ $t('carpool.carpoolTripModal.person', { legDetails: fmt(euros(live.legDetails[i]?.perPerson || 0)) }) }}</strong>
             </span>
-            <button v-if="sourceMode === 'MANUAL' && form.legs.length > 1" type="button" @click="removeLeg(i)" class="text-slate-500 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.deleteTheLeg')">
+            <button v-if="sourceMode === 'MANUAL' && form.legs.length > 1" type="button" @click="removeLeg(i)" class="text-slate-400 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.deleteTheLeg')">
               <Trash2 class="w-3.5 h-3.5" />
             </button>
           </div>
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
             <div v-for="f in COST_FIELDS" :key="f.key">
-              <label :for="`leg-${f.key}-${i}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t(`carpool.costFields.${f.label}`) }} ({{ currencySymbol(vehicleStore.currency) }})</label>
+              <label :for="`leg-${f.key}-${i}`" class="block text-xs text-slate-400 mb-0.5">{{ $t(`carpool.costFields.${f.label}`) }} ({{ currencySymbol(vehicleStore.currency) }})</label>
               <input
                 :id="`leg-${f.key}-${i}`"
                 v-model.number="(leg as any)[f.key]"
@@ -532,7 +532,7 @@ async function handleModalRecalculate() {
         <div v-for="(p, index) in form.passengers" :key="index" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
           <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end text-xs">
             <div class="col-span-2 sm:col-span-3">
-              <label :for="`passenger-name-${index}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t('carpool.carpoolTripModal.name') }}</label>
+              <label :for="`passenger-name-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.name') }}</label>
               <input
                 :id="`passenger-name-${index}`"
                 v-model="p.passenger_name"
@@ -540,7 +540,7 @@ async function handleModalRecalculate() {
               />
             </div>
             <div class="sm:col-span-3">
-              <label :for="`passenger-board-${index}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOnAt') }}</label>
+              <label :for="`passenger-board-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOnAt') }}</label>
               <select
                 :id="`passenger-board-${index}`"
                 v-model.number="p.board_stop_index"
@@ -551,7 +551,7 @@ async function handleModalRecalculate() {
               </select>
             </div>
             <div class="sm:col-span-3">
-              <label :for="`passenger-alight-${index}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOffAt') }}</label>
+              <label :for="`passenger-alight-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOffAt') }}</label>
               <select
                 :id="`passenger-alight-${index}`"
                 v-model.number="p.alight_stop_index"
@@ -561,7 +561,7 @@ async function handleModalRecalculate() {
               </select>
             </div>
             <div>
-              <label :for="`passenger-seats-${index}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t('carpool.carpoolTripModal.seats') }}</label>
+              <label :for="`passenger-seats-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.seats') }}</label>
               <input
                 :id="`passenger-seats-${index}`"
                 v-model.number="p.seats"
@@ -572,7 +572,7 @@ async function handleModalRecalculate() {
               />
             </div>
             <div class="sm:col-span-2">
-              <label :for="`passenger-paid-${index}`" class="block text-[10px] text-slate-500 mb-0.5">{{ $t('carpool.carpoolTripModal.paid', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
+              <label :for="`passenger-paid-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.paid', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
               <input
                 :id="`passenger-paid-${index}`"
                 v-model.number="p.amount_paid"
@@ -583,7 +583,7 @@ async function handleModalRecalculate() {
               />
             </div>
           </div>
-          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
             <span class="text-slate-400">
               {{ $t('carpool.carpoolTripModal.fairShare') }} <strong class="text-slate-200">{{ fmt(euros(live.shares[index] || 0)) }}</strong>
               <span :class="cents(p.amount_paid) >= (live.shares[index] || 0) ? 'text-emerald-400' : 'text-amber-400'" class="ml-2">
@@ -605,7 +605,7 @@ async function handleModalRecalculate() {
                 <ChevronDown v-else class="w-3.5 h-3.5" />
               </button>
               <button type="button" @click="applyFairPrice(index)" class="text-indigo-400 hover:text-indigo-300 font-semibold">{{ $t('carpool.carpoolTripModal.applyTheFairShare') }}</button>
-              <button v-if="form.passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-500 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
+              <button v-if="form.passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-400 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
                 <Trash2 class="w-3.5 h-3.5" />
               </button>
             </span>
@@ -621,7 +621,7 @@ async function handleModalRecalculate() {
                 <Calculator class="w-3.5 h-3.5 text-indigo-400" />
                 {{ $t('carpool.carpoolTripModal.formulaPerSection', { name: p.passenger_name || $t('carpool.passenger', { n: index + 1 }) }) }}
               </span>
-              <span class="text-[11px] text-slate-400 font-medium">
+              <span class="text-xs text-slate-400 font-medium">
                 {{ $t('carpool.carpoolTripModal.seatsBooked', p.seats) }}
               </span>
             </div>
@@ -630,14 +630,14 @@ async function handleModalRecalculate() {
               <div
                 v-for="(leg, legIdx) in form.legs"
                 :key="legIdx"
-                class="text-[11px] p-2.5 rounded-lg border transition-colors"
+                class="text-xs p-2.5 rounded-lg border transition-colors"
                 :class="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index
                   ? 'bg-slate-900/90 border-indigo-500/30 text-slate-200'
-                  : 'bg-slate-900/30 border-slate-800/50 text-slate-500 opacity-60'"
+                  : 'bg-slate-900/30 border-slate-800/50 text-slate-400 opacity-60'"
               >
                 <div class="flex items-center justify-between font-semibold">
                   <span class="flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-mono text-slate-300">
+                    <span class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-xs font-mono text-slate-300">
                       {{ legIdx + 1 }}
                     </span>
                     <span>{{ stops[legIdx] }} → {{ stops[legIdx + 1] }}</span>
@@ -646,12 +646,12 @@ async function handleModalRecalculate() {
                   <span v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="text-indigo-300 font-bold">
                     {{ fmt(euros((live.legDetails[legIdx]?.perPerson || 0) * (Number(p.seats) || 1))) }}
                   </span>
-                  <span v-else class="text-slate-500 italic text-[10px]">
+                  <span v-else class="text-slate-400 italic text-xs">
                     {{ $t('carpool.carpoolTripModal.notTravelled') }}
                   </span>
                 </div>
 
-                <div v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="mt-1.5 pl-5.5 text-[10px] text-slate-400 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <div v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="mt-1.5 pl-5.5 text-xs text-slate-400 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                   <span>{{ $t('carpool.carpoolTripModal.actualCostOfTheSection') }} <strong class="text-slate-200">{{ fmt(euros(live.legDetails[legIdx]?.total || 0)) }}</strong></span>
                   <span>•</span>
                   <span>{{ $t('carpool.carpoolTripModal.occupants') }} <strong class="text-slate-200">{{ $t('carpool.carpoolTripModal.oneDriverPlusPassengers', { legDetails: live.legDetails[legIdx]?.seats || 0, legDetails2: 1 + (live.legDetails[legIdx]?.seats || 0) }) }}</strong></span>
@@ -667,7 +667,7 @@ async function handleModalRecalculate() {
               <span class="text-slate-400">{{ $t('carpool.carpoolTripModal.totalFairShareDue') }}</span>
               <div class="text-right">
                 <span class="font-bold text-emerald-400 text-sm">{{ fmt(euros(live.shares[index] || 0)) }}</span>
-                <span class="text-[10px] text-slate-500 block">{{ $t('carpool.carpoolTripModal.exactSumOfTheSections') }}</span>
+                <span class="text-xs text-slate-400 block">{{ $t('carpool.carpoolTripModal.exactSumOfTheSections') }}</span>
               </div>
             </div>
           </div>
@@ -677,23 +677,23 @@ async function handleModalRecalculate() {
       <!-- Simulation -->
       <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
         <div>
-          <div class="text-slate-500">{{ $t('carpool.carpoolTripModal.actualCost') }}</div>
+          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.actualCost') }}</div>
           <div class="text-sm font-bold text-white">{{ fmt(euros(live.total)) }}</div>
         </div>
         <div>
-          <div class="text-slate-500">{{ $t('carpool.carpoolTripModal.passengersShares') }}</div>
+          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.passengersShares') }}</div>
           <div class="text-sm font-bold text-blue-400">{{ fmt(euros(live.passengersShare)) }}</div>
         </div>
         <div>
-          <div class="text-slate-500">{{ $t('carpool.carpoolTripModal.driverSShare') }}</div>
+          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.driverSShare') }}</div>
           <div class="text-sm font-bold text-amber-400">{{ fmt(euros(live.driverShare)) }}</div>
         </div>
         <div>
-          <div class="text-slate-500">{{ $t('carpool.carpoolTripModal.received') }}</div>
+          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.received') }}</div>
           <div class="text-sm font-bold text-emerald-400">{{ fmt(euros(liveRevenue)) }} ({{ liveCoverage }} %)</div>
         </div>
         <div>
-          <div class="text-slate-500">{{ liveNet > 0 ? $t('carpool.carpoolTripModal.leftToDriver') : $t('carpool.carpoolTripModal.surplus') }}</div>
+          <div class="text-slate-400">{{ liveNet > 0 ? $t('carpool.carpoolTripModal.leftToDriver') : $t('carpool.carpoolTripModal.surplus') }}</div>
           <div class="text-sm font-bold" :class="liveNet > 0 ? 'text-white' : 'text-emerald-400'">{{ fmt(euros(Math.abs(liveNet))) }}</div>
         </div>
       </div>

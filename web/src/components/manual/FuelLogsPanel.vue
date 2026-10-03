@@ -188,30 +188,30 @@ onMounted(load)
 
     <div v-if="stats && stats.fill_ups > 0" class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-        <div class="text-[11px] text-slate-400">{{ $t('manual.fuelLogsPanel.fillUps') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('manual.fuelLogsPanel.fillUps') }}</div>
         <div class="text-lg font-bold text-white">{{ stats.fill_ups }}</div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-        <div class="text-[11px] text-slate-400">{{ $t('manual.fuelLogsPanel.totalSpent') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('manual.fuelLogsPanel.totalSpent') }}</div>
         <div class="text-lg font-bold text-white">{{ fmtMoney(stats.total_cost, 0) }}</div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-        <div class="text-[11px] text-slate-400">{{ $t('manual.fuelLogsPanel.averagePricePerLitre') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('manual.fuelLogsPanel.averagePricePerLitre') }}</div>
         <div class="text-lg font-bold text-white">{{ stats.avg_price_per_liter ? `${fmtMoney(stats.avg_price_per_liter, 3)}/L` : '—' }}</div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
-        <div class="text-[11px] text-slate-400">{{ $t('manual.fuelLogsPanel.averageConsumption') }}</div>
+        <div class="text-xs text-slate-400">{{ $t('manual.fuelLogsPanel.averageConsumption') }}</div>
         <div class="text-lg font-bold text-white">{{ stats.consumption_l_100km ? `${formatPerDistanceValue(stats.consumption_l_100km, 2)} L/100 ${distanceUnit()}` : $t('manual.fuelLogsPanel.notMeasurable') }}</div>
       </div>
     </div>
-    <p v-if="stats && stats.unmeasurable_segments > 0" class="text-[11px] text-amber-400">
+    <p v-if="stats && stats.unmeasurable_segments > 0" class="text-xs text-amber-400">
       {{ $t('manual.fuelLogsPanel.intervalSBetweenFullTanks', { unmeasurable_segments: stats.unmeasurable_segments }) }}
     </p>
-    <p v-if="stats && stats.fill_ups_without_mileage > 0" class="text-[11px] text-slate-500">
+    <p v-if="stats && stats.fill_ups_without_mileage > 0" class="text-xs text-slate-400">
       {{ $t('manual.fuelLogsPanel.fillUpSWithoutMileage', { fill_ups_without_mileage: stats.fill_ups_without_mileage }) }}
       <template v-if="stats.estimated_segments > 0">{{ $t('manual.fuelLogsPanel.theConsumptionOfIntervalS', { estimated_segments: stats.estimated_segments }) }}</template>
     </p>
-    <p v-if="stats && stats.fill_ups > 0 && !stats.consumption_l_100km && stats.unmeasurable_segments === 0" class="text-[11px] text-slate-500">
+    <p v-if="stats && stats.fill_ups > 0 && !stats.consumption_l_100km && stats.unmeasurable_segments === 0" class="text-xs text-slate-400">
       {{ $t('manual.fuelLogsPanel.consumptionIsCalculatedBetweenTwo') }}
     </p>
 
@@ -225,8 +225,8 @@ onMounted(load)
           <div class="text-sm font-semibold text-white flex flex-wrap items-center gap-2">
             {{ fmtDate(log.date) }}
             <template v-if="log.odometer != null"> · {{ formatDistance(log.odometer) }}</template>
-            <template v-else-if="log.odometer_estimated != null"> · ≈ {{ formatDistance(log.odometer_estimated) }} <span class="text-[10px] px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('manual.fuelLogsPanel.estimated') }}</span></template>
-            <span v-if="!log.is_full_tank" class="text-[10px] px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('manual.fuelLogsPanel.partial') }}</span>
+            <template v-else-if="log.odometer_estimated != null"> · ≈ {{ formatDistance(log.odometer_estimated) }} <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('manual.fuelLogsPanel.estimated') }}</span></template>
+            <span v-if="!log.is_full_tank" class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('manual.fuelLogsPanel.partial') }}</span>
           </div>
           <div class="text-xs text-slate-400 mt-0.5">
             {{ fmtMoney(log.amount) }}
@@ -282,10 +282,10 @@ onMounted(load)
             <input id="fuel-price" v-model.number="form.price_per_liter" type="number" inputmode="decimal" min="0.001" step="0.001" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
           </div>
         </div>
-        <p class="text-[11px] text-slate-500 -mt-1.5">
+        <p class="text-xs text-slate-400 -mt-1.5">
           {{ $t('manual.fuelLogsPanel.enterTheAmountOrThe', { derivedHint }) }}
         </p>
-        <p v-if="!hasOdometer(form.odometer)" class="text-[11px] text-slate-500 -mt-2">
+        <p v-if="!hasOdometer(form.odometer)" class="text-xs text-slate-400 -mt-2">
           {{ $t('manual.fuelLogsPanel.withoutAMileageItIs') }}
         </p>
 

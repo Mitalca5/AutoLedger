@@ -182,24 +182,24 @@ onBeforeUnmount(() => {
 
     <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} <span class="text-xs font-medium text-slate-400">kWh/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</p>
+        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyCost') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyCost') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(perUnit(stats?.summary.cost_per_100km) || 0, currency) }} <span class="text-xs font-medium text-slate-400">/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</p>
+        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiency') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiency') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmtPercent(stats?.summary.charge_efficiency) }}</dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
+        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(stats?.summary.cost_per_full_charge || 0, currency) }} <span class="text-xs font-medium text-slate-400">(0 → 100 %)</span></dd>
-        <p class="mt-0.5 text-[11px] text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</p>
+        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</p>
       </div>
     </dl>
 
@@ -270,7 +270,7 @@ onBeforeUnmount(() => {
           </li>
         </ul>
       </div>
-      <p v-if="acDc.unknownSessions > 0" class="mt-2 text-[11px] text-slate-500">
+      <p v-if="acDc.unknownSessions > 0" class="mt-2 text-xs text-slate-400">
         {{ $t('dashboard.energyEfficiencyPanel.unknownDurationSessions', { count: acDc.unknownSessions }) }}
       </p>
     </div>

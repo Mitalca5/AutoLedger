@@ -30,9 +30,9 @@ const vehicleStore = useVehicleStore()
           </label>
           {{ t.tire.brand }} {{ t.tire.model }}
         </h4>
-        <div class="text-[11px] text-slate-500 font-mono">{{ t.tire.dimension }}</div>
+        <div class="text-xs text-slate-400 font-mono">{{ t.tire.dimension }}</div>
       </div>
-      <span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-full border border-slate-700 font-medium">
+      <span class="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full border border-slate-700 font-medium">
         {{ $t('tires.tireDisposedCard.scrapped') }}
       </span>
     </div>

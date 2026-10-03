@@ -38,13 +38,13 @@ const vehicleStore = useVehicleStore()
           <div class="font-bold text-white flex items-center gap-2">
             <span>{{ $t('expenses.remindersPanel.homelabWebhook') }}</span>
             <span
-              class="px-2 py-0.5 text-[10px] rounded-full font-bold border"
+              class="px-2 py-0.5 text-xs rounded-full font-bold border"
               :class="vehicleWebhook?.enabled ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
             >
               {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.active', { type: vehicleWebhook.type }) : $t('expenses.remindersPanel.notConfigured') }}
             </span>
           </div>
-          <p class="text-slate-400 text-[11px] mt-0.5">
+          <p class="text-slate-400 text-xs mt-0.5">
             {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.alertsSent') : $t('expenses.remindersPanel.alertsHint') }}
           </p>
         </div>
@@ -159,7 +159,7 @@ const vehicleStore = useVehicleStore()
 
             <span
               v-if="r.webhook_enabled"
-              class="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center gap-1"
+              class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center gap-1"
               :title="$t('expenses.remindersPanel.webhookNotificationEnabledForThis')"
             >
               <Radio class="w-2.5 h-2.5" />
@@ -189,13 +189,13 @@ const vehicleStore = useVehicleStore()
         <!-- Card details grid -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs text-slate-300">
           <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.mileageDue') }}</span>
+            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.mileageDue') }}</span>
             <span v-if="r.interval_km" class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyKm', { unit: distanceUnit(), interval_km: formatDistanceValue(r.interval_km) }) }}
-              <span v-if="r.observed_interval_km" class="text-slate-400 block text-[11px]">
+              <span v-if="r.observed_interval_km" class="text-slate-400 block text-xs">
                 {{ $t('expenses.remindersPanel.observedInterval', { km: formatDistanceValue(r.observed_interval_km), unit: distanceUnit(), months: r.observed_interval_months ?? '–' }) }}
               </span>
-              <span v-if="r.due_odometer" class="text-slate-400 block text-[11px]">
+              <span v-if="r.due_odometer" class="text-slate-400 block text-xs">
                 {{ $t('expenses.remindersPanel.dueAtKm', { unit: distanceUnit(), due_odometer: formatDistanceValue(r.due_odometer) }) }}
               </span>
             </span>
@@ -203,10 +203,10 @@ const vehicleStore = useVehicleStore()
           </div>
 
           <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
+            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
             <span v-if="r.interval_months" class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyMonths', { interval_months: r.interval_months }) }}
-              <span v-if="r.due_date" class="text-slate-400 block text-[11px]">
+              <span v-if="r.due_date" class="text-slate-400 block text-xs">
                 {{ $t('expenses.remindersPanel.due', { due_date: formatDate(r.due_date) }) }}
               </span>
             </span>
@@ -214,10 +214,10 @@ const vehicleStore = useVehicleStore()
           </div>
 
           <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-[11px] text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.lastCompleted') }}</span>
+            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.lastCompleted') }}</span>
             <span class="font-medium text-white">
               {{ r.last_service_date ? formatDate(r.last_service_date) : $t('expenses.remindersPanel.notEntered') }}
-              <span v-if="r.last_service_odometer" class="text-slate-400 block text-[11px]">
+              <span v-if="r.last_service_odometer" class="text-slate-400 block text-xs">
                 {{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(r.last_service_odometer) }) }}
               </span>
             </span>
@@ -226,7 +226,7 @@ const vehicleStore = useVehicleStore()
 
         <!-- Card footer -->
         <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-          <div class="text-[11px] text-slate-400">
+          <div class="text-xs text-slate-400">
             <span v-if="r.last_notified_at">
               {{ $t('expenses.remindersPanel.lastWebhookAlert', { last_notified_at: formatDate(r.last_notified_at) }) }}
             </span>

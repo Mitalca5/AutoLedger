@@ -101,7 +101,7 @@ async function submit() {
         <input id="qc-cost" v-model="form.cost" type="number" inputmode="decimal" step="any" min="0" class="quick-input min-w-0" @input="costTouched = true" />
         <button type="button" class="quick-chip shrink-0 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" @click="setFree">{{ $t('quickadd.quickChargeForm.free') }}</button>
       </div>
-      <p class="mt-1.5 min-h-4 text-[11px] text-slate-400" aria-live="polite">
+      <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
         <template v-if="followsTariff">{{ $t('quickadd.quickChargeForm.calculatedAtTheLastRate', { pricePerKwh: fmtPrice(memory.pricePerKwh!) }) }}</template>
         <template v-else-if="pricePerKwh !== null">{{ $t('quickadd.quickChargeForm.thatIsKwh', { pricePerKwh: fmtPrice(pricePerKwh) }) }}</template>
       </p>

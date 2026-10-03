@@ -159,7 +159,7 @@ onMounted(() => {
           </div>
           <div>
             <h2 class="text-sm font-bold text-white">{{ t('tariffs.publicModal.title') }}</h2>
-            <p class="text-[11px] text-slate-400">{{ t('tariffs.publicModal.subtitle') }}</p>
+            <p class="text-xs text-slate-400">{{ t('tariffs.publicModal.subtitle') }}</p>
           </div>
         </div>
         <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
@@ -339,7 +339,7 @@ onMounted(() => {
             </span>
           </div>
 
-          <div class="space-y-1 pt-2 border-t border-blue-500/20 text-[11px] text-slate-300">
+          <div class="space-y-1 pt-2 border-t border-blue-500/20 text-xs text-slate-300">
             <div v-if="breakdown.connection_fee_cents > 0" class="flex justify-between">
               <span>{{ t('tariffs.publicModal.breakdownConnection') }}</span>
               <span>{{ formatAmount(breakdown.connection_fee_cents / 100, currency) }}</span>

@@ -82,7 +82,7 @@ async function handleDisposeTire() {
           {{ selectedTire.brand }} {{ selectedTire.model }}
         </p>
         <div>
-          <label for="tire-dispose-date" class="block text-[11px] text-slate-400 mb-1 font-semibold">{{ $t('common.date') }}</label>
+          <label for="tire-dispose-date" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('common.date') }}</label>
           <AppDatePicker
             id="tire-dispose-date"
             v-model="disposeForm.date"
@@ -91,7 +91,7 @@ async function handleDisposeTire() {
           />
         </div>
         <div v-if="['FL', 'FR', 'RL', 'RR'].includes(selectedTire.current_position)">
-          <label for="tire-dispose-odometer" class="block text-[11px] text-slate-400 mb-1 font-semibold">{{ $t('tires.tireDisposeModal.odometerAtRemovalKm', { unit: distanceUnit() }) }}</label>
+          <label for="tire-dispose-odometer" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireDisposeModal.odometerAtRemovalKm', { unit: distanceUnit() }) }}</label>
           <DistanceInput id="tire-dispose-odometer" v-model="disposeForm.odometer" min="0" required class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500" />
         </div>
       </form>

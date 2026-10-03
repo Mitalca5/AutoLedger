@@ -74,13 +74,13 @@ function formatLast(iso?: string) {
       </div>
 
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
-        <div v-if="loading" class="flex justify-center py-6"><RefreshCw class="w-5 h-5 animate-spin text-slate-500" /></div>
+        <div v-if="loading" class="flex justify-center py-6"><RefreshCw class="w-5 h-5 animate-spin text-slate-400" /></div>
         <p v-else-if="error" class="text-rose-400">{{ error }}</p>
         <template v-else-if="summary">
           <div v-if="canCharge(vehicle?.powertrain)" class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <h4 class="font-bold text-white uppercase tracking-wider">{{ $t('vehicles.vehicleDataSourcesModal.teslamate') }}</h4>
-              <span class="font-semibold" :class="summary.teslamate_configured ? 'text-emerald-400' : 'text-slate-500'">
+              <span class="font-semibold" :class="summary.teslamate_configured ? 'text-emerald-400' : 'text-slate-400'">
                 {{ !isOwner ? $t('vehicles.vehicleCard.managedByAdmin') : summary.teslamate_configured ? $t('vehicles.vehicleCard.configured') : $t('vehicles.vehicleCard.notConfigured') }}
               </span>
             </div>
@@ -117,14 +117,14 @@ function formatLast(iso?: string) {
               <li v-for="r in rows" :key="r.origin" class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between gap-2">
                   <span class="font-semibold text-slate-200">{{ $t('vehicles.vehicleDataSourcesModal.origin.' + r.origin) }}</span>
-                  <span class="text-slate-500">{{ $t('vehicles.vehicleDataSourcesModal.lastData', { date: formatLast((r as any).last_at) }) }}</span>
+                  <span class="text-slate-400">{{ $t('vehicles.vehicleDataSourcesModal.lastData', { date: formatLast((r as any).last_at) }) }}</span>
                 </div>
                 <p class="mt-1 text-slate-400">
                   {{ $t('vehicles.vehicleDataSourcesModal.counts', { drives: (r as any).drives || 0, charges: (r as any).charges || 0, readings: (r as any).odometer_readings || 0 }) }}
                 </p>
               </li>
             </ul>
-            <p v-if="!summary.activity.length" class="text-slate-500 mt-2">{{ $t('vehicles.vehicleDataSourcesModal.empty') }}</p>
+            <p v-if="!summary.activity.length" class="text-slate-400 mt-2">{{ $t('vehicles.vehicleDataSourcesModal.empty') }}</p>
           </div>
         </template>
       </div>

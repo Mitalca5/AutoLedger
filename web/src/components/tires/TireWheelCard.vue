@@ -21,7 +21,7 @@ const vehicleStore = useVehicleStore()
   >
     <div class="flex items-start justify-between">
       <div>
-        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" @click.stop class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-rose-400 hover:text-rose-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
+        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" @click.stop class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400 hover:text-rose-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
           <input
             :id="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id"
             type="checkbox"
@@ -35,7 +35,7 @@ const vehicleStore = useVehicleStore()
         <div class="text-xs text-slate-400 font-mono">{{ stat.tire.dimension }}</div>
       </div>
       <span
-        class="px-2.5 py-1 rounded-full text-[11px] font-semibold border"
+        class="px-2.5 py-1 rounded-full text-xs font-semibold border"
         :class="getConditionBadge(stat.condition).class"
       >
         {{ getConditionBadge(stat.condition).label }}
@@ -45,11 +45,11 @@ const vehicleStore = useVehicleStore()
     <!-- Metrics Row -->
     <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 text-center">
       <div>
-        <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireWheelCard.totalDriven') }}</div>
+        <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireWheelCard.totalDriven') }}</div>
         <div class="text-sm font-bold text-slate-200">{{ formatDistance(stat.total_distance_km) }}</div>
       </div>
       <div>
-        <div class="text-[10px] text-slate-500 uppercase">{{ $t('tires.tireWheelCard.costKm', { unit: distanceUnit() }) }}</div>
+        <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireWheelCard.costKm', { unit: distanceUnit() }) }}</div>
         <div class="text-sm font-bold text-amber-400">{{ formatAmount(perDistance(Number(stat.cost_per_km)), vehicleStore.currency, 4) }}</div>
       </div>
     </div>
@@ -69,7 +69,7 @@ const vehicleStore = useVehicleStore()
       </div>
     </div>
   </div>
-  <div v-else class="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8 text-center text-slate-500 flex flex-col items-center justify-center space-y-2">
+  <div v-else class="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8 text-center text-slate-400 flex flex-col items-center justify-center space-y-2">
     <Disc class="w-8 h-8 opacity-30" />
     <span>{{ $t('tires.tireWheelCard.noTireFittedAtThe', { label, pos }) }}</span>
   </div>

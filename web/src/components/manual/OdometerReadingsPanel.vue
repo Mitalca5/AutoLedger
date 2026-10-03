@@ -170,7 +170,7 @@ onMounted(() => {
 
       <div v-if="loading" class="py-8 text-center text-xs text-slate-400">{{ $t('manual.odometerReadingsPanel.loadingTheReadings') }}</div>
 
-      <div v-else-if="readings.length === 0" class="py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800 text-xs text-slate-500">
+      <div v-else-if="readings.length === 0" class="py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800 text-xs text-slate-400">
         {{ $t('manual.odometerReadingsPanel.noManualReadingYet') }}
       </div>
 
@@ -187,7 +187,7 @@ onMounted(() => {
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-bold text-white font-mono">{{ formatDistance(r.odometer) }}</span>
-                <span v-if="r.source === 'HA'" class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
+                <span v-if="r.source === 'HA'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
                 <span class="text-xs text-slate-400">
                   {{ $t('manual.odometerReadingsPanel.onDate', { date: new Date(r.date).toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) }) }}
                 </span>

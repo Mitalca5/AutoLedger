@@ -8,7 +8,6 @@ import { RefreshCw, Car, Gauge, Plus, AlertCircle, AlertTriangle, X, CheckCircle
 import { useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { apiMessageText } from '@/services/apiError'
-import { APP_VERSION } from '@/version'
 
 const vehicleStore = useVehicleStore()
 const offlineStore = useOfflineStore()
@@ -88,7 +87,7 @@ function onVehicleChange(event: Event) {
         <!-- Offline queue -->
         <div
           v-if="!offlineStore.isOnline || offlineStore.pendingCount > 0"
-          class="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border"
+          class="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border"
           :class="offlineStore.isOnline ? 'text-sky-300 bg-sky-500/10 border-sky-500/20' : 'text-amber-300 bg-amber-500/10 border-amber-500/20'"
           :title="offlineStore.isOnline ? $t('shell.topBar.offlineSendingTitle') : $t('shell.topBar.offlineKeptTitle')"
           :aria-label="`${!offlineStore.isOnline ? $t('shell.topBar.offlineSentence') + ' ' : ''}${offlineStore.pendingCount > 0 ? $t('shell.topBar.pendingEntries', { count: offlineStore.pendingCount }) : ''}`"
@@ -118,7 +117,7 @@ function onVehicleChange(event: Event) {
         <!-- Sync result success -->
         <div
           v-if="vehicleStore.syncResult && !vehicleStore.syncResult.warnings?.length"
-          class="hidden md:flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg"
+          class="hidden md:flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg"
         >
           <CheckCircle2 class="w-3 h-3 shrink-0" />
           <span>{{ syncSummary }}</span>
@@ -126,10 +125,6 @@ function onVehicleChange(event: Event) {
             <X class="w-3 h-3" />
           </button>
         </div>
-
-        <span class="hidden sm:inline text-[10px] font-mono px-2 py-1 rounded-lg bg-slate-800/80 text-slate-400 border border-slate-700/50 font-medium">
-          {{ APP_VERSION }}
-        </span>
       </div>
     </header>
 

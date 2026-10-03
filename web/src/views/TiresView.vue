@@ -582,7 +582,7 @@ async function handleDeleteLog(l: any) {
     <!-- TAB 2: CATALOGUE & STOCK AU GARAGE -->
     <div v-if="activeTab === 'storage'" class="space-y-4">
       <div v-if="storageTires.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center text-slate-400 space-y-3">
-        <Package class="w-10 h-10 mx-auto text-slate-600" />
+        <Package class="w-10 h-10 mx-auto text-slate-400" />
         <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noTireInGarageStorage') }}</h3>
         <p class="text-xs text-slate-400 max-w-sm mx-auto">
           {{ $t('tires.tiresView.youCanRecordYourWinter') }}

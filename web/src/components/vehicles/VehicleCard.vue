@@ -51,7 +51,7 @@ function clearCardTestResult() {
             <h3 class="text-base font-bold text-white">{{ v.name }}</h3>
             <span
               v-if="v.role"
-              class="px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase tracking-wider"
+              class="px-2 py-0.5 text-xs font-semibold rounded-full uppercase tracking-wider"
               :class="{
                 'bg-amber-500/10 text-amber-400 border border-amber-500/20': v.role === 'OWNER',
                 'bg-sky-500/10 text-sky-400 border border-sky-500/20': v.role === 'EDITOR',
@@ -134,7 +134,7 @@ function clearCardTestResult() {
               ? 'text-rose-400'
               : v.teslamate_api_url
               ? 'text-emerald-400/80'
-              : 'text-slate-500'
+              : 'text-slate-400'
           "
         >
           {{
@@ -157,7 +157,7 @@ function clearCardTestResult() {
           <Zap class="w-3.5 h-3.5 text-sky-400" />
           {{ $t('vehicles.vehicleCard.kwh100kmKwh', { unit: distanceUnit(), estimated_kwh_100km: formatPerDistanceValue(Number(v.estimated_kwh_100km)), price: `${formatAmount(v.estimated_price_per_kwh, v.currency || 'EUR', 3)}/kWh` }) }}
         </p>
-        <p v-else class="text-xs text-slate-500 mt-1">{{ $t('vehicles.vehicleCard.notConfigured') }}</p>
+        <p v-else class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleCard.notConfigured') }}</p>
       </div>
     </div>
 
