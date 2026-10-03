@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AutoLedger</title>
-<meta name="description" content="Self-hosted total cost of ownership ledger for electric, hybrid and combustion vehicles. Any brand, TeslaMate, CSV or manual entry.">
+<meta name="description" content="Self-hosted total cost of ownership ledger for electric, hybrid and combustion vehicles. Any brand: manual entry, CSV, API or telemetry.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root{--bg:#f8fafc;--fg:#0f172a;--muted:#475569;--card:#fff;--line:#e2e8f0;--accent:#e11d48;--code:#0f172a;--codefg:#e2e8f0}
@@ -38,6 +38,9 @@ tr:last-child td{border-bottom:0}
 pre{background:var(--code);color:var(--codefg);padding:16px;border-radius:12px;overflow-x:auto;font-size:.88rem;line-height:1.5}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .pill{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+.lang{margin-left:16px;display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;vertical-align:middle}
+.lang button{background:none;border:0;color:var(--muted);padding:3px 10px;font:inherit;font-size:.85rem;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--accent);color:#fff}
 footer{padding:32px 0 48px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);margin-top:24px}
 footer a{color:var(--muted)}
 </style>
@@ -46,75 +49,90 @@ footer a{color:var(--muted)}
 <div class="wrap">
 <header>
   <div class="brand"><img src="icon.png" alt="" width="32" height="32">AutoLedger</div>
-  <nav><a href="#features">Features</a><a href="#ingestion">Data in</a><a href="#install">Install</a><a href="https://github.com/Rem7474/AutoLedger">GitHub</a></nav>
+  <nav><a href="#features" data-i18n="nav_f">Features</a><a href="#ingestion" data-i18n="nav_i">Data in</a><a href="#install" data-i18n="nav_s">Install</a><a href="https://github.com/Rem7474/AutoLedger">GitHub</a><span class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="fr" aria-pressed="false">FR</button></span></nav>
 </header>
 
 <div class="hero">
-  <h1>What does your car <span>really</span> cost you?</h1>
-  <p class="lead">AutoLedger is a self-hosted ledger that adds up everything a vehicle costs, to the cent: energy, financing, depreciation, tires, tolls, maintenance and insurance. Electric, combustion or hybrid, any brand, on your own server.</p>
-  <a class="btn primary" href="#install">Install with Docker</a>
-  <a class="btn" href="https://github.com/Rem7474/AutoLedger">View on GitHub</a>
-  <div style="margin-top:12px">
-    <span class="pill">Self-hosted</span><span class="pill">Open source</span><span class="pill">No telemetry</span><span class="pill">Go + Vue 3</span><span class="pill">PostgreSQL</span><span class="pill">PWA</span>
-  </div>
+  <h1 data-i18n="h1">What does your vehicle <span>really</span> cost you?</h1>
+  <p class="lead" data-i18n="lead">AutoLedger is a self-hosted ledger that adds up everything a vehicle costs, to the cent: fuel and electricity, financing, depreciation, tires, tolls, maintenance and insurance. Electric, hybrid or combustion, any brand, on your own server.</p>
+  <a href="#install" class="btn primary" data-i18n="cta1">Install with Docker</a>
+  <a href="https://github.com/Rem7474/AutoLedger" class="btn" data-i18n="cta2">View on GitHub</a>
+  <div style="margin-top:12px"><span class="pill" data-i18n="p1">Self-hosted</span><span class="pill" data-i18n="p2">Open source</span><span class="pill" data-i18n="p3">No telemetry</span><span class="pill" data-i18n="p4">Go + Vue 3</span><span class="pill" data-i18n="p5">PostgreSQL</span><span class="pill" data-i18n="p6">PWA</span></div>
 </div>
-
 <section id="features">
-  <h2>What it does</h2>
-  <p class="sub">One cost ledger feeds every figure you see, so the cost per km on the dashboard is the sum of what you actually paid.</p>
+  <h2 data-i18n="f_h">What it does</h2>
+  <p class="sub" data-i18n="f_sub">One cost ledger feeds every figure you see, so the cost per km on the dashboard is the sum of what you actually paid.</p>
   <div class="grid">
-    <div class="card"><h3>Full TCO engine</h3><p>Cash purchase, loan or lease (LOA/LLD) with fees, deposit, mileage allowance and resale value. Real cost per km, net of carpooling revenue, with a completeness score.</p></div>
-    <div class="card"><h3>Energy analytics</h3><p>Consumption in kWh/100 km or L/100 km, home vs AC vs DC charging, fuel fill-ups, and the effect of cold weather.</p></div>
-    <div class="card"><h3>Tariffs</h3><p>Flat or time-of-use electricity plans with public presets, applied to each charging session when it is recorded.</p></div>
-    <div class="card"><h3>Tires by axle</h3><p>Mount, swap and store tires per position, log tread depth and project the remaining mileage.</p></div>
-    <div class="card"><h3>Carpooling</h3><p>Split a trip fairly using the real energy price and a per-km insurance share.</p></div>
-    <div class="card"><h3>Maintenance reminders</h3><p>Date or mileage triggers, delivered to Discord, Telegram, Gotify or any JSON webhook such as Home Assistant, Node-RED or n8n.</p></div>
-    <div class="card"><h3>Fleet and comparison</h3><p>Several vehicles in one account, a fleet dashboard, and EV vs combustion scenarios built from your own data.</p></div>
-    <div class="card"><h3>Documents</h3><p>Attach invoices, receipts and registration cards to your records, stored on your own volume.</p></div>
-    <div class="card"><h3>Secure by default</h3><p>Local accounts or OIDC single sign-on (Authentik, Keycloak, Authelia, Kanidm), encrypted stored credentials, rate limiting and security headers.</p></div>
+    <div class="card"><h3 data-i18n="c1_h">Full TCO engine</h3><p data-i18n="c1_p">Cash purchase, loan or lease (LOA/LLD) with fees, deposit, mileage allowance and resale value. Real cost per km, net of carpooling revenue, with a completeness score.</p></div>
+    <div class="card"><h3 data-i18n="c2_h">Fuel and electricity</h3><p data-i18n="c2_p">Fill-ups and charging sessions in one place: L/100 km or kWh/100 km, price paid per unit, and the real cost per km of each energy.</p></div>
+    <div class="card"><h3 data-i18n="c3_h">Electricity tariffs</h3><p data-i18n="c3_p">For vehicles that charge: flat or time-of-use plans with public presets, applied to each session when it is recorded.</p></div>
+    <div class="card"><h3 data-i18n="c4_h">Tires by axle</h3><p data-i18n="c4_p">Mount, swap and store tires per position, log tread depth and project the remaining mileage.</p></div>
+    <div class="card"><h3 data-i18n="c5_h">Carpooling</h3><p data-i18n="c5_p">Split a trip fairly using the real energy price and a per-km insurance share.</p></div>
+    <div class="card"><h3 data-i18n="c6_h">Maintenance reminders</h3><p data-i18n="c6_p">Date or mileage triggers, delivered to Discord, Telegram, Gotify or any JSON webhook such as Home Assistant, Node-RED or n8n.</p></div>
+    <div class="card"><h3 data-i18n="c7_h">Fleet and comparison</h3><p data-i18n="c7_p">Several vehicles in one account, a fleet dashboard, and electric vs combustion scenarios built from your own data.</p></div>
+    <div class="card"><h3 data-i18n="c8_h">Documents</h3><p data-i18n="c8_p">Attach invoices, receipts and registration cards to your records, stored on your own volume.</p></div>
+    <div class="card"><h3 data-i18n="c9_h">Secure by default</h3><p data-i18n="c9_p">Local accounts or OIDC single sign-on (Authentik, Keycloak, Authelia, Kanidm), encrypted stored credentials, rate limiting and security headers.</p></div>
   </div>
 </section>
-
 <section id="ingestion">
-  <h2>Bring your data your way</h2>
-  <p class="sub">The vehicle is described by what you actually have. Nothing is tied to one brand.</p>
+  <h2 data-i18n="i_h">Bring your data your way</h2>
+  <p class="sub" data-i18n="i_sub">The vehicle is described by what you actually have. Nothing is tied to one brand or one powertrain.</p>
   <div class="grid">
-    <div class="card"><h3>Connected</h3><p>Continuous sync with <a href="https://github.com/teslamate-org/teslamate">TeslaMate</a>: odometer, drives and charges, with fees re-read when you update them.</p></div>
-    <div class="card"><h3>Ingestion API and Home Assistant</h3><p>Push drives, charges, fill-ups and odometer readings with scoped tokens. The <a href="https://github.com/Rem7474/autoledger-homeassistant">official Home Assistant integration</a> (HACS) detects wallbox charging sessions and sends them for you.</p></div>
-    <div class="card"><h3>CSV import</h3><p>Column mapping with preview, saved profiles, deduplication, and one-click undo of a whole import batch.</p></div>
-    <div class="card"><h3>Manual PWA</h3><p>Add a fill-up, a charge or a toll in a few taps on your phone. Entries made offline are queued and sent when you are back online.</p></div>
+    <div class="card"><h3 data-i18n="i1_h">Manual PWA</h3><p data-i18n="i1_p">Add a fill-up, a charge, a toll or an odometer reading in a few taps on your phone. Entries made offline are queued and sent when you are back online.</p></div>
+    <div class="card"><h3 data-i18n="i2_h">CSV import</h3><p data-i18n="i2_p">Column mapping with preview, saved profiles, deduplication, and one-click undo of a whole import batch. Works for fill-ups, charges, trips and odometer readings.</p></div>
+    <div class="card"><h3 data-i18n="i3_h">Ingestion API and Home Assistant</h3><p data-i18n="i3_p">Push drives, charges, fill-ups and odometer readings with scoped tokens, from an OBD2 logger, a script or Home Assistant. The <a href="https://github.com/Rem7474/autoledger-homeassistant">official Home Assistant integration</a> (HACS) detects wallbox sessions for you.</p></div>
+    <div class="card"><h3 data-i18n="i4_h">Telemetry sync</h3><p data-i18n="i4_p">Optional continuous sync with <a href="https://github.com/teslamate-org/teslamate">TeslaMate</a> for vehicles it supports: odometer, drives and charges.</p></div>
   </div>
 </section>
-
 <section>
-  <h2>How it compares</h2>
-  <div class="table-wrap">
+  <h2 data-i18n="t_h">How it compares</h2>
+<div class="table-wrap">
   <table>
-    <thead><tr><th></th><th>AutoLedger</th><th>Spreadsheet</th><th>Paid SaaS</th><th>Manufacturer app</th></tr></thead>
+    <thead><tr><th></th><th><span data-i18n="th1">AutoLedger</span></th><th><span data-i18n="th2">Spreadsheet</span></th><th><span data-i18n="th3">Paid SaaS</span></th><th><span data-i18n="th4">Manufacturer app</span></th></tr></thead>
     <tbody>
-      <tr><td>Self-hosted, private</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
-      <tr><td>Any brand and powertrain</td><td>Yes</td><td>Manual</td><td>Often EV only</td><td>One brand</td></tr>
-      <tr><td>Financing, depreciation, tires, tolls</td><td>Yes</td><td>Manual</td><td>Energy only</td><td>No</td></tr>
-      <tr><td>Documents and reminders</td><td>Yes</td><td>No</td><td>Limited</td><td>No</td></tr>
+      <tr><td><span data-i18n="r0_0">Self-hosted, private</span></td><td><span data-i18n="r0_1">Yes</span></td><td><span data-i18n="r0_2">Yes</span></td><td><span data-i18n="r0_3">No</span></td><td><span data-i18n="r0_4">No</span></td></tr>
+      <tr><td><span data-i18n="r1_0">Any brand and powertrain</span></td><td><span data-i18n="r1_1">Yes</span></td><td><span data-i18n="r1_2">Manual</span></td><td><span data-i18n="r1_3">Often one powertrain</span></td><td><span data-i18n="r1_4">One brand</span></td></tr>
+      <tr><td><span data-i18n="r2_0">Financing, depreciation, tires, tolls</span></td><td><span data-i18n="r2_1">Yes</span></td><td><span data-i18n="r2_2">Manual</span></td><td><span data-i18n="r2_3">Energy only</span></td><td><span data-i18n="r2_4">No</span></td></tr>
+      <tr><td><span data-i18n="r3_0">Documents and reminders</span></td><td><span data-i18n="r3_1">Yes</span></td><td><span data-i18n="r3_2">No</span></td><td><span data-i18n="r3_3">Limited</span></td><td><span data-i18n="r3_4">No</span></td></tr>
     </tbody>
   </table>
   </div>
 </section>
-
 <section id="install">
-  <h2>Run it in two minutes</h2>
-  <p class="sub">Multi-architecture image (amd64 and arm64) with a bundled PostgreSQL and optional backup service.</p>
+  <h2 data-i18n="s_h">Run it in two minutes</h2>
+  <p class="sub" data-i18n="s_sub">Multi-architecture image (amd64 and arm64) with a bundled PostgreSQL and optional backup service.</p>
 <pre><code>mkdir autoledger &amp;&amp; cd autoledger
 curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
 curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
 openssl rand -hex 32   # AUTOLEDGER_ENCRYPTION_KEY
 docker compose up -d   # http://localhost:8080</code></pre>
-  <p class="sub">Set <code>AUTOLEDGER_ENCRYPTION_KEY</code>, <code>AUTOLEDGER_DB_PASSWORD</code> and <code>AUTOLEDGER_JWT_SECRET</code> in <code>.env</code> first. Full variable reference and upgrade notes are in the <a href="https://github.com/Rem7474/AutoLedger#readme">README</a>.</p>
+  <p class="sub" data-i18n="s_note">Set <code>AUTOLEDGER_ENCRYPTION_KEY</code>, <code>AUTOLEDGER_DB_PASSWORD</code> and <code>AUTOLEDGER_JWT_SECRET</code> in <code>.env</code> first. Full variable reference and upgrade notes are in the <a href="https://github.com/Rem7474/AutoLedger#readme">README</a>.</p>
 </section>
-
-<footer>
-  AutoLedger is open source. <a href="https://github.com/Rem7474/AutoLedger">Source</a> · <a href="https://github.com/Rem7474/AutoLedger/issues">Issues</a> · <a href="https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger">Docker image</a>
-</footer>
+<footer><span data-i18n="ft">AutoLedger is open source.</span> <a href="https://github.com/Rem7474/AutoLedger">Source</a> · <a href="https://github.com/Rem7474/AutoLedger/issues">Issues</a> · <a href="https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger">Docker</a></footer>
 </div>
+<script>
+(function(){
+  var FR = {"h1": "Combien vous coûte <span>vraiment</span> votre véhicule ?", "lead": "AutoLedger est un registre auto-hébergé qui additionne tout ce que coûte un véhicule, au centime près : carburant et électricité, financement, dépréciation, pneus, péages, entretien et assurance. Électrique, hybride ou thermique, toutes marques, sur votre propre serveur.", "cta1": "Installer avec Docker", "cta2": "Voir sur GitHub", "p1": "Auto-hébergé", "p2": "Open source", "p3": "Aucune télémétrie", "p4": "Go + Vue 3", "p5": "PostgreSQL", "p6": "PWA", "f_h": "Ce que ça fait", "f_sub": "Un seul registre de coûts alimente tous les chiffres : le coût au km du tableau de bord est la somme de ce que vous avez réellement payé.", "c1_h": "Moteur TCO complet", "c1_p": "Achat comptant, crédit ou location (LOA/LLD) avec frais, dépôt de garantie, kilométrage inclus et valeur de revente. Coût réel au km, net des revenus de covoiturage, avec un score de complétude.", "c2_h": "Carburant et électricité", "c2_p": "Pleins et recharges au même endroit : L/100 km ou kWh/100 km, prix payé par unité, et coût réel au km de chaque énergie.", "c3_h": "Tarifs d’électricité", "c3_p": "Pour les véhicules qui se rechargent : forfaits fixes ou heures creuses/pleines avec préréglages publics, appliqués à chaque session à son enregistrement.", "c4_h": "Pneus par essieu", "c4_p": "Montez, permutez et stockez les pneus par position, relevez la profondeur de sculpture et projetez le kilométrage restant.", "c5_h": "Covoiturage", "c5_p": "Partagez un trajet équitablement avec le prix réel de l’énergie et une part d’assurance au km.", "c6_h": "Rappels d’entretien", "c6_p": "Échéances par date ou kilométrage, envoyées vers Discord, Telegram, Gotify ou tout webhook JSON (Home Assistant, Node-RED, n8n).", "c7_h": "Flotte et comparaison", "c7_p": "Plusieurs véhicules dans un compte, un tableau de bord de flotte, et des scénarios électrique contre thermique construits sur vos propres données.", "c8_h": "Documents", "c8_p": "Joignez factures, tickets et cartes grises à vos enregistrements, stockés sur votre propre volume.", "c9_h": "Sécurisé par défaut", "c9_p": "Comptes locaux ou SSO OIDC (Authentik, Keycloak, Authelia, Kanidm), identifiants chiffrés, limitation de débit et en-têtes de sécurité.", "i_h": "Vos données, à votre façon", "i_sub": "Le véhicule est décrit par ce que vous avez vraiment. Rien n’est lié à une marque ou à une motorisation.", "i1_h": "PWA en saisie manuelle", "i1_p": "Ajoutez un plein, une recharge, un péage ou un relevé kilométrique en quelques appuis. Les saisies hors ligne sont mises en file et envoyées au retour du réseau.", "i2_h": "Import CSV", "i2_p": "Mappage des colonnes avec aperçu, profils enregistrés, dédoublonnage et annulation d’un lot entier en un clic. Pour les pleins, recharges, trajets et relevés kilométriques.", "i3_h": "API d’ingestion et Home Assistant", "i3_p": "Envoyez trajets, recharges, pleins et relevés avec des jetons à portée limitée, depuis un boîtier OBD2, un script ou Home Assistant. L’<a href=\"https://github.com/Rem7474/autoledger-homeassistant\">intégration Home Assistant officielle</a> (HACS) détecte les sessions de wallbox pour vous.", "i4_h": "Synchronisation télémétrie", "i4_p": "Synchronisation continue optionnelle avec <a href=\"https://github.com/teslamate-org/teslamate\">TeslaMate</a> pour les véhicules qu’il prend en charge : kilométrage, trajets et recharges.", "t_h": "Comparaison", "th1": "AutoLedger", "th2": "Tableur", "th3": "SaaS payant", "th4": "App constructeur", "r0_0": "Auto-hébergé, privé", "r0_1": "Oui", "r0_2": "Oui", "r0_3": "Non", "r0_4": "Non", "r1_0": "Toutes marques et motorisations", "r1_1": "Oui", "r1_2": "Manuel", "r1_3": "Souvent une seule motorisation", "r1_4": "Une marque", "r2_0": "Financement, dépréciation, pneus, péages", "r2_1": "Oui", "r2_2": "Manuel", "r2_3": "Énergie seule", "r2_4": "Non", "r3_0": "Documents et rappels", "r3_1": "Oui", "r3_2": "Non", "r3_3": "Limité", "r3_4": "Non", "s_h": "En ligne en deux minutes", "s_sub": "Image multi-architecture (amd64 et arm64) avec PostgreSQL inclus et service de sauvegarde optionnel.", "s_note": "Renseignez d’abord <code>AUTOLEDGER_ENCRYPTION_KEY</code>, <code>AUTOLEDGER_DB_PASSWORD</code> et <code>AUTOLEDGER_JWT_SECRET</code> dans <code>.env</code>. La référence des variables et les notes de mise à jour sont dans le <a href=\"https://github.com/Rem7474/AutoLedger#readme\">README</a>.", "ft": "AutoLedger est open source.", "title": "AutoLedger", "nav_f": "Fonctionnalités", "nav_i": "Données", "nav_s": "Installation"};
+  var nodes = document.querySelectorAll('[data-i18n]');
+  var EN = {};
+  nodes.forEach(function(n){ EN[n.getAttribute('data-i18n')] = n.innerHTML; });
+  var metaEN = document.querySelector('meta[name=description]').content;
+  var metaFR = "Registre TCO auto-hébergé pour véhicules électriques, hybrides et thermiques. Toutes marques : saisie manuelle, CSV, API ou télémétrie.";
+  function apply(lang){
+    var dict = lang === 'fr' ? FR : EN;
+    nodes.forEach(function(n){ var v = dict[n.getAttribute('data-i18n')]; if (v !== undefined) n.innerHTML = v; });
+    document.documentElement.lang = lang;
+    document.querySelector('meta[name=description]').content = lang === 'fr' ? metaFR : metaEN;
+    document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
+  }
+  var lang = 'en';
+  try { lang = localStorage.getItem('al-lang') || ''; } catch (e) {}
+  if (lang !== 'en' && lang !== 'fr') lang = (navigator.language || '').toLowerCase().indexOf('fr') === 0 ? 'fr' : 'en';
+  apply(lang);
+  document.querySelectorAll('.lang button').forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.dataset.lang); try { localStorage.setItem('al-lang', b.dataset.lang); } catch (e) {} });
+  });
+})();
+</script>
 </body>
 </html>
