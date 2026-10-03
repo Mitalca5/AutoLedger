@@ -577,6 +577,7 @@ async function openWebhookModal() {
       @edit="openEditReminderModal"
       @complete="openCompleteReminder"
       @delete="handleDeleteReminder"
+      @reload="loadReminders"
     />
 
     <div

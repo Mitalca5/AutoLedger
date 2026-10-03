@@ -326,5 +326,9 @@
   "mileage": {
     "label_required": "A name for the scale is required",
     "rate_invalid": "Invalid year, distance slice or rate"
+  },
+  "reminder_template": {
+    "name_required": "A name for the template is required",
+    "items_required": "A template needs at least one reminder with a title and an interval"
   }
 }

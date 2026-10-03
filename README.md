@@ -89,6 +89,7 @@ Home Assistant, Node-RED, n8n or any script can also push charging sessions, dri
 
 ### 🔔 Maintenance Reminders & Homelab Notifications
 - **Dual Trigger Monitoring**: Proactive notifications based on due dates and/or mileage thresholds calculated against the real odometer.
+- **Your own templates**: no manufacturer plan is built in. Save a vehicle's reminders as a template, apply it to another vehicle, and see the interval you really follow once a reminder has been completed twice.
 - **Multi-Channel Dispatchers**: Native integrations for **Discord** (rich embeds), **Telegram** (Markdown bot API), **Gotify** (push notifications), and **Generic JSON Webhooks** (Home Assistant, Node-RED, n8n).
 
 ### 🔐 Hybrid Authentication & Homelab Security

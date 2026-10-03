@@ -243,7 +243,20 @@
     "kmLeft": "{km} {unit} left",
     "daysOver": "{days} d overdue",
     "daysLeft": "{days} d left",
-    "notEntered": "Not entered"
+    "notEntered": "Not entered",
+    "templates": {
+      "title": "Reminder templates",
+      "hint": "Save this vehicle's reminders as a template and apply it to another vehicle. Reminders already present (same title) are skipped.",
+      "none": "No template yet",
+      "pick": "Choose a template",
+      "apply": "Apply",
+      "delete": "Delete",
+      "saveName": "Template name",
+      "save": "Save current reminders as a template",
+      "applied": "{created} reminder(s) added, {skipped} already present.",
+      "saved": "Template saved."
+    },
+    "observedInterval": "You do it every {km} {unit} / {months} months on average"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Drop the invoice here or click to browse",

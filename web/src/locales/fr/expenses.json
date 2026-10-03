@@ -243,7 +243,20 @@
     "kmLeft": "Reste {km} {unit}",
     "daysOver": "Dépassé de {days} j",
     "daysLeft": "Reste {days} j",
-    "notEntered": "Non renseigné"
+    "notEntered": "Non renseigné",
+    "templates": {
+      "title": "Modèles de rappels",
+      "hint": "Enregistrez les rappels de ce véhicule comme modèle et appliquez-le à un autre véhicule. Les rappels déjà présents (même titre) sont ignorés.",
+      "none": "Aucun modèle pour l’instant",
+      "pick": "Choisir un modèle",
+      "apply": "Appliquer",
+      "delete": "Supprimer",
+      "saveName": "Nom du modèle",
+      "save": "Enregistrer les rappels actuels comme modèle",
+      "applied": "{created} rappel(s) ajouté(s), {skipped} déjà présent(s).",
+      "saved": "Modèle enregistré."
+    },
+    "observedInterval": "Vous le faites en moyenne tous les {km} {unit} / {months} mois"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Déposez la facture ici ou cliquez pour parcourir",

@@ -153,7 +153,7 @@ func (r *Repository) CompleteMaintenanceReminder(ctx context.Context, vehicleID,
 	if cmdTag.RowsAffected() == 0 {
 		return ErrNotFound
 	}
-	return nil
+	return r.recordReminderCompletion(ctx, vehicleID, reminderID, completedDate, completedOdo)
 }
 
 func (r *Repository) DeleteMaintenanceReminder(ctx context.Context, vehicleID, reminderID string) error {

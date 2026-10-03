@@ -5,6 +5,7 @@ import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
 import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles } from 'lucide-vue-next'
 import { reminderPresets, formatDate, type ReminderPreset } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import ReminderTemplatesBar from '@/components/expenses/ReminderTemplatesBar.vue'
 
 defineProps<{
   reminders: MaintenanceReminder[]
@@ -20,6 +21,7 @@ const emit = defineEmits<{
   edit: [reminder: MaintenanceReminder]
   complete: [reminder: MaintenanceReminder]
   delete: [reminder: MaintenanceReminder]
+  reload: []
 }>()
 const vehicleStore = useVehicleStore()
 </script>
@@ -55,6 +57,8 @@ const vehicleStore = useVehicleStore()
         {{ vehicleWebhook ? $t('expenses.remindersPanel.editWebhook') : $t('expenses.remindersPanel.setUpWebhook') }}
       </button>
     </div>
+
+    <ReminderTemplatesBar v-if="vehicleStore.canEdit" :has-reminders="reminders.length > 0" @changed="emit('reload')" />
 
     <!-- Quick summary stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -188,6 +192,9 @@ const vehicleStore = useVehicleStore()
             <span class="text-[11px] text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.mileageDue') }}</span>
             <span v-if="r.interval_km" class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyKm', { unit: distanceUnit(), interval_km: formatDistanceValue(r.interval_km) }) }}
+              <span v-if="r.observed_interval_km" class="text-slate-400 block text-[11px]">
+                {{ $t('expenses.remindersPanel.observedInterval', { km: formatDistanceValue(r.observed_interval_km), unit: distanceUnit(), months: r.observed_interval_months ?? '–' }) }}
+              </span>
               <span v-if="r.due_odometer" class="text-slate-400 block text-[11px]">
                 {{ $t('expenses.remindersPanel.dueAtKm', { unit: distanceUnit(), due_odometer: formatDistanceValue(r.due_odometer) }) }}
               </span>

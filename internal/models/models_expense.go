@@ -113,6 +113,10 @@ type MaintenanceReminder struct {
 	RemainingDays *int       `json:"remaining_days,omitempty"`
 	DueOdometer   *float64   `json:"due_odometer,omitempty"`
 	DueDate       *time.Time `json:"due_date,omitempty"`
+
+	// Intervals the user really followed, averaged over the gaps between completions; absent below two completions.
+	ObservedIntervalKm     *int     `json:"observed_interval_km,omitempty"`
+	ObservedIntervalMonths *float64 `json:"observed_interval_months,omitempty"`
 }
 
 // ComputeStatus calculates the status (OK, DUE_SOON, OVERDUE) and remaining km/days.

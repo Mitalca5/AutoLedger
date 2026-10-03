@@ -482,6 +482,16 @@ export const api = {
     request<{ success: boolean }>(`/vehicles/${vehicleId}/reminders/${reminderId}`, { method: 'DELETE' }, t('shell.api.reminderDeleted')),
   completeReminder: (vehicleId: string, reminderId: string, data: { completed_date: string; completed_odometer?: number }) =>
     request<MaintenanceReminder>(`/vehicles/${vehicleId}/reminders/${reminderId}/complete`, { method: 'POST', body: JSON.stringify(data) }, t('shell.api.maintenanceDone')),
+  getReminderTemplates: () => request<{ templates: ReminderTemplate[] }>('/reminder-templates/'),
+  createReminderTemplate: (data: { name: string; from_vehicle_id: string }) =>
+    request<ReminderTemplate>('/reminder-templates/', { method: 'POST', body: JSON.stringify(data) }),
+  deleteReminderTemplate: (id: string) =>
+    request<{ success: boolean }>(`/reminder-templates/${id}`, { method: 'DELETE' }),
+  applyReminderTemplate: (vehicleId: string, templateId: string) =>
+    request<{ created: MaintenanceReminder[]; skipped: string[] }>(`/vehicles/${vehicleId}/reminders/apply-template`, {
+      method: 'POST',
+      body: JSON.stringify({ template_id: templateId }),
+    }),
   getVehicleWebhook: (vehicleId: string) =>
     request<VehicleWebhook | null>(`/vehicles/${vehicleId}/webhook`),
   saveVehicleWebhook: (vehicleId: string, data: any) =>
@@ -550,6 +560,8 @@ export interface MaintenanceReminder {
   webhook_enabled: boolean
   last_notified_at?: string | null
   last_notified_odometer?: number | null
+  observed_interval_km?: number | null
+  observed_interval_months?: number | null
   created_at: string
   updated_at: string
   status: 'OK' | 'DUE_SOON' | 'OVERDUE'
@@ -557,6 +569,12 @@ export interface MaintenanceReminder {
   remaining_days?: number | null
   due_odometer?: number | null
   due_date?: string | null
+}
+
+export interface ReminderTemplate {
+  id: string
+  name: string
+  items: { title: string; category: string; interval_km: number | null; interval_months: number | null; lead_km: number; lead_days: number }[]
 }
 
 export interface VehicleWebhook {

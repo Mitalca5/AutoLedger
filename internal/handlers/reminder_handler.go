@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -52,6 +53,22 @@ func (h *ReminderHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	if reminders == nil {
 		reminders = []models.MaintenanceReminder{}
+	}
+	if observed, oerr := h.repo.ObservedReminderIntervals(r.Context(), vehicleID); oerr == nil {
+		for i := range reminders {
+			o, ok := observed[reminders[i].ID]
+			if !ok {
+				continue
+			}
+			if o.AvgKm != nil {
+				km := int(math.Round(*o.AvgKm))
+				reminders[i].ObservedIntervalKm = &km
+			}
+			if o.AvgDays != nil {
+				months := math.Round(*o.AvgDays/30.4375*10) / 10
+				reminders[i].ObservedIntervalMonths = &months
+			}
+		}
 	}
 
 	writeJSON(w, http.StatusOK, reminders)

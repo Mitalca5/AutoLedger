@@ -416,6 +416,12 @@ func main() {
 				r.Post("/", mileageHandler.CreateRate)
 				r.Delete("/{id}", mileageHandler.DeleteRate)
 			})
+			// Reminder templates
+			r.Route("/api/reminder-templates", func(r chi.Router) {
+				r.Get("/", reminderHandler.ListTemplates)
+				r.Post("/", reminderHandler.CreateTemplate)
+				r.Delete("/{id}", reminderHandler.DeleteTemplate)
+			})
 			r.Route("/api/tariffs", func(r chi.Router) {
 				r.Get("/plans", tariffHandler.List)
 				r.Post("/plans", tariffHandler.Create)
@@ -576,6 +582,7 @@ func main() {
 				// Maintenance Reminders & Webhooks
 				r.Get("/{vehicleId}/reminders", reminderHandler.List)
 				r.Post("/{vehicleId}/reminders", reminderHandler.Create)
+				r.Post("/{vehicleId}/reminders/apply-template", reminderHandler.ApplyTemplate)
 				r.Put("/{vehicleId}/reminders/{reminderId}", reminderHandler.Update)
 				r.Delete("/{vehicleId}/reminders/{reminderId}", reminderHandler.Delete)
 				r.Post("/{vehicleId}/reminders/{reminderId}/complete", reminderHandler.Complete)

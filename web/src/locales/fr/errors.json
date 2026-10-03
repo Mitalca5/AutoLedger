@@ -326,5 +326,9 @@
   "mileage": {
     "label_required": "Un nom de barème est requis",
     "rate_invalid": "Année, tranche de distance ou taux invalide"
+  },
+  "reminder_template": {
+    "name_required": "Un nom de modèle est requis",
+    "items_required": "Un modèle contient au moins un rappel avec un titre et un intervalle"
   }
 }
