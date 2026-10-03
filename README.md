@@ -77,6 +77,7 @@ Home Assistant, Node-RED, n8n or any script can also push charging sessions, dri
   - *Leasing (LOA / LLD)*: Down payment, monthly payments, security deposit, contract mileage allowance, and excess mileage provisions.
 - **Advanced Indicators**: Real cost per km (energy + tolls vs full TCO), net cost factoring carpooling revenues, and an adaptive TCO completeness score.
 - **Energy Analytics** (for EVs): Real consumption in kWh/100 km, home vs AC vs DC charging efficiency, battery temperature correlation, and cold-weather impact.
+- **Battery health and residual value**: Source-agnostic state of health (OBD2 or garage readings, TeslaMate, or estimated from complete charges) and a resale value projection built from your own purchase price and expected resale, adjusted for age, distance and battery health.
 
 ### 🛞 Tire Lifecycle Management
 - **Axle-Level Tracking**: Mount, swap, and dismount tires across axles (`FL`, `FR`, `RL`, `RR`, `STORAGE`, `DISPOSED`) with chronological session logs.

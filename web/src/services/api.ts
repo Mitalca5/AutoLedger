@@ -368,6 +368,15 @@ export const api = {
 
   // TCO Analytics
   getTCO: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/tco`),
+  getBatteryHealth: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/battery-health`),
+  saveBatteryReading: (vehicleId: string, data: { date: string; health_percent?: number; current_capacity_kwh?: number; max_capacity_kwh?: number }) =>
+    request<any>(`/vehicles/${vehicleId}/battery-health`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteBatteryReading: (vehicleId: string, date: string) => request<void>(`/vehicles/${vehicleId}/battery-health/${date}`, { method: 'DELETE' }),
+  getResidualValue: (vehicleId: string, opts: { expected_km?: number; km_share?: number; health_weight?: number }) => {
+    const q = new URLSearchParams()
+    for (const [k, v] of Object.entries(opts)) if (v !== undefined && !Number.isNaN(v)) q.set(k, String(v))
+    return request<any>(`/vehicles/${vehicleId}/residual-value?${q}`)
+  },
   getEnergyStats: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/energy-stats`),
 
   // EV vs ICE cost comparison (informational)

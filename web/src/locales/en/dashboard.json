@@ -264,5 +264,28 @@
     "financing": "Financing and leasing",
     "financingNote": "Smoothed: {smoothed} (monthly payment made: {paid})",
     "other": "Subscriptions, taxes and other"
+  },
+  "residualPanel": {
+    "title": "Battery health and residual value",
+    "health": "Battery state of health",
+    "noHealth": "Unknown yet: add a reading, or the new-battery capacity so the charges can be compared with it.",
+    "healthHint": "A reading can come from an OBD2 scan, a garage report, TeslaMate or the ingestion API. Without one, the capacity estimated from your complete charges is compared with the new-battery capacity.",
+    "date": "Reading date",
+    "percent": "Health (%)",
+    "newCapacity": "New capacity (kWh)",
+    "addReading": "Add",
+    "deleteReading": "Delete the reading of {date}",
+    "residual": "Projected resale value",
+    "expectedKm": "Planned distance (km)",
+    "kmShare": "Weight of the distance (%)",
+    "healthWeight": "Health weight",
+    "summary": "{depreciation} lost so far · {progress}% of the planned depreciation",
+    "curve": "Projected value over the holding period",
+    "curveHint": "Curve from your purchase price to the {value} expected after {months} months; adjusted for age, distance and battery health.",
+    "source": {
+      "reading": "recorded reading",
+      "capacity": "recorded capacities",
+      "charges": "estimated from charges"
+    }
   }
 }

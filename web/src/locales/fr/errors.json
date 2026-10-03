@@ -330,5 +330,12 @@
   "reminder_template": {
     "name_required": "Un nom de modèle est requis",
     "items_required": "Un modèle contient au moins un rappel avec un titre et un intervalle"
+  },
+  "battery": {
+    "reading_invalid": "Indiquez une date et au moins un état de santé (1–100) ou une capacité en kWh"
+  },
+  "residual": {
+    "missing_inputs": "Renseignez d’abord le prix d’achat, la valeur de revente attendue et la durée de détention dans la section propriété",
+    "invalid_options": "Hypothèses de projection invalides"
   }
 }

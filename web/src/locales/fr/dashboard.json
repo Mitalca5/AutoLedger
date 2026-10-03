@@ -264,5 +264,28 @@
     "financing": "Financement & Location",
     "financingNote": "Lissé : {smoothed} (mensualité réglée : {paid})",
     "other": "Abonnements, taxes & autres"
+  },
+  "residualPanel": {
+    "title": "Santé de la batterie et valeur résiduelle",
+    "health": "État de santé de la batterie",
+    "noHealth": "Inconnu pour l’instant : ajoutez une mesure, ou la capacité de la batterie neuve pour y comparer les charges.",
+    "healthHint": "Une mesure peut venir d’un scan OBD2, d’un rapport de garage, de TeslaMate ou de l’API d’ingestion. À défaut, la capacité estimée à partir de vos charges complètes est comparée à celle de la batterie neuve.",
+    "date": "Date de la mesure",
+    "percent": "Santé (%)",
+    "newCapacity": "Capacité neuve (kWh)",
+    "addReading": "Ajouter",
+    "deleteReading": "Supprimer la mesure du {date}",
+    "residual": "Valeur de revente projetée",
+    "expectedKm": "Distance prévue (km)",
+    "kmShare": "Poids de la distance (%)",
+    "healthWeight": "Poids de la santé",
+    "summary": "{depreciation} perdus à ce jour · {progress} % de la dépréciation prévue",
+    "curve": "Valeur projetée sur la durée de détention",
+    "curveHint": "Courbe de votre prix d’achat jusqu’aux {value} attendus après {months} mois ; ajustée selon l’âge, la distance et la santé de la batterie.",
+    "source": {
+      "reading": "mesure enregistrée",
+      "capacity": "capacités enregistrées",
+      "charges": "estimée via les charges"
+    }
   }
 }

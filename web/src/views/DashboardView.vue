@@ -4,6 +4,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { api, type MaintenanceReminder } from '@/services/api'
 
+import ResidualValuePanel from '@/components/dashboard/ResidualValuePanel.vue'
 import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
 import UrgentRemindersBanner from '@/components/dashboard/UrgentRemindersBanner.vue'
 import DataQualityCard from '@/components/dashboard/DataQualityCard.vue'
@@ -157,6 +158,12 @@ onMounted(() => {
         :vehicle-id="vehicleStore.activeVehicle.id"
         :grafana-url="vehicleStore.activeVehicle.teslamate_grafana_url"
         :sync-key="vehicleStore.lastSyncTimestamp"
+      />
+
+      <ResidualValuePanel
+        v-if="vehicleStore.activeVehicle"
+        :vehicle-id="vehicleStore.activeVehicle.id"
+        :show-battery="vehicleStore.canCharge"
       />
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
