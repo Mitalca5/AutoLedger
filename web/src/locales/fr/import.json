@@ -69,6 +69,21 @@
     "fuel": "Pleins",
     "odometer": "Relevés kilométriques",
     "expenses": "Dépenses",
-    "maintenance": "Entretien"
-  }
+    "maintenance": "Entretien",
+    "mileage": "Kilométrage par tag"
+  },
+  "exportTag": "Tag (facultatif)",
+  "exportRates": "Barème d’indemnités",
+  "exportNoRates": "Sans indemnité",
+  "exportRatesTitle": "Barèmes d’indemnités",
+  "exportRatesHint": "Saisis par vous, jamais supposés : chaque tranche valorise la distance cumulée de l’année d’un km à un autre. Les tranches de même nom forment un barème.",
+  "rateLabel": "Nom du barème",
+  "rateYear": "Année",
+  "rateFrom": "De (km)",
+  "rateTo": "À (km, vide : sans limite)",
+  "ratePerKm": "Taux par km",
+  "rateAdd": "Ajouter la tranche",
+  "rateDelete": "Supprimer",
+  "rateSlice": "{from} – {to} km : {rate} / km",
+  "rateOpenEnded": "sans limite"
 }

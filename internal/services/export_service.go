@@ -24,6 +24,7 @@ const (
 	ExportOdometer    ExportType = "odometer"
 	ExportExpenses    ExportType = "expenses"
 	ExportMaintenance ExportType = "maintenance"
+	ExportMileage     ExportType = "mileage"
 )
 
 type ExportFormat string
@@ -42,14 +43,24 @@ type ExportOptions struct {
 	Tag    string
 	Unit   string
 	Lang   string
+	// UserID and RateLabel feed the mileage export: whose scale to apply (none when the label is empty).
+	UserID    string
+	RateLabel string
 }
 
 type ExportService struct {
-	repo *database.Repository
+	repo    *database.Repository
+	mileage *MileageService
 }
 
 func NewExportService(repo *database.Repository) *ExportService {
 	return &ExportService{repo: repo}
+}
+
+// WithMileage enables the mileage export.
+func (s *ExportService) WithMileage(m *MileageService) *ExportService {
+	s.mileage = m
+	return s
 }
 
 type exportTable struct {
@@ -66,7 +77,7 @@ type ExportResult struct {
 
 func ValidExportType(t ExportType) bool {
 	switch t {
-	case ExportCharges, ExportDrives, ExportFuel, ExportOdometer, ExportExpenses, ExportMaintenance:
+	case ExportCharges, ExportDrives, ExportFuel, ExportOdometer, ExportExpenses, ExportMaintenance, ExportMileage:
 		return true
 	}
 	return false
@@ -100,6 +111,8 @@ func (s *ExportService) Export(ctx context.Context, vehicle *models.Vehicle, opt
 		table, err = s.expenses(ctx, vehicle, opts)
 	case ExportMaintenance:
 		table, err = s.maintenance(ctx, vehicle, opts)
+	case ExportMileage:
+		table, err = s.mileageTable(ctx, vehicle, opts)
 	}
 	if err != nil {
 		return nil, err
@@ -363,4 +376,23 @@ func renderExportJSON(t *exportTable) (*ExportResult, error) {
 	}
 	buf.WriteString("]")
 	return &ExportResult{Body: buf.Bytes(), ContentType: "application/json", Extension: "json"}, nil
+}
+
+func (s *ExportService) mileageTable(ctx context.Context, v *models.Vehicle, o ExportOptions) (*exportTable, error) {
+	if s.mileage == nil {
+		return nil, apierror.New("export.invalid_type", "Unknown export type")
+	}
+	report, err := s.mileage.Report(ctx, v, o.UserID, MileageOptions{From: o.From, To: o.To, Tag: o.Tag, RateLabel: o.RateLabel})
+	if err != nil {
+		return nil, err
+	}
+	t := &exportTable{headers: []string{"tag", "trips", distanceHeader("distance", o.Unit), "tolls", "allowance", "currency"}}
+	for _, row := range report.Tags {
+		var allowance any = ""
+		if row.Allowance != nil {
+			allowance = row.Allowance.String()
+		}
+		t.rows = append(t.rows, []any{row.Tag, row.Trips, exportDistance(row.DistanceKm, o.Unit), row.Tolls.String(), allowance, report.Currency})
+	}
+	return t, nil
 }

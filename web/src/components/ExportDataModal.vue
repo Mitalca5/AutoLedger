@@ -2,17 +2,21 @@
 import { ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
+import MileageRatesEditor from '@/components/MileageRatesEditor.vue'
 import { X, Download } from 'lucide-vue-next'
 
 const props = defineProps<{ open: boolean; vehicleId: string }>()
 const emit = defineEmits<{ (e: 'update:open', val: boolean): void }>()
 
-const TYPES = ['charges', 'drives', 'fuel', 'odometer', 'expenses', 'maintenance'] as const
+const TYPES = ['charges', 'drives', 'fuel', 'odometer', 'expenses', 'maintenance', 'mileage'] as const
 
 const type = ref<(typeof TYPES)[number]>('drives')
 const format = ref<'csv' | 'json'>('csv')
 const from = ref('')
 const to = ref('')
+const tag = ref('')
+const rates = ref('')
+const scaleLabels = ref<string[]>([])
 const loading = ref(false)
 const error = ref('')
 
@@ -32,6 +36,8 @@ async function download() {
       format: format.value,
       from: from.value,
       to: to.value,
+      tag: type.value === 'drives' || type.value === 'mileage' ? tag.value : '',
+      rates: type.value === 'mileage' ? rates.value : '',
     })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -72,6 +78,19 @@ async function download() {
             <option v-for="k in TYPES" :key="k" :value="k">{{ $t(`import.exportTypes.${k}`) }}</option>
           </select>
         </label>
+        <template v-if="type === 'mileage'">
+          <label class="block space-y-1">
+            <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportTag') }}</span>
+            <input v-model="tag" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+          </label>
+          <label class="block space-y-1">
+            <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportRates') }}</span>
+            <select v-model="rates" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+              <option value="">{{ $t('import.exportNoRates') }}</option>
+              <option v-for="l in scaleLabels" :key="l" :value="l">{{ l }}</option>
+            </select>
+          </label>
+        </template>
         <label class="block space-y-1">
           <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportFormat') }}</span>
           <select v-model="format" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
@@ -89,6 +108,8 @@ async function download() {
             <input v-model="to" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
           </label>
         </div>
+
+        <MileageRatesEditor v-if="type === 'mileage'" @change="scaleLabels = $event" />
 
         <p v-if="error" class="text-xs text-rose-400" role="alert">{{ error }}</p>
         <button

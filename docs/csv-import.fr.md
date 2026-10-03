@@ -59,6 +59,12 @@ Les mêmes colonnes sont utilisées par l'**export** (page de suivi manuel, ou `
 | `odometer_km` / `odometer_mi` | `odometer`, `odo` | oui |
 | `notes` | `note`, `comment` | non |
 
+## Kilométrage par tag et barèmes d'indemnités
+
+`type=mileage` (ou `GET /api/vehicles/{id}/mileage-report?from=&to=&tag=&rates=`) totalise les trajets de la période par tag : nombre de trajets, distance, péages et, si un barème est choisi, l'indemnité kilométrique. Un trajet portant plusieurs tags compte dans chacun ; les trajets sans tag ont un tag vide.
+
+Un barème est une donnée que vous saisissez, jamais supposée par l'application. Chaque tranche (`POST /api/mileage-rates/`) a un nom, une année, un premier et un dernier kilomètre (le dernier vide pour aucune limite) et un taux par kilomètre. Les tranches de même nom forment un barème et valorisent la **distance cumulée de l'année** : les kilomètres parcourus avant le début de la période comptent pour trouver la tranche, donc un rapport de septembre prolonge le total de janvier. Le barème se choisit avec `rates=<nom>` ; sans lui, aucune indemnité n'est calculée.
+
 ## Correspondance des colonnes et profils
 
 Quand un en-tête n'est pas reconnu, la fenêtre d'import affiche chaque colonne du fichier avec le champ auquel elle est associée et permet d'en choisir un autre, ou d'ignorer la colonne. La correspondance, l'ordre des dates et le séparateur décimal peuvent être enregistrés dans un **profil** nommé ; le sélectionner plus tard les applique à tout fichier de même structure, sur n'importe quel véhicule du compte.

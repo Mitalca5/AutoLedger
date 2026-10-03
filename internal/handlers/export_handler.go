@@ -72,6 +72,9 @@ func (h *ExportHandler) Export(w http.ResponseWriter, r *http.Request) {
 		Tag:    strings.TrimSpace(q.Get("tag")),
 		Unit:   "km",
 		Lang:   requestLanguage(r, h.repo),
+
+		UserID:    middleware.GetUserID(r.Context()),
+		RateLabel: strings.TrimSpace(q.Get("rates")),
 	}
 	if user, uerr := h.repo.GetUserByID(r.Context(), middleware.GetUserID(r.Context())); uerr == nil && user != nil && user.DistanceUnit == "mi" {
 		opts.Unit = "mi"

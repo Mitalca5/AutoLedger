@@ -322,5 +322,9 @@
     "invalid_date": "Date invalide : utilisez le format AAAA-MM-JJ",
     "invalid_type": "Type de données à exporter inconnu",
     "invalid_format": "Format d’export inconnu"
+  },
+  "mileage": {
+    "label_required": "Un nom de barème est requis",
+    "rate_invalid": "Année, tranche de distance ou taux invalide"
   }
 }

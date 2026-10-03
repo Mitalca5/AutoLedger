@@ -348,7 +348,9 @@ func main() {
 		csvImportService := services.NewCSVImportService(repo, cfg.ReportingTimezone)
 		importHandler := handlers.NewImportHandler(repo, csvImportService)
 		importProfileHandler := handlers.NewImportProfileHandler(repo)
-		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo))
+		mileageService := services.NewMileageService(repo, cfg.ReportingTimezone)
+		mileageHandler := handlers.NewMileageHandler(repo, mileageService)
+		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo).WithMileage(mileageService))
 
 		tariffService := services.NewTariffServiceIn(cfg.ReportingTimezone)
 		fleetService := services.NewFleetService(repo, tcoService)
@@ -409,6 +411,11 @@ func main() {
 			})
 
 			// Tariffs & Public Charging Calculator
+			r.Route("/api/mileage-rates", func(r chi.Router) {
+				r.Get("/", mileageHandler.ListRates)
+				r.Post("/", mileageHandler.CreateRate)
+				r.Delete("/{id}", mileageHandler.DeleteRate)
+			})
 			r.Route("/api/tariffs", func(r chi.Router) {
 				r.Get("/plans", tariffHandler.List)
 				r.Post("/plans", tariffHandler.Create)
@@ -497,6 +504,7 @@ func main() {
 
 				// Export (CSV / JSON)
 				r.Get("/{vehicleId}/export", exportHandler.Export)
+				r.Get("/{vehicleId}/mileage-report", mileageHandler.Report)
 
 				// Import (CSV Charges & Drives)
 				r.Post("/{vehicleId}/import/preview", importHandler.Preview)

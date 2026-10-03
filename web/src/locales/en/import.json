@@ -69,6 +69,21 @@
     "fuel": "Fill-ups",
     "odometer": "Odometer readings",
     "expenses": "Expenses",
-    "maintenance": "Maintenance"
-  }
+    "maintenance": "Maintenance",
+    "mileage": "Mileage by tag"
+  },
+  "exportTag": "Tag (optional)",
+  "exportRates": "Allowance scale",
+  "exportNoRates": "No allowance",
+  "exportRatesTitle": "Allowance scales",
+  "exportRatesHint": "Typed by you, never assumed: each slice prices the year's cumulative distance from one km to another. Slices sharing a name form a scale.",
+  "rateLabel": "Scale name",
+  "rateYear": "Year",
+  "rateFrom": "From km",
+  "rateTo": "To km (empty: no limit)",
+  "ratePerKm": "Rate per km",
+  "rateAdd": "Add slice",
+  "rateDelete": "Delete",
+  "rateSlice": "{from} – {to} km: {rate} / km",
+  "rateOpenEnded": "no limit"
 }

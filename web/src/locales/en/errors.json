@@ -322,5 +322,9 @@
     "invalid_date": "Invalid date: use the YYYY-MM-DD format",
     "invalid_type": "Unknown data type to export",
     "invalid_format": "Unknown export format"
+  },
+  "mileage": {
+    "label_required": "A name for the scale is required",
+    "rate_invalid": "Invalid year, distance slice or rate"
   }
 }

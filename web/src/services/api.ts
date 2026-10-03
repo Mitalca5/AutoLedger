@@ -450,10 +450,12 @@ export const api = {
     return { blob, filename }
   },
 
-  downloadExport: async (vehicleId: string, params: { type: string; format: string; from?: string; to?: string }): Promise<{ blob: Blob; filename: string }> => {
+  downloadExport: async (vehicleId: string, params: { type: string; format: string; from?: string; to?: string; tag?: string; rates?: string }): Promise<{ blob: Blob; filename: string }> => {
     const qs = new URLSearchParams({ type: params.type, format: params.format })
     if (params.from) qs.set('from', params.from)
     if (params.to) qs.set('to', params.to)
+    if (params.tag) qs.set('tag', params.tag)
+    if (params.rates) qs.set('rates', params.rates)
     const res = await fetch(`${BASE_URL}/vehicles/${vehicleId}/export?${qs}`, { credentials: 'include' })
     if (!res.ok) {
       let errorMsg = t('import.exportFailed')
@@ -495,6 +497,13 @@ export const api = {
     request<APITokenCreatedResponse>('/auth/tokens', { method: 'POST', body: JSON.stringify(data) }),
   revokeAPIToken: (tokenId: string) =>
     request<{ success: boolean }>(`/auth/tokens/${tokenId}`, { method: 'DELETE' }),
+
+  // Mileage allowance scales
+  getMileageRates: () => request<{ rates: MileageRate[] }>('/mileage-rates/'),
+  createMileageRate: (data: Omit<MileageRate, 'id'>) =>
+    request<MileageRate>('/mileage-rates/', { method: 'POST', body: JSON.stringify(data) }),
+  deleteMileageRate: (id: string) =>
+    request<{ success: boolean }>(`/mileage-rates/${id}`, { method: 'DELETE' }),
 
   // Tariff Plans & Public Charging
   getTariffPlans: () => request<{ plans: TariffPlan[] }>('/tariffs/plans'),
@@ -592,6 +601,15 @@ export interface TariffRule {
   start: string
   end: string
   band: string
+}
+
+export interface MileageRate {
+  id: string
+  label: string
+  year: number
+  from_km: number
+  to_km: number | null
+  rate_per_km: number
 }
 
 export interface TariffPlan {
