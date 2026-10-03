@@ -43,5 +43,20 @@
     "spent": "{spent} sur {budget} ({percent} %)",
     "remaining": "{amount} restants",
     "over": "{amount} de dépassement"
+  },
+  "compare": {
+    "title": "Coût au kilomètre, côte à côte",
+    "hint": "Toutes motorisations, d'après le TCO de chaque véhicule",
+    "vehicle": "Véhicule",
+    "runningPerDistance": "Coût d'usage / {unit}",
+    "fullPerDistance": "Coût complet / {unit}",
+    "energy": "Énergie / 100",
+    "annual": "Coût annuel",
+    "completeness": "Complétude",
+    "kwh100": "{value} kWh/100 {unit}",
+    "l100": "{value} L/100 {unit}",
+    "cheapest": "Le moins cher",
+    "indicative": "Indicatif",
+    "footnote": "Le coût d'usage couvre l'énergie, l'entretien, l'assurance et le financement ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). Un véhicule sous 60 % de complétude est affiché mais pas classé."
   }
 }

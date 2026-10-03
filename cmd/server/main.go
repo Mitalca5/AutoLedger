@@ -351,7 +351,7 @@ func main() {
 		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo))
 
 		tariffService := services.NewTariffServiceIn(cfg.ReportingTimezone)
-		fleetService := services.NewFleetService(repo)
+		fleetService := services.NewFleetService(repo, tcoService)
 
 		tokenHandler := handlers.NewTokenHandler(repo)
 		tariffHandler := handlers.NewTariffHandler(repo, tariffService)

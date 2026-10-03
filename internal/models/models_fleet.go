@@ -37,6 +37,20 @@ type VehicleFleetMetric struct {
 	MonthDistanceKm    float64     `json:"month_distance_km"`
 	MonthCost          money.Cents `json:"month_cost"`
 	EnergyCostPer100Km float64     `json:"energy_cost_per_100km"`
+
+	Powertrain string `json:"powertrain"`
+	// RunningCostPerKm is what the vehicle costs to run (energy, upkeep, insurance, financing); FullCostPerKm adds
+	// depreciation and amortized tires. Both rely on the distance basis of the TCO.
+	RunningCostPerKm float64 `json:"running_cost_per_km"`
+	FullCostPerKm    float64 `json:"full_cost_per_km"`
+	// KwhPer100Km and LitersPer100Km are set when the vehicle consumed that energy; a plug-in hybrid has both.
+	KwhPer100Km    *float64 `json:"kwh_per_100km"`
+	LitersPer100Km *float64 `json:"liters_per_100km"`
+	// AnnualCost is the full cost extrapolated to twelve months over the observed history; nil under three months.
+	AnnualCost *money.Cents `json:"annual_cost"`
+	// CompletenessPct is the TCO completeness score; a vehicle under the comparison threshold is shown but not ranked.
+	CompletenessPct int  `json:"completeness_pct"`
+	Comparable      bool `json:"comparable"`
 }
 
 // MemberKmShare provides distance distribution among household members.

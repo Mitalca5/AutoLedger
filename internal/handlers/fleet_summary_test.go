@@ -59,7 +59,7 @@ func TestFleetBudgetSetValidateAndClear(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := NewFleetHandler(services.NewFleetService(repo))
+	h := NewFleetHandler(services.NewFleetService(repo, services.NewTCOService(repo.Pool(), "UTC")))
 	put := func(body string) *httptest.ResponseRecorder {
 		req := httptest.NewRequest(http.MethodPut, "/api/fleet/budget", strings.NewReader(body))
 		req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, u.ID))
@@ -98,5 +98,43 @@ func TestFleetBudgetSetValidateAndClear(t *testing.T) {
 	}
 	if b := budget(); b != nil {
 		t.Fatalf("budget after clear: %v", *b)
+	}
+}
+
+func TestFleetSummaryCarriesComparisonFigures(t *testing.T) {
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	u, err := repo.CreateUser(ctx, "fleet-compare@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := &models.Vehicle{UserID: u.ID, Name: "EV", TeslaMateAuthType: models.AuthModeNone}
+	if err := repo.CreateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	pool := repo.Pool()
+	if _, err := pool.Exec(ctx, `INSERT INTO charge_logs (vehicle_id, date, kwh_added, cost, cost_source, currency, is_manual)
+		VALUES ($1, now(), 40, 20, 'MANUAL', 'EUR', TRUE)`, v.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Exec(ctx, `INSERT INTO drives (vehicle_id, start_time, end_time, distance_km, duration_min)
+		VALUES ($1, now() - interval '1 hour', now(), 200, 60)`, v.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	svc := services.NewFleetService(repo, services.NewTCOService(pool, "UTC"))
+	summary, err := svc.GetSummary(ctx, u.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := summary.Vehicles[0]
+	if m.RunningCostPerKm <= 0 || m.FullCostPerKm <= 0 {
+		t.Errorf("per-km costs missing: running %v full %v", m.RunningCostPerKm, m.FullCostPerKm)
+	}
+	if m.KwhPer100Km == nil || *m.KwhPer100Km != 20 {
+		t.Errorf("kWh per 100 km: got %v, want 20 (40 kWh over 200 km)", m.KwhPer100Km)
+	}
+	if m.Powertrain != "EV" || m.AnnualCost != nil {
+		t.Errorf("powertrain %q, annual cost %v (one month of history gives none)", m.Powertrain, m.AnnualCost)
 	}
 }

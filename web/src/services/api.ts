@@ -688,6 +688,14 @@ export interface VehicleFleetMetric {
   month_distance_km: number
   month_cost: number
   energy_cost_per_100km: number
+  powertrain: string
+  running_cost_per_km: number
+  full_cost_per_km: number
+  kwh_per_100km: number | null
+  liters_per_100km: number | null
+  annual_cost: number | null
+  completeness_pct: number
+  comparable: boolean
 }
 
 export interface MemberKmShare {

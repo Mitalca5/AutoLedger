@@ -6,7 +6,7 @@ import { api, type FleetSummaryResponse } from '@/services/api'
 import { formatAmount } from '@/currency'
 import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
 import { useConfirm } from '@/composables/useConfirm'
-import { formatDistance, currentDistanceUnit, perDistance } from '@/units'
+import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue } from '@/units'
 import { t } from '@/i18n'
 
 Chart.register(...registerables)
@@ -73,6 +73,31 @@ const mostEconomicalVehicleId = computed(() => {
   if (!withCost.length) return null
   return withCost.reduce((prev, curr) => (curr.energy_cost_per_100km < prev.energy_cost_per_100km ? curr : prev)).vehicle_id
 })
+
+// Ranking by full cost per km, only among vehicles whose figures are complete enough to be compared
+const rankedVehicles = computed(() =>
+  [...(summary.value?.vehicles ?? [])].sort((a, b) => {
+    if (a.comparable !== b.comparable) return a.comparable ? -1 : 1
+    return a.full_cost_per_km - b.full_cost_per_km
+  }),
+)
+const cheapestPerKmId = computed(() => {
+  const first = rankedVehicles.value[0]
+  return first?.comparable && rankedVehicles.value.filter((v) => v.comparable).length > 1 ? first.vehicle_id : null
+})
+
+function completenessClass(pct: number): string {
+  if (pct >= 80) return 'text-emerald-400'
+  if (pct >= 60) return 'text-amber-400'
+  return 'text-rose-400'
+}
+
+function energyPer100(v: { kwh_per_100km: number | null; liters_per_100km: number | null }): string {
+  const parts: string[] = []
+  if (v.kwh_per_100km != null) parts.push(t('fleet.compare.kwh100', { value: formatPerDistanceValue(v.kwh_per_100km), unit: distanceUnitLabel.value }))
+  if (v.liters_per_100km != null) parts.push(t('fleet.compare.l100', { value: formatPerDistanceValue(v.liters_per_100km), unit: distanceUnitLabel.value }))
+  return parts.length ? parts.join(' + ') : '—'
+}
 
 function renderChart() {
   if (!chartCanvas.value || !summary.value?.monthly_costs.length) return
@@ -358,6 +383,48 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Cost per distance comparison -->
+    <div v-if="summary && summary.vehicles.length > 1" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+          <TrendingDown class="w-4 h-4 text-rose-400" />
+          {{ t('fleet.compare.title') }}
+        </h2>
+        <span class="text-xs text-slate-400">{{ t('fleet.compare.hint') }}</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-400">
+              <th class="py-2 pr-4 font-medium">{{ t('fleet.compare.vehicle') }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.energy') }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.annual') }}</th>
+              <th class="py-2 font-medium text-right">{{ t('fleet.compare.completeness') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60" :class="{ 'opacity-70': !v.comparable }">
+              <td class="py-2 pr-4">
+                <span class="font-semibold text-white">{{ v.name }}</span>
+                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase text-emerald-400">
+                  <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
+                </span>
+                <span v-else-if="!v.comparable" class="ml-2 text-[10px] uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</span>
+              </td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ energyPer100(v) }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</td>
+              <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-400">{{ t('fleet.compare.footnote') }}</p>
     </div>
 
     <!-- Charts & Driver Share Row -->

@@ -43,5 +43,20 @@
     "spent": "{spent} of {budget} ({percent}%)",
     "remaining": "{amount} left",
     "over": "{amount} over"
+  },
+  "compare": {
+    "title": "Cost per distance, side by side",
+    "hint": "All powertrains, from each vehicle's TCO",
+    "vehicle": "Vehicle",
+    "runningPerDistance": "Running cost / {unit}",
+    "fullPerDistance": "Full cost / {unit}",
+    "energy": "Energy / 100",
+    "annual": "Annual cost",
+    "completeness": "Completeness",
+    "kwh100": "{value} kWh/100 {unit}",
+    "l100": "{value} L/100 {unit}",
+    "cheapest": "Cheapest",
+    "indicative": "Indicative",
+    "footnote": "Running cost covers energy, upkeep, insurance and financing; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). A vehicle under 60% completeness is shown but not ranked."
   }
 }
