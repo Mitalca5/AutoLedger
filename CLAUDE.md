@@ -102,6 +102,23 @@ Refactors
 - Splitting a file is a pure move unless stated otherwise: verify declaration hashes and the multiset of non-blank lines before and after, then `gofmt`, build, vet, tests. For Vue views, compare the rendered DOM and recorded API writes before and after with a Playwright characterization run (mock `/api/**`, fixed clock).
 - SonarCloud counts moved code as new code: duplication that already existed inside a big file fails `new_duplicated_lines_density` (3 %) once the file is split. Find the blocks with `api/duplications/show?key=Rem7474_TeslaCost:<path>&pullRequest=<n>` and extract a small helper in a separate commit.
 
+## Out of scope
+
+AutoLedger is a self-hosted ledger: it records what the user enters or pushes and computes costs from it. Do not build:
+
+- Connectors that log into a manufacturer cloud, or that go through an aggregator (Enode, Smartcar, scrapers). Data comes from TeslaMate, CSV, the ingestion API, Home Assistant or manual entry.
+- Per-operator or per-brand parsers in the core (charging network exports, manufacturer CSV layouts). Mapping is done by the generic CSV importer and saved import profiles; a layout belongs in documentation or a shared profile.
+- Hard-coded lists of brands, models, manufacturer maintenance plans or tire presets (see Brand & Model Neutrality). Maintenance intervals are user-defined reminders.
+- Country-specific tax engines in the code (mileage allowance scales, benefit-in-kind rules). Exports with the pro/personal split by tag are in scope; rate tables are data, not logic.
+- Receipt OCR or any AI-based extraction.
+- Route planning, live navigation, or real-time telemetry dashboards that compete with TeslaMate/Grafana.
+- A native mobile app: the PWA is the mobile client.
+- Outbound telemetry or analytics. Product metrics, if any, are computed locally.
+- A generic plugin or scripting system, and multi-tenant SaaS features (billing, organisations).
+- Recomputing recorded history when a tariff, rate or setting changes: stored costs stay as entered.
+
+A feature that needs one of these goes to an issue for discussion first.
+
 ## Git and PRs
 
 - Check `gh pr list --state all` before touching a branch that had a PR: PRs are merged quickly and a merged branch must not be reused. Follow-up work goes on a fresh branch from `origin/main`, one PR per topic, independent PRs rather than stacks unless the work truly depends on the previous one.
