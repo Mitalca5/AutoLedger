@@ -53,5 +53,22 @@
   "undo": "Undo this import",
   "undoTitle": "Undo this import?",
   "undoMessage": "The {count} rows it created and that are still in place will be deleted, including any edits made to them since. This cannot be undone.",
-  "undoFailed": "Could not undo the import"
+  "undoFailed": "Could not undo the import",
+  "export": "Export",
+  "exportTitle": "Export data",
+  "exportIntro": "Download your data in the same columns the CSV import accepts, so it can be re-imported elsewhere.",
+  "exportType": "Data",
+  "exportFormat": "Format",
+  "exportFrom": "From",
+  "exportTo": "To",
+  "exportDownload": "Download",
+  "exportFailed": "Could not export the data",
+  "exportTypes": {
+    "charges": "Charges",
+    "drives": "Drives",
+    "fuel": "Fill-ups",
+    "odometer": "Odometer readings",
+    "expenses": "Expenses",
+    "maintenance": "Maintenance"
+  }
 }

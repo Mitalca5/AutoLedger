@@ -450,6 +450,25 @@ export const api = {
     return { blob, filename }
   },
 
+  downloadExport: async (vehicleId: string, params: { type: string; format: string; from?: string; to?: string }): Promise<{ blob: Blob; filename: string }> => {
+    const qs = new URLSearchParams({ type: params.type, format: params.format })
+    if (params.from) qs.set('from', params.from)
+    if (params.to) qs.set('to', params.to)
+    const res = await fetch(`${BASE_URL}/vehicles/${vehicleId}/export?${qs}`, { credentials: 'include' })
+    if (!res.ok) {
+      let errorMsg = t('import.exportFailed')
+      try {
+        const errorData = await res.json()
+        if (errorData && errorData.error) errorMsg = errorData.error
+      } catch {
+        // Non-JSON response
+      }
+      throw new Error(errorMsg)
+    }
+    const match = (res.headers.get('content-disposition') || '').match(/filename="?([^";]+)"?/)
+    return { blob: await res.blob(), filename: match?.[1] || `export.${params.format}` }
+  },
+
   // Maintenance Reminders & Webhooks
   getReminders: (vehicleId: string) =>
     request<MaintenanceReminder[]>(`/vehicles/${vehicleId}/reminders`),

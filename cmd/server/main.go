@@ -348,6 +348,7 @@ func main() {
 		csvImportService := services.NewCSVImportService(repo, cfg.ReportingTimezone)
 		importHandler := handlers.NewImportHandler(repo, csvImportService)
 		importProfileHandler := handlers.NewImportProfileHandler(repo)
+		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo))
 
 		tariffService := services.NewTariffService()
 		fleetService := services.NewFleetService(repo)
@@ -493,6 +494,9 @@ func main() {
 				r.Delete("/{vehicleId}/drives/{driveId}", driveHandler.Delete)
 				r.Put("/{vehicleId}/drives/{driveId}/driver", driveHandler.UpdateDriver)
 				r.Get("/{vehicleId}/drives/{driveId}/expenses", driveHandler.GetDriveExpenses)
+
+				// Export (CSV / JSON)
+				r.Get("/{vehicleId}/export", exportHandler.Export)
 
 				// Import (CSV Charges & Drives)
 				r.Post("/{vehicleId}/import/preview", importHandler.Preview)

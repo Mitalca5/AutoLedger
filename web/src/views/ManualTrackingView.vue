@@ -2,16 +2,18 @@
 import { t } from '@/i18n'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ClipboardList, Gauge, Fuel, Zap, UploadCloud } from 'lucide-vue-next'
+import { ClipboardList, Gauge, Fuel, Zap, UploadCloud, Download } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import OdometerReadingsPanel from '@/components/manual/OdometerReadingsPanel.vue'
 import FuelLogsPanel from '@/components/manual/FuelLogsPanel.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
+import ExportDataModal from '@/components/ExportDataModal.vue'
 import EstimatedEnergyPanel from '@/components/manual/EstimatedEnergyPanel.vue'
 
 type Tab = 'KM' | 'FUEL' | 'ENERGY'
 
 const showImport = ref(false)
+const showExport = ref(false)
 const reloadKey = ref(0)
 // The panels load their data when mounted: remounting them shows what the import added
 const onImported = () => {
@@ -96,6 +98,14 @@ function select(tab: Tab) {
           <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
           <span>{{ $t('expenses.expensesView.importCsv') }}</span>
         </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white shrink-0"
+          @click="showExport = true"
+        >
+          <Download class="w-3.5 h-3.5 text-sky-400" />
+          <span>{{ $t('import.export') }}</span>
+        </button>
       </div>
 
       <OdometerReadingsPanel v-if="activeTab === 'KM'" :key="reloadKey" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />
@@ -106,6 +116,7 @@ function select(tab: Tab) {
         :can-edit="vehicleStore.canEdit"
       />
       <EstimatedEnergyPanel v-else-if="activeTab === 'ENERGY'" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />
+      <ExportDataModal v-model:open="showExport" :vehicle-id="vehicleStore.activeVehicle.id" />
       <CSVImportModal
         v-model:open="showImport"
         :vehicle-id="vehicleStore.activeVehicle.id"

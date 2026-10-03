@@ -313,5 +313,10 @@
   "integration": {
     "unknown_event_type": "Unknown event type: {p0}",
     "invalid_distance_unit": "Unknown distance unit: {p0} (km or mi)"
+  },
+  "export": {
+    "invalid_date": "Invalid date: use the YYYY-MM-DD format",
+    "invalid_type": "Unknown data type to export",
+    "invalid_format": "Unknown export format"
   }
 }
