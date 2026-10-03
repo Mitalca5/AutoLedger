@@ -79,6 +79,12 @@ Home Assistant, Node-RED, n8n or any script can also push charging sessions, dri
 - **OIDC / SSO Integration**: Seamless single sign-on with Authentik, Keycloak, Authelia, or Kanidm via standard Authorization Code Flow with PKCE.
 - **Security & Hardening**: AES-256-GCM encryption for stored credentials, brute-force rate limiters, security headers (CSP, HSTS, X-Frame-Options), and configurable trusted reverse proxies.
 
+### 🏠 Home Assistant Integration
+- **Official HACS integration**: [Rem7474/autoledger-homeassistant](https://github.com/Rem7474/autoledger-homeassistant) detects charging sessions from your wallbox or energy meter and sends them to AutoLedger, with a configurable debounce for solar charging that pauses and resumes.
+- **Multi-vehicle**: one charger can serve several cars, assigned to a fixed vehicle, an `input_select`, automatic correlation, or left unassigned to qualify later in the web UI.
+- **Sensors and services**: last charge cost and cost per 100 km per vehicle, plus the `autoledger.sync` and `autoledger.submit_charge` services.
+- It talks to the [ingestion API](#-the-3-ingestion-modes) with an `al_live_` token; any other system can use the same API.
+
 ### 📁 Document & Invoice Archiving
 - Attachments (PDF invoices, receipts, registration cards) stored securely on a dedicated volume (`/data/documents`) with non-root isolation and strict JWT authorization.
 
