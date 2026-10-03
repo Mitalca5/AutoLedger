@@ -64,7 +64,7 @@ const (
 // DerivedTelemetryMode is CONNECTED for an electric vehicle with a teslamateapi URL (the condition the
 // synchronization and the frontend's hasTeslaMate use), MANUAL otherwise.
 func (v *Vehicle) DerivedTelemetryMode() string {
-	if v.Powertrain != PowertrainICE && v.TeslaMateAPIURL != nil && strings.TrimSpace(*v.TeslaMateAPIURL) != "" {
+	if v.CanLinkTeslaMate() && v.TeslaMateAPIURL != nil && strings.TrimSpace(*v.TeslaMateAPIURL) != "" {
 		return TelemetryConnected
 	}
 	return TelemetryManual
@@ -75,6 +75,22 @@ const (
 	PowertrainEV  = "EV"
 	PowertrainICE = "ICE"
 )
+
+// What a powertrain can record. Callers ask for a capability instead of comparing the powertrain, so a new
+// powertrain only has to be described here.
+
+// PowertrainCanCharge reports whether the powertrain has a battery to plug in and so records charging sessions.
+func PowertrainCanCharge(powertrain string) bool { return powertrain != PowertrainICE }
+
+// PowertrainCanRefuel reports whether the powertrain burns fuel and so records fill-ups.
+func PowertrainCanRefuel(powertrain string) bool { return powertrain == PowertrainICE }
+
+// PowertrainCanLinkTeslaMate reports whether a teslamateapi connection makes sense for the powertrain.
+func PowertrainCanLinkTeslaMate(powertrain string) bool { return PowertrainCanCharge(powertrain) }
+
+func (v *Vehicle) CanCharge() bool        { return PowertrainCanCharge(v.Powertrain) }
+func (v *Vehicle) CanRefuel() bool        { return PowertrainCanRefuel(v.Powertrain) }
+func (v *Vehicle) CanLinkTeslaMate() bool { return PowertrainCanLinkTeslaMate(v.Powertrain) }
 
 // VehicleMember represents a user who has access to a vehicle with a specific role.
 type VehicleMember struct {

@@ -57,7 +57,7 @@ func (h *PendingChargesHandler) Assign(w http.ResponseWriter, r *http.Request) {
 	if vehicle == nil {
 		return
 	}
-	if vehicle.Powertrain == models.PowertrainICE {
+	if !vehicle.CanCharge() {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("charge.electric_only", "Charging sessions only apply to electric vehicles"))
 		return
 	}

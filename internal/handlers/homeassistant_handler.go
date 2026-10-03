@@ -163,7 +163,7 @@ func (h *HomeAssistantHandler) recordChargingSession(w http.ResponseWriter, r *h
 		if target = requireVehicleAccess(w, r, h.repo, *requested, models.RoleEditor); target == nil {
 			return
 		}
-		if target.Powertrain == models.PowertrainICE {
+		if !target.CanCharge() {
 			writeAPIError(w, http.StatusBadRequest, apierror.New("charge.electric_only", "Charging sessions only apply to electric vehicles"))
 			return
 		}
@@ -267,7 +267,7 @@ func chargingSessionVehicle(vehicles []models.Vehicle) *models.Vehicle {
 		if v.IsHomeChargerDefault {
 			return v
 		}
-		if v.Powertrain != models.PowertrainICE {
+		if v.CanCharge() {
 			electric = append(electric, v)
 		}
 	}

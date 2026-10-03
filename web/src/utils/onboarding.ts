@@ -1,3 +1,5 @@
+import { canLinkTeslaMate } from './vehicles'
+
 export type Powertrain = 'EV' | 'ICE'
 export type TeslaMateAuthType = 'BEARER' | 'BASIC' | 'NONE'
 
@@ -26,7 +28,7 @@ export function emptyTeslaMateForm(): TeslaMateForm {
 
 // Only electric vehicles can use TeslaMate.
 export function supportsTeslaMate(powertrain: Powertrain): boolean {
-  return powertrain === 'EV'
+  return canLinkTeslaMate(powertrain)
 }
 
 export function teslaMateCredentials(tm: Pick<TeslaMateForm, 'authType' | 'apiKey' | 'user' | 'pass'>) {

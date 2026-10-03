@@ -28,7 +28,7 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	if v.Currency == "" {
 		v.Currency = "EUR"
 	}
-	if v.Powertrain == models.PowertrainICE {
+	if !v.CanLinkTeslaMate() {
 		v.TeslaMateCarID = nil
 		v.TeslaMateAPIURL = nil
 		v.TeslaMateGrafanaURL = nil

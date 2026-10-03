@@ -6,7 +6,7 @@ import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { Car, Plus, Trash2, Edit2, RefreshCw, CheckCircle2, AlertCircle, X, Gauge, Link2, FileText, Zap, Users, Pencil, Database } from 'lucide-vue-next'
-import { ownershipSummary, roleLabel } from '@/utils/vehicles'
+import { canCharge, canRefuel, ownershipSummary, roleLabel } from '@/utils/vehicles'
 
 // One vehicle of the list, with its contract summary and a TeslaMate connection test of its own
 const props = defineProps<{ v: any; ownership: any | null }>()
@@ -119,11 +119,11 @@ function clearCardTestResult() {
         </p>
       </div>
 
-      <div v-if="v.powertrain === 'ICE'">
+      <div v-if="canRefuel(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.powertrain') }}</span>
         <p class="text-sm font-semibold mt-0.5 text-amber-300">{{ $t('vehicles.vehicleCard.combustionFillUpsEnteredBy') }}</p>
       </div>
-      <div v-if="v.powertrain !== 'ICE'">
+      <div v-if="canCharge(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.teslamateConnection') }}</span>
         <p
           class="text-sm font-semibold mt-0.5"
@@ -151,7 +151,7 @@ function clearCardTestResult() {
         </p>
       </div>
 
-      <div v-if="v.powertrain !== 'ICE'">
+      <div v-if="canCharge(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.estimatedEnergy') }}</span>
         <p v-if="v.estimated_kwh_100km && v.estimated_price_per_kwh" class="text-xs font-semibold text-sky-400 flex items-center gap-1 mt-1">
           <Zap class="w-3.5 h-3.5 text-sky-400" />

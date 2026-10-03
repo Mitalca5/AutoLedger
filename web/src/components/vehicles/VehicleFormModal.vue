@@ -17,7 +17,7 @@ import {
   Copy,
   Sliders,
 } from 'lucide-vue-next'
-import { emptyVehicleForm, vehicleFormFrom } from '@/utils/vehicles'
+import { canLinkTeslaMate, emptyVehicleForm, vehicleFormFrom } from '@/utils/vehicles'
 import { CURRENCIES } from '@/utils/expenses'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue, formatPerDistanceValue } from '@/units'
@@ -95,7 +95,7 @@ watch(open, (isOpen) => {
 async function handleSave() {
   try {
     const payload: Record<string, any> = { ...form.value }
-    if (payload.powertrain === 'ICE') {
+    if (!canLinkTeslaMate(payload.powertrain)) {
       payload.teslamate_car_id = null
       payload.teslamate_api_url = ''
       payload.teslamate_grafana_url = ''
@@ -262,7 +262,7 @@ async function testModalConnection() {
         </div>
 
         <!-- 2. TeslaMate synchronization (electric vehicles); the tracking mode follows from it on the server -->
-        <div v-if="form.powertrain === 'EV'" class="pt-3 border-t border-slate-800">
+        <div v-if="canLinkTeslaMate(form.powertrain)" class="pt-3 border-t border-slate-800">
           <label
             for="vehicle-connect-teslamate"
             class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
@@ -279,7 +279,7 @@ async function testModalConnection() {
         </div>
 
         <!-- 3. Paramètres de télémétrie connectée (Visible UNIQUEMENT si EV et CONNECTED) -->
-        <div v-if="form.powertrain === 'EV' && connectTeslaMate" class="pt-3 border-t border-slate-800 space-y-3">
+        <div v-if="canLinkTeslaMate(form.powertrain) && connectTeslaMate" class="pt-3 border-t border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider">{{ $t('vehicles.vehicleFormModal.telemetrySettings') }}</h4>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">TeslaMate</span>
@@ -417,7 +417,7 @@ async function testModalConnection() {
         </div>
 
         <!-- 4. Options complémentaires (Repliables pour ne pas encombrer la création) -->
-        <div v-if="form.powertrain === 'EV'" class="pt-3 border-t border-slate-800">
+        <div v-if="canLinkTeslaMate(form.powertrain)" class="pt-3 border-t border-slate-800">
           <button
             type="button"
             @click="showAdvanced = !showAdvanced"

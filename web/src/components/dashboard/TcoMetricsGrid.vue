@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { intlLocale } from '@/i18n'
+import { canRefuel } from '@/utils/vehicles'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
 import { Coins, Zap, Receipt, TrendingUp } from 'lucide-vue-next'
@@ -62,7 +63,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <!-- Energy Cost -->
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ tco?.powertrain === 'ICE' ? $t('dashboard.tcoMetricsGrid.fuel') : $t('dashboard.tcoMetricsGrid.energy') }}</span>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ canRefuel(tco?.powertrain) ? $t('dashboard.tcoMetricsGrid.fuel') : $t('dashboard.tcoMetricsGrid.energy') }}</span>
         <div class="p-2 bg-sky-500/10 text-sky-400 rounded-xl">
           <Zap class="w-5 h-5" />
         </div>
@@ -71,7 +72,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         {{ money(tco?.energy_cost) }}
       </div>
       <div class="mt-2 space-y-0.5">
-        <p v-if="tco?.powertrain === 'ICE'" class="text-xs text-slate-400">
+        <p v-if="canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
           {{ perUnit(tco?.energy_cost_per_km) }}/{{ distanceUnit() }} • {{ Math.round(tco?.total_liters || 0).toLocaleString(intlLocale()) }} L<template v-if="tco?.consumption_l_100km"> • {{ formatPerDistanceValue(tco.consumption_l_100km, 2) }} L/100 {{ distanceUnit() }}</template><template v-if="tco?.avg_cost_per_liter"> • {{ money(tco.avg_cost_per_liter, 3) }}/L</template>
         </p>
         <p v-else class="text-xs text-slate-400">

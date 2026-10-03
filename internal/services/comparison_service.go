@@ -120,7 +120,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		if err != nil {
 			return nil, err
 		}
-		if sum.Powertrain == models.PowertrainICE {
+		if !models.PowertrainCanCharge(sum.Powertrain) {
 			return nil, ErrComparisonNeedsEV
 		}
 		ev, notes = evBaselineFromTCO(sum, sc.AnnualKm, sc.Years)
@@ -164,7 +164,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 	}
 	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum)
 	d.Powertrain = sum.Powertrain
-	if sum.Powertrain == models.PowertrainICE {
+	if models.PowertrainCanRefuel(sum.Powertrain) {
 		d.ICELPer100Km = sum.ConsumptionL100km
 		if sum.AvgCostPerLiter > 0 {
 			v := sum.AvgCostPerLiter

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { formatAmount } from '@/currency'
 import {
+  canCharge,
+  canLinkTeslaMate,
+  canRefuel,
   emptyOwnership,
   emptyVehicleForm,
   hasTeslaMate,
@@ -224,5 +227,13 @@ describe('ownershipStepError', () => {
 
   it('has nothing to check on the last step', () => {
     expect(ownershipStepError(form({ acquisition_type: 'CASH' }), 3)).toBeNull()
+  })
+})
+
+describe('powertrain capabilities', () => {
+  it('maps each powertrain to what it records', () => {
+    expect([canCharge('EV'), canRefuel('EV'), canLinkTeslaMate('EV')]).toEqual([true, false, true])
+    expect([canCharge('ICE'), canRefuel('ICE'), canLinkTeslaMate('ICE')]).toEqual([false, true, false])
+    expect([canCharge(undefined), canRefuel(undefined)]).toEqual([true, false])
   })
 })

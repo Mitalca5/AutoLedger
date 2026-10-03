@@ -25,7 +25,7 @@ const vehicleStore = useVehicleStore()
 // Readings are shared by every vehicle; fill-ups only exist for combustion vehicles, the energy estimate for electric ones
 const tabs = computed<{ key: Tab; label: string; icon: any }[]>(() => {
   const list: { key: Tab; label: string; icon: any }[] = [{ key: 'KM', label: t('manual.manualTrackingView.mileage'), icon: Gauge }]
-  if (vehicleStore.isIce) list.push({ key: 'FUEL', label: t('manual.manualTrackingView.fillUpsTab'), icon: Fuel })
+  if (vehicleStore.canRefuel) list.push({ key: 'FUEL', label: t('manual.manualTrackingView.fillUpsTab'), icon: Fuel })
   else list.push({ key: 'ENERGY', label: t('manual.manualTrackingView.estimatedEnergy'), icon: Zap })
   return list
 })
@@ -44,7 +44,7 @@ watch(() => route.query.tab, (q) => {
 })
 
 // A tab that does not exist for the newly selected vehicle falls back to the readings
-watch(() => vehicleStore.isIce, () => {
+watch(() => vehicleStore.canRefuel, () => {
   activeTab.value = resolveTab(activeTab.value)
 })
 
@@ -63,7 +63,7 @@ function select(tab: Tab) {
       <div>
         <h1 class="text-xl font-bold text-white">{{ $t('manual.manualTrackingView.manualTracking') }}</h1>
         <p class="text-xs text-slate-400">
-          {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.isIce ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
+          {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.canRefuel ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
         </p>
       </div>
     </div>

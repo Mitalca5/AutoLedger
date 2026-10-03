@@ -30,8 +30,8 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 	if err := s.pool.QueryRow(ctx, `SELECT powertrain FROM vehicles WHERE id = $1;`, vehicleID).Scan(&powertrain); err != nil {
 		return nil, nil, err
 	}
-	isICE := powertrain == models.PowertrainICE
-	if isICE {
+	usesFuel := models.PowertrainCanRefuel(powertrain)
+	if usesFuel {
 		// Fill-ups are odometer readings of a combustion vehicle, like manual checkpoints.
 		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
 		if err != nil {
@@ -154,7 +154,7 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 		return nil, nil, nil
 	}
 
-	if isICE {
+	if usesFuel {
 		// No TeslaMate history to precede: every interval is plain smoothing, never estimated energy.
 		first := cleanPoints[0].date
 		firstTrackingTime = &first

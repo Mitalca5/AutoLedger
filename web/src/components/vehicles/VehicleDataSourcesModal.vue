@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { intlLocale } from '@/i18n'
 import { t } from '@/i18n'
+import { canCharge } from '@/utils/vehicles'
 import { computed, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { Database, X, RefreshCw, Link2, CheckCircle2, AlertCircle, Pencil } from 'lucide-vue-next'
@@ -76,7 +77,7 @@ function formatLast(iso?: string) {
         <div v-if="loading" class="flex justify-center py-6"><RefreshCw class="w-5 h-5 animate-spin text-slate-500" /></div>
         <p v-else-if="error" class="text-rose-400">{{ error }}</p>
         <template v-else-if="summary">
-          <div v-if="vehicle?.powertrain !== 'ICE'" class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
+          <div v-if="canCharge(vehicle?.powertrain)" class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <h4 class="font-bold text-white uppercase tracking-wider">{{ $t('vehicles.vehicleDataSourcesModal.teslamate') }}</h4>
               <span class="font-semibold" :class="summary.teslamate_configured ? 'text-emerald-400' : 'text-slate-500'">

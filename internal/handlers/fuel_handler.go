@@ -134,7 +134,7 @@ func (h *FuelHandler) requireICE(w http.ResponseWriter, r *http.Request, vehicle
 	if v == nil {
 		return false
 	}
-	if v.Powertrain != models.PowertrainICE {
+	if !v.CanRefuel() {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups only apply to combustion vehicles"))
 		return false
 	}

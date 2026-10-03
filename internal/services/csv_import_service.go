@@ -280,7 +280,7 @@ func (s *CSVImportService) plan(ctx context.Context, vehicle *models.Vehicle, co
 	if !ok {
 		return nil, apierror.Newf("import.unsupported_type", "Unrecognized or unsupported import type %q", string(importType))
 	}
-	if importType == ImportTypeCharges && vehicle.Powertrain == models.PowertrainICE {
+	if importType == ImportTypeCharges && !vehicle.CanCharge() {
 		return nil, apierror.New("import.ice_charges", "A combustion vehicle has no charges to import: import its fill-ups instead")
 	}
 

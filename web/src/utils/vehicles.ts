@@ -49,9 +49,27 @@ export function emptyOwnership() {
 
 export type OwnershipForm = ReturnType<typeof emptyOwnership>
 
+// What a powertrain can record. Components and stores ask for a capability instead of comparing the powertrain.
+type PowertrainLike = string | null | undefined
+
+/** A battery to plug in: the vehicle has charging sessions. */
+export function canCharge(powertrain: PowertrainLike): boolean {
+  return powertrain !== 'ICE'
+}
+
+/** Fuel burned: the vehicle has fill-ups. */
+export function canRefuel(powertrain: PowertrainLike): boolean {
+  return powertrain === 'ICE'
+}
+
+/** A teslamateapi connection makes sense for the powertrain. */
+export function canLinkTeslaMate(powertrain: PowertrainLike): boolean {
+  return canCharge(powertrain)
+}
+
 /** TeslaMate features (synchronization, drives, battery and temperature data) apply to an electric vehicle with a teslamateapi URL. */
 export function hasTeslaMate(v: { powertrain?: string; teslamate_api_url?: string | null } | null | undefined): boolean {
-  return !!v && v.powertrain !== 'ICE' && !!v.teslamate_api_url?.trim()
+  return !!v && canLinkTeslaMate(v.powertrain) && !!v.teslamate_api_url?.trim()
 }
 
 /**

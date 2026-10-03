@@ -31,7 +31,7 @@ const vehicle = computed(() => vehicleStore.activeVehicle)
 
 const tabs = computed<{ key: QuickKind; label: string; badge?: number }[]>(() => {
   const list: { key: QuickKind; label: string; badge?: number }[] = []
-  if (vehicleStore.isIce) {
+  if (vehicleStore.canRefuel) {
     list.push({ key: 'FUEL', label: 'quickadd.quickAddSheet.tabFuel' })
   } else {
     if (pendingTotal.value > 0) list.push({ key: 'PENDING', label: 'quickadd.quickAddSheet.tabPending', badge: pendingTotal.value })
@@ -45,7 +45,7 @@ const activeKind = ref<QuickKind>('CHARGE')
 
 // Recharges TeslaMate waiting for a cost: loaded ahead of time so the sheet opens on the right tab.
 async function loadPending() {
-  if (!vehicle.value || vehicleStore.isIce || !vehicleStore.canEdit || !offlineStore.isOnline) return
+  if (!vehicle.value || vehicleStore.canRefuel || !vehicleStore.canEdit || !offlineStore.isOnline) return
   try {
     const res = await api.getCharges(vehicle.value.id, { missingCost: true, limit: PENDING_LIMIT })
     pending.value = (res.charges || []).filter((c: any) => !c.is_manual)

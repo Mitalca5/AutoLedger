@@ -43,7 +43,7 @@ const initialTab = (route.query.tab as string)?.toUpperCase()
 const activeTab = ref<TabType>(validTabs.includes(initialTab as TabType) ? (initialTab as TabType) : 'TOLLS')
 
 // A combustion vehicle has no charges: its fill-ups live in the manual tracking page
-watch([() => vehicleStore.isIce, activeTab], ([ice, tab]) => {
+watch([() => vehicleStore.canRefuel, activeTab], ([ice, tab]) => {
   if (ice && tab === 'CHARGES') router.replace('/manual?tab=FUEL')
 }, { immediate: true })
 
@@ -149,7 +149,7 @@ async function loadData() {
       maintenanceExpenses.value = await api.getMaintenance(vehicleStore.activeVehicle.id)
     } else if (activeTab.value === 'REMINDERS') {
       await loadReminders()
-    } else if (activeTab.value === 'CHARGES' && !vehicleStore.isIce) {
+    } else if (activeTab.value === 'CHARGES' && vehicleStore.canCharge) {
       chargesPage.value = 1
       const res = await api.getCharges(vehicleStore.activeVehicle.id, { missingCost: missingCostOnly.value })
       charges.value = res.charges
@@ -434,7 +434,7 @@ async function openWebhookModal() {
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.newReminder') }}
         </button>
-        <template v-if="activeTab === 'CHARGES' && !vehicleStore.isIce">
+        <template v-if="activeTab === 'CHARGES' && vehicleStore.canCharge">
           <button
             @click="openCSVImportModal"
             class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 border border-slate-700 transition-colors"
@@ -488,7 +488,7 @@ async function openWebhookModal() {
             <span>{{ $t('expenses.expensesView.tolls') }}</span>
           </button>
           <button
-            v-if="!vehicleStore.isIce"
+            v-if="vehicleStore.canCharge"
             @click="activeTab = 'CHARGES'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
             :class="activeTab === 'CHARGES' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
@@ -580,7 +580,7 @@ async function openWebhookModal() {
     />
 
     <div
-      v-if="activeTab === 'CHARGES' && !vehicleStore.isIce && pendingChargesCount > 0"
+      v-if="activeTab === 'CHARGES' && vehicleStore.canCharge && pendingChargesCount > 0"
       class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
     >
       <div class="flex items-center gap-2.5 text-amber-300">
@@ -599,7 +599,7 @@ async function openWebhookModal() {
     </div>
 
     <ChargesPanel
-      v-if="activeTab === 'CHARGES' && !vehicleStore.isIce"
+      v-if="activeTab === 'CHARGES' && vehicleStore.canCharge"
       :charges="charges"
       :charges-total="chargesTotal"
       :charges-without-cost="chargesWithoutCost"

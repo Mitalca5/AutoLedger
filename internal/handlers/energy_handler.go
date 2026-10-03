@@ -8,7 +8,6 @@ import (
 	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/middleware"
-	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/services"
 )
 
@@ -32,7 +31,7 @@ func (h *EnergyHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
 		return
 	}
-	if vehicle.Powertrain == models.PowertrainICE {
+	if !vehicle.CanCharge() {
 		writeJSON(w, http.StatusOK, &services.EnergyStats{
 			Months:        []services.EnergyMonth{},
 			ChargeClasses: []services.ChargeClassStat{},

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { t } from '@/i18n'
 import { apiErrorMessage } from '@/services/apiError'
-import { hasTeslaMate as vehicleHasTeslaMate } from '@/utils/vehicles'
+import { canCharge as canChargePowertrain, canRefuel as canRefuelPowertrain, hasTeslaMate as vehicleHasTeslaMate } from '@/utils/vehicles'
 import { checkSyncProgress, POLL_INTERVAL_MS, STALE_AFTER_HIDDEN_MS, type SyncSeen } from '@/utils/syncWatch'
 
 export const useVehicleStore = defineStore('vehicle', () => {
@@ -27,7 +27,8 @@ export const useVehicleStore = defineStore('vehicle', () => {
   const isViewer = computed(() => userRole.value === 'VIEWER')
   const canEdit = computed(() => isOwner.value || isEditor.value)
   // Combustion vehicles are tracked manually (fuel fill-ups) and have no TeslaMate link
-  const isIce = computed(() => activeVehicle.value?.powertrain === 'ICE')
+  const canCharge = computed(() => canChargePowertrain(activeVehicle.value?.powertrain))
+  const canRefuel = computed(() => canRefuelPowertrain(activeVehicle.value?.powertrain))
   // TeslaMate-fed data (drives, battery, temperature, synchronization) only exists for a vehicle linked to a teslamateapi
   const hasTeslaMate = computed(() => vehicleHasTeslaMate(activeVehicle.value))
   // Every amount of a vehicle is stored and shown in the currency chosen at its creation
@@ -177,7 +178,8 @@ export const useVehicleStore = defineStore('vehicle', () => {
     isEditor,
     isViewer,
     canEdit,
-    isIce,
+    canCharge,
+    canRefuel,
     hasTeslaMate,
     currency,
     isSyncing,

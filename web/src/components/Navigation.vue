@@ -47,8 +47,8 @@ const allNavItems = [
 // Drives and carpooling apply to any non-combustion vehicle (connected or manually tracked)
 const navItems = computed(() =>
   allNavItems.filter((item) => {
-    if (item.name === 'drives') return !vehicleStore.isIce
-    if (item.name === 'carpools') return !vehicleStore.isIce
+    if (item.name === 'drives') return vehicleStore.canCharge
+    if (item.name === 'carpools') return vehicleStore.canCharge
     return true
   }),
 )
@@ -56,7 +56,7 @@ const navItems = computed(() =>
 const currentRouteName = computed(() => route.name)
 
 // Phone bar: the everyday pages, the quick entry button in the middle, everything else behind "Plus".
-const primaryNames = computed(() => (!vehicleStore.isIce ? ['dashboard', 'drives', 'expenses'] : ['dashboard', 'expenses', 'manual']))
+const primaryNames = computed(() => (vehicleStore.canCharge ? ['dashboard', 'drives', 'expenses'] : ['dashboard', 'expenses', 'manual']))
 const primaryItems = computed(() =>
   primaryNames.value.map((name) => navItems.value.find((item) => item.name === name)).filter((item) => !!item),
 )

@@ -144,7 +144,7 @@ func (h *HomeAssistantHandler) recordFuel(w http.ResponseWriter, r *http.Request
 	if vehicle == nil {
 		return
 	}
-	if vehicle.Powertrain != models.PowertrainICE {
+	if !vehicle.CanRefuel() {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("fuel.combustion_only", "Fuel fill-ups only apply to combustion vehicles"))
 		return
 	}

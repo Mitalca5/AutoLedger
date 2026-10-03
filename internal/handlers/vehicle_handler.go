@@ -183,7 +183,7 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		authType = models.AuthModeNone
 	}
 
-	if powertrain == models.PowertrainICE {
+	if !models.PowertrainCanLinkTeslaMate(powertrain) {
 		req.TeslaMateCarID = nil
 		req.TeslaMateAPIURL = nil
 		req.TeslaMateGrafanaURL = nil
@@ -283,7 +283,7 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	existing.Name = req.Name
 	existing.Vin = req.Vin
-	if existing.Powertrain == models.PowertrainICE {
+	if !existing.CanLinkTeslaMate() {
 		existing.TeslaMateCarID = nil
 		existing.TeslaMateAPIURL = nil
 		existing.TeslaMateGrafanaURL = nil
