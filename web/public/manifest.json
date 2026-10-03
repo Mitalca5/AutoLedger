@@ -1,7 +1,7 @@
 {
   "name": "AutoLedger - Vehicle TCO & Maintenance",
   "short_name": "AutoLedger",
-  "description": "Application de suivi des coûts de possession et d'entretien pour véhicules électriques",
+  "description": "Self-hosted total cost of ownership tracker for electric, hybrid and combustion vehicles",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",
@@ -34,9 +34,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Saisie rapide",
-      "short_name": "Saisie",
-      "description": "Ajouter une recharge, un plein ou un coût",
+      "name": "Quick add",
+      "short_name": "Quick add",
+      "description": "Add a charge, a fill-up or an expense",
       "url": "/?quick=1",
       "icons": [
         {
@@ -47,8 +47,8 @@
       ]
     },
     {
-      "name": "Péage / parking",
-      "short_name": "Péage",
+      "name": "Toll / parking",
+      "short_name": "Toll",
       "url": "/?quick=expense",
       "icons": [
         {
@@ -56,7 +56,8 @@
           "sizes": "192x192",
           "type": "image/png"
         }
-      ]
+      ],
+      "description": "Add a toll or parking cost"
     }
   ]
 }

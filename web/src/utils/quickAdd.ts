@@ -17,7 +17,8 @@ export interface StorageLike {
   setItem(key: string, value: string): void
 }
 
-const MEMORY_PREFIX = 'teslacost.quickadd.'
+const MEMORY_PREFIX = 'autoledger.quickadd.'
+const LEGACY_MEMORY_PREFIX = 'teslacost.quickadd.'
 
 // Parses a number typed on a phone keyboard, which may use a decimal comma. Empty or invalid input gives null.
 export function toNumber(value: unknown): number | null {
@@ -179,7 +180,7 @@ function defaultStorage(): StorageLike | null {
 export function loadMemory(vehicleId: string, storage: StorageLike | null = defaultStorage()): QuickMemory {
   if (!storage) return {}
   try {
-    const raw = storage.getItem(MEMORY_PREFIX + vehicleId)
+    const raw = storage.getItem(MEMORY_PREFIX + vehicleId) ?? storage.getItem(LEGACY_MEMORY_PREFIX + vehicleId)
     if (!raw) return {}
     const parsed = JSON.parse(raw)
     const memory: QuickMemory = {}

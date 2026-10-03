@@ -27,15 +27,15 @@ type ICEDefault struct {
 	FuelType  string  `json:"fuel_type"`
 	Label     string  `json:"label"`
 	LPer100Km float64 `json:"l_per_100km"`
-	FuelPrice float64 `json:"fuel_price"` // EUR per litre
+	FuelPrice float64 `json:"fuel_price"` // vehicle currency per litre
 }
 
-// iceDefaults are indicative figures for the French market; users are expected to adjust them.
+// iceDefaults are indicative figures; users are expected to adjust them to their market and currency.
 var iceDefaults = []ICEDefault{
-	{"SP95_E10", "Petrol SP95-E10", 6.5, 1.75},
-	{"SP98", "Petrol SP98", 6.5, 1.85},
+	{"SP95_E10", "Petrol E10", 6.5, 1.75},
+	{"SP98", "Petrol (premium)", 6.5, 1.85},
 	{"DIESEL", "Diesel", 5.5, 1.70},
-	{"E85", "Superethanol E85", 9.0, 0.80},
+	{"E85", "Ethanol E85", 9.0, 0.80},
 	{"GPL", "LPG", 8.0, 0.95},
 }
 

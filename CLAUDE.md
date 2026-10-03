@@ -1,4 +1,4 @@
-# AutoLedger (repository and technical names: TeslaCost)
+# AutoLedger (module path, image, database and volume names keep the original `teslacost` identifier)
 
 Self-hosted total-cost-of-ownership tracker for cars: energy/fuel, maintenance, tires, documents, reminders, carpooling, financing. Vehicles can be fed automatically by a [TeslaMate](https://github.com/teslamate-org/teslamate) instance through `teslamateapi`, or tracked entirely by hand.
 

@@ -30,11 +30,11 @@ const formError = ref('')
 
 const fuelTypes = [
   { value: '', label: '', labelKey: 'manual.fuelLogsPanel.unspecified' },
-  { value: 'SP95_E10', label: 'SP95-E10' },
-  { value: 'SP98', label: 'SP98' },
+  { value: 'SP95_E10', label: '', labelKey: 'comparison.fuelTypes.SP95_E10' },
+  { value: 'SP98', label: '', labelKey: 'comparison.fuelTypes.SP98' },
   { value: 'DIESEL', label: '', labelKey: 'manual.fuelLogsPanel.diesel' },
-  { value: 'E85', label: 'E85' },
-  { value: 'GPL', label: 'GPL' },
+  { value: 'E85', label: '', labelKey: 'comparison.fuelTypes.E85' },
+  { value: 'GPL', label: '', labelKey: 'comparison.fuelTypes.GPL' },
 ]
 
 function emptyForm() {

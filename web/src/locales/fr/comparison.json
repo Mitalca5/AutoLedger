@@ -155,10 +155,10 @@
     "years": "{years} an(s)"
   },
   "fuelTypes": {
-    "SP95_E10": "Essence SP95-E10",
-    "SP98": "Essence SP98",
+    "SP95_E10": "Essence E10",
+    "SP98": "Essence (premium)",
     "DIESEL": "Gazole",
-    "E85": "Superéthanol E85",
+    "E85": "Éthanol E85",
     "GPL": "GPL"
   }
 }

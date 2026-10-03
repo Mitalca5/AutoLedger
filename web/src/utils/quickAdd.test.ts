@@ -212,6 +212,13 @@ describe('tariff memory', () => {
     expect(loadMemory('v1', storage)).toEqual({ pricePerKwh: 0.3, address: 'Domicile' })
   })
 
+  it('reads a memory saved under the previous key and rewrites it under the new one', () => {
+    const storage = memoryStorage({ 'teslacost.quickadd.v1': '{"pricePerKwh":0.25,"address":"Home"}' })
+    expect(loadMemory('v1', storage)).toEqual({ pricePerKwh: 0.25, address: 'Home' })
+    rememberCharge('v1', { kwh: 10, cost: 3, address: null }, storage)
+    expect(JSON.parse(storage.data['autoledger.quickadd.v1'])).toEqual({ pricePerKwh: 0.3, address: 'Home' })
+  })
+
   it('ignores corrupted or invalid stored values', () => {
     expect(loadMemory('v1', memoryStorage({ 'teslacost.quickadd.v1': '{not json' }))).toEqual({})
     expect(loadMemory('v1', memoryStorage({ 'teslacost.quickadd.v1': '{"pricePerKwh":-2,"address":"  "}' }))).toEqual({})

@@ -1,5 +1,5 @@
 // Bump when the caching strategy changes; hashed build assets are versioned by their file names.
-const CACHE_NAME = 'teslacost-v2';
+const CACHE_NAME = 'autoledger-v3';
 const OFFLINE_SHELL = ['/index.html', '/manifest.json', '/favicon.svg', '/pwa-icon.svg'];
 
 self.addEventListener('install', (event) => {

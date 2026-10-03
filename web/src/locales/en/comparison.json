@@ -155,10 +155,10 @@
     "years": "{years} year(s)"
   },
   "fuelTypes": {
-    "SP95_E10": "Petrol SP95-E10",
-    "SP98": "Petrol SP98",
+    "SP95_E10": "Petrol E10",
+    "SP98": "Petrol (premium)",
     "DIESEL": "Diesel",
-    "E85": "Superethanol E85",
+    "E85": "Ethanol E85",
     "GPL": "LPG"
   }
 }
