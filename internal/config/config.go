@@ -84,8 +84,8 @@ func Load() *Config {
 		dbURL = NormalizeDatabaseURL(rawURL)
 	}
 
-	encKey := getEnvWithFallback("AUTOLEDGER_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY", "dev-default-32-byte-secret-key!!")
-	jwtSecret := getEnvWithFallback("AUTOLEDGER_JWT_SECRET", "JWT_SECRET", "super_secret_jwt_signing_key_for_teslacost_app")
+	encKey := getEnvWithFallback("AUTOLEDGER_ENCRYPTION_KEY", "APP_ENCRYPTION_KEY", "")
+	jwtSecret := getEnvWithFallback("AUTOLEDGER_JWT_SECRET", "JWT_SECRET", "")
 	jwtAccessExpMinutes, _ := strconv.Atoi(getEnv("JWT_ACCESS_EXPIRATION_MINUTES", "15"))
 	if jwtAccessExpMinutes <= 0 {
 		jwtAccessExpMinutes = 15
@@ -121,6 +121,15 @@ func Load() *Config {
 
 	reportingTimezone := getEnv("APP_TIMEZONE", "Europe/Paris")
 	storageDir := getEnvWithFallback("AUTOLEDGER_STORAGE_DIR", "STORAGE_DIR", "./data/documents")
+
+	encSet, jwtSet := encKey != "", jwtSecret != ""
+	if !encSet {
+		encKey = "dev-default-32-byte-secret-key!!"
+	}
+	if !jwtSet {
+		jwtSecret = "super_secret_jwt_signing_key_for_teslacost_app"
+	}
+	jwtSecret, encKey = resolveSecrets(strings.ToLower(env), storageDir, jwtSecret, encKey, jwtSet, encSet)
 
 	// OIDC configuration
 	oidcIssuerURL := getEnv("OIDC_ISSUER_URL", "")

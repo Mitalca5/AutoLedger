@@ -148,15 +148,9 @@ AutoLedger/
    curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
    ```
 
-2. **Generate your production encryption key and configure `.env`:**
-   ```bash
-   # Generate a 32-byte AES-256 encryption key (64 hex characters):
-   openssl rand -hex 32
-   ```
-   Open `.env` and set your secrets:
-   - `AUTOLEDGER_ENCRYPTION_KEY`: your generated 64-character hex key
-   - `AUTOLEDGER_DB_PASSWORD`: a strong database password
-   - `AUTOLEDGER_JWT_SECRET`: your random token signing secret
+2. **Configure `.env`:**
+   - `AUTOLEDGER_DB_PASSWORD`: a strong database password (`openssl rand -hex 32`)
+   - `AUTOLEDGER_JWT_SECRET` and `AUTOLEDGER_ENCRYPTION_KEY`: leave unset and random values are generated on first start, stored in `.autoledger-secrets.json` on the documents volume (mode 0600). Back that volume up with the database: the encryption key is needed to read stored credentials. Set them explicitly to manage them yourself.
    - *(Optional)* OIDC / SSO parameters if using Authentik, Keycloak, etc.
 
 3. **Start the stack:**
@@ -237,7 +231,7 @@ autoledger.homelab.local {
 
 - **Trusted Proxies**: `TRUSTED_PROXIES` ensures `X-Forwarded-*` headers are only honored from your reverse proxy (defaults to loopback and private LAN/Docker networks).
 - **Security Headers**: Built-in strict CSP (`Content-Security-Policy`), HSTS over HTTPS, and `X-Frame-Options: DENY`.
-- **Production Safety Check**: In `ENVIRONMENT=production`, the application refuses to boot if default repository passwords or secrets are detected.
+- **Production Safety Check**: In `ENVIRONMENT=production`, the application refuses to boot if default repository passwords or secrets are detected. An unset JWT secret or encryption key is generated and persisted instead.
 
 ---
 
