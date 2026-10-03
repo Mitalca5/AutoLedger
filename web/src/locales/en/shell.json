@@ -114,5 +114,8 @@
     "fillUp": "Fill-up of {amount}",
     "charge": "Charge of {kwh} kWh",
     "documentLoadFailed": "Could not load the document"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
   }
 }

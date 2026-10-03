@@ -39,7 +39,7 @@ function openInNewTab() {
     class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-hidden"
     @click.self="emit('close')"
   >
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[92vh] sm:h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div v-dialog="() => emit('close')" class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[92vh] sm:h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <!-- Header -->
       <div class="px-4 sm:px-6 py-3.5 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95 gap-3">
         <div class="flex items-center gap-2.5 min-w-0">

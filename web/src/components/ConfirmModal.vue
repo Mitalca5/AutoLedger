@@ -46,7 +46,7 @@ watch(isOpen, async (open) => {
           leave-from-class="opacity-100 scale-100 translate-y-0"
           leave-to-class="opacity-0 scale-95 translate-y-2"
         >
-          <div
+          <div v-dialog
             v-if="isOpen"
             class="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl shadow-black/80 space-y-5 overflow-hidden my-auto"
             role="dialog"

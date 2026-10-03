@@ -495,7 +495,7 @@ onBeforeUnmount(destroyChart)
           <Scale class="w-5 h-5 text-sky-400" />
         </div>
         <div>
-          <h1 class="text-xl font-bold text-white">{{ $t('comparison.comparisonView.electricCombustionComparison') }}</h1>
+          <h2 class="text-xl font-bold text-white">{{ $t('comparison.comparisonView.electricCombustionComparison') }}</h2>
           <p class="text-xs text-slate-400">{{ $t('comparison.comparisonView.forInformationOnlyNoneOf') }}</p>
         </div>
       </div>

@@ -197,9 +197,9 @@ onBeforeUnmount(() => {
           <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
             <LayoutGrid class="w-6 h-6" />
           </div>
-          <h1 class="text-2xl font-bold tracking-tight text-white">
+          <h2 class="text-2xl font-bold tracking-tight text-white">
             {{ t('fleet.title') }}
-          </h1>
+          </h2>
         </div>
         <p class="text-sm text-slate-400 mt-1">
           {{ t('fleet.subtitle') }}

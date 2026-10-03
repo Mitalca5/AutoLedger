@@ -249,7 +249,7 @@ onMounted(load)
 
     <!-- Add / edit modal -->
     <div v-if="showForm" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
-      <form class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3.5 my-auto shadow-2xl" @submit.prevent="save">
+      <form v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3.5 my-auto shadow-2xl" @submit.prevent="save">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-bold text-white">{{ editingId ? $t('manual.fuelLogsPanel.edit') : $t('manual.fuelLogsPanel.new') }}</h3>
           <button type="button" :aria-label="$t('common.close')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800" @click="showForm = false">

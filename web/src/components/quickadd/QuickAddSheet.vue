@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
     class="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 md:items-center md:p-4"
     @click.self="quickAdd.close()"
   >
-    <div
+    <div v-dialog
       ref="panel"
       role="dialog"
       aria-modal="true"

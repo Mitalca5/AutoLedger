@@ -21,6 +21,17 @@ function listen() {
   window.addEventListener('keydown', closeTopLayerOnEscape)
 }
 
+/** Registers a layer closed by Escape until the returned function is called. */
+export function pushEscapeLayer(close: () => void): () => void {
+  const layer = () => close()
+  listen()
+  layers.push(layer)
+  return () => {
+    const i = layers.indexOf(layer)
+    if (i >= 0) layers.splice(i, 1)
+  }
+}
+
 /** Closes the layer with `close` on Escape while `isOpen` is true (a ref or a getter), if no layer opened after it is still open. */
 export function useEscapeToClose(isOpen: Ref<boolean> | (() => boolean), close: () => void) {
   const layer = () => close()

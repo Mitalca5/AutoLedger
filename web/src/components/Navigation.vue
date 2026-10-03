@@ -95,9 +95,9 @@ function handleLogout() {
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+          <p class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
             {{ APP_NAME }}
-          </h1>
+          </p>
           <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">
             {{ APP_VERSION }}
           </span>
@@ -219,6 +219,7 @@ function handleLogout() {
     @click.self="showMore = false"
   >
     <div
+      v-dialog="() => (showMore = false)"
       role="dialog"
       aria-modal="true"
       :aria-label="$t('shell.navigation.otherPages')"

@@ -149,7 +149,7 @@ onMounted(load)
         <ShieldCheck class="h-5 w-5 text-emerald-400" aria-hidden="true" />
       </div>
       <div>
-        <h1 class="text-xl font-bold text-white">{{ $t('account.accountView.accountAndSecurity') }}</h1>
+        <h2 class="text-xl font-bold text-white">{{ $t('account.accountView.accountAndSecurity') }}</h2>
         <p class="text-xs text-slate-400">{{ $t('account.accountView.signInPasswordAndConnected') }}</p>
       </div>
     </div>

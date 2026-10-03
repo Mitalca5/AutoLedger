@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { APP_NAME } from '@/brand'
 import { useAuthStore } from '@/stores/auth'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useOfflineStore } from '@/stores/offline'
@@ -10,6 +12,36 @@ import ConfirmModal from '@/components/ConfirmModal.vue'
 import QuickAddSheet from '@/components/quickadd/QuickAddSheet.vue'
 
 const route = useRoute()
+const { t } = useI18n()
+
+const ROUTE_TITLE_KEYS: Record<string, string> = {
+  dashboard: 'shell.nav.dashboard',
+  fleet: 'shell.nav.fleet',
+  drives: 'shell.nav.drives',
+  carpools: 'shell.nav.carpools',
+  tires: 'shell.nav.tires',
+  manual: 'shell.nav.manual',
+  expenses: 'shell.nav.expenses',
+  comparison: 'shell.nav.comparison',
+  vehicles: 'shell.nav.vehicles',
+  account: 'shell.nav.account',
+  login: 'auth.loginView.signInTo',
+  register: 'auth.registerView.createAnAccount',
+  onboarding: 'onboarding.onboardingView.welcomeTo',
+}
+
+const pageTitle = computed(() => {
+  const key = ROUTE_TITLE_KEYS[String(route.name)]
+  return key ? t(key, { APP_NAME }) : APP_NAME
+})
+
+watch(
+  pageTitle,
+  (title) => {
+    document.title = title === APP_NAME ? APP_NAME : `${title} · ${APP_NAME}`
+  },
+  { immediate: true }
+)
 const authStore = useAuthStore()
 const vehicleStore = useVehicleStore()
 
@@ -44,10 +76,12 @@ onMounted(async () => {
 
 <template>
   <div v-if="showDashboardLayout" class="flex h-screen overflow-hidden bg-slate-950">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-rose-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">{{ $t('shell.a11y.skipToContent') }}</a>
     <Navigation />
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
       <TopBar />
-      <main class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
+      <main id="main-content" tabindex="-1" class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto focus:outline-none">
+        <h1 class="sr-only">{{ pageTitle }}</h1>
         <!-- Attente de l'initialisation du store véhicule pour éviter un affichage vide au refresh -->
         <div v-if="!vehicleStore.isInitialized" class="flex flex-col items-center justify-center py-28 space-y-4">
           <div class="w-9 h-9 border-3 border-rose-500 border-t-transparent rounded-full animate-spin"></div>

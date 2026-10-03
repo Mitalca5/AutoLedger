@@ -63,7 +63,7 @@ function select(tab: Tab) {
         <ClipboardList class="w-5 h-5 text-cyan-400" />
       </div>
       <div>
-        <h1 class="text-xl font-bold text-white">{{ $t('manual.manualTrackingView.manualTracking') }}</h1>
+        <h2 class="text-xl font-bold text-white">{{ $t('manual.manualTrackingView.manualTracking') }}</h2>
         <p class="text-xs text-slate-400">
           {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.canRefuel ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
         </p>

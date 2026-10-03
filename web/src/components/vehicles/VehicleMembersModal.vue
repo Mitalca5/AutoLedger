@@ -107,7 +107,7 @@ async function handleRemoveMember(m: any) {
     v-if="open"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
   >
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <!-- Header -->
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
