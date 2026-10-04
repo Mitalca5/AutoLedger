@@ -145,7 +145,7 @@
     "distanceKm": "Distance ({unit})",
     "lastMonthSDetail": "Détail dernier mois",
     "clickABarOfThe": "Cliquer sur une barre du graphique pour ouvrir le détail chiffré du mois.",
-    "monthlyMileageAndCostPer2": "Kilométrage Mensuel & Coût de Revient au {unit} ({cur}/{unit})",
+    "monthlyMileageAndCostPer2": "Kilométrage mensuel et coût de revient au {unit} ({cur}/{unit})",
     "kmDriven": "Distance parcourue ({unit})",
     "averageCostPerKm": "Coût moyen au {unit} ({cur}/{unit})",
     "tooltipDistance": "Distance : {distance} {unit}",

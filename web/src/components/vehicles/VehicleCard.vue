@@ -84,7 +84,7 @@ function clearCardTestResult() {
     </div>
 
     <!-- Telemetry & Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-800 text-xs">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 mt-4 pt-4 border-t border-slate-800 text-xs">
       <div>
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.currentOdometer') }}</span>
         <p class="text-sm font-bold text-slate-200 flex items-center gap-1.5 mt-0.5">
@@ -121,7 +121,7 @@ function clearCardTestResult() {
 
       <div v-if="canRefuel(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.powertrain') }}</span>
-        <p class="text-sm font-semibold mt-0.5 text-warning-300">{{ canCharge(v.powertrain) ? $t(`vehicles.powertrains.${v.powertrain}`) : $t('vehicles.vehicleCard.combustionFillUpsEnteredBy') }}</p>
+        <p class="text-sm font-semibold mt-0.5 text-slate-200">{{ canCharge(v.powertrain) ? $t(`vehicles.powertrains.${v.powertrain}`) : $t('vehicles.vehicleCard.combustionFillUpsEnteredBy') }}</p>
       </div>
       <div v-if="canCharge(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.teslamateConnection') }}</span>

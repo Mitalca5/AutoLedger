@@ -45,7 +45,7 @@
     "teslamateGrafanaUrlOptional": "URL Grafana TeslaMate (optionnelle)",
     "eGHttp1921682": "ex: http://192.168.1.50:8080 ou http://host.docker.internal:8080",
     "teslamateapiBaseUrl": "URL de base teslamateapi",
-    "teslamateapiConnectionOptional": "Connexion TeslaMateApi (Optionnelle)",
+    "teslamateapiConnectionOptional": "Connexion TeslaMateApi (optionnelle)",
     "rateKwh": "Tarif ({currency}/kWh)",
     "consumptionKwh100km": "Conso (kWh/100 {unit})",
     "estimatedEnergyOptional": "Énergie estimée (Optionnel)",
@@ -109,7 +109,7 @@
     "deleteMessage": "Supprimer ce véhicule et tout son historique ? Cette action est irréversible.",
     "addAVehicle": "Ajouter un véhicule",
     "setUpYourVehiclesAnd": "Configurez vos véhicules et la synchronisation avec TeslaMateApi",
-    "vehicleManagement": "Gestion des Véhicules"
+    "vehicleManagement": "Gestion des véhicules"
   },
   "ownershipWizardModal": {
     "leaseStart": "Début du contrat de location",
@@ -185,15 +185,15 @@
   },
   "wizardSteps": {
     "one": {
-      "title": "Mode & Début",
+      "title": "Mode et début",
       "description": "Type de contrat et date"
     },
     "two": {
-      "title": "Modalités Financières",
+      "title": "Modalités financières",
       "description": "Coûts et mensualités"
     },
     "three": {
-      "title": "Conditions & Fin",
+      "title": "Conditions et fin",
       "description": "Kilométrage, options et clôture"
     }
   },

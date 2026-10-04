@@ -265,7 +265,7 @@ async function testModalConnection() {
               ? 'bg-rose-500/10 border-rose-500/50 shadow-sm ring-1 ring-rose-500/20'
               : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800'"
           >
-            <input id="vehicle-connect-teslamate" v-model="connectTeslaMate" type="checkbox" class="mt-0.5 rounded text-rose-500 focus:ring-rose-500/20 bg-slate-900 border-slate-700" />
+            <input id="vehicle-connect-teslamate" v-model="connectTeslaMate" type="checkbox" class="select-box mt-0.5" />
             <div>
               <span class="text-xs font-semibold text-white block">{{ $t('vehicles.vehicleFormModal.teslamateSync') }}</span>
               <span class="text-xs text-slate-400 block mt-0.5">{{ $t('vehicles.vehicleFormModal.teslamateSyncDesc') }}</span>
@@ -441,7 +441,7 @@ async function testModalConnection() {
             </div>
 
             <label for="vehicle-home-charger-default" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">
-              <input id="vehicle-home-charger-default" type="checkbox" v-model="form.is_home_charger_default" class="mt-0.5 rounded border-slate-600 text-rose-600 focus:ring-rose-500 bg-slate-900" />
+              <input id="vehicle-home-charger-default" type="checkbox" v-model="form.is_home_charger_default" class="select-box mt-0.5" />
               <div class="text-xs">
                 <span class="font-semibold text-white block">{{ $t('vehicles.homeChargerDefaultLabel') }}</span>
                 <span class="text-slate-400 block mt-0.5">{{ $t('vehicles.homeChargerDefaultHint') }}</span>
