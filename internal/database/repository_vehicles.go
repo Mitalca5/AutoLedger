@@ -45,9 +45,8 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 		}
 	}
 	v.TelemetryMode = v.DerivedTelemetryMode()
-	if v.DefaultDriverID == nil {
-		v.DefaultDriverID = &v.UserID
-	}
+	// The default driver is a person of the vehicle, created below once the vehicle exists.
+	v.DefaultDriverID = nil
 	query := `
 		INSERT INTO vehicles (
 			user_id, name, vin, current_odometer,
@@ -78,6 +77,14 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 	if _, err := tx.Exec(ctx, memberQuery, v.ID, v.UserID); err != nil {
 		return fmt.Errorf("failed to insert vehicle owner member: %w", err)
 	}
+	ownerPerson, err := ensureMemberPerson(ctx, tx, v.ID, v.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to create the owner's driver profile: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `UPDATE vehicles SET default_driver_id = $1 WHERE id = $2`, ownerPerson, v.ID); err != nil {
+		return fmt.Errorf("failed to set the default driver: %w", err)
+	}
+	v.DefaultDriverID = &ownerPerson
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("failed to commit vehicle creation: %w", err)
@@ -337,7 +344,7 @@ func (r *Repository) ListVehicleMembers(ctx context.Context, vehicleID string) (
 }
 
 // AddVehicleMember associates an existing user to a vehicle by email with a specified role.
-func (r *Repository) AddVehicleMember(ctx context.Context, vehicleID, userEmail string, role models.VehicleRole) (*models.VehicleMember, error) {
+func (r *Repository) AddVehicleMember(ctx context.Context, vehicleID, userEmail string, role models.VehicleRole, personID *string) (*models.VehicleMember, error) {
 	if !role.IsValid() {
 		return nil, apierror.Newf("member.invalid_role", "Invalid role: %s", role)
 	}
@@ -357,12 +364,27 @@ func (r *Repository) AddVehicleMember(ctx context.Context, vehicleID, userEmail 
 		RETURNING created_at, updated_at;
 	`
 	var createdAt, updatedAt time.Time
-	err = r.pool.QueryRow(ctx, query, vehicleID, targetUser.ID, string(role)).Scan(&createdAt, &updatedAt)
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck
+	err = tx.QueryRow(ctx, query, vehicleID, targetUser.ID, string(role)).Scan(&createdAt, &updatedAt)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "vehicle_members_pkey") {
 			return nil, apierror.New("member.already_member", "This user already has access to this vehicle")
 		}
 		return nil, fmt.Errorf("failed to add vehicle member: %w", err)
+	}
+	if personID != nil && *personID != "" {
+		if err := attachAccountToPerson(ctx, tx, vehicleID, *personID, targetUser.ID); err != nil {
+			return nil, err
+		}
+	} else if _, err := ensureMemberPerson(ctx, tx, vehicleID, targetUser.ID); err != nil {
+		return nil, fmt.Errorf("failed to create the member's driver profile: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
 	}
 
 	return &models.VehicleMember{
@@ -437,6 +459,10 @@ func (r *Repository) RemoveVehicleMember(ctx context.Context, vehicleID, targetU
 		}
 	}
 
+	// The person (and the history attached to it) stays, without an account.
+	if _, err := r.pool.Exec(ctx, `UPDATE vehicle_people SET user_id = NULL, updated_at = NOW() WHERE vehicle_id::text = $1 AND user_id::text = $2;`, vehicleID, targetUserID); err != nil {
+		return err
+	}
 	tag, err := r.pool.Exec(ctx, `DELETE FROM vehicle_members WHERE vehicle_id::text = $1 AND user_id::text = $2;`, vehicleID, targetUserID)
 	if err != nil {
 		return fmt.Errorf("failed to remove vehicle member: %w", err)

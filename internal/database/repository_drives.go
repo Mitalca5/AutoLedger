@@ -202,7 +202,7 @@ func (r *Repository) ListDrives(ctx context.Context, vehicleID string, filter Dr
 		       start_odometer, end_odometer, distance_km, duration_min,
 		       speed_avg, speed_max, power_max, power_min, start_address, end_address, energy_consumed_kwh,
 		       consumption_kwh_100km, tags, is_manual, energy_estimated, toll_reviewed_at, created_at, updated_at,
-		       driver_id, (SELECT email FROM users WHERE id = drives.driver_id) AS driver_name
+		       driver_id, (SELECT name FROM vehicle_people WHERE id = drives.driver_id) AS driver_name
 		FROM drives
 		WHERE ` + whereClause + fmt.Sprintf(" ORDER BY start_time DESC LIMIT $%d OFFSET $%d;", argIdx, argIdx+1)
 

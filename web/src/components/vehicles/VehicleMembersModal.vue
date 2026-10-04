@@ -4,9 +4,9 @@ import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useAuthStore } from '@/stores/auth'
-import { api } from '@/services/api'
+import { api, type VehiclePerson } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { Trash2, RefreshCw, X, Users, UserPlus, ShieldCheck, LogOut } from 'lucide-vue-next'
+import { Trash2, RefreshCw, X, Users, UserPlus, ShieldCheck, LogOut, Star } from 'lucide-vue-next'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 // Who can access a vehicle: the owner adds members and changes their role, a member can leave.
@@ -24,18 +24,30 @@ const newMemberEmail = ref('')
 const newMemberRole = ref<'EDITOR' | 'VIEWER'>('EDITOR')
 const addingMember = ref(false)
 const updatingMemberId = ref<string | null>(null)
+const people = ref<VehiclePerson[]>([])
+const newPersonName = ref('')
+const newMemberPersonId = ref('')
+const addingPerson = ref(false)
+const isOwner = computed(() => membersVehicle.value?.role === 'OWNER')
+// People who are not tied to an account yet: a new member can take one over, keeping its history.
+const accountlessPeople = computed(() => people.value.filter((p) => !p.user_id))
+const linkableMembers = computed(() => members.value.filter((m) => m.role !== 'OWNER'))
 
 watch(open, async (isOpen) => {
   if (!isOpen || !props.vehicle) return
   newMemberEmail.value = ''
   newMemberRole.value = 'EDITOR'
+  newMemberPersonId.value = ''
+  newPersonName.value = ''
   await loadMembers(props.vehicle.id)
 })
 
 async function loadMembers(vehicleId: string) {
   loadingMembers.value = true
   try {
-    members.value = await api.getVehicleMembers(vehicleId)
+    const [list, drivers] = await Promise.all([api.getVehicleMembers(vehicleId), api.getVehiclePeople(vehicleId)])
+    members.value = list
+    people.value = drivers
   } catch (err: any) {
     showAlert(t('vehicles.vehicleMembersModal.loadError', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -50,8 +62,10 @@ async function handleAddMember() {
     await api.addVehicleMember(membersVehicle.value.id, {
       email: newMemberEmail.value.trim(),
       role: newMemberRole.value,
+      ...(newMemberPersonId.value ? { person_id: newMemberPersonId.value } : {}),
     })
     newMemberEmail.value = ''
+    newMemberPersonId.value = ''
     await loadMembers(membersVehicle.value.id)
     showAlert(t('vehicles.vehicleMembersModal.added'), t('common.success'), 'info')
   } catch (err: any) {
@@ -59,6 +73,47 @@ async function handleAddMember() {
   } finally {
     addingMember.value = false
   }
+}
+
+async function runPersonAction(action: () => Promise<unknown>, successMessage: string) {
+  if (!membersVehicle.value) return
+  try {
+    await action()
+    await loadMembers(membersVehicle.value.id)
+    await vehicleStore.fetchVehicles()
+    showAlert(successMessage, t('common.success'), 'info')
+  } catch (err: any) {
+    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+  }
+}
+
+async function handleAddPerson() {
+  const name = newPersonName.value.trim()
+  if (!membersVehicle.value || !name) return
+  addingPerson.value = true
+  await runPersonAction(() => api.createVehiclePerson(membersVehicle.value!.id, name), t('vehicles.vehicleMembersModal.personAdded'))
+  newPersonName.value = ''
+  addingPerson.value = false
+}
+
+function handleSetDefaultPerson(p: VehiclePerson) {
+  return runPersonAction(() => api.setDefaultVehiclePerson(membersVehicle.value!.id, p.id), t('vehicles.vehicleMembersModal.defaultDriverUpdated'))
+}
+
+function handleLinkPerson(p: VehiclePerson, userId: string) {
+  if (!userId) return
+  return runPersonAction(() => api.linkVehiclePerson(membersVehicle.value!.id, p.id, userId), t('vehicles.vehicleMembersModal.accountLinked'))
+}
+
+async function handleDeletePerson(p: VehiclePerson) {
+  const ok = await showConfirm({
+    title: t('vehicles.vehicleMembersModal.removePersonTitle'),
+    message: t('vehicles.vehicleMembersModal.removePersonMessage', { name: p.name }),
+    confirmText: t('vehicles.vehicleMembersModal.remove'),
+    type: 'danger',
+  })
+  if (!ok) return
+  await runPersonAction(() => api.deleteVehiclePerson(membersVehicle.value!.id, p.id), t('vehicles.vehicleMembersModal.personRemoved'))
 }
 
 async function handleUpdateMemberRole(m: any, newRole: string) {
@@ -166,6 +221,16 @@ async function handleRemoveMember(m: any) {
                   <option value="VIEWER">{{ $t('vehicles.vehicleMembersModal.readOnly') }}</option>
                 </select>
               </div>
+            </div>
+
+            <div v-if="accountlessPeople.length">
+              <label for="new-member-person" class="sr-only">{{ $t('vehicles.vehicleMembersModal.takeOverDriver') }}</label>
+              <select id="new-member-person" v-model="newMemberPersonId" class="field focus:border-violet-500">
+                <option value="">{{ $t('vehicles.vehicleMembersModal.noExistingDriver') }}</option>
+                <option v-for="p in accountlessPeople" :key="p.id" :value="p.id">
+                  {{ $t('vehicles.vehicleMembersModal.takeOverDriverOption', { name: p.name }) }}
+                </option>
+              </select>
             </div>
 
             <div class="flex items-center justify-between gap-3 pt-1">
@@ -279,6 +344,87 @@ async function handleRemoveMember(m: any) {
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Drivers: people who drive the vehicle, with or without an account -->
+        <div class="space-y-3">
+          <div>
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider">{{ $t('vehicles.vehicleMembersModal.drivers') }}</h4>
+            <p class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleMembersModal.driversHint') }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <div
+              v-for="p in people"
+              :key="p.id"
+              class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap"
+            >
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-semibold text-white truncate">{{ p.name }}</span>
+                  <span v-if="p.is_default" class="text-xs px-2 py-0.5 rounded-full font-semibold bg-violet-500/10 text-violet-300 border border-violet-500/20 flex items-center gap-1">
+                    <Star class="w-3 h-3" />
+                    {{ $t('vehicles.vehicleMembersModal.defaultDriver') }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">
+                  {{ p.user_email || $t('vehicles.vehicleMembersModal.noAccount') }}
+                </p>
+              </div>
+
+              <div v-if="isOwner" class="flex items-center gap-2 shrink-0 flex-wrap">
+                <button
+                  v-if="!p.is_default"
+                  type="button"
+                  @click="handleSetDefaultPerson(p)"
+                  class="tap px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors"
+                >
+                  {{ $t('vehicles.vehicleMembersModal.makeDefault') }}
+                </button>
+                <template v-if="!p.user_id">
+                  <label :for="'link-person-' + p.id" class="sr-only">{{ $t('vehicles.vehicleMembersModal.linkAccountOf', { name: p.name }) }}</label>
+                  <select
+                    v-if="linkableMembers.length"
+                    :id="'link-person-' + p.id"
+                    value=""
+                    @change="handleLinkPerson(p, ($event.target as HTMLSelectElement).value)"
+                    class="field text-slate-200 focus:border-violet-500"
+                  >
+                    <option value="">{{ $t('vehicles.vehicleMembersModal.linkAccount') }}</option>
+                    <option v-for="m in linkableMembers" :key="m.user_id" :value="m.user_id">{{ m.user_email }}</option>
+                  </select>
+                  <button
+                    type="button"
+                    @click="handleDeletePerson(p)"
+                    class="tap p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                    :title="$t('vehicles.vehicleMembersModal.removeDriver')"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <form v-if="isOwner" @submit.prevent="handleAddPerson" class="flex items-center gap-2">
+            <label for="new-person-name" class="sr-only">{{ $t('vehicles.vehicleMembersModal.driverName') }}</label>
+            <input
+              id="new-person-name"
+              v-model="newPersonName"
+              type="text"
+              maxlength="80"
+              :placeholder="$t('vehicles.vehicleMembersModal.driverNamePlaceholder')"
+              class="field placeholder-slate-500 focus:border-violet-500"
+            />
+            <button
+              type="submit"
+              :disabled="addingPerson || !newPersonName.trim()"
+              class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
+            >
+              <UserPlus class="w-3.5 h-3.5" />
+              <span>{{ $t('vehicles.vehicleMembersModal.add') }}</span>
+            </button>
+          </form>
         </div>
       </div>
 

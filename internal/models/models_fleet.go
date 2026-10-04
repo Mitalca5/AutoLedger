@@ -53,9 +53,9 @@ type VehicleFleetMetric struct {
 	Comparable      bool `json:"comparable"`
 }
 
-// MemberKmShare provides distance distribution among household members.
+// MemberKmShare provides distance distribution among the people who drive the fleet.
 type MemberKmShare struct {
-	UserID      string  `json:"user_id"`
+	PersonID    string  `json:"person_id"`
 	DisplayName string  `json:"display_name"`
 	DistanceKm  float64 `json:"distance_km"`
 	Percentage  float64 `json:"percentage"`

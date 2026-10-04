@@ -130,6 +130,8 @@ type VehicleMember struct {
 type AddVehicleMemberRequest struct {
 	Email string      `json:"email"`
 	Role  VehicleRole `json:"role"`
+	// PersonID attaches the new account to an existing person of the vehicle instead of creating one.
+	PersonID *string `json:"person_id,omitempty"`
 }
 
 type UpdateVehicleMemberRoleRequest struct {
@@ -222,4 +224,25 @@ func (o *VehicleOwnership) InLeasePhase(at time.Time) bool {
 		return false
 	}
 	return at.Before(o.StartDate.AddDate(0, *o.LeaseDurationMonths, 0))
+}
+
+// VehiclePerson is someone who drives a vehicle. UserID is set when the person has an account.
+type VehiclePerson struct {
+	ID        string    `json:"id"`
+	VehicleID string    `json:"vehicle_id"`
+	Name      string    `json:"name"`
+	UserID    *string   `json:"user_id,omitempty"`
+	UserEmail *string   `json:"user_email,omitempty"`
+	IsDefault bool      `json:"is_default"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type SaveVehiclePersonRequest struct {
+	Name string `json:"name"`
+}
+
+// LinkVehiclePersonRequest links a person to the account of one of the vehicle's members.
+type LinkVehiclePersonRequest struct {
+	UserID string `json:"user_id"`
 }

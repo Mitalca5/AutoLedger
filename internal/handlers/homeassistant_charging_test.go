@@ -61,7 +61,7 @@ func TestHomeAssistantChargingSessions(t *testing.T) {
 	ice := newVehicle(owner, "ICE", models.PowertrainICE)
 	friend := newUser("ha-friend@example.com")
 	shared := newVehicle(friend, "Friend's EV", models.PowertrainEV)
-	if _, err := repo.AddVehicleMember(ctx, shared.ID, owner.Email, models.RoleViewer); err != nil {
+	if _, err := repo.AddVehicleMember(ctx, shared.ID, owner.Email, models.RoleViewer, nil); err != nil {
 		t.Fatal(err)
 	}
 

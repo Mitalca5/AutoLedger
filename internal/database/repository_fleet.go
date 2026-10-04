@@ -252,31 +252,33 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 	}
 
 	// 6. Member Km Shares
+	// A drive counts for its driver, else for the default driver of its vehicle. The same person
+	// is one line across vehicles: by account when linked, else by name.
 	driverSharesQuery := `
-		SELECT COALESCE(d.driver_id, v.default_driver_id, v.user_id)::text AS effective_driver_id,
-		       COALESCE(u.email, 'Other') AS driver_email,
+		SELECT COALESCE(MIN(p.id::text), 'other') AS person_id,
+		       COALESCE(MIN(p.name), 'Other') AS driver_name,
 		       COALESCE(SUM(d.distance_km), 0) AS total_km
 		FROM drives d
 		JOIN vehicles v ON v.id = d.vehicle_id
-		LEFT JOIN users u ON u.id = COALESCE(d.driver_id, v.default_driver_id, v.user_id)
+		LEFT JOIN vehicle_people p ON p.id = COALESCE(d.driver_id, v.default_driver_id)
 		WHERE v.id::text = ANY($1)
 		  AND d.deleted_upstream_at IS NULL
 		  AND d.start_time >= $2
-		GROUP BY effective_driver_id, u.email
+		GROUP BY COALESCE(p.user_id::text, LOWER(p.name))
 		ORDER BY total_km DESC;
 	`
 	totalFleetKm := 0.0
 	rows, err = r.pool.Query(ctx, driverSharesQuery, vehicleIDs, startOfHistory)
 	if err == nil {
 		type driverRaw struct {
-			id    string
-			email string
-			km    float64
+			id   string
+			name string
+			km   float64
 		}
 		var rawList []driverRaw
 		for rows.Next() {
 			var dr driverRaw
-			if err := rows.Scan(&dr.id, &dr.email, &dr.km); err == nil {
+			if err := rows.Scan(&dr.id, &dr.name, &dr.km); err == nil {
 				totalFleetKm += dr.km
 				rawList = append(rawList, dr)
 			}
@@ -289,8 +291,8 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 				pct = math.Round((dr.km/totalFleetKm)*1000) / 10.0 // 1 decimal place
 			}
 			res.MemberKmShares = append(res.MemberKmShares, models.MemberKmShare{
-				UserID:      dr.id,
-				DisplayName: dr.email,
+				PersonID:    dr.id,
+				DisplayName: dr.name,
 				DistanceKm:  math.Round(dr.km*10) / 10.0,
 				Percentage:  pct,
 			})

@@ -23,7 +23,6 @@ import {
   toDateInput,
   vehicleFormFrom,
   defaultDriver,
-  memberLabel,
 } from './vehicles'
 
 const form = (over: Record<string, any> = {}) => ({ ...emptyOwnership(), ...over })
@@ -245,19 +244,21 @@ describe('powertrain capabilities', () => {
   })
 })
 
-describe('driver labels', () => {
-  const owner = { user_id: 'o', user_email: 'o@x.fr', display_name: 'Rémy', role: 'OWNER' }
-  const editor = { user_id: 'e', user_email: 'e@x.fr', display_name: null, role: 'EDITOR' }
+describe('default driver', () => {
+  const owner = { id: 'o', name: 'Rémy', is_default: true }
+  const guest = { id: 'g', name: 'Léa', is_default: false }
 
-  it('labels a member by display name, else email', () => {
-    expect(memberLabel(owner)).toBe('Rémy')
-    expect(memberLabel(editor)).toBe('e@x.fr')
-    expect(memberLabel({ display_name: '  ', user_email: 'a@b.c' })).toBe('a@b.c')
+  it('picks the chosen default driver', () => {
+    expect(defaultDriver([owner, guest], 'g')).toBe(guest)
   })
 
-  it('picks the chosen default driver, else the owner', () => {
-    expect(defaultDriver([owner, editor], 'e')).toBe(editor)
-    expect(defaultDriver([editor, owner], null)).toBe(owner)
-    expect(defaultDriver([editor], 'zzz')).toBeUndefined()
+  it('falls back to the person the server flags as default', () => {
+    expect(defaultDriver([guest, owner], null)).toBe(owner)
+    expect(defaultDriver([guest, owner], 'zzz')).toBe(owner)
+  })
+
+  it('has no default driver without people', () => {
+    expect(defaultDriver([guest], null)).toBeUndefined()
+    expect(defaultDriver([], 'o')).toBeUndefined()
   })
 })

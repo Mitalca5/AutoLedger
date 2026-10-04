@@ -495,6 +495,12 @@ func main() {
 				r.Post("/{id}/members", vehicleMemberHandler.AddMember)
 				r.Put("/{id}/members/{memberId}", vehicleMemberHandler.UpdateMemberRole)
 				r.Delete("/{id}/members/{memberId}", vehicleMemberHandler.RemoveMember)
+				r.Get("/{id}/people", vehicleMemberHandler.ListPeople)
+				r.Post("/{id}/people", vehicleMemberHandler.CreatePerson)
+				r.Put("/{id}/people/{personId}", vehicleMemberHandler.UpdatePerson)
+				r.Delete("/{id}/people/{personId}", vehicleMemberHandler.DeletePerson)
+				r.Put("/{id}/people/{personId}/link", vehicleMemberHandler.LinkPerson)
+				r.Put("/{id}/people/{personId}/default", vehicleMemberHandler.SetDefaultPerson)
 
 				// Odometer Checkpoints
 				r.Get("/{vehicleId}/odometer-checkpoints", checkpointHandler.List)

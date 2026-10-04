@@ -574,6 +574,10 @@ func (h *DriveHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.driverBelongs(w, r, vehicleID, req.DriverID) {
+		return
+	}
+
 	timings := ingest.NormalizeDrive(ingest.DriveInput{
 		Start:           req.StartTime,
 		End:             req.EndTime,
@@ -724,6 +728,9 @@ func (h *DriveHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.driverBelongs(w, r, vehicleID, req.DriverID) {
+		return
+	}
 	if err := h.repo.SetDriveDriver(r.Context(), driveID, vehicleID, req.DriverID); err != nil {
 		writeRepoError(w, r, err, "Failed to update driver")
 		return
@@ -792,4 +799,17 @@ func parseDriveFilter(r *http.Request) database.DriveFilter {
 		}
 	}
 	return filter
+}
+
+// driverBelongs answers 400 when a driver is given that is not a person of the vehicle.
+func (h *DriveHandler) driverBelongs(w http.ResponseWriter, r *http.Request, vehicleID string, driverID *string) bool {
+	if driverID == nil || *driverID == "" {
+		return true
+	}
+	ok, err := h.repo.VehiclePersonExists(r.Context(), vehicleID, *driverID)
+	if err != nil || !ok {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("person.not_found", "Driver not found"))
+		return false
+	}
+	return true
 }

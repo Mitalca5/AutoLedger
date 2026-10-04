@@ -2,11 +2,11 @@
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
-import { defaultDriver, memberLabel } from '@/utils/vehicles'
+import { defaultDriver } from '@/utils/vehicles'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
-import { api } from '@/services/api'
+import { api, type VehiclePerson } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { Receipt, Layers, MapPin, ExternalLink, Zap, X, Users, Coins, Shield, Wrench, Disc, Plus, AlertTriangle, Pencil, Trash2, Save, ArrowLeft, ChevronRight, ChevronDown, Radar, User } from 'lucide-vue-next'
 import { teslamateDriveUrl as buildTeslamateDriveUrl, tollApplyStatusLabel, mergeExpensesByDrive } from '@/utils/drives'
@@ -122,22 +122,21 @@ watch(open, (isOpen) => {
   inlineTollNotes.value = ''
   loadDriveExpenses(drive.id)
   loadTollDetection(drive)
-  loadVehicleMembers()
+  loadVehiclePeople()
 })
 
-const vehicleMembers = ref<any[]>([])
+const vehiclePeople = ref<VehiclePerson[]>([])
 const defaultDriverOption = computed(() => {
-  const d = defaultDriver(vehicleMembers.value, vehicleStore.activeVehicle?.default_driver_id)
-  return d ? t('drives.defaultDriver', { name: memberLabel(d) }) : t('drives.unassignedDriver')
+  const d = defaultDriver(vehiclePeople.value, vehicleStore.activeVehicle?.default_driver_id)
+  return d ? t('drives.defaultDriver', { name: d.name }) : t('drives.unassignedDriver')
 })
 
-async function loadVehicleMembers() {
+async function loadVehiclePeople() {
   if (!props.vehicleId) return
   try {
-    const list = await api.getVehicleMembers(props.vehicleId)
-    vehicleMembers.value = list
+    vehiclePeople.value = await api.getVehiclePeople(props.vehicleId)
   } catch (err) {
-    console.error('Failed to load vehicle members', err)
+    console.error('Failed to load vehicle people', err)
   }
 }
 
@@ -438,8 +437,8 @@ async function handleDeleteExpense(exp: any) {
             class="field focus:border-purple-500"
           >
             <option value="">{{ defaultDriverOption }}</option>
-            <option v-for="m in vehicleMembers" :key="m.user_id" :value="m.user_id">
-              {{ memberLabel(m) }}
+            <option v-for="p in vehiclePeople" :key="p.id" :value="p.id">
+              {{ p.name }}
             </option>
           </select>
         </div>

@@ -448,11 +448,11 @@ onBeforeUnmount(() => {
         <div v-if="summary.member_km_shares.length" class="space-y-3">
           <div
             v-for="member in summary.member_km_shares"
-            :key="member.driver_id || 'unassigned'"
+            :key="member.person_id"
             class="space-y-1.5"
           >
             <div class="flex items-center justify-between text-xs">
-              <span class="font-medium text-slate-200 truncate">{{ member.driver_name }}</span>
+              <span class="font-medium text-slate-200 truncate">{{ member.display_name }}</span>
               <span class="text-slate-400 shrink-0 font-mono">
                 {{ formatDistance(member.distance_km) }} ({{ formatPercent(member.percentage) }})
               </span>

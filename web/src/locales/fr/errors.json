@@ -14,7 +14,8 @@
     "owner_only_roles": "Seul le propriétaire peut modifier les rôles",
     "owner_only_remove_member": "Seul le propriétaire peut retirer un membre (ou vous pouvez vous retirer vous-même)",
     "owner_only_delete": "Seul le propriétaire peut supprimer le véhicule",
-    "owner_only_test_connection": "Seul le propriétaire peut tester la connexion TeslaMate"
+    "owner_only_test_connection": "Seul le propriétaire peut tester la connexion TeslaMate",
+    "owner_only_people": "Seul le propriétaire peut gérer les conducteurs"
   },
   "request": {
     "invalid_body": "Corps de requête invalide",
@@ -340,5 +341,14 @@
   },
   "demo": {
     "read_only": "Cette démo est en lecture seule : les modifications ne sont pas enregistrées"
+  },
+  "person": {
+    "not_found": "Conducteur introuvable",
+    "already_linked": "Ce conducteur est déjà lié à un compte",
+    "name_required": "Le nom du conducteur est requis",
+    "name_too_long": "Le nom du conducteur est trop long",
+    "link_requires_member": "Invitez d'abord ce compte sur le véhicule",
+    "default_delete": "Le conducteur par défaut ne peut pas être retiré : choisissez-en un autre d'abord",
+    "linked_delete": "Un conducteur lié à un compte ne peut pas être retiré : retirez d'abord le membre"
   }
 }

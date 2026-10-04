@@ -82,7 +82,7 @@ func (h *VehicleMemberHandler) AddMember(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	member, err := h.repo.AddVehicleMember(r.Context(), vehicleID, req.Email, req.Role)
+	member, err := h.repo.AddVehicleMember(r.Context(), vehicleID, req.Email, req.Role, req.PersonID)
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			writeAPIError(w, http.StatusNotFound, apierror.New("member.user_not_found", "No user found with this email address"))
@@ -160,4 +160,126 @@ func (h *VehicleMemberHandler) RemoveMember(w http.ResponseWriter, r *http.Reque
 	}
 
 	writeJSON(w, http.StatusOK, map[string]string{"message": "Member removed"})
+}
+
+// ListPeople lists the people who drive the vehicle, with or without an account.
+func (h *VehicleMemberHandler) ListPeople(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	vehicleID := h.getVehicleID(r)
+	if _, err := h.repo.GetVehicleByID(r.Context(), vehicleID, userID); err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
+		return
+	}
+	people, err := h.repo.ListVehiclePeople(r.Context(), vehicleID)
+	if err != nil {
+		writeRepoError(w, r, err, "Could not load the drivers")
+		return
+	}
+	writeJSON(w, http.StatusOK, people)
+}
+
+func (h *VehicleMemberHandler) requireOwner(w http.ResponseWriter, r *http.Request) (string, bool) {
+	userID := middleware.GetUserID(r.Context())
+	vehicleID := h.getVehicleID(r)
+	v, err := h.repo.GetVehicleByID(r.Context(), vehicleID, userID)
+	if err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
+		return "", false
+	}
+	if v.Role != models.RoleOwner {
+		writeAPIError(w, http.StatusForbidden, apierror.New("access.owner_only_people", "Only the owner can manage the drivers"))
+		return "", false
+	}
+	return vehicleID, true
+}
+
+// CreatePerson adds a driver without an account. Restricted to OWNER.
+func (h *VehicleMemberHandler) CreatePerson(w http.ResponseWriter, r *http.Request) {
+	vehicleID, ok := h.requireOwner(w, r)
+	if !ok {
+		return
+	}
+	var req models.SaveVehiclePersonRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid", "Invalid request"))
+		return
+	}
+	person, err := h.repo.CreateVehiclePerson(r.Context(), vehicleID, req.Name)
+	if err != nil {
+		writeRepoError(w, r, err, "Could not add the driver")
+		return
+	}
+	writeJSON(w, http.StatusCreated, person)
+}
+
+// UpdatePerson renames a driver. Restricted to OWNER.
+func (h *VehicleMemberHandler) UpdatePerson(w http.ResponseWriter, r *http.Request) {
+	vehicleID, ok := h.requireOwner(w, r)
+	if !ok {
+		return
+	}
+	var req models.SaveVehiclePersonRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid", "Invalid request"))
+		return
+	}
+	person, err := h.repo.RenameVehiclePerson(r.Context(), vehicleID, chi.URLParam(r, "personId"), req.Name)
+	if err != nil {
+		writePersonError(w, r, err, "Could not update the driver")
+		return
+	}
+	writeJSON(w, http.StatusOK, person)
+}
+
+// LinkPerson gives a driver the account of one of the vehicle's members. Restricted to OWNER.
+func (h *VehicleMemberHandler) LinkPerson(w http.ResponseWriter, r *http.Request) {
+	vehicleID, ok := h.requireOwner(w, r)
+	if !ok {
+		return
+	}
+	var req models.LinkVehiclePersonRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.UserID == "" {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid", "Invalid request"))
+		return
+	}
+	person, err := h.repo.LinkVehiclePersonToMember(r.Context(), vehicleID, chi.URLParam(r, "personId"), req.UserID)
+	if err != nil {
+		writePersonError(w, r, err, "Could not link the account")
+		return
+	}
+	writeJSON(w, http.StatusOK, person)
+}
+
+// SetDefaultPerson chooses the default driver of the vehicle. Restricted to OWNER.
+func (h *VehicleMemberHandler) SetDefaultPerson(w http.ResponseWriter, r *http.Request) {
+	vehicleID, ok := h.requireOwner(w, r)
+	if !ok {
+		return
+	}
+	if err := h.repo.SetVehicleDefaultDriver(r.Context(), vehicleID, chi.URLParam(r, "personId")); err != nil {
+		writePersonError(w, r, err, "Could not set the default driver")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// DeletePerson removes a driver without an account. Restricted to OWNER.
+func (h *VehicleMemberHandler) DeletePerson(w http.ResponseWriter, r *http.Request) {
+	vehicleID, ok := h.requireOwner(w, r)
+	if !ok {
+		return
+	}
+	if err := h.repo.DeleteVehiclePerson(r.Context(), vehicleID, chi.URLParam(r, "personId")); err != nil {
+		writePersonError(w, r, err, "Could not remove the driver")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func writePersonError(w http.ResponseWriter, r *http.Request, err error, fallback string) {
+	if errors.Is(err, database.ErrNotFound) {
+		writeAPIError(w, http.StatusNotFound, apierror.New("person.not_found", "Driver not found"))
+		return
+	}
+	writeRepoError(w, r, err, fallback)
 }

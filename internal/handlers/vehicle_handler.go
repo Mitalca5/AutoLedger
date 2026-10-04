@@ -332,7 +332,13 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Model != nil {
 		existing.Model = trimmedText(req.Model)
 	}
-	existing.DefaultDriverID = req.DefaultDriverID
+	if req.DefaultDriverID != nil && *req.DefaultDriverID != "" && (existing.DefaultDriverID == nil || *existing.DefaultDriverID != *req.DefaultDriverID) {
+		if ok, err := h.repo.VehiclePersonExists(r.Context(), existing.ID, *req.DefaultDriverID); err != nil || !ok {
+			writeAPIError(w, http.StatusBadRequest, apierror.New("person.not_found", "Driver not found"))
+			return
+		}
+		existing.DefaultDriverID = req.DefaultDriverID
+	}
 	existing.TariffPlanID = req.TariffPlanID
 	existing.IsHomeChargerDefault = req.IsHomeChargerDefault
 

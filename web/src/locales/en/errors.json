@@ -14,7 +14,8 @@
     "owner_only_roles": "Only the owner can change the roles",
     "owner_only_remove_member": "Only the owner can remove a member (or you can remove yourself)",
     "owner_only_delete": "Only the owner can delete the vehicle",
-    "owner_only_test_connection": "Only the owner can test the TeslaMate connection"
+    "owner_only_test_connection": "Only the owner can test the TeslaMate connection",
+    "owner_only_people": "Only the owner can manage the drivers"
   },
   "request": {
     "invalid_body": "Invalid request body",
@@ -340,5 +341,14 @@
   },
   "demo": {
     "read_only": "This demo is read-only: changes are not saved"
+  },
+  "person": {
+    "not_found": "Driver not found",
+    "already_linked": "This driver is already linked to an account",
+    "name_required": "The driver's name is required",
+    "name_too_long": "The driver's name is too long",
+    "link_requires_member": "Invite this account to the vehicle first",
+    "default_delete": "The default driver cannot be removed: pick another one first",
+    "linked_delete": "A driver linked to an account cannot be removed: remove the member first"
   }
 }

@@ -193,12 +193,25 @@ export const api = {
 
   // Vehicle Members
   getVehicleMembers: (vehicleId: string) => request<any[]>(`/vehicles/${vehicleId}/members`),
-  addVehicleMember: (vehicleId: string, payload: { email: string; role: string }) =>
+  addVehicleMember: (vehicleId: string, payload: { email: string; role: string; person_id?: string }) =>
     request<any>(`/vehicles/${vehicleId}/members`, { method: 'POST', body: JSON.stringify(payload) }),
   updateVehicleMemberRole: (vehicleId: string, memberId: string, payload: { role: string }) =>
     request<any>(`/vehicles/${vehicleId}/members/${memberId}`, { method: 'PUT', body: JSON.stringify(payload) }),
   removeVehicleMember: (vehicleId: string, memberId: string) =>
     request<any>(`/vehicles/${vehicleId}/members/${memberId}`, { method: 'DELETE' }),
+
+  // People of a vehicle (drivers, with or without an account)
+  getVehiclePeople: (vehicleId: string) => request<VehiclePerson[]>(`/vehicles/${vehicleId}/people`),
+  createVehiclePerson: (vehicleId: string, name: string) =>
+    request<VehiclePerson>(`/vehicles/${vehicleId}/people`, { method: 'POST', body: JSON.stringify({ name }) }),
+  renameVehiclePerson: (vehicleId: string, personId: string, name: string) =>
+    request<VehiclePerson>(`/vehicles/${vehicleId}/people/${personId}`, { method: 'PUT', body: JSON.stringify({ name }) }),
+  linkVehiclePerson: (vehicleId: string, personId: string, userId: string) =>
+    request<VehiclePerson>(`/vehicles/${vehicleId}/people/${personId}/link`, { method: 'PUT', body: JSON.stringify({ user_id: userId }) }),
+  setDefaultVehiclePerson: (vehicleId: string, personId: string) =>
+    request<any>(`/vehicles/${vehicleId}/people/${personId}/default`, { method: 'PUT' }),
+  deleteVehiclePerson: (vehicleId: string, personId: string) =>
+    request<any>(`/vehicles/${vehicleId}/people/${personId}`, { method: 'DELETE' }),
 
   // Fuel fill-ups (combustion vehicles); the list comes with consumption figures per segment and global stats
   getFuelLogs: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/fuel-logs`),
@@ -746,9 +759,18 @@ export interface VehicleFleetMetric {
   comparable: boolean
 }
 
+export interface VehiclePerson {
+  id: string
+  vehicle_id: string
+  name: string
+  user_id: string | null
+  user_email: string | null
+  is_default: boolean
+}
+
 export interface MemberKmShare {
-  driver_id: string | null
-  driver_name: string
+  person_id: string
+  display_name: string
   distance_km: number
   percentage: number
 }
