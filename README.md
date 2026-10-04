@@ -18,11 +18,11 @@ AutoLedger does not need any telemetry source. Any car, any brand, electric, hyb
 3. **See the cost per km**: energy, tolls, maintenance, tires, insurance and financing roll up into one real cost per km, with a completeness score telling what is still missing.
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="TCO dashboard of a diesel station wagon" width="62%">
-  <img src="docs/screenshots/mobile-quickadd.png" alt="Quick add of a fill-up on a phone" width="22%">
+  <img src="docs/screenshots/dashboard-ev.en.png" alt="TCO dashboard of an electric car" width="62%">
+  <img src="docs/screenshots/mobile-quickadd.en.png" alt="Quick add of a fill-up on a phone" width="22%">
 </p>
 <p align="center">
-  <img src="docs/screenshots/fleet.png" alt="Household fleet comparing a diesel, a hybrid and an electric car" width="86%">
+  <img src="docs/screenshots/fleet.en.png" alt="Household fleet comparing an electric and a petrol car" width="86%">
 </p>
 
 ### Works with
