@@ -1,5 +1,6 @@
 {
   "onboardingView": {
+    "addFirstEntry": "Add my first expense",
     "currency": "Currency",
     "currencyHelp": "Every amount of this vehicle is stored in this currency, which cannot be changed afterwards.",
     "stepOf": "Step {step} of {total}",

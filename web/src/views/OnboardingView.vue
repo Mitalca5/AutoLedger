@@ -8,6 +8,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useVehicleStore } from '@/stores/vehicle'
+import { useQuickAddStore } from '@/stores/quickAdd'
 import { api } from '@/services/api'
 import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2, Webhook, FileSpreadsheet, Download, Copy } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -18,6 +19,7 @@ import { downloadCsv } from '@/utils/csv'
 const router = useRouter()
 const authStore = useAuthStore()
 const vehicleStore = useVehicleStore()
+const quickAdd = useQuickAddStore()
 
 const currentStep = ref(1)
 const loading = ref(false)
@@ -169,6 +171,11 @@ async function handleFinalSubmit() {
 
 function finishOnboarding() {
   router.push('/')
+}
+
+async function addFirstEntry() {
+  await router.push('/')
+  quickAdd.open()
 }
 </script>
 
@@ -563,6 +570,13 @@ function finishOnboarding() {
           class="w-full py-3.5 px-6 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 transition-all"
         >
           {{ $t('onboarding.onboardingView.goToMyDashboard') }}
+        </button>
+        <button
+          type="button"
+          @click="addFirstEntry"
+          class="mt-3 w-full py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl border border-slate-700 transition-colors"
+        >
+          {{ $t('onboarding.onboardingView.addFirstEntry') }}
         </button>
       </div>
     </div>

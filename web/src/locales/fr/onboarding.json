@@ -1,5 +1,6 @@
 {
   "onboardingView": {
+    "addFirstEntry": "Saisir ma première dépense",
     "currency": "Devise",
     "currencyHelp": "Tous les montants de ce véhicule sont enregistrés dans cette devise, qui ne pourra plus être modifiée.",
     "stepOf": "Étape {step} sur {total}",
