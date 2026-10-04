@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { currentLocale, intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import { CURRENCIES } from '@/utils/expenses'
 import { APP_NAME } from '@/brand'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -34,6 +36,7 @@ const vehicleVin = ref('')
 const vehiclePowertrain = ref<Powertrain>('EV')
 const vehicleOdometer = ref<number | string | null>(null)
 const vehicleNameEdited = ref(false)
+const vehicleCurrency = ref(currentLocale() === 'fr' ? 'EUR' : 'USD')
 
 function updateVehicleNameDefault() {
   if (vehicleNameEdited.value && vehicleName.value) return
@@ -142,6 +145,7 @@ async function handleFinalSubmit() {
       vin: vehicleVin.value,
       powertrain: vehiclePowertrain.value,
       odometer: Number(vehicleOdometer.value),
+      currency: vehicleCurrency.value,
       teslamate,
     })
 
@@ -171,6 +175,10 @@ function finishOnboarding() {
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 bg-slate-950">
     <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl">
+      <div class="flex justify-end mb-2">
+        <LanguageSwitcher />
+      </div>
+
       <!-- Header -->
       <div class="text-center mb-8">
         <div class="inline-flex p-3.5 bg-gradient-to-tr from-rose-500 to-warning-500 rounded-2xl shadow-lg shadow-rose-500/25 mb-4">
@@ -324,6 +332,13 @@ function finishOnboarding() {
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div class="sm:col-span-2">
+              <label for="onboarding-vehicle-currency" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.currency') }}</label>
+              <select id="onboarding-vehicle-currency" v-model="vehicleCurrency" class="field">
+                <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-400">{{ $t('onboarding.onboardingView.currencyHelp') }}</p>
+            </div>
             <div>
               <label for="onboarding-vehicle-odometer" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.currentOdometerKm', { unit: distanceUnit() }) }}</label>
               <DistanceInput id="onboarding-vehicle-odometer"

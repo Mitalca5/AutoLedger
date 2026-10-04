@@ -19,6 +19,7 @@ export interface OnboardingVehicleForm {
   vin: string
   powertrain: Powertrain
   odometer: number | string
+  currency?: string
   teslamate: TeslaMateForm
 }
 
@@ -50,6 +51,7 @@ export function buildVehiclePayload(form: OnboardingVehicleForm): Record<string,
     current_odometer: Number(form.odometer) || 0,
     teslamate_auth_type: withTeslaMate ? tm.authType : 'NONE',
   }
+  if (form.currency) payload.currency = form.currency
   if (withTeslaMate) {
     payload.teslamate_api_url = tm.url
     payload.teslamate_car_id = 1

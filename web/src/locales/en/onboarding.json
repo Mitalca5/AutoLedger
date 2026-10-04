@@ -1,5 +1,7 @@
 {
   "onboardingView": {
+    "currency": "Currency",
+    "currencyHelp": "Every amount of this vehicle is stored in this currency, which cannot be changed afterwards.",
     "stepOf": "Step {step} of {total}",
     "goToMyDashboard": "Go to my dashboard",
     "yourAdministratorAccountAndYour": "Your administrator account and your vehicle are ready. You can now start tracking your costs.",

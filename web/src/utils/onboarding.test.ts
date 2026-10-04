@@ -88,4 +88,9 @@ describe('buildVehiclePayload', () => {
   it('keeps the VIN when given', () => {
     expect(buildVehiclePayload(form({ vin: 'VIN123' })).vin).toBe('VIN123')
   })
+
+  it('sends the chosen currency, and none when unset', () => {
+    expect(buildVehiclePayload(form({ currency: 'GBP' })).currency).toBe('GBP')
+    expect(buildVehiclePayload(form())).not.toHaveProperty('currency')
+  })
 })
