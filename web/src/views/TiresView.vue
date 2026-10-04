@@ -545,7 +545,7 @@ async function handleDeleteLog(l: any) {
         v-if="disposedTires.length"
         @click="activeTab = 'disposed'"
         class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
-        :class="activeTab === 'disposed' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/40'"
+        :class="activeTab === 'disposed' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'"
       >
         <Archive class="w-4 h-4" />
         {{ $t('tires.tiresView.scrapped', { length: disposedTires.length }) }}

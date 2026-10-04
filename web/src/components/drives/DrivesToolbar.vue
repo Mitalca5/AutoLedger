@@ -81,14 +81,14 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           <button
             @click="setPeriodMode('ALL')"
             class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
-            :class="periodMode === 'ALL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white'"
+            :class="periodMode === 'ALL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             {{ $t('drives.drivesToolbar.all') }}
           </button>
           <button
             @click="setPeriodMode('MONTH')"
             class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
-            :class="periodMode === 'MONTH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white'"
+            :class="periodMode === 'MONTH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Calendar class="w-3.5 h-3.5" />
             {{ $t('drives.drivesToolbar.byMonth') }}
@@ -96,7 +96,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           <button
             @click="setPeriodMode('CUSTOM')"
             class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
-            :class="periodMode === 'CUSTOM' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white'"
+            :class="periodMode === 'CUSTOM' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             {{ $t('drives.drivesToolbar.period') }}
           </button>

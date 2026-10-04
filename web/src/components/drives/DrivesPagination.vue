@@ -49,7 +49,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
           :key="s"
           @click="setLimit(s)"
           class="px-2 py-0.5 rounded-lg text-xs font-semibold transition-colors"
-          :class="limit === s ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white bg-slate-800/60'"
+          :class="limit === s ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white bg-slate-800/60 border border-transparent'"
         >
           {{ s }}
         </button>

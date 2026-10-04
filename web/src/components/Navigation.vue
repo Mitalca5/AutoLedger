@@ -118,7 +118,7 @@ function handleLogout() {
         v-for="item in navItems"
         :key="item.name"
         :to="item.path"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border border-transparent"
         :class="
           currentRouteName === item.name
             ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-sm'

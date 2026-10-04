@@ -77,7 +77,7 @@ function select(tab: Tab) {
           role="tab"
           :aria-selected="activeTab === t.key"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-          :class="activeTab === t.key ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+          :class="activeTab === t.key ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           @click="select(t.key)"
         >
           <component :is="t.icon" class="w-3.5 h-3.5" />

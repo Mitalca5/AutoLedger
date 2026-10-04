@@ -665,18 +665,18 @@ async function handleBulkApplyToll() {
     <PageHeader :title="$t('drives.drivesView.drivesAndTrips')" :icon="PageIcon">
       {{ $t('drives.drivesView.drivesActualEnergyAndTolls', { unit: distanceUnit(), total }) }}
       <template #below>
-      <div class="flex items-center gap-1 mt-3 bg-slate-900 border border-slate-800 p-1 rounded-xl w-fit">
+      <div class="flex items-center gap-1 mt-3 bg-slate-900 border border-slate-800 p-1 rounded-xl w-full sm:w-fit">
           <button
             @click="switchView('DRIVES')"
-            class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            :class="viewMode === 'DRIVES' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white'"
+            class="tap flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-transparent"
+            :class="viewMode === 'DRIVES' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <List class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.drives') }}
           </button>
           <button
             @click="switchView('TRIPS')"
-            class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            :class="viewMode === 'TRIPS' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-white'"
+            class="tap flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-transparent"
+            :class="viewMode === 'TRIPS' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Layers class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.trips') }}
           </button>
@@ -713,7 +713,7 @@ async function handleBulkApplyToll() {
         <button
           @click="hasTollOnly = !hasTollOnly"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
-          :class="hasTollOnly ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-cyan-400/80 hover:text-cyan-300'"
+          :class="hasTollOnly ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-cyan-400/80 hover:text-cyan-300 border border-transparent'"
           :title="$t('drives.drivesView.drivesWithATollExpense')"
         >
           <Receipt class="w-3.5 h-3.5" />
@@ -735,21 +735,21 @@ async function handleBulkApplyToll() {
           <button
             @click="selectedTag = ''"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-            :class="selectedTag === '' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white'"
+            :class="selectedTag === '' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             {{ $t('drives.drivesView.all') }}
           </button>
           <button
             @click="selectedTag = 'Pro'"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-            :class="selectedTag === 'Pro' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-white'"
+            :class="selectedTag === 'Pro' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             {{ $t('drives.drivesView.work') }}
           </button>
           <button
             @click="selectedTag = 'Perso'"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-            :class="selectedTag === 'Perso' ? 'bg-success-500/20 text-success-400 border border-success-500/30' : 'text-slate-400 hover:text-white'"
+            :class="selectedTag === 'Perso' ? 'bg-success-500/20 text-success-400 border border-success-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             {{ $t('drives.drivesView.personal') }}
           </button>

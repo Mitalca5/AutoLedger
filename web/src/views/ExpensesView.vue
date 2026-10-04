@@ -483,7 +483,7 @@ async function openWebhookModal() {
           <button
             @click="activeTab = 'TOLLS'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'TOLLS' ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'TOLLS' ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Receipt class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.tolls') }}</span>
@@ -492,7 +492,7 @@ async function openWebhookModal() {
             v-if="vehicleStore.canCharge"
             @click="activeTab = 'CHARGES'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'CHARGES' ? 'bg-info-500/20 text-info-300 border border-info-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'CHARGES' ? 'bg-info-500/20 text-info-300 border border-info-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.charges') }}</span>
@@ -511,7 +511,7 @@ async function openWebhookModal() {
           <button
             @click="activeTab = 'MAINTENANCE'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'MAINTENANCE' ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'MAINTENANCE' ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Wrench class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.maintenance') }}</span>
@@ -519,7 +519,7 @@ async function openWebhookModal() {
           <button
             @click="activeTab = 'REMINDERS'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 relative"
-            :class="activeTab === 'REMINDERS' ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'REMINDERS' ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Bell class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.reminders') }}</span>
@@ -534,7 +534,7 @@ async function openWebhookModal() {
           <button
             @click="activeTab = 'DOCUMENTS'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'DOCUMENTS' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'DOCUMENTS' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Paperclip class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.receipts') }}</span>
