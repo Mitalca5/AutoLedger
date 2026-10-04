@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { UserRound as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import DistanceUnitSwitcher from '@/components/DistanceUnitSwitcher.vue'
 import ApiTokensSection from '@/components/account/ApiTokensSection.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { KeyRound, Laptop, LogOut, ShieldCheck, SlidersHorizontal, Smartphone, UserRound } from 'lucide-vue-next'
+import { KeyRound, Laptop, LogOut, SlidersHorizontal, Smartphone, UserRound } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -144,15 +146,9 @@ onMounted(load)
 
 <template>
   <div class="mx-auto max-w-3xl space-y-6">
-    <div class="flex items-center gap-3">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10">
-        <ShieldCheck class="h-5 w-5 text-emerald-400" aria-hidden="true" />
-      </div>
-      <div>
-        <h2 class="text-xl font-bold text-white">{{ $t('account.accountView.accountAndSecurity') }}</h2>
-        <p class="text-xs text-slate-400">{{ $t('account.accountView.signInPasswordAndConnected') }}</p>
-      </div>
-    </div>
+    <PageHeader :title="$t('account.accountView.accountAndSecurity')" :icon="PageIcon">
+      {{ $t('account.accountView.signInPasswordAndConnected') }}
+    </PageHeader>
 
     <section class="rounded-2xl border border-slate-800 bg-slate-900 p-5" aria-labelledby="account-identity">
       <h2 id="account-identity" class="mb-3 flex items-center gap-2 text-sm font-bold text-white">

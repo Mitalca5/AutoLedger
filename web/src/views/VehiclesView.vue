@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Car as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -128,12 +130,9 @@ function openMembersModal(v: any) {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white">{{ $t('vehicles.vehiclesView.vehicleManagement') }}</h2>
-        <p class="text-sm text-slate-400">{{ $t('vehicles.vehiclesView.setUpYourVehiclesAnd') }}</p>
-      </div>
-
+    <PageHeader :title="$t('vehicles.vehiclesView.vehicleManagement')" :icon="PageIcon">
+      {{ $t('vehicles.vehiclesView.setUpYourVehiclesAnd') }}
+      <template #actions>
       <button
         @click="openCreateModal"
         class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
@@ -141,7 +140,9 @@ function openMembersModal(v: any) {
         <Plus class="w-3.5 h-3.5" />
         {{ $t('vehicles.vehiclesView.addAVehicle') }}
       </button>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Vehicles Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

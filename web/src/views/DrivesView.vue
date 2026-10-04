@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Navigation as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { distanceUnit } from '@/units'
 import { ref, computed, onMounted, watch } from 'vue'
@@ -659,13 +661,10 @@ async function handleBulkApplyToll() {
     </div>
 
     <!-- Header & Filter Tabs -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white">{{ $t('drives.drivesView.drivesAndTrips') }}</h2>
-        <p class="text-sm text-slate-400">
-          {{ $t('drives.drivesView.drivesActualEnergyAndTolls', { unit: distanceUnit(), total }) }}
-        </p>
-        <div class="flex items-center gap-1 mt-2 bg-slate-900 border border-slate-800 p-1 rounded-xl w-fit">
+    <PageHeader :title="$t('drives.drivesView.drivesAndTrips')" :icon="PageIcon">
+      {{ $t('drives.drivesView.drivesActualEnergyAndTolls', { unit: distanceUnit(), total }) }}
+      <template #below>
+      <div class="flex items-center gap-1 mt-3 bg-slate-900 border border-slate-800 p-1 rounded-xl w-fit">
           <button
             @click="switchView('DRIVES')"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
@@ -681,8 +680,8 @@ async function handleBulkApplyToll() {
             <Layers class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.trips') }}
           </button>
         </div>
-      </div>
-
+      </template>
+      <template #actions>
       <!-- Actions & Tag Filters container -->
       <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
         <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
@@ -769,7 +768,9 @@ async function handleBulkApplyToll() {
         />
       </div>
       </div>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Filters & Navigation Toolbar (Drives Mode) -->
     <DrivesToolbar

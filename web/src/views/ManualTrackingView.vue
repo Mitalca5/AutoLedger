@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { ClipboardList as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ClipboardList, Gauge, Fuel, Zap, UploadCloud, Download } from 'lucide-vue-next'
+import { Gauge, Fuel, Zap, UploadCloud, Download } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import OdometerReadingsPanel from '@/components/manual/OdometerReadingsPanel.vue'
 import FuelLogsPanel from '@/components/manual/FuelLogsPanel.vue'
@@ -58,17 +60,9 @@ function select(tab: Tab) {
 
 <template>
   <div class="space-y-5">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-        <ClipboardList class="w-5 h-5 text-cyan-400" />
-      </div>
-      <div>
-        <h2 class="text-xl font-bold text-white">{{ $t('manual.manualTrackingView.manualTracking') }}</h2>
-        <p class="text-xs text-slate-400">
-          {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.canRefuel ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
-        </p>
-      </div>
-    </div>
+    <PageHeader :title="$t('manual.manualTrackingView.manualTracking')" :icon="PageIcon">
+      {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.canRefuel ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
+    </PageHeader>
 
     <div v-if="!vehicleStore.activeVehicle" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-sm text-slate-400">
       {{ $t('manual.manualTrackingView.addAVehicleFirst') }}

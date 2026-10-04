@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Users as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { APP_NAME } from '@/brand'
 import { ref, onMounted, watch, computed } from 'vue'
@@ -249,16 +251,9 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <Users class="w-6 h-6 text-rose-500" />
-          {{ $t('carpool.carpoolView.carpooling') }}
-        </h2>
-        <p class="text-sm text-slate-400">
-          {{ $t('carpool.carpoolView.multiLegTripsPassengersGetting') }}
-        </p>
-      </div>
+    <PageHeader :title="$t('carpool.carpoolView.carpooling')" :icon="PageIcon">
+      {{ $t('carpool.carpoolView.multiLegTripsPassengersGetting') }}
+      <template #actions>
       <button
         v-if="vehicleStore.canEdit"
         @click="openCreateModal()"
@@ -267,7 +262,9 @@ onMounted(() => {
         <Plus class="w-4 h-4" />
         {{ $t('carpool.carpoolView.newCarpool') }}
       </button>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Viewer mode banner -->
     <div

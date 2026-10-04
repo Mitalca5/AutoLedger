@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Scale as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t, te } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { distanceUnit, formatDistanceValue, perDistance } from '@/units'
 import { apiMessageText } from '@/services/apiError'
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
-import { Scale, Plus, Trash2, Pencil, ArrowLeft, ArrowRight, Info, TrendingDown, TrendingUp, ChevronDown, Download, Printer, GitCompare } from 'lucide-vue-next'
+import { Plus, Trash2, Pencil, ArrowLeft, ArrowRight, Info, TrendingDown, TrendingUp, ChevronDown, Download, Printer, GitCompare } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
@@ -489,24 +491,19 @@ onBeforeUnmount(destroyChart)
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
-          <Scale class="w-5 h-5 text-sky-400" />
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-white">{{ $t('comparison.comparisonView.electricCombustionComparison') }}</h2>
-          <p class="text-xs text-slate-400">{{ $t('comparison.comparisonView.forInformationOnlyNoneOf') }}</p>
-        </div>
-      </div>
+    <PageHeader :title="$t('comparison.comparisonView.electricCombustionComparison')" :icon="PageIcon">
+      {{ $t('comparison.comparisonView.forInformationOnlyNoneOf') }}
+      <template #actions>
       <button
         v-if="view === 'list'"
-        class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-colors"
+        class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20 transition-colors"
         @click="startNew"
       >
         <Plus class="w-4 h-4" /> {{ $t('comparison.comparisonView.newComparison') }}
       </button>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Scenario list -->
     <div v-if="view === 'list'">

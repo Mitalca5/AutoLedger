@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Disc as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t } from '@/i18n'
 import { ref, onMounted, computed, watch } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -412,17 +414,9 @@ async function handleDeleteLog(l: any) {
 <template>
   <div class="space-y-6">
     <!-- Header & Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-          <Disc class="w-6 h-6 text-rose-500" />
-          {{ $t('tires.tiresView.tiresAndLifeCycles') }}
-        </h2>
-        <p class="text-sm text-slate-400">
-          {{ $t('tires.tiresView.wearTrackingInMmEstimated') }}
-        </p>
-      </div>
-
+    <PageHeader :title="$t('tires.tiresView.tiresAndLifeCycles')" :icon="PageIcon">
+      {{ $t('tires.tiresView.wearTrackingInMmEstimated') }}
+      <template #actions>
       <!-- Action Buttons -->
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2 flex-wrap">
         <button
@@ -443,7 +437,9 @@ async function handleDeleteLog(l: any) {
           {{ $t('tires.tiresView.addTires') }}
         </button>
       </div>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Viewer mode banner -->
     <div

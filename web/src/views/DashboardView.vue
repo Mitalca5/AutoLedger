@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { LayoutDashboard as PageIcon } from 'lucide-vue-next'
 import { ref, onMounted, watch, computed } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -71,16 +73,9 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Header Summary -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          {{ $t('dashboard.dashboardView.tcoDashboard') }}
-        </h2>
-        <p class="text-sm text-slate-400">
-          {{ $t('dashboard.dashboardView.subtitle', { unit: distanceUnit(), name: vehicleStore.activeVehicle?.name || $t('dashboard.dashboardView.yourVehicle') }) }}
-        </p>
-      </div>
-
+    <PageHeader :title="$t('dashboard.dashboardView.tcoDashboard')" :icon="PageIcon">
+      {{ $t('dashboard.dashboardView.subtitle', { unit: distanceUnit(), name: vehicleStore.activeVehicle?.name || $t('dashboard.dashboardView.yourVehicle') }) }}
+      <template #actions>
       <div class="flex items-center gap-2">
         <router-link
           to="/expenses"
@@ -95,7 +90,9 @@ onMounted(() => {
           {{ $t('dashboard.dashboardView.viewDrives') }}
         </router-link>
       </div>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Empty state if no vehicle -->
     <div v-if="!vehicleStore.activeVehicle" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl">

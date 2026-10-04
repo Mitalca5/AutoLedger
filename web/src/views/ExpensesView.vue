@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Receipt as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -393,12 +395,9 @@ async function openWebhookModal() {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight text-white">{{ $t('expenses.expensesView.expensesAndMaintenance') }}</h2>
-        <p class="text-sm text-slate-400">{{ $t('expenses.expensesView.tollsParkingRecurringMaintenanceInsurance') }}</p>
-      </div>
-
+    <PageHeader :title="$t('expenses.expensesView.expensesAndMaintenance')" :icon="PageIcon">
+      {{ $t('expenses.expensesView.tollsParkingRecurringMaintenanceInsurance') }}
+      <template #actions>
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
         <button
           v-if="activeTab === 'TOLLS'"
@@ -459,7 +458,9 @@ async function openWebhookModal() {
           {{ $t('expenses.expensesView.addAReceipt') }}
         </button>
       </div>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Viewer mode banner -->
     <div

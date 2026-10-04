@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import PageHeader from '@/components/PageHeader.vue'
+import { Gauge as PageIcon } from 'lucide-vue-next'
 import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
-import { LayoutGrid, Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown, ArrowUpRight } from 'lucide-vue-next'
+import { Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown, ArrowUpRight } from 'lucide-vue-next'
 import { Chart, registerables } from 'chart.js'
 import { api, type FleetSummaryResponse } from '@/services/api'
 import { formatAmount } from '@/currency'
@@ -191,21 +193,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-            <LayoutGrid class="w-6 h-6" />
-          </div>
-          <h2 class="text-2xl font-bold tracking-tight text-white">
-            {{ t('fleet.title') }}
-          </h2>
-        </div>
-        <p class="text-sm text-slate-400 mt-1">
-          {{ t('fleet.subtitle') }}
-        </p>
-      </div>
-
+    <PageHeader :title="t('fleet.title')" :icon="PageIcon">
+      {{ t('fleet.subtitle') }}
+      <template #actions>
       <button
         @click="loadFleetSummary"
         :disabled="loading"
@@ -214,7 +204,9 @@ onBeforeUnmount(() => {
         <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
         {{ t('fleet.refresh') }}
       </button>
-    </div>
+    
+      </template>
+    </PageHeader>
 
     <!-- Monthly budget -->
     <div v-if="summary" class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
