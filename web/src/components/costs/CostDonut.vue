@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { formatAmount } from '@/currency'
@@ -47,9 +48,9 @@ function render() {
             label: (ctx) => {
               if (!items.length) return ' ' + props.emptyLabel
               const value = Number(ctx.raw || 0)
-              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0'
-              const formatted = props.unit ? `${value.toFixed(2)} ${props.unit}` : formatAmount(value, props.currency)
-              return ` ${ctx.label} : ${formatted} (${pct}%)`
+              const pct = formatPercent(total > 0 ? (value / total) * 100 : 0)
+              const formatted = props.unit ? `${formatNumber(value, 2)} ${props.unit}` : formatAmount(value, props.currency)
+              return ` ${ctx.label} : ${formatted} (${pct})`
             },
           },
         },

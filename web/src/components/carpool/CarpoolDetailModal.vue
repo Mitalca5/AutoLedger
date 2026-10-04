@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { computed } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Users, X, MapPin, Navigation, Pencil, RotateCw, CheckCircle2, Sparkles, ChevronRight, Zap, Disc, Wrench, Shield, Receipt } from 'lucide-vue-next'
@@ -181,7 +182,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           <div class="pt-3 border-t border-slate-700/60 space-y-2">
             <div class="flex items-baseline justify-between gap-2">
               <span class="text-xs font-semibold text-slate-300">{{ $t('carpool.carpoolDetailModal.paidByPassengers') }}</span>
-              <span class="text-sm font-bold font-mono" :class="coverage.status === 'below' ? 'text-warning-400' : 'text-success-400'">{{ coverage.paidPct.toFixed(0) }}%</span>
+              <span class="text-sm font-bold font-mono" :class="coverage.status === 'below' ? 'text-warning-400' : 'text-success-400'">{{ formatPercent(coverage.paidPct, 0) }}</span>
             </div>
             <div
               class="relative h-2.5 rounded-full bg-slate-950 border border-slate-700/60"

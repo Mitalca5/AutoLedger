@@ -6,6 +6,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { distanceUnit } from '@/units'
 import { toLocalDateTimeInput } from '@/utils/dates'
+import AppDatePicker from '@/components/AppDatePicker.vue'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { X, Plus, Calendar, MapPin, Gauge, Zap } from 'lucide-vue-next'
 
@@ -60,7 +61,8 @@ watch(
       energyKwh.value = null
       startAddress.value = ''
       endAddress.value = ''
-      startOdometer.value = vehicleStore.activeVehicle?.current_odometer || null
+      const odo = vehicleStore.activeVehicle?.current_odometer
+      startOdometer.value = odo ? Math.round(odo) : null
       endOdometer.value = null
       selectedTag.value = ''
     }
@@ -141,24 +143,13 @@ async function handleSubmit() {
             <label for="manual-drive-start-time" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.dateStart') }}
             </label>
-            <input
-              id="manual-drive-start-time"
-              v-model="startTime"
-              type="datetime-local"
-              required
-              class="field"
-            />
+            <AppDatePicker id="manual-drive-start-time" v-model="startTime" enable-time-picker required />
           </div>
           <div>
             <label for="manual-drive-end-time" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.dateEnd') }}
             </label>
-            <input
-              id="manual-drive-end-time"
-              v-model="endTime"
-              type="datetime-local"
-              class="field"
-            />
+            <AppDatePicker id="manual-drive-end-time" v-model="endTime" enable-time-picker />
           </div>
         </div>
 

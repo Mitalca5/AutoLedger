@@ -4,6 +4,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Navigation, Layers, Users, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
 import { formatDate } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
+import { t } from '@/i18n'
 
 defineProps<{ driveExpenses: any[]; loading: boolean }>()
 const emit = defineEmits<{
@@ -13,6 +14,14 @@ const emit = defineEmits<{
 }>()
 const router = useRouter()
 const vehicleStore = useVehicleStore()
+
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  TOLL: 'expenses.tollModal.toll',
+  PARKING: 'expenses.tollModal.parking',
+  FERRY: 'expenses.tollModal.ferry',
+  OTHER: 'expenses.tollModal.other',
+}
+const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL_KEYS[type]) : type)
 </script>
 
 <template>
@@ -30,7 +39,7 @@ const vehicleStore = useVehicleStore()
         <div class="space-y-1.5 min-w-0 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs px-2 py-0.5 rounded-full font-bold bg-warning-500/10 text-warning-400 border border-warning-500/20 shrink-0">
-              {{ e.type }}
+              {{ expenseTypeLabel(e.type) }}
             </span>
             <span class="text-xs text-slate-400 shrink-0">{{ formatDate(e.date) }}</span>
             <span v-if="e.drive_title" class="text-xs px-2.5 py-0.5 rounded-lg bg-success-500/10 text-success-400 border border-success-500/20 flex items-center gap-1 truncate max-w-xs">

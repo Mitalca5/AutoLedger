@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import PageHeader from '@/components/PageHeader.vue'
 import { Gauge as PageIcon } from 'lucide-vue-next'
 import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
@@ -298,7 +299,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <p class="text-2xl font-bold text-white mt-2">
-          {{ summary.current_month_energy_kwh.toFixed(1) }} <span class="text-sm font-normal text-slate-400">kWh</span>
+          {{ formatNumber(summary.current_month_energy_kwh) }} <span class="text-sm font-normal text-slate-400">kWh</span>
         </p>
         <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.energyDelivered') }}</p>
       </div>
@@ -453,7 +454,7 @@ onBeforeUnmount(() => {
             <div class="flex items-center justify-between text-xs">
               <span class="font-medium text-slate-200 truncate">{{ member.driver_name }}</span>
               <span class="text-slate-400 shrink-0 font-mono">
-                {{ formatDistance(member.distance_km) }} ({{ member.percentage.toFixed(1) }}%)
+                {{ formatDistance(member.distance_km) }} ({{ formatPercent(member.percentage) }})
               </span>
             </div>
             <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -619,7 +620,7 @@ async function handleDeleteExpense(exp: any) {
             <div class="flex items-center gap-2">
               <div class="text-right">
                 <div class="text-sm font-bold text-warning-400 font-mono">{{ formatAmount(selectedCostDrive.costs?.tolls_cost || 0, vehicleCurrency) }}</div>
-                <div class="text-xs text-slate-400 font-normal font-sans">({{ breakdown.byKey.tolls.sharePct.toFixed(1) }}%) · <span class="text-success-400">{{ formatAmount(perDistance(breakdown.byKey.tolls.costPerKm), vehicleCurrency, 3) }}/{{ distanceUnit() }}</span></div>
+                <div class="text-xs text-slate-400 font-normal font-sans">({{ formatPercent(breakdown.byKey.tolls.sharePct) }}) · <span class="text-success-400">{{ formatAmount(perDistance(breakdown.byKey.tolls.costPerKm), vehicleCurrency, 3) }}/{{ distanceUnit() }}</span></div>
               </div>
               <button
                 v-if="canDetectTolls"

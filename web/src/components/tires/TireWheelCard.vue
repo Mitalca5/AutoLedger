@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { Disc } from 'lucide-vue-next'
 import { getConditionBadge } from '@/utils/tires'
@@ -58,7 +59,7 @@ const vehicleStore = useVehicleStore()
     <div class="space-y-1.5">
       <div class="flex items-center justify-between text-xs text-slate-400">
         <span>{{ $t('tires.tireWheelCard.estimatedLifespanWearKm', { unit: distanceUnit(), estimated_lifespan_km: formatDistanceValue(stat.estimated_lifespan_km) }) }}</span>
-        <span class="font-bold text-slate-200">{{ stat.life_progress_pct }}%</span>
+        <span class="font-bold text-slate-200">{{ formatPercent(Number(stat.life_progress_pct)) }}</span>
       </div>
       <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
         <div

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { intlLocale, t } from '@/i18n'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Coins, Zap, Receipt, Disc, Wrench, Briefcase, ArrowRight, Activity, Shield, X, ChevronLeft, ChevronRight, PieChart, Info, SlidersHorizontal } from 'lucide-vue-next'
@@ -297,7 +298,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                     {{ formatAmount(item.displayAmount, currency) }}
                   </span>
                   <span class="text-xs text-slate-400 font-medium">
-                    ({{ item.sharePct.toFixed(1) }}%)
+                    ({{ formatPercent(item.sharePct) }})
                   </span>
                 </div>
                 <div class="text-xs text-success-400 font-medium">

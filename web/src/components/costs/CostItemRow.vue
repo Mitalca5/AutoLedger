@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import type { Component } from 'vue'
 import { distanceUnit, perDistance } from '@/units'
 import { formatAmount } from '@/currency'
@@ -35,7 +36,7 @@ const TONES: Record<Tone, { box: string; text: string }> = {
     </div>
     <div class="text-right">
       <div class="text-sm font-bold font-mono" :class="TONES[tone].text">{{ formatAmount(amount, currency) }}</div>
-      <div class="text-xs text-slate-400 font-normal font-sans">({{ sharePct.toFixed(1) }}%) · <span class="text-success-400">{{ formatAmount(perDistance(costPerKm), currency, 3) }}/{{ distanceUnit() }}</span></div>
+      <div class="text-xs text-slate-400 font-normal font-sans">({{ formatPercent(sharePct) }}) · <span class="text-success-400">{{ formatAmount(perDistance(costPerKm), currency, 3) }}/{{ distanceUnit() }}</span></div>
     </div>
   </div>
 </template>

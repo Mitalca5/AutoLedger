@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber, formatPercent } from '@/utils/numbers'
 import { ref, onMounted, computed, watch } from 'vue'
 import { Zap, Check, Trash2, X, Car, Calendar, User, ArrowRight, Clock } from 'lucide-vue-next'
 import { api, type PendingCharge } from '@/services/api'
@@ -131,7 +132,7 @@ onMounted(() => {
             <div class="space-y-1 min-w-0">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-sm text-white">
-                  {{ charge.energy_kwh.toFixed(2) }} kWh
+                  {{ formatNumber(charge.energy_kwh, 2) }} kWh
                 </span>
                 <span v-if="charge.charger_name" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
                   {{ charge.charger_name }}
