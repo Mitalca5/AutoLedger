@@ -40,6 +40,11 @@ type Config struct {
 	ReportingTimezone          string
 	StorageDir                 string // Directory for document file storage (Docker volume mount point)
 
+	// Reverse geocoding of the positions sent by integrations (optional, off by default: coordinates leave the server)
+	GeocodingEnabled   bool
+	GeocodingURL       string // Nominatim base URL; empty = the public OpenStreetMap instance
+	GeocodingUserAgent string // Empty = a default that identifies AutoLedger
+
 	// Reverse proxy and browser hardening
 	TrustedProxies        []string // Addresses or CIDR ranges of the reverse proxy allowed to set X-Forwarded-*; default: private ranges
 	SecurityHeaders       bool     // Send the security headers (disable when the proxy already sets them)
@@ -193,6 +198,9 @@ func Load() *Config {
 		SyncIntervalMinutes:        syncIntervalMinutes,
 		ReportingTimezone:          reportingTimezone,
 		StorageDir:                 storageDir,
+		GeocodingEnabled:           getEnvBool("GEOCODING_ENABLED", false),
+		GeocodingURL:               strings.TrimSpace(getEnv("GEOCODING_URL", "")),
+		GeocodingUserAgent:         strings.TrimSpace(getEnv("GEOCODING_USER_AGENT", "")),
 		TrustedProxies:             trustedProxies,
 		SecurityHeaders:            getEnvBool("SECURITY_HEADERS", true),
 		ContentSecurityPolicy:      strings.TrimSpace(getEnv("CONTENT_SECURITY_POLICY", "")),

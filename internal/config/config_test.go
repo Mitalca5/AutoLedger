@@ -142,3 +142,15 @@ func TestSecurityHeadersDefaultOn(t *testing.T) {
 		t.Error("SECURITY_HEADERS=false must turn them off")
 	}
 }
+
+func TestGeocodingIsOffByDefault(t *testing.T) {
+	if cfg := config.Load(); cfg.GeocodingEnabled || cfg.GeocodingURL != "" {
+		t.Fatalf("geocoding must be opt-in: %+v", cfg)
+	}
+	t.Setenv("GEOCODING_ENABLED", "true")
+	t.Setenv("GEOCODING_URL", " http://nominatim.local:8080 ")
+	cfg := config.Load()
+	if !cfg.GeocodingEnabled || cfg.GeocodingURL != "http://nominatim.local:8080" {
+		t.Fatalf("got %+v", cfg)
+	}
+}

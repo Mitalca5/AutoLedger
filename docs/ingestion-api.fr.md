@@ -39,7 +39,7 @@ Une session sans `vehicle_id` va au véhicule par défaut de la borne domestique
 
 `data` : `start_time` (ou le `timestamp` de l'événement), `end_time` ou `duration_min`, `distance` (dans `distance_unit`, de 0,1 à 3000 km), `start_odometer`, `end_odometer`, `start_address`, `end_address`, `energy_kwh`.
 
-`distance` est facultative. Si elle est absente, c'est la différence de `end_odometer` et `start_odometer` quand les deux sont envoyés. Sinon le trajet est enregistré sans distance (affichée à 0), sans énergie estimée ni consommation ; une `distance` envoyée à 0 est refusée. `start_lat`/`start_lon` et `end_lat`/`end_lon` donnent les positions : elles tiennent lieu de `start_address` / `end_address` quand ceux-ci sont absents (enregistrées sous la forme `lat, lon`).
+`distance` est facultative. Si elle est absente, c'est la différence de `end_odometer` et `start_odometer` quand les deux sont envoyés. Sinon le trajet est enregistré sans distance (affichée à 0), sans énergie estimée ni consommation ; une `distance` envoyée à 0 est refusée. `start_lat`/`start_lon` et `end_lat`/`end_lon` donnent les positions : elles tiennent lieu de `start_address` / `end_address` quand ceux-ci sont absents (enregistrées sous la forme `lat, lon`). Quand `GEOCODING_ENABLED` est activé sur le serveur, ces positions sont ensuite remplacées en arrière-plan par une adresse trouvée sur OpenStreetMap Nominatim (une adresse modifiée entre-temps est conservée ; en cas d'échec les coordonnées restent).
 
 Sans `energy_kwh`, l'énergie est estimée d'après la consommation moyenne du véhicule et marquée comme estimée.
 

@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/middleware"
@@ -260,5 +263,69 @@ func TestHomeAssistantDriveEventWithoutDistance(t *testing.T) {
 
 	if d := byStart["2026-05-04"]; d.StartAddress != nil {
 		t.Errorf("out of range latitude must be ignored: %v", *d.StartAddress)
+	}
+}
+
+type fakeGeocoder struct {
+	answers map[string]string
+	calls   chan string
+}
+
+func (f *fakeGeocoder) Reverse(_ context.Context, lat, lon float64) (string, error) {
+	key := fmt.Sprintf("%.4f,%.4f", lat, lon)
+	f.calls <- key
+	if a, ok := f.answers[key]; ok {
+		return a, nil
+	}
+	return "", errors.New("no address")
+}
+
+func TestHomeAssistantDriveEventGeocodesPositions(t *testing.T) {
+	env, u := newHAEventEnv(t, "ha-drive-geocode@example.com")
+	v := env.vehicle(u.ID, "Car", models.PowertrainEV, 1000)
+	ctx := context.Background()
+	geo := &fakeGeocoder{answers: map[string]string{"45.8992,6.1294": "1 Rue Example, Annecy"}, calls: make(chan string, 8)}
+	env.h.SetGeocoder(geo)
+
+	// Departure resolved, arrival unknown to the geocoder (keeps its coordinates), a given address is never looked up.
+	body := `{"vehicle_id":"` + v.ID + `","event_type":"drive","event_id":"g-1","data":{"start_time":"2026-05-01T08:00:00Z",` +
+		`"start_lat":45.8992,"start_lon":6.1294,"end_lat":45.7640,"end_lon":4.8357}}`
+	if status, code := env.post(u.ID, body); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("drive: got %d %q", status, code)
+	}
+	named := `{"vehicle_id":"` + v.ID + `","event_type":"drive","event_id":"g-2","data":{"start_time":"2026-05-02T08:00:00Z",` +
+		`"start_address":"Home","start_lat":45.8992,"start_lon":6.1294}}`
+	if status, code := env.post(u.ID, named); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("named drive: got %d %q", status, code)
+	}
+
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		drives, _, err := env.repo.ListDrives(ctx, v.ID, database.DriveFilter{}, 10, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resolved := false
+		for _, d := range drives {
+			if d.StartTime.Day() == 1 && d.StartAddress != nil && *d.StartAddress == "1 Rue Example, Annecy" {
+				resolved = true
+				if d.EndAddress == nil || *d.EndAddress != "45.76400, 4.83570" {
+					t.Errorf("an unresolved end keeps its coordinates: got %v", d.EndAddress)
+				}
+			}
+			if d.StartTime.Day() == 2 && (d.StartAddress == nil || *d.StartAddress != "Home") {
+				t.Errorf("a given address must stay: got %v", d.StartAddress)
+			}
+		}
+		if resolved {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the departure address was never resolved")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if len(geo.calls) > 2 {
+		t.Errorf("a given address must not be looked up: %d lookups", len(geo.calls))
 	}
 }

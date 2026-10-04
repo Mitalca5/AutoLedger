@@ -281,6 +281,8 @@ docker run --rm \
 | `AUTOLEDGER_JWT_SECRET` | `JWT_SECRET` | Secret key for signing user sessions | *Generated* |
 | `AUTOLEDGER_STORAGE_DIR` | `STORAGE_DIR` | Filesystem path for document attachments | `/data/documents` |
 | `APP_TIMEZONE` | - | IANA timezone for reports and aggregations | `Europe/Paris` |
+| `GEOCODING_ENABLED` | - | Resolve the coordinates sent by integrations (Home Assistant trips) into addresses through OpenStreetMap Nominatim. Off by default: the coordinates are sent to the geocoding service | `false` |
+| `GEOCODING_URL` / `GEOCODING_USER_AGENT` | - | Nominatim instance to use (a self-hosted one avoids sending coordinates to a third party) and the User-Agent sent to it | Public OSM instance / `AutoLedger (+https://github.com/Rem7474/AutoLedger)` |
 | `DISABLE_REGISTRATION` | - | Set to `true` to disable public user registration | `false` |
 | `AUTOLEDGER_DEMO` | - | Read-only public demo: every write except sign-in is refused, registration is closed | `false` |
 | `AUTOLEDGER_DEMO_EMAIL` / `AUTOLEDGER_DEMO_PASSWORD` | - | Demo account offered by the "Try the demo" button on the sign-in page (public by design) | - |

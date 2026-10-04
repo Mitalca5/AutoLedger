@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"math"
@@ -22,7 +23,16 @@ type HomeAssistantHandler struct {
 	repo          *database.Repository
 	tariffService *services.TariffService
 	loc           *time.Location
+	geocoder      Geocoder
 }
+
+// Geocoder resolves a position to a short address.
+type Geocoder interface {
+	Reverse(ctx context.Context, lat, lon float64) (string, error)
+}
+
+// SetGeocoder turns on reverse geocoding of the positions of drives sent without an address.
+func (h *HomeAssistantHandler) SetGeocoder(g Geocoder) { h.geocoder = g }
 
 // SetTimezone sets the timezone that decides which day an odometer reading belongs to (UTC by default).
 func (h *HomeAssistantHandler) SetTimezone(name string) {

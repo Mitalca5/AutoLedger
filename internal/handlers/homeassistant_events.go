@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/teslacost/teslacost/internal/apierror"
+	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 	"github.com/teslacost/teslacost/internal/services/ingest"
@@ -77,6 +80,43 @@ func driveAddress(address *string, lat, lon *float64) *string {
 	}
 	text := fmt.Sprintf("%.5f, %.5f", *lat, *lon)
 	return &text
+}
+
+// resolveDriveAddresses replaces, in the background, the coordinates stored as addresses with real addresses.
+func (h *HomeAssistantHandler) resolveDriveAddresses(drive *models.Drive, data *HAEventData) {
+	if h.geocoder == nil {
+		return
+	}
+	type job struct {
+		end         database.DriveEnd
+		lat, lon    float64
+		placeholder string
+	}
+	var jobs []job
+	if optionalText(data.StartAddress) == nil && drive.StartAddress != nil {
+		jobs = append(jobs, job{database.DriveEndDeparture, *data.StartLat, *data.StartLon, *drive.StartAddress})
+	}
+	if optionalText(data.EndAddress) == nil && drive.EndAddress != nil {
+		jobs = append(jobs, job{database.DriveEndArrival, *data.EndLat, *data.EndLon, *drive.EndAddress})
+	}
+	if len(jobs) == 0 {
+		return
+	}
+	driveID := drive.ID
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+		for _, j := range jobs {
+			address, err := h.geocoder.Reverse(ctx, j.lat, j.lon)
+			if err != nil {
+				slog.Warn("reverse geocoding failed, the drive keeps its coordinates", "drive_id", driveID, "error", err)
+				continue
+			}
+			if err := h.repo.ReplaceDriveAddress(ctx, driveID, j.end, j.placeholder, address); err != nil {
+				slog.Warn("could not store the geocoded address", "drive_id", driveID, "error", err)
+			}
+		}
+	}()
 }
 
 // recordDrive stores a drive reported by an integration, once per event id and once per similar drive.
@@ -151,6 +191,7 @@ func (h *HomeAssistantHandler) recordDrive(w http.ResponseWriter, r *http.Reques
 		writeRepoError(w, r, err, "Failed to store drive")
 		return
 	}
+	h.resolveDriveAddresses(drive, &req.Data)
 	if endOdo != nil && *endOdo > vehicle.CurrentOdometer {
 		_ = h.repo.UpdateVehicleOdometer(r.Context(), vehicle.ID, *endOdo)
 	}

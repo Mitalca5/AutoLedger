@@ -23,6 +23,7 @@ import (
 	"github.com/teslacost/teslacost/internal/config"
 	"github.com/teslacost/teslacost/internal/crypto"
 	"github.com/teslacost/teslacost/internal/database"
+	"github.com/teslacost/teslacost/internal/geocode"
 	"github.com/teslacost/teslacost/internal/handlers"
 	appMiddleware "github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/services"
@@ -365,6 +366,9 @@ func main() {
 		fleetHandler := handlers.NewFleetHandler(fleetService)
 		haHandler := handlers.NewHomeAssistantHandler(repo, tariffService)
 		haHandler.SetTimezone(cfg.ReportingTimezone)
+		if cfg.GeocodingEnabled {
+			haHandler.SetGeocoder(geocode.New(cfg.GeocodingURL, cfg.GeocodingUserAgent))
+		}
 
 		// Public Auth
 		r.Route("/api/auth", func(r chi.Router) {

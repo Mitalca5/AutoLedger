@@ -39,7 +39,7 @@ A session without `vehicle_id` goes to the home charger's default vehicle, other
 
 `data`: `start_time` (or the event `timestamp`), `end_time` or `duration_min`, `distance` (in `distance_unit`, 0.1 to 3000 km), `start_odometer`, `end_odometer`, `start_address`, `end_address`, `energy_kwh`.
 
-`distance` is optional. When it is absent, it is the difference of `end_odometer` and `start_odometer` if both are sent. Otherwise the drive is stored without distance (shown as 0), with no energy estimate and no consumption figure; a `distance` sent as 0 is refused. `start_lat`/`start_lon` and `end_lat`/`end_lon` give the positions: they stand in for `start_address` / `end_address` when these are absent (stored as `lat, lon` text).
+`distance` is optional. When it is absent, it is the difference of `end_odometer` and `start_odometer` if both are sent. Otherwise the drive is stored without distance (shown as 0), with no energy estimate and no consumption figure; a `distance` sent as 0 is refused. `start_lat`/`start_lon` and `end_lat`/`end_lon` give the positions: they stand in for `start_address` / `end_address` when these are absent (stored as `lat, lon` text). When `GEOCODING_ENABLED` is set on the server, the positions are then replaced in the background by a street address looked up on OpenStreetMap Nominatim (an address edited in the meantime is kept; on failure the coordinates stay).
 
 Without `energy_kwh`, the energy is estimated from the vehicle's average consumption and flagged as estimated.
 

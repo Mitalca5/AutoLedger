@@ -633,6 +633,25 @@ func (r *Repository) CreateManualDrive(ctx context.Context, d *models.Drive) err
 	).Scan(&d.ID, &d.CreatedAt, &d.UpdatedAt)
 }
 
+// ReplaceDriveAddress sets one end of a drive to a resolved address, only while it still holds the placeholder
+// it was created with, so an address the user edited in the meantime is kept.
+func (r *Repository) ReplaceDriveAddress(ctx context.Context, driveID string, end DriveEnd, placeholder, address string) error {
+	column := "start_address"
+	if end == DriveEndArrival {
+		column = "end_address"
+	}
+	_, err := r.pool.Exec(ctx, "UPDATE drives SET "+column+" = $3, updated_at = NOW() WHERE id = $1 AND "+column+" = $2;", driveID, placeholder, address)
+	return err
+}
+
+// DriveEnd selects the departure or the arrival of a drive.
+type DriveEnd int
+
+const (
+	DriveEndDeparture DriveEnd = iota
+	DriveEndArrival
+)
+
 func (r *Repository) UpdateManualDrive(ctx context.Context, d *models.Drive) error {
 	if d.Tags == nil {
 		d.Tags = []string{}
