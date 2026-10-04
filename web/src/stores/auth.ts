@@ -8,6 +8,13 @@ import { setDistanceUnit } from '@/units'
 // holds a token value, only whether the current cookie-backed session is valid.
 type AuthStatus = 'unknown' | 'authenticated' | 'unauthenticated'
 
+// Reminder and sync-failure webhooks are built outside any request, so the server keeps its own copy
+// of the language. The UI's language is the source: push it whenever the account's copy differs.
+export function syncAccountLanguage(user: { language?: string } | null | undefined) {
+  const locale = currentLocale()
+  if (user && user.language !== locale) api.updateLanguage(locale).catch(() => {})
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const status = ref<AuthStatus>('unknown')
   const user = ref<any | null>(null)
@@ -21,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = await api.getMe()
       setDistanceUnit(user.value?.distance_unit)
       status.value = 'authenticated'
+      syncAccountLanguage(user.value)
     } catch {
       user.value = null
       status.value = 'unauthenticated'
@@ -32,6 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = res.user
     setDistanceUnit(user.value?.distance_unit)
     status.value = 'authenticated'
+    syncAccountLanguage(user.value)
   }
 
   async function register(payload: { email: string; password: string }) {
@@ -39,9 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = res.user
     setDistanceUnit(user.value?.distance_unit)
     status.value = 'authenticated'
-    // New account: match the language of reminder and sync-failure webhooks to the UI the
-    // person is already using, rather than the server-side default.
-    api.updateLanguage(currentLocale()).catch(() => {})
+    syncAccountLanguage(user.value)
   }
 
   async function logout() {
