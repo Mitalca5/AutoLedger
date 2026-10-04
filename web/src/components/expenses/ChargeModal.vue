@@ -136,7 +136,7 @@ async function handleSaveCharge() {
             {{ $t('expenses.chargeModal.teslamateChargeOfKwhThe', { date: formatDate(editingCharge.date), kwh_added: editingCharge.kwh_added }) }}
           </p>
         </div>
-        <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -213,7 +213,7 @@ async function handleSaveCharge() {
               <button
                 type="button"
                 @click="emit('view-document', chargeForm.document_id, chargeForm.document_filename, false)"
-                class="p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.chargeModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
@@ -221,7 +221,7 @@ async function handleSaveCharge() {
               <button
                 type="button"
                 @click="chargeForm.document_id = null; chargeForm.document_filename = null"
-                class="p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.chargeModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />

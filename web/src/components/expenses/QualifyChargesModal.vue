@@ -107,7 +107,7 @@ onMounted(() => {
             <p class="text-xs text-slate-400">{{ t('pendingCharges.modalSubtitle') }}</p>
           </div>
         </div>
-        <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -179,7 +179,7 @@ onMounted(() => {
                 type="button"
                 :disabled="dismissingId === charge.id"
                 @click="handleDismiss(charge)"
-                class="p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                class="tap p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                 :title="t('pendingCharges.dismiss')"
               >
                 <Trash2 class="w-4 h-4" />

@@ -58,21 +58,21 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-          <button @click="emit('edit-tire')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.editTheTire')">
+          <button @click="emit('edit-tire')" class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.editTheTire')">
             <Pencil class="w-4 h-4" />
           </button>
           <button
             v-if="selectedTire.current_position !== 'DISPOSED'"
             @click="emit('dispose-tire')"
-            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-lg transition-colors"
+            class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-lg transition-colors"
             :title="$t('tires.tireHistoryModal.scrapWornPuncturedSold')"
           >
             <Archive class="w-4 h-4" />
           </button>
-          <button @click="emit('delete-tire')" class="p-1.5 bg-slate-800 hover:bg-danger-900/40 text-slate-400 hover:text-danger-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')">
+          <button @click="emit('delete-tire')" class="tap p-1.5 bg-slate-800 hover:bg-danger-900/40 text-slate-400 hover:text-danger-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')">
             <Trash2 class="w-4 h-4" />
           </button>
-          <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -211,7 +211,7 @@ useEscapeToClose(open, () => (open.value = false))
               <div class="flex items-center gap-1.5">
                 <button
                   @click="emit('copy-session', s)"
-                  class="p-1 rounded transition-colors"
+                  class="tap p-1 rounded transition-colors"
                   :class="copiedSession?.mounted_date === (s.mounted_date ? new Date(s.mounted_date).toISOString().substring(0, 10) : '') && copiedSession?.mounted_odometer === s.mounted_odometer ? 'text-indigo-400 bg-indigo-950/60' : 'text-slate-400 hover:text-indigo-400'"
                   :title="$t('tires.tireHistoryModal.copyThisSessionSData')"
                 >
@@ -219,21 +219,21 @@ useEscapeToClose(open, () => (open.value = false))
                 </button>
                 <button
                   @click="emit('duplicate-session', s)"
-                  class="p-1 text-slate-400 hover:text-info-400 rounded transition-colors"
+                  class="tap p-1 text-slate-400 hover:text-info-400 rounded transition-colors"
                   :title="$t('tires.tireHistoryModal.duplicateToOtherTires')"
                 >
                   <Shuffle class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="emit('edit-session', s)"
-                  class="p-1 text-slate-400 hover:text-white rounded"
+                  class="tap p-1 text-slate-400 hover:text-white rounded"
                   :title="$t('tires.tireHistoryModal.editTheSession')"
                 >
                   <Edit2 class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="emit('delete-session', s)"
-                  class="p-1 text-slate-400 hover:text-rose-400 rounded"
+                  class="tap p-1 text-slate-400 hover:text-rose-400 rounded"
                   :title="$t('tires.tireHistoryModal.deleteTheSession')"
                 >
                   <Trash2 class="w-3.5 h-3.5" />

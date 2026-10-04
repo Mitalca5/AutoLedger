@@ -106,7 +106,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
         <div v-if="periodMode === 'MONTH'" class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800/80">
           <button
             @click="prevMonth"
-            class="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
             :title="$t('drives.drivesToolbar.previousMonth')"
           >
             <ChevronLeft class="w-4 h-4" />
@@ -124,7 +124,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           </div>
           <button
             @click="nextMonth"
-            class="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
             :title="$t('drives.drivesToolbar.nextMonth')"
           >
             <ChevronRight class="w-4 h-4" />

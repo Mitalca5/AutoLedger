@@ -149,7 +149,7 @@ function onVehicleChange(event: Event) {
           {{ offlineStore.failures.map((f) => `${f.label} (${f.error})`).join(' ; ') }}
         </span>
       </div>
-      <button @click="offlineStore.dismissFailures" class="text-danger-400 hover:text-white p-1 rounded transition-colors">
+      <button @click="offlineStore.dismissFailures" class="tap text-danger-400 hover:text-white p-1 rounded transition-colors">
         <X class="w-4 h-4" />
       </button>
     </div>
@@ -165,7 +165,7 @@ function onVehicleChange(event: Event) {
       </div>
       <button
         @click="vehicleStore.clearSyncStatus"
-        class="text-rose-400 hover:text-white p-1 rounded transition-colors"
+        class="tap text-rose-400 hover:text-white p-1 rounded transition-colors"
       >
         <X class="w-4 h-4" />
       </button>
@@ -185,7 +185,7 @@ function onVehicleChange(event: Event) {
       </div>
       <button
         @click="vehicleStore.clearSyncStatus"
-        class="text-warning-400 hover:text-white p-1 rounded transition-colors"
+        class="tap text-warning-400 hover:text-white p-1 rounded transition-colors"
       >
         <X class="w-4 h-4" />
       </button>

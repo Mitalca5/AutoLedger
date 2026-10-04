@@ -197,10 +197,10 @@ onMounted(() => {
           </div>
 
           <div v-if="canEdit" class="flex items-center gap-1.5 shrink-0">
-            <button v-if="r.source !== 'HA'" type="button" class="p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.editReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="startEdit(r)">
+            <button v-if="r.source !== 'HA'" type="button" class="tap p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.editReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="startEdit(r)">
               <Edit2 class="w-4 h-4" />
             </button>
-            <button type="button" class="p-1.5 text-slate-400 hover:text-danger-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.deleteReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="remove(r)">
+            <button type="button" class="tap p-1.5 text-slate-400 hover:text-danger-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.deleteReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="remove(r)">
               <Trash2 class="w-4 h-4" />
             </button>
           </div>

@@ -162,7 +162,7 @@ onMounted(() => {
             <p class="text-xs text-slate-400">{{ t('tariffs.publicModal.subtitle') }}</p>
           </div>
         </div>
-        <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
           <X class="w-4 h-4" />
         </button>
       </div>

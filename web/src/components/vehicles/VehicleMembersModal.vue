@@ -121,7 +121,7 @@ async function handleRemoveMember(m: any) {
         </div>
         <button
           @click="open = false"
-          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+          class="tap p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
         >
           <X class="w-4 h-4" />
         </button>
@@ -258,7 +258,7 @@ async function handleRemoveMember(m: any) {
                   <button
                     type="button"
                     @click="handleRemoveMember(m)"
-                    class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                    class="tap p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
                     :title="$t('vehicles.vehicleMembersModal.removeAccess')"
                   >
                     <Trash2 class="w-4 h-4" />

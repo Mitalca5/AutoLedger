@@ -108,7 +108,7 @@ async function handleCreateTires() {
           <Plus class="w-5 h-5 text-rose-500" />
           {{ $t('tires.tireAddModal.addTires') }}
         </h3>
-        <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>

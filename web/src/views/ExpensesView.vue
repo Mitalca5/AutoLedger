@@ -476,13 +476,13 @@ async function openWebhookModal() {
       <div class="flex min-w-0 max-w-full flex-wrap items-center gap-3">
         <!-- Groupe 1: Route & Trajets -->
         <div class="flex max-w-full items-center overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1">
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
             <Navigation class="w-3 h-3 text-warning-400" />
             <span class="hidden sm:inline">{{ $t('expenses.expensesView.roadAndDrives') }}</span>
           </span>
           <button
             @click="activeTab = 'TOLLS'"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
+            class="tap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
             :class="activeTab === 'TOLLS' ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Receipt class="w-3.5 h-3.5" />
@@ -491,7 +491,7 @@ async function openWebhookModal() {
           <button
             v-if="vehicleStore.canCharge"
             @click="activeTab = 'CHARGES'"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
+            class="tap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
             :class="activeTab === 'CHARGES' ? 'bg-info-500/20 text-info-300 border border-info-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Zap class="w-3.5 h-3.5" />
@@ -504,13 +504,13 @@ async function openWebhookModal() {
 
         <!-- Groupe 2: Flotte & Entretien -->
         <div class="flex max-w-full items-center overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1">
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
             <Wrench class="w-3 h-3 text-pink-400" />
             <span class="hidden sm:inline">{{ $t('expenses.expensesView.fleetAndVehicle') }}</span>
           </span>
           <button
             @click="activeTab = 'MAINTENANCE'"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
+            class="tap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
             :class="activeTab === 'MAINTENANCE' ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Wrench class="w-3.5 h-3.5" />
@@ -518,7 +518,7 @@ async function openWebhookModal() {
           </button>
           <button
             @click="activeTab = 'REMINDERS'"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 relative"
+            class="tap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 relative"
             :class="activeTab === 'REMINDERS' ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Bell class="w-3.5 h-3.5" />
@@ -533,7 +533,7 @@ async function openWebhookModal() {
           </button>
           <button
             @click="activeTab = 'DOCUMENTS'"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
+            class="tap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
             :class="activeTab === 'DOCUMENTS' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Paperclip class="w-3.5 h-3.5" />

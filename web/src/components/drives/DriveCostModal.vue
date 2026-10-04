@@ -339,7 +339,7 @@ async function handleDeleteExpense(exp: any) {
             v-if="parentTrip || backLabel"
             type="button"
             @click="parentTrip ? backToTrip() : emit('back')"
-            class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
+            class="tap p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
             :title="parentTrip ? $t('drives.driveCostModal.backToTrip') : backLabel"
           >
             <ArrowLeft class="w-4 h-4" />
@@ -365,7 +365,7 @@ async function handleDeleteExpense(exp: any) {
           <ExternalLink class="w-3.5 h-3.5 text-info-400" />
           <span class="hidden sm:inline">TeslaMate</span>
         </a>
-        <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0">
+        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -627,7 +627,7 @@ async function handleDeleteExpense(exp: any) {
                 type="button"
                 @click="handleDetectTolls"
                 :disabled="tollDetectionLoading"
-                class="p-1 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 rounded-lg text-xs disabled:opacity-50"
+                class="tap p-1 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 rounded-lg text-xs disabled:opacity-50"
                 :title="tollDetectionLoading ? $t('drives.driveCostModal.detecting') : tollDetection ? $t('drives.driveCostModal.redetect') : $t('drives.driveCostModal.detectTolls')"
                 :aria-label="$t('drives.driveCostModal.detectTolls')"
               >
@@ -636,7 +636,7 @@ async function handleDeleteExpense(exp: any) {
               <button
                 v-if="!selectedCostDrive.is_suggestion"
                 @click="showAddTollInline = !showAddTollInline"
-                class="p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs"
+                class="tap p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs"
                 :title="$t('drives.driveCostModal.addATollOrParking')"
               >
                 <Plus class="w-3.5 h-3.5" />

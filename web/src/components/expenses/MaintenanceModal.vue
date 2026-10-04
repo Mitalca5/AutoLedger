@@ -212,7 +212,7 @@ async function handleCreateMaint() {
           <Wrench class="w-5 h-5 text-pink-400" />
           {{ editingMaintId ? $t('expenses.maintenanceModal.edit') : $t('expenses.maintenanceModal.add') }}
         </h3>
-        <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -426,7 +426,7 @@ async function handleCreateMaint() {
               <button
                 type="button"
                 @click="emit('view-document', maintForm.document_id, maintForm.document_filename, false)"
-                class="p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.maintenanceModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ async function handleCreateMaint() {
               <button
                 type="button"
                 @click="maintForm.document_id = null; maintForm.document_filename = null"
-                class="p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.maintenanceModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />

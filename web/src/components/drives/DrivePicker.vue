@@ -82,7 +82,7 @@ watch(
   <div class="space-y-1.5">
     <!-- Which drives are listed: the latest ones, or those around a date -->
     <div class="flex items-center gap-1.5 text-xs text-slate-400">
-      <button type="button" @click="shiftWindow(-2 * DRIVE_WINDOW_DAYS)" class="p-1 rounded-lg hover:bg-slate-800 hover:text-white" :title="$t('drives.drivePicker.earlierDrives')">
+      <button type="button" @click="shiftWindow(-2 * DRIVE_WINDOW_DAYS)" class="tap p-1 rounded-lg hover:bg-slate-800 hover:text-white" :title="$t('drives.drivePicker.earlierDrives')">
         <ChevronLeft class="w-4 h-4" />
       </button>
       <div class="w-44">
@@ -95,7 +95,7 @@ watch(
           @change="load"
         />
       </div>
-      <button type="button" @click="shiftWindow(2 * DRIVE_WINDOW_DAYS)" class="p-1 rounded-lg hover:bg-slate-800 hover:text-white" :title="$t('drives.drivePicker.laterDrives')">
+      <button type="button" @click="shiftWindow(2 * DRIVE_WINDOW_DAYS)" class="tap p-1 rounded-lg hover:bg-slate-800 hover:text-white" :title="$t('drives.drivePicker.laterDrives')">
         <ChevronRight class="w-4 h-4" />
       </button>
       <span v-if="pickerDate" class="text-xs text-slate-400">{{ $t('drives.drivePicker.aroundTheDate', { days: DRIVE_WINDOW_DAYS }) }}</span>

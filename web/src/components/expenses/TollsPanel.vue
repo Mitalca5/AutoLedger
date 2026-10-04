@@ -77,14 +77,14 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
             </button>
             <button
               @click="emit('edit', e)"
-              class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-xl transition-colors border border-slate-700/60"
               :title="$t('expenses.tollsPanel.editThisToll')"
             >
               <Pencil class="w-3.5 h-3.5" />
             </button>
             <button
               @click="emit('delete', e)"
-              class="p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
               :title="$t('expenses.tollsPanel.deleteThisToll')"
             >
               <Trash2 class="w-3.5 h-3.5" />

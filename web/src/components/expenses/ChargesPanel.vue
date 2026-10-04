@@ -111,7 +111,7 @@ const vehicleStore = useVehicleStore()
           <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">
             <button
               @click="emit('edit', c)"
-              class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-info-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-info-400 rounded-xl transition-colors border border-slate-700/60"
               :title="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
             >
               <Pencil class="w-3.5 h-3.5" />
@@ -119,7 +119,7 @@ const vehicleStore = useVehicleStore()
             <button
               v-if="c.is_manual"
               @click="emit('delete', c)"
-              class="p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
               :title="$t('expenses.chargesPanel.deleteThisCharge')"
             >
               <Trash2 class="w-3.5 h-3.5" />

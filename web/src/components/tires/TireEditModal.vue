@@ -138,7 +138,7 @@ async function handleSaveTireEdit() {
           <Pencil class="w-4 h-4 text-rose-400" />
           {{ tireEditIds.length > 1 ? $t('tires.tireEditModal.editMany', { count: tireEditIds.length }) : $t('tires.tireEditModal.editOne') }}
         </h3>
-        <button type="button" @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-4 h-4" />
         </button>
       </div>

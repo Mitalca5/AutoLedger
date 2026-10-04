@@ -86,7 +86,7 @@ async function handleCompleteReminder() {
           <CheckCircle2 class="w-5 h-5 text-success-400" />
           {{ $t('expenses.completeReminderModal.confirmCompletion', { title: completingReminder?.title }) }}
         </h3>
-        <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>

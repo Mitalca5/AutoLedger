@@ -188,7 +188,7 @@ async function handleCreateToll() {
           <Receipt class="w-5 h-5 text-warning-400" />
           {{ editingTollId ? $t('expenses.tollModal.edit') : $t('expenses.tollModal.add') }}
         </h3>
-        <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -325,7 +325,7 @@ async function handleCreateToll() {
               <button
                 type="button"
                 @click="emit('view-document', tollForm.document_id, tollForm.document_filename, false)"
-                class="p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.tollModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
@@ -333,7 +333,7 @@ async function handleCreateToll() {
               <button
                 type="button"
                 @click="tollForm.document_id = null; tollForm.document_filename = null"
-                class="p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.tollModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />

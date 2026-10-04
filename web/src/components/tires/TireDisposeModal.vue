@@ -72,7 +72,7 @@ async function handleDisposeTire() {
           <Archive class="w-4 h-4 text-warning-400" />
           {{ $t('tires.tireDisposeModal.scrap') }}
         </h3>
-        <button type="button" @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
           <X class="w-4 h-4" />
         </button>
       </div>

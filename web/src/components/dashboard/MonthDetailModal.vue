@@ -103,7 +103,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               type="button"
               :disabled="!hasPrevMonth"
               @click="selectPrevMonth"
-              class="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
+              class="tap p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
               :title="$t('dashboard.monthDetailModal.previousMonth')"
             >
               <ChevronLeft class="w-4 h-4" />
@@ -112,7 +112,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               type="button"
               :disabled="!hasNextMonth"
               @click="selectNextMonth"
-              class="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
+              class="tap p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
               :title="$t('dashboard.monthDetailModal.nextMonth')"
             >
               <ChevronRight class="w-4 h-4" />
