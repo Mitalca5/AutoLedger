@@ -80,6 +80,9 @@ func (c *client) login(email, password string) error {
 	return nil
 }
 
+// The API reads and writes amounts in currency units, not cents.
+func units(cents int64) float64 { return float64(cents) / 100 }
+
 func day(t time.Time) string { return t.Format("2006-01-02") }
 
 func (c *client) seed(ds demodata.Dataset, apiToken string) error {
@@ -107,7 +110,7 @@ func (c *client) seed(ds demodata.Dataset, apiToken string) error {
 	for _, t := range ds.Tires {
 		err := c.do("POST", "/api/vehicles/"+v.ID+"/tires", map[string]any{
 			"brand": t.Brand, "model": t.Model, "dimension": t.Dimension, "season": t.Season,
-			"purchase_date": day(t.PurchaseDate), "purchase_price": t.PriceCents, "current_position": t.Position,
+			"purchase_date": day(t.PurchaseDate), "purchase_price": units(t.PriceCents), "current_position": t.Position,
 			"initial_depth_mm": 8.0, "min_legal_depth_mm": 1.6, "mounted_odometer": t.MountedOdometer,
 			"estimated_lifespan_km": t.LifespanKm,
 		}, nil, "")
@@ -119,12 +122,12 @@ func (c *client) seed(ds demodata.Dataset, apiToken string) error {
 		var err error
 		if x.Kind == "toll" {
 			err = c.do("POST", "/api/vehicles/"+v.ID+"/expenses", map[string]any{
-				"type": "TOLL", "amount": x.AmountCents, "currency": ds.Vehicle.Currency,
+				"type": "TOLL", "amount": units(x.AmountCents), "currency": ds.Vehicle.Currency,
 				"date": day(x.Date), "notes": x.Description,
 			}, nil, "")
 		} else {
 			err = c.do("POST", "/api/vehicles/"+v.ID+"/maintenance", map[string]any{
-				"category": x.Category, "amount": x.AmountCents, "currency": ds.Vehicle.Currency,
+				"category": x.Category, "amount": units(x.AmountCents), "currency": ds.Vehicle.Currency,
 				"date": day(x.Date), "description": x.Description, "amortization_mode": "NONE",
 			}, nil, "")
 		}
