@@ -277,3 +277,18 @@
 .app-datepicker-wrapper.size-xs {
   --touch-font-size: 0.8125rem;
 }
+
+/* The list a select opens is drawn by the browser: give it the app's dark surface, with the chosen
+   option in the accent colour, instead of the system's light grey highlight. */
+select option,
+select optgroup {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+select option:checked {
+  background: linear-gradient(#be123c, #be123c);
+  color: #ffffff;
+}
+select option:disabled {
+  color: #64748b;
+}
