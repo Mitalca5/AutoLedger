@@ -150,7 +150,13 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
 
       <!-- Axis; the detail card hangs from it, under the segment it describes -->
       <div class="relative h-4 text-xs text-slate-400" :class="multiLane ? 'ml-12 sm:ml-[8.75rem]' : ''">
-        <span v-for="km in ticks" :key="km" class="absolute -translate-x-1/2 first:translate-x-0" :style="{ left: pct(km) + '%' }">
+        <span
+          v-for="(km, i) in ticks"
+          :key="km"
+          class="absolute"
+          :class="i === 0 ? '' : i === ticks.length - 1 ? '-translate-x-full' : '-translate-x-1/2'"
+          :style="{ left: pct(km) + '%' }"
+        >
           {{ (km / 1000).toLocaleString(intlLocale()) }}k
         </span>
 
