@@ -282,6 +282,8 @@ docker run --rm \
 | `AUTOLEDGER_STORAGE_DIR` | `STORAGE_DIR` | Filesystem path for document attachments | `/data/documents` |
 | `APP_TIMEZONE` | - | IANA timezone for reports and aggregations | `Europe/Paris` |
 | `DISABLE_REGISTRATION` | - | Set to `true` to disable public user registration | `false` |
+| `AUTOLEDGER_DEMO` | - | Read-only public demo: every write except sign-in is refused, registration is closed | `false` |
+| `AUTOLEDGER_DEMO_EMAIL` / `AUTOLEDGER_DEMO_PASSWORD` | - | Demo account offered by the "Try the demo" button on the sign-in page (public by design) | - |
 | `INITIAL_ADMIN_EMAIL` | - | Pre-configured admin user email | *Optional* |
 | `INITIAL_ADMIN_PASSWORD` | - | Pre-configured admin user password | *Optional* |
 | `TRUSTED_PROXIES` | - | Reverse proxy CIDR whitelist for client IP resolution | Private ranges |

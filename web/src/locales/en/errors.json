@@ -337,5 +337,8 @@
   "residual": {
     "missing_inputs": "Set the purchase price, expected resale value and holding period in the ownership section first",
     "invalid_options": "Invalid projection assumptions"
+  },
+  "demo": {
+    "read_only": "This demo is read-only: changes are not saved"
   }
 }

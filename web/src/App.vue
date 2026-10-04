@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, watch } from 'vue'
+import { onMounted, onUnmounted, computed, watch, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { APP_NAME } from '@/brand'
@@ -55,6 +55,7 @@ const showDashboardLayout = computed(() => {
 })
 
 const offlineStore = useOfflineStore()
+const isDemo = ref(false)
 
 // Pages follow the server-side synchronization while the user is signed in
 watch(
@@ -66,6 +67,10 @@ onUnmounted(() => vehicleStore.stopAutoRefresh())
 
 onMounted(async () => {
   offlineStore.start()
+  fetch('/api/auth/config')
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => (isDemo.value = !!data?.demo))
+    .catch(() => {})
   await authStore.init()
   if (authStore.isAuthenticated) {
     await vehicleStore.fetchVehicles()
@@ -80,6 +85,9 @@ onMounted(async () => {
     <Navigation />
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
       <TopBar />
+      <div v-if="isDemo" role="status" class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs font-medium text-amber-300">
+        {{ $t('shell.app.demoBanner') }}
+      </div>
       <main id="main-content" tabindex="-1" class="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto focus:outline-none">
         <h1 class="sr-only">{{ pageTitle }}</h1>
         <!-- Attente de l'initialisation du store véhicule pour éviter un affichage vide au refresh -->

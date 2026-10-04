@@ -246,6 +246,9 @@ func main() {
 		r.Use(appMiddleware.SecurityHeaders(contentSecurityPolicy(cfg)))
 	}
 	r.Use(appMiddleware.BodyLimit(maxJSONBodyBytes))
+	if cfg.Demo {
+		r.Use(appMiddleware.DemoReadOnly)
+	}
 	r.Use(appMiddleware.OriginCheck(append([]string{cfg.AppBaseURL}, cfg.AllowedOrigins...)))
 
 	// CORS setup

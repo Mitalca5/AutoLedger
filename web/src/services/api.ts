@@ -53,6 +53,9 @@ export interface AuthConfig {
   user_count: number
   oidc_enabled: boolean
   oidc_provider_name: string
+  demo?: boolean
+  demo_email?: string
+  demo_password?: string
 }
 
 export interface ExpenseDocumentHeader {

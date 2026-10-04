@@ -19,6 +19,7 @@ const loading = ref(false)
 const registrationEnabled = ref(true)
 const oidcEnabled = ref(false)
 const oidcProviderName = ref('SSO')
+const demoAccount = ref<{ email: string; password: string } | null>(null)
 
 onMounted(async () => {
   try {
@@ -28,6 +29,9 @@ onMounted(async () => {
       registrationEnabled.value = data.registration_enabled
       oidcEnabled.value = !!data.oidc_enabled
       oidcProviderName.value = data.oidc_provider_name || 'SSO'
+      if (data.demo && data.demo_email && data.demo_password) {
+        demoAccount.value = { email: data.demo_email, password: data.demo_password }
+      }
     }
   } catch {
     // defaults
@@ -41,10 +45,18 @@ onMounted(async () => {
 })
 
 async function handleSubmit() {
+  await signIn(email.value, password.value)
+}
+
+async function openDemo() {
+  if (demoAccount.value) await signIn(demoAccount.value.email, demoAccount.value.password)
+}
+
+async function signIn(emailValue: string, passwordValue: string) {
   error.value = ''
   loading.value = true
   try {
-    await authStore.login({ email: email.value, password: password.value })
+    await authStore.login({ email: emailValue, password: passwordValue })
     const vehicleStore = useVehicleStore()
     await vehicleStore.fetchVehicles()
     router.push('/')
@@ -71,6 +83,16 @@ async function handleSubmit() {
         <AlertCircle class="w-4 h-4 shrink-0" />
         <span>{{ error }}</span>
       </div>
+
+      <button
+        v-if="demoAccount"
+        type="button"
+        :disabled="loading"
+        class="w-full mb-4 py-3 px-4 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        @click="openDemo"
+      >
+        {{ loading ? $t('auth.loginView.openingTheDemo') : $t('auth.loginView.tryTheDemo') }}
+      </button>
 
       <!-- OIDC / SSO login button (shown only when OIDC is configured server-side) -->
       <a

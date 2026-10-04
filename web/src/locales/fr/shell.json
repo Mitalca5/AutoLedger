@@ -50,7 +50,8 @@
     }
   },
   "app": {
-    "loadingYourVehicle": "Chargement de votre véhicule..."
+    "loadingYourVehicle": "Chargement de votre véhicule...",
+    "demoBanner": "Démo en lecture seule avec des données d'exemple. Les modifications sont désactivées."
   },
   "nav": {
     "dashboard": "Tableau de bord",

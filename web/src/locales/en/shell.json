@@ -50,7 +50,8 @@
     }
   },
   "app": {
-    "loadingYourVehicle": "Loading your vehicle..."
+    "loadingYourVehicle": "Loading your vehicle...",
+    "demoBanner": "Read-only demo with sample data. Changes are disabled."
   },
   "nav": {
     "dashboard": "Dashboard",

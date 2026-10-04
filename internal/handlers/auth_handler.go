@@ -204,13 +204,19 @@ func (h *AuthHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 		regEnabled = false
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	body := map[string]any{
 		"registration_enabled": regEnabled,
 		"needs_onboarding":     needsOnboarding,
 		"user_count":           userCount,
 		"oidc_enabled":         h.cfg.OIDCEnabled,
 		"oidc_provider_name":   h.cfg.OIDCProviderName,
-	})
+		"demo":                 h.cfg.Demo,
+	}
+	if h.cfg.Demo && h.cfg.DemoEmail != "" && h.cfg.DemoPassword != "" {
+		body["demo_email"] = h.cfg.DemoEmail
+		body["demo_password"] = h.cfg.DemoPassword
+	}
+	writeJSON(w, http.StatusOK, body)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {

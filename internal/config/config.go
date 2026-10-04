@@ -30,6 +30,9 @@ type Config struct {
 	JWTRefreshExpirationDays   int
 	CookieSecure               bool
 	DisableRegistration        bool
+	Demo                       bool   // Read-only public demo: every write is refused
+	DemoEmail                  string // Optional demo account shown on the sign-in page
+	DemoPassword               string
 	InitialAdminEmail          string
 	InitialAdminPassword       string
 	AllowedOrigins             []string
@@ -110,6 +113,10 @@ func Load() *Config {
 	cookieSecure := getEnvBool("COOKIE_SECURE", defaultCookieSecure)
 
 	disableRegistration := getEnvBool("DISABLE_REGISTRATION", false)
+	demo := getEnvBool("AUTOLEDGER_DEMO", false)
+	if demo {
+		disableRegistration = true
+	}
 	initialAdminEmail := getEnv("INITIAL_ADMIN_EMAIL", "")
 	initialAdminPassword := getEnv("INITIAL_ADMIN_PASSWORD", "")
 
@@ -177,6 +184,9 @@ func Load() *Config {
 		JWTRefreshExpirationDays:   jwtRefreshExpDays,
 		CookieSecure:               cookieSecure,
 		DisableRegistration:        disableRegistration,
+		Demo:                       demo,
+		DemoEmail:                  getEnv("AUTOLEDGER_DEMO_EMAIL", ""),
+		DemoPassword:               getEnv("AUTOLEDGER_DEMO_PASSWORD", ""),
 		InitialAdminEmail:          initialAdminEmail,
 		InitialAdminPassword:       initialAdminPassword,
 		AllowedOrigins:             allowedOrigins,

@@ -337,5 +337,8 @@
   "residual": {
     "missing_inputs": "Renseignez d’abord le prix d’achat, la valeur de revente attendue et la durée de détention dans la section propriété",
     "invalid_options": "Hypothèses de projection invalides"
+  },
+  "demo": {
+    "read_only": "Cette démo est en lecture seule : les modifications ne sont pas enregistrées"
   }
 }
