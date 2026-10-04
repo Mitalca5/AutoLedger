@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Navigation as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
@@ -825,8 +826,9 @@ async function handleBulkApplyToll() {
     </div>
 
     <!-- EMPTY STATE -->
-    <div v-else-if="!drives.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-3">
-      <p>{{ $t('drives.drivesView.noDriveFoundForThis') }}</p>
+    <EmptyState v-else-if="!drives.length">
+      {{ $t('drives.drivesView.noDriveFoundForThis') }}
+      <template #actions>
       <EmptySourceHints v-if="!(searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly)" @import-csv="openCSVImportModal" />
       <button
         v-if="searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly"
@@ -836,7 +838,8 @@ async function handleBulkApplyToll() {
         <RotateCcw class="w-3.5 h-3.5" />
         {{ $t('drives.drivesView.resetTheFilters') }}
       </button>
-    </div>
+      </template>
+    </EmptyState>
 
     <!-- REAL DRIVES LIST -->
     <div v-else class="space-y-3">

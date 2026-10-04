@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { ExpenseDocumentHeader } from '@/services/api'
 import { Trash2, Paperclip, FileText, Download, Eye, UploadCloud, Loader2 } from 'lucide-vue-next'
@@ -29,8 +30,9 @@ const vehicleStore = useVehicleStore()
     </div>
 
     <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <div v-else-if="!documents.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-3">
-      <p>{{ $t('expenses.documentsPanel.noReceiptOrInvoiceUploaded') }}</p>
+    <EmptyState v-else-if="!documents.length">
+      {{ $t('expenses.documentsPanel.noReceiptOrInvoiceUploaded') }}
+      <template #actions>
       <button
         v-if="vehicleStore.canEdit"
         @click="emit('upload')"
@@ -39,7 +41,8 @@ const vehicleStore = useVehicleStore()
         <UploadCloud class="w-4 h-4" />
         {{ $t('expenses.documentsPanel.uploadAFirstDocument') }}
       </button>
-    </div>
+      </template>
+    </EmptyState>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div

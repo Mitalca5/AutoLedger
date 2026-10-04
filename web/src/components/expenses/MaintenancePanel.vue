@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Repeat, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
@@ -18,9 +19,9 @@ const vehicleStore = useVehicleStore()
 <template>
   <div>
     <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <div v-else-if="!maintenanceExpenses.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
+    <EmptyState v-else-if="!maintenanceExpenses.length">
       {{ $t('expenses.maintenancePanel.noMaintenanceOrFixedExpense') }}
-    </div>
+    </EmptyState>
     <div v-else class="space-y-3">
       <div
         v-for="m in maintenanceExpenses"

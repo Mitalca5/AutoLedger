@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Navigation, Layers, Users, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
@@ -27,9 +28,9 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
 <template>
   <div>
     <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <div v-else-if="!driveExpenses.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
+    <EmptyState v-else-if="!driveExpenses.length">
       {{ $t('expenses.tollsPanel.noTollOrParkingRecorded') }}
-    </div>
+    </EmptyState>
     <div v-else class="space-y-3">
       <div
         v-for="e in driveExpenses"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Scale as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t, te } from '@/i18n'
@@ -508,9 +509,9 @@ onBeforeUnmount(destroyChart)
     <!-- Scenario list -->
     <div v-if="view === 'list'">
       <div v-if="loading" class="text-sm text-slate-400">{{ $t('comparison.comparisonView.loading') }}</div>
-      <div v-else-if="scenarios.length === 0" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-sm text-slate-400">
+      <EmptyState v-else-if="scenarios.length === 0">
         {{ $t('comparison.comparisonView.noComparisonYetCreateOne') }}
-      </div>
+      </EmptyState>
       <div v-else class="space-y-3">
       <div v-if="scenarios.length >= 2" class="flex items-center justify-between gap-3 text-xs text-slate-400">
         <span>{{ $t('comparison.comparisonView.tick2Or3Comparisons') }}</span>

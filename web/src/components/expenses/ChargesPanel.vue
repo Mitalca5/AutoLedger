@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -62,10 +63,12 @@ const vehicleStore = useVehicleStore()
       <span v-else>{{ $t('expenses.chargesPanel.chargeSWithoutACost', { chargesWithoutCost }) }}</span>
     </button>
     <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <div v-else-if="!charges.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
-      <p class="mb-3">{{ $t('expenses.chargesPanel.empty') }}</p>
-      <EmptySourceHints quick-kind="CHARGE" @import-csv="emit('import-csv')" />
-    </div>
+    <EmptyState v-else-if="!charges.length">
+      {{ $t('expenses.chargesPanel.empty') }}
+      <template #actions>
+        <EmptySourceHints quick-kind="CHARGE" @import-csv="emit('import-csv')" />
+      </template>
+    </EmptyState>
     <div v-else class="space-y-3">
       <div
         v-for="c in charges"

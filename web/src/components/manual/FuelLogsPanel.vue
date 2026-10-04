@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { ref, computed, watch, onMounted } from 'vue'
@@ -216,9 +217,9 @@ onMounted(load)
     </p>
 
     <div v-if="loading && !stats" class="text-sm text-slate-400">{{ $t('manual.fuelLogsPanel.loading') }}</div>
-    <div v-else-if="logs.length === 0" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-sm text-slate-400">
+    <EmptyState v-else-if="logs.length === 0">
       {{ $t('manual.fuelLogsPanel.noFillUpRecordedEnter', { unit: distanceUnit() }) }}
-    </div>
+    </EmptyState>
     <ul v-else class="space-y-2">
       <li v-for="log in logs" :key="log.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
         <div class="min-w-0">

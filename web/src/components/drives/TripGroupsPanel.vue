@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { distanceUnit, formatDistance, perDistance } from '@/units'
 import { useRouter } from 'vue-router'
@@ -25,9 +26,9 @@ const formatDate = formatDayTime
 <template>
   <div class="space-y-3">
     <div v-if="loadingTrips" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <div v-else-if="!tripGroups.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
+    <EmptyState v-else-if="!tripGroups.length">
       {{ hasFilters ? $t('drives.tripGroupsPanel.noTripMatchesTheFilters') : $t('drives.tripGroupsPanel.noTripsSelectSeveralDrives') }}
-    </div>
+    </EmptyState>
     <template v-else>
     <template
       v-for="tg in tripGroups"
