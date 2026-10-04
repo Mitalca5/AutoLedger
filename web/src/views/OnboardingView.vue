@@ -32,13 +32,12 @@ const vehicleModel = ref('')
 const vehicleName = ref('')
 const vehicleVin = ref('')
 const vehiclePowertrain = ref<Powertrain>('EV')
-const vehicleOdometer = ref(15000)
+const vehicleOdometer = ref<number | string | null>(null)
+const vehicleNameEdited = ref(false)
 
 function updateVehicleNameDefault() {
-  const parts = [vehicleMake.value.trim(), vehicleModel.value.trim()].filter(Boolean)
-  if (!vehicleName.value || vehicleName.value === parts.slice(0, -1).join(' ')) {
-    vehicleName.value = parts.join(' ')
-  }
+  if (vehicleNameEdited.value && vehicleName.value) return
+  vehicleName.value = [vehicleMake.value.trim(), vehicleModel.value.trim()].filter(Boolean).join(' ')
 }
 
 // Step 3: data sources (optional, nothing preselected)
@@ -142,7 +141,7 @@ async function handleFinalSubmit() {
       model: vehicleModel.value,
       vin: vehicleVin.value,
       powertrain: vehiclePowertrain.value,
-      odometer: vehicleOdometer.value,
+      odometer: Number(vehicleOdometer.value),
       teslamate,
     })
 
@@ -187,6 +186,7 @@ function finishOnboarding() {
         <div
           v-for="step in 3"
           :key="step"
+          :aria-current="currentStep === step ? 'step' : undefined"
           class="relative z-10 w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all"
           :class="[
             currentStep === step
@@ -197,7 +197,8 @@ function finishOnboarding() {
           ]"
         >
           <CheckCircle2 v-if="currentStep > step" class="w-5 h-5" />
-          <span v-else>{{ step }}</span>
+          <span v-else aria-hidden="true">{{ step }}</span>
+          <span class="sr-only">{{ $t('onboarding.onboardingView.stepOf', { step, total: 3 }) }}</span>
         </div>
       </div>
 
@@ -223,6 +224,7 @@ function finishOnboarding() {
             <input id="onboarding-admin-email"
               v-model="adminEmail"
               type="email"
+              autocomplete="email"
               required
               :placeholder="$t('onboarding.onboardingView.adminYourDomainCom')"
               class="field placeholder-slate-500"
@@ -234,6 +236,7 @@ function finishOnboarding() {
             <input id="onboarding-admin-password"
               v-model="adminPassword"
               type="password"
+              autocomplete="new-password"
               required
               placeholder=""
               class="field placeholder-slate-500"
@@ -245,6 +248,7 @@ function finishOnboarding() {
             <input id="onboarding-admin-confirm-password"
               v-model="adminConfirmPassword"
               type="password"
+              autocomplete="new-password"
               required
               placeholder=""
               class="field placeholder-slate-500"
@@ -301,6 +305,7 @@ function finishOnboarding() {
             <label for="onboarding-vehicle-name" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.vehicleName') }}</label>
             <input id="onboarding-vehicle-name"
               v-model="vehicleName"
+              @input="vehicleNameEdited = true"
               type="text"
               required
               :placeholder="$t('onboarding.onboardingView.vehicleName')"

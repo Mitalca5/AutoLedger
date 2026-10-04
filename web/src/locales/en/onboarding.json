@@ -1,5 +1,6 @@
 {
   "onboardingView": {
+    "stepOf": "Step {step} of {total}",
     "goToMyDashboard": "Go to my dashboard",
     "yourAdministratorAccountAndYour": "Your administrator account and your vehicle are ready. You can now start tracking your costs.",
     "congratulations": "Congratulations!",
