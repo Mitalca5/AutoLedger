@@ -4,13 +4,13 @@ import DistanceInput from '@/components/DistanceInput.vue'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { CURRENCIES } from '@/utils/expenses'
 import { APP_NAME } from '@/brand'
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useQuickAddStore } from '@/stores/quickAdd'
 import { api } from '@/services/api'
-import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2, Webhook, FileSpreadsheet, Download, Copy } from 'lucide-vue-next'
+import { Eye, EyeOff, Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2, Webhook, FileSpreadsheet, Download, Copy } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
 import { buildVehiclePayload, emptyTeslaMateForm, supportsTeslaMate, teslaMateCarId, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
 import { csvTemplate, csvTemplateFilename, csvTemplateTypes, webhookSnippet, type CsvTemplateType } from '@/utils/dataSources'
@@ -29,6 +29,15 @@ const error = ref('')
 const adminEmail = ref('')
 const adminPassword = ref('')
 const adminConfirmPassword = ref('')
+const showAdminPassword = ref(false)
+const passwordTouched = ref(false)
+const confirmTouched = ref(false)
+const passwordHint = computed(() =>
+  passwordTouched.value && adminPassword.value.length > 0 && adminPassword.value.length < 8 ? t('onboarding.passwordTooShort') : ''
+)
+const confirmHint = computed(() =>
+  confirmTouched.value && adminConfirmPassword.value !== '' && adminConfirmPassword.value !== adminPassword.value ? t('onboarding.passwordsDiffer') : ''
+)
 
 // Step 2: Vehicle Setup
 const vehicleMake = ref('')
@@ -248,26 +257,46 @@ async function addFirstEntry() {
 
           <div>
             <label for="onboarding-admin-password" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.password8CharactersMin') }}</label>
-            <input id="onboarding-admin-password"
-              v-model="adminPassword"
-              type="password"
-              autocomplete="new-password"
-              required
-              placeholder=""
-              class="field placeholder-slate-500"
-            />
+            <div class="relative">
+              <input id="onboarding-admin-password"
+                v-model="adminPassword"
+                :type="showAdminPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                required
+                placeholder=""
+                :aria-invalid="passwordHint ? 'true' : undefined"
+                aria-describedby="onboarding-admin-password-hint"
+                class="field pr-12 placeholder-slate-500"
+                @blur="passwordTouched = true"
+              />
+              <button
+                type="button"
+                class="tap absolute inset-y-0 right-0 flex items-center justify-center px-3 text-slate-400 hover:text-slate-200"
+                :aria-label="showAdminPassword ? $t('onboarding.hidePassword') : $t('onboarding.showPassword')"
+                :aria-pressed="showAdminPassword"
+                @click="showAdminPassword = !showAdminPassword"
+              >
+                <EyeOff v-if="showAdminPassword" class="w-4 h-4" />
+                <Eye v-else class="w-4 h-4" />
+              </button>
+            </div>
+            <p id="onboarding-admin-password-hint" class="mt-1.5 min-h-4 text-xs text-danger-400" aria-live="polite">{{ passwordHint }}</p>
           </div>
 
           <div>
             <label for="onboarding-admin-confirm-password" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.confirmThePassword') }}</label>
             <input id="onboarding-admin-confirm-password"
               v-model="adminConfirmPassword"
-              type="password"
+              :type="showAdminPassword ? 'text' : 'password'"
               autocomplete="new-password"
               required
-              placeholder=""
+              placeholder=""
+              :aria-invalid="confirmHint ? 'true' : undefined"
+              aria-describedby="onboarding-admin-confirm-hint"
               class="field placeholder-slate-500"
+              @blur="confirmTouched = true"
             />
+            <p id="onboarding-admin-confirm-hint" class="mt-1.5 min-h-4 text-xs text-danger-400" aria-live="polite">{{ confirmHint }}</p>
           </div>
 
           <button

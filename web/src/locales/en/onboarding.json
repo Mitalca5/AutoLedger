@@ -45,6 +45,8 @@
     "welcomeTo": "Welcome to {APP_NAME}"
   },
   "passwordsDiffer": "The passwords do not match",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
   "passwordTooShort": "The password must be at least 8 characters long",
   "adminCreationFailed": "Could not create the administrator account",
   "vehicleNameRequired": "Please enter a name for your vehicle",
