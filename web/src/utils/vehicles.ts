@@ -236,3 +236,19 @@ export function ownershipStepError(f: OwnershipForm, step: number): string | nul
   }
   return null
 }
+
+export interface VehicleMemberLike {
+  user_id: string
+  user_email?: string | null
+  display_name?: string | null
+  role?: string
+}
+
+export function memberLabel(m: Pick<VehicleMemberLike, 'user_email' | 'display_name'>): string {
+  return m.display_name?.trim() || m.user_email || ''
+}
+
+// The household default driver of a vehicle: the chosen one, else its owner.
+export function defaultDriver<T extends VehicleMemberLike>(members: T[], defaultDriverId?: string | null): T | undefined {
+  return members.find((m) => m.user_id === defaultDriverId) ?? members.find((m) => m.role === 'OWNER')
+}

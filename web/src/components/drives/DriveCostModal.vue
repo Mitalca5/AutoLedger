@@ -2,6 +2,7 @@
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
+import { defaultDriver, memberLabel } from '@/utils/vehicles'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -125,6 +126,10 @@ watch(open, (isOpen) => {
 })
 
 const vehicleMembers = ref<any[]>([])
+const defaultDriverOption = computed(() => {
+  const d = defaultDriver(vehicleMembers.value, vehicleStore.activeVehicle?.default_driver_id)
+  return d ? t('drives.defaultDriver', { name: memberLabel(d) }) : t('drives.unassignedDriver')
+})
 
 async function loadVehicleMembers() {
   if (!props.vehicleId) return
@@ -432,9 +437,9 @@ async function handleDeleteExpense(exp: any) {
             @change="handleDriverChange($event)"
             class="field focus:border-purple-500"
           >
-            <option value="">{{ $t('drives.unassignedDriver') }}</option>
+            <option value="">{{ defaultDriverOption }}</option>
             <option v-for="m in vehicleMembers" :key="m.user_id" :value="m.user_id">
-              {{ m.name || m.email }}
+              {{ memberLabel(m) }}
             </option>
           </select>
         </div>

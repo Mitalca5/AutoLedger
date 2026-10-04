@@ -22,6 +22,8 @@ import {
   ownershipSummary,
   toDateInput,
   vehicleFormFrom,
+  defaultDriver,
+  memberLabel,
 } from './vehicles'
 
 const form = (over: Record<string, any> = {}) => ({ ...emptyOwnership(), ...over })
@@ -240,5 +242,22 @@ describe('powertrain capabilities', () => {
     expect([canCharge('PHEV'), canRefuel('PHEV'), canLinkTeslaMate('PHEV')]).toEqual([true, true, true])
     expect([canCharge('REEV'), canRefuel('REEV')]).toEqual([true, true])
     expect(['EV', 'ICE', 'PHEV'].map((p) => [isElectricOnly(p), isFuelOnly(p)])).toEqual([[true, false], [false, true], [false, false]])
+  })
+})
+
+describe('driver labels', () => {
+  const owner = { user_id: 'o', user_email: 'o@x.fr', display_name: 'Rémy', role: 'OWNER' }
+  const editor = { user_id: 'e', user_email: 'e@x.fr', display_name: null, role: 'EDITOR' }
+
+  it('labels a member by display name, else email', () => {
+    expect(memberLabel(owner)).toBe('Rémy')
+    expect(memberLabel(editor)).toBe('e@x.fr')
+    expect(memberLabel({ display_name: '  ', user_email: 'a@b.c' })).toBe('a@b.c')
+  })
+
+  it('picks the chosen default driver, else the owner', () => {
+    expect(defaultDriver([owner, editor], 'e')).toBe(editor)
+    expect(defaultDriver([editor, owner], null)).toBe(owner)
+    expect(defaultDriver([editor], 'zzz')).toBeUndefined()
   })
 })

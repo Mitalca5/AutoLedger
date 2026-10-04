@@ -288,5 +288,6 @@
     "distanceRequired": "Distance is required"
   },
   "driverLabel": "Driver",
+  "defaultDriver": "Household default driver: {name}",
   "unassignedDriver": "Unassigned (Household default)"
 }

@@ -288,5 +288,6 @@
     "distanceRequired": "La distance est requise"
   },
   "driverLabel": "Conducteur",
+  "defaultDriver": "Conducteur par défaut du foyer : {name}",
   "unassignedDriver": "Non assigné (Conducteur par défaut du foyer)"
 }
