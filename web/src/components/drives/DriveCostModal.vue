@@ -343,7 +343,7 @@ async function handleDeleteExpense(exp: any) {
           >
             <ArrowLeft class="w-4 h-4" />
           </button>
-          <div class="p-2 rounded-xl shrink-0" :class="selectedCostDrive.is_trip_group ? 'bg-indigo-500/10 text-indigo-400' : 'bg-emerald-500/10 text-emerald-400'">
+          <div class="p-2 rounded-xl shrink-0" :class="selectedCostDrive.is_trip_group ? 'bg-indigo-500/10 text-indigo-400' : 'bg-success-500/10 text-success-400'">
             <component :is="selectedCostDrive.is_trip_group ? Layers : Coins" class="w-5 h-5" />
           </div>
           <div class="min-w-0 truncate">
@@ -361,7 +361,7 @@ async function handleDeleteExpense(exp: any) {
           class="ml-auto mr-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 shrink-0"
           :title="$t('drives.driveCostModal.openThisDriveInThe')"
         >
-          <ExternalLink class="w-3.5 h-3.5 text-sky-400" />
+          <ExternalLink class="w-3.5 h-3.5 text-info-400" />
           <span class="hidden sm:inline">TeslaMate</span>
         </a>
         <button @click="open = false" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0">
@@ -385,7 +385,7 @@ async function handleDeleteExpense(exp: any) {
           <span v-if="selectedCostDrive.duration_min" class="text-slate-400">{{ $t('drives.driveCostModal.min', { duration_min: selectedCostDrive.duration_min }) }}</span>
           <span v-if="selectedCostDrive.drives_count" class="text-indigo-400 font-semibold">{{ $t('drives.driveCostModal.legs', { drives_count: selectedCostDrive.drives_count }) }}</span>
           <span v-if="selectedCostDrive.speed_avg" class="text-slate-400">{{ $t('drives.driveCostModal.kmHAvg', { speed: speedUnit(), speed_avg: Math.round(kmToDisplayDistance(selectedCostDrive.speed_avg)) }) }}</span>
-          <span v-if="selectedCostDrive.costs?.electricity_kwh" class="text-sky-400 font-mono">{{ $t('drives.driveCostModal.kwh', { electricity_kwh: selectedCostDrive.costs.electricity_kwh }) }}</span>
+          <span v-if="selectedCostDrive.costs?.electricity_kwh" class="text-info-400 font-mono">{{ $t('drives.driveCostModal.kwh', { electricity_kwh: selectedCostDrive.costs.electricity_kwh }) }}</span>
         </div>
 
         <!-- Tag qualification (only for individual drives) -->
@@ -410,7 +410,7 @@ async function handleDeleteExpense(exp: any) {
               class="px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all"
               :class="
                 selectedCostDrive.tags?.includes('Perso')
-                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm'
+                  ? 'bg-success-500/20 text-success-400 border-success-500/40 shadow-sm'
                   : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
               "
             >
@@ -443,7 +443,7 @@ async function handleDeleteExpense(exp: any) {
         {{ $t('drives.driveCostModal.suggestionNotice') }}
       </p>
 
-      <p v-if="selectedCostDrive.costs?.has_estimates" class="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2 flex items-start gap-2">
+      <p v-if="selectedCostDrive.costs?.has_estimates" class="text-xs text-warning-400/90 bg-warning-500/10 border border-warning-500/20 rounded-xl px-3 py-2 flex items-start gap-2">
         <AlertTriangle class="w-3.5 h-3.5 shrink-0 mt-0.5" />
         <span>{{ $t('drives.driveCostModal.someItemsUseADefault') }}</span>
       </p>
@@ -495,7 +495,7 @@ async function handleDeleteExpense(exp: any) {
             </div>
           </div>
           <div class="text-right shrink-0">
-            <div class="text-xs font-mono font-bold text-emerald-400">+{{ formatAmount(Number(c.total_revenue || 0), vehicleCurrency) }}</div>
+            <div class="text-xs font-mono font-bold text-success-400">+{{ formatAmount(Number(c.total_revenue || 0), vehicleCurrency) }}</div>
             <div class="text-xs text-slate-400">{{ $t('drives.driveCostModal.carpoolNetCost', { amount: formatAmount(Number(c.net_cost || 0), vehicleCurrency) }) }}</div>
           </div>
         </button>
@@ -529,7 +529,7 @@ async function handleDeleteExpense(exp: any) {
           :currency="vehicleCurrency"
         >
           <template #badge>
-            <span v-if="selectedCostDrive.costs?.energy_source === 'DEFAULT' || selectedCostDrive.costs?.electricity_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
+            <span v-if="selectedCostDrive.costs?.energy_source === 'DEFAULT' || selectedCostDrive.costs?.electricity_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-warning-500/10 text-warning-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
           </template>
         </CostItemRow>
 
@@ -545,8 +545,8 @@ async function handleDeleteExpense(exp: any) {
           :currency="vehicleCurrency"
         >
           <template #badge>
-            <span v-if="selectedCostDrive.costs?.tires_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
-            <span v-else-if="selectedCostDrive.costs?.tires_rate_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">{{ $t('drives.driveCostModal.includedInTheLease2') }}</span>
+            <span v-if="selectedCostDrive.costs?.tires_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-warning-500/10 text-warning-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
+            <span v-else-if="selectedCostDrive.costs?.tires_rate_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-success-500/10 text-success-400 font-medium">{{ $t('drives.driveCostModal.includedInTheLease2') }}</span>
           </template>
         </CostItemRow>
 
@@ -562,8 +562,8 @@ async function handleDeleteExpense(exp: any) {
           :currency="vehicleCurrency"
         >
           <template #badge>
-            <span v-if="selectedCostDrive.costs?.maintenance_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
-            <span v-else-if="selectedCostDrive.costs?.maintenance_rate_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">{{ $t('drives.driveCostModal.includedInTheLease2') }}</span>
+            <span v-if="selectedCostDrive.costs?.maintenance_rate_source === 'DEFAULT'" class="text-[9px] px-1.5 py-0.5 rounded bg-warning-500/10 text-warning-400 font-medium">{{ $t('drives.driveCostModal.estimate') }}</span>
+            <span v-else-if="selectedCostDrive.costs?.maintenance_rate_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-success-500/10 text-success-400 font-medium">{{ $t('drives.driveCostModal.includedInTheLease2') }}</span>
           </template>
         </CostItemRow>
 
@@ -586,17 +586,17 @@ async function handleDeleteExpense(exp: any) {
             >
               {{ $t('drives.driveCostModal.actualPremiums') }}
             </span>
-            <span v-else-if="selectedCostDrive.costs?.insurance_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">
+            <span v-else-if="selectedCostDrive.costs?.insurance_source === 'INCLUDED_IN_LEASE'" class="text-[9px] px-1.5 py-0.5 rounded bg-success-500/10 text-success-400 font-medium">
               {{ $t('drives.driveCostModal.includedInTheLease') }}
             </span>
             <span
               v-else-if="selectedCostDrive.costs?.insurance_source === 'INSUFFICIENT_DISTANCE'"
-              class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium"
+              class="text-[9px] px-1.5 py-0.5 rounded bg-warning-500/10 text-warning-400 font-medium"
               :title="$t('drives.driveCostModal.lessThan500KmDriven', { min: formatDistance(500) })"
             >
               {{ $t('drives.driveCostModal.notEnoughKm') }}
             </span>
-            <span v-else class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium" :title="$t('drives.driveCostModal.noInsurancePremiumRecordedIn')">
+            <span v-else class="text-[9px] px-1.5 py-0.5 rounded bg-warning-500/10 text-warning-400 font-medium" :title="$t('drives.driveCostModal.noInsurancePremiumRecordedIn')">
               {{ $t('drives.driveCostModal.notEntered') }}
             </span>
           </template>
@@ -606,7 +606,7 @@ async function handleDeleteExpense(exp: any) {
         <div class="bg-slate-800/40 border border-slate-800 p-3 rounded-xl space-y-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+              <div class="p-2 bg-warning-500/10 text-warning-400 rounded-lg">
                 <Receipt class="w-4 h-4" />
               </div>
               <div>
@@ -618,8 +618,8 @@ async function handleDeleteExpense(exp: any) {
             </div>
             <div class="flex items-center gap-2">
               <div class="text-right">
-                <div class="text-sm font-bold text-amber-400 font-mono">{{ formatAmount(selectedCostDrive.costs?.tolls_cost || 0, vehicleCurrency) }}</div>
-                <div class="text-xs text-slate-400 font-normal font-sans">({{ breakdown.byKey.tolls.sharePct.toFixed(1) }}%) · <span class="text-emerald-400">{{ formatAmount(perDistance(breakdown.byKey.tolls.costPerKm), vehicleCurrency, 3) }}/{{ distanceUnit() }}</span></div>
+                <div class="text-sm font-bold text-warning-400 font-mono">{{ formatAmount(selectedCostDrive.costs?.tolls_cost || 0, vehicleCurrency) }}</div>
+                <div class="text-xs text-slate-400 font-normal font-sans">({{ breakdown.byKey.tolls.sharePct.toFixed(1) }}%) · <span class="text-success-400">{{ formatAmount(perDistance(breakdown.byKey.tolls.costPerKm), vehicleCurrency, 3) }}/{{ distanceUnit() }}</span></div>
               </div>
               <button
                 v-if="canDetectTolls"
@@ -654,11 +654,11 @@ async function handleDeleteExpense(exp: any) {
                   <span v-if="exp.trip_group_id && !selectedCostDrive.is_trip_group" class="text-indigo-400"> {{ $t('drives.driveCostModal.shareOfATripCosting', { amount: formatAmount(exp.amount, exp.currency || vehicleCurrency) }) }}</span>
                 </span>
                 <span class="flex items-center gap-1.5">
-                  <span class="font-mono text-amber-400">{{ formatAmount(exp.allocated_amount ?? exp.amount, vehicleCurrency) }}</span>
-                  <button v-if="!selectedCostDrive.is_suggestion" @click="startEditExpense(exp)" class="p-0.5 text-slate-400 hover:text-amber-400" :title="$t('drives.driveCostModal.editThisCost')">
+                  <span class="font-mono text-warning-400">{{ formatAmount(exp.allocated_amount ?? exp.amount, vehicleCurrency) }}</span>
+                  <button v-if="!selectedCostDrive.is_suggestion" @click="startEditExpense(exp)" class="p-0.5 text-slate-400 hover:text-warning-400" :title="$t('drives.driveCostModal.editThisCost')">
                     <Pencil class="w-3 h-3" />
                   </button>
-                  <button v-if="!selectedCostDrive.is_suggestion" @click="handleDeleteExpense(exp)" class="p-0.5 text-slate-400 hover:text-rose-400" :title="$t('drives.driveCostModal.deleteThisCost')">
+                  <button v-if="!selectedCostDrive.is_suggestion" @click="handleDeleteExpense(exp)" class="p-0.5 text-slate-400 hover:text-danger-400" :title="$t('drives.driveCostModal.deleteThisCost')">
                     <Trash2 class="w-3 h-3" />
                   </button>
                 </span>
@@ -675,7 +675,7 @@ async function handleDeleteExpense(exp: any) {
                 <input :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" type="number" step="0.01" min="0.01" class="col-span-3 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white" />
                 <label :for="`drive-expense-notes-${exp.id}`" class="sr-only">{{ $t('common.notes') }}</label>
                 <input :id="`drive-expense-notes-${exp.id}`" v-model="expenseEditForm.notes" :placeholder="$t('common.notes')" class="col-span-4 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white" />
-                <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-emerald-400 hover:text-emerald-300" :title="$t('common.save')">
+                <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-success-400 hover:text-success-300" :title="$t('common.save')">
                   <Save class="w-3.5 h-3.5" />
                 </button>
                 <button @click="editingExpenseId = null" class="col-span-1 p-1 text-slate-400 hover:text-white" :title="$t('common.cancel')">
@@ -692,7 +692,7 @@ async function handleDeleteExpense(exp: any) {
             class="pt-1 space-y-1 text-xs pl-9"
             :class="driveExpenses.length ? '' : 'border-t border-slate-700/50'"
           >
-            <p v-if="tollDetectionError" class="text-rose-400">{{ tollDetectionError }}</p>
+            <p v-if="tollDetectionError" class="text-danger-400">{{ tollDetectionError }}</p>
             <template v-else-if="tollDetection?.segments?.length">
               <div class="flex items-center justify-between gap-2 text-slate-300">
                 <button
@@ -707,7 +707,7 @@ async function handleDeleteExpense(exp: any) {
                 </button>
                 <span v-if="tollDetectionEstimatedTotal != null" class="flex items-center gap-2 shrink-0">
                   <span class="text-slate-400">{{ $t('drives.driveCostModal.totalEstimate') }}</span>
-                  <span class="text-amber-400 font-mono font-semibold" :title="$t('drives.driveCostModal.class1LightVehicle')">{{ formatAmount(tollDetectionEstimatedTotal, 'EUR') }}</span>
+                  <span class="text-warning-400 font-mono font-semibold" :title="$t('drives.driveCostModal.class1LightVehicle')">{{ formatAmount(tollDetectionEstimatedTotal, 'EUR') }}</span>
                   <button
                     v-if="canApplyTollEstimate && !estimateMatchesExistingToll"
                     type="button"
@@ -726,7 +726,7 @@ async function handleDeleteExpense(exp: any) {
                   </span>
                   <span v-else-if="seg.type === 'close'">{{ $t('drives.driveCostModal.entryDetectedExitNotIdentified', { entry: seg.entry }) }}</span>
                   <span v-else>{{ $t('drives.driveCostModal.tollGate', { entry: seg.entry }) }}</span>
-                  <span v-if="seg.estimated_price != null" class="text-amber-400 font-mono shrink-0">{{ formatAmount(seg.estimated_price, 'EUR') }}</span>
+                  <span v-if="seg.estimated_price != null" class="text-warning-400 font-mono shrink-0">{{ formatAmount(seg.estimated_price, 'EUR') }}</span>
                 </div>
               </div>
             </template>
@@ -772,7 +772,7 @@ async function handleDeleteExpense(exp: any) {
               <button
                 @click="handleAddTollToDrive"
                 :disabled="addingToll"
-                class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs rounded-lg disabled:opacity-50"
+                class="px-3 py-1 bg-warning-600 hover:bg-warning-500 text-white font-semibold text-xs rounded-lg disabled:opacity-50"
               >
                 {{ addingToll ? $t('drives.driveCostModal.saving') : $t('drives.driveCostModal.confirm') }}
               </button>
@@ -781,16 +781,16 @@ async function handleDeleteExpense(exp: any) {
         </div>
 
         <!-- Grand Total Card -->
-        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border border-success-500/30 p-4 rounded-2xl flex items-center justify-between shadow-lg">
           <div>
-            <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
+            <span class="text-xs font-semibold text-success-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
             <div class="text-2xl font-black text-white">
               {{ formatAmount(selectedCostDrive.costs?.total_cost || 0, vehicleCurrency) }}
             </div>
           </div>
           <div class="text-right">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
-            <div class="text-lg font-extrabold text-emerald-400 font-mono">
+            <div class="text-lg font-extrabold text-success-400 font-mono">
               {{ formatAmount(perDistance(selectedCostDrive.costs?.cost_per_km || 0), vehicleCurrency, 3) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
             </div>
           </div>

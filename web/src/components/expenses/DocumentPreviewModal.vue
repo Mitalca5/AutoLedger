@@ -45,7 +45,7 @@ function openInNewTab() {
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
             <FileText v-if="previewDoc.isPdf" class="w-4 h-4 text-indigo-400" />
-            <ImageIcon v-else-if="previewDoc.isImage" class="w-4 h-4 text-emerald-400" />
+            <ImageIcon v-else-if="previewDoc.isImage" class="w-4 h-4 text-success-400" />
             <Paperclip v-else class="w-4 h-4 text-slate-400" />
           </div>
           <div class="min-w-0">
@@ -54,7 +54,7 @@ function openInNewTab() {
             </h3>
             <p class="text-xs text-slate-400 flex items-center gap-1.5">
               <span v-if="previewDoc.isPdf" class="text-indigo-400 font-semibold">{{ $t('expenses.documentPreviewModal.pdfDocument') }}</span>
-              <span v-else-if="previewDoc.isImage" class="text-emerald-400 font-semibold">{{ $t('expenses.documentPreviewModal.image') }}</span>
+              <span v-else-if="previewDoc.isImage" class="text-success-400 font-semibold">{{ $t('expenses.documentPreviewModal.image') }}</span>
               <span v-else class="text-slate-400 font-semibold">{{ $t('expenses.documentPreviewModal.file') }}</span>
             </p>
           </div>

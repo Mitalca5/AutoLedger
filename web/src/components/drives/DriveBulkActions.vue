@@ -76,7 +76,7 @@ const prefs = usePreferencesStore()
       v-if="prefs.proPersoEnabled"
       type="button"
       @click="emit('tag', 'Perso')"
-      class="px-2.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors"
+      class="px-2.5 py-1.5 bg-success-500/20 hover:bg-success-500/30 text-success-300 border border-success-500/40 text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors"
       :title="$t('drives.driveBulkActions.markTheSelectionAsPersonal')"
     >
       <span>{{ $t('drives.driveBulkActions.personal') }}</span>

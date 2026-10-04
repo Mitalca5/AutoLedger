@@ -77,7 +77,7 @@ async function handleBatchDisposeSubmit() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <div class="flex items-center gap-2">
-          <Archive class="w-5 h-5 text-amber-500" />
+          <Archive class="w-5 h-5 text-warning-500" />
           <h3 class="text-base font-bold text-white">
             {{ $t('tires.tireBatchDisposeModal.scrapTireS', { length: selectedTireIds.length }) }}
           </h3>
@@ -116,7 +116,7 @@ async function handleBatchDisposeSubmit() {
               id="batch-dispose-date"
               v-model="batchDisposeForm.date"
               type="date"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none"
+              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-warning-500 focus:outline-none"
             />
             <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.defaultDateOfTheLast') }}</p>
           </div>
@@ -126,7 +126,7 @@ async function handleBatchDisposeSubmit() {
               id="batch-dispose-odo"
               v-model="batchDisposeForm.odometer"
               :placeholder="$t('tires.tireBatchDisposeModal.optionalForAGarageTire')"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none"
+              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-warning-500 focus:outline-none"
             />
             <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.finalOdometerIfRemovedOn') }}</p>
           </div>
@@ -145,7 +145,7 @@ async function handleBatchDisposeSubmit() {
           type="button"
           @click="handleBatchDisposeSubmit()"
           :disabled="disposingBatch || !batchDisposeForm.date"
-          class="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl shadow-lg shadow-amber-600/20 transition-all flex items-center gap-1.5"
+          class="px-4 py-2 bg-warning-600 hover:bg-warning-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl shadow-lg shadow-warning-600/20 transition-all flex items-center gap-1.5"
         >
           <Archive class="w-4 h-4" />
           <span>{{ disposingBatch ? $t('tires.tireBatchDisposeModal.scrapping') : $t('tires.tireBatchDisposeModal.scrapCount', { count: selectedTireIds.length }) }}</span>

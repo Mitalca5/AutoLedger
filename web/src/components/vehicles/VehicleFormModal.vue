@@ -212,7 +212,7 @@ async function testModalConnection() {
               :class="form.powertrain === p ? 'bg-rose-500/10 border-rose-500/50 text-white shadow-sm ring-1 ring-rose-500/20' : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
             >
               <Flame v-if="p === 'ICE'" class="w-4 h-4 text-orange-400 shrink-0" />
-              <Zap v-else class="w-4 h-4 text-amber-400 shrink-0" />
+              <Zap v-else class="w-4 h-4 text-warning-400 shrink-0" />
               <span class="text-xs font-semibold leading-tight">{{ $t(`vehicles.powertrainOptions.${p}`) }}</span>
             </button>
           </div>
@@ -391,20 +391,20 @@ async function testModalConnection() {
             <div
               v-if="modalTestResult"
               class="mt-2.5 p-3 rounded-xl text-xs flex items-start gap-2"
-              :class="modalTestResult.success ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
+              :class="modalTestResult.success ? 'bg-success-500/10 text-success-300 border border-success-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
             >
-              <CheckCircle2 v-if="modalTestResult.success" class="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-              <AlertCircle v-else class="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+              <CheckCircle2 v-if="modalTestResult.success" class="w-4 h-4 shrink-0 text-success-400 mt-0.5" />
+              <AlertCircle v-else class="w-4 h-4 shrink-0 text-danger-400 mt-0.5" />
               <div class="flex-1">
                 <div v-if="modalTestResult.success">
                   <strong class="font-semibold">{{ $t('vehicles.vehicleFormModal.connectionSuccessful') }}</strong>
-                  <p class="text-xs text-emerald-200/80 mt-0.5">
+                  <p class="text-xs text-success-200/80 mt-0.5">
                     {{ $t('vehicles.vehicleFormModal.testStatus', { unit: distanceUnit(), state: modalTestResult.status?.state || $t('vehicles.vehicleCard.online'), odometer: formatDistanceValue(modalTestResult.status?.odometer || 0) }) }}
                   </p>
                 </div>
                 <div v-else>
                   <strong class="font-semibold">{{ $t('vehicles.vehicleFormModal.connectionFailed') }}</strong>
-                  <p class="text-xs text-rose-200/90 mt-0.5">{{ modalTestResult.error }}</p>
+                  <p class="text-xs text-danger-200/90 mt-0.5">{{ modalTestResult.error }}</p>
                 </div>
               </div>
             </div>
@@ -419,7 +419,7 @@ async function testModalConnection() {
             class="w-full flex items-center justify-between py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
           >
             <span class="flex items-center gap-2">
-              <Sliders class="w-4 h-4 text-amber-400" />
+              <Sliders class="w-4 h-4 text-warning-400" />
               {{ $t('vehicles.vehicleFormModal.advancedOptions') }}
             </span>
             <ChevronDown v-if="showAdvanced" class="w-4 h-4 text-slate-400" />

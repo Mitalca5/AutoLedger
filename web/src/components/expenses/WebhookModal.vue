@@ -162,10 +162,10 @@ async function handleDeleteWebhook() {
         <div
           v-if="webhookTestResult"
           class="p-3 rounded-xl border text-xs flex items-center gap-2"
-          :class="webhookTestResult.success ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'"
+          :class="webhookTestResult.success ? 'bg-success-500/10 border-success-500/30 text-success-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'"
         >
-          <CheckCircle2 v-if="webhookTestResult.success" class="w-4 h-4 shrink-0 text-emerald-400" />
-          <AlertTriangle v-else class="w-4 h-4 shrink-0 text-rose-400" />
+          <CheckCircle2 v-if="webhookTestResult.success" class="w-4 h-4 shrink-0 text-success-400" />
+          <AlertTriangle v-else class="w-4 h-4 shrink-0 text-danger-400" />
           <span>{{ webhookTestResult.message }}</span>
         </div>
 

@@ -52,7 +52,7 @@ function clear() {
         <FileText class="h-4 w-4 shrink-0 text-indigo-400" aria-hidden="true" />
         <span class="truncate">{{ filename || $t('quickadd.quickPhotoField.attached') }}</span>
       </span>
-      <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:text-rose-400" :aria-label="$t('quickadd.quickPhotoField.removeTheReceipt')" @click="clear">
+      <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:text-danger-400" :aria-label="$t('quickadd.quickPhotoField.removeTheReceipt')" @click="clear">
         <X class="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
@@ -68,6 +68,6 @@ function clear() {
       </label>
       <p v-if="!offlineStore.isOnline" class="mt-1 text-xs text-slate-400">{{ $t('quickadd.quickPhotoField.photoUnavailableOfflineAttachIt') }}</p>
     </template>
-    <p v-if="error" role="alert" class="mt-1 text-xs text-rose-300">{{ error }}</p>
+    <p v-if="error" role="alert" class="mt-1 text-xs text-danger-300">{{ error }}</p>
   </div>
 </template>

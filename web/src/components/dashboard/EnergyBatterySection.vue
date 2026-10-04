@@ -82,7 +82,7 @@ onBeforeUnmount(() => chart?.destroy())
 <template>
   <div v-if="hasContent" class="space-y-3" aria-labelledby="energy-battery-title" role="group">
     <h4 id="energy-battery-title" class="flex items-center gap-2 text-xs font-bold text-slate-200">
-      <BatteryMedium class="h-4 w-4 text-emerald-400" aria-hidden="true" />
+      <BatteryMedium class="h-4 w-4 text-success-400" aria-hidden="true" />
       {{ $t('dashboard.energyBatterySection.battery') }}
     </h4>
 

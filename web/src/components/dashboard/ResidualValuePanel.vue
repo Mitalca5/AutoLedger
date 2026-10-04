@@ -115,11 +115,11 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
           <input v-model="readingMax" type="number" min="1" step="0.1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
           <button type="submit" class="px-3 py-2 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!readingPercent && !readingMax">{{ $t('dashboard.residualPanel.addReading') }}</button>
         </form>
-        <p v-if="error" class="text-rose-400" role="alert">{{ error }}</p>
+        <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
         <ul v-if="health?.readings.length" class="space-y-1">
           <li v-for="r in [...health.readings].reverse().slice(0, 6)" :key="r.date" class="flex items-center justify-between text-slate-300">
             <span>{{ r.date }} · <template v-if="r.health_percent !== undefined">{{ r.health_percent }} %</template><template v-else-if="r.current_capacity_kwh !== undefined">{{ r.current_capacity_kwh }} kWh</template><template v-else>{{ r.max_capacity_kwh }} kWh</template></span>
-            <button type="button" class="text-slate-400 hover:text-rose-400" :aria-label="$t('dashboard.residualPanel.deleteReading', { date: r.date })" @click="removeReading(r.date)"><Trash2 class="w-4 h-4" /></button>
+            <button type="button" class="text-slate-400 hover:text-danger-400" :aria-label="$t('dashboard.residualPanel.deleteReading', { date: r.date })" @click="removeReading(r.date)"><Trash2 class="w-4 h-4" /></button>
           </li>
         </ul>
       </div>

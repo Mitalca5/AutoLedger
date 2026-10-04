@@ -53,8 +53,8 @@ function clearCardTestResult() {
               v-if="v.role"
               class="px-2 py-0.5 text-xs font-semibold rounded-full uppercase tracking-wider"
               :class="{
-                'bg-amber-500/10 text-amber-400 border border-amber-500/20': v.role === 'OWNER',
-                'bg-sky-500/10 text-sky-400 border border-sky-500/20': v.role === 'EDITOR',
+                'bg-warning-500/10 text-warning-400 border border-warning-500/20': v.role === 'OWNER',
+                'bg-info-500/10 text-info-400 border border-info-500/20': v.role === 'EDITOR',
                 'bg-slate-700/50 text-slate-400 border border-slate-600/30': v.role === 'VIEWER',
               }"
             >
@@ -102,12 +102,12 @@ function clearCardTestResult() {
           :class="
             ownership
               ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-              : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+              : 'bg-warning-500/10 hover:bg-warning-500/20 text-warning-300 border-warning-500/30'
           "
           :title="ownership ? $t('vehicles.vehicleCard.editContract') : $t('vehicles.vehicleCard.setUpContract')"
         >
           <FileText v-if="ownership" class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <Plus v-else class="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <Plus v-else class="w-3.5 h-3.5 text-warning-400 shrink-0" />
           <span>{{ ownership ? ownershipSummary(ownership, v.currency || 'EUR') : $t('vehicles.vehicleCard.enterContract') }}</span>
           <Pencil v-if="ownership" class="w-3 h-3 text-indigo-400 opacity-60 group-hover:opacity-100 shrink-0 ml-0.5" />
         </button>
@@ -121,7 +121,7 @@ function clearCardTestResult() {
 
       <div v-if="canRefuel(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.powertrain') }}</span>
-        <p class="text-sm font-semibold mt-0.5 text-amber-300">{{ canCharge(v.powertrain) ? $t(`vehicles.powertrains.${v.powertrain}`) : $t('vehicles.vehicleCard.combustionFillUpsEnteredBy') }}</p>
+        <p class="text-sm font-semibold mt-0.5 text-warning-300">{{ canCharge(v.powertrain) ? $t(`vehicles.powertrains.${v.powertrain}`) : $t('vehicles.vehicleCard.combustionFillUpsEnteredBy') }}</p>
       </div>
       <div v-if="canCharge(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.teslamateConnection') }}</span>
@@ -129,11 +129,11 @@ function clearCardTestResult() {
           class="text-sm font-semibold mt-0.5"
           :class="
             cardTest?.success
-              ? 'text-emerald-400'
+              ? 'text-success-400'
               : cardTest?.error
               ? 'text-rose-400'
               : v.teslamate_api_url
-              ? 'text-emerald-400/80'
+              ? 'text-success-400/80'
               : 'text-slate-400'
           "
         >
@@ -153,8 +153,8 @@ function clearCardTestResult() {
 
       <div v-if="isElectricOnly(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.estimatedEnergy') }}</span>
-        <p v-if="v.estimated_kwh_100km && v.estimated_price_per_kwh" class="text-xs font-semibold text-sky-400 flex items-center gap-1 mt-1">
-          <Zap class="w-3.5 h-3.5 text-sky-400" />
+        <p v-if="v.estimated_kwh_100km && v.estimated_price_per_kwh" class="text-xs font-semibold text-info-400 flex items-center gap-1 mt-1">
+          <Zap class="w-3.5 h-3.5 text-info-400" />
           {{ $t('vehicles.vehicleCard.kwh100kmKwh', { unit: distanceUnit(), estimated_kwh_100km: formatPerDistanceValue(Number(v.estimated_kwh_100km)), price: `${formatAmount(v.estimated_price_per_kwh, v.currency || 'EUR', 3)}/kWh` }) }}
         </p>
         <p v-else class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleCard.notConfigured') }}</p>
@@ -222,11 +222,11 @@ function clearCardTestResult() {
     <div
       v-if="cardTest && !cardTest.loading"
       class="mt-3 p-3 rounded-xl text-xs flex items-start justify-between gap-2"
-      :class="cardTest.success ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
+      :class="cardTest.success ? 'bg-success-500/10 text-success-300 border border-success-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
     >
       <div class="flex items-start gap-2">
-        <CheckCircle2 v-if="cardTest.success" class="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-        <AlertCircle v-else class="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+        <CheckCircle2 v-if="cardTest.success" class="w-4 h-4 shrink-0 text-success-400 mt-0.5" />
+        <AlertCircle v-else class="w-4 h-4 shrink-0 text-danger-400 mt-0.5" />
         <div>
           <span v-if="cardTest.success">
             {{ $t('vehicles.testSuccess', { unit: distanceUnit(), state: cardTest.status?.state || $t('vehicles.vehicleCard.online'), odometer: formatDistanceValue(cardTest.status?.odometer || 0) }) }}

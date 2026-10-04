@@ -148,14 +148,14 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           <div v-for="p in trip.passengers" :key="p.id" class="bg-slate-800/40 border border-slate-800 rounded-xl px-3 py-2 text-xs space-y-1">
             <div class="flex items-center justify-between gap-2">
               <span class="font-semibold text-slate-200 truncate">{{ p.passenger_name }}</span>
-              <span class="font-bold text-emerald-400 shrink-0">+{{ fmt(p.amount_paid) }}</span>
+              <span class="font-bold text-success-400 shrink-0">+{{ fmt(p.amount_paid) }}</span>
             </div>
             <div class="text-xs text-slate-400 truncate">
               {{ stops[p.board_stop_index] }} → {{ stops[p.alight_stop_index] }} • {{ $t('carpool.carpoolTripList.seats', p.seats) }}
             </div>
             <div v-if="trip.passengers.length > 1" class="flex items-center justify-between text-xs">
               <span class="text-slate-400">{{ $t('carpool.carpoolTripList.share', { cost_share: fmt(p.cost_share) }) }}</span>
-              <span :class="p.balance >= 0 ? 'text-emerald-400' : 'text-amber-400'">
+              <span :class="p.balance >= 0 ? 'text-success-400' : 'text-warning-400'">
                 {{ p.balance >= 0 ? $t('carpool.above', { amount: fmt(p.balance) }) : $t('carpool.below', { amount: fmt(-p.balance) }) }}
               </span>
             </div>
@@ -163,15 +163,15 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
         </div>
 
         <!-- Balance: the total of the drive detail, then who paid what and what is left, each figure once -->
-        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border p-4 rounded-2xl space-y-3 shadow-lg" :class="trip.net_cost <= 0 ? 'border-emerald-500/40' : 'border-emerald-500/30'">
+        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border p-4 rounded-2xl space-y-3 shadow-lg" :class="trip.net_cost <= 0 ? 'border-success-500/40' : 'border-success-500/30'">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
+              <span class="text-xs font-semibold text-success-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
               <div class="text-2xl font-black text-white">{{ fmt(trip.total_cost) }}</div>
             </div>
             <div class="text-right">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
-              <div class="text-lg font-extrabold text-emerald-400 font-mono">
+              <div class="text-lg font-extrabold text-success-400 font-mono">
                 {{ formatAmount(perDistance(trip.distance_km > 0 ? trip.total_cost / trip.distance_km : 0), vehicleStore.currency, 3) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
               </div>
             </div>
@@ -181,7 +181,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           <div class="pt-3 border-t border-slate-700/60 space-y-2">
             <div class="flex items-baseline justify-between gap-2">
               <span class="text-xs font-semibold text-slate-300">{{ $t('carpool.carpoolDetailModal.paidByPassengers') }}</span>
-              <span class="text-sm font-bold font-mono" :class="coverage.status === 'below' ? 'text-amber-400' : 'text-emerald-400'">{{ coverage.paidPct.toFixed(0) }}%</span>
+              <span class="text-sm font-bold font-mono" :class="coverage.status === 'below' ? 'text-warning-400' : 'text-success-400'">{{ coverage.paidPct.toFixed(0) }}%</span>
             </div>
             <div
               class="relative h-2.5 rounded-full bg-slate-950 border border-slate-700/60"
@@ -193,7 +193,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
             >
               <div
                 class="absolute inset-y-0 left-0 rounded-full transition-all"
-                :class="coverage.status === 'below' ? 'bg-amber-500' : 'bg-emerald-500'"
+                :class="coverage.status === 'below' ? 'bg-warning-500' : 'bg-success-500'"
                 :style="{ width: Math.min(100, coverage.paidPct) + '%' }"
               ></div>
               <div
@@ -207,7 +207,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
                 {{ $t('carpool.carpoolDetailModal.received', { amount: fmt(coverage.paid) }) }} ·
                 {{ $t('carpool.carpoolDetailModal.fairShareAmount', { percent: coverage.fairPct.toFixed(0), amount: fmt(coverage.fair) }) }}
               </span>
-              <span v-if="coverage.status !== 'fair'" :class="balance > 0 ? 'text-emerald-400' : 'text-amber-400'">
+              <span v-if="coverage.status !== 'fair'" :class="balance > 0 ? 'text-success-400' : 'text-warning-400'">
                 {{ balance > 0 ? $t('carpool.above', { amount: fmt(balance) }) : $t('carpool.carpoolSummaryGrid.below', { amount: fmt(-balance) }) }}
               </span>
             </div>
@@ -215,15 +215,15 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
 
           <div class="pt-3 border-t border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-300">
             <div class="flex items-center gap-2">
-              <CheckCircle2 v-if="trip.net_cost <= 0" class="w-4 h-4 text-emerald-400 shrink-0" />
-              <Sparkles v-else class="w-4 h-4 text-amber-400 shrink-0" />
+              <CheckCircle2 v-if="trip.net_cost <= 0" class="w-4 h-4 text-success-400 shrink-0" />
+              <Sparkles v-else class="w-4 h-4 text-warning-400 shrink-0" />
               <span>{{ $t('carpool.carpoolTripList.driverSShare') }} <strong>{{ fmt(trip.driver_cost_share) }}</strong></span>
             </div>
             <div>
               <template v-if="trip.net_cost > 0">
                 {{ $t('carpool.carpoolTripList.leftToTheDriver') }} <strong class="text-white text-sm">{{ fmt(trip.net_cost) }}</strong>
               </template>
-              <span v-else class="font-bold text-emerald-400 text-sm">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
+              <span v-else class="font-bold text-success-400 text-sm">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
             </div>
           </div>
         </div>

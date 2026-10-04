@@ -123,14 +123,14 @@ describe('buildLeaseSummary', () => {
     expect(s.hasMileageAllowance).toBe(true)
     expect(s.kmDiff).toBe(2000)
     expect(s.mileageProgressPct).toBe(32)
-    expect(s.mileageColor).toContain('rose')
+    expect(s.mileageColor).toContain('danger')
     expect(s.contractualPaceKmMonth).toBe(1250)
   })
 
   it('warns when the mileage is close to the allowance but not over it', () => {
     const s = buildLeaseSummary({ ...lease, lease_km_driven: 12000 }, now)!
-    expect(s.mileageColor).toContain('amber')
-    expect(buildLeaseSummary({ ...lease, lease_km_driven: 9000 }, now)!.mileageColor).toContain('emerald')
+    expect(s.mileageColor).toContain('warning')
+    expect(buildLeaseSummary({ ...lease, lease_km_driven: 9000 }, now)!.mileageColor).toContain('success')
   })
 
   it('flags an ended contract, an approaching end, an unstarted contract and an exercised option', () => {

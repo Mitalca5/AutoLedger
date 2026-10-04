@@ -223,7 +223,7 @@ function removeFile() {
             class="w-full h-full object-cover"
           />
           <FileText v-else-if="isPdf" class="w-6 h-6 text-rose-400" />
-          <ImageIcon v-else-if="isImage" class="w-6 h-6 text-sky-400" />
+          <ImageIcon v-else-if="isImage" class="w-6 h-6 text-info-400" />
           <UploadCloud v-else class="w-6 h-6 text-slate-400" />
         </div>
 

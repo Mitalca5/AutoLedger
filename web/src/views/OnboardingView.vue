@@ -174,7 +174,7 @@ function finishOnboarding() {
     <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl">
       <!-- Header -->
       <div class="text-center mb-8">
-        <div class="inline-flex p-3.5 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl shadow-lg shadow-rose-500/25 mb-4">
+        <div class="inline-flex p-3.5 bg-gradient-to-tr from-rose-500 to-warning-500 rounded-2xl shadow-lg shadow-rose-500/25 mb-4">
           <Zap class="w-8 h-8 text-white" />
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">{{ $t('onboarding.onboardingView.welcomeTo', { APP_NAME }) }}</h1>
@@ -192,7 +192,7 @@ function finishOnboarding() {
             currentStep === step
               ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 ring-4 ring-rose-500/20'
               : currentStep > step
-              ? 'bg-emerald-500 text-white'
+              ? 'bg-success-500 text-white'
               : 'bg-slate-800 text-slate-400 border border-slate-700'
           ]"
         >
@@ -202,7 +202,7 @@ function finishOnboarding() {
       </div>
 
       <!-- Error alert -->
-      <div v-if="error" class="mb-6 p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2.5 text-sm text-rose-400">
+      <div v-if="error" class="mb-6 p-3.5 bg-danger-500/10 border border-danger-500/20 rounded-xl flex items-center gap-2.5 text-sm text-danger-400">
         <AlertCircle class="w-4 h-4 shrink-0" />
         <span>{{ error }}</span>
       </div>
@@ -441,10 +441,10 @@ function finishOnboarding() {
               <div
                 v-if="testResult"
                 class="mt-2.5 p-3 rounded-xl text-xs flex items-start gap-2.5"
-                :class="testResult.ok ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
+                :class="testResult.ok ? 'bg-success-500/10 text-success-300 border border-success-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'"
               >
-                <CheckCircle2 v-if="testResult.ok" class="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-                <AlertCircle v-else class="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                <CheckCircle2 v-if="testResult.ok" class="w-4 h-4 shrink-0 text-success-400 mt-0.5" />
+                <AlertCircle v-else class="w-4 h-4 shrink-0 text-danger-400 mt-0.5" />
                 <span>{{ testResult.message }}</span>
               </div>
             </div>
@@ -507,7 +507,7 @@ function finishOnboarding() {
 
       <!-- STEP 4: Completed -->
       <div v-else-if="currentStep === 4" class="text-center py-6">
-        <div class="inline-flex p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full mb-4">
+        <div class="inline-flex p-4 bg-success-500/10 border border-success-500/20 text-success-400 rounded-full mb-4">
           <CheckCircle2 class="w-12 h-12" />
         </div>
         <h2 class="text-2xl font-bold text-white mb-2">{{ $t('onboarding.onboardingView.congratulations') }}</h2>
@@ -524,7 +524,7 @@ function finishOnboarding() {
                 <Copy class="w-3.5 h-3.5" />{{ copiedField === 'token' ? $t('onboarding.copied') : $t('onboarding.copy') }}
               </button>
             </div>
-            <code class="block bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-emerald-300 break-all">{{ webhook.token }}</code>
+            <code class="block bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-success-300 break-all">{{ webhook.token }}</code>
           </div>
           <div>
             <div class="flex items-center justify-between mb-1">
@@ -536,7 +536,7 @@ function finishOnboarding() {
             <pre class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 overflow-x-auto whitespace-pre">{{ webhook.snippet }}</pre>
           </div>
         </div>
-        <p v-else-if="webhookFailed" class="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-6">{{ $t('onboarding.webhookTokenFailed') }}</p>
+        <p v-else-if="webhookFailed" class="text-xs text-warning-300 bg-warning-500/10 border border-warning-500/20 rounded-xl p-3 mb-6">{{ $t('onboarding.webhookTokenFailed') }}</p>
 
         <button
           @click="finishOnboarding"

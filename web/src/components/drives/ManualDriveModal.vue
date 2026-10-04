@@ -131,7 +131,7 @@ async function handleSubmit() {
 
       <!-- Body -->
       <form @submit.prevent="handleSubmit" class="p-6 space-y-4 overflow-y-auto">
-        <div v-if="error" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
+        <div v-if="error" class="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl text-xs text-danger-400">
           {{ error }}
         </div>
 
@@ -267,7 +267,7 @@ async function handleSubmit() {
               type="button"
               @click="selectedTag = selectedTag === 'Perso' ? '' : 'Perso'"
               class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
-              :class="selectedTag === 'Perso' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+              :class="selectedTag === 'Perso' ? 'bg-success-500/20 text-success-300 border-success-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
             >
               Perso
             </button>

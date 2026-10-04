@@ -497,7 +497,7 @@ async function handleModalRecalculate() {
               {{ $t('carpool.carpoolTripModal.onBoard', { legDetails: fmt(euros(live.legDetails[i]?.total || 0)), legDetails2: 1 + (live.legDetails[i]?.seats || 0) }) }}
               <strong>{{ $t('carpool.carpoolTripModal.person', { legDetails: fmt(euros(live.legDetails[i]?.perPerson || 0)) }) }}</strong>
             </span>
-            <button v-if="sourceMode === 'MANUAL' && form.legs.length > 1" type="button" @click="removeLeg(i)" class="text-slate-400 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.deleteTheLeg')">
+            <button v-if="sourceMode === 'MANUAL' && form.legs.length > 1" type="button" @click="removeLeg(i)" class="text-slate-400 hover:text-danger-400" :title="$t('carpool.carpoolTripModal.deleteTheLeg')">
               <Trash2 class="w-3.5 h-3.5" />
             </button>
           </div>
@@ -579,14 +579,14 @@ async function handleModalRecalculate() {
                 type="number"
                 step="0.5"
                 min="0"
-                class="w-full bg-slate-900 text-emerald-400 font-bold rounded-lg px-2 py-1.5 border border-slate-700"
+                class="w-full bg-slate-900 text-success-400 font-bold rounded-lg px-2 py-1.5 border border-slate-700"
               />
             </div>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
             <span class="text-slate-400">
               {{ $t('carpool.carpoolTripModal.fairShare') }} <strong class="text-slate-200">{{ fmt(euros(live.shares[index] || 0)) }}</strong>
-              <span :class="cents(p.amount_paid) >= (live.shares[index] || 0) ? 'text-emerald-400' : 'text-amber-400'" class="ml-2">
+              <span :class="cents(p.amount_paid) >= (live.shares[index] || 0) ? 'text-success-400' : 'text-warning-400'" class="ml-2">
                 {{ cents(p.amount_paid) >= (live.shares[index] || 0)
                   ? $t('carpool.above', { amount: fmt(euros(cents(p.amount_paid) - (live.shares[index] || 0))) })
                   : $t('carpool.below', { amount: fmt(euros((live.shares[index] || 0) - cents(p.amount_paid))) }) }}
@@ -605,7 +605,7 @@ async function handleModalRecalculate() {
                 <ChevronDown v-else class="w-3.5 h-3.5" />
               </button>
               <button type="button" @click="applyFairPrice(index)" class="text-indigo-400 hover:text-indigo-300 font-semibold">{{ $t('carpool.carpoolTripModal.applyTheFairShare') }}</button>
-              <button v-if="form.passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-400 hover:text-rose-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
+              <button v-if="form.passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-400 hover:text-danger-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
                 <Trash2 class="w-3.5 h-3.5" />
               </button>
             </span>
@@ -666,7 +666,7 @@ async function handleModalRecalculate() {
             <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
               <span class="text-slate-400">{{ $t('carpool.carpoolTripModal.totalFairShareDue') }}</span>
               <div class="text-right">
-                <span class="font-bold text-emerald-400 text-sm">{{ fmt(euros(live.shares[index] || 0)) }}</span>
+                <span class="font-bold text-success-400 text-sm">{{ fmt(euros(live.shares[index] || 0)) }}</span>
                 <span class="text-xs text-slate-400 block">{{ $t('carpool.carpoolTripModal.exactSumOfTheSections') }}</span>
               </div>
             </div>
@@ -686,15 +686,15 @@ async function handleModalRecalculate() {
         </div>
         <div>
           <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.driverSShare') }}</div>
-          <div class="text-sm font-bold text-amber-400">{{ fmt(euros(live.driverShare)) }}</div>
+          <div class="text-sm font-bold text-warning-400">{{ fmt(euros(live.driverShare)) }}</div>
         </div>
         <div>
           <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.received') }}</div>
-          <div class="text-sm font-bold text-emerald-400">{{ fmt(euros(liveRevenue)) }} ({{ liveCoverage }} %)</div>
+          <div class="text-sm font-bold text-success-400">{{ fmt(euros(liveRevenue)) }} ({{ liveCoverage }} %)</div>
         </div>
         <div>
           <div class="text-slate-400">{{ liveNet > 0 ? $t('carpool.carpoolTripModal.leftToDriver') : $t('carpool.carpoolTripModal.surplus') }}</div>
-          <div class="text-sm font-bold" :class="liveNet > 0 ? 'text-white' : 'text-emerald-400'">{{ fmt(euros(Math.abs(liveNet))) }}</div>
+          <div class="text-sm font-bold" :class="liveNet > 0 ? 'text-white' : 'text-success-400'">{{ fmt(euros(Math.abs(liveNet))) }}</div>
         </div>
       </div>
 

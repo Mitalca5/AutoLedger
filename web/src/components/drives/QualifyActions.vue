@@ -13,7 +13,7 @@ const emit = defineEmits<{ primary: []; secondary: [] }>()
       type="button"
       :disabled="busy"
       @click="emit('primary')"
-      class="px-2.5 py-1 text-xs font-semibold rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 flex items-center gap-1 disabled:opacity-50"
+      class="px-2.5 py-1 text-xs font-semibold rounded-lg border border-warning-500/40 bg-warning-500/10 text-warning-400 hover:bg-warning-500/20 flex items-center gap-1 disabled:opacity-50"
       :title="primaryTitle"
     >
       <Plus class="w-3.5 h-3.5" /> {{ primaryLabel }}

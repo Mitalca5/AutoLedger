@@ -61,23 +61,23 @@ async function handleSubmit() {
   <div class="min-h-screen flex items-center justify-center p-4 bg-slate-950">
     <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-8">
-        <div class="inline-flex p-3 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl shadow-lg shadow-rose-500/20 mb-3">
+        <div class="inline-flex p-3 bg-gradient-to-tr from-rose-500 to-warning-500 rounded-2xl shadow-lg shadow-rose-500/20 mb-3">
           <Zap class="w-8 h-8 text-white" />
         </div>
         <h1 class="text-2xl font-bold tracking-tight text-white">{{ $t('auth.registerView.createAnAccount') }}</h1>
         <p class="text-sm text-slate-400 mt-1">{{ $t('auth.registerView.joinToManageYourVehicle', { APP_NAME }) }}</p>
       </div>
 
-      <div v-if="error" class="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2 text-sm text-rose-400">
+      <div v-if="error" class="mb-4 p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl flex items-center gap-2 text-sm text-danger-400">
         <AlertCircle class="w-4 h-4 shrink-0" />
         <span>{{ error }}</span>
       </div>
 
       <div v-if="!registrationEnabled" class="text-center py-4">
-        <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex flex-col items-center gap-2 text-amber-400 text-sm mb-6">
-          <ShieldAlert class="w-8 h-8 text-amber-400" />
+        <div class="p-4 bg-warning-500/10 border border-warning-500/20 rounded-xl flex flex-col items-center gap-2 text-warning-400 text-sm mb-6">
+          <ShieldAlert class="w-8 h-8 text-warning-400" />
           <p class="font-medium">{{ $t('auth.registerView.registrationIsClosed') }}</p>
-          <p class="text-xs text-amber-300/80">{{ $t('auth.registerView.theAdministratorHasClosedAccount') }}</p>
+          <p class="text-xs text-warning-300/80">{{ $t('auth.registerView.theAdministratorHasClosedAccount') }}</p>
         </div>
         <router-link
           to="/login"

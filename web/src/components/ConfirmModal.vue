@@ -56,10 +56,10 @@ watch(isOpen, async (open) => {
             <div
               class="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-20"
               :class="{
-                'bg-rose-500': options.type === 'danger',
-                'bg-amber-500': options.type === 'warning',
+                'bg-danger-500': options.type === 'danger',
+                'bg-warning-500': options.type === 'warning',
                 'bg-indigo-500': options.type === 'info',
-                'bg-emerald-500': options.type === 'success',
+                'bg-success-500': options.type === 'success',
               }"
             />
 
@@ -69,10 +69,10 @@ watch(isOpen, async (open) => {
                 <div
                   class="p-3 rounded-2xl flex items-center justify-center border"
                   :class="{
-                    'bg-rose-500/10 text-rose-400 border-rose-500/20': options.type === 'danger',
-                    'bg-amber-500/10 text-amber-400 border-amber-500/20': options.type === 'warning',
+                    'bg-danger-500/10 text-danger-400 border-danger-500/20': options.type === 'danger',
+                    'bg-warning-500/10 text-warning-400 border-warning-500/20': options.type === 'warning',
                     'bg-indigo-500/10 text-indigo-400 border-indigo-500/20': options.type === 'info',
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': options.type === 'success',
+                    'bg-success-500/10 text-success-400 border-success-500/20': options.type === 'success',
                   }"
                 >
                   <Trash2 v-if="options.type === 'danger'" class="w-5 h-5" />
@@ -119,10 +119,10 @@ watch(isOpen, async (open) => {
                 @click="onConfirm"
                 class="px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all shadow-lg"
                 :class="{
-                  'bg-rose-600 hover:bg-rose-500 shadow-rose-600/30': options.type === 'danger',
-                  'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30': options.type === 'warning',
+                  'bg-danger-600 hover:bg-danger-500 shadow-danger-600/30': options.type === 'danger',
+                  'bg-warning-600 hover:bg-warning-500 shadow-warning-600/30': options.type === 'warning',
                   'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30': options.type === 'info',
-                  'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30': options.type === 'success',
+                  'bg-success-600 hover:bg-success-500 shadow-success-600/30': options.type === 'success',
                 }"
               >
                 {{ options.confirmText || $t('common.confirm') }}

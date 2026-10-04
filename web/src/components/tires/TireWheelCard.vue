@@ -21,7 +21,7 @@ const vehicleStore = useVehicleStore()
   >
     <div class="flex items-start justify-between">
       <div>
-        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" @click.stop class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400 hover:text-rose-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
+        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" @click.stop class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-danger-400 hover:text-danger-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
           <input
             :id="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id"
             type="checkbox"
@@ -50,7 +50,7 @@ const vehicleStore = useVehicleStore()
       </div>
       <div>
         <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireWheelCard.costKm', { unit: distanceUnit() }) }}</div>
-        <div class="text-sm font-bold text-amber-400">{{ formatAmount(perDistance(Number(stat.cost_per_km)), vehicleStore.currency, 4) }}</div>
+        <div class="text-sm font-bold text-warning-400">{{ formatAmount(perDistance(Number(stat.cost_per_km)), vehicleStore.currency, 4) }}</div>
       </div>
     </div>
 
@@ -63,7 +63,7 @@ const vehicleStore = useVehicleStore()
       <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
         <div
           class="h-full rounded-full transition-all"
-          :class="stat.life_progress_pct > 80 ? 'bg-rose-500' : 'bg-emerald-500'"
+          :class="stat.life_progress_pct > 80 ? 'bg-rose-500' : 'bg-success-500'"
           :style="{ width: `${Math.min(100, stat.life_progress_pct)}%` }"
         ></div>
       </div>

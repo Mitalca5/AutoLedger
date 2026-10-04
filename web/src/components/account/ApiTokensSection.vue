@@ -163,7 +163,7 @@ onMounted(() => {
               {{ t('account.tokens.lastUsed', { date: describeRelativeTime(tok.last_used_at) }) }}
             </span>
             <span v-else class="text-slate-400">{{ t('account.tokens.neverUsed') }}</span>
-            <span v-if="tok.expires_at" class="text-amber-400/80">
+            <span v-if="tok.expires_at" class="text-warning-400/80">
               {{ t('account.tokens.expires', { date: describeRelativeTime(tok.expires_at) }) }}
             </span>
           </div>
@@ -224,7 +224,7 @@ onMounted(() => {
               </select>
             </div>
 
-            <p v-if="createError" class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2">
+            <p v-if="createError" class="text-xs text-danger-400 bg-danger-500/10 border border-danger-500/20 rounded-lg p-2">
               {{ createError }}
             </p>
 
@@ -251,15 +251,15 @@ onMounted(() => {
         <template v-else>
           <div class="space-y-3">
             <h3 class="text-base font-bold text-white">{{ t('account.tokens.tokenGeneratedTitle') }}</h3>
-            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5">
-              <ShieldAlert class="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-              <p class="text-xs text-amber-200">
+            <div class="p-3 bg-warning-500/10 border border-warning-500/20 rounded-xl flex items-start gap-2.5">
+              <ShieldAlert class="h-4 w-4 text-warning-400 shrink-0 mt-0.5" />
+              <p class="text-xs text-warning-200">
                 {{ t('account.tokens.tokenWarning') }}
               </p>
             </div>
 
             <div class="relative">
-              <div class="p-3 bg-slate-950 border border-slate-700 rounded-xl font-mono text-xs text-emerald-400 break-all select-all pr-12">
+              <div class="p-3 bg-slate-950 border border-slate-700 rounded-xl font-mono text-xs text-success-400 break-all select-all pr-12">
                 {{ createdTokenResponse.token }}
               </div>
               <button
@@ -268,7 +268,7 @@ onMounted(() => {
                 class="absolute right-2 top-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
                 :title="t('account.tokens.copy')"
               >
-                <Check v-if="copied" class="h-4 w-4 text-emerald-400" />
+                <Check v-if="copied" class="h-4 w-4 text-success-400" />
                 <Copy v-else class="h-4 w-4" />
               </button>
             </div>

@@ -90,7 +90,7 @@ function handleLogout() {
   <!-- Desktop Sidebar -->
   <aside class="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 p-4 shrink-0">
     <div class="flex items-center gap-3 px-3 py-4 mb-4">
-      <div class="p-2 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-xl shadow-lg shadow-rose-500/20">
+      <div class="p-2 bg-gradient-to-tr from-rose-500 to-warning-500 rounded-xl shadow-lg shadow-rose-500/20">
         <Zap class="w-6 h-6 text-white" />
       </div>
       <div>

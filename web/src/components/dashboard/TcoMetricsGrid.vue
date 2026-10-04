@@ -32,7 +32,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
           {{ $t('dashboard.tcoMetricsGrid.fullCost', { full_cost: money(tco?.full_cost) }) }}
           <span v-if="tco?.depreciation_cost" class="text-slate-400 text-xs"> {{ $t('dashboard.tcoMetricsGrid.includingDepreciation', { depreciation_cost: money(tco.depreciation_cost, 0) }) }}</span>
         </p>
-        <p v-if="tco?.carpool_revenue" class="text-xs text-emerald-400">
+        <p v-if="tco?.carpool_revenue" class="text-xs text-success-400">
           {{ $t('dashboard.tcoMetricsGrid.netOfCarpooling', { full_cost_net: money(tco.full_cost_net) }) }}
         </p>
       </div>
@@ -42,11 +42,11 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.fullCostPerKm', { unit: distanceUnit() }) }}</span>
-        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+        <div class="p-2 bg-success-500/10 text-success-400 rounded-xl">
           <TrendingUp class="w-5 h-5" />
         </div>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400">
+      <div class="text-2xl sm:text-3xl font-extrabold text-success-400">
         {{ perUnit(tco?.full_cost_per_km) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
       </div>
       <div class="mt-2 space-y-0.5">
@@ -64,11 +64,11 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ isFuelOnly(tco?.powertrain) ? $t('dashboard.tcoMetricsGrid.fuel') : $t('dashboard.tcoMetricsGrid.energy') }}</span>
-        <div class="p-2 bg-sky-500/10 text-sky-400 rounded-xl">
+        <div class="p-2 bg-info-500/10 text-info-400 rounded-xl">
           <Zap class="w-5 h-5" />
         </div>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-sky-400">
+      <div class="text-2xl sm:text-3xl font-extrabold text-info-400">
         {{ money(tco?.energy_cost) }}
       </div>
       <div class="mt-2 space-y-0.5">
@@ -81,7 +81,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         <p v-else-if="!canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.kmKwh', { unit: distanceUnit(), energy_cost_per_km: perUnit(tco?.energy_cost_per_km), total_kwh_added: Math.round(tco?.total_kwh_added || 0).toLocaleString(intlLocale()) }) }}
         </p>
-        <p v-if="tco?.completeness?.charges_without_cost" class="text-xs text-amber-400">
+        <p v-if="tco?.completeness?.charges_without_cost" class="text-xs text-warning-400">
           {{ $t('dashboard.tcoMetricsGrid.chargeSWithoutACost', { charges_without_cost: tco.completeness.charges_without_cost }) }}
         </p>
       </div>
@@ -91,11 +91,11 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.tollsAndParking') }}</span>
-        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-xl">
+        <div class="p-2 bg-warning-500/10 text-warning-400 rounded-xl">
           <Receipt class="w-5 h-5" />
         </div>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-amber-400">
+      <div class="text-2xl sm:text-3xl font-extrabold text-warning-400">
         {{ money(tco?.tolls_cost) }}
       </div>
       <div class="mt-2">

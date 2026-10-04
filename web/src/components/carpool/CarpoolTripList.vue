@@ -105,7 +105,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
               <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-700/60 font-medium shrink-0">{{ formatDistance(trip.distance_km, 1) }}</span>
               <span
                 class="text-xs px-2.5 py-0.5 rounded-full font-semibold border shrink-0"
-                :class="trip.net_cost <= 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'"
+                :class="trip.net_cost <= 0 ? 'bg-success-500/15 text-success-400 border-success-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'"
               >
                 {{ trip.net_cost <= 0 ? $t('carpool.carpoolTripList.fullyRecovered') : $t('carpool.carpoolTripList.recovered', { percent: trip.total_cost > 0 ? Math.min(100, Math.round((trip.total_revenue / trip.total_cost) * 100)) : 0 }) }}
               </span>
@@ -129,7 +129,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
           <button @click="emit('edit', trip)" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" :title="$t('common.edit')">
             <Edit2 class="w-4 h-4" />
           </button>
-          <button @click="emit('delete', trip)" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" :title="$t('common.delete')">
+          <button @click="emit('delete', trip)" class="p-2 text-slate-400 hover:text-danger-400 hover:bg-danger-500/10 rounded-lg transition-colors" :title="$t('common.delete')">
             <Trash2 class="w-4 h-4" />
           </button>
         </div>
@@ -141,13 +141,13 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
           <span class="flex items-center gap-1.5"><Navigation class="w-3.5 h-3.5 text-indigo-400" />{{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}</span>
           <span class="flex items-center gap-1.5"><Users class="w-3.5 h-3.5 text-blue-400" />{{ $t('carpool.carpoolTripList.passengers', { length: trip.passengers?.length || 0 }) }}</span>
           <span>{{ $t('carpool.carpoolTripList.actualCost') }} <strong class="text-slate-200">{{ fmt(trip.total_cost) }}</strong></span>
-          <span class="text-emerald-400 font-semibold">+{{ fmt(trip.total_revenue) }}</span>
+          <span class="text-success-400 font-semibold">+{{ fmt(trip.total_revenue) }}</span>
         </div>
         <div class="flex items-center gap-2">
           <span v-if="trip.net_cost > 0" class="font-semibold text-slate-200">
             {{ $t('carpool.carpoolTripList.leftToTheDriver') }} {{ fmt(trip.net_cost) }}
           </span>
-          <span v-else class="font-semibold text-emerald-400">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
+          <span v-else class="font-semibold text-success-400">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
           <ChevronRight class="w-4 h-4 text-slate-400" />
         </div>
       </div>

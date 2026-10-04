@@ -129,7 +129,7 @@ async function handleSaveCharge() {
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <div class="min-w-0 pr-2">
           <h3 class="text-base font-bold text-white flex items-center gap-2 truncate">
-            <Zap class="w-5 h-5 text-sky-400 shrink-0" />
+            <Zap class="w-5 h-5 text-info-400 shrink-0" />
             {{ !editingCharge ? $t('expenses.chargeModal.newCharge') : editingCharge.is_manual ? $t('expenses.chargeModal.editCharge') : $t('expenses.chargeModal.chargeCost') }}
           </h3>
           <p v-if="editingCharge && !editingCharge.is_manual" class="text-xs text-slate-400 mt-1">
@@ -201,7 +201,7 @@ async function handleSaveCharge() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.chargeModal.receiptInvoice') }}
             </span>
-            <span v-if="chargeForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.chargeModal.linked') }}</span>
+            <span v-if="chargeForm.document_id" class="text-xs text-success-400 font-medium">{{ $t('expenses.chargeModal.linked') }}</span>
           </div>
 
           <div v-if="chargeForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">

@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
           @click="activeKind = t.key"
         >
           {{ $t(t.label) }}
-          <span v-if="t.badge" class="rounded-full bg-amber-500/20 px-1.5 text-xs font-bold text-amber-300">{{ t.badge }}</span>
+          <span v-if="t.badge" class="rounded-full bg-warning-500/20 px-1.5 text-xs font-bold text-warning-300">{{ t.badge }}</span>
         </button>
       </div>
 
@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
     v-if="toast && !quickAdd.isOpen"
     role="status"
     aria-live="polite"
-    class="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 z-[55] flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-center gap-2 rounded-xl border border-emerald-500/30 bg-slate-900 px-4 py-3 text-sm font-medium text-emerald-200 shadow-xl md:bottom-6"
+    class="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 z-[55] flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-center gap-2 rounded-xl border border-success-500/30 bg-slate-900 px-4 py-3 text-sm font-medium text-success-200 shadow-xl md:bottom-6"
   >
     <CheckCircle2 class="h-4 w-4 shrink-0" aria-hidden="true" />
     <span>{{ toast }}</span>

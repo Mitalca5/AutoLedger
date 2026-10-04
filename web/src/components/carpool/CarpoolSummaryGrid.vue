@@ -42,10 +42,10 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-xs font-medium text-slate-400">{{ $t('carpool.carpoolSummaryGrid.totalReceivedFromPassengers') }}</span>
-        <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400"><CreditCard class="w-4 h-4" /></div>
+        <div class="p-2 bg-success-500/10 rounded-xl text-success-400"><CreditCard class="w-4 h-4" /></div>
       </div>
-      <div class="mt-2"><span class="text-2xl font-bold text-emerald-400">{{ fmt(summary.total_revenue) }}</span></div>
-      <div class="mt-1 text-xs" :class="summary.total_revenue >= summary.total_passengers_share ? 'text-emerald-500/80' : 'text-amber-400'">
+      <div class="mt-2"><span class="text-2xl font-bold text-success-400">{{ fmt(summary.total_revenue) }}</span></div>
+      <div class="mt-1 text-xs" :class="summary.total_revenue >= summary.total_passengers_share ? 'text-success-500/80' : 'text-warning-400'">
         {{ summary.total_revenue >= summary.total_passengers_share ? $t('carpool.carpoolSummaryGrid.covered') : $t('carpool.carpoolSummaryGrid.below', { amount: fmt(summary.total_passengers_share - summary.total_revenue) }) }}
       </div>
     </div>
@@ -62,10 +62,10 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
     <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-xs font-medium text-slate-400">{{ $t('carpool.carpoolSummaryGrid.driverSNetCost') }}</span>
-        <div class="p-2 bg-amber-500/10 rounded-xl text-amber-400"><Receipt class="w-4 h-4" /></div>
+        <div class="p-2 bg-warning-500/10 rounded-xl text-warning-400"><Receipt class="w-4 h-4" /></div>
       </div>
       <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-2xl font-bold text-amber-400">{{ formatAmount(perDistance(Number(summary.net_cost_per_km || 0)), vehicleStore.currency, 3) }}</span>
+        <span class="text-2xl font-bold text-warning-400">{{ formatAmount(perDistance(Number(summary.net_cost_per_km || 0)), vehicleStore.currency, 3) }}</span>
         <span class="text-xs text-slate-400">/ {{ distanceUnit() }}</span>
       </div>
       <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.driverSFairShare', { total_driver_share: fmt(summary.total_driver_share) }) }}</div>

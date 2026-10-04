@@ -214,8 +214,8 @@ onMounted(load)
           <label for="pw-confirm" class="quick-label">{{ $t('account.accountView.confirmTheNewPassword') }}</label>
           <input id="pw-confirm" v-model="confirmation" type="password" autocomplete="new-password" class="quick-input" />
         </div>
-        <p v-if="passwordError" role="alert" class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">{{ passwordError }}</p>
-        <p v-if="passwordDone" role="status" class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">{{ passwordDone }}</p>
+        <p v-if="passwordError" role="alert" class="rounded-lg border border-danger-500/30 bg-danger-500/10 px-3 py-2 text-xs text-danger-300">{{ passwordError }}</p>
+        <p v-if="passwordDone" role="status" class="rounded-lg border border-success-500/30 bg-success-500/10 px-3 py-2 text-xs text-success-300">{{ passwordDone }}</p>
         <button
           type="submit"
           :disabled="saving || !current || !next || !confirmation"
@@ -246,20 +246,20 @@ onMounted(load)
       </div>
 
       <p v-if="loading" class="text-sm text-slate-400">{{ $t('account.accountView.loading') }}</p>
-      <p v-else-if="loadError" role="alert" class="text-sm text-rose-300">{{ loadError }}</p>
+      <p v-else-if="loadError" role="alert" class="text-sm text-danger-300">{{ loadError }}</p>
       <ul v-else class="space-y-2">
         <li
           v-for="s in sessions"
           :key="s.id"
           class="flex items-center justify-between gap-3 rounded-xl border bg-slate-950/60 p-3"
-          :class="s.current ? 'border-emerald-500/30' : 'border-slate-800'"
+          :class="s.current ? 'border-success-500/30' : 'border-slate-800'"
         >
           <div class="flex min-w-0 items-start gap-3">
             <component :is="isMobile(s.user_agent) ? Smartphone : Laptop" class="mt-0.5 h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
             <div class="min-w-0">
               <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
                 {{ describeUserAgent(s.user_agent) }}
-                <span v-if="s.current" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-300">{{ $t('account.accountView.thisDevice') }}</span>
+                <span v-if="s.current" class="rounded-full bg-success-500/15 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-success-300">{{ $t('account.accountView.thisDevice') }}</span>
               </p>
               <p class="text-xs text-slate-400">
                 {{ $t('account.accountView.active', { value: describeRelativeTime(s.last_used_at) }) }}<template v-if="s.ip"> · {{ s.ip }}</template>
@@ -280,7 +280,7 @@ onMounted(load)
         </li>
         <li v-if="sessions.length === 0" class="text-sm text-slate-400">{{ $t('account.accountView.noActiveSession') }}</li>
       </ul>
-      <p v-if="sessionError" role="alert" class="mt-3 text-xs text-rose-300">{{ sessionError }}</p>
+      <p v-if="sessionError" role="alert" class="mt-3 text-xs text-danger-300">{{ sessionError }}</p>
       <p class="mt-3 text-xs text-slate-400">{{ $t('account.accountView.aSignedOutDeviceKeeps') }}</p>
     </section>
   </div>

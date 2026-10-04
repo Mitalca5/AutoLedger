@@ -142,7 +142,7 @@ async function handleDeleteOwnership() {
                 currentOwnershipStep === s.step
                   ? 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/40'
                   : currentOwnershipStep > s.step
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-success-500/20 text-success-400 border border-success-500/30'
                   : 'bg-slate-800 text-slate-400 border border-slate-700'
               ]"
             >
@@ -175,7 +175,7 @@ async function handleDeleteOwnership() {
                 ]"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <Wallet class="w-5 h-5 text-emerald-400" />
+                  <Wallet class="w-5 h-5 text-success-400" />
                   <span v-if="ownershipForm.acquisition_type === 'CASH'" class="w-2 h-2 rounded-full bg-indigo-400"></span>
                 </div>
                 <div>
@@ -215,7 +215,7 @@ async function handleDeleteOwnership() {
                 ]"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <KeyRound class="w-5 h-5 text-amber-400" />
+                  <KeyRound class="w-5 h-5 text-warning-400" />
                   <span v-if="ownershipForm.acquisition_type === 'LOA'" class="w-2 h-2 rounded-full bg-indigo-400"></span>
                 </div>
                 <div>
@@ -235,7 +235,7 @@ async function handleDeleteOwnership() {
                 ]"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <RefreshCw class="w-5 h-5 text-sky-400" />
+                  <RefreshCw class="w-5 h-5 text-info-400" />
                   <span v-if="ownershipForm.acquisition_type === 'LLD'" class="w-2 h-2 rounded-full bg-indigo-400"></span>
                 </div>
                 <div>

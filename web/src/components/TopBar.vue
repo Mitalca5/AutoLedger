@@ -88,7 +88,7 @@ function onVehicleChange(event: Event) {
         <div
           v-if="!offlineStore.isOnline || offlineStore.pendingCount > 0"
           class="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border"
-          :class="offlineStore.isOnline ? 'text-sky-300 bg-sky-500/10 border-sky-500/20' : 'text-amber-300 bg-amber-500/10 border-amber-500/20'"
+          :class="offlineStore.isOnline ? 'text-info-300 bg-info-500/10 border-info-500/20' : 'text-warning-300 bg-warning-500/10 border-warning-500/20'"
           :title="offlineStore.isOnline ? $t('shell.topBar.offlineSendingTitle') : $t('shell.topBar.offlineKeptTitle')"
           :aria-label="`${!offlineStore.isOnline ? $t('shell.topBar.offlineSentence') + ' ' : ''}${offlineStore.pendingCount > 0 ? $t('shell.topBar.pendingEntries', { count: offlineStore.pendingCount }) : ''}`"
         >
@@ -117,7 +117,7 @@ function onVehicleChange(event: Event) {
         <!-- Sync result success -->
         <div
           v-if="vehicleStore.syncResult && !vehicleStore.syncResult.warnings?.length"
-          class="hidden md:flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg"
+          class="hidden md:flex items-center gap-1.5 text-xs text-success-400 bg-success-500/10 border border-success-500/20 px-2.5 py-1 rounded-lg"
         >
           <CheckCircle2 class="w-3 h-3 shrink-0" />
           <span>{{ syncSummary }}</span>
@@ -131,9 +131,9 @@ function onVehicleChange(event: Event) {
     <!-- Offline confirmation -->
     <div
       v-if="offlineStore.lastQueuedLabel"
-      class="bg-sky-500/15 border-b border-sky-500/30 px-4 py-2 text-xs text-sky-200 flex items-center gap-2"
+      class="bg-info-500/15 border-b border-info-500/30 px-4 py-2 text-xs text-info-200 flex items-center gap-2"
     >
-      <CloudUpload class="w-4 h-4 shrink-0 text-sky-400" />
+      <CloudUpload class="w-4 h-4 shrink-0 text-info-400" />
       <span><strong>{{ offlineStore.lastQueuedLabel }}</strong> {{ $t('shell.topBar.savedOfflineItWillBe') }}</span>
     </div>
 
@@ -143,13 +143,13 @@ function onVehicleChange(event: Event) {
       class="bg-rose-500/15 border-b border-rose-500/30 px-4 py-2.5 text-xs text-rose-300 flex items-center justify-between gap-3"
     >
       <div class="flex items-start gap-2">
-        <AlertCircle class="w-4 h-4 shrink-0 text-rose-400" />
+        <AlertCircle class="w-4 h-4 shrink-0 text-danger-400" />
         <span>
           <strong>{{ $t('shell.topBar.offlineEntriesRejected') }}</strong>
           {{ offlineStore.failures.map((f) => `${f.label} (${f.error})`).join(' ; ') }}
         </span>
       </div>
-      <button @click="offlineStore.dismissFailures" class="text-rose-400 hover:text-white p-1 rounded transition-colors">
+      <button @click="offlineStore.dismissFailures" class="text-danger-400 hover:text-white p-1 rounded transition-colors">
         <X class="w-4 h-4" />
       </button>
     </div>
@@ -160,7 +160,7 @@ function onVehicleChange(event: Event) {
       class="bg-rose-500/15 border-b border-rose-500/30 px-4 py-2.5 text-xs text-rose-300 flex items-center justify-between gap-3"
     >
       <div class="flex items-center gap-2">
-        <AlertCircle class="w-4 h-4 shrink-0 text-rose-400" />
+        <AlertCircle class="w-4 h-4 shrink-0 text-danger-400" />
         <span><strong>{{ $t('shell.topBar.syncError') }}</strong> {{ vehicleStore.syncError }}</span>
       </div>
       <button
@@ -174,18 +174,18 @@ function onVehicleChange(event: Event) {
     <!-- Warning Banner for Partial Sync -->
     <div
       v-if="vehicleStore.syncResult?.warnings?.length"
-      class="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 text-xs text-amber-300 flex items-center justify-between gap-3"
+      class="bg-warning-500/15 border-b border-warning-500/30 px-4 py-2.5 text-xs text-warning-300 flex items-center justify-between gap-3"
     >
       <div class="flex items-center gap-2">
-        <AlertTriangle class="w-4 h-4 shrink-0 text-amber-400" />
+        <AlertTriangle class="w-4 h-4 shrink-0 text-warning-400" />
         <span>
           <strong>{{ $t('shell.topBar.syncFinishedWithWarnings') }}</strong> {{ syncSummary }}.
-          <span class="text-amber-200/80">({{ vehicleStore.syncResult.warnings.map(apiMessageText).join(' ; ') }})</span>
+          <span class="text-warning-200/80">({{ vehicleStore.syncResult.warnings.map(apiMessageText).join(' ; ') }})</span>
         </span>
       </div>
       <button
         @click="vehicleStore.clearSyncStatus"
-        class="text-amber-400 hover:text-white p-1 rounded transition-colors"
+        class="text-warning-400 hover:text-white p-1 rounded transition-colors"
       >
         <X class="w-4 h-4" />
       </button>

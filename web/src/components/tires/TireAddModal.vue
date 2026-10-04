@@ -247,14 +247,14 @@ async function handleCreateTires() {
             v-model.number="addTireForm.total_price"
             type="number"
             step="10"
-            class="w-full bg-slate-900 text-emerald-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="w-full bg-slate-900 text-success-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
           />
           <input id="tire-add-tire-total-price"
             v-else
             v-model.number="addTireForm.unit_price"
             type="number"
             step="5"
-            class="w-full bg-slate-900 text-emerald-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="w-full bg-slate-900 text-success-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
           />
         </div>
 

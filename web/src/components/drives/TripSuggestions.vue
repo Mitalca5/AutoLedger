@@ -25,7 +25,7 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
 <template>
   <div v-if="suggestions.length" class="space-y-2">
     <div class="flex items-start gap-2 text-xs text-slate-400 px-1">
-      <Sparkles class="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+      <Sparkles class="w-4 h-4 text-warning-400 shrink-0 mt-0.5" />
       <div>
         <span class="font-bold text-white">{{ $t('drives.tripSuggestions.title', { count: suggestions.length }) }}</span>
         <span class="block">{{ $t('drives.tripSuggestions.help', { min: formatDistance(50) }) }}</span>
@@ -36,7 +36,7 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
       v-for="s in visible"
       :key="key(s)"
       @click="emit('open', s)"
-      class="bg-slate-900/60 border border-dashed border-amber-500/30 hover:border-amber-500/60 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 cursor-pointer transition-colors"
+      class="bg-slate-900/60 border border-dashed border-warning-500/30 hover:border-warning-500/60 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 cursor-pointer transition-colors"
     >
       <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap mb-1">
@@ -49,7 +49,7 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
           </span>
           <span
             class="text-xs px-2.5 py-0.5 rounded-full font-semibold border flex items-center gap-1"
-            :class="s.reason === 'CHARGE' ? 'bg-sky-500/10 text-sky-300 border-sky-500/30' : 'bg-amber-500/10 text-amber-300 border-amber-500/30'"
+            :class="s.reason === 'CHARGE' ? 'bg-info-500/10 text-info-300 border-info-500/30' : 'bg-warning-500/10 text-warning-300 border-warning-500/30'"
           >
             <component :is="s.reason === 'CHARGE' ? Zap : Timer" class="w-3 h-3" />
             {{ s.reason === 'CHARGE' ? $t('drives.tripSuggestions.reasonCharge') : $t('drives.tripSuggestions.reasonPause') }}

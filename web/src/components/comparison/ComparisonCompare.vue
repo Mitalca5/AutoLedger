@@ -123,7 +123,7 @@ onBeforeUnmount(() => chart?.destroy())
             </th>
             <td>{{ fmtMoney(r.ev) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
             <td>{{ fmtMoney(r.ice) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
-            <td :class="r.savings >= 0 ? 'text-emerald-400' : 'text-amber-400'">
+            <td :class="r.savings >= 0 ? 'text-success-400' : 'text-warning-400'">
               {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings)) }}
               <div class="text-xs text-slate-400">{{ r.savings >= 0 ? $t('comparison.compare.saves') : $t('comparison.compare.costsMore') }}</div>
             </td>

@@ -89,8 +89,8 @@ const cheapestPerKmId = computed(() => {
 })
 
 function completenessClass(pct: number): string {
-  if (pct >= 80) return 'text-emerald-400'
-  if (pct >= 60) return 'text-amber-400'
+  if (pct >= 80) return 'text-success-400'
+  if (pct >= 60) return 'text-warning-400'
   return 'text-rose-400'
 }
 
@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
         <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(usage.percent)" aria-valuemin="0" aria-valuemax="100">
           <div
             class="h-full rounded-full"
-            :class="usage.status === 'over' ? 'bg-rose-500' : usage.status === 'warning' ? 'bg-amber-400' : 'bg-emerald-500'"
+            :class="usage.status === 'over' ? 'bg-rose-500' : usage.status === 'warning' ? 'bg-warning-400' : 'bg-success-500'"
             :style="{ width: `${Math.min(100, usage.percent)}%` }"
           ></div>
         </div>
@@ -267,7 +267,7 @@ onBeforeUnmount(() => {
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthCost') }}</span>
-          <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+          <div class="p-2 bg-success-500/10 text-success-400 rounded-lg">
             <TrendingDown class="w-4 h-4" />
           </div>
         </div>
@@ -293,7 +293,7 @@ onBeforeUnmount(() => {
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthEnergy') }}</span>
-          <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+          <div class="p-2 bg-warning-500/10 text-warning-400 rounded-lg">
             <Zap class="w-4 h-4" />
           </div>
         </div>
@@ -321,14 +321,14 @@ onBeforeUnmount(() => {
           class="relative p-4 rounded-xl bg-slate-950/60 border transition-all"
           :class="[
             v.vehicle_id === mostEconomicalVehicleId
-              ? 'border-emerald-500/40 bg-emerald-950/10 shadow-sm shadow-emerald-500/10'
+              ? 'border-success-500/40 bg-success-950/10 shadow-sm shadow-success-500/10'
               : 'border-slate-800/80 hover:border-slate-700'
           ]"
         >
           <!-- Economical Badge -->
           <div
             v-if="v.vehicle_id === mostEconomicalVehicleId && v.energy_cost_per_100km > 0"
-            class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold tracking-wide uppercase"
+            class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-500/20 text-success-400 border border-success-500/30 text-xs font-semibold tracking-wide uppercase"
           >
             <Award class="w-3 h-3" />
             {{ t('fleet.vehicles.mostEconomical') }}
@@ -342,7 +342,7 @@ onBeforeUnmount(() => {
           <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800/60">
             <div>
               <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.energyCostPer100') }}</span>
-              <span class="text-sm font-bold block mt-0.5" :class="v.energy_cost_per_100km > 0 ? 'text-emerald-400' : 'text-slate-400'">
+              <span class="text-sm font-bold block mt-0.5" :class="v.energy_cost_per_100km > 0 ? 'text-success-400' : 'text-slate-400'">
                 <template v-if="v.energy_cost_per_100km > 0">
                   {{ formatAmount(perDistance(v.energy_cost_per_100km), v.currency) }} / 100 {{ distanceUnitLabel }}
                 </template>
@@ -402,7 +402,7 @@ onBeforeUnmount(() => {
             <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60" :class="{ 'opacity-70': !v.comparable }">
               <td class="py-2 pr-4">
                 <span class="font-semibold text-white">{{ v.name }}</span>
-                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-emerald-400">
+                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
                   <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
                 </span>
                 <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</span>

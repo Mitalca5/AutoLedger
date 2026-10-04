@@ -21,10 +21,10 @@ const vehicleStore = useVehicleStore()
         <Plus class="w-3.5 h-3.5 text-rose-400" />{{ $t('common.emptySources.quickAdd') }}
       </button>
       <button type="button" class="empty-hint-btn" @click="$emit('import-csv')">
-        <UploadCloud class="w-3.5 h-3.5 text-sky-400" />{{ $t('common.emptySources.csv') }}
+        <UploadCloud class="w-3.5 h-3.5 text-info-400" />{{ $t('common.emptySources.csv') }}
       </button>
       <button type="button" class="empty-hint-btn" @click="router.push('/account')">
-        <Webhook class="w-3.5 h-3.5 text-emerald-400" />{{ $t('common.emptySources.webhook') }}
+        <Webhook class="w-3.5 h-3.5 text-success-400" />{{ $t('common.emptySources.webhook') }}
       </button>
     </div>
   </div>

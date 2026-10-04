@@ -438,7 +438,7 @@ async function openWebhookModal() {
             @click="openCSVImportModal"
             class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 border border-slate-700 transition-colors"
           >
-            <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
+            <UploadCloud class="w-3.5 h-3.5 text-info-400" />
             <span>{{ $t('expenses.expensesView.importCsv') }}</span>
           </button>
           <button
@@ -477,13 +477,13 @@ async function openWebhookModal() {
         <!-- Groupe 1: Route & Trajets -->
         <div class="flex max-w-full items-center overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 select-none flex items-center gap-1.5">
-            <Navigation class="w-3 h-3 text-amber-400" />
+            <Navigation class="w-3 h-3 text-warning-400" />
             <span class="hidden sm:inline">{{ $t('expenses.expensesView.roadAndDrives') }}</span>
           </span>
           <button
             @click="activeTab = 'TOLLS'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'TOLLS' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'TOLLS' ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
           >
             <Receipt class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.tolls') }}</span>
@@ -492,11 +492,11 @@ async function openWebhookModal() {
             v-if="vehicleStore.canCharge"
             @click="activeTab = 'CHARGES'"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === 'CHARGES' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            :class="activeTab === 'CHARGES' ? 'bg-info-500/20 text-info-300 border border-info-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.charges') }}</span>
-            <span v-if="chargesWithoutCost > 0" class="px-1.5 py-0.2 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span v-if="chargesWithoutCost > 0" class="px-1.5 py-0.2 text-xs font-bold rounded-full bg-warning-500/20 text-warning-300 border border-warning-500/30">
               {{ chargesWithoutCost }}
             </span>
           </button>
@@ -526,7 +526,7 @@ async function openWebhookModal() {
             <span
               v-if="urgentRemindersCount > 0"
               class="px-1.5 py-0.2 text-xs font-bold rounded-full"
-              :class="overdueReminders.length > 0 ? 'bg-rose-500 text-white' : 'bg-amber-500 text-slate-950'"
+              :class="overdueReminders.length > 0 ? 'bg-danger-500 text-white' : 'bg-warning-500 text-slate-950'"
             >
               {{ urgentRemindersCount }}
             </span>
@@ -583,10 +583,10 @@ async function openWebhookModal() {
 
     <div
       v-if="activeTab === 'CHARGES' && vehicleStore.canCharge && pendingChargesCount > 0"
-      class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+      class="p-4 bg-warning-500/10 border border-warning-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
     >
-      <div class="flex items-center gap-2.5 text-amber-300">
-        <Zap class="w-4 h-4 text-amber-400 shrink-0" />
+      <div class="flex items-center gap-2.5 text-warning-300">
+        <Zap class="w-4 h-4 text-warning-400 shrink-0" />
         <span>
           <strong>{{ pendingChargesCount }} {{ $t('pendingCharges.bannerCount', { count: pendingChargesCount }) }}</strong>
           — {{ $t('pendingCharges.bannerDescription') }}
@@ -594,7 +594,7 @@ async function openWebhookModal() {
       </div>
       <button
         @click="showQualifyModal = true"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-colors shrink-0"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-warning-600 hover:bg-warning-500 text-white font-semibold rounded-xl transition-colors shrink-0"
       >
         {{ $t('pendingCharges.qualifyButton') }}
       </button>

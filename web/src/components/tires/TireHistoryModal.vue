@@ -64,12 +64,12 @@ useEscapeToClose(open, () => (open.value = false))
           <button
             v-if="selectedTire.current_position !== 'DISPOSED'"
             @click="emit('dispose-tire')"
-            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded-lg transition-colors"
+            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-lg transition-colors"
             :title="$t('tires.tireHistoryModal.scrapWornPuncturedSold')"
           >
             <Archive class="w-4 h-4" />
           </button>
-          <button @click="emit('delete-tire')" class="p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')">
+          <button @click="emit('delete-tire')" class="p-1.5 bg-slate-800 hover:bg-danger-900/40 text-slate-400 hover:text-danger-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')">
             <Trash2 class="w-4 h-4" />
           </button>
           <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -94,7 +94,7 @@ useEscapeToClose(open, () => (open.value = false))
         <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
           <div
             class="h-full rounded-full transition-all"
-            :class="(selectedTireStats?.life_progress_pct || 0) > 80 ? 'bg-rose-500' : 'bg-emerald-500'"
+            :class="(selectedTireStats?.life_progress_pct || 0) > 80 ? 'bg-rose-500' : 'bg-success-500'"
             :style="{ width: `${Math.min(100, selectedTireStats?.life_progress_pct || 0)}%` }"
           ></div>
         </div>
@@ -102,7 +102,7 @@ useEscapeToClose(open, () => (open.value = false))
         <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.currentTread') }}</div>
-            <div class="font-bold text-emerald-400">{{ selectedTireStats?.current_depth_mm }} mm</div>
+            <div class="font-bold text-success-400">{{ selectedTireStats?.current_depth_mm }} mm</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.lifespanUsed') }}</div>
@@ -110,7 +110,7 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>
-            <div class="font-bold text-amber-400">{{ formatAmount(perDistance(Number(selectedTireStats?.cost_per_km)), vehicleStore.currency, 4) }}</div>
+            <div class="font-bold text-warning-400">{{ formatAmount(perDistance(Number(selectedTireStats?.cost_per_km)), vehicleStore.currency, 4) }}</div>
           </div>
         </div>
       </div>
@@ -119,7 +119,7 @@ useEscapeToClose(open, () => (open.value = false))
       <div v-if="vehicleStore.hasTeslaMate && selectedTireStats?.driving_stress_index > 0" class="bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <Zap class="w-4 h-4 text-amber-400" />
+            <Zap class="w-4 h-4 text-warning-400" />
             <h4 class="text-xs font-bold text-white uppercase tracking-wider">{{ $t('tires.tireHistoryModal.teslamateDrivingTelemetry') }}</h4>
           </div>
           <span
@@ -128,8 +128,8 @@ useEscapeToClose(open, () => (open.value = false))
               selectedTireStats.driving_style === 'SPORT'
                 ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
                 : selectedTireStats.driving_style === 'ECO'
-                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                ? 'bg-success-500/15 text-success-400 border-success-500/30'
+                : 'bg-info-500/15 text-info-400 border-info-500/30'
             "
           >
             {{ selectedTireStats.driving_style === 'SPORT' ? $t('tires.tireHistoryModal.sport') : selectedTireStats.driving_style === 'ECO' ? $t('tires.tireHistoryModal.eco') : $t('tires.tireHistoryModal.balanced') }} {{ $t('tires.tireHistoryModal.index', { index: selectedTireStats.driving_stress_index }) }}
@@ -143,11 +143,11 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.peakRegeneration') }}</div>
-            <div class="font-bold text-emerald-400 text-sm mt-0.5">{{ selectedTireStats.avg_power_min_kw }} kW</div>
+            <div class="font-bold text-success-400 text-sm mt-0.5">{{ selectedTireStats.avg_power_min_kw }} kW</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.averageConsumption') }}</div>
-            <div class="font-bold text-sky-400 text-sm mt-0.5">{{ $t('tires.tireHistoryModal.kwh', { unit: distanceUnit(), avg_consumption_kwh_100km: formatPerDistanceValue(Number(selectedTireStats.avg_consumption_kwh_100km)) }) }}</div>
+            <div class="font-bold text-info-400 text-sm mt-0.5">{{ $t('tires.tireHistoryModal.kwh', { unit: distanceUnit(), avg_consumption_kwh_100km: formatPerDistanceValue(Number(selectedTireStats.avg_consumption_kwh_100km)) }) }}</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.adjustedLongevity') }}</div>
@@ -201,7 +201,7 @@ useEscapeToClose(open, () => (open.value = false))
               <div class="flex items-center gap-2">
                 <span
                   class="px-2 py-0.5 rounded-md font-bold text-xs"
-                  :class="s.dismounted_date ? 'bg-slate-800 text-slate-300' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'"
+                  :class="s.dismounted_date ? 'bg-slate-800 text-slate-300' : 'bg-success-500/20 text-success-400 border border-success-500/30'"
                 >
                   {{ s.dismounted_date ? $t('tires.tireHistoryModal.sessionOver') : $t('tires.tireHistoryModal.currentlyFitted') }}
                 </span>
@@ -219,7 +219,7 @@ useEscapeToClose(open, () => (open.value = false))
                 </button>
                 <button
                   @click="emit('duplicate-session', s)"
-                  class="p-1 text-slate-400 hover:text-sky-400 rounded transition-colors"
+                  class="p-1 text-slate-400 hover:text-info-400 rounded transition-colors"
                   :title="$t('tires.tireHistoryModal.duplicateToOtherTires')"
                 >
                   <Shuffle class="w-3.5 h-3.5" />
@@ -268,12 +268,12 @@ useEscapeToClose(open, () => (open.value = false))
       <div class="space-y-2 pt-3 border-t border-slate-800">
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-            <Ruler class="w-4 h-4 text-emerald-400" />
+            <Ruler class="w-4 h-4 text-success-400" />
             {{ $t('tires.tireHistoryModal.treadDepthReadings', { length: tireLogs.length }) }}
           </h4>
           <button
             @click="emit('add-log')"
-            class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 transition-colors"
+            class="text-xs text-success-400 hover:text-success-300 font-semibold flex items-center gap-1 transition-colors"
           >
             <Plus class="w-3.5 h-3.5" />
             {{ $t('tires.tireHistoryModal.addAReading') }}
@@ -287,16 +287,16 @@ useEscapeToClose(open, () => (open.value = false))
             class="bg-slate-950/60 border border-slate-800 p-2.5 rounded-xl text-xs space-y-0.5"
           >
             <div class="flex items-center justify-between">
-              <span class="font-bold text-emerald-400">{{ l.depth_mm }} mm</span>
+              <span class="font-bold text-success-400">{{ l.depth_mm }} mm</span>
               <span class="text-xs text-slate-400">{{ formatDate(l.date) }}</span>
             </div>
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span>{{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(l.odometer) }) }}</span>
               <span class="flex items-center gap-1">
-                <button @click="emit('edit-log', l)" class="text-slate-400 hover:text-emerald-400" :title="$t('tires.tireHistoryModal.editTheReading')">
+                <button @click="emit('edit-log', l)" class="text-slate-400 hover:text-success-400" :title="$t('tires.tireHistoryModal.editTheReading')">
                   <Pencil class="w-3 h-3" />
                 </button>
-                <button @click="emit('delete-log', l)" class="text-slate-400 hover:text-rose-400" :title="$t('tires.tireHistoryModal.deleteTheReading')">
+                <button @click="emit('delete-log', l)" class="text-slate-400 hover:text-danger-400" :title="$t('tires.tireHistoryModal.deleteTheReading')">
                   <Trash2 class="w-3 h-3" />
                 </button>
               </span>

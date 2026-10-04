@@ -162,8 +162,8 @@ onUnmounted(() => {
             <span class="w-3 h-3 rounded bg-indigo-500/80 inline-block"></span>
             {{ $t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() }) }}
           </span>
-          <span class="flex items-center gap-1.5 text-emerald-400">
-            <span class="w-3 h-1 rounded bg-emerald-400 inline-block"></span>
+          <span class="flex items-center gap-1.5 text-success-400">
+            <span class="w-3 h-1 rounded bg-success-400 inline-block"></span>
             {{ $t('dashboard.mileageCostChart.costKm', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) }) }}
           </span>
         </div>

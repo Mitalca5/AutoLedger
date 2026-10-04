@@ -174,7 +174,7 @@ onMounted(load)
   <div class="space-y-3">
     <div class="flex items-center justify-between gap-3">
       <div class="flex items-center gap-2 text-sm font-semibold text-white">
-        <Fuel class="w-4 h-4 text-amber-400" /> {{ $t('manual.fuelLogsPanel.fuelFillUps') }}
+        <Fuel class="w-4 h-4 text-warning-400" /> {{ $t('manual.fuelLogsPanel.fuelFillUps') }}
       </div>
       <button
         v-if="canEdit"
@@ -204,7 +204,7 @@ onMounted(load)
         <div class="text-lg font-bold text-white">{{ stats.consumption_l_100km ? `${formatPerDistanceValue(stats.consumption_l_100km, 2)} L/100 ${distanceUnit()}` : $t('manual.fuelLogsPanel.notMeasurable') }}</div>
       </div>
     </div>
-    <p v-if="stats && stats.unmeasurable_segments > 0" class="text-xs text-amber-400">
+    <p v-if="stats && stats.unmeasurable_segments > 0" class="text-xs text-warning-400">
       {{ $t('manual.fuelLogsPanel.intervalSBetweenFullTanks', { unmeasurable_segments: stats.unmeasurable_segments }) }}
     </p>
     <p v-if="stats && stats.fill_ups_without_mileage > 0" class="text-xs text-slate-400">
@@ -232,7 +232,7 @@ onMounted(load)
             {{ fmtMoney(log.amount) }}
             <template v-if="log.liters"> · {{ fmtNum(log.liters, 2) }} L</template>
             <template v-if="log.price_per_liter"> · {{ fmtMoney(log.price_per_liter, 3) }}/L</template>
-            <template v-if="log.consumption_l_100km"> · <span class="text-emerald-300">{{ log.segment_estimated ? '≈ ' : '' }}{{ formatPerDistanceValue(log.consumption_l_100km, 2) }} L/100 {{ distanceUnit() }}</span></template>
+            <template v-if="log.consumption_l_100km"> · <span class="text-success-300">{{ log.segment_estimated ? '≈ ' : '' }}{{ formatPerDistanceValue(log.consumption_l_100km, 2) }} L/100 {{ distanceUnit() }}</span></template>
             <template v-if="log.cost_per_km"> · {{ fmtMoney(perDistance(log.cost_per_km), 3) }}/{{ distanceUnit() }}</template>
           </div>
         </div>

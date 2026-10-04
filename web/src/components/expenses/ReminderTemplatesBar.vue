@@ -73,7 +73,7 @@ onMounted(load)
         <button type="button" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!selected" @click="apply">
           {{ $t('expenses.remindersPanel.templates.apply') }}
         </button>
-        <button type="button" class="text-slate-400 hover:text-rose-400 disabled:opacity-40" :disabled="!selected" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
+        <button type="button" class="text-slate-400 hover:text-danger-400 disabled:opacity-40" :disabled="!selected" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
           <Trash2 class="w-4 h-4" />
         </button>
       </div>
@@ -84,8 +84,8 @@ onMounted(load)
           {{ $t('expenses.remindersPanel.templates.save') }}
         </button>
       </div>
-      <p v-if="message" class="text-emerald-400" role="status">{{ message }}</p>
-      <p v-if="error" class="text-rose-400" role="alert">{{ error }}</p>
+      <p v-if="message" class="text-success-400" role="status">{{ message }}</p>
+      <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
     </div>
   </details>
 </template>

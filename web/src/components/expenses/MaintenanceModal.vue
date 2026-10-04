@@ -254,7 +254,7 @@ async function handleCreateMaint() {
             {{ $t('expenses.maintenanceModal.createsAMonthlyRecurringExpense') }}
           </p>
         </div>
-        <p v-else-if="maintForm.category === 'FINANCING'" class="text-xs text-amber-300/90">
+        <p v-else-if="maintForm.category === 'FINANCING'" class="text-xs text-warning-300/90">
           {{ $t('expenses.maintenanceModal.leasePaymentsTheDownPayment') }}
         </p>
 
@@ -290,13 +290,13 @@ async function handleCreateMaint() {
             <span v-if="detectingOdometer" class="text-xs text-slate-400">{{ $t('expenses.maintenanceModal.detectingTheMileage') }}</span>
           </div>
           <DistanceInput id="expense-maint-odometer" v-model="maintForm.odometer" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
-          <div v-if="detectedOdometer !== null && detectedOdometer > 0" class="flex items-center justify-between text-xs text-emerald-400 mt-1">
+          <div v-if="detectedOdometer !== null && detectedOdometer > 0" class="flex items-center justify-between text-xs text-success-400 mt-1">
             <span>{{ $t('expenses.maintenanceModal.mileageDetectedKm', { unit: distanceUnit(), detectedOdometer: formatDistanceValue(detectedOdometer) }) }}</span>
             <button
               type="button"
               v-if="maintForm.odometer !== Math.round(detectedOdometer)"
               @click="maintForm.odometer = Math.round(detectedOdometer)"
-              class="underline hover:text-emerald-300 transition-colors ml-2"
+              class="underline hover:text-success-300 transition-colors ml-2"
             >
               {{ $t('expenses.maintenanceModal.apply') }}
             </button>
@@ -322,7 +322,7 @@ async function handleCreateMaint() {
               type="button"
               @click="maintForm.amortization_mode = 'DISTANCE'"
               class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
-              :class="maintForm.amortization_mode === 'DISTANCE' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+              :class="maintForm.amortization_mode === 'DISTANCE' ? 'bg-success-500/20 text-success-300 border-success-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
               {{ $t('expenses.maintenanceModal.perKm', { unit: distanceUnit() }) }}
             </button>
@@ -382,7 +382,7 @@ async function handleCreateMaint() {
               />
               <label for="close-candidate" class="text-xs text-slate-300 leading-snug cursor-pointer">
                 {{ $t('expenses.maintenanceModal.closeThePreviousServiceIn') }}
-                <span class="block text-xs text-amber-400 font-normal">
+                <span class="block text-xs text-warning-400 font-normal">
                   {{ closeCandidateMaintenance.description }} ({{ formatDate(closeCandidateMaintenance.date) }} — {{ formatAmount(Number(closeCandidateMaintenance.amount), baseCurrency) }})
                 </span>
               </label>
@@ -414,7 +414,7 @@ async function handleCreateMaint() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.maintenanceModal.receiptInvoice') }}
             </span>
-            <span v-if="maintForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.maintenanceModal.linked') }}</span>
+            <span v-if="maintForm.document_id" class="text-xs text-success-400 font-medium">{{ $t('expenses.maintenanceModal.linked') }}</span>
           </div>
 
           <div v-if="maintForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">

@@ -27,7 +27,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
         <div class="text-base sm:text-lg font-bold text-white flex items-center gap-2 sm:gap-3 mt-0.5 flex-wrap">
           <span>{{ $t('dashboard.currentMonthBanner.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(currentMonthStats.distance_km) }) }}</span>
           <span class="text-slate-400">•</span>
-          <span class="text-emerald-400">{{ formatAmount(perDistance(currentMonthStats.cost_per_km > 0 ? currentMonthStats.cost_per_km : 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}</span>
+          <span class="text-success-400">{{ formatAmount(perDistance(currentMonthStats.cost_per_km > 0 ? currentMonthStats.cost_per_km : 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}</span>
           <span class="text-slate-400">•</span>
           <span class="text-slate-300">{{ $t('dashboard.currentMonthBanner.spent', { value: formatAmount(currentMonthStats.total, vehicleStore.currency) }) }}</span>
           <template v-if="currentMonthStats.fixedVar && currentMonthStats.fixedVar.totalAmount > 0">

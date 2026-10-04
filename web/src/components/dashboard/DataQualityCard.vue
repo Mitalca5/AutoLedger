@@ -36,11 +36,11 @@ const issueLabels: Record<string, () => string> = {
   <div
     v-if="tco?.completeness"
     class="p-4 rounded-2xl space-y-2 border"
-    :class="tco.completeness.is_complete ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/30'"
+    :class="tco.completeness.is_complete ? 'bg-success-500/5 border-success-500/20' : 'bg-warning-500/10 border-warning-500/30'"
   >
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-      <div class="flex items-center gap-2 text-sm font-bold" :class="tco.completeness.is_complete ? 'text-emerald-400' : 'text-amber-400'">
-        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-4 h-4 text-emerald-400" />
+      <div class="flex items-center gap-2 text-sm font-bold" :class="tco.completeness.is_complete ? 'text-success-400' : 'text-warning-400'">
+        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-4 h-4 text-success-400" />
         <AlertTriangle v-else class="w-4 h-4" />
         <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
         <span
@@ -53,7 +53,7 @@ const issueLabels: Record<string, () => string> = {
       <div class="w-full sm:w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
         <div
           class="h-full rounded-full"
-          :class="tco.completeness.score_pct >= 90 ? 'bg-emerald-500' : tco.completeness.score_pct >= 60 ? 'bg-amber-500' : 'bg-rose-500'"
+          :class="tco.completeness.score_pct >= 90 ? 'bg-success-500' : tco.completeness.score_pct >= 60 ? 'bg-warning-500' : 'bg-rose-500'"
           :style="{ width: tco.completeness.score_pct + '%' }"
         ></div>
       </div>
@@ -62,28 +62,28 @@ const issueLabels: Record<string, () => string> = {
       <router-link
         v-if="tco.completeness.charges_without_cost > 0"
         to="/expenses"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.completeTheCharges') }}
       </router-link>
       <router-link
         v-if="tco.completeness.unqualified_drives > 0"
         to="/drives"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.qualifyTheDrives') }}
       </router-link>
       <router-link
         v-if="tco.completeness.insurance_missing"
         to="/expenses"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheInsurance') }}
       </router-link>
       <router-link
         v-if="tco.completeness.acquisition_missing"
         to="/vehicles"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheAcquisition') }}
       </router-link>
@@ -91,14 +91,14 @@ const issueLabels: Record<string, () => string> = {
         v-if="tco.completeness.start_odometer_missing"
         to="/vehicles"
         :title="$t('dashboard.dataQualityCard.enterTheStartOdometerHint')"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheStartOdometer') }}
       </router-link>
       <router-link
         v-if="canRefuel(tco.powertrain) && !tco.fuel_fill_ups"
         to="/manual?tab=FUEL"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterAFillUp') }}
       </router-link>
@@ -106,14 +106,14 @@ const issueLabels: Record<string, () => string> = {
         v-if="isElectricOnly(tco.powertrain) && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
         to="/manual?tab=ENERGY"
         :title="$t('dashboard.dataQualityCard.enterAverageConsumptionHint')"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterAverageConsumption') }}
       </router-link>
       <button
         v-if="tco.completeness.odometer_gaps > 0 || tco.completeness.odometer_anomalies > 0"
         @click="toggleDataQuality"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ showDataQuality ? $t('dashboard.dataQualityCard.hideIssues') : $t('dashboard.dataQualityCard.showIssues') }}
       </button>
@@ -122,7 +122,7 @@ const issueLabels: Record<string, () => string> = {
       <div
         v-for="issue in dataQuality.issues"
         :key="issue.type + issue.drive_id"
-        class="text-xs text-amber-100/90 flex items-center justify-between gap-3 bg-slate-950/40 rounded-lg px-2.5 py-1.5"
+        class="text-xs text-warning-100/90 flex items-center justify-between gap-3 bg-slate-950/40 rounded-lg px-2.5 py-1.5"
       >
         <span>{{ new Date(issue.date).toLocaleString(intlLocale(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }} — {{ issueLabels[issue.type]?.() || issue.type }}</span>
         <span class="font-mono">{{ issue.km > 0 ? '+' : '' }}{{ formatDistance(issue.km, 1) }}</span>

@@ -75,12 +75,12 @@ function formatLast(iso?: string) {
 
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
         <div v-if="loading" class="flex justify-center py-6"><RefreshCw class="w-5 h-5 animate-spin text-slate-400" /></div>
-        <p v-else-if="error" class="text-rose-400">{{ error }}</p>
+        <p v-else-if="error" class="text-danger-400">{{ error }}</p>
         <template v-else-if="summary">
           <div v-if="canCharge(vehicle?.powertrain)" class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <h4 class="font-bold text-white uppercase tracking-wider">{{ $t('vehicles.vehicleDataSourcesModal.teslamate') }}</h4>
-              <span class="font-semibold" :class="summary.teslamate_configured ? 'text-emerald-400' : 'text-slate-400'">
+              <span class="font-semibold" :class="summary.teslamate_configured ? 'text-success-400' : 'text-slate-400'">
                 {{ !isOwner ? $t('vehicles.vehicleCard.managedByAdmin') : summary.teslamate_configured ? $t('vehicles.vehicleCard.configured') : $t('vehicles.vehicleCard.notConfigured') }}
               </span>
             </div>
@@ -104,7 +104,7 @@ function formatLast(iso?: string) {
                 {{ summary.teslamate_configured ? $t('vehicles.vehicleDataSourcesModal.editConnection') : $t('vehicles.vehicleDataSourcesModal.connect') }}
               </button>
             </div>
-            <p v-if="test && !test.loading" class="flex items-start gap-2" :class="test.success ? 'text-emerald-300' : 'text-rose-300'">
+            <p v-if="test && !test.loading" class="flex items-start gap-2" :class="test.success ? 'text-success-300' : 'text-rose-300'">
               <CheckCircle2 v-if="test.success" class="w-4 h-4 shrink-0" />
               <AlertCircle v-else class="w-4 h-4 shrink-0" />
               <span>{{ test.success ? $t('vehicles.vehicleCard.online') : test.error }}</span>

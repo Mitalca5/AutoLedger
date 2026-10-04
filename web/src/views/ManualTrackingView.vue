@@ -89,7 +89,7 @@ function select(tab: Tab) {
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white shrink-0"
           @click="showImport = true"
         >
-          <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
+          <UploadCloud class="w-3.5 h-3.5 text-info-400" />
           <span>{{ $t('expenses.expensesView.importCsv') }}</span>
         </button>
         <button
@@ -97,7 +97,7 @@ function select(tab: Tab) {
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white shrink-0"
           @click="showExport = true"
         >
-          <Download class="w-3.5 h-3.5 text-sky-400" />
+          <Download class="w-3.5 h-3.5 text-info-400" />
           <span>{{ $t('import.export') }}</span>
         </button>
       </div>

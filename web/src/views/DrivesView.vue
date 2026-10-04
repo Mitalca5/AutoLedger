@@ -642,18 +642,18 @@ async function handleBulkApplyToll() {
 <template>
   <div class="space-y-6">
     <!-- Drives informational banner when no telemetry is linked -->
-    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate && total === 0" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4 text-sm text-sky-200">
+    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate && total === 0" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-info-500/30 bg-info-500/10 p-4 text-sm text-info-200">
       <span>{{ $t('drives.drivesView.noTelemetryBanner') }}</span>
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
         <button
           @click="openCSVImportModal"
-          class="rounded-lg bg-sky-500/20 px-2.5 py-1 text-xs font-semibold text-sky-300 hover:bg-sky-500/30 transition-colors"
+          class="rounded-lg bg-info-500/20 px-2.5 py-1 text-xs font-semibold text-info-300 hover:bg-info-500/30 transition-colors"
         >
           {{ $t('drives.drivesView.importCsv') }}
         </button>
         <button
           @click="openManualDriveModal()"
-          class="rounded-lg bg-sky-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-sky-500 transition-colors"
+          class="rounded-lg bg-info-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-info-500 transition-colors"
         >
           {{ $t('drives.drivesView.newDrive') }}
         </button>
@@ -689,7 +689,7 @@ async function handleBulkApplyToll() {
             @click="openCSVImportModal"
             class="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:border-slate-600 hover:bg-slate-700 transition-colors"
           >
-            <UploadCloud class="w-4 h-4 text-sky-400" />
+            <UploadCloud class="w-4 h-4 text-info-400" />
             <span>{{ $t('drives.drivesView.importCsv') }}</span>
           </button>
           <button
@@ -748,7 +748,7 @@ async function handleBulkApplyToll() {
           <button
             @click="selectedTag = 'Perso'"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-            :class="selectedTag === 'Perso' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:text-white'"
+            :class="selectedTag === 'Perso' ? 'bg-success-500/20 text-success-400 border border-success-500/30' : 'text-slate-400 hover:text-white'"
           >
             {{ $t('drives.drivesView.personal') }}
           </button>

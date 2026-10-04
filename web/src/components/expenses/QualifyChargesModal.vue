@@ -98,7 +98,7 @@ onMounted(() => {
       <!-- Header -->
       <div class="flex items-center justify-between p-4 border-b border-slate-800">
         <div class="flex items-center gap-2">
-          <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+          <div class="p-2 bg-warning-500/10 text-warning-400 rounded-lg">
             <Zap class="w-4 h-4" />
           </div>
           <div>
@@ -157,7 +157,7 @@ onMounted(() => {
               <select
                 :id="'qualify-vehicle-' + charge.id"
                 v-model="selectedVehicleIds[charge.id]"
-                class="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                class="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white focus:border-warning-500 focus:outline-none"
               >
                 <option v-for="v in vehicleStore.vehicles" :key="v.id" :value="v.id">
                   {{ v.name }}
@@ -168,7 +168,7 @@ onMounted(() => {
                 type="button"
                 :disabled="assigningId === charge.id || !selectedVehicleIds[charge.id]"
                 @click="handleAssign(charge)"
-                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-warning-600 hover:bg-warning-500 text-white text-xs font-semibold transition-colors disabled:opacity-50"
               >
                 <Check class="w-3.5 h-3.5" />
                 <span>{{ assigningId === charge.id ? t('pendingCharges.assigning') : t('pendingCharges.assign') }}</span>

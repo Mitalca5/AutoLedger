@@ -15,7 +15,7 @@ defineEmits<{ submit: [] }>()
       <slot />
     </div>
     <div class="shrink-0 space-y-2 border-t border-slate-800 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <p v-if="error" role="alert" class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+      <p v-if="error" role="alert" class="rounded-lg border border-danger-500/30 bg-danger-500/10 px-3 py-2 text-xs text-danger-300">
         {{ error }}
       </p>
       <button

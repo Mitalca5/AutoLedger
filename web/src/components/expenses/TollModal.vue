@@ -185,7 +185,7 @@ async function handleCreateToll() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Receipt class="w-5 h-5 text-amber-400" />
+          <Receipt class="w-5 h-5 text-warning-400" />
           {{ editingTollId ? $t('expenses.tollModal.edit') : $t('expenses.tollModal.add') }}
         </h3>
         <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -231,7 +231,7 @@ async function handleCreateToll() {
               type="button"
               @click="associationMode = 'NONE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
-              :class="associationMode === 'NONE' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+              :class="associationMode === 'NONE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
               {{ $t('expenses.tollModal.noDrive') }}
             </button>
@@ -239,7 +239,7 @@ async function handleCreateToll() {
               type="button"
               @click="associationMode = 'SINGLE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
-              :class="associationMode === 'SINGLE' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+              :class="associationMode === 'SINGLE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
               {{ $t('expenses.tollModal.singleDrive') }}
             </button>
@@ -247,7 +247,7 @@ async function handleCreateToll() {
               type="button"
               @click="associationMode = 'MULTI'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
-              :class="associationMode === 'MULTI' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+              :class="associationMode === 'MULTI' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
               {{ $t('expenses.tollModal.multiLeg') }}
             </button>
@@ -272,7 +272,7 @@ async function handleCreateToll() {
           <div v-if="associationMode === 'MULTI'" class="pt-2 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-xs text-slate-400">{{ $t('expenses.tollModal.tickTheLegsThatMake') }}</span>
-              <span class="text-xs text-amber-400 font-semibold">
+              <span class="text-xs text-warning-400 font-semibold">
                 {{ $t('expenses.tollModal.legS', { length: selectedDriveIds.length }) }}<template v-if="selectedDrivesNotListed"> {{ $t('expenses.tollModal.ofWhichOlderThanThe', { selectedDrivesNotListed }) }}</template>
               </span>
             </div>
@@ -282,10 +282,10 @@ async function handleCreateToll() {
                 :key="d.id"
                 @click="toggleMultiDrive(d.id)"
                 class="flex items-center justify-between p-2 rounded-lg cursor-pointer text-xs border transition-colors"
-                :class="selectedDriveIds.includes(d.id) ? 'bg-amber-500/10 border-amber-500/40 text-amber-200' : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'"
+                :class="selectedDriveIds.includes(d.id) ? 'bg-warning-500/10 border-warning-500/40 text-warning-200' : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'"
               >
                 <div class="flex items-center gap-2">
-                  <CheckSquare v-if="selectedDriveIds.includes(d.id)" class="w-4 h-4 text-amber-400" />
+                  <CheckSquare v-if="selectedDriveIds.includes(d.id)" class="w-4 h-4 text-warning-400" />
                   <Square v-else class="w-4 h-4 text-slate-400" />
                   <span>{{ formatDayTime(d.start_time) }}{{ $t('expenses.tollModal.dateSeparator') }}{{ (d.start_address || $t('expenses.tollModal.start')).split(',')[0] }} → {{ (d.end_address || $t('expenses.tollModal.destination')).split(',')[0] }}</span>
                 </div>
@@ -313,7 +313,7 @@ async function handleCreateToll() {
               <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
               {{ $t('expenses.tollModal.receiptInvoice') }}
             </span>
-            <span v-if="tollForm.document_id" class="text-xs text-emerald-400 font-medium">{{ $t('expenses.tollModal.linked') }}</span>
+            <span v-if="tollForm.document_id" class="text-xs text-success-400 font-medium">{{ $t('expenses.tollModal.linked') }}</span>
           </div>
 
           <div v-if="tollForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">

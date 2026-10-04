@@ -144,12 +144,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           <span v-else class="text-xs text-slate-400 block truncate">{{ $t('dashboard.monthDetailModal.100GpsDrives') }}</span>
         </div>
 
-        <div class="bg-emerald-500/5 border border-emerald-500/30 p-3 rounded-xl">
-          <span class="text-xs font-medium text-emerald-400 block">{{ $t('dashboard.monthDetailModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
-          <div class="text-base sm:text-lg font-extrabold text-emerald-400 mt-0.5">
-            {{ formatAmount(perDistance(selectedMonthBreakdown.costPerKm), currency, 3) }}<span class="text-xs font-normal text-emerald-500/80">/{{ distanceUnit() }}</span>
+        <div class="bg-success-500/5 border border-success-500/30 p-3 rounded-xl">
+          <span class="text-xs font-medium text-success-400 block">{{ $t('dashboard.monthDetailModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
+          <div class="text-base sm:text-lg font-extrabold text-success-400 mt-0.5">
+            {{ formatAmount(perDistance(selectedMonthBreakdown.costPerKm), currency, 3) }}<span class="text-xs font-normal text-success-500/80">/{{ distanceUnit() }}</span>
           </div>
-          <span class="text-xs text-emerald-400/70 block">{{ $t('dashboard.monthDetailModal.actualCostPrice') }}</span>
+          <span class="text-xs text-success-400/70 block">{{ $t('dashboard.monthDetailModal.actualCostPrice') }}</span>
         </div>
 
         <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
@@ -182,8 +182,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               <span>{{ $t('dashboard.monthDetailModal.fixedCosts') }} : <strong class="text-white">{{ selectedMonthBreakdown.fixedVar.fixedPct }}%</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.fixedAmount, currency) }})</span>
             </span>
             <span class="text-slate-400">•</span>
-            <span class="flex items-center gap-1.5 text-sky-300">
-              <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span class="flex items-center gap-1.5 text-info-300">
+              <span class="w-2 h-2 rounded-full bg-info-500"></span>
               <span>{{ $t('dashboard.monthDetailModal.variableCosts') }} : <strong class="text-white">{{ selectedMonthBreakdown.fixedVar.variablePct }}%</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.variableAmount, currency) }})</span>
             </span>
           </div>
@@ -197,7 +197,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             :title="`${$t('dashboard.monthDetailModal.fixedCosts')}: ${selectedMonthBreakdown.fixedVar.fixedPct}%`"
           ></div>
           <div
-            class="bg-gradient-to-r from-sky-500 to-teal-400 h-full transition-all duration-300"
+            class="bg-gradient-to-r from-info-500 to-teal-400 h-full transition-all duration-300"
             :style="{ width: `${selectedMonthBreakdown.fixedVar.variablePct}%` }"
             :title="`${$t('dashboard.monthDetailModal.variableCosts')}: ${selectedMonthBreakdown.fixedVar.variablePct}%`"
           ></div>
@@ -300,7 +300,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                     ({{ item.sharePct.toFixed(1) }}%)
                   </span>
                 </div>
-                <div class="text-xs text-emerald-400 font-medium">
+                <div class="text-xs text-success-400 font-medium">
                   {{ formatAmount(perDistance(item.costPerKm), currency, 3) }}/{{ distanceUnit() }}
                 </div>
               </div>
@@ -317,7 +317,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               <div class="font-extrabold text-white text-sm sm:text-base">
                 {{ formatAmount(selectedMonthBreakdown.activeTotal, currency) }}
               </div>
-              <div class="text-xs font-bold text-emerald-400">
+              <div class="text-xs font-bold text-success-400">
                 {{ formatAmount(perDistance(selectedMonthBreakdown.distanceKm > 0 ? selectedMonthBreakdown.activeTotal / selectedMonthBreakdown.distanceKm : 0), currency, 3) }}/{{ distanceUnit() }}
               </div>
             </div>
@@ -340,7 +340,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             to="/expenses"
             class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
           >
-            <Receipt class="w-3.5 h-3.5 text-amber-400" />
+            <Receipt class="w-3.5 h-3.5 text-warning-400" />
             <span>{{ $t('dashboard.monthDetailModal.expensesAndInvoices') }}</span>
           </router-link>
         </div>

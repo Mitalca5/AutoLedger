@@ -352,7 +352,7 @@ onMounted(() => {
               <span>{{ t('tariffs.publicModal.breakdownDuration') }}</span>
               <span>{{ formatAmount(breakdown.duration_cost_cents / 100, currency) }}</span>
             </div>
-            <div v-if="breakdown.idle_cost_cents > 0" class="flex justify-between text-amber-300">
+            <div v-if="breakdown.idle_cost_cents > 0" class="flex justify-between text-warning-300">
               <span>{{ t('tariffs.publicModal.breakdownIdle') }}</span>
               <span>{{ formatAmount(breakdown.idle_cost_cents / 100, currency) }}</span>
             </div>

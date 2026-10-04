@@ -64,7 +64,7 @@ const vehicleStore = useVehicleStore()
             </div>
             <span
               class="text-xs px-2 py-0.5 rounded-full font-bold shrink-0 border"
-              :class="d.linked_expenses_count > 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
+              :class="d.linked_expenses_count > 0 ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
             >
               {{ d.linked_expenses_count > 0 ? $t('expenses.documentsPanel.linkedExpenses', { count: d.linked_expenses_count }) : $t('expenses.documentsPanel.notLinked') }}
             </span>

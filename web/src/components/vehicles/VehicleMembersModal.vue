@@ -170,7 +170,7 @@ async function handleRemoveMember(m: any) {
 
             <div class="flex items-center justify-between gap-3 pt-1">
               <p class="text-xs text-slate-400 leading-tight">
-                <ShieldCheck class="w-3 h-3 text-emerald-400 inline mr-0.5 -mt-0.5" />
+                <ShieldCheck class="w-3 h-3 text-success-400 inline mr-0.5 -mt-0.5" />
                 {{ $t('vehicles.vehicleMembersModal.yourTeslamateApiKeysAnd') }}
               </p>
               <button
@@ -210,7 +210,7 @@ async function handleRemoveMember(m: any) {
               <div class="flex items-center gap-3 min-w-0">
                 <div
                   class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
-                  :class="m.role === 'OWNER' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300'"
+                  :class="m.role === 'OWNER' ? 'bg-warning-500/10 text-warning-400 border border-warning-500/20' : 'bg-slate-800 text-slate-300'"
                 >
                   {{ (m.user_email || '?').charAt(0).toUpperCase() }}
                 </div>
@@ -228,8 +228,8 @@ async function handleRemoveMember(m: any) {
                     <span
                       class="text-xs px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider"
                       :class="{
-                        'bg-amber-500/10 text-amber-400 border border-amber-500/20': m.role === 'OWNER',
-                        'bg-sky-500/10 text-sky-400 border border-sky-500/20': m.role === 'EDITOR',
+                        'bg-warning-500/10 text-warning-400 border border-warning-500/20': m.role === 'OWNER',
+                        'bg-info-500/10 text-info-400 border border-info-500/20': m.role === 'EDITOR',
                         'bg-slate-800 text-slate-400 border border-slate-700': m.role === 'VIEWER',
                       }"
                     >

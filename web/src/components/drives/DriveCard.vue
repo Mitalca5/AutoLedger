@@ -63,7 +63,7 @@ const formatDate = formatDayTime
           <span
             v-if="d.consumption_kwh_100km"
             class="text-xs font-mono shrink-0"
-            :class="d.energy_estimated ? 'text-slate-400' : 'text-sky-400'"
+            :class="d.energy_estimated ? 'text-slate-400' : 'text-info-400'"
             :title="d.energy_estimated ? $t('drives.driveCard.estimatedConsumption') : undefined"
           >
             {{ $t(d.energy_estimated ? 'drives.driveCard.kwh100kmEstimated' : 'drives.driveCard.kwh100km', { unit: distanceUnit(), consumption_kwh_100km: Math.round(perDistance(d.consumption_kwh_100km) * 10) / 10 }) }}
@@ -77,13 +77,13 @@ const formatDate = formatDayTime
           </span>
           <span
             v-if="prefs.proPersoEnabled && d.tags?.includes('Perso')"
-            class="text-xs px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0"
+            class="text-xs px-2 py-0.5 rounded-full font-bold bg-success-500/20 text-success-400 border border-success-500/40 shrink-0"
           >
             {{ $t('drives.driveCard.personal') }}
           </span>
           <span
             v-if="d.is_manual"
-            class="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0"
+            class="text-xs px-2 py-0.5 rounded-full font-bold bg-warning-500/20 text-warning-300 border border-warning-500/40 shrink-0"
           >
             {{ $t('drives.drivesView.manual') }}
           </span>
@@ -117,13 +117,13 @@ const formatDate = formatDayTime
         class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/70 rounded-xl flex items-center gap-2 text-left shadow-sm"
         :title="$t('drives.driveCard.actualCostPriceCalculatedFor')"
       >
-        <div class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
+        <div class="p-1 rounded-lg bg-success-500/10 text-success-400">
           <Coins class="w-3.5 h-3.5" />
         </div>
         <div>
           <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
             <span>{{ d.costs?.has_estimates ? '~' : '' }}{{ formatAmount(d.costs?.total_cost || 0, vehicleStore.currency) }}</span>
-            <span class="text-xs font-normal text-emerald-400 font-mono">
+            <span class="text-xs font-normal text-success-400 font-mono">
               {{ formatAmount(perDistance(d.costs?.cost_per_km || 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}
             </span>
           </div>

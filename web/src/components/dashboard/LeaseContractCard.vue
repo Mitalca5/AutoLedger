@@ -90,7 +90,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
       <div v-if="leaseContract.hasMileageAllowance" class="bg-slate-950/50 border border-slate-800/80 rounded-xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between text-xs">
           <span class="font-semibold text-slate-300 flex items-center gap-1.5">
-            <Gauge class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <Gauge class="w-3.5 h-3.5 text-success-400 shrink-0" />
             {{ $t('dashboard.leaseContractCard.mileageAllowance') }}
           </span>
           <span class="font-bold text-slate-200">
@@ -121,7 +121,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
           </span>
           <span
             v-if="leaseContract.kmDiff !== undefined"
-            :class="leaseContract.kmDiff > 0 ? 'text-rose-400 font-semibold' : 'text-emerald-400 font-semibold'"
+            :class="leaseContract.kmDiff > 0 ? 'text-rose-400 font-semibold' : 'text-success-400 font-semibold'"
           >
             {{ leaseContract.kmDiff > 0 ? $t('dashboard.leaseContractCard.kmOver', { unit: distanceUnit(), km: formatDistanceValue(leaseContract.kmDiff) }) : $t('dashboard.leaseContractCard.kmAhead', { unit: distanceUnit(), km: formatDistanceValue(Math.abs(leaseContract.kmDiff)) }) }}
           </span>
@@ -137,26 +137,26 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
           v-if="leaseContract.purchaseOptionPrice"
           class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium border border-slate-700/60 flex items-center gap-1.5"
         >
-          <Coins class="w-3.5 h-3.5 text-amber-400" />
+          <Coins class="w-3.5 h-3.5 text-warning-400" />
           {{ $t('dashboard.leaseContractCard.finalPurchaseOption') }} <strong class="text-white">{{ formatAmount(Number(leaseContract.purchaseOptionPrice), currency, 0) }}</strong>
         </span>
 
         <!-- Included Services Badges -->
         <span
           v-if="leaseContract.includesMaintenance"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-success-500/10 text-success-400 border border-success-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.maintenanceIncluded') }}
         </span>
         <span
           v-if="leaseContract.includesInsurance"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-success-500/10 text-success-400 border border-success-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.insuranceIncluded') }}
         </span>
         <span
           v-if="leaseContract.includesTires"
-          class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium flex items-center gap-1"
+          class="px-2 py-0.5 rounded-md bg-success-500/10 text-success-400 border border-success-500/20 text-xs font-medium flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('dashboard.leaseContractCard.tiresIncluded') }}
         </span>
@@ -167,7 +167,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         <span v-if="leaseContract.excessKmCost > 0" class="text-rose-400 font-semibold">
           {{ $t('dashboard.leaseContractCard.overageToDate', { value: formatAmount(leaseContract.excessKmCost, currency) }) }}
         </span>
-        <span v-if="leaseContract.excessKmProjected > 0" class="text-amber-400 font-semibold">
+        <span v-if="leaseContract.excessKmProjected > 0" class="text-warning-400 font-semibold">
           {{ $t('dashboard.leaseContractCard.estimatedEndOfContractPenalty', { value: formatAmount(leaseContract.excessKmProjected, currency) }) }}
         </span>
       </div>

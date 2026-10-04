@@ -171,7 +171,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
               <div v-if="shared" class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
                 <component :is="getSeasonIcon(shared.season).icon" class="w-3 h-3" :class="getSeasonIcon(shared.season).color" />
                 {{ getSeasonIcon(shared.season).label }} · {{ period(shared) }}
-                <span v-if="shared.ongoing" class="text-emerald-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
+                <span v-if="shared.ongoing" class="text-success-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
               </div>
             </div>
             <button v-if="pinned" type="button" class="p-0.5 text-slate-400 hover:text-white shrink-0" :title="$t('common.close')" @click="unpin">
@@ -192,7 +192,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
               <div v-if="!shared" class="flex items-center gap-1.5 text-xs text-slate-400">
                 <component :is="getSeasonIcon(t.season).icon" class="w-3 h-3" :class="getSeasonIcon(t.season).color" />
                 {{ period(t) }}
-                <span v-if="t.ongoing" class="text-emerald-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
+                <span v-if="t.ongoing" class="text-success-400">{{ $t('tires.tireOdometerTimeline.ongoing') }}</span>
               </div>
             </li>
           </ul>

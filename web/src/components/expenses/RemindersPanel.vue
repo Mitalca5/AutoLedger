@@ -39,7 +39,7 @@ const vehicleStore = useVehicleStore()
             <span>{{ $t('expenses.remindersPanel.homelabWebhook') }}</span>
             <span
               class="px-2 py-0.5 text-xs rounded-full font-bold border"
-              :class="vehicleWebhook?.enabled ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
+              :class="vehicleWebhook?.enabled ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
             >
               {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.active', { type: vehicleWebhook.type }) : $t('expenses.remindersPanel.notConfigured') }}
             </span>
@@ -67,25 +67,25 @@ const vehicleStore = useVehicleStore()
         <span class="text-xl font-bold text-white mt-1">{{ reminders.length }}</span>
       </div>
       <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-emerald-400 flex items-center gap-1.5">
+        <span class="text-xs text-success-400 flex items-center gap-1.5">
           <CheckCircle2 class="w-3.5 h-3.5" />
           {{ $t('expenses.remindersPanel.upToDate') }}
         </span>
-        <span class="text-xl font-bold text-emerald-400 mt-1">{{ okReminders.length }}</span>
+        <span class="text-xl font-bold text-success-400 mt-1">{{ okReminders.length }}</span>
       </div>
       <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-amber-400 flex items-center gap-1.5">
+        <span class="text-xs text-warning-400 flex items-center gap-1.5">
           <Clock class="w-3.5 h-3.5" />
           {{ $t('expenses.remindersPanel.comingUp') }}
         </span>
-        <span class="text-xl font-bold text-amber-400 mt-1">{{ dueSoonReminders.length }}</span>
+        <span class="text-xl font-bold text-warning-400 mt-1">{{ dueSoonReminders.length }}</span>
       </div>
       <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
         <span class="text-xs text-rose-400 flex items-center gap-1.5">
           <AlertTriangle class="w-3.5 h-3.5" />
           {{ $t('expenses.remindersPanel.overdue') }}
         </span>
-        <span class="text-xl font-bold text-rose-400 mt-1">{{ overdueReminders.length }}</span>
+        <span class="text-xl font-bold text-danger-400 mt-1">{{ overdueReminders.length }}</span>
       </div>
     </div>
 
@@ -136,14 +136,14 @@ const vehicleStore = useVehicleStore()
         v-for="r in reminders"
         :key="r.id"
         class="bg-slate-900 border p-4 rounded-2xl flex flex-col justify-between gap-3 transition-colors"
-        :class="r.status === 'OVERDUE' ? 'border-rose-500/40 bg-rose-500/5' : r.status === 'DUE_SOON' ? 'border-amber-500/40 bg-amber-500/5' : 'border-slate-800'"
+        :class="r.status === 'OVERDUE' ? 'border-danger-500/40 bg-danger-500/5' : r.status === 'DUE_SOON' ? 'border-warning-500/40 bg-warning-500/5' : 'border-slate-800'"
       >
         <!-- Card top -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div class="flex items-center gap-2.5 flex-wrap">
             <span
               class="text-xs px-2.5 py-0.5 rounded-full font-bold border flex items-center gap-1"
-              :class="r.status === 'OVERDUE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : r.status === 'DUE_SOON' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'"
+              :class="r.status === 'OVERDUE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : r.status === 'DUE_SOON' ? 'bg-warning-500/20 text-warning-300 border-warning-500/30' : 'bg-success-500/10 text-success-400 border-success-500/20'"
             >
               <AlertTriangle v-if="r.status === 'OVERDUE'" class="w-3 h-3" />
               <Clock v-else-if="r.status === 'DUE_SOON'" class="w-3 h-3" />
@@ -172,14 +172,14 @@ const vehicleStore = useVehicleStore()
             <span
               v-if="r.remaining_km !== null && r.remaining_km !== undefined"
               class="px-2 py-0.5 rounded-lg"
-              :class="r.remaining_km <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_km <= r.lead_km ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
+              :class="r.remaining_km <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_km <= r.lead_km ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
             >
               {{ r.remaining_km <= 0 ? $t('expenses.remindersPanel.kmOver', { unit: distanceUnit(), km: formatDistanceValue(Math.abs(Math.round(r.remaining_km))) }) : $t('expenses.remindersPanel.kmLeft', { unit: distanceUnit(), km: formatDistanceValue(r.remaining_km) }) }}
             </span>
             <span
               v-if="r.remaining_days !== null && r.remaining_days !== undefined"
               class="px-2 py-0.5 rounded-lg"
-              :class="r.remaining_days <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_days <= r.lead_days ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
+              :class="r.remaining_days <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_days <= r.lead_days ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
             >
               {{ r.remaining_days <= 0 ? $t('expenses.remindersPanel.daysOver', { days: Math.abs(r.remaining_days) }) : $t('expenses.remindersPanel.daysLeft', { days: r.remaining_days }) }}
             </span>
@@ -238,10 +238,10 @@ const vehicleStore = useVehicleStore()
           <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">
             <button
               @click="emit('complete', r)"
-              class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-semibold rounded-xl border border-emerald-500/30 flex items-center gap-1.5 transition-colors"
+              class="px-2.5 py-1.5 bg-success-600/20 hover:bg-success-600/30 text-success-300 text-xs font-semibold rounded-xl border border-success-500/30 flex items-center gap-1.5 transition-colors"
               :title="$t('expenses.remindersPanel.markThisMaintenanceAsDone')"
             >
-              <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400" />
+              <CheckCircle2 class="w-3.5 h-3.5 text-success-400" />
               <span>{{ $t('expenses.remindersPanel.markDone') }}</span>
             </button>
             <button

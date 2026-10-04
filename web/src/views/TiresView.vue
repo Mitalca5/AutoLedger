@@ -425,7 +425,7 @@ async function handleDeleteLog(l: any) {
           class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-40"
           :title="$t('tires.tiresView.swapTheFittedSetWith')"
         >
-          <Snowflake class="w-4 h-4 text-sky-400" />
+          <Snowflake class="w-4 h-4 text-info-400" />
           <span class="hidden md:inline">{{ $t('tires.tiresView.changeSet') }}</span>
         </button>
 
@@ -494,7 +494,7 @@ async function handleDeleteLog(l: any) {
         v-if="canBatchDispose"
         type="button"
         @click="openBatchDisposeModal()"
-        class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-lg flex items-center gap-1 transition-colors text-xs"
+        class="px-2.5 py-1 bg-warning-600 hover:bg-warning-500 text-white font-semibold rounded-lg flex items-center gap-1 transition-colors text-xs"
         :title="$t('tires.tiresView.scrapTheSelectedTires')"
       >
         <Archive class="w-3 h-3" />

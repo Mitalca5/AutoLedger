@@ -37,7 +37,7 @@ const vehicleStore = useVehicleStore()
               <Repeat class="w-3 h-3 text-pink-400" /> {{ $t('expenses.maintenancePanel.everyMonths', { recurrence_interval_months: m.recurrence_interval_months }) }}
               <template v-if="m.recurrence_end_date">{{ $t('expenses.maintenancePanel.until', { recurrence_end_date: formatDate(m.recurrence_end_date) }) }}</template>
             </span>
-            <span v-else-if="m.amortization_mode === 'DISTANCE'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+            <span v-else-if="m.amortization_mode === 'DISTANCE'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-success-500/10 text-success-400 border border-success-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.smoothedOverKm', { unit: distanceUnit(), coverage_km: m.coverage_km ? formatDistanceValue(m.coverage_km) : formatDistanceValue(50000) }) }}
             </span>
             <span v-else-if="m.amortization_mode === 'DURATION'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
@@ -46,7 +46,7 @@ const vehicleStore = useVehicleStore()
             <span v-else-if="m.amortization_mode === 'HYBRID'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.mixedSmoothingKmMonths', { unit: distanceUnit(), coverage_km: m.coverage_km ? formatDistanceValue(m.coverage_km) : formatDistanceValue(50000), coverage_months: m.coverage_months || 24 }) }}
             </span>
-            <span v-if="m.closes_maintenance_id" class="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+            <span v-if="m.closes_maintenance_id" class="text-xs px-2 py-0.5 rounded-full font-medium bg-warning-500/10 text-warning-400 border border-warning-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.closesThePreviousService') }}
             </span>
             <button

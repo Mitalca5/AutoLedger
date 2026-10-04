@@ -91,20 +91,20 @@ onMounted(() => {
 
 <template>
   <div class="space-y-5">
-    <div class="bg-gradient-to-br from-sky-950/40 to-slate-950/60 border border-sky-500/20 rounded-xl p-4 space-y-4">
+    <div class="bg-gradient-to-br from-info-950/40 to-slate-950/60 border border-info-500/20 rounded-xl p-4 space-y-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="p-2 bg-sky-500/10 text-sky-400 rounded-lg">
+          <div class="p-2 bg-info-500/10 text-info-400 rounded-lg">
             <Zap class="w-4 h-4" />
           </div>
           <div>
-            <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">{{ $t('manual.estimatedEnergyPanel.energyEstimate') }}</h4>
+            <h4 class="text-xs font-bold text-info-400 uppercase tracking-wider">{{ $t('manual.estimatedEnergyPanel.energyEstimate') }}</h4>
             <p class="text-xs text-slate-400">{{ $t('manual.estimatedEnergyPanel.automaticallyFillInTheEnergy') }}</p>
           </div>
         </div>
         <span
           v-if="vehicle?.estimated_kwh_100km && vehicle?.estimated_price_per_kwh"
-          class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1"
+          class="text-xs px-2.5 py-0.5 rounded-full bg-success-500/10 text-success-400 border border-success-500/20 font-semibold flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('manual.estimatedEnergyPanel.active') }}
         </span>
@@ -123,7 +123,7 @@ onMounted(() => {
               max="100"
               :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })"
               :disabled="!canEdit"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 disabled:opacity-50"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-info-500 disabled:opacity-50"
             />
           </div>
           <div>
@@ -137,7 +137,7 @@ onMounted(() => {
               max="5"
               :placeholder="$t('common.example', { value: $n(0.22) })"
               :disabled="!canEdit"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500 disabled:opacity-50"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-info-500 disabled:opacity-50"
             />
           </div>
         </div>
@@ -145,7 +145,7 @@ onMounted(() => {
         <div v-if="preview" class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
           <div class="text-slate-300 font-semibold flex items-center justify-between">
             <span>{{ $t('manual.estimatedEnergyPanel.estimateOverSmoothedKm', { distance: formatDistance(preview.distance) }) }}</span>
-            <span class="text-sky-400 font-bold font-mono">
+            <span class="text-info-400 font-bold font-mono">
               ≈ {{ formatAmount(preview.cost, vehicleStore.currency) }}
             </span>
           </div>
@@ -170,7 +170,7 @@ onMounted(() => {
           <button
             type="submit"
             :disabled="saving"
-            class="px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-sky-600/20"
+            class="px-4 py-2 bg-info-600 hover:bg-info-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-info-600/20"
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ saving ? $t('common.loading') : $t('manual.estimatedEnergyPanel.saveEstimate') }}</span>

@@ -69,7 +69,7 @@ async function handleDisposeTire() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Archive class="w-4 h-4 text-amber-400" />
+          <Archive class="w-4 h-4 text-warning-400" />
           {{ $t('tires.tireDisposeModal.scrap') }}
         </h3>
         <button type="button" @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -100,7 +100,7 @@ async function handleDisposeTire() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="tire-dispose-modal-form" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+        <button type="submit" form="tire-dispose-modal-form" class="bg-warning-600 hover:bg-warning-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
           {{ $t('tires.tireDisposeModal.scrap') }}
         </button>
       </div>

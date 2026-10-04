@@ -75,7 +75,7 @@ async function complete(c: PendingCharge) {
             <span class="min-w-0 truncate text-slate-200">
               {{ fmtDate(c.date) }}<template v-if="c.address"> · {{ c.address }}</template>
             </span>
-            <span class="shrink-0 font-semibold text-sky-300">{{ $t('quickadd.quickPendingCosts.kwh', { kwh_added: fmtKwh(c.kwh_added) }) }}</span>
+            <span class="shrink-0 font-semibold text-info-300">{{ $t('quickadd.quickPendingCosts.kwh', { kwh_added: fmtKwh(c.kwh_added) }) }}</span>
           </div>
 
           <form class="mt-2 flex gap-2" novalidate @submit.prevent="complete(c)">
@@ -107,7 +107,7 @@ async function complete(c: PendingCharge) {
           >
             {{ $t('quickadd.quickPendingCosts.applyTheLastRate', { c: formatAmount(Number(suggestion(c)), vehicleStore.currency) }) }}
           </button>
-          <p v-if="errors[c.id]" role="alert" class="mt-1 text-xs text-rose-300">{{ errors[c.id] }}</p>
+          <p v-if="errors[c.id]" role="alert" class="mt-1 text-xs text-danger-300">{{ errors[c.id] }}</p>
         </li>
       </ul>
       <p v-if="total > charges.length" class="mt-3 text-center text-xs text-slate-400">

@@ -597,7 +597,7 @@ onBeforeUnmount(destroyChart)
 
       <template v-else>
         <div class="space-y-3">
-          <h2 class="text-sm font-semibold text-amber-300">{{ $t('comparison.comparisonView.equivalentCombustionVehicle') }}</h2>
+          <h2 class="text-sm font-semibold text-warning-300">{{ $t('comparison.comparisonView.equivalentCombustionVehicle') }}</h2>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label for="cmp-fuel" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuel') }}</label>
@@ -624,7 +624,7 @@ onBeforeUnmount(destroyChart)
         </div>
 
         <div v-if="!isRetro" class="space-y-3 pt-2 border-t border-slate-800">
-          <h2 class="text-sm font-semibold text-sky-300">{{ $t('comparison.comparisonView.electricVehicle') }}</h2>
+          <h2 class="text-sm font-semibold text-info-300">{{ $t('comparison.comparisonView.electricVehicle') }}</h2>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="cmp-ev-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.consumptionKwh100Km', { unit: distanceUnit() }) }}</label>
@@ -683,7 +683,7 @@ onBeforeUnmount(destroyChart)
         <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2" @click="prevStep">
           <ArrowLeft class="w-4 h-4" /> {{ step === 1 ? $t('common.cancel') : $t('comparison.comparisonView.back') }}
         </button>
-        <button type="submit" :disabled="saving" class="bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
+        <button type="submit" :disabled="saving" class="bg-info-600 hover:bg-info-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
           {{ step === 2 ? (saving ? $t('comparison.comparisonView.calculating') : $t('comparison.comparisonView.viewResult')) : $t('comparison.comparisonView.next') }} <ArrowRight class="w-4 h-4" />
         </button>
       </div>
@@ -709,9 +709,9 @@ onBeforeUnmount(destroyChart)
       <template v-else>
         <div
           class="rounded-2xl border p-5 flex items-center gap-4"
-          :class="savings >= 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'"
+          :class="savings >= 0 ? 'bg-success-500/10 border-success-500/30' : 'bg-warning-500/10 border-warning-500/30'"
         >
-          <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-emerald-400' : 'text-amber-400'" />
+          <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
           <div>
             <div class="text-lg font-bold text-white">{{ verdict }}</div>
             <div class="text-xs text-slate-400 mt-0.5">{{ currentScenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
@@ -721,8 +721,8 @@ onBeforeUnmount(destroyChart)
         <div class="grid gap-4 md:grid-cols-2">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
-              <h2 class="text-sm font-semibold text-sky-300">{{ $t('comparison.comparisonView.electric') }}</h2>
-              <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-emerald-500/40 text-emerald-300' : 'border-slate-600 text-slate-400'">
+              <h2 class="text-sm font-semibold text-info-300">{{ $t('comparison.comparisonView.electric') }}</h2>
+              <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-success-500/40 text-success-300' : 'border-slate-600 text-slate-400'">
                 {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.actual') : $t('comparison.comparisonView.estimated') }}
               </span>
             </div>
@@ -731,7 +731,7 @@ onBeforeUnmount(destroyChart)
           </div>
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
-              <h2 class="text-sm font-semibold text-amber-300">{{ $t('comparison.comparisonView.combustion') }}</h2>
+              <h2 class="text-sm font-semibold text-warning-300">{{ $t('comparison.comparisonView.combustion') }}</h2>
               <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('comparison.comparisonView.estimated') }}</span>
             </div>
             <div class="text-2xl font-bold text-white">{{ fmtMoney(result.ice.total) }}</div>

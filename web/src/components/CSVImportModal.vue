@@ -248,7 +248,7 @@ async function handleExecute() {
 
       <!-- Body -->
       <div class="p-6 space-y-5 overflow-y-auto">
-        <div v-if="error" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
+        <div v-if="error" class="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl text-xs text-danger-400">
           {{ error }}
         </div>
 
@@ -256,9 +256,9 @@ async function handleExecute() {
         <div
           v-if="executeResult"
           class="p-4 rounded-2xl space-y-3 border"
-          :class="executeResult.committed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'"
+          :class="executeResult.committed ? 'bg-success-500/10 border-success-500/30' : 'bg-rose-500/10 border-rose-500/30'"
         >
-          <div class="flex items-center gap-2.5 font-bold" :class="executeResult.committed ? 'text-emerald-400' : 'text-rose-400'">
+          <div class="flex items-center gap-2.5 font-bold" :class="executeResult.committed ? 'text-success-400' : 'text-rose-400'">
             <CheckCircle2 v-if="executeResult.committed" class="w-5 h-5" />
             <XCircle v-else class="w-5 h-5" />
             <span>{{ executeResult.committed ? $t('import.successTitle') : $t('import.cancelledTitle') }}</span>
@@ -267,25 +267,25 @@ async function handleExecute() {
           <div class="grid grid-cols-3 gap-2 text-center pt-2">
             <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/50">
               <span class="text-xs text-slate-400 block">{{ $t('import.imported') }}</span>
-              <span class="text-xl font-bold text-emerald-400">{{ executeResult.imported_count }}</span>
+              <span class="text-xl font-bold text-success-400">{{ executeResult.imported_count }}</span>
             </div>
             <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/50">
               <span class="text-xs text-slate-400 block">{{ $t('import.skipped') }}</span>
-              <span class="text-xl font-bold text-amber-400">{{ executeResult.skipped_count }}</span>
+              <span class="text-xl font-bold text-warning-400">{{ executeResult.skipped_count }}</span>
             </div>
             <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/50">
               <span class="text-xs text-slate-400 block">{{ $t('import.errors') }}</span>
-              <span class="text-xl font-bold text-rose-400">{{ executeResult.error_count }}</span>
+              <span class="text-xl font-bold text-danger-400">{{ executeResult.error_count }}</span>
             </div>
           </div>
-          <div v-if="executeResult.errors?.length" class="text-xs text-rose-400 space-y-1 max-h-32 overflow-y-auto pt-2">
+          <div v-if="executeResult.errors?.length" class="text-xs text-danger-400 space-y-1 max-h-32 overflow-y-auto pt-2">
             <div v-for="(msg, idx) in rowErrors(executeResult.errors)" :key="idx">• {{ msg }}</div>
             <div v-if="executeResult.errors_truncated" class="text-slate-400">{{ $t('import.moreErrors') }}</div>
           </div>
           <div class="pt-2 flex justify-end">
             <button
               @click="close"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition-colors"
+              class="px-4 py-2 bg-success-600 hover:bg-success-500 text-white text-xs font-semibold rounded-xl transition-colors"
             >
               {{ $t('common.close') }}
             </button>
@@ -302,7 +302,7 @@ async function handleExecute() {
                 <button type="button" @click="downloadTemplate(type)" class="shrink-0 text-rose-400 hover:text-rose-300 font-semibold">{{ $t('import.downloadTemplate') }}</button>
               </div>
               <p class="break-words text-slate-400">
-                <code class="text-emerald-300">{{ CSV_COLUMNS[type].required.join(', ') }}</code>
+                <code class="text-success-300">{{ CSV_COLUMNS[type].required.join(', ') }}</code>
                 <span v-if="CSV_COLUMNS[type].optional.length"> + <code>{{ CSV_COLUMNS[type].optional.join(', ') }}</code></span>
               </p>
             </div>
@@ -391,13 +391,13 @@ async function handleExecute() {
             </div>
 
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <span class="text-emerald-400">{{ previewResult.valid_rows }} {{ $t('import.validRows') }}</span>
-              <span class="text-amber-400">{{ previewResult.duplicate_rows }} {{ $t('import.duplicateRows') }}</span>
-              <span class="text-rose-400">{{ previewResult.invalid_rows }} {{ $t('import.invalidRows') }}</span>
+              <span class="text-success-400">{{ previewResult.valid_rows }} {{ $t('import.validRows') }}</span>
+              <span class="text-warning-400">{{ previewResult.duplicate_rows }} {{ $t('import.duplicateRows') }}</span>
+              <span class="text-danger-400">{{ previewResult.invalid_rows }} {{ $t('import.invalidRows') }}</span>
             </div>
             <p class="text-xs text-slate-400">{{ $t('import.distanceHint', { unit: distanceUnit() }) }}</p>
 
-            <div v-if="previewResult.errors?.length" class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 space-y-1 max-h-32 overflow-y-auto">
+            <div v-if="previewResult.errors?.length" class="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl text-xs text-danger-400 space-y-1 max-h-32 overflow-y-auto">
               <div v-for="(msg, idx) in rowErrors(previewResult.errors)" :key="idx">• {{ msg }}</div>
               <div v-if="previewResult.errors_truncated" class="text-slate-400">{{ $t('import.moreErrors') }}</div>
             </div>
@@ -459,7 +459,7 @@ async function handleExecute() {
                 <ul v-if="profilesForType.length" class="mt-2 space-y-1">
                   <li v-for="p in profilesForType" :key="p.id" class="flex items-center justify-between gap-2 text-slate-400">
                     <span class="truncate">{{ p.name }}</span>
-                    <button type="button" @click="deleteProfile(p.id)" class="shrink-0 text-rose-400 hover:text-rose-300">{{ $t('common.delete') }}</button>
+                    <button type="button" @click="deleteProfile(p.id)" class="shrink-0 text-danger-400 hover:text-danger-300">{{ $t('common.delete') }}</button>
                   </li>
                 </ul>
               </div>

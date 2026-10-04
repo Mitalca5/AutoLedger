@@ -73,7 +73,7 @@ async function handlePackSwapSubmit() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Snowflake class="w-4 h-4 text-sky-400" />
+          <Snowflake class="w-4 h-4 text-info-400" />
           {{ $t('tires.tirePackSwapModal.seasonalSwapFullSetChange') }}
         </h3>
         <button @click="open = false" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -156,7 +156,7 @@ async function handlePackSwapSubmit() {
         <button
           type="button"
           @click="handlePackSwapSubmit"
-          class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+          class="bg-info-600 hover:bg-info-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
         >
           {{ $t('tires.tirePackSwapModal.confirmTheRotation') }}
         </button>

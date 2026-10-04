@@ -65,7 +65,7 @@ onMounted(load)
     <ul v-if="rates.length" class="space-y-1 text-xs text-slate-300">
       <li v-for="r in rates" :key="r.id" class="flex items-center justify-between gap-2">
         <span>{{ r.label }} · {{ r.year }} · {{ describe(r) }}</span>
-        <button type="button" class="text-slate-400 hover:text-rose-400" :aria-label="$t('import.rateDelete')" @click="remove(r.id)">
+        <button type="button" class="text-slate-400 hover:text-danger-400" :aria-label="$t('import.rateDelete')" @click="remove(r.id)">
           <Trash2 class="w-4 h-4" />
         </button>
       </li>
@@ -77,7 +77,7 @@ onMounted(load)
       <input v-model.number="fromKm" type="number" min="0" :placeholder="$t('import.rateFrom')" :aria-label="$t('import.rateFrom')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
       <input v-model.number="toKm" type="number" min="1" :placeholder="$t('import.rateTo')" :aria-label="$t('import.rateTo')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
     </div>
-    <p v-if="error" class="text-xs text-rose-400" role="alert">{{ error }}</p>
+    <p v-if="error" class="text-xs text-danger-400" role="alert">{{ error }}</p>
     <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold disabled:opacity-50" :disabled="!label || rate === null" @click="add">
       {{ $t('import.rateAdd') }}
     </button>

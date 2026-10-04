@@ -10,9 +10,9 @@ export const isMountedPosition = (position: string): boolean => (MOUNTED_POSITIO
 export function getConditionBadge(condition: string) {
   switch (condition) {
     case 'GOOD':
-      return { label: t('tires.condition.good'), class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' }
+      return { label: t('tires.condition.good'), class: 'bg-success-500/10 text-success-400 border-success-500/20' }
     case 'WARNING':
-      return { label: t('tires.condition.warning'), class: 'bg-amber-500/10 text-amber-400 border-amber-500/20' }
+      return { label: t('tires.condition.warning'), class: 'bg-warning-500/10 text-warning-400 border-warning-500/20' }
     case 'CRITICAL':
       return { label: t('tires.condition.critical'), class: 'bg-rose-500/10 text-rose-400 border-rose-500/20' }
     default:
@@ -23,9 +23,9 @@ export function getConditionBadge(condition: string) {
 export function getSeasonIcon(season: string) {
   switch (season) {
     case 'WINTER':
-      return { icon: Snowflake, color: 'text-sky-400', label: t('tires.season.winter') }
+      return { icon: Snowflake, color: 'text-info-400', label: t('tires.season.winter') }
     case 'ALL_SEASON':
-      return { icon: CloudSun, color: 'text-amber-400', label: t('tires.season.allSeason') }
+      return { icon: CloudSun, color: 'text-warning-400', label: t('tires.season.allSeason') }
     default:
       return { icon: Sun, color: 'text-orange-400', label: t('tires.season.summer') }
   }

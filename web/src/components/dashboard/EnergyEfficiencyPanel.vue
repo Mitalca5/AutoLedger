@@ -172,7 +172,7 @@ onBeforeUnmount(() => {
     <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">
-          <Gauge class="h-4 w-4 text-sky-400" aria-hidden="true" />
+          <Gauge class="h-4 w-4 text-info-400" aria-hidden="true" />
           {{ $t('dashboard.energyEfficiencyPanel.energyEfficiency') }}
         </h3>
         <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.whatTheCarUsesAnd') }}</p>
@@ -203,12 +203,12 @@ onBeforeUnmount(() => {
       </div>
     </dl>
 
-    <p v-if="(stats?.summary.sessions_without_cost ?? 0) > 0" class="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+    <p v-if="(stats?.summary.sessions_without_cost ?? 0) > 0" class="rounded-lg border border-warning-500/20 bg-warning-500/10 px-3 py-2 text-xs text-warning-300">
       {{ $t('dashboard.energyEfficiencyPanel.chargeSWithoutAKnown', { unit: distanceUnit(), sessions_without_cost: stats?.summary.sessions_without_cost }) }}
       <router-link to="/expenses?tab=CHARGES" class="font-semibold underline">{{ $t('dashboard.energyEfficiencyPanel.completeThem') }}</router-link>
     </p>
 
-    <p v-if="hasDerived" class="rounded-lg border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-xs text-sky-300">
+    <p v-if="hasDerived" class="rounded-lg border border-info-500/20 bg-info-500/10 px-3 py-2 text-xs text-info-300">
       {{ $t('dashboard.energyEfficiencyPanel.derivedNote') }}
     </p>
 

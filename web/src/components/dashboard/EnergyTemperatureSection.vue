@@ -80,11 +80,11 @@ onBeforeUnmount(() => chart?.destroy())
 <template>
   <div v-if="bins.length > 0" class="space-y-3" role="group" aria-labelledby="energy-temperature-title">
     <h4 id="energy-temperature-title" class="flex items-center gap-2 text-xs font-bold text-slate-200">
-      <Snowflake class="h-4 w-4 text-sky-400" aria-hidden="true" />
+      <Snowflake class="h-4 w-4 text-info-400" aria-hidden="true" />
       {{ $t('dashboard.energyTemperatureSection.effectOfTemperature') }}
     </h4>
 
-    <p v-if="effect.extra_percent !== undefined" class="rounded-xl border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-sm text-sky-100">
+    <p v-if="effect.extra_percent !== undefined" class="rounded-xl border border-info-500/20 bg-info-500/10 px-3 py-2 text-sm text-info-100">
       {{ $t('dashboard.energyTemperatureSection.below5CTheCar') }} <strong>{{ $t('dashboard.energyTemperatureSection.kwh100Km', { unit: distanceUnit(), value: fmt(perUnit(effect.cold_consumption_kwh_100km), 1) }) }}</strong>
       {{ $t('dashboard.energyTemperatureSection.againstInMildWeather15', { value: fmt(perUnit(effect.mild_consumption_kwh_100km), 1) }) }}
       <strong>+{{ fmt(effect.extra_percent, 0) }} %</strong><template v-if="effect.extra_cost_per_100km !== undefined">{{ $t('dashboard.energyTemperatureSection.aboutMorePer100Km', { unit: distanceUnit(), value: formatAmount(perDistance(effect.extra_cost_per_100km), vehicleStore.currency) }) }}</template>.

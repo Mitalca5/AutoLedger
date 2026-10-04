@@ -73,13 +73,13 @@ const formatDate = formatDayTime
             class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/70 rounded-xl flex items-center gap-2 text-left shadow-sm"
             :title="$t('drives.tripGroupsPanel.consolidatedCostOfTheTrip')"
           >
-            <div class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <div class="p-1 rounded-lg bg-success-500/10 text-success-400">
               <Coins class="w-3.5 h-3.5" />
             </div>
             <div>
               <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
                 <span>{{ Number(tg.tolls_total || 0) > 0 ? $t('drives.tripGroupsPanel.costsAmount', { amount: formatAmount(Number(tg.tolls_total), vehicleStore.currency) }) : $t('drives.tripGroupsPanel.costDetail') }}</span>
-                <span v-if="tg.distance_km > 0 && tg.tolls_total" class="text-xs font-normal text-emerald-400 font-mono">
+                <span v-if="tg.distance_km > 0 && tg.tolls_total" class="text-xs font-normal text-success-400 font-mono">
                   {{ formatAmount(perDistance(Number(tg.tolls_total) / tg.distance_km), vehicleStore.currency, 3) }}/{{ distanceUnit() }}
                 </span>
               </div>
@@ -131,7 +131,7 @@ const formatDate = formatDayTime
             {{ formatDate(d.start_time) }}{{ $t('drives.tripGroupsPanel.dateSeparator') }}{{ (d.start_address || $t('drives.driveCostModal.start')).split(',')[0] }} → {{ (d.end_address || $t('drives.driveCostModal.end')).split(',')[0] }}
             <span class="text-slate-400">({{ formatDistance(d.distance_km, 1) }})</span>
           </span>
-          <button v-if="vehicleStore.canEdit" @click="emit('remove-drive', tg, d.id)" class="text-slate-400 hover:text-rose-400 shrink-0 p-1" :title="$t('drives.tripGroupsPanel.removeThisDriveFromThe')">
+          <button v-if="vehicleStore.canEdit" @click="emit('remove-drive', tg, d.id)" class="text-slate-400 hover:text-danger-400 shrink-0 p-1" :title="$t('drives.tripGroupsPanel.removeThisDriveFromThe')">
             <X class="w-3.5 h-3.5" />
           </button>
         </div>

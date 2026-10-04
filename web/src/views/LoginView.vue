@@ -72,14 +72,14 @@ async function signIn(emailValue: string, passwordValue: string) {
   <div class="min-h-screen flex items-center justify-center p-4 bg-slate-950">
     <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
       <div class="text-center mb-8">
-        <div class="inline-flex p-3 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-2xl shadow-lg shadow-rose-500/20 mb-3">
+        <div class="inline-flex p-3 bg-gradient-to-tr from-rose-500 to-warning-500 rounded-2xl shadow-lg shadow-rose-500/20 mb-3">
           <Zap class="w-8 h-8 text-white" />
         </div>
         <h1 class="text-2xl font-bold tracking-tight text-white">{{ $t('auth.loginView.signInTo', { APP_NAME }) }}</h1>
         <p class="text-sm text-slate-400 mt-1">{{ $t('auth.loginView.totalCostOfOwnershipTco') }}</p>
       </div>
 
-      <div v-if="error" class="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2 text-sm text-rose-400">
+      <div v-if="error" class="mb-4 p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl flex items-center gap-2 text-sm text-danger-400">
         <AlertCircle class="w-4 h-4 shrink-0" />
         <span>{{ error }}</span>
       </div>
