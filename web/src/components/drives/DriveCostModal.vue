@@ -429,7 +429,7 @@ async function handleDeleteExpense(exp: any) {
             id="drive-driver-select"
             :value="selectedCostDrive.driver_id || ''"
             @change="handleDriverChange($event)"
-            class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:border-purple-500 focus:outline-none"
+            class="field focus:border-purple-500"
           >
             <option value="">{{ $t('drives.unassignedDriver') }}</option>
             <option v-for="m in vehicleMembers" :key="m.user_id" :value="m.user_id">
@@ -665,16 +665,16 @@ async function handleDeleteExpense(exp: any) {
               </div>
               <div v-else class="grid grid-cols-12 gap-1.5 items-center py-1">
                 <label :for="`drive-expense-type-${exp.id}`" class="sr-only">{{ $t('drives.driveCostModal.costType') }}</label>
-                <select :id="`drive-expense-type-${exp.id}`" v-model="expenseEditForm.type" class="col-span-3 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white">
+                <select :id="`drive-expense-type-${exp.id}`" v-model="expenseEditForm.type" class="field col-span-3">
                   <option value="TOLL">{{ $t('drives.driveCostModal.toll') }}</option>
                   <option value="PARKING">{{ $t('drives.driveCostModal.parking') }}</option>
                   <option value="FERRY">{{ $t('drives.driveCostModal.ferry') }}</option>
                   <option value="OTHER">{{ $t('drives.driveCostModal.other') }}</option>
                 </select>
                 <label :for="`drive-expense-amount-${exp.id}`" class="sr-only">{{ $t('drives.driveCostModal.totalAmount') }}</label>
-                <input :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" type="number" step="0.01" min="0.01" class="col-span-3 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white" />
+                <input :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" type="number" step="0.01" min="0.01" class="field col-span-3" />
                 <label :for="`drive-expense-notes-${exp.id}`" class="sr-only">{{ $t('common.notes') }}</label>
-                <input :id="`drive-expense-notes-${exp.id}`" v-model="expenseEditForm.notes" :placeholder="$t('common.notes')" class="col-span-4 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white" />
+                <input :id="`drive-expense-notes-${exp.id}`" v-model="expenseEditForm.notes" :placeholder="$t('common.notes')" class="field col-span-4" />
                 <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-success-400 hover:text-success-300" :title="$t('common.save')">
                   <Save class="w-3.5 h-3.5" />
                 </button>
@@ -713,7 +713,7 @@ async function handleDeleteExpense(exp: any) {
                     type="button"
                     @click="handleApplyTollEstimate"
                     :disabled="applyingToll"
-                    class="px-2 py-0.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
+                    class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
                   >
                     {{ applyingToll ? '...' : existingTollExpense ? $t('drives.driveCostModal.update') : $t('drives.drivesView.apply') }}
                   </button>
@@ -740,7 +740,7 @@ async function handleDeleteExpense(exp: any) {
               <label for="drive-inline-toll-type" class="sr-only">{{ $t('drives.driveCostModal.costType') }}</label>
               <select id="drive-inline-toll-type"
                 v-model="inlineTollType"
-                class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+                class="field"
               >
                 <option value="TOLL">{{ $t('drives.driveCostModal.toll') }}</option>
                 <option value="PARKING">{{ $t('drives.driveCostModal.parking') }}</option>
@@ -752,7 +752,7 @@ async function handleDeleteExpense(exp: any) {
                 type="number"
                 step="0.01"
                 :placeholder="$t('drives.driveCostModal.amount', { cur: currencySymbol(vehicleCurrency) })"
-                class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+                class="field"
               />
             </div>
             <label for="drive-inline-toll-notes" class="sr-only">{{ $t('drives.driveCostModal.notesEGA6Beaune') }}</label>
@@ -760,7 +760,7 @@ async function handleDeleteExpense(exp: any) {
               v-model="inlineTollNotes"
               type="text"
               :placeholder="$t('drives.driveCostModal.notesEGA6Beaune')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+              class="field"
             />
             <div class="flex justify-end gap-2">
               <button

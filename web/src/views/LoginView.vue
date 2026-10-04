@@ -121,7 +121,7 @@ async function signIn(emailValue: string, passwordValue: string) {
               type="email"
               required
               :placeholder="$t('auth.loginView.youExampleCom')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field pl-10 pr-4 placeholder-slate-500"
             />
           </div>
         </div>
@@ -135,7 +135,7 @@ async function signIn(emailValue: string, passwordValue: string) {
               type="password"
               required
               placeholder="••••••••"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field pl-10 pr-4 placeholder-slate-500"
             />
           </div>
         </div>

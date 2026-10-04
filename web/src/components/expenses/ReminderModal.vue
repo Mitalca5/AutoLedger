@@ -155,7 +155,7 @@ async function handleSaveReminder() {
               type="text"
               required
               :placeholder="$t('expenses.reminderModal.eGTireRotation')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+              class="field"
             />
           </div>
           <div>
@@ -163,7 +163,7 @@ async function handleSaveReminder() {
             <select
               id="reminder-form-category"
               v-model="reminderForm.category"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+              class="field"
             >
               <option value="MAINTENANCE">{{ $t('expenses.reminderModal.maintenance') }}</option>
               <option value="TIRES">{{ $t('expenses.reminderModal.tires') }}</option>
@@ -183,7 +183,7 @@ async function handleSaveReminder() {
                 min="500"
                 step="500"
                 :placeholder="$t('expenses.reminderModal.eG10000EmptyIgnored')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
             <div>
@@ -195,7 +195,7 @@ async function handleSaveReminder() {
                 min="1"
                 max="120"
                 :placeholder="$t('expenses.reminderModal.eG12EmptyIgnored')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
           </div>
@@ -212,7 +212,7 @@ async function handleSaveReminder() {
                 v-model="reminderForm.last_service_odometer"
                 min="0"
                 :placeholder="$t('common.example', { value: '45000' })"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
             <div>
@@ -239,7 +239,7 @@ async function handleSaveReminder() {
                 min="0"
                 step="100"
                 placeholder="1000"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
             <div>
@@ -250,7 +250,7 @@ async function handleSaveReminder() {
                 type="number"
                 min="0"
                 placeholder="15"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
           </div>

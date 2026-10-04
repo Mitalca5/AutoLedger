@@ -196,6 +196,17 @@
   }
 }
 
+/* Icon buttons and row checkboxes reach a 40px hit area on touch screens without growing on desktop. */
+@media (pointer: coarse) {
+  .tap {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Comfortable tap target (48px) for the fields of the quick entry forms. */
 @media (pointer: coarse) {
   .field-touch {
@@ -213,6 +224,16 @@
   }
   .quick-chip {
     @apply min-h-12 rounded-xl border px-3 text-sm font-semibold transition-colors;
+  }
+}
+
+/* The one text field of the app: forms, modals and settings share its size, surface and focus ring. */
+@layer components {
+  .field {
+    @apply w-full min-w-0 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-rose-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .field-label {
+    @apply mb-1.5 block text-xs font-semibold text-slate-300;
   }
 }
 

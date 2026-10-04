@@ -27,7 +27,7 @@ const selected = computed({
     <span class="sr-only">{{ $t('shell.language.label') }}</span>
     <select
       v-model="selected"
-      class="bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
+      class="field rounded-md text-slate-200"
     >
       <option v-for="locale in SUPPORTED_LOCALES" :key="locale" :value="locale">{{ LANGUAGE_NAMES[locale] }}</option>
     </select>

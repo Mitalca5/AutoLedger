@@ -163,7 +163,7 @@ async function handleSaveTireEdit() {
           </div>
           <div>
             <label for="tire-edit-season" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.season') }}</label>
-            <select id="tire-edit-season" v-model="tireEditForm.season" class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500">
+            <select id="tire-edit-season" v-model="tireEditForm.season" class="field">
               <option value="">{{ tireEditIds.length > 1 ? $t('tires.tireEditModal.unchangedFeminine') : '—' }}</option>
               <option value="SUMMER">{{ $t('tires.tireEditModal.summer') }}</option>
               <option value="WINTER">{{ $t('tires.tireEditModal.winter') }}</option>
@@ -189,7 +189,7 @@ async function handleSaveTireEdit() {
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
           <div>
             <label for="tire-edit-price-mode" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.priceEntry') }}</label>
-            <select id="tire-edit-price-mode" v-model="tireEditPriceMode" class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500">
+            <select id="tire-edit-price-mode" v-model="tireEditPriceMode" class="field">
               <option value="UNIT">{{ $t('tires.tireEditModal.unitPrice') }}</option>
               <option value="TOTAL" :disabled="tireEditIds.length < 2">{{ $t('tires.tireEditModal.totalPriceSplit') }}</option>
             </select>

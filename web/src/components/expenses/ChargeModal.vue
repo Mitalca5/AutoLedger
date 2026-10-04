@@ -150,17 +150,17 @@ async function handleSaveCharge() {
             </div>
             <div>
               <label for="charge-form-kwh-added" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.energyAddedKwh') }}</label>
-              <input id="charge-form-kwh-added" v-model="chargeForm.kwh_added" type="number" inputmode="decimal" step="0.001" min="0.001" required class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="charge-form-kwh-added" v-model="chargeForm.kwh_added" type="number" inputmode="decimal" step="0.001" min="0.001" required class="field" />
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="charge-form-address" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.placeOptional') }}</label>
-              <input id="charge-form-address" v-model="chargeForm.address" :placeholder="$t('expenses.chargeModal.chargerHome')" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="charge-form-address" v-model="chargeForm.address" :placeholder="$t('expenses.chargeModal.chargerHome')" class="field" />
             </div>
             <div>
               <label for="charge-form-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.odometerOptional') }}</label>
-              <DistanceInput text id="charge-form-odometer" v-model="chargeForm.odometer" inputmode="numeric" min="0" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <DistanceInput text id="charge-form-odometer" v-model="chargeForm.odometer" inputmode="numeric" min="0" class="field" />
             </div>
           </div>
         </template>
@@ -178,20 +178,20 @@ async function handleSaveCharge() {
             </button>
           </div>
           <div class="flex gap-1.5">
-            <input id="charge-form-cost" v-model="chargeForm.cost" type="number" inputmode="decimal" step="0.01" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field-touch w-full min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="charge-form-cost" v-model="chargeForm.cost" type="number" inputmode="decimal" step="0.01" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field" />
             <label for="charge-form-currency" class="sr-only">{{ $t('expenses.chargeModal.currency') }}</label>
-            <select id="charge-form-currency" v-model="chargeForm.currency" class="bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs text-white">
+            <select id="charge-form-currency" v-model="chargeForm.currency" class="field">
               <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
             </select>
           </div>
         </div>
         <div v-if="chargeForm.currency !== baseCurrency">
           <label for="charge-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.conversionRate1', { currency: chargeForm.currency, base: baseCurrency }) }}</label>
-          <input id="charge-form-fx-rate" v-model="chargeForm.fx_rate" type="number" inputmode="decimal" step="0.000001" min="0.000001" required class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="charge-form-fx-rate" v-model="chargeForm.fx_rate" type="number" inputmode="decimal" step="0.000001" min="0.000001" required class="field" />
         </div>
         <div>
           <label for="charge-form-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.notesOptional') }}</label>
-          <input id="charge-form-notes" v-model="chargeForm.notes" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="charge-form-notes" v-model="chargeForm.notes" class="field" />
         </div>
 
         <!-- Justificatif / Facture -->
@@ -235,7 +235,7 @@ async function handleSaveCharge() {
                 <label for="charge-existing-doc" class="sr-only">{{ $t('expenses.chargeModal.pickAnExistingInvoice') }}</label>
                 <select
                   id="charge-existing-doc"
-                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300"
+                  class="field text-slate-300"
                   @change="(e: any) => onSelectExistingDoc(e.target.value, chargeForm)"
                 >
                   <option value="">{{ $t('expenses.chargeModal.attachAnExistingInvoice') }}</option>

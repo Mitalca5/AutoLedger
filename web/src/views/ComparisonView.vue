@@ -568,11 +568,11 @@ onBeforeUnmount(destroyChart)
       <template v-if="step === 1">
         <div>
           <label for="cmp-name" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.comparisonName') }}</label>
-          <input id="cmp-name" v-model="form.name" maxlength="100" :placeholder="$t('comparison.comparisonView.eGComparedWithA')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="cmp-name" v-model="form.name" maxlength="100" :placeholder="$t('comparison.comparisonView.eGComparedWithA')" class="field" />
         </div>
         <div>
           <label for="cmp-mode" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.comparisonType') }}</label>
-          <select id="cmp-mode" v-model="form.mode" :disabled="!!editingId" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" @change="onModeChange">
+          <select id="cmp-mode" v-model="form.mode" :disabled="!!editingId" class="field" @change="onModeChange">
             <option value="RETROSPECTIVE" :disabled="!canCompareTrackedVehicle">
               {{ $t('comparison.comparisonView.myTrackedEv') }}{{ vehicleStore.activeVehicle ? ` (${vehicleStore.activeVehicle.name})` : '' }} {{ $t('comparison.comparisonView.vsIce') }}
             </option>
@@ -583,14 +583,14 @@ onBeforeUnmount(destroyChart)
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label for="cmp-km" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.kilometresPerYear', { unit: distanceUnit() }) }}</label>
-            <DistanceInput id="cmp-km" v-model="form.annual_km" :digits="0" min="1" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <DistanceInput id="cmp-km" v-model="form.annual_km" :digits="0" min="1" step="any" class="field" />
             <p v-if="defaults && isRetro" class="text-xs text-slate-400 mt-1">
               {{ defaults.annual_km_from_data ? $t('comparison.comparisonView.fromHistory') : $t('comparison.comparisonView.defaultValue') }}
             </p>
           </div>
           <div>
             <label for="cmp-years" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.durationYears') }}</label>
-            <input id="cmp-years" v-model.number="form.years" type="number" min="1" max="15" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="cmp-years" v-model.number="form.years" type="number" min="1" max="15" class="field" />
           </div>
         </div>
       </template>
@@ -601,24 +601,24 @@ onBeforeUnmount(destroyChart)
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label for="cmp-fuel" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuel') }}</label>
-              <select id="cmp-fuel" v-model="form.ice.fuel_type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" @change="applyFuelDefaults">
+              <select id="cmp-fuel" v-model="form.ice.fuel_type" class="field" @change="applyFuelDefaults">
                 <option v-for="f in fuelTypes" :key="f.fuel_type" :value="f.fuel_type">{{ fuelLabel(f) }}</option>
               </select>
             </div>
             <div>
               <label for="cmp-ice-l100" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.consumptionL100Km', { unit: distanceUnit() }) }}</label>
-              <DistanceInput kind="per-distance" id="cmp-ice-l100" v-model="form.ice.l_per_100km" min="0.1" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <DistanceInput kind="per-distance" id="cmp-ice-l100" v-model="form.ice.l_per_100km" min="0.1" step="any" class="field" />
             </div>
             <div>
               <label for="cmp-ice-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuelPriceL', { cur: currencySign }) }}</label>
-              <input id="cmp-ice-price" v-model.number="form.ice.fuel_price" type="number" min="0" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="cmp-ice-price" v-model.number="form.ice.fuel_price" type="number" min="0" step="any" class="field" />
             </div>
           </div>
           <p class="text-xs text-slate-400 flex items-center gap-1"><Info class="w-3 h-3" /> {{ defaults?.source ? apiMessageText(defaults.source) : $t('comparison.comparisonView.indicative') }}</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in iceFields" :key="f.key">
               <label :for="`cmp-ice-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
-              <input :id="`cmp-ice-${f.key}`" v-model.number="form.ice[f.key]" type="number" min="0" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input :id="`cmp-ice-${f.key}`" v-model.number="form.ice[f.key]" type="number" min="0" step="any" class="field" />
             </div>
           </div>
         </div>
@@ -628,17 +628,17 @@ onBeforeUnmount(destroyChart)
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="cmp-ev-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.consumptionKwh100Km', { unit: distanceUnit() }) }}</label>
-              <DistanceInput kind="per-distance" id="cmp-ev-kwh" v-model="form.ev.kwh_per_100km" min="0.1" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <DistanceInput kind="per-distance" id="cmp-ev-kwh" v-model="form.ev.kwh_per_100km" min="0.1" step="any" class="field" />
             </div>
             <div>
               <label for="cmp-ev-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.averageElectricityPriceKwh', { cur: currencySign }) }}</label>
-              <input id="cmp-ev-price" v-model.number="form.ev.eur_per_kwh" type="number" min="0" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="cmp-ev-price" v-model.number="form.ev.eur_per_kwh" type="number" min="0" step="any" class="field" />
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in evFields" :key="f.key">
               <label :for="`cmp-ev-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
-              <input :id="`cmp-ev-${f.key}`" v-model.number="form.ev[f.key]" type="number" min="0" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input :id="`cmp-ev-${f.key}`" v-model.number="form.ev[f.key]" type="number" min="0" step="any" class="field" />
             </div>
           </div>
         </div>
@@ -659,20 +659,20 @@ onBeforeUnmount(destroyChart)
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label for="cmp-infl-fuel" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuelYear') }}</label>
-              <input id="cmp-infl-fuel" v-model.number="form.options.fuel_inflation_pct" type="number" min="-10" max="30" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="cmp-infl-fuel" v-model.number="form.options.fuel_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
             </div>
             <div>
               <label for="cmp-infl-elec" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.electricityYear') }}</label>
-              <input id="cmp-infl-elec" v-model.number="form.options.electricity_inflation_pct" type="number" min="-10" max="30" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="cmp-infl-elec" v-model.number="form.options.electricity_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
             </div>
             <div>
               <label for="cmp-infl-cost" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.maintenanceInsuranceTaxesYear') }}</label>
-              <input id="cmp-infl-cost" v-model.number="form.options.cost_inflation_pct" type="number" min="-10" max="30" step="any" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="cmp-infl-cost" v-model.number="form.options.cost_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
             </div>
           </div>
           <div v-if="!isRetro">
             <label for="cmp-ev-incentives" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.electricPurchaseGrantsDeductedFrom', { cur: currencySign }) }}</label>
-            <input id="cmp-ev-incentives" v-model.number="form.options.ev_incentives" type="number" min="0" step="any" class="w-full sm:w-1/2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="cmp-ev-incentives" v-model.number="form.options.ev_incentives" type="number" min="0" step="any" class="field sm:w-1/2" />
           </div>
         </div>
       </div>
@@ -683,7 +683,7 @@ onBeforeUnmount(destroyChart)
         <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2" @click="prevStep">
           <ArrowLeft class="w-4 h-4" /> {{ step === 1 ? $t('common.cancel') : $t('comparison.comparisonView.back') }}
         </button>
-        <button type="submit" :disabled="saving" class="bg-info-600 hover:bg-info-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
+        <button type="submit" :disabled="saving" class="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
           {{ step === 2 ? (saving ? $t('comparison.comparisonView.calculating') : $t('comparison.comparisonView.viewResult')) : $t('comparison.comparisonView.next') }} <ArrowRight class="w-4 h-4" />
         </button>
       </div>

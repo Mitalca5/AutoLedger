@@ -77,7 +77,7 @@ async function handleUploadStandaloneDocument() {
             id="standalone-doc-desc"
             v-model="uploadDocDescription"
             :placeholder="$t('expenses.uploadDocumentModal.eGServiceInvoiceAugust')"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+            class="field"
           />
         </div>
       </form>

@@ -175,7 +175,7 @@ async function handleCreateTires() {
         <label for="tire-add-tire-position" class="block text-xs font-semibold text-slate-400">{{ $t('tires.tireAddModal.position') }}</label>
         <select id="tire-add-tire-position"
           v-model="addTireForm.current_position"
-          class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+          class="field"
         >
           <option value="FL">{{ $t('tires.tireAddModal.frontLeftFl') }}</option>
           <option value="FR">{{ $t('tires.tireAddModal.frontRightFr') }}</option>
@@ -193,7 +193,7 @@ async function handleCreateTires() {
             v-model="addTireForm.brand"
             type="text"
             :placeholder="$t('tires.tireAddModal.brand')"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
         <div>
@@ -202,7 +202,7 @@ async function handleCreateTires() {
             v-model="addTireForm.model"
             type="text"
             :placeholder="$t('tires.tireAddModal.model')"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
         <div>
@@ -211,14 +211,14 @@ async function handleCreateTires() {
             v-model="addTireForm.dimension"
             type="text"
             placeholder="235/45 R18 98Y"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500 font-mono"
+            class="field font-mono"
           />
         </div>
         <div>
           <label for="tire-add-tire-season" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.season') }}</label>
           <select id="tire-add-tire-season"
             v-model="addTireForm.season"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           >
             <option value="SUMMER">{{ $t('tires.tireAddModal.summer') }}</option>
             <option value="WINTER">{{ $t('tires.tireAddModal.winter') }}</option>
@@ -247,14 +247,14 @@ async function handleCreateTires() {
             v-model.number="addTireForm.total_price"
             type="number"
             step="10"
-            class="w-full bg-slate-900 text-success-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field text-success-400 font-bold"
           />
           <input id="tire-add-tire-total-price"
             v-else
             v-model.number="addTireForm.unit_price"
             type="number"
             step="5"
-            class="w-full bg-slate-900 text-success-400 font-bold text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field text-success-400 font-bold"
           />
         </div>
 
@@ -263,7 +263,7 @@ async function handleCreateTires() {
           <DistanceInput whole id="tire-add-tire-estimated-lifespan-km"
             v-model="addTireForm.estimated_lifespan_km"
             step="5000"
-            class="w-full bg-slate-900 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
       </div>
@@ -273,7 +273,7 @@ async function handleCreateTires() {
         <label for="tire-add-tire-accumulated-distance-km" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.kmAlreadyDrivenIfUsed', { unit: distanceUnit() }) }}</label>
         <DistanceInput id="tire-add-tire-accumulated-distance-km"
           v-model="addTireForm.accumulated_distance_km"
-          class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+          class="field"
         />
       </div>
 
@@ -294,7 +294,7 @@ async function handleCreateTires() {
             v-model.number="addTireForm.initial_depth_mm"
             type="number"
             step="0.1"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-1.5 border border-slate-700"
+            class="field"
           />
         </div>
         <div>
@@ -303,7 +303,7 @@ async function handleCreateTires() {
             v-model.number="addTireForm.min_legal_depth_mm"
             type="number"
             step="0.1"
-            class="w-full bg-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-1.5 border border-slate-700"
+            class="field"
           />
         </div>
       </div>

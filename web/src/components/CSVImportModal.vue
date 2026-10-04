@@ -357,7 +357,7 @@ async function handleExecute() {
                 id="csv-type-select"
                 v-model="selectedType"
                 @change="onOptionsChange"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                class="field"
               >
                 <option value="">{{ $t('import.autoDetect') }}</option>
                 <option value="CHARGES">{{ $t('import.typeCharges') }}</option>
@@ -409,7 +409,7 @@ async function handleExecute() {
               <div v-if="profilesForType.length" class="mt-3">
                 <label for="csv-profile" class="block text-slate-400 mb-1">{{ $t('import.profileApply') }}</label>
                 <div class="flex items-center gap-2">
-                  <select id="csv-profile" class="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white" @change="applyProfile(($event.target as HTMLSelectElement).value)">
+                  <select id="csv-profile" class="field flex-1" @change="applyProfile(($event.target as HTMLSelectElement).value)">
                     <option value="">{{ $t('import.profileNone') }}</option>
                     <option v-for="p in profilesForType" :key="p.id" :value="p.id">{{ p.name }}</option>
                   </select>
@@ -422,7 +422,7 @@ async function handleExecute() {
                     :id="`csv-col-${col.index}`"
                     :value="col.field"
                     @change="setColumnField(col.index, ($event.target as HTMLSelectElement).value)"
-                    class="min-w-0 w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    class="field"
                   >
                     <option value="">{{ $t('import.ignoreColumn') }}</option>
                     <option v-if="col.field && !previewResult.fields.includes(col.field)" :value="col.field" disabled>{{ col.field }}</option>
@@ -433,7 +433,7 @@ async function handleExecute() {
               <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label for="csv-date-order" class="block text-slate-400 mb-1">{{ $t('import.dateOrder') }}</label>
-                  <select id="csv-date-order" v-model="dateOrder" @change="handlePreview" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                  <select id="csv-date-order" v-model="dateOrder" @change="handlePreview" class="field">
                     <option value="">{{ $t('import.autoDetect') }}</option>
                     <option value="dmy">{{ $t('import.dateDmy') }}</option>
                     <option value="mdy">{{ $t('import.dateMdy') }}</option>
@@ -442,7 +442,7 @@ async function handleExecute() {
                 </div>
                 <div>
                   <label for="csv-decimal" class="block text-slate-400 mb-1">{{ $t('import.decimalSeparator') }}</label>
-                  <select id="csv-decimal" v-model="decimalSeparator" @change="handlePreview" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                  <select id="csv-decimal" v-model="decimalSeparator" @change="handlePreview" class="field">
                     <option value="">{{ $t('import.autoDetect') }}</option>
                     <option value=".">{{ $t('import.decimalDot') }}</option>
                     <option value=",">{{ $t('import.decimalComma') }}</option>
@@ -453,7 +453,7 @@ async function handleExecute() {
               <div v-if="previewResult.type !== 'UNKNOWN'" class="mt-3 border-t border-slate-800 pt-3">
                 <label for="csv-profile-name" class="block text-slate-400 mb-1">{{ $t('import.profileSaveLabel') }}</label>
                 <div class="flex items-center gap-2">
-                  <input id="csv-profile-name" v-model="profileName" maxlength="60" type="text" :placeholder="$t('import.profileNamePlaceholder')" class="min-w-0 flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white" />
+                  <input id="csv-profile-name" v-model="profileName" maxlength="60" type="text" :placeholder="$t('import.profileNamePlaceholder')" class="field flex-1" />
                   <button type="button" :disabled="!profileName.trim()" @click="saveProfile" class="shrink-0 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg disabled:opacity-50">{{ $t('common.save') }}</button>
                 </div>
                 <ul v-if="profilesForType.length" class="mt-2 space-y-1">

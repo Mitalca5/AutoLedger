@@ -37,7 +37,7 @@ const formatDate = formatDayTime
         v-if="vehicleStore.canEdit"
         :for="'drive-select-' + d.id"
         @click.stop
-        class="mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
+        class="tap mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
         :title="$t('drives.driveCard.selectThisDrive')"
       >
         <span class="sr-only">{{ $t('drives.driveCard.selectThisDrive') }}</span>
@@ -134,7 +134,7 @@ const formatDate = formatDayTime
       <button
         v-if="vehicleStore.canEdit"
         @click="router.push({ path: '/carpools', query: { new_drive_id: d.id } })"
-        class="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 flex items-center gap-1.5 transition-all"
+        class="tap px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 flex items-center gap-1.5 transition-all"
         :title="$t('drives.driveCard.createACarpoolFromThis')"
       >
         <Users class="w-3.5 h-3.5 text-rose-500" />
@@ -145,14 +145,14 @@ const formatDate = formatDayTime
       <template v-if="vehicleStore.canEdit && d.is_manual">
         <button
           @click="emit('edit', d)"
-          class="p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
+          class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
           :title="$t('common.edit')"
         >
           <Pencil class="w-3.5 h-3.5" />
         </button>
         <button
           @click="emit('delete', d)"
-          class="p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
+          class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
           :title="$t('common.delete')"
         >
           <Trash2 class="w-3.5 h-3.5" />

@@ -86,7 +86,7 @@ async function handlePackSwapSubmit() {
           <label for="tire-pack-swap-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.odometerAtTheSwapKm', { unit: distanceUnit() }) }}</label>
           <DistanceInput id="tire-pack-swap-odometer"
             v-model="packSwapForm.odometer"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700"
+            class="field"
           />
         </div>
 
@@ -95,7 +95,7 @@ async function handlePackSwapSubmit() {
             <label for="tire-pack-swap-tires-fl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontLeftFl') }}</label>
             <select id="tire-pack-swap-tires-fl"
               v-model="packSwapForm.tires.FL"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-700"
+              class="field"
             >
               <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
               <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
@@ -108,7 +108,7 @@ async function handlePackSwapSubmit() {
             <label for="tire-pack-swap-tires-fr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontRightFr') }}</label>
             <select id="tire-pack-swap-tires-fr"
               v-model="packSwapForm.tires.FR"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-700"
+              class="field"
             >
               <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
               <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
@@ -121,7 +121,7 @@ async function handlePackSwapSubmit() {
             <label for="tire-pack-swap-tires-rl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearLeftRl') }}</label>
             <select id="tire-pack-swap-tires-rl"
               v-model="packSwapForm.tires.RL"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-700"
+              class="field"
             >
               <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
               <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
@@ -134,7 +134,7 @@ async function handlePackSwapSubmit() {
             <label for="tire-pack-swap-tires-rr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearRightRr') }}</label>
             <select id="tire-pack-swap-tires-rr"
               v-model="packSwapForm.tires.RR"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-700"
+              class="field"
             >
               <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
               <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
@@ -156,7 +156,7 @@ async function handlePackSwapSubmit() {
         <button
           type="button"
           @click="handlePackSwapSubmit"
-          class="bg-info-600 hover:bg-info-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+          class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
         >
           {{ $t('tires.tirePackSwapModal.confirmTheRotation') }}
         </button>

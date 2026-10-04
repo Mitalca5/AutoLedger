@@ -723,7 +723,7 @@ async function handleBulkApplyToll() {
           <select
             id="drives-toll-source"
             v-model="tollSource"
-            class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+            class="field"
           >
             <option value="">{{ $t('drives.drivesView.all') }}</option>
             <option value="AUTO_TOLL">{{ $t('drives.drivesView.auto') }}</option>

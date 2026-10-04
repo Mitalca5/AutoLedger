@@ -220,7 +220,7 @@ async function handleCreateMaint() {
       <form id="maint-modal-form" @submit.prevent="handleCreateMaint" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
         <div>
           <label for="expense-maint-category" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.category') }}</label>
-          <select id="expense-maint-category" v-model="maintForm.category" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+          <select id="expense-maint-category" v-model="maintForm.category" class="field">
             <option value="MAINTENANCE">{{ $t('expenses.maintenanceModal.maintenanceService') }}</option>
             <option value="REPAIR">{{ $t('expenses.maintenanceModal.repairClaimExcess') }}</option>
             <option value="INSURANCE">{{ $t('expenses.maintenanceModal.insurancePremium') }}</option>
@@ -243,7 +243,7 @@ async function handleCreateMaint() {
                 step="0.01"
                 min="0"
                 :placeholder="$t('common.example', { value: '850' })"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
             <button type="button" @click="applyMonthlyPremium" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl">
@@ -260,7 +260,7 @@ async function handleCreateMaint() {
 
         <div>
           <label for="expense-maint-description" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.description') }}</label>
-          <input id="expense-maint-description" v-model="maintForm.description" required :placeholder="$t('expenses.maintenanceModal.eGCabinFilterReplacement')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="expense-maint-description" v-model="maintForm.description" required :placeholder="$t('expenses.maintenanceModal.eGCabinFilterReplacement')" class="field" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -271,9 +271,9 @@ async function handleCreateMaint() {
           <div>
             <label for="maint-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.amount') }}</label>
             <div class="flex gap-1.5">
-              <input id="maint-form-amount" v-model="maintForm.amount" type="number" step="0.01" min="0.01" required class="w-full min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="maint-form-amount" v-model="maintForm.amount" type="number" step="0.01" min="0.01" required class="field" />
               <label for="maint-form-currency" class="sr-only">{{ $t('expenses.maintenanceModal.currency') }}</label>
-              <select id="maint-form-currency" v-model="maintForm.currency" class="bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs text-white">
+              <select id="maint-form-currency" v-model="maintForm.currency" class="field">
                 <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
               </select>
             </div>
@@ -281,7 +281,7 @@ async function handleCreateMaint() {
         </div>
         <div v-if="maintForm.currency !== baseCurrency">
           <label for="maint-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.conversionRate1', { currency: maintForm.currency, base: baseCurrency }) }}</label>
-          <input id="maint-form-fx-rate" v-model="maintForm.fx_rate" type="number" step="0.000001" min="0.000001" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="maint-form-fx-rate" v-model="maintForm.fx_rate" type="number" step="0.000001" min="0.000001" required class="field" />
         </div>
 
         <div>
@@ -289,7 +289,7 @@ async function handleCreateMaint() {
             <label for="expense-maint-odometer" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.maintenanceModal.odometerKm', { unit: distanceUnit() }) }}</label>
             <span v-if="detectingOdometer" class="text-xs text-slate-400">{{ $t('expenses.maintenanceModal.detectingTheMileage') }}</span>
           </div>
-          <DistanceInput id="expense-maint-odometer" v-model="maintForm.odometer" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <DistanceInput id="expense-maint-odometer" v-model="maintForm.odometer" class="field" />
           <div v-if="detectedOdometer !== null && detectedOdometer > 0" class="flex items-center justify-between text-xs text-success-400 mt-1">
             <span>{{ $t('expenses.maintenanceModal.mileageDetectedKm', { unit: distanceUnit(), detectedOdometer: formatDistanceValue(detectedOdometer) }) }}</span>
             <button
@@ -353,7 +353,7 @@ async function handleCreateMaint() {
               min="1000"
               step="1000"
               placeholder="50000"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+              class="field"
             />
           </div>
 
@@ -367,7 +367,7 @@ async function handleCreateMaint() {
               min="1"
               max="120"
               placeholder="24"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+              class="field"
             />
           </div>
 
@@ -398,7 +398,7 @@ async function handleCreateMaint() {
           <div v-if="maintForm.is_recurring" class="pt-1 grid grid-cols-2 gap-3">
             <div>
               <label for="maint-form-recurrence-interval-months" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.intervalMonths') }}</label>
-              <input id="maint-form-recurrence-interval-months" v-model.number="maintForm.recurrence_interval_months" type="number" min="1" max="120" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="maint-form-recurrence-interval-months" v-model.number="maintForm.recurrence_interval_months" type="number" min="1" max="120" required class="field" />
             </div>
             <div>
               <label for="maint-form-recurrence-end-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.endOptional') }}</label>
@@ -447,7 +447,7 @@ async function handleCreateMaint() {
               <label for="maint-existing-doc" class="block text-xs text-slate-400 mb-1">{{ $t('expenses.maintenanceModal.attachAnExistingInvoice') }}</label>
               <select
                 id="maint-existing-doc"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300"
+                class="field text-slate-300"
                 @change="(e: any) => onSelectExistingDoc(e.target.value, maintForm)"
               >
                 <option value="">{{ $t('expenses.maintenanceModal.selectAnExistingReceipt') }}</option>

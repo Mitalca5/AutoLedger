@@ -152,7 +152,7 @@ async function handleRemoveMember(m: any) {
                   type="email"
                   required
                   :placeholder="$t('vehicles.vehicleMembersModal.emailExampleCom')"
-                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                  class="field placeholder-slate-500 focus:border-violet-500"
                 />
               </div>
               <div class="sm:col-span-5">
@@ -160,7 +160,7 @@ async function handleRemoveMember(m: any) {
                 <select
                   id="new-member-role"
                   v-model="newMemberRole"
-                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                  class="field focus:border-violet-500"
                 >
                   <option value="EDITOR">{{ $t('vehicles.vehicleMembersModal.coDriverEditor') }}</option>
                   <option value="VIEWER">{{ $t('vehicles.vehicleMembersModal.readOnly') }}</option>
@@ -249,7 +249,7 @@ async function handleRemoveMember(m: any) {
                     :value="m.role"
                     :disabled="updatingMemberId === m.user_id"
                     @change="handleUpdateMemberRole(m, ($event.target as HTMLSelectElement).value)"
-                    class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+                    class="field text-slate-200 focus:border-violet-500"
                   >
                     <option value="EDITOR">{{ $t('vehicles.vehicleMembersModal.coDriver') }}</option>
                     <option value="VIEWER">{{ $t('vehicles.vehicleMembersModal.viewer') }}</option>

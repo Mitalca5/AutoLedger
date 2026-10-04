@@ -79,11 +79,11 @@ async function handleSave() {
       <form id="trip-edit-form" @submit.prevent="handleSave" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
         <div>
           <label for="trip-edit-name" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.tripEditModal.name') }}</label>
-          <input id="trip-edit-name" v-model="form.name" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500" />
+          <input id="trip-edit-name" v-model="form.name" required class="field" />
         </div>
         <div>
           <label for="trip-edit-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('common.notes') }}</label>
-          <input id="trip-edit-notes" v-model="form.notes" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500" />
+          <input id="trip-edit-notes" v-model="form.notes" class="field" />
         </div>
 
         <div class="space-y-1.5">

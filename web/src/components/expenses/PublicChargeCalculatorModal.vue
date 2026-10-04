@@ -195,7 +195,7 @@ onMounted(() => {
               step="0.01"
               min="0"
               placeholder="0.00"
-              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
+              class="field focus:border-blue-500"
             />
           </div>
           <div>
@@ -207,7 +207,7 @@ onMounted(() => {
               step="1"
               min="0"
               placeholder="0"
-              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
+              class="field focus:border-blue-500"
             />
           </div>
           <div>
@@ -219,7 +219,7 @@ onMounted(() => {
               step="1"
               min="0"
               placeholder="0"
-              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
+              class="field focus:border-blue-500"
             />
           </div>
         </div>

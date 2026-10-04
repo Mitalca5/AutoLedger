@@ -104,7 +104,7 @@ async function handleCopyHistorySubmit() {
             id="copy-history-source-select"
             :value="copyHistorySourceTire.id"
             @change="onSourceTireChange(($event.target as HTMLSelectElement).value)"
-            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer"
+            class="field cursor-pointer"
           >
             <option v-for="t in tires" :key="t.tire.id" :value="t.tire.id">
               {{ getTireSelectLabel(t) }}

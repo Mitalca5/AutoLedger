@@ -146,7 +146,7 @@ async function handleSubmit() {
               v-model="startTime"
               type="datetime-local"
               required
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
           <div>
@@ -157,7 +157,7 @@ async function handleSubmit() {
               id="manual-drive-end-time"
               v-model="endTime"
               type="datetime-local"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
         </div>
@@ -174,7 +174,7 @@ async function handleSubmit() {
               required
               min="0.1"
               step="0.1"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
           <div>
@@ -188,7 +188,7 @@ async function handleSubmit() {
               step="0.1"
               min="0"
               :placeholder="$t('drives.manualModal.energyPlaceholder')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+              class="field placeholder-slate-500"
             />
           </div>
         </div>
@@ -204,7 +204,7 @@ async function handleSubmit() {
               v-model="startAddress"
               type="text"
               :placeholder="$t('drives.manualModal.originPlaceholder')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+              class="field placeholder-slate-500"
             />
           </div>
           <div>
@@ -216,7 +216,7 @@ async function handleSubmit() {
               v-model="endAddress"
               type="text"
               :placeholder="$t('drives.manualModal.destinationPlaceholder')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+              class="field placeholder-slate-500"
             />
           </div>
         </div>
@@ -232,7 +232,7 @@ async function handleSubmit() {
               v-model="startOdometer"
               step="1"
               min="0"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
           <div>
@@ -244,7 +244,7 @@ async function handleSubmit() {
               v-model="endOdometer"
               step="1"
               min="0"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
         </div>

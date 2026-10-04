@@ -406,7 +406,7 @@ async function handleModalRecalculate() {
             v-model="form.title"
             @input="titleTouched = true"
             :placeholder="$t('carpool.carpoolTripModal.eGAnnecyValence')"
-            class="w-full bg-slate-800 text-slate-100 text-sm rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
         <div>
@@ -465,7 +465,7 @@ async function handleModalRecalculate() {
               :id="`leg-start-${i}`"
               v-model="leg.start_label"
               :placeholder="$t('carpool.carpoolTripModal.start')"
-              class="w-36 bg-slate-800 text-slate-100 rounded-lg px-2 py-1 border border-slate-700"
+              class="field w-36!"
             />
             <span class="text-slate-400">→</span>
             <label :for="`leg-end-${i}`" class="sr-only">{{ $t('carpool.carpoolTripModal.endOfLeg', { i: i + 1 }) }}</label>
@@ -473,7 +473,7 @@ async function handleModalRecalculate() {
               :id="`leg-end-${i}`"
               v-model="leg.end_label"
               :placeholder="$t('carpool.carpoolTripModal.destination')"
-              class="w-36 bg-slate-800 text-slate-100 rounded-lg px-2 py-1 border border-slate-700"
+              class="field w-36!"
             />
             <label :for="`leg-distance-${i}`" class="text-slate-400">{{ distanceUnit() }}</label>
             <DistanceInput
@@ -482,7 +482,7 @@ async function handleModalRecalculate() {
               step="0.1"
               min="0"
               :readonly="!!leg.drive_id"
-              class="w-20 bg-slate-800 text-slate-100 rounded-lg px-2 py-1 border border-slate-700"
+              class="field w-20!"
             />
             <button
               v-if="!leg.drive_id"
@@ -510,7 +510,7 @@ async function handleModalRecalculate() {
                 type="number"
                 step="0.01"
                 min="0"
-                class="w-full bg-slate-900 text-slate-100 text-xs rounded-lg px-2 py-1 border border-slate-700 focus:outline-none focus:border-rose-500"
+                class="field"
               />
             </div>
           </div>
@@ -536,7 +536,7 @@ async function handleModalRecalculate() {
               <input
                 :id="`passenger-name-${index}`"
                 v-model="p.passenger_name"
-                class="w-full bg-slate-900 text-slate-100 rounded-lg px-2 py-1.5 border border-slate-700"
+                class="field"
               />
             </div>
             <div class="sm:col-span-3">
@@ -545,7 +545,7 @@ async function handleModalRecalculate() {
                 :id="`passenger-board-${index}`"
                 v-model.number="p.board_stop_index"
                 @change="onBoardChange(p)"
-                class="w-full bg-slate-900 text-slate-100 rounded-lg px-2 py-1.5 border border-slate-700"
+                class="field"
               >
                 <option v-for="(name, s) in stops.slice(0, -1)" :key="s" :value="s">{{ name }}</option>
               </select>
@@ -555,7 +555,7 @@ async function handleModalRecalculate() {
               <select
                 :id="`passenger-alight-${index}`"
                 v-model.number="p.alight_stop_index"
-                class="w-full bg-slate-900 text-slate-100 rounded-lg px-2 py-1.5 border border-slate-700"
+                class="field"
               >
                 <option v-for="(name, s) in stops" v-show="s > p.board_stop_index" :key="s" :value="s" :disabled="s <= p.board_stop_index">{{ name }}</option>
               </select>
@@ -568,7 +568,7 @@ async function handleModalRecalculate() {
                 type="number"
                 min="1"
                 max="7"
-                class="w-full bg-slate-900 text-slate-100 rounded-lg px-2 py-1.5 border border-slate-700"
+                class="field"
               />
             </div>
             <div class="sm:col-span-2">
@@ -579,7 +579,7 @@ async function handleModalRecalculate() {
                 type="number"
                 step="0.5"
                 min="0"
-                class="w-full bg-slate-900 text-success-400 font-bold rounded-lg px-2 py-1.5 border border-slate-700"
+                class="field font-bold text-success-400"
               />
             </div>
           </div>
@@ -700,7 +700,7 @@ async function handleModalRecalculate() {
 
       <div>
         <label for="carpool-notes" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('carpool.carpoolTripModal.notesOptional') }}</label>
-        <input id="carpool-notes" v-model="form.notes" class="w-full bg-slate-800 text-slate-100 text-sm rounded-xl px-3 py-2 border border-slate-700" />
+        <input id="carpool-notes" v-model="form.notes" class="field" />
       </div>
 
       </div>

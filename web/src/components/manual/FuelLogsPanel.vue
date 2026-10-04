@@ -264,22 +264,22 @@ onMounted(load)
           </div>
           <div>
             <label for="fuel-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.mileageKmOptional', { unit: distanceUnit() }) }}</label>
-            <DistanceInput id="fuel-odometer" v-model="form.odometer" inputmode="numeric" min="0" step="1" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <DistanceInput id="fuel-odometer" v-model="form.odometer" inputmode="numeric" min="0" step="1" class="field" />
           </div>
         </div>
 
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label for="fuel-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.amount', { cur: currencySymbol(currency) }) }}</label>
-            <input id="fuel-amount" v-model.number="form.amount" type="number" inputmode="decimal" min="0.01" step="0.01" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="fuel-amount" v-model.number="form.amount" type="number" inputmode="decimal" min="0.01" step="0.01" class="field" />
           </div>
           <div>
             <label for="fuel-liters" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.litres') }}</label>
-            <input id="fuel-liters" v-model.number="form.liters" type="number" inputmode="decimal" min="0.01" step="0.01" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="fuel-liters" v-model.number="form.liters" type="number" inputmode="decimal" min="0.01" step="0.01" class="field" />
           </div>
           <div>
             <label for="fuel-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.priceL', { cur: currencySymbol(currency) }) }}</label>
-            <input id="fuel-price" v-model.number="form.price_per_liter" type="number" inputmode="decimal" min="0.001" step="0.001" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+            <input id="fuel-price" v-model.number="form.price_per_liter" type="number" inputmode="decimal" min="0.001" step="0.001" class="field" />
           </div>
         </div>
         <p class="text-xs text-slate-400 -mt-1.5">
@@ -292,7 +292,7 @@ onMounted(load)
         <div class="grid grid-cols-2 gap-3 items-end">
           <div>
             <label for="fuel-type" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.fuel') }}</label>
-            <select id="fuel-type" v-model="form.fuel_type" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+            <select id="fuel-type" v-model="form.fuel_type" class="field">
               <option v-for="t in fuelTypes" :key="t.value" :value="t.value">{{ t.labelKey ? $t(t.labelKey) : t.label }}</option>
             </select>
           </div>
@@ -304,7 +304,7 @@ onMounted(load)
 
         <div>
           <label for="fuel-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.notesOptional') }}</label>
-          <input id="fuel-notes" v-model="form.notes" maxlength="200" class="field-touch w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="fuel-notes" v-model="form.notes" maxlength="200" class="field" />
         </div>
 
         <p v-if="formError" class="text-xs text-red-300" role="alert">{{ formError }}</p>

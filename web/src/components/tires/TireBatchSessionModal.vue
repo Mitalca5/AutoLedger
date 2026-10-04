@@ -207,7 +207,7 @@ async function handleSaveBatchSession() {
               id="batch-session-mounted-odometer"
               v-model="batchSessionForm.mounted_odometer"
               @input="onBatchOdometerChange"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-2 border border-slate-700 focus:border-rose-500 focus:outline-none"
+              class="field"
             />
           </div>
         </div>
@@ -228,7 +228,7 @@ async function handleSaveBatchSession() {
               id="batch-session-dismounted-odometer"
               v-model="batchSessionForm.dismounted_odometer"
               @input="onBatchOdometerChange"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-2 border border-slate-700 focus:border-rose-500 focus:outline-none"
+              class="field"
             />
           </div>
         </div>
@@ -239,7 +239,7 @@ async function handleSaveBatchSession() {
             id="batch-session-distance-km"
             v-model="batchSessionForm.distance_km"
             :placeholder="$t('tires.tireBatchSessionModal.calculatedFromTheOdometersOr')"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-rose-500 focus:outline-none"
+            class="field"
           />
         </div>
 
@@ -250,7 +250,7 @@ async function handleSaveBatchSession() {
             v-model="batchSessionForm.notes"
             type="text"
             :placeholder="$t('tires.tireBatchSessionModal.eGWinterSeason2023')"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-rose-500 focus:outline-none"
+            class="field"
           />
         </div>
       </div>

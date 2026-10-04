@@ -202,17 +202,17 @@ onMounted(load)
       </h2>
       <form class="space-y-4" novalidate @submit.prevent="changePassword">
         <div>
-          <label for="pw-current" class="quick-label">{{ $t('account.accountView.currentPassword') }}</label>
-          <input id="pw-current" v-model="current" type="password" autocomplete="current-password" class="quick-input" />
+          <label for="pw-current" class="field-label">{{ $t('account.accountView.currentPassword') }}</label>
+          <input id="pw-current" v-model="current" type="password" autocomplete="current-password" class="field" />
         </div>
         <div>
-          <label for="pw-new" class="quick-label">{{ $t('account.accountView.newPassword') }}</label>
-          <input id="pw-new" v-model="next" type="password" autocomplete="new-password" class="quick-input" aria-describedby="pw-hint" />
+          <label for="pw-new" class="field-label">{{ $t('account.accountView.newPassword') }}</label>
+          <input id="pw-new" v-model="next" type="password" autocomplete="new-password" class="field" aria-describedby="pw-hint" />
           <p id="pw-hint" class="mt-1 text-xs text-slate-400">{{ $t('account.accountView.8CharactersMinimum72Bytes') }}</p>
         </div>
         <div>
-          <label for="pw-confirm" class="quick-label">{{ $t('account.accountView.confirmTheNewPassword') }}</label>
-          <input id="pw-confirm" v-model="confirmation" type="password" autocomplete="new-password" class="quick-input" />
+          <label for="pw-confirm" class="field-label">{{ $t('account.accountView.confirmTheNewPassword') }}</label>
+          <input id="pw-confirm" v-model="confirmation" type="password" autocomplete="new-password" class="field" />
         </div>
         <p v-if="passwordError" role="alert" class="rounded-lg border border-danger-500/30 bg-danger-500/10 px-3 py-2 text-xs text-danger-300">{{ passwordError }}</p>
         <p v-if="passwordDone" role="status" class="rounded-lg border border-success-500/30 bg-success-500/10 px-3 py-2 text-xs text-success-300">{{ passwordDone }}</p>

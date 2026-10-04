@@ -228,7 +228,7 @@ onBeforeUnmount(() => {
           inputmode="decimal"
           :aria-label="t('fleet.budget.title')"
           :placeholder="t('fleet.budget.placeholder', { currency: summary.currency })"
-          class="min-w-0 flex-1 bg-slate-800 text-slate-100 rounded-xl px-3 py-2 text-sm border border-slate-700"
+          class="field flex-1"
         />
         <button type="submit" :disabled="savingBudget" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50">{{ t('common.save') }}</button>
         <button type="button" @click="editingBudget = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">{{ t('common.cancel') }}</button>

@@ -113,7 +113,7 @@ async function handleCompleteReminder() {
               v-model="completeForm.service_odometer"
               min="0"
               required
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+              class="field"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ async function handleCompleteReminder() {
                 step="0.01"
                 min="0"
                 :placeholder="$t('expenses.completeReminderModal.000IfFree')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@ async function handleCompleteReminder() {
                 id="complete-form-expense-desc"
                 v-model="completeForm.expense_description"
                 :placeholder="$t('expenses.completeReminderModal.eGWorkshopServiceTire')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+                class="field"
               />
             </div>
           </div>

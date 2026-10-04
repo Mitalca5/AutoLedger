@@ -123,7 +123,7 @@ onMounted(() => {
               max="100"
               :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })"
               :disabled="!canEdit"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-info-500 disabled:opacity-50"
+              class="field"
             />
           </div>
           <div>
@@ -137,7 +137,7 @@ onMounted(() => {
               max="5"
               :placeholder="$t('common.example', { value: $n(0.22) })"
               :disabled="!canEdit"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-info-500 disabled:opacity-50"
+              class="field"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ onMounted(() => {
           <button
             type="submit"
             :disabled="saving"
-            class="px-4 py-2 bg-info-600 hover:bg-info-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-info-600/20"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-info-600/20"
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ saving ? $t('common.loading') : $t('manual.estimatedEnergyPanel.saveEstimate') }}</span>

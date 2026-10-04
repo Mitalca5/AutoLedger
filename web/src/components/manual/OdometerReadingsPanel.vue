@@ -140,7 +140,7 @@ onMounted(() => {
             max="2000000"
             required
             :placeholder="$t('common.example', { value: '45000' })"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+            class="field"
           />
         </div>
         <div>
@@ -150,13 +150,13 @@ onMounted(() => {
             v-model="form.notes"
             type="text"
             :placeholder="$t('manual.odometerReadingsPanel.eGRoadworthinessInspection')"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+            class="field"
           />
         </div>
       </div>
 
       <div class="flex justify-end pt-1">
-        <button type="submit" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
+        <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
           <span>{{ editingId ? $t('manual.odometerReadingsPanel.update') : $t('manual.odometerReadingsPanel.add') }}</span>
         </button>
       </div>

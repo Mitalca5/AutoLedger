@@ -172,7 +172,7 @@ async function testModalConnection() {
               id="vehicle-make"
               v-model="form.make"
               :placeholder="$t('onboarding.onboardingView.makePlaceholder')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+              class="field transition-colors"
             />
           </div>
           <div>
@@ -181,7 +181,7 @@ async function testModalConnection() {
               id="vehicle-model"
               v-model="form.model"
               :placeholder="$t('onboarding.onboardingView.modelPlaceholder')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+              class="field transition-colors"
             />
           </div>
         </div>
@@ -194,7 +194,7 @@ async function testModalConnection() {
             v-model="form.name"
             required
             :placeholder="$t('vehicles.vehicleFormModal.eGMyCar')"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+            class="field transition-colors"
           />
         </div>
 
@@ -227,7 +227,7 @@ async function testModalConnection() {
               v-model="form.current_odometer"
               step="1"
               :disabled="!!form.teslamate_api_url && connectTeslaMate"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-rose-500"
+              class="field"
             />
             <p class="mt-1 text-xs text-slate-400">{{ $t('vehicles.vehicleFormModal.currentMileageHelp') }}</p>
           </div>
@@ -237,7 +237,7 @@ async function testModalConnection() {
               id="vehicle-currency"
               v-model="form.currency"
               :disabled="isEditing"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white disabled:opacity-50 focus:outline-none focus:border-rose-500"
+              class="field"
             >
               <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
             </select>
@@ -252,7 +252,7 @@ async function testModalConnection() {
             id="vehicle-vin"
             v-model="form.vin"
             placeholder="VIN"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+            class="field transition-colors"
           />
         </div>
 
@@ -301,7 +301,7 @@ async function testModalConnection() {
               id="vehicle-teslamate-api-url"
               v-model="form.teslamate_api_url"
               :placeholder="$t('vehicles.vehicleFormModal.eGHttp1921682')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
 
@@ -312,7 +312,7 @@ async function testModalConnection() {
               v-model="form.teslamate_grafana_url"
               type="url"
               :placeholder="$t('vehicles.vehicleFormModal.eGHttp192168')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
             <p class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleFormModal.addsAnOpenInTeslamate') }}</p>
           </div>
@@ -325,7 +325,7 @@ async function testModalConnection() {
                 v-model.number="form.teslamate_car_id"
                 type="number"
                 min="1"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+                class="field"
               />
             </div>
             <div>
@@ -333,7 +333,7 @@ async function testModalConnection() {
               <select
                 id="vehicle-teslamate-auth-type"
                 v-model="form.teslamate_auth_type"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+                class="field"
               >
                 <option value="NONE">{{ $t('vehicles.vehicleFormModal.noneLan') }}</option>
                 <option value="BEARER">{{ $t('vehicles.vehicleFormModal.bearerTokenApiToken') }}</option>
@@ -349,7 +349,7 @@ async function testModalConnection() {
               v-model="form.teslamate_api_key"
               type="password"
               placeholder="••••••••"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
 
@@ -360,7 +360,7 @@ async function testModalConnection() {
                 id="vehicle-teslamate-basic-user"
                 v-model="form.teslamate_basic_user"
                 placeholder="admin"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+                class="field"
               />
             </div>
             <div>
@@ -370,7 +370,7 @@ async function testModalConnection() {
                 v-model="form.teslamate_basic_pass"
                 type="password"
                 placeholder="••••••••"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+                class="field"
               />
             </div>
           </div>
@@ -431,7 +431,7 @@ async function testModalConnection() {
             <!-- Tarifs & Borne -->
             <div>
               <label for="vehicle-tariff-plan" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('tariffs.planSelectLabel') }}</label>
-              <select id="vehicle-tariff-plan" v-model="form.tariff_plan_id" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+              <select id="vehicle-tariff-plan" v-model="form.tariff_plan_id" class="field">
                 <option :value="null">{{ $t('tariffs.noPlanManual') }}</option>
                 <option v-for="p in tariffPlans" :key="p.id" :value="p.id">
                   {{ p.name }} ({{ p.plan_type }})
@@ -452,11 +452,11 @@ async function testModalConnection() {
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div>
                 <label for="vehicle-pre-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.consumptionKwh100km', { unit: distanceUnit() }) }}</label>
-                <DistanceInput kind="per-distance" id="vehicle-pre-kwh" v-model="form.estimated_kwh_100km" step="0.1" min="1" max="100" :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500" />
+                <DistanceInput kind="per-distance" id="vehicle-pre-kwh" v-model="form.estimated_kwh_100km" step="0.1" min="1" max="100" :placeholder="$t('common.example', { value: formatPerDistanceValue(16.5, 1) })" class="field" />
               </div>
               <div>
                 <label for="vehicle-pre-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.rateKwh', { currency: form.currency }) }}</label>
-                <input id="vehicle-pre-rate" v-model.number="form.estimated_price_per_kwh" type="number" step="0.0001" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500" />
+                <input id="vehicle-pre-rate" v-model.number="form.estimated_price_per_kwh" type="number" step="0.0001" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="field" />
               </div>
             </div>
           </div>

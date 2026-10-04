@@ -54,7 +54,7 @@ const prefs = usePreferencesStore()
       type="button"
       @click="emit('bulk-toll')"
       :disabled="bulkApplyingToll"
-      class="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50"
+      class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50"
       :title="$t('drives.driveBulkActions.detectsTheTollsAndRecords')"
     >
       <Receipt class="w-3.5 h-3.5" />

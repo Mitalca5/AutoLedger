@@ -116,7 +116,7 @@ async function handleBatchDisposeSubmit() {
               id="batch-dispose-date"
               v-model="batchDisposeForm.date"
               type="date"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-warning-500 focus:outline-none"
+              class="field focus:border-warning-500"
             />
             <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.defaultDateOfTheLast') }}</p>
           </div>
@@ -126,7 +126,7 @@ async function handleBatchDisposeSubmit() {
               id="batch-dispose-odo"
               v-model="batchDisposeForm.odometer"
               :placeholder="$t('tires.tireBatchDisposeModal.optionalForAGarageTire')"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:border-warning-500 focus:outline-none"
+              class="field focus:border-warning-500"
             />
             <p class="text-xs text-slate-400 mt-1">{{ $t('tires.tireBatchDisposeModal.finalOdometerIfRemovedOn') }}</p>
           </div>

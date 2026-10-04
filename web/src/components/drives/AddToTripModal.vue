@@ -54,7 +54,7 @@ async function handleAddToTrip() {
         <p v-if="!tripGroups.length" class="text-xs text-slate-400">{{ $t('drives.addToTripModal.noExistingTripUseMerge') }}</p>
         <div v-else>
           <label for="add-to-trip" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.addToTripModal.trip') }}</label>
-          <select id="add-to-trip" v-model="addToTripId" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+          <select id="add-to-trip" v-model="addToTripId" class="field">
             <option v-for="tg in tripGroups" :key="tg.id" :value="tg.id">{{ $t('drives.addToTripModal.drives', { name: tg.name, length: tg.drive_ids.length }) }}</option>
           </select>
         </div>

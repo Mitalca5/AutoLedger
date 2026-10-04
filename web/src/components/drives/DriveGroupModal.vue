@@ -85,7 +85,7 @@ async function handleCreateGroupAndExpense() {
             v-model="groupName"
             type="text"
             :placeholder="$t('drives.driveGroupModal.eGBrittanyHolidayOutbound')"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
 
@@ -94,7 +94,7 @@ async function handleCreateGroupAndExpense() {
             <label for="drive-expense-type" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.driveGroupModal.costType') }}</label>
             <select id="drive-expense-type"
               v-model="expenseType"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             >
               <option value="TOLL">{{ $t('drives.driveGroupModal.toll') }}</option>
               <option value="PARKING">{{ $t('drives.driveGroupModal.parking') }}</option>
@@ -108,7 +108,7 @@ async function handleCreateGroupAndExpense() {
               type="number"
               step="0.01"
               placeholder="0.00"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
+              class="field"
             />
           </div>
         </div>

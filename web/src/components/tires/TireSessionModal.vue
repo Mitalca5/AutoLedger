@@ -140,7 +140,7 @@ async function handleSaveSession() {
           <label for="tire-session-position" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireSessionModal.positionUsed') }}</label>
           <select id="tire-session-position"
             v-model="sessionForm.position"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700"
+            class="field"
           >
             <option value="FL">{{ $t('tires.tireSessionModal.frontLeftFl') }}</option>
             <option value="FR">{{ $t('tires.tireSessionModal.frontRightFr') }}</option>
@@ -165,7 +165,7 @@ async function handleSaveSession() {
             <DistanceInput id="tire-session-mounted-odometer"
               v-model="sessionForm.mounted_odometer"
               @input="onSessionOdometerChange"
-              class="w-full bg-slate-800 text-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-700"
+              class="field"
             />
           </div>
         </div>
@@ -192,7 +192,7 @@ async function handleSaveSession() {
             <DistanceInput id="tire-session-dismounted-odometer"
               v-model="sessionForm.dismounted_odometer"
               @input="onSessionOdometerChange"
-              class="w-full bg-slate-900 text-slate-100 rounded-lg px-2 py-1.5 border border-slate-700"
+              class="field"
             />
           </div>
         </div>
@@ -202,7 +202,7 @@ async function handleSaveSession() {
           <DistanceInput id="tire-session-distance-km"
             v-model="sessionForm.distance_km"
             :placeholder="$t('tires.tireSessionModal.calculatedOrForced')"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700"
+            class="field"
           />
         </div>
 
@@ -212,7 +212,7 @@ async function handleSaveSession() {
             v-model="sessionForm.notes"
             type="text"
             :placeholder="$t('tires.tireSessionModal.eGWinterSeason2024')"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700"
+            class="field"
           />
         </div>
       </div>

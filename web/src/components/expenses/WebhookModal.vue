@@ -122,7 +122,7 @@ async function handleDeleteWebhook() {
           <select
             id="webhook-form-type"
             v-model="webhookForm.type"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white"
+            class="field"
           >
             <option value="DISCORD">{{ $t('expenses.webhookModal.discordWebhookEmbed') }}</option>
             <option value="TELEGRAM">{{ $t('expenses.webhookModal.telegramBotSendmessageApi') }}</option>
@@ -139,7 +139,7 @@ async function handleDeleteWebhook() {
             type="url"
             required
             :placeholder="$t('expenses.webhookModal.httpsDiscordComApiWebhooks')"
-            class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+            class="field"
           />
           <p class="text-xs text-slate-400 mt-1">
             {{ $t('expenses.webhookModal.forTelegramTheUrlMust') }}

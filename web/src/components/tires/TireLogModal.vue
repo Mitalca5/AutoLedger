@@ -77,14 +77,14 @@ async function handleAddLog() {
             step="0.1"
             min="1.0"
             max="10.0"
-            class="w-full bg-slate-800 text-slate-100 font-bold rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500 text-sm"
+            class="field font-bold"
           />
         </div>
         <div>
           <label for="tire-new-log-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.currentOdometerKm', { unit: distanceUnit() }) }}</label>
           <DistanceInput id="tire-new-log-odometer"
             v-model="newLogForm.odometer"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-rose-500"
+            class="field"
           />
         </div>
         <div>
@@ -97,7 +97,7 @@ async function handleAddLog() {
             v-model="newLogForm.notes"
             type="text"
             :placeholder="$t('tires.tireLogModal.eGCheckBeforeThe')"
-            class="w-full bg-slate-800 text-slate-100 rounded-xl px-3 py-2 border border-slate-700"
+            class="field"
           />
         </div>
       </div>

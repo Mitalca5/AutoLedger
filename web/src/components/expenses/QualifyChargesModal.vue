@@ -157,7 +157,7 @@ onMounted(() => {
               <select
                 :id="'qualify-vehicle-' + charge.id"
                 v-model="selectedVehicleIds[charge.id]"
-                class="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-white focus:border-warning-500 focus:outline-none"
+                class="field focus:border-warning-500"
               >
                 <option v-for="v in vehicleStore.vehicles" :key="v.id" :value="v.id">
                   {{ v.name }}

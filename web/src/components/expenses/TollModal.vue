@@ -197,7 +197,7 @@ async function handleCreateToll() {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label for="expense-toll-type" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.type') }}</label>
-            <select id="expense-toll-type" v-model="tollForm.type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+            <select id="expense-toll-type" v-model="tollForm.type" class="field">
               <option value="TOLL">{{ $t('expenses.tollModal.toll') }}</option>
               <option value="PARKING">{{ $t('expenses.tollModal.parking') }}</option>
               <option value="FERRY">{{ $t('expenses.tollModal.ferry') }}</option>
@@ -207,9 +207,9 @@ async function handleCreateToll() {
           <div>
             <label for="toll-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.amount') }}</label>
             <div class="flex gap-1.5">
-              <input id="toll-form-amount" v-model="tollForm.amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="w-full min-w-0 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+              <input id="toll-form-amount" v-model="tollForm.amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="field" />
               <label for="toll-form-currency" class="sr-only">{{ $t('expenses.tollModal.currency') }}</label>
-              <select id="toll-form-currency" v-model="tollForm.currency" class="bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-xs text-white">
+              <select id="toll-form-currency" v-model="tollForm.currency" class="field">
                 <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
               </select>
             </div>
@@ -217,7 +217,7 @@ async function handleCreateToll() {
         </div>
         <div v-if="tollForm.currency !== baseCurrency">
           <label for="toll-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.conversionRate1', { currency: tollForm.currency, base: baseCurrency }) }}</label>
-          <input id="toll-form-fx-rate" v-model="tollForm.fx_rate" type="number" step="0.000001" min="0.000001" required :placeholder="$t('common.example', { value: $n(1.05) })" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+          <input id="toll-form-fx-rate" v-model="tollForm.fx_rate" type="number" step="0.000001" min="0.000001" required :placeholder="$t('common.example', { value: $n(1.05) })" class="field" />
         </div>
 
         <!-- Association à un/des trajets TeslaMate -->
@@ -259,7 +259,7 @@ async function handleCreateToll() {
             <select id="expense-selected-drive-id"
               v-model="selectedDriveId"
               @change="onSingleDriveChange"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+              class="field"
             >
               <option value="">{{ $t('expenses.tollModal.selectARecentDrive') }}</option>
               <option v-for="d in recentDrives" :key="d.id" :value="d.id">
@@ -302,7 +302,7 @@ async function handleCreateToll() {
           </div>
           <div>
             <label for="expense-toll-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.notesDescription') }}</label>
-            <input id="expense-toll-notes" v-model="tollForm.notes" :placeholder="$t('expenses.tollModal.a10ParisBordeaux')" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
+            <input id="expense-toll-notes" v-model="tollForm.notes" :placeholder="$t('expenses.tollModal.a10ParisBordeaux')" class="field" />
           </div>
         </div>
 
@@ -346,7 +346,7 @@ async function handleCreateToll() {
               <label for="toll-existing-doc" class="block text-xs text-slate-400 mb-1">{{ $t('expenses.tollModal.attachAnExistingInvoice') }}</label>
               <select
                 id="toll-existing-doc"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-300"
+                class="field text-slate-300"
                 @change="(e: any) => onSelectExistingDoc(e.target.value, tollForm)"
               >
                 <option value="">{{ $t('expenses.tollModal.selectAnExistingReceipt') }}</option>

@@ -225,7 +225,7 @@ function finishOnboarding() {
               type="email"
               required
               :placeholder="$t('onboarding.onboardingView.adminYourDomainCom')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field placeholder-slate-500"
             />
           </div>
 
@@ -236,7 +236,7 @@ function finishOnboarding() {
               type="password"
               required
               placeholder=""
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field placeholder-slate-500"
             />
           </div>
 
@@ -247,7 +247,7 @@ function finishOnboarding() {
               type="password"
               required
               placeholder=""
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field placeholder-slate-500"
             />
           </div>
 
@@ -282,7 +282,7 @@ function finishOnboarding() {
                 @input="updateVehicleNameDefault"
                 type="text"
                 :placeholder="$t('onboarding.onboardingView.makePlaceholder')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
             <div>
@@ -292,7 +292,7 @@ function finishOnboarding() {
                 @input="updateVehicleNameDefault"
                 type="text"
                 :placeholder="$t('onboarding.onboardingView.modelPlaceholder')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
           </div>
@@ -304,7 +304,7 @@ function finishOnboarding() {
               type="text"
               required
               :placeholder="$t('onboarding.onboardingView.vehicleName')"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+              class="field placeholder-slate-500"
             />
           </div>
 
@@ -312,7 +312,7 @@ function finishOnboarding() {
             <label for="onboarding-vehicle-powertrain" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.powertrain') }}</label>
             <select id="onboarding-vehicle-powertrain"
               v-model="vehiclePowertrain"
-              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+              class="field"
             >
               <option v-for="p in ['EV', 'PHEV', 'REEV', 'ICE']" :key="p" :value="p">{{ $t(`vehicles.powertrainOptions.${p}`) }}</option>
             </select>
@@ -326,7 +326,7 @@ function finishOnboarding() {
                 min="0"
                 step="1"
                 required
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
             <div>
@@ -335,7 +335,7 @@ function finishOnboarding() {
                 v-model="vehicleVin"
                 type="text"
                 placeholder="VIN"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
           </div>
@@ -378,7 +378,7 @@ function finishOnboarding() {
                 v-model="teslamate.url"
                 type="url"
                 :placeholder="$t('onboarding.onboardingView.http192168150')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
 
@@ -386,7 +386,7 @@ function finishOnboarding() {
               <label for="onboarding-teslamate-auth-type" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('onboarding.onboardingView.authenticationMode') }}</label>
               <select id="onboarding-teslamate-auth-type"
                 v-model="teslamate.authType"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+                class="field"
               >
                 <option value="NONE">{{ $t('onboarding.onboardingView.noAuthentication') }}</option>
                 <option value="BEARER">{{ $t('onboarding.onboardingView.apiKeyBearerToken') }}</option>
@@ -400,7 +400,7 @@ function finishOnboarding() {
                 v-model="teslamate.apiKey"
                 type="password"
                 :placeholder="$t('onboarding.onboardingView.yourSecretToken')"
-                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                class="field placeholder-slate-500"
               />
             </div>
 
@@ -411,7 +411,7 @@ function finishOnboarding() {
                   v-model="teslamate.user"
                   type="text"
                   placeholder="admin"
-                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                  class="field placeholder-slate-500"
                 />
               </div>
               <div>
@@ -420,7 +420,7 @@ function finishOnboarding() {
                   v-model="teslamate.pass"
                   type="password"
                   placeholder="••••••••"
-                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+                  class="field placeholder-slate-500"
                 />
               </div>
             </div>
