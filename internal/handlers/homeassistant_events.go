@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -66,6 +67,18 @@ func eventStart(req *HAEventPayload) *time.Time {
 	return nil
 }
 
+// driveAddress is the address of a drive end: the one sent, else the coordinates as text.
+func driveAddress(address *string, lat, lon *float64) *string {
+	if a := optionalText(address); a != nil {
+		return a
+	}
+	if lat == nil || lon == nil || *lat < -90 || *lat > 90 || *lon < -180 || *lon > 180 {
+		return nil
+	}
+	text := fmt.Sprintf("%.5f, %.5f", *lat, *lon)
+	return &text
+}
+
 // recordDrive stores a drive reported by an integration, once per event id and once per similar drive.
 func (h *HomeAssistantHandler) recordDrive(w http.ResponseWriter, r *http.Request, req *HAEventPayload) {
 	vehicle := h.namedVehicle(w, r, req)
@@ -81,11 +94,10 @@ func (h *HomeAssistantHandler) recordDrive(w http.ResponseWriter, r *http.Reques
 		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.missing_start_time", "Start time is required"))
 		return
 	}
-	distance := 0.0
-	if req.Data.Distance != nil {
-		distance = *req.Data.Distance * factor
-	}
-	if !ingest.ValidDriveDistance(distance) {
+	startOdoKm := scaled(req.Data.StartOdometer, factor)
+	endOdoKm := scaled(req.Data.EndOdometer, factor)
+	distance, ok := ingest.DeriveDistance(scaled(req.Data.Distance, factor), startOdoKm, endOdoKm)
+	if !ok {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("drive.invalid_distance", "Distance must be between 0.1 and 3000 km"))
 		return
 	}
@@ -108,25 +120,32 @@ func (h *HomeAssistantHandler) recordDrive(w http.ResponseWriter, r *http.Reques
 		Start: *start, End: end, DurationMin: req.Data.DurationMin, DistanceKm: distance,
 		EnergyKwh: req.Data.EnergyKwh, VehicleKwh100km: vehicle.EstimatedKwh100km,
 	})
-	startOdo, endOdo := ingest.CompleteOdometers(scaled(req.Data.StartOdometer, factor), scaled(req.Data.EndOdometer, factor), distance)
+	startOdo, endOdo := startOdoKm, endOdoKm
+	if distance > 0 {
+		startOdo, endOdo = ingest.CompleteOdometers(startOdoKm, endOdoKm, distance)
+	}
 
 	drive := &models.Drive{
-		VehicleID:           vehicle.ID,
-		Origin:              "WEBHOOK",
-		ExternalID:          eventID,
-		StartTime:           *start,
-		EndTime:             timings.End,
-		StartOdometer:       startOdo,
-		EndOdometer:         endOdo,
-		DistanceKm:          distance,
-		DurationMin:         timings.DurationMin,
-		StartAddress:        optionalText(req.Data.StartAddress),
-		EndAddress:          optionalText(req.Data.EndAddress),
-		EnergyConsumedKwh:   &timings.EnergyKwh,
-		ConsumptionKwh100km: &timings.Kwh100km,
-		Tags:                []string{},
-		IsManual:            true,
-		EnergyEstimated:     timings.EnergyEstimated,
+		VehicleID:       vehicle.ID,
+		Origin:          "WEBHOOK",
+		ExternalID:      eventID,
+		StartTime:       *start,
+		EndTime:         timings.End,
+		StartOdometer:   startOdo,
+		EndOdometer:     endOdo,
+		DistanceKm:      distance,
+		DurationMin:     timings.DurationMin,
+		StartAddress:    driveAddress(req.Data.StartAddress, req.Data.StartLat, req.Data.StartLon),
+		EndAddress:      driveAddress(req.Data.EndAddress, req.Data.EndLat, req.Data.EndLon),
+		Tags:            []string{},
+		IsManual:        true,
+		EnergyEstimated: timings.EnergyEstimated,
+	}
+	if timings.EnergyKnown {
+		drive.EnergyConsumedKwh = &timings.EnergyKwh
+	}
+	if distance > 0 && timings.EnergyKnown {
+		drive.ConsumptionKwh100km = &timings.Kwh100km
 	}
 	if err := h.repo.CreateManualDrive(r.Context(), drive); err != nil {
 		writeRepoError(w, r, err, "Failed to store drive")

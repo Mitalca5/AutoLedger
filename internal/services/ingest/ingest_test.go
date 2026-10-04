@@ -104,3 +104,48 @@ func TestCompleteOdometers(t *testing.T) {
 		t.Fatal("nothing given, nothing derived")
 	}
 }
+
+func TestDeriveDistance(t *testing.T) {
+	cases := []struct {
+		name               string
+		reported, from, to *float64
+		wantKm             float64
+		wantOK             bool
+	}{
+		{"reported", fptr(12), fptr(1000), fptr(2000), 12, true},
+		{"reported zero is refused", fptr(0), nil, nil, 0, false},
+		{"reported too long is refused", fptr(4000), nil, nil, 4000, false},
+		{"odometer difference", nil, fptr(1000), fptr(1025.5), 25.5, true},
+		{"odometer going backwards is unknown", nil, fptr(1000), fptr(990), 0, true},
+		{"odometer standing still is unknown", nil, fptr(1000), fptr(1000), 0, true},
+		{"one odometer is unknown", nil, fptr(1000), nil, 0, true},
+		{"nothing is unknown", nil, nil, nil, 0, true},
+	}
+	for _, c := range cases {
+		km, ok := DeriveDistance(c.reported, c.from, c.to)
+		if km != c.wantKm || ok != c.wantOK {
+			t.Errorf("%s: got %v, %v want %v, %v", c.name, km, ok, c.wantKm, c.wantOK)
+		}
+	}
+}
+
+func TestNormalizeDriveWithoutDistance(t *testing.T) {
+	start := time.Date(2026, 5, 1, 8, 0, 0, 0, time.UTC)
+	end := start.Add(20 * time.Minute)
+
+	got := NormalizeDrive(DriveInput{Start: start, End: &end, VehicleKwh100km: fptr(18)})
+	if got.EnergyKnown || got.EnergyEstimated || got.EnergyKwh != 0 || got.Kwh100km != 0 {
+		t.Errorf("no distance and no energy: nothing to estimate, got %+v", got)
+	}
+	if got.DurationMin != 20 {
+		t.Errorf("duration: got %d, want 20", got.DurationMin)
+	}
+
+	got = NormalizeDrive(DriveInput{Start: start, End: &end, EnergyKwh: fptr(4)})
+	if !got.EnergyKnown || got.EnergyKwh != 4 || got.Kwh100km != 0 || got.EnergyEstimated {
+		t.Errorf("measured energy without distance: got %+v", got)
+	}
+	if math.IsInf(got.Kwh100km, 0) || math.IsNaN(got.Kwh100km) {
+		t.Errorf("consumption must not divide by zero: %v", got.Kwh100km)
+	}
+}

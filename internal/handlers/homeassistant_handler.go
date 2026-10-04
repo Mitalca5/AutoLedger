@@ -72,6 +72,11 @@ type HAEventData struct {
 	DurationMin   *int     `json:"duration_min"`
 	StartAddress  *string  `json:"start_address"`
 	EndAddress    *string  `json:"end_address"`
+	// Positions of a drive, used when the event carries no address.
+	StartLat      *float64 `json:"start_lat"`
+	StartLon      *float64 `json:"start_lon"`
+	EndLat        *float64 `json:"end_lat"`
+	EndLon        *float64 `json:"end_lon"`
 	Amount        *float64 `json:"amount"`
 	Liters        *float64 `json:"liters"`
 	PricePerLiter *float64 `json:"price_per_liter"`

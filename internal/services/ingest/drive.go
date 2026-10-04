@@ -30,6 +30,8 @@ type DriveInput struct {
 type DriveTimings struct {
 	End         time.Time
 	DurationMin int
+	// EnergyKnown is false for a drive without distance and without measured energy: there is nothing to estimate from.
+	EnergyKnown bool
 	EnergyKwh   float64
 	Kwh100km    float64
 	// EnergyEstimated is true when the energy was derived from the vehicle's average consumption.
@@ -41,9 +43,24 @@ func ValidDriveDistance(km float64) bool {
 	return km > 0 && km <= MaxDriveKm
 }
 
+// DeriveDistance gives the distance of a drive in km: the one reported, else the difference of the two odometer
+// readings. A distance of 0 means unknown (a source with no odometer). ok is false when a reported distance is
+// out of range.
+func DeriveDistance(reportedKm, startOdometerKm, endOdometerKm *float64) (km float64, ok bool) {
+	if reportedKm != nil {
+		return *reportedKm, ValidDriveDistance(*reportedKm)
+	}
+	if startOdometerKm != nil && endOdometerKm != nil {
+		if d := *endOdometerKm - *startOdometerKm; ValidDriveDistance(d) {
+			return d, true
+		}
+	}
+	return 0, true
+}
+
 // NormalizeDrive completes a drive: end time (given end, then given duration, then the assumed average speed),
 // duration in minutes, and energy (given, or estimated from the vehicle's consumption). The distance must
-// already be valid.
+// already be valid, or 0 when unknown.
 func NormalizeDrive(in DriveInput) DriveTimings {
 	var out DriveTimings
 	switch {
@@ -57,12 +74,18 @@ func NormalizeDrive(in DriveInput) DriveTimings {
 	}
 	out.DurationMin = DurationMinutes(in.Start, out.End)
 
-	if in.EnergyKwh == nil || *in.EnergyKwh <= 0 {
+	hasEnergy := in.EnergyKwh != nil && *in.EnergyKwh > 0
+	switch {
+	case hasEnergy:
+		out.EnergyKnown = true
+		out.EnergyKwh = *in.EnergyKwh
+		if in.DistanceKm > 0 {
+			out.Kwh100km = Consumption100km(out.EnergyKwh, in.DistanceKm)
+		}
+	case in.DistanceKm > 0:
+		out.EnergyKnown = true
 		out.EnergyEstimated = true
 		out.EnergyKwh, out.Kwh100km = EstimateDriveEnergy(in.VehicleKwh100km, in.DistanceKm)
-	} else {
-		out.EnergyKwh = *in.EnergyKwh
-		out.Kwh100km = Consumption100km(out.EnergyKwh, in.DistanceKm)
 	}
 	return out
 }

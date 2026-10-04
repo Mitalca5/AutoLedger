@@ -196,3 +196,69 @@ func TestHomeAssistantEventsOnHybrids(t *testing.T) {
 		}
 	}
 }
+
+func TestHomeAssistantDriveEventWithoutDistance(t *testing.T) {
+	env, u := newHAEventEnv(t, "ha-drive-nodist@example.com")
+	v := env.vehicle(u.ID, "Car", models.PowertrainEV, 1000)
+	ctx := context.Background()
+	body := func(extra string) string {
+		return `{"vehicle_id":"` + v.ID + `","event_type":"drive",` + extra + `}`
+	}
+
+	// Positions only: no distance, no energy, coordinates stand in for the addresses.
+	positions := body(`"event_id":"t-1","data":{"start_time":"2026-05-01T08:00:00Z","end_time":"2026-05-01T08:25:00Z",` +
+		`"start_lat":45.8992,"start_lon":6.1294,"end_lat":45.7640,"end_lon":4.8357,"end_address":"Work"}`)
+	if status, code := env.post(u.ID, positions); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("positions only: got %d %q", status, code)
+	}
+	// Odometers on both ends give the distance.
+	odometers := body(`"event_id":"t-2","data":{"start_time":"2026-05-02T08:00:00Z","start_odometer":1000,"end_odometer":1031.5}`)
+	if status, code := env.post(u.ID, odometers); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("odometers: got %d %q", status, code)
+	}
+	// One odometer alone does not invent the other.
+	oneOdo := body(`"event_id":"t-3","data":{"start_time":"2026-05-03T08:00:00Z","start_odometer":1100}`)
+	if status, code := env.post(u.ID, oneOdo); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("one odometer: got %d %q", status, code)
+	}
+	if status, code := env.post(u.ID, body(`"data":{"start_time":"2026-05-04T08:00:00Z","start_lat":120,"start_lon":6}`)); status != http.StatusCreated || code != "recorded" {
+		t.Fatalf("bad latitude: got %d %q", status, code)
+	}
+
+	drives, total, err := env.repo.ListDrives(ctx, v.ID, database.DriveFilter{}, 10, 0)
+	if err != nil || total != 4 {
+		t.Fatalf("drives: %v, total %d", err, total)
+	}
+	byStart := map[string]models.Drive{}
+	for _, d := range drives {
+		byStart[d.StartTime.Format("2006-01-02")] = d
+	}
+
+	d := byStart["2026-05-01"]
+	if d.DistanceKm != 0 || d.EnergyConsumedKwh != nil || d.ConsumptionKwh100km != nil || d.EnergyEstimated {
+		t.Errorf("positions only: distance %v, energy %v, consumption %v, estimated %v", d.DistanceKm, d.EnergyConsumedKwh, d.ConsumptionKwh100km, d.EnergyEstimated)
+	}
+	if d.DurationMin != 25 {
+		t.Errorf("duration: got %d, want 25", d.DurationMin)
+	}
+	if d.StartAddress == nil || *d.StartAddress != "45.89920, 6.12940" {
+		t.Errorf("start address: got %v", d.StartAddress)
+	}
+	if d.EndAddress == nil || *d.EndAddress != "Work" {
+		t.Errorf("a given address wins over coordinates: got %v", d.EndAddress)
+	}
+
+	d = byStart["2026-05-02"]
+	if math.Abs(d.DistanceKm-31.5) > 0.001 || d.EnergyConsumedKwh == nil || !d.EnergyEstimated {
+		t.Errorf("odometer pair: distance %v, energy %v, estimated %v", d.DistanceKm, d.EnergyConsumedKwh, d.EnergyEstimated)
+	}
+
+	d = byStart["2026-05-03"]
+	if d.DistanceKm != 0 || d.EndOdometer != nil {
+		t.Errorf("one odometer: distance %v, end odometer %v, want unknown", d.DistanceKm, d.EndOdometer)
+	}
+
+	if d := byStart["2026-05-04"]; d.StartAddress != nil {
+		t.Errorf("out of range latitude must be ignored: %v", *d.StartAddress)
+	}
+}
