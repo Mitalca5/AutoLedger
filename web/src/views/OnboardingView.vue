@@ -12,7 +12,7 @@ import { useQuickAddStore } from '@/stores/quickAdd'
 import { api } from '@/services/api'
 import { Zap, ShieldCheck, Car, KeyRound, ArrowRight, CheckCircle2, AlertCircle, RefreshCw, Link2, Webhook, FileSpreadsheet, Download, Copy } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
-import { buildVehiclePayload, emptyTeslaMateForm, supportsTeslaMate, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
+import { buildVehiclePayload, emptyTeslaMateForm, supportsTeslaMate, teslaMateCarId, teslaMateCredentials, type Powertrain } from '@/utils/onboarding'
 import { csvTemplate, csvTemplateFilename, csvTemplateTypes, webhookSnippet, type CsvTemplateType } from '@/utils/dataSources'
 import { downloadCsv } from '@/utils/csv'
 
@@ -120,7 +120,7 @@ async function testConnection() {
     const payload = {
       teslamate_api_url: teslamate.url,
       teslamate_auth_type: teslamate.authType,
-      teslamate_car_id: 1,
+      teslamate_car_id: teslaMateCarId(teslamate),
       ...teslaMateCredentials(teslamate),
     }
     const res = await api.testTeslaMateRaw(payload)
@@ -419,6 +419,17 @@ async function addFirstEntry() {
                 <option value="BEARER">{{ $t('onboarding.onboardingView.apiKeyBearerToken') }}</option>
                 <option value="BASIC">{{ $t('onboarding.onboardingView.httpBasicAuthUserPassword') }}</option>
               </select>
+            </div>
+
+            <div>
+              <label for="onboarding-teslamate-car-id" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{{ $t('vehicles.vehicleFormModal.carIdInTeslamate') }}</label>
+              <input id="onboarding-teslamate-car-id"
+                v-model.number="teslamate.carId"
+                type="number"
+                min="1"
+                inputmode="numeric"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+              />
             </div>
 
             <div v-if="teslamate.authType === 'BEARER'">

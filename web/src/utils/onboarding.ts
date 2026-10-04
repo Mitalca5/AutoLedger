@@ -10,6 +10,7 @@ export interface TeslaMateForm {
   apiKey: string
   user: string
   pass: string
+  carId: number | string
 }
 
 export interface OnboardingVehicleForm {
@@ -24,7 +25,7 @@ export interface OnboardingVehicleForm {
 }
 
 export function emptyTeslaMateForm(): TeslaMateForm {
-  return { enabled: false, url: '', authType: 'NONE', apiKey: '', user: '', pass: '' }
+  return { enabled: false, url: '', authType: 'NONE', apiKey: '', user: '', pass: '', carId: 1 }
 }
 
 // Only electric vehicles can use TeslaMate.
@@ -36,6 +37,11 @@ export function teslaMateCredentials(tm: Pick<TeslaMateForm, 'authType' | 'apiKe
   if (tm.authType === 'BEARER') return { teslamate_api_key: tm.apiKey }
   if (tm.authType === 'BASIC') return { teslamate_basic_user: tm.user, teslamate_basic_pass: tm.pass }
   return {}
+}
+
+export function teslaMateCarId(tm: Pick<TeslaMateForm, 'carId'>): number {
+  const id = Math.trunc(Number(tm.carId))
+  return id > 0 ? id : 1
 }
 
 // telemetry_mode is derived by the server from the connected sources, never sent by the client.
@@ -54,7 +60,7 @@ export function buildVehiclePayload(form: OnboardingVehicleForm): Record<string,
   if (form.currency) payload.currency = form.currency
   if (withTeslaMate) {
     payload.teslamate_api_url = tm.url
-    payload.teslamate_car_id = 1
+    payload.teslamate_car_id = teslaMateCarId(tm)
     Object.assign(payload, teslaMateCredentials(tm))
   }
   return payload

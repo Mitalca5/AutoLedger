@@ -3,6 +3,7 @@ import {
   buildVehiclePayload,
   emptyTeslaMateForm,
   supportsTeslaMate,
+  teslaMateCarId,
   teslaMateCredentials,
   type OnboardingVehicleForm,
 } from './onboarding'
@@ -49,6 +50,16 @@ describe('teslaMateCredentials', () => {
   })
 })
 
+describe('teslaMateCarId', () => {
+  it('keeps a valid id and falls back to 1 otherwise', () => {
+    expect(teslaMateCarId({ carId: 3 })).toBe(3)
+    expect(teslaMateCarId({ carId: '2' })).toBe(2)
+    expect(teslaMateCarId({ carId: '' })).toBe(1)
+    expect(teslaMateCarId({ carId: 0 })).toBe(1)
+    expect(teslaMateCarId({ carId: -4 })).toBe(1)
+  })
+})
+
 describe('buildVehiclePayload', () => {
   it('never sends telemetry_mode', () => {
     expect(buildVehiclePayload(form())).not.toHaveProperty('telemetry_mode')
@@ -74,6 +85,7 @@ describe('buildVehiclePayload', () => {
       teslamate_auth_type: 'BEARER',
       teslamate_api_key: 'k',
     })
+    expect(buildVehiclePayload(form({ teslamate: { ...tm, carId: 2 } })).teslamate_car_id).toBe(2)
     expect(buildVehiclePayload(form({ teslamate: { ...tm, url: '  ' } }))).not.toHaveProperty('teslamate_api_url')
     expect(buildVehiclePayload(form({ teslamate: { ...tm, enabled: false } }))).not.toHaveProperty('teslamate_api_url')
   })
