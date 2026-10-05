@@ -49,9 +49,14 @@ const donutItems = computed(() =>
 
 const visibleMonths = computed(() => filterMonthsByRange(stats.value?.months ?? [], range.value))
 
+// A line or bar chart of one value, or of an estimate repeated every month, tells nothing the figures above do not already say.
+const hasTrend = (values: (number | null | undefined)[]) => new Set(values.filter((v): v is number => typeof v === 'number').map((v) => v.toFixed(2))).size >= 2
+const consumptionTrend = computed(() => hasTrend(visibleMonths.value.map((m) => m.consumption_kwh_100km)))
+const costTrend = computed(() => hasTrend(visibleMonths.value.map((m) => m.cost_per_100km)))
+
 const basis = computed(() => stats.value?.basis)
-const showConsumption = computed(() => basis.value?.consumption !== 'unavailable')
-const showCost = computed(() => basis.value?.cost !== 'unavailable')
+const showConsumption = computed(() => basis.value?.consumption !== 'unavailable' && consumptionTrend.value)
+const showCost = computed(() => basis.value?.cost !== 'unavailable' && costTrend.value)
 const hasDerived = computed(() => basis.value?.consumption === 'derived' || basis.value?.cost === 'derived')
 
 const hasData = computed(() => (stats.value?.months.length ?? 0) > 0)
@@ -87,7 +92,7 @@ function baseOptions(unit: string) {
     },
     scales: {
       x: { grid: { color: GRID_COLOR }, ticks: { color: AXIS_TEXT } },
-      y: { grid: { color: GRID_COLOR }, ticks: { color: AXIS_TEXT, callback: (v: any) => `${v}` }, title: { display: true, text: unit, color: AXIS_TEXT } },
+      y: { beginAtZero: true, grid: { color: GRID_COLOR }, ticks: { color: AXIS_TEXT, callback: (v: any) => `${v}` }, title: { display: true, text: unit, color: AXIS_TEXT } },
     },
   }
 }
@@ -181,26 +186,26 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} <span class="text-xs font-medium text-slate-400">kWh/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</p>
+        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyCost') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(perUnit(stats?.summary.cost_per_100km) || 0, currency) }} <span class="text-xs font-medium text-slate-400">/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</p>
+        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiency') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmtPercent(stats?.summary.charge_efficiency) }}</dd>
-        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
+        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(stats?.summary.cost_per_full_charge || 0, currency) }} <span class="text-xs font-medium text-slate-400">(0 → 100 %)</span></dd>
-        <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</p>
+        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</p>
       </div>
     </dl>
 
@@ -213,14 +218,14 @@ onBeforeUnmount(() => {
       {{ $t('dashboard.energyEfficiencyPanel.derivedNote') }}
     </p>
 
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div v-if="showConsumption || showCost" class="grid grid-cols-1 gap-4" :class="{ 'lg:grid-cols-2': showConsumption && showCost }">
       <div v-if="showConsumption">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.monthlyConsumption') }}</h4>
-        <div class="h-56"><canvas ref="consumptionRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
+        <div class="h-44 sm:h-56"><canvas ref="consumptionRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
       </div>
       <div v-if="showCost">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.energyCostPer100Km', { unit: distanceUnit() }) }}</h4>
-        <div class="h-56"><canvas ref="costRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyEnergyCostPer100', { unit: distanceUnit() })"></canvas></div>
+        <div class="h-44 sm:h-56"><canvas ref="costRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyEnergyCostPer100', { unit: distanceUnit() })"></canvas></div>
       </div>
     </div>
 
@@ -245,7 +250,7 @@ onBeforeUnmount(() => {
     <div v-if="acDc.classes.length > 0">
       <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.howTheCarIsCharged') }}</h4>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-        <div class="md:col-span-2 bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center">
+        <div v-if="acDc.classes.length > 1" class="md:col-span-2 bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center">
           <div class="w-full h-40 relative">
             <CostDonut
               :items="donutItems"
@@ -256,7 +261,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <ul class="md:col-span-3 space-y-2">
+        <ul :class="acDc.classes.length > 1 ? 'md:col-span-3' : 'md:col-span-5'" class="space-y-2">
           <li v-for="c in acDc.classes" :key="c.class" class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
             <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <span class="text-sm font-semibold text-white flex items-center gap-1.5">

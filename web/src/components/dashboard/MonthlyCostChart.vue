@@ -5,7 +5,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { computeMonthFixedVariable, filterMonthsByRange } from '@/utils/dashboard'
 import { usePreferencesStore } from '@/stores/preferences'
-import { currencySymbol, formatAmount } from '@/currency'
+import { currencySymbol, formatAmount, formatAxisAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 
 Chart.register(...registerables)
@@ -106,8 +106,9 @@ function renderChart() {
         x: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
         y: {
           stacked: true,
+          beginAtZero: true,
           grid: { color: '#1e293b' },
-          ticks: { color: '#64748b', callback: (v) => formatAmount(Number(v), currency.value) },
+          ticks: { color: '#64748b', callback: (v) => formatAxisAmount(Number(v), currency.value) },
         },
       },
     },
@@ -128,7 +129,7 @@ onUnmounted(() => {
         <span>{{ $t('dashboard.monthlyCostChart.monthlyExpenseTrend', { cur: currencySymbol(currency) }) }}</span>
       </h3>
     </div>
-    <div class="h-64 sm:h-72">
+    <div class="h-52 sm:h-72">
       <canvas ref="monthlyChartRef" role="img" :aria-label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')"></canvas>
     </div>
   </div>

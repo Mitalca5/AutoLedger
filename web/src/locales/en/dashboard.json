@@ -294,6 +294,10 @@
       "reading": "recorded reading",
       "capacity": "recorded capacities",
       "charges": "estimated from charges"
-    }
+    },
+    "configure": "Set up",
+    "show": "Show",
+    "advanced": "Advanced settings",
+    "advancedHint": "The residual value combines age, mileage and battery health. These weights set the share of each: keep the defaults if unsure."
   }
 }

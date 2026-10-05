@@ -16,8 +16,8 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
 <template>
   <div
     v-if="next || !hasSchedule"
-    class="p-4 rounded-2xl border bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-    :class="soon ? 'border-warning-500/30' : 'border-slate-800'"
+    class="p-4 rounded-2xl border bg-slate-900 flex sm:flex-row sm:items-center justify-between gap-3"
+    :class="[soon ? 'border-warning-500/30' : 'border-slate-800', next ? 'flex-col' : 'items-center']"
   >
     <div class="flex items-center gap-3 min-w-0 flex-1">
       <div
@@ -54,7 +54,8 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
     <router-link
       v-if="next || canEdit"
       to="/expenses?tab=REMINDERS"
-      class="tap-text px-3.5 text-xs font-semibold rounded-xl shrink-0 self-start sm:self-auto gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+      :class="{ 'self-start': next }"
+      class="tap-text px-3.5 text-xs font-semibold rounded-xl shrink-0 sm:self-auto gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
     >
       {{ next ? $t('dashboard.nextDueCard.viewReminders') : $t('dashboard.nextDueCard.create') }}
       <ArrowRight class="w-3.5 h-3.5" />

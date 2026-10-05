@@ -171,7 +171,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="h-64 sm:h-72">
+    <div class="h-52 sm:h-72">
       <canvas ref="mileageChartRef" role="img" :aria-label="$t('dashboard.mileageCostChart.monthlyMileageAndCostPer', { unit: distanceUnit() })"></canvas>
     </div>
   </div>

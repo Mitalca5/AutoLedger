@@ -107,7 +107,7 @@ onBeforeUnmount(() => chart?.destroy())
       </div>
     </dl>
 
-    <div v-if="showChart" class="h-52">
+    <div v-if="showChart" class="h-44 sm:h-52">
       <canvas ref="canvas" role="img" :aria-label="$t('dashboard.energyBatterySection.batteryCapacityPerMonthTeslamate')"></canvas>
     </div>
     <div v-if="showChart" class="sr-only">

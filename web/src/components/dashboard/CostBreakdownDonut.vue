@@ -58,7 +58,7 @@ onUnmounted(() => {
 <template>
   <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
     <h3 class="text-sm font-bold text-white mb-4">{{ $t('dashboard.costBreakdownDonut.fullCostBreakdown') }}</h3>
-    <div class="h-56 sm:h-64">
+    <div class="h-48 sm:h-64">
       <canvas ref="donutChartRef" role="img" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
     </div>
   </div>

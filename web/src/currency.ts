@@ -19,3 +19,8 @@ export function currencySymbol(currency: string): string {
   const part = new Intl.NumberFormat(intlLocale(), { style: 'currency', currency }).formatToParts(0).find((p) => p.type === 'currency')
   return part?.value ?? currency
 }
+
+/** A money axis tick without decimals, shortened above a thousand ("400 k€"). */
+export function formatAxisAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat(intlLocale(), { style: 'currency', currency, notation: 'compact', maximumFractionDigits: Math.abs(amount) >= 1000 ? 1 : 0 }).format(amount)
+}

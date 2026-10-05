@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { currencySymbol, formatAmount, formatMoney } from './currency'
+import { currencySymbol, formatAmount, formatAxisAmount, formatMoney } from './currency'
 
 describe('formatMoney', () => {
   it('divides cents into the main unit before formatting', () => {
@@ -22,5 +22,18 @@ describe('currencySymbol', () => {
   it('extracts just the symbol for a chart label', () => {
     expect(currencySymbol('EUR')).toBe('€')
     expect(currencySymbol('USD')).toBe('$US')
+  })
+})
+
+describe('formatAxisAmount', () => {
+  it('never shows decimals on a small tick', () => {
+    expect(formatAxisAmount(800, 'EUR')).not.toMatch(/[.,]/)
+  })
+
+  it('shortens thousands instead of printing 400 000,00', () => {
+    const got = formatAxisAmount(400000, 'EUR')
+    expect(got).toContain('400')
+    expect(got).not.toMatch(/000/)
+    expect(got).not.toMatch(/,00/)
   })
 })

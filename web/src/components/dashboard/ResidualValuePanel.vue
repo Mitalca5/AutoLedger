@@ -95,12 +95,29 @@ const marker = computed(() => {
   const x = Math.min(Math.max(r.progress, 0), 1) * 200
   return { x, y: 40 - ((r.current_value - min) / (max - min || 1)) * 36 - 2 }
 })
+// Collapsed until there is something to show: a fresh vehicle only sees a "Configure" prompt, not a form of empty fields.
+const hasContent = computed(() => health.value?.health_percent !== undefined || !!health.value?.readings?.length || !!residual.value)
+const isOpen = ref(false)
+const userToggled = ref(false)
+watch(hasContent, (filled) => {
+  if (!userToggled.value) isOpen.value = filled
+})
+function onToggle(e: Event) {
+  const open = (e.target as HTMLDetailsElement).open
+  if (open !== isOpen.value) {
+    userToggled.value = true
+    isOpen.value = open
+  }
+}
 const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residualPanel.source.${health.value.source}`) : ''))
 </script>
 
 <template>
-  <details class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs" open>
-    <summary class="font-bold text-white cursor-pointer">{{ $t('dashboard.residualPanel.title') }}</summary>
+  <details class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs" :open="isOpen" @toggle="onToggle">
+    <summary class="tap flex cursor-pointer items-center justify-between gap-2 font-bold text-white">
+      <span>{{ $t('dashboard.residualPanel.title') }}</span>
+      <span v-if="!isOpen" class="rounded-full border border-slate-700 bg-slate-800 px-2.5 py-0.5 text-[11px] font-semibold text-slate-300">{{ hasContent ? $t('dashboard.residualPanel.show') : $t('dashboard.residualPanel.configure') }}</span>
+    </summary>
     <div class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div v-if="showBattery" class="space-y-3">
         <h4 class="font-bold text-slate-200">{{ $t('dashboard.residualPanel.health') }}</h4>
@@ -130,13 +147,19 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
           <label class="text-slate-400">{{ $t('dashboard.residualPanel.expectedKm') }}
             <input v-model="expectedKm" type="number" min="0" step="1000" class="block w-32 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
           </label>
-          <label class="text-slate-400">{{ $t('dashboard.residualPanel.kmShare') }}
-            <input v-model="kmShare" type="number" min="0" max="100" step="5" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
-          </label>
-          <label v-if="showBattery" class="text-slate-400">{{ $t('dashboard.residualPanel.healthWeight') }}
-            <input v-model="healthWeight" type="number" min="0" max="2" step="0.1" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
-          </label>
         </div>
+        <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2">
+          <summary class="cursor-pointer font-semibold text-slate-300">{{ $t('dashboard.residualPanel.advanced') }}</summary>
+          <p class="mt-2 text-slate-400">{{ $t('dashboard.residualPanel.advancedHint') }}</p>
+          <div class="mt-2 flex flex-wrap items-end gap-2">
+            <label class="text-slate-400">{{ $t('dashboard.residualPanel.kmShare') }}
+              <input v-model="kmShare" type="number" min="0" max="100" step="5" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
+            </label>
+            <label v-if="showBattery" class="text-slate-400">{{ $t('dashboard.residualPanel.healthWeight') }}
+              <input v-model="healthWeight" type="number" min="0" max="2" step="0.1" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
+            </label>
+          </div>
+        </details>
         <template v-if="residual">
           <p class="text-xl font-bold text-white">{{ formatAmount(residual.current_value, vehicleStore.currency) }}</p>
           <p class="text-slate-400">

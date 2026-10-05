@@ -140,7 +140,7 @@ onMounted(() => {
     </div>
 
     <!-- REAL CONTENT WHEN LOADED -->
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-4 sm:space-y-6">
       <UrgentRemindersBanner :reminders="dashboardReminders" />
 
       <TcoMetricsGrid :tco="tco" />

@@ -24,14 +24,14 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">{{ $t('dashboard.currentMonthBanner.activityThisMonth', { month: currentMonthStats.month }) }}</span>
         </div>
-        <div class="text-base sm:text-lg font-bold text-white flex items-center gap-2 sm:gap-3 mt-0.5 flex-wrap">
+        <div class="text-base sm:text-lg font-bold text-white flex items-center gap-x-3 gap-y-0.5 mt-0.5 flex-wrap">
           <span>{{ $t('dashboard.currentMonthBanner.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(currentMonthStats.distance_km) }) }}</span>
-          <span class="text-slate-400">•</span>
+          <span class="text-slate-400 hidden sm:inline">•</span>
           <span class="text-success-400">{{ formatAmount(perDistance(currentMonthStats.cost_per_km > 0 ? currentMonthStats.cost_per_km : 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}</span>
-          <span class="text-slate-400">•</span>
+          <span class="text-slate-400 hidden sm:inline">•</span>
           <span class="text-slate-300">{{ $t('dashboard.currentMonthBanner.spent', { value: formatAmount(currentMonthStats.total, vehicleStore.currency) }) }}</span>
           <template v-if="currentMonthStats.fixedVar && currentMonthStats.fixedVar.totalAmount > 0">
-            <span class="text-slate-400">•</span>
+            <span class="text-slate-400 hidden sm:inline">•</span>
             <span class="text-xs font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-700/60">
               {{ $t('dashboard.currentMonthBanner.fixedVariableRatio', { fixedPct: currentMonthStats.fixedVar.fixedPct, variablePct: currentMonthStats.fixedVar.variablePct }) }}
             </span>
@@ -50,7 +50,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
       </button>
       <router-link
         to="/drives"
-        class="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1.5"
+        class="hidden sm:flex text-xs font-semibold text-slate-400 hover:text-white items-center gap-1 px-2 py-1.5"
       >
         {{ $t('dashboard.currentMonthBanner.drives') }} <ArrowRight class="w-3.5 h-3.5" />
       </router-link>

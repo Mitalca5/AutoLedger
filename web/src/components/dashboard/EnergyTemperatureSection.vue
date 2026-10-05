@@ -90,7 +90,7 @@ onBeforeUnmount(() => chart?.destroy())
       <strong>+{{ fmt(effect.extra_percent, 0) }} %</strong><template v-if="effect.extra_cost_per_100km !== undefined">{{ $t('dashboard.energyTemperatureSection.aboutMorePer100Km', { unit: distanceUnit(), value: formatAmount(perDistance(effect.extra_cost_per_100km), vehicleStore.currency) }) }}</template>.
     </p>
 
-    <div class="h-52">
+    <div class="h-44 sm:h-52">
       <canvas ref="canvas" role="img" :aria-label="$t('dashboard.energyTemperatureSection.averageConsumptionPer100Km', { unit: distanceUnit() })"></canvas>
     </div>
     <div class="sr-only">
