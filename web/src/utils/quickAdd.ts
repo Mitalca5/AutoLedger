@@ -41,6 +41,18 @@ export function costFromTariff(kwh: number | null, pricePerKwh: number | undefin
   return round(kwh * pricePerKwh, 2)
 }
 
+// Total for a quantity at a unit price (kWh or litres), rounded to the cent.
+export function totalFromUnitPrice(quantity: number | null, unitPrice: number | null): number | null {
+  if (quantity === null || quantity <= 0 || unitPrice === null || unitPrice < 0) return null
+  return round(quantity * unitPrice, 2)
+}
+
+// Unit price paid for a total and a quantity, as the text of an input; empty when it cannot be computed.
+export function unitPriceText(total: number | null, quantity: number | null, digits: number): string {
+  if (total === null || total < 0 || quantity === null || quantity <= 0) return ''
+  return String(round(total / quantity, digits))
+}
+
 // Price per kWh actually paid, null when it cannot be computed.
 export function effectivePricePerKwh(kwh: number | null, cost: number | null): number | null {
   if (kwh === null || kwh <= 0 || cost === null || cost <= 0) return null

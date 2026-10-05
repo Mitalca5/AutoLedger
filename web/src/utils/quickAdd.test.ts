@@ -7,6 +7,8 @@ import {
   buildFuelPayload,
   buildPendingCostPayload,
   costFromTariff,
+  totalFromUnitPrice,
+  unitPriceText,
   effectivePricePerKwh,
   isQueued,
   loadMemory,
@@ -294,5 +296,33 @@ describe('describeQuickDate', () => {
 
   it('returns the raw value when it is not a date', () => {
     expect(describeQuickDate('nope', false, now, 'fr-FR', 'x')).toBe('nope')
+  })
+})
+
+describe('unit price helpers', () => {
+  it('computes the total of a quantity at a unit price, to the cent', () => {
+    expect(totalFromUnitPrice(30, 0.3858)).toBe(11.57)
+    expect(totalFromUnitPrice(41.2, 1.789)).toBe(73.71)
+    expect(totalFromUnitPrice(10, 0)).toBe(0)
+  })
+
+  it('gives no total without a usable quantity or price', () => {
+    expect(totalFromUnitPrice(null, 0.3)).toBeNull()
+    expect(totalFromUnitPrice(0, 0.3)).toBeNull()
+    expect(totalFromUnitPrice(10, null)).toBeNull()
+    expect(totalFromUnitPrice(10, -1)).toBeNull()
+  })
+
+  it('writes the unit price paid as input text', () => {
+    expect(unitPriceText(11.57, 30, 4)).toBe('0.3857')
+    expect(unitPriceText(73.71, 41.2, 3)).toBe('1.789')
+    expect(unitPriceText(0, 20, 4)).toBe('0')
+  })
+
+  it('leaves the price empty when it cannot be computed', () => {
+    expect(unitPriceText(null, 30, 4)).toBe('')
+    expect(unitPriceText(10, null, 4)).toBe('')
+    expect(unitPriceText(10, 0, 4)).toBe('')
+    expect(unitPriceText(-5, 10, 4)).toBe('')
   })
 })

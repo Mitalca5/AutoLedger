@@ -7,7 +7,7 @@ import QuickFormShell from './QuickFormShell.vue'
 import QuickOdometerField from './QuickOdometerField.vue'
 import QuickDateLine from './QuickDateLine.vue'
 import { currencySymbol, formatAmount } from '@/currency'
-import { buildFuelPayload, checkOdometer, isQueued, toLocalDateInput, toNumber } from '@/utils/quickAdd'
+import { buildFuelPayload, checkOdometer, isQueued, toLocalDateInput, toNumber, totalFromUnitPrice, unitPriceText } from '@/utils/quickAdd'
 import { formatDistance } from '@/units'
 
 const props = defineProps<{ vehicle: any }>()
@@ -18,6 +18,7 @@ const form = reactive({
   date: toLocalDateInput(new Date()),
   amount: '',
   liters: '',
+  price: '',
   fullTank: true,
   odometer: '',
   notes: '',
@@ -32,13 +33,28 @@ const amountInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => amountInput.value?.focus())
 
-const pricePerLiter = computed(() => {
-  const amount = toNumber(form.amount)
+// The field edited last decides the other: a price gives the amount for the litres, an amount gives the price paid.
+const driver = ref<'amount' | 'price'>('amount')
+
+function sync() {
   const liters = toNumber(form.liters)
-  if (amount === null || liters === null || amount <= 0 || liters <= 0) return null
-  return amount / liters
-})
-const fmtPrice = (v: number) => formatAmount(v, currency, 3)
+  if (driver.value === 'price') {
+    const amount = totalFromUnitPrice(liters, toNumber(form.price))
+    form.amount = amount === null ? '' : amount.toFixed(2)
+  } else {
+    form.price = unitPriceText(toNumber(form.amount), liters, 3)
+  }
+}
+
+function onPriceInput() {
+  driver.value = 'price'
+  sync()
+}
+
+function onAmountInput() {
+  driver.value = 'amount'
+  sync()
+}
 
 async function submit() {
   error.value = ''
@@ -70,15 +86,17 @@ async function submit() {
   <QuickFormShell :submit-label="$t('quickadd.quickFuelForm.saveTheFillUp')" :saving="saving" :error="error" @submit="submit">
     <div>
       <label for="qf-amount" class="quick-label">{{ $t('quickadd.quickFuelForm.amount', { cur: currencySymbol(currency) }) }}</label>
-      <input id="qf-amount" ref="amountInput" v-model="form.amount" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
+      <input id="qf-amount" ref="amountInput" v-model="form.amount" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onAmountInput" />
     </div>
 
     <div>
       <label for="qf-liters" class="quick-label">{{ $t('quickadd.quickFuelForm.quantityL') }}</label>
-      <input id="qf-liters" v-model="form.liters" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
-      <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
-        <template v-if="pricePerLiter !== null">{{ $t('quickadd.quickFuelForm.thatIsL', { pricePerLiter: fmtPrice(pricePerLiter) }) }}</template>
-      </p>
+      <input id="qf-liters" v-model="form.liters" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="sync" />
+    </div>
+
+    <div>
+      <label for="qf-price" class="quick-label">{{ $t('quickadd.quickFuelForm.pricePerLiter', { cur: currencySymbol(currency) }) }}</label>
+      <input id="qf-price" v-model="form.price" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onPriceInput" />
     </div>
 
     <label class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-800 px-4 text-sm font-semibold text-white">

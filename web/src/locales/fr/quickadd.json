@@ -12,7 +12,6 @@
     "chargerHome": "Borne, domicile…",
     "place": "Lieu",
     "moreDetails": "Plus de détails",
-    "thatIsKwh": "Soit {pricePerKwh}/kWh.",
     "calculatedAtTheLastRate": "Calculé au dernier tarif ({pricePerKwh}/kWh). Modifiez le coût si besoin.",
     "free": "Gratuit",
     "cost": "Coût ({cur})",
@@ -20,7 +19,8 @@
     "chargeOutsideTeslamateThirdParty": "Recharge que le véhicule n'a pas enregistrée lui-même (borne tierce, prise non suivie).",
     "saveTheCharge": "Enregistrer la recharge",
     "message": "Recharge de {kwh} kWh",
-    "saveFailed": "Impossible d'enregistrer la recharge."
+    "saveFailed": "Impossible d'enregistrer la recharge.",
+    "pricePerKwh": "Prix au kWh ({cur})"
   },
   "quickExpenseForm": {
     "moreDetails": "Plus de détails",
@@ -38,12 +38,12 @@
   "quickFuelForm": {
     "moreDetails": "Plus de détails",
     "fullTank": "Plein complet",
-    "thatIsL": "Soit {pricePerLiter}/L.",
     "quantityL": "Quantité (L)",
     "amount": "Montant ({cur})",
     "saveTheFillUp": "Enregistrer le plein",
     "message": "Plein de {amount}",
-    "saveFailed": "Impossible d'enregistrer le plein."
+    "saveFailed": "Impossible d'enregistrer le plein.",
+    "pricePerLiter": "Prix au litre ({cur})"
   },
   "quickPendingCosts": {
     "otherSToCompleteFrom": "{total} autre(s) : à compléter depuis Énergie › Recharges.",

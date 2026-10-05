@@ -12,7 +12,6 @@
     "chargerHome": "Charger, home…",
     "place": "Place",
     "moreDetails": "More details",
-    "thatIsKwh": "That is {pricePerKwh}/kWh.",
     "calculatedAtTheLastRate": "Calculated at the last rate ({pricePerKwh}/kWh). Edit the cost if needed.",
     "free": "Free",
     "cost": "Cost ({cur})",
@@ -20,7 +19,8 @@
     "chargeOutsideTeslamateThirdParty": "Charge the vehicle did not record itself (third-party charger, untracked socket).",
     "saveTheCharge": "Save the charge",
     "message": "Charge of {kwh} kWh",
-    "saveFailed": "Could not save the charge."
+    "saveFailed": "Could not save the charge.",
+    "pricePerKwh": "Price per kWh ({cur})"
   },
   "quickExpenseForm": {
     "moreDetails": "More details",
@@ -38,12 +38,12 @@
   "quickFuelForm": {
     "moreDetails": "More details",
     "fullTank": "Full tank",
-    "thatIsL": "That is {pricePerLiter}/L.",
     "quantityL": "Quantity (L)",
     "amount": "Amount ({cur})",
     "saveTheFillUp": "Save the fill-up",
     "message": "Fill-up of {amount}",
-    "saveFailed": "Could not save the fill-up."
+    "saveFailed": "Could not save the fill-up.",
+    "pricePerLiter": "Price per litre ({cur})"
   },
   "quickPendingCosts": {
     "otherSToCompleteFrom": "{total} other(s): to complete from Energy › Charges.",

@@ -14,10 +14,11 @@ import {
   buildChargePayload,
   checkOdometer,
   costFromTariff,
-  effectivePricePerKwh,
   isQueued,
   loadMemory,
   rememberCharge,
+  totalFromUnitPrice,
+  unitPriceText,
   toLocalDateTimeInput,
   toNumber,
 } from '@/utils/quickAdd'
@@ -32,6 +33,7 @@ const odometer = props.vehicle.current_odometer ? String(Math.round(props.vehicl
 const form = reactive({
   date: toLocalDateTimeInput(new Date()),
   kwh: '',
+  price: memory.pricePerKwh ? String(memory.pricePerKwh) : '',
   cost: '',
   address: memory.address ?? '',
   odometer,
@@ -43,30 +45,48 @@ const form = reactive({
 const saving = ref(false)
 const error = ref('')
 const showDetails = ref(false)
-const costTouched = ref(false)
 const odometerConfirmed = ref(false)
 watch(odometerConfirmed, () => (error.value = ''))
 const kwhInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => kwhInput.value?.focus())
 
-// Until the cost is typed by hand it follows the energy at the last tariff used on this vehicle.
+// The price per kWh starts at the last tariff used on this vehicle. The field edited last decides the other:
+// a price gives the cost for the energy, a cost gives the price paid.
+type Driver = 'tariff' | 'price' | 'cost'
+const driver = ref<Driver>('tariff')
+
 watch(
   () => form.kwh,
   (value) => {
-    if (costTouched.value) return
-    const cost = costFromTariff(toNumber(value), memory.pricePerKwh)
+    const kwh = toNumber(value)
+    if (driver.value === 'cost') {
+      form.price = unitPriceText(toNumber(form.cost), kwh, 4)
+      return
+    }
+    const cost = totalFromUnitPrice(kwh, toNumber(form.price))
     form.cost = cost === null ? '' : cost.toFixed(2)
   },
 )
 
-const pricePerKwh = computed(() => effectivePricePerKwh(toNumber(form.kwh), toNumber(form.cost)))
+function onPriceInput() {
+  driver.value = 'price'
+  const cost = totalFromUnitPrice(toNumber(form.kwh), toNumber(form.price))
+  form.cost = cost === null ? '' : cost.toFixed(2)
+}
+
+function onCostInput() {
+  driver.value = 'cost'
+  form.price = unitPriceText(toNumber(form.cost), toNumber(form.kwh), 4)
+}
+
 const fmtPrice = (v: number) => formatAmount(v, currency, 4)
-const followsTariff = computed(() => !costTouched.value && memory.pricePerKwh !== undefined && form.cost !== '')
+const followsTariff = computed(() => driver.value === 'tariff' && memory.pricePerKwh !== undefined && form.cost !== '')
 
 function setFree() {
-  costTouched.value = true
+  driver.value = 'cost'
   form.cost = '0'
+  form.price = '0'
 }
 
 async function submit() {
@@ -106,14 +126,18 @@ async function submit() {
     </div>
 
     <div>
+      <label for="qc-price" class="quick-label">{{ $t('quickadd.quickChargeForm.pricePerKwh', { cur: currencySymbol(currency) }) }}</label>
+      <input id="qc-price" v-model="form.price" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onPriceInput" />
+    </div>
+
+    <div>
       <label for="qc-cost" class="quick-label">{{ $t('quickadd.quickChargeForm.cost', { cur: currencySymbol(currency) }) }}</label>
       <div class="flex gap-2">
-        <input id="qc-cost" v-model="form.cost" type="number" inputmode="decimal" step="any" min="0" class="quick-input min-w-0" @input="costTouched = true" />
+        <input id="qc-cost" v-model="form.cost" type="number" inputmode="decimal" step="any" min="0" class="quick-input min-w-0" @input="onCostInput" />
         <button type="button" class="quick-chip shrink-0 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" @click="setFree">{{ $t('quickadd.quickChargeForm.free') }}</button>
       </div>
       <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
         <template v-if="followsTariff">{{ $t('quickadd.quickChargeForm.calculatedAtTheLastRate', { pricePerKwh: fmtPrice(memory.pricePerKwh!) }) }}</template>
-        <template v-else-if="pricePerKwh !== null">{{ $t('quickadd.quickChargeForm.thatIsKwh', { pricePerKwh: fmtPrice(pricePerKwh) }) }}</template>
       </p>
     </div>
 
