@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { useRouter } from 'vue-router'
@@ -63,7 +64,7 @@ const vehicleStore = useVehicleStore()
       <span v-if="missingCostOnly">{{ $t('expenses.chargesPanel.showingOnlyTheChargesWithout') }}</span>
       <span v-else>{{ $t('expenses.chargesPanel.chargeSWithoutACost', { chargesWithoutCost }) }}</span>
     </button>
-    <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
+    <ListSkeleton v-if="loading" />
     <EmptyState v-else-if="!charges.length">
       {{ $t('expenses.chargesPanel.empty') }}
       <template #actions>

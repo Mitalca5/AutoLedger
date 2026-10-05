@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -27,7 +28,7 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
 
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
+    <ListSkeleton v-if="loading" />
     <EmptyState v-else-if="!driveExpenses.length">
       {{ $t('expenses.tollsPanel.noTollOrParkingRecorded') }}
     </EmptyState>

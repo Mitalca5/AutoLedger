@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -18,7 +19,7 @@ const vehicleStore = useVehicleStore()
 
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
+    <ListSkeleton v-if="loading" />
     <EmptyState v-else-if="!maintenanceExpenses.length">
       {{ $t('expenses.maintenancePanel.noMaintenanceOrFixedExpense') }}
     </EmptyState>

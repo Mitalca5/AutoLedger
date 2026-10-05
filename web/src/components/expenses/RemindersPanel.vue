@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import { computed, ref } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
@@ -90,7 +91,7 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
       <ReminderTemplatesBar v-if="vehicleStore.canEdit" :has-reminders="reminders.length > 0" @changed="emit('reload')" />
     </div>
 
-    <div v-if="loadingReminders" class="text-center py-12 text-slate-400">{{ $t('expenses.remindersPanel.loadingTheReminders') }}</div>
+    <ListSkeleton v-if="loadingReminders" :label="$t('expenses.remindersPanel.loadingTheReminders')" />
 
     <!-- Empty state -->
     <div v-else-if="!reminders.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-4">
