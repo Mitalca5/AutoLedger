@@ -292,7 +292,11 @@
     "dueToday": "Today",
     "everyYearOn": "Every year on {date}",
     "onDate": "On {date}",
-    "basedOnMaintenance": "Based on the maintenance of {date}"
+    "basedOnMaintenance": "Based on the maintenance of {date}",
+    "groupOverdue": "Overdue",
+    "groupSoon": "Coming up soon",
+    "groupLater": "Later",
+    "groupUnscheduled": "No schedule"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Drop the invoice here or click to browse",

@@ -98,6 +98,29 @@ export function sortRemindersByUrgency<T extends ScheduledReminder>(reminders: T
   })
 }
 
+export type ReminderGroupKey = 'overdue' | 'soon' | 'later' | 'unscheduled'
+
+const dueKey = (r: ScheduledReminder & { due_date?: string | null }): string => (r.due_date ?? '').slice(0, 10) || '9999-99-99'
+
+/** Reminders split by how close they are, each group ordered by due date (reminders only due by mileage after the dated ones, by remaining distance); empty groups are left out. */
+export function groupRemindersByDue<T extends ScheduledReminder & { due_date?: string | null; remaining_km?: number | null; interval_km?: number | null; interval_months?: number | null; scheduled_date?: string | null }>(
+  reminders: T[],
+): { key: ReminderGroupKey; items: T[] }[] {
+  const buckets: Record<ReminderGroupKey, T[]> = { overdue: [], soon: [], later: [], unscheduled: [] }
+  for (const r of reminders) {
+    if (r.status === 'OVERDUE') buckets.overdue.push(r)
+    else if (r.status === 'DUE_SOON') buckets.soon.push(r)
+    else if ((r.interval_km ?? 0) > 0 || (r.interval_months ?? 0) > 0 || r.scheduled_date) buckets.later.push(r)
+    else buckets.unscheduled.push(r)
+  }
+  const byDue = (a: T, b: T) => {
+    const k = dueKey(a).localeCompare(dueKey(b))
+    return k !== 0 ? k : (a.remaining_km ?? Infinity) - (b.remaining_km ?? Infinity)
+  }
+  const order: ReminderGroupKey[] = ['overdue', 'soon', 'later', 'unscheduled']
+  return order.filter((key) => buckets[key].length).map((key) => ({ key, items: buckets[key].sort(byDue) }))
+}
+
 /** The scheduled reminder that comes due first and is not overdue yet (overdue ones have their own banner). */
 export function nextDueReminder<T extends ScheduledReminder>(reminders: T[]): { reminder: T; progress: number } | null {
   let best: { reminder: T; progress: number } | null = null

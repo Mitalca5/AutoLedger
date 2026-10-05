@@ -12,6 +12,7 @@ import {
   isFixedCost,
   groupChargesByMonth,
   hasReminderSchedule,
+  reminderDueTile,
   nextOccurrenceDate,
   reminderDaysLabel,
   reminderDaysOver,
@@ -265,5 +266,13 @@ describe('fixed costs', () => {
   it('splits the expenses between servicing and fixed costs', () => {
     expect(expensesOfKind(items, 'service').map((m) => m.id)).toEqual([1, 3, 7, 8])
     expect(expensesOfKind(items, 'fixed').map((m) => m.id)).toEqual([2, 4, 5, 6])
+  })
+})
+
+describe('reminderDueTile', () => {
+  it('prefers the due date, then the due mileage', () => {
+    expect(reminderDueTile({ due_date: '2026-11-01T00:00:00Z', due_odometer: 90000 })).toMatchObject({ kind: 'date', day: 1 })
+    expect(reminderDueTile({ due_odometer: 90000 })).toEqual({ kind: 'km', km: 90000 })
+    expect(reminderDueTile({})).toBeNull()
   })
 })

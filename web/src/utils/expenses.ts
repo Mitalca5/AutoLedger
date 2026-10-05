@@ -125,6 +125,19 @@ export const reminderDaysLabel = (r: ReminderDays): string =>
       ? t('expenses.remindersPanel.daysOver', { days: Math.abs(r.remaining_days) })
       : t('expenses.remindersPanel.daysLeft', { days: r.remaining_days })
 
+export type ReminderDueTile = { kind: 'date'; month: string; day: number } | { kind: 'km'; km: number }
+
+/** What a reminder row shows in its leading tile: the due date when there is one, else the due mileage. */
+export function reminderDueTile(r: { due_date?: string | null; due_odometer?: number | null }): ReminderDueTile | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(r.due_date ?? '')
+  if (m) {
+    const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])))
+    return { kind: 'date', month: d.toLocaleDateString(undefined, { month: 'short', timeZone: 'UTC' }).replace('.', ''), day: d.getUTCDate() }
+  }
+  if (r.due_odometer) return { kind: 'km', km: r.due_odometer }
+  return null
+}
+
 export function toLocalDateTimeInput(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`

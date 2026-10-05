@@ -3,10 +3,10 @@ import ListSkeleton from '@/components/ListSkeleton.vue'
 import { computed, ref } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
-import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed, Settings } from 'lucide-vue-next'
-import { reminderPresets, formatDate, formatCalendarDay, hasReminderSchedule, reminderDaysLabel, reminderDaysOver, type ReminderPreset } from '@/utils/expenses'
-import { distanceUnit, formatDistanceValue } from '@/units'
-import { sortRemindersByUrgency } from '@/utils/dashboard'
+import { Plus, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed, Settings } from 'lucide-vue-next'
+import { reminderPresets, type ReminderPreset } from '@/utils/expenses'
+import { groupRemindersByDue } from '@/utils/dashboard'
+import ReminderRow from '@/components/expenses/ReminderRow.vue'
 import ReminderTemplatesBar from '@/components/expenses/ReminderTemplatesBar.vue'
 
 const props = defineProps<{
@@ -28,7 +28,7 @@ const emit = defineEmits<{
 }>()
 const vehicleStore = useVehicleStore()
 const showSettings = ref(false)
-const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
+const groups = computed(() => groupRemindersByDue(props.reminders))
 </script>
 
 <template>
@@ -132,149 +132,29 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
       </div>
     </div>
 
-    <!-- Reminders List -->
-    <div v-else class="space-y-3">
-      <div
-        v-for="r in sortedReminders"
-        :key="r.id"
-        class="bg-slate-900 border p-4 rounded-2xl flex flex-col justify-between gap-3 transition-colors"
-        :class="r.status === 'OVERDUE' ? 'border-danger-500/40 bg-danger-500/5' : r.status === 'DUE_SOON' ? 'border-warning-500/40 bg-warning-500/5' : 'border-slate-800'"
-      >
-        <!-- Card top -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-2.5 flex-wrap">
-            <span
-              class="text-xs px-2.5 py-0.5 rounded-full font-bold border flex items-center gap-1"
-              :class="r.status === 'OVERDUE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : r.status === 'DUE_SOON' ? 'bg-warning-500/20 text-warning-300 border-warning-500/30' : hasReminderSchedule(r) ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
-            >
-              <AlertTriangle v-if="r.status === 'OVERDUE'" class="w-3 h-3" />
-              <Clock v-else-if="r.status === 'DUE_SOON'" class="w-3 h-3" />
-              <CheckCircle2 v-else-if="hasReminderSchedule(r)" class="w-3 h-3" />
-              <CircleDashed v-else class="w-3 h-3" />
-              {{ r.status === 'OVERDUE' ? $t('expenses.remindersPanel.overdue') : r.status === 'DUE_SOON' ? $t('expenses.remindersPanel.dueSoon') : hasReminderSchedule(r) ? $t('expenses.remindersPanel.upToDate') : $t('expenses.remindersPanel.withoutSchedule') }}
-            </span>
-
-            <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-              {{ r.category === 'TIRES' ? $t('expenses.remindersPanel.tires') : $t('expenses.remindersPanel.maintenance') }}
-            </span>
-
-            <h4 class="text-sm font-bold text-white">{{ r.title }}</h4>
-
-            <span
-              v-if="r.webhook_enabled"
-              class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center gap-1"
-              :title="$t('expenses.remindersPanel.webhookNotificationEnabledForThis')"
-            >
-              <Radio class="w-2.5 h-2.5" />
-              {{ $t('expenses.remindersPanel.webhook') }}
-            </span>
-          </div>
-
-          <!-- Due Badges / Urgency pill -->
-          <div class="flex items-center gap-2 text-xs font-semibold">
-            <span
-              v-if="r.remaining_km !== null && r.remaining_km !== undefined"
-              class="px-2 py-0.5 rounded-lg"
-              :class="r.remaining_km <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_km <= r.lead_km ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
-            >
-              {{ r.remaining_km <= 0 ? $t('expenses.remindersPanel.kmOver', { unit: distanceUnit(), km: formatDistanceValue(Math.abs(Math.round(r.remaining_km))) }) : $t('expenses.remindersPanel.kmLeft', { unit: distanceUnit(), km: formatDistanceValue(r.remaining_km) }) }}
-            </span>
-            <span
-              v-if="r.remaining_days !== null && r.remaining_days !== undefined"
-              class="px-2 py-0.5 rounded-lg"
-              :class="reminderDaysOver({ remaining_days: r.remaining_days, scheduled_date: r.scheduled_date }) ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_days <= r.lead_days ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
-            >
-              {{ reminderDaysLabel({ remaining_days: r.remaining_days, scheduled_date: r.scheduled_date }) }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Card details grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-2.5 pt-1 text-xs text-slate-300">
-          <div v-if="r.interval_km" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.mileageDue') }}</span>
-            <span class="font-medium text-white">
-              {{ $t('expenses.remindersPanel.everyKm', { unit: distanceUnit(), interval_km: formatDistanceValue(r.interval_km) }) }}
-              <span v-if="r.observed_interval_km" class="text-slate-400 block text-xs">
-                {{ $t('expenses.remindersPanel.observedInterval', { km: formatDistanceValue(r.observed_interval_km), unit: distanceUnit(), months: r.observed_interval_months ?? '–' }) }}
-              </span>
-              <span v-if="r.due_odometer" class="text-slate-400 block text-xs">
-                {{ $t('expenses.remindersPanel.dueAtKm', { unit: distanceUnit(), due_odometer: formatDistanceValue(r.due_odometer) }) }}
-              </span>
-            </span>
-          </div>
-
-          <div v-if="r.scheduled_date" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
-            <span class="font-medium text-white">
-              {{ r.repeat_yearly ? $t('expenses.remindersPanel.everyYearOn', { date: formatCalendarDay(r.scheduled_date, false) }) : $t('expenses.remindersPanel.onDate', { date: formatCalendarDay(r.scheduled_date) }) }}
-              <span v-if="r.due_date && r.repeat_yearly" class="text-slate-400 block text-xs">
-                {{ $t('expenses.remindersPanel.due', { due_date: formatDate(r.due_date) }) }}
-              </span>
-            </span>
-          </div>
-
-          <div v-else-if="r.interval_months" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
-            <span class="font-medium text-white">
-              {{ $t('expenses.remindersPanel.everyMonths', { interval_months: r.interval_months }) }}
-              <span v-if="r.due_date" class="text-slate-400 block text-xs">
-                {{ $t('expenses.remindersPanel.due', { due_date: formatDate(r.due_date) }) }}
-              </span>
-            </span>
-          </div>
-
-          <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
-            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.lastCompleted') }}</span>
-            <span class="font-medium text-white">
-              {{ r.last_service_date ? formatDate(r.last_service_date) : $t('expenses.remindersPanel.notEntered') }}
-              <span v-if="r.last_service_odometer" class="text-slate-400 block text-xs">
-                {{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(r.last_service_odometer) }) }}
-              </span>
-            </span>
-            <span v-if="r.maintenance" class="mt-1 block text-xs text-violet-300">
-              {{ $t('expenses.remindersPanel.basedOnMaintenance', { date: formatDate(r.maintenance.date) }) }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Card footer -->
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-          <div class="text-xs text-slate-400">
-            <span v-if="r.last_notified_at">
-              {{ $t('expenses.remindersPanel.lastWebhookAlert', { last_notified_at: formatDate(r.last_notified_at) }) }}
-            </span>
-            <span v-else>
-              {{ $t('expenses.remindersPanel.earlyAlertKmDBefore', { unit: distanceUnit(), lead_km: formatDistanceValue(r.lead_km), lead_days: r.lead_days }) }}
-            </span>
-          </div>
-
-          <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">
-            <button
-              @click="emit('complete', r)"
-              class="px-2.5 py-1.5 bg-success-600/20 hover:bg-success-600/30 text-success-300 text-xs font-semibold rounded-xl border border-success-500/30 flex items-center gap-1.5 transition-colors"
-              :title="$t('expenses.remindersPanel.markThisMaintenanceAsDone')"
-            >
-              <CheckCircle2 class="w-3.5 h-3.5 text-success-400" />
-              <span>{{ $t('expenses.remindersPanel.markDone') }}</span>
-            </button>
-            <button
-              @click="emit('edit', r)"
-              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-violet-400 rounded-xl transition-colors border border-slate-700/60"
-              :title="$t('expenses.remindersPanel.editThisReminder')"
-            >
-              <Pencil class="w-3.5 h-3.5" />
-            </button>
-            <button
-              @click="emit('delete', r)"
-              class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
-              :title="$t('expenses.remindersPanel.deleteThisReminder')"
-            >
-              <Trash2 class="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- Reminders by due date -->
+    <div v-else class="space-y-5">
+      <section v-for="g in groups" :key="g.key" class="space-y-2">
+        <h4
+          class="flex items-center gap-2 text-xs font-bold uppercase tracking-wide"
+          :class="g.key === 'overdue' ? 'text-rose-300' : g.key === 'soon' ? 'text-warning-300' : 'text-slate-400'"
+        >
+          <AlertTriangle v-if="g.key === 'overdue'" class="w-3.5 h-3.5" />
+          <Clock v-else-if="g.key === 'soon'" class="w-3.5 h-3.5" />
+          <CircleDashed v-else-if="g.key === 'unscheduled'" class="w-3.5 h-3.5" />
+          <CheckCircle2 v-else class="w-3.5 h-3.5" />
+          {{ $t(`expenses.remindersPanel.group${g.key.charAt(0).toUpperCase()}${g.key.slice(1)}`) }}
+          <span class="font-semibold opacity-70">{{ g.items.length }}</span>
+        </h4>
+        <ReminderRow
+          v-for="r in g.items"
+          :key="r.id"
+          :reminder="r"
+          @edit="emit('edit', $event)"
+          @complete="emit('complete', $event)"
+          @delete="emit('delete', $event)"
+        />
+      </section>
     </div>
   </div>
 </template>

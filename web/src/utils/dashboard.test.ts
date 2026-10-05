@@ -11,6 +11,7 @@ import {
   reminderProgress,
   sortRemindersByUrgency,
   summarizeUrgentReminders,
+  groupRemindersByDue,
 } from './dashboard'
 
 describe('filterMonthsByRange', () => {
@@ -322,5 +323,20 @@ describe('sortRemindersByUrgency', () => {
       { title: 'near', status: 'OK', ...sched, remaining_km: 3000 },
     ]
     expect(sortRemindersByUrgency(list).map((r) => r.title)).toEqual(['near', 'far', 'none'])
+  })
+})
+
+describe('groupRemindersByDue', () => {
+  const base = { interval_km: 10000, interval_months: null, scheduled_date: null, remaining_km: null, due_date: null }
+  it('splits by closeness, orders by due date and drops empty groups', () => {
+    const groups = groupRemindersByDue([
+      { id: 1, status: 'OK', ...base, due_date: '2027-03-01' },
+      { id: 2, status: 'OK', ...base, due_date: '2026-12-01' },
+      { id: 3, status: 'OVERDUE', ...base, due_date: '2026-09-01' },
+      { id: 4, status: 'OK', ...base, interval_km: 0 },
+      { id: 5, status: 'OK', ...base, due_date: null, remaining_km: 500 },
+    ])
+    expect(groups.map((g) => g.key)).toEqual(['overdue', 'later', 'unscheduled'])
+    expect(groups[1].items.map((r) => r.id)).toEqual([2, 1, 5])
   })
 })
