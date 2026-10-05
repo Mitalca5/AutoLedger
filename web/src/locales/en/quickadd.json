@@ -31,6 +31,7 @@
     "parking": "Parking",
     "ferry": "Ferry",
     "other": "Other",
+    "maintenance": "Maintenance, insurance… (full form)",
     "message": "{label} of {amount}",
     "saveFailed": "Could not save the expense."
   },

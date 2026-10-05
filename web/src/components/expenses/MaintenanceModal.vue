@@ -21,6 +21,7 @@ const props = defineProps<{
   editing: any | null
   documents: ExpenseDocumentHeader[]
   maintenanceExpenses: any[]
+  currentOdometer?: number
 }>()
 const emit = defineEmits<{
   saved: []
@@ -79,6 +80,8 @@ const maintForm = ref({
 const detectedOdometer = ref<number | null>(null)
 const detectingOdometer = ref(false)
 const shouldClosePrevious = ref(false)
+// Last value the form put in the odometer itself: only that value is replaced when the date changes.
+let autofilledOdometer = 0
 
 const closeCandidateMaintenance = computed(() =>
   findCloseCandidate(props.maintenanceExpenses, editingMaintId.value, maintForm.value.date)
@@ -91,8 +94,9 @@ async function checkOdometerForDate(dateVal: string) {
     const res = await api.getOdometerAt(props.vehicleId, dateVal)
     if (res && typeof res.odometer === 'number' && res.odometer > 0) {
       detectedOdometer.value = res.odometer
-      if (!maintForm.value.odometer || maintForm.value.odometer === 0) {
+      if (!maintForm.value.odometer || maintForm.value.odometer === autofilledOdometer) {
         maintForm.value.odometer = Math.round(res.odometer)
+        autofilledOdometer = maintForm.value.odometer
       }
     } else {
       detectedOdometer.value = null
@@ -110,13 +114,14 @@ watch(open, (isOpen) => {
   detectedOdometer.value = null
   if (!m) {
     shouldClosePrevious.value = false
+    autofilledOdometer = props.currentOdometer ? Math.round(props.currentOdometer) : 0
     maintForm.value = {
       category: 'MAINTENANCE',
       amount: '',
       currency: baseCurrency.value,
       fx_rate: '',
       date: todayIso(),
-      odometer: 0,
+      odometer: autofilledOdometer,
       is_recurring: false,
       recurrence_interval_months: 12,
       recurrence_end_date: '',

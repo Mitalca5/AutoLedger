@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import { onMounted, reactive, ref } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { ChevronDown, Wrench } from 'lucide-vue-next'
 import { api } from '@/services/api'
+import { useQuickAddStore } from '@/stores/quickAdd'
 import QuickFormShell from './QuickFormShell.vue'
 import QuickPhotoField from './QuickPhotoField.vue'
 import QuickDateLine from './QuickDateLine.vue'
@@ -28,6 +30,15 @@ const form = reactive({
   documentId: null as string | null,
   documentFilename: null as string | null,
 })
+
+const router = useRouter()
+const quickAdd = useQuickAddStore()
+
+// A maintenance carries a category, a coverage and documents: the full form opens with today's date and the detected odometer.
+function openMaintenance() {
+  quickAdd.close()
+  router.push({ path: '/expenses', query: { tab: 'MAINTENANCE', add: 'maintenance' } })
+}
 
 const saving = ref(false)
 const error = ref('')
@@ -74,6 +85,15 @@ async function submit() {
         {{ $t(t.label) }}
       </button>
     </div>
+
+    <button
+      type="button"
+      class="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-600 px-3 text-sm font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:bg-slate-800"
+      @click="openMaintenance"
+    >
+      <Wrench class="h-4 w-4" aria-hidden="true" />
+      {{ $t('quickadd.quickExpenseForm.maintenance') }}
+    </button>
 
     <div>
       <label for="qe-amount" class="quick-label">{{ $t('quickadd.quickExpenseForm.amount', { cur: currencySymbol(currency) }) }}</label>

@@ -2,7 +2,7 @@
 import PageHeader from '@/components/PageHeader.vue'
 import { Receipt as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
@@ -188,6 +188,19 @@ watch(
   () => {
     loadData()
   }
+)
+
+// The quick entry sheet sends maintenance entries here: the form opens on arrival and the parameter is dropped.
+watch(
+  () => [route.query.add, vehicleStore.canEdit] as const,
+  ([add, canEdit]) => {
+    if (add !== 'maintenance') return
+    const { add: _drop, ...rest } = route.query
+    router.replace({ query: rest })
+    // Once mounted, so the modal sees its `open` go from false to true and loads its defaults
+    if (canEdit) nextTick(openAddMaintModal)
+  },
+  { immediate: true },
 )
 
 onMounted(() => {
@@ -645,6 +658,7 @@ async function openWebhookModal() {
       :editing="editingMaint"
       :documents="documents"
       :maintenance-expenses="maintenanceExpenses"
+      :current-odometer="currentOdometer"
       @saved="loadData"
       @document-added="onDocumentAdded"
       @view-document="viewOrDownloadDocument"
