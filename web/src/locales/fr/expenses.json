@@ -162,7 +162,9 @@
     "uploadHelper": "PDF ou image (téléversé et rattaché automatiquement à cette dépense)",
     "enterAnnualPremium": "Veuillez saisir la prime annuelle",
     "premiumDescription": "Prime d'assurance ({amount}/an)",
-    "perKm": "Au {unit}"
+    "perKm": "Au {unit}",
+    "advancedOptions": "Options avancées",
+    "smoothingSummary": "Lissage : {mode}"
   },
   "maintenancePanel": {
     "deleteThisExpense": "Supprimer cette dépense",

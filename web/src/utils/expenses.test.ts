@@ -3,6 +3,8 @@ import {
   reminderPresets,
   countUnlistedDrives,
   currencyPayload,
+  defaultAmortizationMode,
+  recentDescriptions,
   findCloseCandidate,
   formatFileSize,
   filterMaintenance,
@@ -122,5 +124,25 @@ describe('maintenance list helpers', () => {
     expect(maintenanceTotal(items, 'EUR')).toBeCloseTo(168.5)
     expect(maintenanceTotal([{ category: 'OTHER', date: '2026-01-01', amount: 10, currency: 'USD', fx_rate: null }], 'EUR')).toBe(0)
     expect(maintenanceTotal([], 'EUR')).toBe(0)
+  })
+})
+
+describe('maintenance form defaults', () => {
+  it('spreads only accessories over the distance by default', () => {
+    expect(defaultAmortizationMode('ACCESSORY')).toBe('DISTANCE')
+    expect(defaultAmortizationMode('MAINTENANCE')).toBe('NONE')
+    expect(defaultAmortizationMode('INSURANCE')).toBe('NONE')
+  })
+
+  it('suggests the latest distinct descriptions, newest first and capped', () => {
+    const items = [
+      { description: 'Vidange', date: '2025-01-01' },
+      { description: 'Pneus', date: '2026-02-01' },
+      { description: ' Vidange ', date: '2026-03-01' },
+      { description: '', date: '2026-04-01' },
+      { description: null, date: '2026-05-01' },
+    ]
+    expect(recentDescriptions(items)).toEqual(['Vidange', 'Pneus'])
+    expect(recentDescriptions(items, 1)).toEqual(['Vidange'])
   })
 })

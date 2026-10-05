@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { api, type ExpenseDocumentHeader } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useDocumentAttach } from '@/composables/useDocumentAttach'
 import { useVehicleStore } from '@/stores/vehicle'
 import { currencySymbol, formatAmount } from '@/currency'
-import { Wrench, X, Paperclip, FileText, Eye } from 'lucide-vue-next'
+import { ChevronDown, Wrench, X, Paperclip, FileText, Eye } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import AppDropzone from '@/components/AppDropzone.vue'
-import { CURRENCIES, currencyPayload, findCloseCandidate, formatDate } from '@/utils/expenses'
+import { CURRENCIES, currencyPayload, defaultAmortizationMode, findCloseCandidate, formatDate, recentDescriptions } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -68,7 +68,7 @@ const maintForm = ref({
   is_recurring: false,
   recurrence_interval_months: 12,
   recurrence_end_date: '',
-  amortization_mode: 'DISTANCE',
+  amortization_mode: defaultAmortizationMode('MAINTENANCE'),
   coverage_km: 50000,
   coverage_months: 24,
   closes_maintenance_id: null as string | null,
@@ -77,8 +77,31 @@ const maintForm = ref({
   document_filename: null as string | null,
 })
 
+const amortizationLabel = computed(() => {
+  const key = { NONE: 'immediate', DISTANCE: 'perKm', DURATION: 'byDuration', HYBRID: 'mixed' }[maintForm.value.amortization_mode] ?? 'immediate'
+  return t(`expenses.maintenanceModal.${key}`, { unit: distanceUnit() })
+})
+const descriptionSuggestions = computed(() => recentDescriptions(props.maintenanceExpenses))
+
+// The smoothing follows the category until the user picks a mode; it stays folded unless an edited expense uses one.
+const showAdvanced = ref(false)
+let amortizationTouched = false
+
+function pickAmortization(mode: string) {
+  amortizationTouched = true
+  maintForm.value.amortization_mode = mode
+}
+
+watch(
+  () => maintForm.value.category,
+  (category) => {
+    if (open.value && !props.editing && !amortizationTouched) maintForm.value.amortization_mode = defaultAmortizationMode(category)
+  }
+)
+
 const detectedOdometer = ref<number | null>(null)
 const detectingOdometer = ref(false)
+const amountInput = ref<HTMLInputElement | null>(null)
 const shouldClosePrevious = ref(false)
 // Last value the form put in the odometer itself: only that value is replaced when the date changes.
 let autofilledOdometer = 0
@@ -112,6 +135,8 @@ watch(open, (isOpen) => {
   if (!isOpen) return
   const m = props.editing
   detectedOdometer.value = null
+  amortizationTouched = false
+  showAdvanced.value = Boolean(m && m.amortization_mode && m.amortization_mode !== 'NONE')
   if (!m) {
     shouldClosePrevious.value = false
     autofilledOdometer = props.currentOdometer ? Math.round(props.currentOdometer) : 0
@@ -125,7 +150,7 @@ watch(open, (isOpen) => {
       is_recurring: false,
       recurrence_interval_months: 12,
       recurrence_end_date: '',
-      amortization_mode: 'DISTANCE',
+      amortization_mode: defaultAmortizationMode('MAINTENANCE'),
       coverage_km: 50000,
       coverage_months: 24,
       closes_maintenance_id: null,
@@ -134,6 +159,7 @@ watch(open, (isOpen) => {
       document_filename: null,
     }
     checkOdometerForDate(maintForm.value.date)
+    nextTick(() => amountInput.value?.focus())
   } else {
     shouldClosePrevious.value = Boolean(m.closes_maintenance_id)
     maintForm.value = {
@@ -265,7 +291,10 @@ async function handleCreateMaint() {
 
         <div>
           <label for="expense-maint-description" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.description') }}</label>
-          <input id="expense-maint-description" v-model="maintForm.description" required :placeholder="$t('expenses.maintenanceModal.eGCabinFilterReplacement')" class="field" />
+          <input id="expense-maint-description" v-model="maintForm.description" required list="maint-description-suggestions" autocomplete="off" :placeholder="$t('expenses.maintenanceModal.eGCabinFilterReplacement')" class="field" />
+          <datalist id="maint-description-suggestions">
+            <option v-for="d in descriptionSuggestions" :key="d" :value="d" />
+          </datalist>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -276,9 +305,9 @@ async function handleCreateMaint() {
           <div>
             <label for="maint-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.amount') }}</label>
             <div class="flex gap-1.5">
-              <input id="maint-form-amount" v-model="maintForm.amount" type="number" step="0.01" min="0.01" required class="field" />
+              <input id="maint-form-amount" ref="amountInput" v-model="maintForm.amount" type="number" inputmode="decimal" step="0.01" min="0.01" required class="field" />
               <label for="maint-form-currency" class="sr-only">{{ $t('expenses.maintenanceModal.currency') }}</label>
-              <select id="maint-form-currency" v-model="maintForm.currency" class="field">
+              <select id="maint-form-currency" v-model="maintForm.currency" class="field !w-16 shrink-0 !px-1.5">
                 <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
               </select>
             </div>
@@ -309,7 +338,20 @@ async function handleCreateMaint() {
         </div>
 
         <!-- Lissage du coût pour dépenses non-récurrentes -->
-        <div v-if="!maintForm.is_recurring" class="space-y-2.5 bg-slate-800/40 p-3.5 rounded-xl border border-slate-700/60">
+        <details
+          v-if="!maintForm.is_recurring"
+          :open="showAdvanced"
+          class="group rounded-xl border border-slate-700/60 bg-slate-800/40"
+          @toggle="showAdvanced = ($event.target as HTMLDetailsElement).open"
+        >
+          <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3.5 text-xs font-semibold text-slate-200 [&::-webkit-details-marker]:hidden">
+            <span>{{ $t('expenses.maintenanceModal.advancedOptions') }}</span>
+            <span class="flex items-center gap-1.5 font-medium text-slate-400">
+              {{ $t('expenses.maintenanceModal.smoothingSummary', { mode: amortizationLabel }) }}
+              <ChevronDown class="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+            </span>
+          </summary>
+          <div class="space-y-2.5 border-t border-slate-700/60 p-3.5">
           <span class="block text-xs font-semibold text-slate-200">
             {{ $t('expenses.maintenanceModal.costPerKmSmoothing', { unit: distanceUnit() }) }}
           </span>
@@ -317,7 +359,7 @@ async function handleCreateMaint() {
           <div class="grid grid-cols-4 gap-1.5 pt-1">
             <button
               type="button"
-              @click="maintForm.amortization_mode = 'NONE'"
+              @click="pickAmortization('NONE')"
               class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="maintForm.amortization_mode === 'NONE' ? 'bg-pink-500/20 text-pink-300 border-pink-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -325,7 +367,7 @@ async function handleCreateMaint() {
             </button>
             <button
               type="button"
-              @click="maintForm.amortization_mode = 'DISTANCE'"
+              @click="pickAmortization('DISTANCE')"
               class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="maintForm.amortization_mode === 'DISTANCE' ? 'bg-success-500/20 text-success-300 border-success-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -333,7 +375,7 @@ async function handleCreateMaint() {
             </button>
             <button
               type="button"
-              @click="maintForm.amortization_mode = 'DURATION'"
+              @click="pickAmortization('DURATION')"
               class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="maintForm.amortization_mode === 'DURATION' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -341,7 +383,7 @@ async function handleCreateMaint() {
             </button>
             <button
               type="button"
-              @click="maintForm.amortization_mode = 'HYBRID'"
+              @click="pickAmortization('HYBRID')"
               class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="maintForm.amortization_mode === 'HYBRID' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -383,7 +425,7 @@ async function handleCreateMaint() {
                 id="close-candidate"
                 v-model="shouldClosePrevious"
                 type="checkbox"
-                class="mt-0.5 rounded border-slate-700 bg-slate-800 text-rose-600 focus:ring-rose-500"
+                class="select-box mt-0.5"
               />
               <label for="close-candidate" class="text-xs text-slate-300 leading-snug cursor-pointer">
                 {{ $t('expenses.maintenanceModal.closeThePreviousServiceIn') }}
@@ -393,11 +435,12 @@ async function handleCreateMaint() {
               </label>
             </div>
           </div>
-        </div>
+          </div>
+        </details>
 
         <div class="space-y-2 pt-1">
           <div class="flex items-center gap-2">
-            <input v-model="maintForm.is_recurring" type="checkbox" id="rec" class="rounded border-slate-700 bg-slate-800 text-rose-600 focus:ring-rose-500" />
+            <input v-model="maintForm.is_recurring" type="checkbox" id="rec" class="select-box" />
             <label for="rec" class="text-xs text-slate-300 font-medium">{{ $t('expenses.maintenanceModal.recurringExpense') }}</label>
           </div>
           <div v-if="maintForm.is_recurring" class="pt-1 grid grid-cols-2 gap-3">

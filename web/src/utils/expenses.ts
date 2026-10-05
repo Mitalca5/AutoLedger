@@ -153,3 +153,19 @@ export function maintenanceTotal(items: MaintenanceLike[], baseCurrency: string)
     return sum + amount * (Number(m.fx_rate) || 0)
   }, 0)
 }
+
+/** How a new expense of a category weighs on the cost per km: only a lasting purchase is spread over the distance. */
+export function defaultAmortizationMode(category: string): string {
+  return category === 'ACCESSORY' ? 'DISTANCE' : 'NONE'
+}
+
+/** The most recent distinct descriptions, to suggest when typing a new one. */
+export function recentDescriptions(items: { description?: string | null; date: string }[], limit = 10): string[] {
+  const seen = new Set<string>()
+  for (const m of [...items].sort((a, b) => b.date.localeCompare(a.date))) {
+    const text = m.description?.trim()
+    if (text) seen.add(text)
+    if (seen.size >= limit) break
+  }
+  return [...seen]
+}

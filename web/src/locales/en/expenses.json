@@ -162,7 +162,9 @@
     "uploadHelper": "PDF or image (uploaded and attached to this expense automatically)",
     "enterAnnualPremium": "Please enter the annual premium",
     "premiumDescription": "Insurance premium ({amount}/year)",
-    "perKm": "Per {unit}"
+    "perKm": "Per {unit}",
+    "advancedOptions": "Advanced options",
+    "smoothingSummary": "Smoothing: {mode}"
   },
   "maintenancePanel": {
     "deleteThisExpense": "Delete this expense",
