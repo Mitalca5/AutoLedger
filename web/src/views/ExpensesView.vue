@@ -29,6 +29,7 @@ import { Receipt, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Ra
 import type { ReminderPreset } from '@/utils/expenses'
 import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
+import { formatNumber } from '@/utils/numbers'
 
 // The page owns the lists, the active tab and which modal is open; each modal owns its form and its API
 // call and reports back with "saved".
@@ -316,7 +317,7 @@ async function handleDeleteCharge(c: any) {
   if (!vehicleStore.activeVehicle) return
   const ok = await showConfirm({
     title: t('expenses.expensesView.deleteChargeTitle'),
-    message: t('expenses.expensesView.deleteChargeMessage', { kwh: c.kwh_added }),
+    message: t('expenses.expensesView.deleteChargeMessage', { kwh: formatNumber(c.kwh_added, 2) }),
     confirmText: t('common.delete'),
     type: 'danger',
   })

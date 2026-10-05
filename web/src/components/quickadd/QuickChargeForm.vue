@@ -9,6 +9,7 @@ import QuickOdometerField from './QuickOdometerField.vue'
 import QuickDateLine from './QuickDateLine.vue'
 import { currencySymbol, formatAmount } from '@/currency'
 import { formatDistance } from '@/units'
+import { formatNumber } from '@/utils/numbers'
 import {
   buildChargePayload,
   checkOdometer,
@@ -86,7 +87,7 @@ async function submit() {
   try {
     const result = await api.createCharge(props.vehicle.id, payload)
     rememberCharge(props.vehicle.id, { kwh: payload.kwh_added, cost: payload.cost, address: payload.address })
-    emit('saved', { queued: isQueued(result), message: t('quickadd.quickChargeForm.message', { kwh: payload.kwh_added }) })
+    emit('saved', { queued: isQueued(result), message: t('quickadd.quickChargeForm.message', { kwh: formatNumber(payload.kwh_added, 2) }) })
   } catch (err: any) {
     error.value = err?.message || t('quickadd.quickChargeForm.saveFailed')
   } finally {

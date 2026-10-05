@@ -4,6 +4,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
 import { Briefcase, User } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import { formatNumber } from '@/utils/numbers'
 
 // Pro / Perso split of the drives
 defineProps<{ tco: any | null }>()
@@ -25,7 +26,7 @@ const vehicleStore = useVehicleStore()
             <User v-else class="w-4 h-4 text-success-400" />
             <span class="text-sm font-bold text-white">{{ item.tag || $t('dashboard.tagBreakdown.untagged') }}</span>
           </div>
-          <p class="text-xs text-slate-400 mt-1">{{ $t('dashboard.tagBreakdown.kmKwh', { unit: distanceUnit(), distance_km: formatDistanceValue(item.distance_km, 1), energy_kwh: item.energy_kwh }) }}</p>
+          <p class="text-xs text-slate-400 mt-1">{{ $t('dashboard.tagBreakdown.kmKwh', { unit: distanceUnit(), distance_km: formatDistanceValue(item.distance_km, 1), energy_kwh: formatNumber(item.energy_kwh, 1) }) }}</p>
           <p v-if="item.tolls_amount" class="text-xs text-warning-400">{{ $t('dashboard.tagBreakdown.ofTollsAndParking', { value: formatAmount(item.tolls_amount, vehicleStore.currency) }) }}</p>
         </div>
         <div class="text-right">
