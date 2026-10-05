@@ -380,14 +380,54 @@ onBeforeUnmount(() => {
 
     <!-- Cost per distance comparison -->
     <div v-if="summary && summary.vehicles.length > 1" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+      <div class="flex flex-col gap-1 border-b border-slate-800/80 pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <h2 class="text-base font-semibold text-white flex items-center gap-2">
           <TrendingDown class="w-4 h-4 text-rose-400" />
           {{ t('fleet.compare.title') }}
         </h2>
         <span class="text-xs text-slate-400">{{ t('fleet.compare.hint') }}</span>
       </div>
-      <div class="overflow-x-auto">
+      <ul class="space-y-2 md:hidden">
+        <li
+          v-for="v in rankedVehicles"
+          :key="v.vehicle_id"
+          class="rounded-xl border border-slate-800 bg-slate-950/60 p-3"
+          :class="{ 'opacity-70': !v.comparable }"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="truncate font-semibold text-white">{{ v.name }}</p>
+              <p v-if="v.vehicle_id === cheapestPerKmId" class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
+                <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
+              </p>
+              <p v-else-if="!v.comparable" class="mt-0.5 text-xs uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</p>
+            </div>
+            <div class="shrink-0 text-right">
+              <p class="text-lg font-bold tabular-nums text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</p>
+              <p class="text-xs text-slate-400">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</p>
+            </div>
+          </div>
+          <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-slate-800/60 pt-2 text-xs">
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.energy') }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ energyPer100(v) }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.annual') }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.completeness') }}</dt>
+              <dd class="font-semibold tabular-nums" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</dd>
+            </div>
+          </dl>
+        </li>
+      </ul>
+      <div class="hidden overflow-x-auto md:block">
         <table class="w-full text-sm">
           <thead>
             <tr class="text-left text-xs uppercase tracking-wider text-slate-400">
