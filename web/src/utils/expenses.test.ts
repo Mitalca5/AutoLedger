@@ -8,6 +8,7 @@ import {
   findCloseCandidate,
   formatFileSize,
   filterMaintenance,
+  groupChargesByMonth,
   hasReminderSchedule,
   maintenanceTotal,
   maintenanceYears,
@@ -144,5 +145,36 @@ describe('maintenance form defaults', () => {
     ]
     expect(recentDescriptions(items)).toEqual(['Vidange', 'Pneus'])
     expect(recentDescriptions(items, 1)).toEqual(['Vidange'])
+  })
+})
+
+describe('groupChargesByMonth', () => {
+  const at = (y: number, m: number, d: number) => new Date(y, m - 1, d, 12).toISOString()
+  const charges = [
+    { date: at(2026, 3, 20), kwh_added: 10, cost: 4, currency: 'EUR' },
+    { date: at(2026, 3, 2), kwh_added: 30, cost: 12, currency: 'EUR' },
+    { date: at(2026, 3, 1), kwh_added: 5, cost: null, currency: 'EUR' },
+    { date: at(2026, 2, 27), kwh_added: 20, cost: 10, currency: 'USD', fx_rate: 0.5 },
+  ]
+
+  it('groups by month in order and totals energy and cost', () => {
+    const months = groupChargesByMonth(charges, 'EUR')
+    expect(months.map((m) => m.key)).toEqual(['2026-03', '2026-02'])
+    expect(months[0].charges).toHaveLength(3)
+    expect(months[0].kwh).toBe(45)
+    expect(months[0].cost).toBe(16)
+    expect(months[0].withoutCost).toBe(1)
+  })
+
+  it('averages the price over the charges that have a cost, converting foreign amounts', () => {
+    const [march, february] = groupChargesByMonth(charges, 'EUR')
+    expect(march.pricePerKwh).toBeCloseTo(16 / 40)
+    expect(february.cost).toBe(5)
+    expect(february.pricePerKwh).toBeCloseTo(0.25)
+  })
+
+  it('has no average price when nothing has a cost, and no month for no charge', () => {
+    expect(groupChargesByMonth([{ date: at(2026, 1, 5), kwh_added: 8, cost: null }], 'EUR')[0].pricePerKwh).toBeNull()
+    expect(groupChargesByMonth([], 'EUR')).toEqual([])
   })
 })

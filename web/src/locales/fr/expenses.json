@@ -76,7 +76,10 @@
     "editThisCharge": "Modifier cette recharge",
     "fixCost": "Renseigner / corriger le coût",
     "loadMore": "Charger plus",
-    "at": "à"
+    "at": "à",
+    "monthSummary": "{count} · {kwh} kWh · {cost}",
+    "averagePrice": "{price}/kWh en moyenne",
+    "monthCount": "{count} recharge | {count} recharges"
   },
   "completeReminderModal": {
     "confirmTheMaintenance": "Confirmer l'entretien",

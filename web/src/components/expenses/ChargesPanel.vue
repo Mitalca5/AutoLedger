@@ -2,15 +2,17 @@
 import ListSkeleton from '@/components/ListSkeleton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import EmptySourceHints from '@/components/EmptySourceHints.vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, Pencil, Trash2, AlertTriangle, Paperclip } from 'lucide-vue-next'
-import { formatDate } from '@/utils/expenses'
+import { formatDate, groupChargesByMonth } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { formatNumber } from '@/utils/numbers'
 import { distanceUnit, formatPerDistanceValue, perDistance } from '@/units'
 
-defineProps<{
+const props = defineProps<{
   charges: any[]
   chargesTotal: number
   chargesWithoutCost: number
@@ -28,6 +30,10 @@ const emit = defineEmits<{
 }>()
 const router = useRouter()
 const vehicleStore = useVehicleStore()
+
+// The charges loaded so far, which is the whole list until "load more" is needed.
+const months = computed(() => groupChargesByMonth(props.charges, vehicleStore.currency))
+const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocale(), { month: 'long', year: 'numeric' })
 </script>
 
 <template>
@@ -72,36 +78,44 @@ const vehicleStore = useVehicleStore()
       </template>
     </EmptyState>
     <div v-else class="space-y-3">
-      <div
-        v-for="c in charges"
-        :key="c.id"
-        class="bg-slate-900 border p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-        :class="c.cost === null ? 'border-warning-500/40' : 'border-slate-800'"
-      >
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs px-2 py-0.5 rounded-full font-bold bg-info-500/10 text-info-400 border border-info-500/20 shrink-0">
-              {{ $t('expenses.chargesPanel.kwh2', { kwh_added: formatNumber(c.kwh_added, 2) }) }}
-            </span>
-            <span class="text-xs text-slate-400 shrink-0">{{ formatDate(c.date) }}</span>
-            <span v-if="c.is_manual" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
-            <span v-else-if="c.cost_source === 'MANUAL'" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
-            <button
-              v-if="c.document_id"
-              @click="emit('view-document', c.document_id, c.document_filename, false)"
-              class="text-xs px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
-              :title="$t('expenses.chargesPanel.viewTheReceipt')"
-            >
-              <Paperclip class="w-3 h-3 shrink-0" />
-              <span class="truncate">{{ c.document_filename || $t('expenses.invoice') }}</span>
-            </button>
+      <section v-for="month in months" :key="month.key" class="space-y-2">
+        <header class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 px-1 pt-2">
+          <h3 class="text-sm font-bold capitalize text-white">{{ monthLabel(month.date) }}</h3>
+          <p class="text-xs text-slate-400">
+            {{ $t('expenses.chargesPanel.monthSummary', { count: $t('expenses.chargesPanel.monthCount', { count: month.charges.length }, month.charges.length), kwh: formatNumber(month.kwh, 1), cost: formatAmount(month.cost, vehicleStore.currency) }) }}
+            <template v-if="month.pricePerKwh !== null"> · {{ $t('expenses.chargesPanel.averagePrice', { price: formatAmount(month.pricePerKwh, vehicleStore.currency, 3) }) }}</template>
+          </p>
+        </header>
+        <div
+          v-for="c in month.charges"
+          :key="c.id"
+          class="bg-slate-900 border p-3 rounded-2xl flex items-center gap-2 sm:gap-3"
+          :class="c.cost === null ? 'border-warning-500/40' : 'border-slate-800'"
+        >
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-x-1.5 gap-y-1 sm:gap-x-2 flex-wrap">
+              <span class="text-sm font-bold text-info-400 shrink-0">
+                {{ $t('expenses.chargesPanel.kwh2', { kwh_added: formatNumber(c.kwh_added, 2) }) }}
+              </span>
+              <span v-if="c.is_manual" class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
+              <span v-else-if="c.cost_source === 'MANUAL'" class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
+              <button
+                v-if="c.document_id"
+                @click="emit('view-document', c.document_id, c.document_filename, false)"
+                class="text-xs px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
+                :title="$t('expenses.chargesPanel.viewTheReceipt')"
+              >
+                <Paperclip class="w-3 h-3 shrink-0" />
+                <span class="truncate">{{ c.document_filename || $t('expenses.invoice') }}</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5 truncate" :title="c.address">
+              {{ formatDate(c.date) }} · <span class="text-slate-300">{{ c.address || $t('expenses.chargesPanel.unknownPlace') }}</span>
+            </p>
           </div>
-          <p class="text-sm text-slate-300 mt-1 truncate" :title="c.address">{{ c.address || $t('expenses.chargesPanel.unknownPlace') }}</p>
-        </div>
-        <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-          <div class="text-left sm:text-right">
+          <div class="text-right shrink-0">
             <template v-if="c.cost !== null">
-              <span class="text-lg font-extrabold text-info-400">{{ formatAmount(c.cost, c.currency || vehicleStore.currency) }}</span>
+              <span class="text-base font-extrabold text-white">{{ formatAmount(c.cost, c.currency || vehicleStore.currency) }}</span>
               <p v-if="c.kwh_added > 0" class="text-xs text-slate-400">
                 {{ $t('expenses.chargesPanel.kwh', { cost: formatAmount(c.cost / c.kwh_added, c.currency || vehicleStore.currency, 3) }) }}
               </p>
@@ -110,10 +124,10 @@ const vehicleStore = useVehicleStore()
               <AlertTriangle class="w-3.5 h-3.5" /> {{ $t('expenses.chargesPanel.missingCost') }}
             </span>
           </div>
-          <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">
+          <div v-if="vehicleStore.canEdit" class="flex items-center gap-0.5 sm:gap-1 shrink-0">
             <button
               @click="emit('edit', c)"
-              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-info-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors border border-slate-700/60"
               :title="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
             >
               <Pencil class="w-3.5 h-3.5" />
@@ -121,14 +135,14 @@ const vehicleStore = useVehicleStore()
             <button
               v-if="c.is_manual"
               @click="emit('delete', c)"
-              class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
+              class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-400/80 hover:text-rose-300 focus-visible:text-rose-300 rounded-xl transition-colors border border-slate-700/60 hover:border-rose-500/40"
               :title="$t('expenses.chargesPanel.deleteThisCharge')"
             >
               <Trash2 class="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      </div>
+      </section>
       <div class="flex items-center justify-between text-xs text-slate-400 px-1">
         <span>{{ $t('expenses.chargesPanel.chargeSShownOutOf', { length: charges.length, chargesTotal }) }}</span>
         <button

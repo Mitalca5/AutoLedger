@@ -169,3 +169,51 @@ export function recentDescriptions(items: { description?: string | null; date: s
   }
   return [...seen]
 }
+
+interface ChargeLike {
+  date: string
+  kwh_added: number
+  cost: number | null
+  currency?: string | null
+  fx_rate?: number | string | null
+}
+
+export interface ChargeMonth<T extends ChargeLike> {
+  key: string
+  date: string
+  charges: T[]
+  kwh: number
+  cost: number
+  withoutCost: number
+  /** Average price per kWh over the charges that have a cost; null when none does. */
+  pricePerKwh: number | null
+}
+
+/** Charges grouped by calendar month (local time, as their dates are shown), in the order they come. Costs are in the vehicle's currency. */
+export function groupChargesByMonth<T extends ChargeLike>(charges: T[], baseCurrency: string): ChargeMonth<T>[] {
+  const months = new Map<string, ChargeMonth<T>>()
+  const pricedKwh = new Map<string, number>()
+  for (const c of charges) {
+    const d = new Date(c.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    let month = months.get(key)
+    if (!month) {
+      month = { key, date: c.date, charges: [], kwh: 0, cost: 0, withoutCost: 0, pricePerKwh: null }
+      months.set(key, month)
+    }
+    month.charges.push(c)
+    month.kwh += Number(c.kwh_added) || 0
+    if (c.cost === null) {
+      month.withoutCost++
+      continue
+    }
+    const base = !c.currency || c.currency === baseCurrency ? c.cost : c.cost * (Number(c.fx_rate) || 0)
+    month.cost += base
+    if (c.kwh_added > 0) pricedKwh.set(key, (pricedKwh.get(key) ?? 0) + c.kwh_added)
+  }
+  for (const month of months.values()) {
+    const priced = pricedKwh.get(month.key) ?? 0
+    month.pricePerKwh = priced > 0 ? month.cost / priced : null
+  }
+  return [...months.values()]
+}

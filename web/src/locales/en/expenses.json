@@ -76,7 +76,10 @@
     "editThisCharge": "Edit this charge",
     "fixCost": "Enter / correct the cost",
     "loadMore": "Load more",
-    "at": "at"
+    "at": "at",
+    "monthSummary": "{count} · {kwh} kWh · {cost}",
+    "averagePrice": "{price}/kWh on average",
+    "monthCount": "{count} charge | {count} charges"
   },
   "completeReminderModal": {
     "confirmTheMaintenance": "Confirm the maintenance",
