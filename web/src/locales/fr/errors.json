@@ -353,5 +353,9 @@
     "link_requires_member": "Invitez d'abord ce compte sur le véhicule",
     "default_delete": "Le conducteur par défaut ne peut pas être retiré : choisissez-en un autre d'abord",
     "linked_delete": "Un conducteur lié à un compte ne peut pas être retiré : retirez d'abord le membre"
+  },
+  "geocoding": {
+    "disabled": "Le géocodage inverse n'est pas activé sur ce serveur.",
+    "already_running": "Une résolution d'adresses est déjà en cours pour ce véhicule."
   }
 }

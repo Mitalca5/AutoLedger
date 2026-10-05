@@ -15,6 +15,7 @@ import DrivesToolbar from '@/components/drives/DrivesToolbar.vue'
 import DriveBulkActions from '@/components/drives/DriveBulkActions.vue'
 import DriveCard from '@/components/drives/DriveCard.vue'
 import DrivesPagination from '@/components/drives/DrivesPagination.vue'
+import AddressBackfillNotice from '@/components/drives/AddressBackfillNotice.vue'
 import TripGroupsPanel from '@/components/drives/TripGroupsPanel.vue'
 import TripSuggestions from '@/components/drives/TripSuggestions.vue'
 import ToQualifyFilter from '@/components/drives/ToQualifyFilter.vue'
@@ -660,6 +661,8 @@ async function handleBulkApplyToll() {
         </button>
       </div>
     </div>
+
+    <AddressBackfillNotice v-if="vehicleId" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @resolved="loadDrives(true)" />
 
     <!-- Header & Filter Tabs -->
     <PageHeader :title="$t('drives.drivesView.drivesAndTrips')" :icon="PageIcon">

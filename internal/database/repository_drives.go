@@ -743,3 +743,45 @@ func isMountedPosition(pos models.TirePosition) bool {
 func isValidTirePosition(pos models.TirePosition) bool {
 	return isMountedPosition(pos) || pos == models.TirePosStorage || pos == models.TirePosDisposed
 }
+
+// CoordinateAddressPattern matches an address that is only a position ("46.05858, 6.57810"), as stored for a
+// drive sent without an address.
+const CoordinateAddressPattern = `^-?[0-9]{1,3}\.[0-9]+, -?[0-9]{1,3}\.[0-9]+$`
+
+// CoordinateDrive is a drive with at least one end whose address is only coordinates.
+type CoordinateDrive struct {
+	ID           string
+	StartAddress *string
+	EndAddress   *string
+}
+
+// CountCoordinateAddressDrives counts the drives of a vehicle with a departure or an arrival stored as coordinates.
+func (r *Repository) CountCoordinateAddressDrives(ctx context.Context, vehicleID string) (int, error) {
+	var n int
+	err := r.pool.QueryRow(ctx, `
+		SELECT COUNT(*) FROM drives
+		WHERE vehicle_id = $1 AND (start_address ~ $2 OR end_address ~ $2);`, vehicleID, CoordinateAddressPattern).Scan(&n)
+	return n, err
+}
+
+// ListCoordinateAddressDrives returns the most recent drives of a vehicle with an end stored as coordinates.
+func (r *Repository) ListCoordinateAddressDrives(ctx context.Context, vehicleID string, limit int) ([]CoordinateDrive, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT id, start_address, end_address FROM drives
+		WHERE vehicle_id = $1 AND (start_address ~ $2 OR end_address ~ $2)
+		ORDER BY start_time DESC
+		LIMIT $3;`, vehicleID, CoordinateAddressPattern, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []CoordinateDrive
+	for rows.Next() {
+		var d CoordinateDrive
+		if err := rows.Scan(&d.ID, &d.StartAddress, &d.EndAddress); err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}

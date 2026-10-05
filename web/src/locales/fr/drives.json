@@ -289,5 +289,13 @@
   },
   "driverLabel": "Conducteur",
   "defaultDriver": "Conducteur par défaut du foyer : {name}",
-  "unassignedDriver": "Non assigné (Conducteur par défaut du foyer)"
+  "unassignedDriver": "Non assigné (Conducteur par défaut du foyer)",
+  "addressBackfill": {
+    "info": "{count} trajet(s) affichent une position (latitude, longitude) au lieu d'une adresse. Pour les convertir en adresses, activez le géocodage côté serveur (GEOCODING_ENABLED=true) : les coordonnées sont alors envoyées à OpenStreetMap Nominatim, ou à votre propre instance (GEOCODING_URL).",
+    "ready": "{count} trajet(s) affichent une position au lieu d'une adresse.",
+    "resolve": "Résoudre les adresses",
+    "running": "Résolution en cours…",
+    "queued": "{count} trajet(s) en cours de traitement, environ une seconde par position.",
+    "error": "Résolution impossible : {message}"
+  }
 }

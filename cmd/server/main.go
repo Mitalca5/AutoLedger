@@ -368,7 +368,9 @@ func main() {
 		haHandler := handlers.NewHomeAssistantHandler(repo, tariffService)
 		haHandler.SetTimezone(cfg.ReportingTimezone)
 		if cfg.GeocodingEnabled {
-			haHandler.SetGeocoder(geocode.New(cfg.GeocodingURL, cfg.GeocodingUserAgent))
+			geocoder := geocode.New(cfg.GeocodingURL, cfg.GeocodingUserAgent)
+			haHandler.SetGeocoder(geocoder)
+			driveHandler.SetGeocoder(geocoder)
 		}
 
 		// Public Auth
@@ -517,6 +519,8 @@ func main() {
 
 				// Drives
 				r.Get("/{vehicleId}/drives", driveHandler.List)
+				r.Get("/{vehicleId}/drives/address-backfill", driveHandler.AddressBackfillStatus)
+				r.Post("/{vehicleId}/drives/resolve-addresses", driveHandler.ResolveAddresses)
 				r.Post("/{vehicleId}/drives", driveHandler.Create)
 				r.Put("/{vehicleId}/drives/{driveId}", driveHandler.Update)
 				r.Delete("/{vehicleId}/drives/{driveId}", driveHandler.Delete)

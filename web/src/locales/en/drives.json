@@ -289,5 +289,13 @@
   },
   "driverLabel": "Driver",
   "defaultDriver": "Household default driver: {name}",
-  "unassignedDriver": "Unassigned (Household default)"
+  "unassignedDriver": "Unassigned (Household default)",
+  "addressBackfill": {
+    "info": "{count} drive(s) show a position (latitude, longitude) instead of an address. To turn them into addresses, enable geocoding on the server (GEOCODING_ENABLED=true): the coordinates are then sent to OpenStreetMap Nominatim, or to your own instance (GEOCODING_URL).",
+    "ready": "{count} drive(s) show a position instead of an address.",
+    "resolve": "Resolve addresses",
+    "running": "Resolving…",
+    "queued": "{count} drive(s) being processed, about one second per position.",
+    "error": "Could not resolve: {message}"
+  }
 }

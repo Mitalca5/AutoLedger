@@ -353,5 +353,9 @@
     "link_requires_member": "Invite this account to the vehicle first",
     "default_delete": "The default driver cannot be removed: pick another one first",
     "linked_delete": "A driver linked to an account cannot be removed: remove the member first"
+  },
+  "geocoding": {
+    "disabled": "Reverse geocoding is not enabled on this server.",
+    "already_running": "An address resolution is already running for this vehicle."
   }
 }

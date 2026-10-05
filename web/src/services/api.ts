@@ -250,6 +250,10 @@ export const api = {
     request<any>(`/vehicles/${vehicleId}/odometer-checkpoints/${checkpointId}`, { method: 'DELETE' }),
 
   // Drives
+  getAddressBackfill: (vehicleId: string) =>
+    request<{ geocoding_enabled: boolean; pending: number; running: boolean }>(`/vehicles/${vehicleId}/drives/address-backfill`),
+  resolveDriveAddresses: (vehicleId: string) =>
+    request<{ queued: number }>(`/vehicles/${vehicleId}/drives/resolve-addresses`, { method: 'POST' }),
   getDrives: (
     vehicleId: string,
     params?: {

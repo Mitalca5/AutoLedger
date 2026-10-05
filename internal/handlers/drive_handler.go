@@ -54,6 +54,8 @@ type DriveHandler struct {
 	repo                 *database.Repository
 	carpoolService       *services.CarpoolService
 	tollDetectionService *services.TollDetectionService
+	geocoder             Geocoder
+	backfills            addressBackfills
 }
 
 func NewDriveHandler(repo *database.Repository, carpoolService *services.CarpoolService, tollDetectionService *services.TollDetectionService) *DriveHandler {
