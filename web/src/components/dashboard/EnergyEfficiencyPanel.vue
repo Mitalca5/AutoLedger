@@ -9,8 +9,8 @@ import EnergyBatterySection from './EnergyBatterySection.vue'
 import EnergyTemperatureSection from './EnergyTemperatureSection.vue'
 import CostDonut from '@/components/costs/CostDonut.vue'
 import { AXIS_TEXT, GRID_COLOR, fmt, fmtMoney, fmtPercent, perUnit, mergeAcDcClasses, type ChargeClass, type EnergyStats } from './energyStats'
-import { filterMonthsByRange, type MonthlyRangeKey } from '@/utils/dashboard'
-import MonthlyRangeSelector from './MonthlyRangeSelector.vue'
+import { filterMonthsByRange } from '@/utils/dashboard'
+import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { distanceUnit } from '@/units'
@@ -29,7 +29,8 @@ const currency = computed(() => vehicleStore.currency)
 
 const stats = ref<EnergyStats | null>(null)
 const failed = ref(false)
-const range = ref<MonthlyRangeKey>('1Y')
+const prefs = usePreferencesStore()
+const range = computed(() => prefs.dashboardRange)
 
 const consumptionRef = ref<HTMLCanvasElement | null>(null)
 const costRef = ref<HTMLCanvasElement | null>(null)
@@ -178,7 +179,6 @@ onBeforeUnmount(() => {
         </h3>
         <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.whatTheCarUsesAnd') }}</p>
       </div>
-      <MonthlyRangeSelector v-model="range" class="self-start" :label="$t('dashboard.energyEfficiencyPanel.period')" />
     </div>
 
     <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

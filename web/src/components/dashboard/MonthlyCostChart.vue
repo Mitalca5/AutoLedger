@@ -3,8 +3,8 @@ import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
-import { computeMonthFixedVariable, filterMonthsByRange, type MonthlyRangeKey } from '@/utils/dashboard'
-import MonthlyRangeSelector from './MonthlyRangeSelector.vue'
+import { computeMonthFixedVariable, filterMonthsByRange } from '@/utils/dashboard'
+import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 
@@ -17,7 +17,8 @@ const vehicleStore = useVehicleStore()
 const currency = computed(() => vehicleStore.currency)
 
 const monthlyChartRef = ref<HTMLCanvasElement | null>(null)
-const monthlyChartRange = ref<MonthlyRangeKey>('1Y')
+const prefs = usePreferencesStore()
+const monthlyChartRange = computed(() => prefs.dashboardRange)
 const filteredMonthlyCosts = computed(() => filterMonthsByRange(props.monthlyCosts || [], monthlyChartRange.value))
 let monthlyChartInstance: Chart | null = null
 
@@ -126,7 +127,6 @@ onUnmounted(() => {
       <h3 class="text-sm font-bold text-white flex items-center gap-2">
         <span>{{ $t('dashboard.monthlyCostChart.monthlyExpenseTrend', { cur: currencySymbol(currency) }) }}</span>
       </h3>
-      <MonthlyRangeSelector v-model="monthlyChartRange" class="self-start sm:self-auto" :label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')" />
     </div>
     <div class="h-64 sm:h-72">
       <canvas ref="monthlyChartRef" role="img" :aria-label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')"></canvas>

@@ -6,7 +6,8 @@
     "expense": "+ Dépense",
     "tcoDashboard": "Tableau de bord TCO",
     "subtitle": "Coût réel de possession et coût au {unit} pour {name}",
-    "yourVehicle": "votre véhicule"
+    "yourVehicle": "votre véhicule",
+    "chartsPeriod": "Période des graphiques"
   },
   "costBreakdownDonut": {
     "fullCostBreakdownByCategory": "Répartition du coût complet par poste",

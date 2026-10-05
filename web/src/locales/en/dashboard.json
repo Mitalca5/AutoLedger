@@ -6,7 +6,8 @@
     "expense": "+ Expense",
     "tcoDashboard": "TCO dashboard",
     "subtitle": "Actual cost of ownership and cost per {unit} for {name}",
-    "yourVehicle": "your vehicle"
+    "yourVehicle": "your vehicle",
+    "chartsPeriod": "Charts period"
   },
   "costBreakdownDonut": {
     "fullCostBreakdownByCategory": "Full cost breakdown by category",

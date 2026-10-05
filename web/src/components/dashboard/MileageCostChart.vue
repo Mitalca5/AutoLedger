@@ -4,8 +4,8 @@ import { formatMonthLabel } from '@/utils/dates'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Activity, PieChart } from 'lucide-vue-next'
-import { filterMonthsByRange, type MonthlyRangeKey } from '@/utils/dashboard'
-import MonthlyRangeSelector from './MonthlyRangeSelector.vue'
+import { filterMonthsByRange } from '@/utils/dashboard'
+import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { distanceUnit, formatDistanceValue, kmToDisplayDistance, perDistance } from '@/units'
@@ -18,7 +18,8 @@ const emit = defineEmits<{ 'open-month': [month: any] }>()
 const vehicleStore = useVehicleStore()
 
 const mileageChartRef = ref<HTMLCanvasElement | null>(null)
-const mileageChartRange = ref<MonthlyRangeKey>('1Y')
+const prefs = usePreferencesStore()
+const mileageChartRange = computed(() => prefs.dashboardRange)
 const filteredMileageCosts = computed(() => filterMonthsByRange(props.monthlyCosts || [], mileageChartRange.value))
 let mileageChartInstance: Chart | null = null
 
@@ -157,7 +158,6 @@ onUnmounted(() => {
           <PieChart class="w-3.5 h-3.5" />
           <span>{{ $t('dashboard.mileageCostChart.lastMonthSDetail') }}</span>
         </button>
-        <MonthlyRangeSelector v-model="mileageChartRange" :label="$t('dashboard.mileageCostChart.monthlyMileageAndCostPer', { unit: distanceUnit() })" />
         <div class="flex items-center gap-3 text-xs">
           <span class="flex items-center gap-1.5 text-indigo-300">
             <span class="w-3 h-3 rounded bg-indigo-500/80 inline-block"></span>

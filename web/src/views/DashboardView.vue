@@ -19,6 +19,7 @@ import CostBreakdownDonut from '@/components/dashboard/CostBreakdownDonut.vue'
 import MileageCostChart from '@/components/dashboard/MileageCostChart.vue'
 import TagBreakdown from '@/components/dashboard/TagBreakdown.vue'
 import MonthDetailModal from '@/components/dashboard/MonthDetailModal.vue'
+import MonthlyRangeSelector from '@/components/dashboard/MonthlyRangeSelector.vue'
 import { distanceUnit } from '@/units'
 
 // The page loads the TCO and the reminders; each card and chart of the dashboard is a component that
@@ -151,6 +152,16 @@ onMounted(() => {
       <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
 
       <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" @open-month="openMonthDetail" />
+
+      <!-- One period for the energy, monthly cost and mileage sections below -->
+      <div class="sticky top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
+        <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
+        <MonthlyRangeSelector
+          :model-value="prefs.dashboardRange"
+          :label="$t('dashboard.dashboardView.chartsPeriod')"
+          @update:model-value="prefs.setDashboardRange"
+        />
+      </div>
 
       <!-- Energy efficiency: consumption, real cost per 100 km and charging habits (electric vehicles) -->
       <EnergyEfficiencyPanel

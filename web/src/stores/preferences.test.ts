@@ -44,4 +44,28 @@ describe('preferences store', () => {
     prefs.setProPersoEnabled(false)
     expect(prefs.proPersoEnabled).toBe(false)
   })
+
+  it('shows the last year of the dashboard charts by default', async () => {
+    vi.stubGlobal('localStorage', fakeStorage())
+    const { usePreferencesStore } = await import('./preferences')
+    expect(usePreferencesStore().dashboardRange).toBe('1Y')
+  })
+
+  it('remembers the dashboard period across reloads', async () => {
+    const storage = fakeStorage()
+    vi.stubGlobal('localStorage', storage)
+    const { usePreferencesStore } = await import('./preferences')
+    usePreferencesStore().setDashboardRange('6M')
+
+    setActivePinia(createPinia())
+    vi.resetModules()
+    const reloaded = await import('./preferences')
+    expect(reloaded.usePreferencesStore().dashboardRange).toBe('6M')
+  })
+
+  it('ignores a stored dashboard period that no longer exists', async () => {
+    vi.stubGlobal('localStorage', fakeStorage({ teslacost_dashboard_range: '10Y' }))
+    const { usePreferencesStore } = await import('./preferences')
+    expect(usePreferencesStore().dashboardRange).toBe('1Y')
+  })
 })
