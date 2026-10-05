@@ -31,7 +31,11 @@
     "expensesTitle": "Dépenses",
     "expensesSubtitle": "Péages, parkings, recharges et justificatifs",
     "maintenanceTitle": "Entretien",
-    "maintenanceSubtitle": "Entretien, assurance, dépenses récurrentes et rappels"
+    "maintenanceSubtitle": "Entretien, assurance, dépenses récurrentes et rappels",
+    "efficiency": "Efficacité",
+    "estimate": "Estimation",
+    "energyTitle": "Énergie",
+    "energySubtitle": "Consommation, recharges et estimation de repli"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF ou image (reçu Superchargeur, borne publique, etc.).",

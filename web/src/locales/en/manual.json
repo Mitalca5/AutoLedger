@@ -4,14 +4,14 @@
     "manualTracking": "Manual entry",
     "subtitle": "Mileage and {what} entered by hand",
     "fillUps": "fill-ups",
-    "energy": "energy",
     "independent": ". Each entry is independent.",
     "mileage": "Mileage",
-    "energyTab": "Energy"
+    "energyTab": "Energy",
+    "subtitleMileage": "Mileage entered by hand"
   },
   "estimatedEnergyPanel": {
     "chargesOutsideTeslamate": "Go to charges",
-    "aChargeMadeOutsideTeslamate": "This estimate only covers distance with no recorded charge. A real charge (public charger, home socket) is entered with its actual cost under Expenses › Charges, and replaces the estimate for that period.",
+    "aChargeMadeOutsideTeslamate": "This estimate only covers distance with no recorded charge. A real charge (public charger, home socket) is entered with its actual cost under Energy › Charges, and replaces the estimate for that period.",
     "resetDisable": "Reset (disable)",
     "kmSpreadProRataAcross": "({cost}/{unit}) spread pro rata across each smoothed month.",
     "kwh": "{kwh} kWh",

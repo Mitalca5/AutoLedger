@@ -46,7 +46,7 @@
     "saveFailed": "Could not save the fill-up."
   },
   "quickPendingCosts": {
-    "otherSToCompleteFrom": "{total} other(s): to complete from Expenses › Charges.",
+    "otherSToCompleteFrom": "{total} other(s): to complete from Energy › Charges.",
     "applyTheLastRate": "Apply the last rate: {c}",
     "cost": "Cost ({cur})",
     "costOfTheChargeOf": "Cost of the charge of {date} ({cur})",

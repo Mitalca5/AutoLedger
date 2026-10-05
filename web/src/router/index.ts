@@ -48,6 +48,10 @@ const router = createRouter({
       name: 'manual',
       component: ManualTrackingView,
       meta: { requiresAuth: true },
+      // The energy estimate of electric vehicles lives on the energy page
+      beforeEnter: (to) => {
+        if (String(to.query.tab ?? '').toUpperCase() === 'ENERGY') return { path: '/energy', query: { tab: 'ESTIMATE' }, replace: true }
+      },
     },
     {
       path: '/comparison',
@@ -70,6 +74,7 @@ const router = createRouter({
       beforeEnter: (to) => {
         const tab = String(to.query.tab ?? '').toUpperCase()
         if (tab === 'MAINTENANCE' || tab === 'REMINDERS') return { name: 'maintenance', query: to.query, replace: true }
+        if (tab === 'CHARGES') return { name: 'energy', query: to.query, replace: true }
       },
     },
     {
@@ -79,8 +84,15 @@ const router = createRouter({
       meta: { requiresAuth: true, section: 'maintenance' },
       beforeEnter: (to) => {
         const tab = String(to.query.tab ?? '').toUpperCase()
-        if (['TOLLS', 'CHARGES', 'DOCUMENTS'].includes(tab)) return { name: 'expenses', query: to.query, replace: true }
+        if (['TOLLS', 'DOCUMENTS'].includes(tab)) return { name: 'expenses', query: to.query, replace: true }
+        if (['CHARGES', 'EFFICIENCY', 'ESTIMATE'].includes(tab)) return { name: 'energy', query: to.query, replace: true }
       },
+    },
+    {
+      path: '/energy',
+      name: 'energy',
+      component: ExpensesView,
+      meta: { requiresAuth: true, section: 'energy' },
     },
     {
       path: '/vehicles',

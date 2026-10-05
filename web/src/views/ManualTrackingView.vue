@@ -5,15 +5,14 @@ import { ClipboardList as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Gauge, Fuel, Zap, UploadCloud, Download } from 'lucide-vue-next'
+import { Gauge, Fuel, UploadCloud, Download } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import OdometerReadingsPanel from '@/components/manual/OdometerReadingsPanel.vue'
 import FuelLogsPanel from '@/components/manual/FuelLogsPanel.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import ExportDataModal from '@/components/ExportDataModal.vue'
-import EstimatedEnergyPanel from '@/components/manual/EstimatedEnergyPanel.vue'
 
-type Tab = 'KM' | 'FUEL' | 'ENERGY'
+type Tab = 'KM' | 'FUEL'
 
 const showImport = ref(false)
 const showExport = ref(false)
@@ -31,7 +30,6 @@ const vehicleStore = useVehicleStore()
 const tabs = computed<TabItem[]>(() => {
   const list: TabItem[] = [{ key: 'KM', label: t('manual.manualTrackingView.mileage'), icon: Gauge }]
   if (vehicleStore.canRefuel) list.push({ key: 'FUEL', label: t('manual.manualTrackingView.energyTab'), icon: Fuel })
-  else list.push({ key: 'ENERGY', label: t('manual.manualTrackingView.energyTab'), icon: Zap })
   return list
 })
 
@@ -62,7 +60,7 @@ function select(tab: Tab) {
 <template>
   <div class="space-y-5">
     <PageHeader :title="$t('manual.manualTrackingView.manualTracking')" :icon="PageIcon">
-      {{ $t('manual.manualTrackingView.subtitle', { what: vehicleStore.canRefuel ? $t('manual.manualTrackingView.fillUps') : $t('manual.manualTrackingView.energy') }) }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
+      {{ vehicleStore.canRefuel ? $t('manual.manualTrackingView.subtitle', { what: $t('manual.manualTrackingView.fillUps') }) : $t('manual.manualTrackingView.subtitleMileage') }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
     </PageHeader>
 
     <div v-if="!vehicleStore.activeVehicle" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-sm text-slate-400">
@@ -73,7 +71,7 @@ function select(tab: Tab) {
       <div class="flex justify-end">
         <div class="flex items-center gap-2">
           <button
-            v-if="vehicleStore.canEdit && activeTab !== 'ENERGY'"
+            v-if="vehicleStore.canEdit"
             type="button"
             class="tap-text flex items-center gap-1.5 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
             @click="showImport = true"
@@ -91,7 +89,7 @@ function select(tab: Tab) {
           </button>
         </div>
       </div>
-      <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('manual.manualTrackingView.manualTracking')" id-prefix="manual-tab" @update:model-value="select($event as Tab)" />
+      <TabBar v-if="tabs.length > 1" :model-value="activeTab" :tabs="tabs" :label="$t('manual.manualTrackingView.manualTracking')" id-prefix="manual-tab" @update:model-value="select($event as Tab)" />
 
       <OdometerReadingsPanel v-if="activeTab === 'KM'" :key="reloadKey" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />
       <FuelLogsPanel
@@ -100,7 +98,6 @@ function select(tab: Tab) {
         :vehicle-id="vehicleStore.activeVehicle.id"
         :can-edit="vehicleStore.canEdit"
       />
-      <EstimatedEnergyPanel v-else-if="activeTab === 'ENERGY'" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />
       <ExportDataModal v-model:open="showExport" :vehicle-id="vehicleStore.activeVehicle.id" />
       <CSVImportModal
         v-model:open="showImport"

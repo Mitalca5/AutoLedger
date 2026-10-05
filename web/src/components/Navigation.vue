@@ -39,6 +39,7 @@ const allNavItems = [
   { name: 'carpools', labelKey: 'shell.nav.carpools', path: '/carpools', icon: Users },
   { name: 'tires', labelKey: 'shell.nav.tires', path: '/tires', icon: Disc },
   { name: 'manual', labelKey: 'shell.nav.manual', path: '/manual', icon: ClipboardList },
+  { name: 'energy', labelKey: 'shell.nav.energy', path: '/energy', icon: Zap },
   { name: 'expenses', labelKey: 'shell.nav.expenses', path: '/expenses', icon: Receipt },
   { name: 'maintenance', labelKey: 'shell.nav.maintenance', path: '/maintenance', icon: Wrench },
   { name: 'comparison', labelKey: 'shell.nav.comparison', path: '/comparison', icon: Scale },
@@ -51,6 +52,7 @@ const navItems = computed(() =>
   allNavItems.filter((item) => {
     if (item.name === 'drives') return vehicleStore.canCharge
     if (item.name === 'carpools') return vehicleStore.canCharge
+    if (item.name === 'energy') return vehicleStore.canCharge
     return true
   }),
 )

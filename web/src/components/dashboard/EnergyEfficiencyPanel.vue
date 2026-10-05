@@ -22,6 +22,9 @@ const props = defineProps<{
   grafanaUrl?: string | null
   // Bumped after a synchronization so the figures follow the imported drives and charges
   syncKey?: number
+  // Dashboard: link to the energy page. Energy page: explain why the panel is empty.
+  showLink?: boolean
+  showEmpty?: boolean
 }>()
 
 const vehicleStore = useVehicleStore()
@@ -175,7 +178,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="hasData" class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
+  <section v-if="!hasData && showEmpty" class="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+    {{ $t('dashboard.energyEfficiencyPanel.noData') }}
+  </section>
+  <section v-else-if="hasData" class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
     <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">
@@ -184,6 +190,9 @@ onBeforeUnmount(() => {
         </h3>
         <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.whatTheCarUsesAnd') }}</p>
       </div>
+      <router-link v-if="showLink" to="/energy" class="tap-text text-xs font-semibold text-sky-400 underline">
+        {{ $t('dashboard.energyEfficiencyPanel.seeEnergy') }}
+      </router-link>
     </div>
 
     <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -202,7 +211,7 @@ onBeforeUnmount(() => {
         <dd class="mt-1 text-xl font-bold text-white">{{ fmtPercent(stats?.summary.charge_efficiency) }}</dd>
         <p v-if="stats?.summary.charge_efficiency == null" class="mt-0.5 text-xs text-slate-400">
           {{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyEmpty') }}
-          <router-link to="/expenses?tab=CHARGES" class="font-semibold text-sky-400 underline">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyAction') }}</router-link>
+          <router-link to="/energy?tab=CHARGES" class="font-semibold text-sky-400 underline">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyAction') }}</router-link>
         </p>
         <p v-else class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
       </div>
@@ -215,7 +224,7 @@ onBeforeUnmount(() => {
 
     <p v-if="(stats?.summary.sessions_without_cost ?? 0) > 0" class="rounded-lg border border-warning-500/20 bg-warning-500/10 px-3 py-2 text-xs text-warning-300">
       {{ $t('dashboard.energyEfficiencyPanel.chargeSWithoutAKnown', { unit: distanceUnit(), sessions_without_cost: stats?.summary.sessions_without_cost }) }}
-      <router-link to="/expenses?tab=CHARGES" class="font-semibold underline">{{ $t('dashboard.energyEfficiencyPanel.completeThem') }}</router-link>
+      <router-link to="/energy?tab=CHARGES" class="font-semibold underline">{{ $t('dashboard.energyEfficiencyPanel.completeThem') }}</router-link>
     </p>
 
     <p v-if="hasDerived" class="rounded-lg border border-info-500/20 bg-info-500/10 px-3 py-2 text-xs text-info-300">

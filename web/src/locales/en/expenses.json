@@ -31,7 +31,11 @@
     "expensesTitle": "Expenses",
     "expensesSubtitle": "Tolls, parking, charging sessions and receipts",
     "maintenanceTitle": "Maintenance",
-    "maintenanceSubtitle": "Maintenance, insurance, recurring costs and reminders"
+    "maintenanceSubtitle": "Maintenance, insurance, recurring costs and reminders",
+    "efficiency": "Efficiency",
+    "estimate": "Estimate",
+    "energyTitle": "Energy",
+    "energySubtitle": "Consumption, charging sessions and fallback estimate"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF or image (Supercharger receipt, public charger, etc.).",

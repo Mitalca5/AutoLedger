@@ -13,6 +13,8 @@ import TollsPanel from '@/components/expenses/TollsPanel.vue'
 import MaintenancePanel from '@/components/expenses/MaintenancePanel.vue'
 import RemindersPanel from '@/components/expenses/RemindersPanel.vue'
 import ChargesPanel from '@/components/expenses/ChargesPanel.vue'
+import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
+import EstimatedEnergyPanel from '@/components/manual/EstimatedEnergyPanel.vue'
 import DocumentsPanel from '@/components/expenses/DocumentsPanel.vue'
 import TollModal from '@/components/expenses/TollModal.vue'
 import MaintenanceModal from '@/components/expenses/MaintenanceModal.vue'
@@ -23,7 +25,7 @@ import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.v
 import WebhookModal from '@/components/expenses/WebhookModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
-import { Receipt, Plus, Wrench, Zap, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
+import { Receipt, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
 import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
@@ -39,13 +41,17 @@ const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
 const { previewDoc, loadingDocId, closeDocPreview, viewOrDownloadDocument } = useDocumentPreview(() => vehicleStore.activeVehicle?.id)
 
-type TabType = 'TOLLS' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS'
+type TabType = 'TOLLS' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS' | 'EFFICIENCY' | 'ESTIMATE'
 
-// One view, two menu entries: /expenses (tolls, charges, receipts) and /maintenance (maintenance, reminders)
+// One view, three menu entries: /expenses (tolls, receipts), /maintenance (maintenance, reminders)
+// and /energy (efficiency, charges, estimate)
 const isMaintenanceSection = computed(() => route.meta.section === 'maintenance')
-const sectionTabs = computed<TabType[]>(() =>
-  isMaintenanceSection.value ? ['MAINTENANCE', 'REMINDERS'] : ['TOLLS', 'CHARGES', 'DOCUMENTS'],
-)
+const isEnergySection = computed(() => route.meta.section === 'energy')
+const sectionTabs = computed<TabType[]>(() => {
+  if (isMaintenanceSection.value) return ['MAINTENANCE', 'REMINDERS']
+  if (isEnergySection.value) return vehicleStore.canRefuel ? ['EFFICIENCY', 'CHARGES'] : ['EFFICIENCY', 'CHARGES', 'ESTIMATE']
+  return ['TOLLS', 'DOCUMENTS']
+})
 
 function parseTab(raw: unknown): TabType {
   const upper = String(Array.isArray(raw) ? raw[0] : (raw ?? '')).toUpperCase() as TabType
@@ -55,8 +61,8 @@ function parseTab(raw: unknown): TabType {
 const activeTab = ref<TabType>(parseTab(route.query.tab))
 
 // A fuel-only vehicle has no charges: its fill-ups live in the manual tracking page
-watch([() => vehicleStore.canCharge, activeTab], ([charges, tab]) => {
-  if (!charges && tab === 'CHARGES') router.replace('/manual?tab=FUEL')
+watch([() => vehicleStore.canCharge, isEnergySection], ([charges, energy]) => {
+  if (!charges && energy) router.replace('/manual?tab=FUEL')
 }, { immediate: true })
 
 watch(activeTab, (newTab) => {
@@ -65,7 +71,7 @@ watch(activeTab, (newTab) => {
   }
 })
 
-watch([() => route.query.tab, isMaintenanceSection], ([qTab]) => {
+watch([() => route.query.tab, () => route.meta.section, () => vehicleStore.canRefuel], ([qTab]) => {
   const tab = parseTab(qTab)
   if (activeTab.value !== tab) activeTab.value = tab
 })
@@ -401,8 +407,10 @@ async function openWebhookModal() {
   showWebhookModal.value = true
 }
 
-const pageTitle = computed(() => t(isMaintenanceSection.value ? 'expenses.expensesView.maintenanceTitle' : 'expenses.expensesView.expensesTitle'))
-const pageSubtitle = computed(() => t(isMaintenanceSection.value ? 'expenses.expensesView.maintenanceSubtitle' : 'expenses.expensesView.expensesSubtitle'))
+const sectionKey = computed(() => (isMaintenanceSection.value ? 'maintenance' : isEnergySection.value ? 'energy' : 'expenses'))
+const pageTitle = computed(() => t(`expenses.expensesView.${sectionKey.value}Title`))
+const pageSubtitle = computed(() => t(`expenses.expensesView.${sectionKey.value}Subtitle`))
+const pageIcon = computed(() => (isMaintenanceSection.value ? Wrench : isEnergySection.value ? Zap : Receipt))
 
 const tabs = computed<TabItem[]>(() => {
   if (isMaintenanceSection.value) {
@@ -417,16 +425,21 @@ const tabs = computed<TabItem[]>(() => {
       },
     ]
   }
-  const list: TabItem[] = [{ key: 'TOLLS', label: t('expenses.expensesView.tolls'), icon: Receipt }]
-  if (vehicleStore.canCharge) {
-    list.push({
-      key: 'CHARGES',
-      label: t('expenses.expensesView.charges'),
-      icon: Zap,
-      badge: chargesWithoutCost.value > 0 ? chargesWithoutCost.value : undefined,
-      badgeTone: 'warning',
-    })
+  if (isEnergySection.value) {
+    const list: TabItem[] = [
+      { key: 'EFFICIENCY', label: t('expenses.expensesView.efficiency'), icon: Gauge },
+      {
+        key: 'CHARGES',
+        label: t('expenses.expensesView.charges'),
+        icon: Zap,
+        badge: chargesWithoutCost.value > 0 ? chargesWithoutCost.value : undefined,
+        badgeTone: 'warning',
+      },
+    ]
+    if (!vehicleStore.canRefuel) list.push({ key: 'ESTIMATE', label: t('expenses.expensesView.estimate'), icon: Calculator })
+    return list
   }
+  const list: TabItem[] = [{ key: 'TOLLS', label: t('expenses.expensesView.tolls'), icon: Receipt }]
   list.push({
     key: 'DOCUMENTS',
     label: t('expenses.expensesView.receipts'),
@@ -440,7 +453,7 @@ const tabs = computed<TabItem[]>(() => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <PageHeader :title="pageTitle" :icon="isMaintenanceSection ? Wrench : Receipt">
+    <PageHeader :title="pageTitle" :icon="pageIcon">
       {{ pageSubtitle }}
       <template #actions>
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
@@ -572,6 +585,20 @@ const tabs = computed<TabItem[]>(() => {
         {{ $t('pendingCharges.qualifyButton') }}
       </button>
     </div>
+
+    <EnergyEfficiencyPanel
+      v-if="activeTab === 'EFFICIENCY' && vehicleStore.activeVehicle"
+      :vehicle-id="vehicleStore.activeVehicle.id"
+      :grafana-url="vehicleStore.activeVehicle.teslamate_grafana_url"
+      :sync-key="vehicleStore.lastSyncTimestamp"
+      show-empty
+    />
+
+    <EstimatedEnergyPanel
+      v-if="activeTab === 'ESTIMATE' && vehicleStore.activeVehicle"
+      :vehicle="vehicleStore.activeVehicle"
+      :can-edit="vehicleStore.canEdit"
+    />
 
     <ChargesPanel
       v-if="activeTab === 'CHARGES' && vehicleStore.canCharge"

@@ -169,6 +169,7 @@ onMounted(() => {
         :vehicle-id="vehicleStore.activeVehicle.id"
         :grafana-url="vehicleStore.activeVehicle.teslamate_grafana_url"
         :sync-key="vehicleStore.lastSyncTimestamp"
+        show-link
       />
 
       <ResidualValuePanel

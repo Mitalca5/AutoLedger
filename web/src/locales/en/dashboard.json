@@ -100,7 +100,9 @@
     "consumption": "Consumption",
     "threeMonthAverage": "3-month average",
     "chargingEfficiencyEmpty": "Add charges with the battery level to work out the efficiency.",
-    "chargingEfficiencyAction": "See the charges"
+    "chargingEfficiencyAction": "See the charges",
+    "noData": "No efficiency data yet: it appears once odometer readings and charges cover the same period.",
+    "seeEnergy": "See energy"
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Drives of at least {min}, grouped by average outside temperature; bands under {band} are hidden.",

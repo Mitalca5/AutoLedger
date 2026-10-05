@@ -46,7 +46,7 @@
     "saveFailed": "Impossible d'enregistrer le plein."
   },
   "quickPendingCosts": {
-    "otherSToCompleteFrom": "{total} autre(s) : à compléter depuis Dépenses › Recharges.",
+    "otherSToCompleteFrom": "{total} autre(s) : à compléter depuis Énergie › Recharges.",
     "applyTheLastRate": "Appliquer le dernier tarif : {c}",
     "cost": "Coût ({cur})",
     "costOfTheChargeOf": "Coût de la recharge du {date} ({cur})",

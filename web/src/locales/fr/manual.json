@@ -4,14 +4,14 @@
     "manualTracking": "Saisie manuelle",
     "subtitle": "Kilométrage et {what} saisis à la main",
     "fillUps": "pleins",
-    "energy": "énergie",
     "independent": ". Chaque saisie est indépendante.",
     "mileage": "Kilométrage",
-    "energyTab": "Énergie"
+    "energyTab": "Énergie",
+    "subtitleMileage": "Kilométrage saisi à la main"
   },
   "estimatedEnergyPanel": {
     "chargesOutsideTeslamate": "Aller aux recharges",
-    "aChargeMadeOutsideTeslamate": "Cette estimation ne couvre que la distance sans recharge enregistrée. Une recharge réelle (borne publique, prise à domicile) se saisit avec son coût réel dans Dépenses › Recharges et remplace l'estimation pour cette période.",
+    "aChargeMadeOutsideTeslamate": "Cette estimation ne couvre que la distance sans recharge enregistrée. Une recharge réelle (borne publique, prise à domicile) se saisit avec son coût réel dans Énergie › Recharges et remplace l'estimation pour cette période.",
     "resetDisable": "Réinitialiser (désactiver)",
     "kmSpreadProRataAcross": "({cost}/{unit}) distribués au prorata dans chaque mois lissé.",
     "kwh": "{kwh} kWh",

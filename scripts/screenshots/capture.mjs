@@ -21,6 +21,8 @@ const desktopShots = [
   ['fleet', '/fleet', 'EV'],
   ['drives', '/drives', 'EV'],
   ['expenses', '/expenses', 'EV'],
+  ['energy', '/energy', 'EV'],
+  ['maintenance', '/maintenance', 'EV'],
   ['tires', '/tires', 'EV'],
 ]
 
