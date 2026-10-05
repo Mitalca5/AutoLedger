@@ -212,6 +212,23 @@
   }
 }
 
+/* Every control meets the minimum hit area without a per-component class: 36px with a mouse,
+   44px on touch screens. :where() keeps the specificity at zero, .no-tap opts out. */
+:where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp__action_button, .dp__inner_nav, .dp__calendar_item *, .dp__month_year_select, .dp__time_display) {
+  min-height: 2.25rem;
+}
+:where(button:has(> svg:only-child)):not(.no-tap) {
+  min-width: 2.25rem;
+}
+@media (pointer: coarse) {
+  :where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp__action_button, .dp__inner_nav, .dp__calendar_item *, .dp__month_year_select, .dp__time_display) {
+    min-height: 2.75rem;
+  }
+  :where(button:has(> svg:only-child)):not(.no-tap) {
+    min-width: 2.75rem;
+  }
+}
+
 /* Text buttons, links and chips: same hit area as .tap, laid out inline. */
 .tap-text {
   min-height: 2.25rem;

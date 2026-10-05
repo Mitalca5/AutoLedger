@@ -130,7 +130,7 @@ onMounted(() => {
         href="https://github.com/Rem7474/autoledger-homeassistant"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-200 text-xs font-medium transition-colors shrink-0"
+        class="tap-text justify-center gap-1.5 px-3 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-blue-200 text-xs font-medium transition-colors shrink-0"
       >
         <ExternalLink class="h-3 w-3" />
         {{ t('account.tokens.haIntegrationLink') }}

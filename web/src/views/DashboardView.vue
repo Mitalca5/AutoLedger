@@ -81,13 +81,13 @@ onMounted(() => {
       <div class="flex items-center gap-2">
         <router-link
           to="/expenses"
-          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
+          class="tap-text px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
         >
           {{ $t('dashboard.dashboardView.expense') }}
         </router-link>
         <router-link
           to="/drives"
-          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
+          class="tap-text px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
         >
           {{ $t('dashboard.dashboardView.viewDrives') }}
         </router-link>

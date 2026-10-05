@@ -50,7 +50,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
       </button>
       <router-link
         to="/drives"
-        class="hidden sm:flex text-xs font-semibold text-slate-400 hover:text-white items-center gap-1 px-2 py-1.5"
+        class="tap-text hidden sm:inline-flex text-xs font-semibold text-slate-400 hover:text-white gap-1 px-2"
       >
         {{ $t('dashboard.currentMonthBanner.drives') }} <ArrowRight class="w-3.5 h-3.5" />
       </router-link>

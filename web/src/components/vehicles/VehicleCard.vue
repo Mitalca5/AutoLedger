@@ -189,7 +189,7 @@ function clearCardTestResult() {
       <router-link
         to="/manual"
         @click="vehicleStore.setActiveVehicle(v.id)"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+        class="tap-text px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg gap-1.5 border border-slate-700"
         :title="$t('vehicles.vehicleCard.odometerReadingsAndManualEntries')"
       >
         <Gauge class="w-3.5 h-3.5 text-cyan-400" />
