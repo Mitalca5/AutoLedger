@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { MaintenanceReminder } from '@/services/api'
 import { CalendarClock, ArrowRight } from 'lucide-vue-next'
 import { nextDueReminder } from '@/utils/dashboard'
-import { hasReminderSchedule } from '@/utils/expenses'
+import { hasReminderSchedule, reminderDaysLabel } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
 
 // The maintenance that comes due next; overdue ones are left to the urgent banner, so the card hides when only those remain.
@@ -38,11 +38,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
             }}
           </span>
           <span v-if="next.reminder.remaining_days != null" class="text-xs font-semibold text-slate-300">
-            {{
-              next.reminder.remaining_days <= 0
-                ? $t('expenses.remindersPanel.daysOver', { days: Math.abs(next.reminder.remaining_days) })
-                : $t('expenses.remindersPanel.daysLeft', { days: next.reminder.remaining_days })
-            }}
+            {{ reminderDaysLabel({ remaining_days: next.reminder.remaining_days, scheduled_date: next.reminder.scheduled_date }) }}
           </span>
         </div>
         <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(next.progress * 100)" aria-valuemin="0" aria-valuemax="100">

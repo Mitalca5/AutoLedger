@@ -15,7 +15,7 @@ import (
 
 func (r *Repository) ListMaintenanceReminders(ctx context.Context, vehicleID string, currentOdo float64) ([]models.MaintenanceReminder, error) {
 	query := `
-		SELECT id, vehicle_id, title, category, interval_km, interval_months,
+		SELECT id, vehicle_id, title, category, interval_km, interval_months, scheduled_date, repeat_yearly,
 		       last_service_odometer, last_service_date, lead_km, lead_days,
 		       webhook_enabled, last_notified_at, last_notified_odometer,
 		       created_at, updated_at
@@ -34,7 +34,7 @@ func (r *Repository) ListMaintenanceReminders(ctx context.Context, vehicleID str
 	for rows.Next() {
 		var rem models.MaintenanceReminder
 		if err := rows.Scan(
-			&rem.ID, &rem.VehicleID, &rem.Title, &rem.Category, &rem.IntervalKm, &rem.IntervalMonths,
+			&rem.ID, &rem.VehicleID, &rem.Title, &rem.Category, &rem.IntervalKm, &rem.IntervalMonths, &rem.ScheduledDate, &rem.RepeatYearly,
 			&rem.LastServiceOdometer, &rem.LastServiceDate, &rem.LeadKm, &rem.LeadDays,
 			&rem.WebhookEnabled, &rem.LastNotifiedAt, &rem.LastNotifiedOdometer,
 			&rem.CreatedAt, &rem.UpdatedAt,
@@ -78,7 +78,7 @@ func (r *Repository) ListMaintenanceReminders(ctx context.Context, vehicleID str
 
 func (r *Repository) GetMaintenanceReminderByID(ctx context.Context, vehicleID, reminderID string, currentOdo float64) (*models.MaintenanceReminder, error) {
 	query := `
-		SELECT id, vehicle_id, title, category, interval_km, interval_months,
+		SELECT id, vehicle_id, title, category, interval_km, interval_months, scheduled_date, repeat_yearly,
 		       last_service_odometer, last_service_date, lead_km, lead_days,
 		       webhook_enabled, last_notified_at, last_notified_odometer,
 		       created_at, updated_at
@@ -87,7 +87,7 @@ func (r *Repository) GetMaintenanceReminderByID(ctx context.Context, vehicleID, 
 	`
 	var rem models.MaintenanceReminder
 	err := r.pool.QueryRow(ctx, query, vehicleID, reminderID).Scan(
-		&rem.ID, &rem.VehicleID, &rem.Title, &rem.Category, &rem.IntervalKm, &rem.IntervalMonths,
+		&rem.ID, &rem.VehicleID, &rem.Title, &rem.Category, &rem.IntervalKm, &rem.IntervalMonths, &rem.ScheduledDate, &rem.RepeatYearly,
 		&rem.LastServiceOdometer, &rem.LastServiceDate, &rem.LeadKm, &rem.LeadDays,
 		&rem.WebhookEnabled, &rem.LastNotifiedAt, &rem.LastNotifiedOdometer,
 		&rem.CreatedAt, &rem.UpdatedAt,
@@ -107,14 +107,14 @@ func (r *Repository) CreateMaintenanceReminder(ctx context.Context, rem *models.
 		INSERT INTO maintenance_reminders (
 			vehicle_id, title, category, interval_km, interval_months,
 			last_service_odometer, last_service_date, lead_km, lead_days,
-			webhook_enabled
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			webhook_enabled, scheduled_date, repeat_yearly
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		RETURNING id, created_at, updated_at;
 	`
 	return r.pool.QueryRow(ctx, query,
 		rem.VehicleID, rem.Title, rem.Category, rem.IntervalKm, rem.IntervalMonths,
 		rem.LastServiceOdometer, rem.LastServiceDate, rem.LeadKm, rem.LeadDays,
-		rem.WebhookEnabled,
+		rem.WebhookEnabled, rem.ScheduledDate, rem.RepeatYearly,
 	).Scan(&rem.ID, &rem.CreatedAt, &rem.UpdatedAt)
 }
 
@@ -123,13 +123,13 @@ func (r *Repository) UpdateMaintenanceReminder(ctx context.Context, rem *models.
 		UPDATE maintenance_reminders
 		SET title = $1, category = $2, interval_km = $3, interval_months = $4,
 		    last_service_odometer = $5, last_service_date = $6, lead_km = $7, lead_days = $8,
-		    webhook_enabled = $9, updated_at = NOW()
-		WHERE id::text = $10 AND vehicle_id = $11;
+		    webhook_enabled = $9, scheduled_date = $10, repeat_yearly = $11, updated_at = NOW()
+		WHERE id::text = $12 AND vehicle_id = $13;
 	`
 	cmdTag, err := r.pool.Exec(ctx, query,
 		rem.Title, rem.Category, rem.IntervalKm, rem.IntervalMonths,
 		rem.LastServiceOdometer, rem.LastServiceDate, rem.LeadKm, rem.LeadDays,
-		rem.WebhookEnabled, rem.ID, rem.VehicleID,
+		rem.WebhookEnabled, rem.ScheduledDate, rem.RepeatYearly, rem.ID, rem.VehicleID,
 	)
 	if err != nil {
 		return err

@@ -217,7 +217,14 @@
     "titleRequired": "The reminder title is required",
     "intervalRequired": "Specify at least one interval in {unit} or months",
     "updated": "Reminder updated",
-    "created": "Reminder created"
+    "created": "Reminder created",
+    "scheduleMode": "Schedule type",
+    "modeInterval": "By interval",
+    "modeDate": "On a date",
+    "scheduleTitleDate": "Scheduled date",
+    "scheduledDate": "Maintenance date",
+    "repeatYearly": "Repeat every year",
+    "dateRequired": "Pick the maintenance date"
   },
   "remindersPanel": {
     "deleteThisReminder": "Delete this reminder",
@@ -275,7 +282,10 @@
       "applied": "{created} reminder(s) added, {skipped} already present.",
       "saved": "Template saved."
     },
-    "observedInterval": "You do it every {km} {unit} / {months} months on average"
+    "observedInterval": "You do it every {km} {unit} / {months} months on average",
+    "dueToday": "Today",
+    "everyYearOn": "Every year on {date}",
+    "onDate": "On {date}"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Drop the invoice here or click to browse",
@@ -377,6 +387,8 @@
     "brakeFluid": "Brake fluid check",
     "inspection": "Roadworthiness inspection",
     "wipers": "Wiper blades",
-    "calipers": "Caliper cleaning and greasing"
+    "calipers": "Caliper cleaning and greasing",
+    "winterTires": "Winter tires (Nov 1)",
+    "summerTires": "Summer tires (Apr 1)"
   }
 }

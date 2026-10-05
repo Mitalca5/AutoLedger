@@ -6,7 +6,7 @@ import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { X, Bell, Sparkles } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { reminderPresets, type ReminderPreset } from '@/utils/expenses'
+import { reminderPresets, nextOccurrenceDate, type ReminderPreset } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
@@ -20,11 +20,15 @@ const { showAlert } = useConfirm()
 
 const editingReminderId = computed(() => props.editing?.id ?? null)
 
+const scheduleMode = ref<'interval' | 'date'>('interval')
+
 const reminderForm = ref({
   title: '',
   category: 'MAINTENANCE',
   interval_km: '' as number | '',
   interval_months: '' as number | '',
+  scheduled_date: '',
+  repeat_yearly: true,
   last_service_odometer: '' as number | '',
   last_service_date: todayIso(),
   lead_km: 1000,
@@ -37,6 +41,16 @@ function applyReminderPreset(preset: ReminderPreset) {
   reminderForm.value.category = preset.category
   reminderForm.value.interval_km = preset.interval_km
   reminderForm.value.interval_months = preset.interval_months
+  if (preset.scheduled_month && preset.scheduled_day) {
+    scheduleMode.value = 'date'
+    reminderForm.value.scheduled_date = nextOccurrenceDate(preset.scheduled_month, preset.scheduled_day)
+    reminderForm.value.repeat_yearly = true
+    reminderForm.value.last_service_date = ''
+  } else {
+    scheduleMode.value = 'interval'
+    reminderForm.value.scheduled_date = ''
+    if (!reminderForm.value.last_service_date) reminderForm.value.last_service_date = todayIso()
+  }
   reminderForm.value.lead_km = preset.lead_km
   reminderForm.value.lead_days = preset.lead_days
 }
@@ -51,21 +65,27 @@ watch(open, (isOpen) => {
       category: 'MAINTENANCE',
       interval_km: 10000,
       interval_months: 12,
+      scheduled_date: '',
+      repeat_yearly: true,
       last_service_odometer: currentOdo,
       last_service_date: todayIso(),
       lead_km: 1000,
       lead_days: 15,
       webhook_enabled: true,
     }
+    scheduleMode.value = 'interval'
     if (props.preset) applyReminderPreset(props.preset)
   } else {
+    scheduleMode.value = r.scheduled_date ? 'date' : 'interval'
     reminderForm.value = {
       title: r.title,
       category: r.category,
       interval_km: r.interval_km ?? '',
       interval_months: r.interval_months ?? '',
+      scheduled_date: r.scheduled_date ? r.scheduled_date.substring(0, 10) : '',
+      repeat_yearly: r.repeat_yearly ?? false,
       last_service_odometer: r.last_service_odometer !== null && r.last_service_odometer !== undefined ? Math.round(r.last_service_odometer) : '',
-      last_service_date: r.last_service_date ? r.last_service_date.substring(0, 10) : todayIso(),
+      last_service_date: r.last_service_date ? r.last_service_date.substring(0, 10) : r.scheduled_date ? '' : todayIso(),
       lead_km: r.lead_km,
       lead_days: r.lead_days,
       webhook_enabled: r.webhook_enabled,
@@ -73,13 +93,26 @@ watch(open, (isOpen) => {
   }
 })
 
+// A fixed-date reminder is settled by a service date close to its occurrence, so a new one starts without a last service date.
+function setScheduleMode(mode: 'interval' | 'date') {
+  scheduleMode.value = mode
+  if (editingReminderId.value) return
+  if (mode === 'date') reminderForm.value.last_service_date = ''
+  else if (!reminderForm.value.last_service_date) reminderForm.value.last_service_date = todayIso()
+}
+
 async function handleSaveReminder() {
   if (!props.vehicleId) return
   if (!reminderForm.value.title.trim()) {
     showAlert(t('expenses.reminderModal.titleRequired'), t('common.requiredField'), 'warning')
     return
   }
-  if (!reminderForm.value.interval_km && !reminderForm.value.interval_months) {
+  const byDate = scheduleMode.value === 'date'
+  if (byDate && !reminderForm.value.scheduled_date) {
+    showAlert(t('expenses.reminderModal.dateRequired'), t('common.requiredField'), 'warning')
+    return
+  }
+  if (!byDate && !reminderForm.value.interval_km && !reminderForm.value.interval_months) {
     showAlert(t('expenses.reminderModal.intervalRequired', { unit: distanceUnit() }), t('common.requiredField'), 'warning')
     return
   }
@@ -88,7 +121,9 @@ async function handleSaveReminder() {
       title: reminderForm.value.title.trim(),
       category: reminderForm.value.category,
       interval_km: reminderForm.value.interval_km !== '' ? Number(reminderForm.value.interval_km) : null,
-      interval_months: reminderForm.value.interval_months !== '' ? Number(reminderForm.value.interval_months) : null,
+      interval_months: !byDate && reminderForm.value.interval_months !== '' ? Number(reminderForm.value.interval_months) : null,
+      scheduled_date: byDate ? reminderForm.value.scheduled_date : null,
+      repeat_yearly: byDate && reminderForm.value.repeat_yearly,
       last_service_odometer: reminderForm.value.last_service_odometer !== '' ? Number(reminderForm.value.last_service_odometer) : null,
       last_service_date: reminderForm.value.last_service_date ? new Date(reminderForm.value.last_service_date).toISOString() : null,
       lead_km: Number(reminderForm.value.lead_km || 0),
@@ -173,7 +208,20 @@ async function handleSaveReminder() {
 
         <!-- Periodicities -->
         <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-800 space-y-3">
-          <span class="block text-xs font-semibold text-slate-200">{{ $t('expenses.reminderModal.frequencyAtLeastOneOf') }}</span>
+          <span class="block text-xs font-semibold text-slate-200">{{ scheduleMode === 'date' ? $t('expenses.reminderModal.scheduleTitleDate') : $t('expenses.reminderModal.frequencyAtLeastOneOf') }}</span>
+          <div role="group" :aria-label="$t('expenses.reminderModal.scheduleMode')" class="flex gap-1 rounded-xl border border-slate-800 bg-slate-950 p-1">
+            <button
+              v-for="mode in (['interval', 'date'] as const)"
+              :key="mode"
+              type="button"
+              :aria-pressed="scheduleMode === mode"
+              class="tap-text flex-1 whitespace-nowrap rounded-lg px-2 text-xs font-semibold transition-colors"
+              :class="scheduleMode === mode ? 'bg-rose-500/15 text-rose-200' : 'text-slate-400 hover:text-white'"
+              @click="setScheduleMode(mode)"
+            >
+              {{ mode === 'interval' ? $t('expenses.reminderModal.modeInterval') : $t('expenses.reminderModal.modeDate') }}
+            </button>
+          </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="reminder-form-interval-km" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.intervalInKm', { unit: distanceUnit() }) }}</label>
@@ -186,7 +234,7 @@ async function handleSaveReminder() {
                 class="field"
               />
             </div>
-            <div>
+            <div v-if="scheduleMode === 'interval'">
               <label for="reminder-form-interval-months" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.intervalInMonths') }}</label>
               <input
                 id="reminder-form-interval-months"
@@ -198,11 +246,24 @@ async function handleSaveReminder() {
                 class="field"
               />
             </div>
+            <div v-else>
+              <label for="reminder-form-scheduled-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.scheduledDate') }}</label>
+              <AppDatePicker id="reminder-form-scheduled-date" v-model="reminderForm.scheduled_date" size="sm" :required="true" />
+            </div>
+          </div>
+          <div v-if="scheduleMode === 'date'" class="flex items-center gap-2">
+            <input
+              id="reminder-form-repeat-yearly"
+              v-model="reminderForm.repeat_yearly"
+              type="checkbox"
+              class="rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+            />
+            <label for="reminder-form-repeat-yearly" class="text-xs text-slate-300 cursor-pointer">{{ $t('expenses.reminderModal.repeatYearly') }}</label>
           </div>
         </div>
 
         <!-- Last service date & odometer -->
-        <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-800 space-y-3">
+        <div v-if="scheduleMode === 'interval' || reminderForm.interval_km" class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-800 space-y-3">
           <span class="block text-xs font-semibold text-slate-200">{{ $t('expenses.reminderModal.startingPointLastMaintenance') }}</span>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -215,7 +276,7 @@ async function handleSaveReminder() {
                 class="field"
               />
             </div>
-            <div>
+            <div v-if="scheduleMode === 'interval'">
               <label for="reminder-form-last-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.dateOfLastMaintenance') }}</label>
               <AppDatePicker
                 id="reminder-form-last-date"

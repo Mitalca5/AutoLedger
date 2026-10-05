@@ -97,6 +97,8 @@ type MaintenanceReminder struct {
 	Category             string     `json:"category"` // MAINTENANCE, TIRES, INSPECTION, OTHER
 	IntervalKm           *int       `json:"interval_km,omitempty"`
 	IntervalMonths       *int       `json:"interval_months,omitempty"`
+	ScheduledDate        *time.Time `json:"scheduled_date,omitempty"` // fixed calendar date, instead of a months interval
+	RepeatYearly         bool       `json:"repeat_yearly"`
 	LastServiceOdometer  *float64   `json:"last_service_odometer,omitempty"`
 	LastServiceDate      *time.Time `json:"last_service_date,omitempty"`
 	LeadKm               int        `json:"lead_km"`
@@ -142,8 +144,10 @@ func (r *MaintenanceReminder) ComputeStatus(currentOdometer float64, now time.Ti
 		}
 	}
 
-	// 2. Date
-	if r.IntervalMonths != nil && *r.IntervalMonths > 0 {
+	// 2. Date: a fixed calendar date wins over a months interval.
+	if r.ScheduledDate != nil {
+		r.computeScheduledStatus(now)
+	} else if r.IntervalMonths != nil && *r.IntervalMonths > 0 {
 		baseDate := r.CreatedAt
 		if r.LastServiceDate != nil {
 			baseDate = *r.LastServiceDate
@@ -161,6 +165,41 @@ func (r *MaintenanceReminder) ComputeStatus(currentOdometer float64, now time.Ti
 				r.Status = "DUE_SOON"
 			}
 		}
+	}
+}
+
+// computeScheduledStatus handles a reminder pinned to a calendar date. A completion made within the lead
+// window of an occurrence (or after it) settles that occurrence; a yearly reminder then moves to the next
+// year, a one-off one has nothing left to do. The due day itself is "due soon", not overdue.
+func (r *MaintenanceReminder) computeScheduledStatus(now time.Time) {
+	base := r.ScheduledDate
+	occurrence := func(n int) time.Time {
+		return time.Date(base.Year()+n, base.Month(), base.Day(), 0, 0, 0, 0, time.UTC)
+	}
+	settled := func(o time.Time) bool {
+		return r.LastServiceDate != nil && !r.LastServiceDate.Before(o.AddDate(0, 0, -r.LeadDays))
+	}
+
+	due := occurrence(0)
+	if settled(due) {
+		if !r.RepeatYearly {
+			return
+		}
+		for n := 1; n < 200 && settled(due); n++ {
+			due = occurrence(n)
+		}
+	}
+	r.DueDate = &due
+
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	remDays := int(due.Sub(today).Hours() / 24)
+	r.RemainingDays = &remDays
+
+	switch {
+	case remDays < 0:
+		r.Status = "OVERDUE"
+	case remDays <= r.LeadDays && r.Status != "OVERDUE":
+		r.Status = "DUE_SOON"
 	}
 }
 

@@ -15,6 +15,8 @@ export interface ReminderPreset {
   category: string
   interval_km: number | ''
   interval_months: number | ''
+  scheduled_month?: number
+  scheduled_day?: number
   lead_km: number
   lead_days: number
 }
@@ -68,12 +70,60 @@ export const reminderPresets = (): ReminderPreset[] => [
     lead_km: 1000,
     lead_days: 15,
   },
+  {
+    title: t('expenses.presets.winterTires'),
+    category: 'TIRES',
+    interval_km: '',
+    interval_months: '',
+    scheduled_month: 11,
+    scheduled_day: 1,
+    lead_km: 0,
+    lead_days: 15,
+  },
+  {
+    title: t('expenses.presets.summerTires'),
+    category: 'TIRES',
+    interval_km: '',
+    interval_months: '',
+    scheduled_month: 4,
+    scheduled_day: 1,
+    lead_km: 0,
+    lead_days: 15,
+  },
 ]
+
+/** The next occurrence of the given month/day on or after `from`, as YYYY-MM-DD. */
+export function nextOccurrenceDate(month: number, day: number, from = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const thisYear = from.getFullYear()
+  const todayKey = `${thisYear}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}`
+  const candidate = `${thisYear}-${pad(month)}-${pad(day)}`
+  return candidate >= todayKey ? candidate : `${thisYear + 1}-${pad(month)}-${pad(day)}`
+}
 
 /** datetime-local inputs expect local time, not UTC. */
 // A reminder only has a due point when it carries a mileage or a calendar interval
-export const hasReminderSchedule = (r: { interval_km?: number | null; interval_months?: number | null }): boolean =>
-  (r.interval_km ?? 0) > 0 || (r.interval_months ?? 0) > 0
+export const hasReminderSchedule = (r: {
+  interval_km?: number | null
+  interval_months?: number | null
+  scheduled_date?: string | null
+}): boolean => (r.interval_km ?? 0) > 0 || (r.interval_months ?? 0) > 0 || !!r.scheduled_date
+
+interface ReminderDays {
+  remaining_days: number
+  scheduled_date?: string | null
+}
+
+/** Whether the calendar due point has passed: a fixed date only does the day after, an interval already on its due day. */
+export const reminderDaysOver = (r: ReminderDays): boolean => (r.scheduled_date ? r.remaining_days < 0 : r.remaining_days <= 0)
+
+/** Remaining (or elapsed) calendar time of a reminder as a short phrase; a fixed date reached today reads "today". */
+export const reminderDaysLabel = (r: ReminderDays): string =>
+  r.scheduled_date && r.remaining_days === 0
+    ? t('expenses.remindersPanel.dueToday')
+    : reminderDaysOver(r)
+      ? t('expenses.remindersPanel.daysOver', { days: Math.abs(r.remaining_days) })
+      : t('expenses.remindersPanel.daysLeft', { days: r.remaining_days })
 
 export function toLocalDateTimeInput(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -100,6 +150,17 @@ export function formatDate(dateStr: string) {
     month: 'short',
     year: 'numeric',
   })
+}
+
+/** A calendar day stored as midnight UTC, shown as that same day whatever the timezone; the year is optional. */
+export function formatCalendarDay(dateStr: string, withYear = true) {
+  const text = new Date(dateStr.substring(0, 10)).toLocaleDateString(intlLocale(), {
+    day: 'numeric',
+    month: 'long',
+    ...(withYear ? { year: 'numeric' } : {}),
+    timeZone: 'UTC',
+  })
+  return intlLocale().startsWith('fr') ? text.replace(/^1 /, '1er ') : text
 }
 
 /** Drives the user picked for a toll that are older than the drives the modal loaded. */

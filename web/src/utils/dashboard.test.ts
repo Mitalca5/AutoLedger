@@ -275,6 +275,12 @@ describe('reminderProgress / nextDueReminder', () => {
     expect(reminderProgress({ status: 'DUE_SOON', interval_km: 10000, remaining_km: -5 })).toBe(1)
   })
 
+  it('measures a fixed date over the year leading to it, ignoring any months interval', () => {
+    expect(reminderProgress({ status: 'OK', scheduled_date: '2026-11-01', remaining_days: 365.25 })).toBe(0)
+    expect(reminderProgress({ status: 'OK', scheduled_date: '2026-11-01', remaining_days: 30 })).toBeCloseTo(1 - 30 / 365.25)
+    expect(reminderProgress({ status: 'DUE_SOON', scheduled_date: '2026-11-01', remaining_days: 0 })).toBe(1)
+  })
+
   it('has no progress without a schedule', () => {
     expect(reminderProgress({ status: 'OK' })).toBeNull()
     expect(reminderProgress({ status: 'OK', interval_km: 0, remaining_km: 5 })).toBeNull()

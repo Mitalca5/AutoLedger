@@ -578,6 +578,8 @@ export interface MaintenanceReminder {
   category: string
   interval_km?: number | null
   interval_months?: number | null
+  scheduled_date?: string | null
+  repeat_yearly?: boolean
   last_service_odometer?: number | null
   last_service_date?: string | null
   lead_km: number

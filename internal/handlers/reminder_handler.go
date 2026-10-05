@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"math"
 	"net/http"
 	"strings"
@@ -32,6 +33,8 @@ type ReminderPayload struct {
 	Category            string   `json:"category"`
 	IntervalKm          *int     `json:"interval_km"`
 	IntervalMonths      *int     `json:"interval_months"`
+	ScheduledDate       *string  `json:"scheduled_date"`
+	RepeatYearly        bool     `json:"repeat_yearly"`
 	LastServiceOdometer *float64 `json:"last_service_odometer"`
 	LastServiceDate     *string  `json:"last_service_date"`
 	LeadKm              int      `json:"lead_km"`
@@ -93,6 +96,14 @@ func (h *ReminderHandler) buildReminder(req ReminderPayload, vehicleID, reminder
 		cat = "MAINTENANCE"
 	}
 
+	scheduled, err := parseReminderDate(req.ScheduledDate)
+	if err != nil {
+		return nil, apierror.New("reminder.invalid_date", "The scheduled date is invalid")
+	}
+	if scheduled != nil && req.IntervalMonths != nil && *req.IntervalMonths > 0 {
+		return nil, apierror.New("reminder.schedule_conflict", "Use either a months interval or a fixed date, not both")
+	}
+
 	rem := &models.MaintenanceReminder{
 		ID:                  reminderID,
 		VehicleID:           vehicleID,
@@ -100,6 +111,8 @@ func (h *ReminderHandler) buildReminder(req ReminderPayload, vehicleID, reminder
 		Category:            cat,
 		IntervalKm:          req.IntervalKm,
 		IntervalMonths:      req.IntervalMonths,
+		ScheduledDate:       scheduled,
+		RepeatYearly:        scheduled != nil && req.RepeatYearly,
 		LastServiceOdometer: req.LastServiceOdometer,
 		LeadKm:              leadKm,
 		LeadDays:            leadDays,
@@ -115,6 +128,20 @@ func (h *ReminderHandler) buildReminder(req ReminderPayload, vehicleID, reminder
 	}
 
 	return rem, nil
+}
+
+// parseReminderDate reads a calendar date ("2006-01-02", or an RFC 3339 timestamp whose date part counts); empty means none.
+func parseReminderDate(raw *string) (*time.Time, error) {
+	if raw == nil || strings.TrimSpace(*raw) == "" {
+		return nil, nil
+	}
+	value := strings.TrimSpace(*raw)
+	if len(value) >= 10 {
+		if t, err := time.Parse("2006-01-02", value[:10]); err == nil {
+			return &t, nil
+		}
+	}
+	return nil, errors.New("invalid date")
 }
 
 func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {

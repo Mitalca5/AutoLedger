@@ -217,7 +217,14 @@
     "titleRequired": "Le titre du rappel est requis",
     "intervalRequired": "Spécifiez au moins un intervalle en {unit} ou en mois",
     "updated": "Rappel mis à jour",
-    "created": "Rappel créé avec succès"
+    "created": "Rappel créé avec succès",
+    "scheduleMode": "Type de périodicité",
+    "modeInterval": "Par intervalle",
+    "modeDate": "À une date",
+    "scheduleTitleDate": "Date prévue",
+    "scheduledDate": "Date de l'entretien",
+    "repeatYearly": "Répéter chaque année",
+    "dateRequired": "Choisissez la date de l'entretien"
   },
   "remindersPanel": {
     "deleteThisReminder": "Supprimer ce rappel",
@@ -275,7 +282,10 @@
       "applied": "{created} rappel(s) ajouté(s), {skipped} déjà présent(s).",
       "saved": "Modèle enregistré."
     },
-    "observedInterval": "Vous le faites en moyenne tous les {km} {unit} / {months} mois"
+    "observedInterval": "Vous le faites en moyenne tous les {km} {unit} / {months} mois",
+    "dueToday": "Aujourd'hui",
+    "everyYearOn": "Chaque année le {date}",
+    "onDate": "Le {date}"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Déposez la facture ici ou cliquez pour parcourir",
@@ -377,6 +387,8 @@
     "brakeFluid": "Contrôle liquide de frein",
     "inspection": "Contrôle technique",
     "wipers": "Balais d'essuie-glace",
-    "calipers": "Nettoyage & graissage des étriers"
+    "calipers": "Nettoyage & graissage des étriers",
+    "winterTires": "Pneus hiver (1er novembre)",
+    "summerTires": "Pneus été (1er avril)"
   }
 }

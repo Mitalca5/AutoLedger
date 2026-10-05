@@ -298,7 +298,9 @@
   },
   "internal": "Something went wrong on the server. Please try again.",
   "reminder": {
-    "title_required": "Title is required"
+    "title_required": "Title is required",
+    "invalid_date": "The scheduled date is invalid",
+    "schedule_conflict": "Use either a months interval or a fixed date, not both"
   },
   "sync": {
     "unreachable": "Cannot reach TeslaMate ({p0}): {p1}",

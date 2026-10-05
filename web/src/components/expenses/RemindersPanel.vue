@@ -4,7 +4,7 @@ import { computed, ref } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
 import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed, Settings } from 'lucide-vue-next'
-import { reminderPresets, formatDate, hasReminderSchedule, type ReminderPreset } from '@/utils/expenses'
+import { reminderPresets, formatDate, formatCalendarDay, hasReminderSchedule, reminderDaysLabel, reminderDaysOver, type ReminderPreset } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
 import { sortRemindersByUrgency } from '@/utils/dashboard'
 import ReminderTemplatesBar from '@/components/expenses/ReminderTemplatesBar.vue'
@@ -182,9 +182,9 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
             <span
               v-if="r.remaining_days !== null && r.remaining_days !== undefined"
               class="px-2 py-0.5 rounded-lg"
-              :class="r.remaining_days <= 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_days <= r.lead_days ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
+              :class="reminderDaysOver({ remaining_days: r.remaining_days, scheduled_date: r.scheduled_date }) ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : r.remaining_days <= r.lead_days ? 'bg-warning-500/20 text-warning-300 border border-warning-500/30' : 'text-slate-300 bg-slate-800 border border-slate-700'"
             >
-              {{ r.remaining_days <= 0 ? $t('expenses.remindersPanel.daysOver', { days: Math.abs(r.remaining_days) }) : $t('expenses.remindersPanel.daysLeft', { days: r.remaining_days }) }}
+              {{ reminderDaysLabel({ remaining_days: r.remaining_days, scheduled_date: r.scheduled_date }) }}
             </span>
           </div>
         </div>
@@ -204,7 +204,17 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
             </span>
           </div>
 
-          <div v-if="r.interval_months" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+          <div v-if="r.scheduled_date" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
+            <span class="font-medium text-white">
+              {{ r.repeat_yearly ? $t('expenses.remindersPanel.everyYearOn', { date: formatCalendarDay(r.scheduled_date, false) }) : $t('expenses.remindersPanel.onDate', { date: formatCalendarDay(r.scheduled_date) }) }}
+              <span v-if="r.due_date && r.repeat_yearly" class="text-slate-400 block text-xs">
+                {{ $t('expenses.remindersPanel.due', { due_date: formatDate(r.due_date) }) }}
+              </span>
+            </span>
+          </div>
+
+          <div v-else-if="r.interval_months" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
             <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
             <span class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyMonths', { interval_months: r.interval_months }) }}

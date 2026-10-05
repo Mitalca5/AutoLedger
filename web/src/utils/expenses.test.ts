@@ -10,6 +10,10 @@ import {
   filterMaintenance,
   groupChargesByMonth,
   hasReminderSchedule,
+  nextOccurrenceDate,
+  reminderDaysLabel,
+  reminderDaysOver,
+  formatCalendarDay,
   maintenanceTotal,
   maintenanceYears,
   toLocalDateTimeInput,
@@ -84,11 +88,47 @@ describe('findCloseCandidate', () => {
 })
 
 describe('reminderPresets', () => {
-  it('gives every preset a title and at least one interval', () => {
+  it('gives every preset a title and a due point: an interval or a fixed day', () => {
     for (const p of reminderPresets()) {
       expect(p.title).not.toBe('')
-      expect(p.interval_km !== '' || p.interval_months !== '').toBe(true)
+      expect(p.interval_km !== '' || p.interval_months !== '' || (!!p.scheduled_month && !!p.scheduled_day)).toBe(true)
     }
+  })
+
+  it('offers seasonal tire changes on a fixed day', () => {
+    const seasonal = reminderPresets().filter((p) => p.scheduled_month)
+    expect(seasonal.map((p) => [p.scheduled_month, p.scheduled_day])).toEqual([[11, 1], [4, 1]])
+    expect(seasonal.every((p) => p.category === 'TIRES')).toBe(true)
+  })
+})
+
+describe('nextOccurrenceDate', () => {
+  it('stays in the current year while the day has not passed, today included', () => {
+    expect(nextOccurrenceDate(11, 1, new Date(2026, 9, 5))).toBe('2026-11-01')
+    expect(nextOccurrenceDate(11, 1, new Date(2026, 10, 1))).toBe('2026-11-01')
+  })
+
+  it('rolls over to next year once it has passed', () => {
+    expect(nextOccurrenceDate(4, 1, new Date(2026, 9, 5))).toBe('2027-04-01')
+    expect(nextOccurrenceDate(11, 1, new Date(2026, 10, 2))).toBe('2027-11-01')
+  })
+})
+
+describe('reminder calendar labels', () => {
+  it('reads a fixed date reached today as today, not overdue', () => {
+    expect(reminderDaysOver({ remaining_days: 0, scheduled_date: '2026-11-01' })).toBe(false)
+    expect(reminderDaysLabel({ remaining_days: 0, scheduled_date: '2026-11-01' })).toBe("Aujourd'hui")
+  })
+
+  it('counts an interval reaching its due day as over, like the backend status', () => {
+    expect(reminderDaysOver({ remaining_days: 0 })).toBe(true)
+    expect(reminderDaysOver({ remaining_days: -1, scheduled_date: '2026-11-01' })).toBe(true)
+    expect(reminderDaysOver({ remaining_days: 3, scheduled_date: '2026-11-01' })).toBe(false)
+  })
+
+  it('shows a calendar day without timezone drift', () => {
+    expect(formatCalendarDay('2026-11-01T00:00:00Z', false)).toMatch(/1/)
+    expect(formatCalendarDay('2026-11-01T00:00:00Z')).toMatch(/2026/)
   })
 })
 
@@ -99,6 +139,7 @@ describe('hasReminderSchedule', () => {
     expect(hasReminderSchedule({ interval_km: 15000 })).toBe(true)
     expect(hasReminderSchedule({ interval_months: 12 })).toBe(true)
     expect(hasReminderSchedule({ interval_km: 15000, interval_months: 12 })).toBe(true)
+    expect(hasReminderSchedule({ scheduled_date: '2026-11-01T00:00:00Z' })).toBe(true)
   })
 })
 

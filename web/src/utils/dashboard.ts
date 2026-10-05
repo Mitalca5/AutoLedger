@@ -69,17 +69,20 @@ interface ScheduledReminder {
   status: string
   interval_km?: number | null
   interval_months?: number | null
+  scheduled_date?: string | null
   remaining_km?: number | null
   remaining_days?: number | null
 }
 
 const DAYS_PER_MONTH = 30.4375
+const DAYS_PER_YEAR = 365.25
 
-/** How far a reminder is through its interval, 0 (just done) to 1 (due): the closer of its mileage and calendar due points. */
+/** How far a reminder is through its interval, 0 (just done) to 1 (due): the closer of its mileage and calendar due points (a fixed date counts a year before it). */
 export function reminderProgress(r: ScheduledReminder): number | null {
   const parts: number[] = []
   if ((r.interval_km ?? 0) > 0 && r.remaining_km != null) parts.push(1 - r.remaining_km / (r.interval_km as number))
-  if ((r.interval_months ?? 0) > 0 && r.remaining_days != null) parts.push(1 - r.remaining_days / ((r.interval_months as number) * DAYS_PER_MONTH))
+  if (r.scheduled_date && r.remaining_days != null) parts.push(1 - r.remaining_days / DAYS_PER_YEAR)
+  else if ((r.interval_months ?? 0) > 0 && r.remaining_days != null) parts.push(1 - r.remaining_days / ((r.interval_months as number) * DAYS_PER_MONTH))
   if (!parts.length) return null
   return Math.min(1, Math.max(0, Math.max(...parts)))
 }
