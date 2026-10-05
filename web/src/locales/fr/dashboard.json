@@ -217,6 +217,12 @@
     "energy": "Énergie (Charges)",
     "kwhOnly": "{total_kwh_added} kWh rechargés"
   },
+  "nextDueCard": {
+    "title": "Prochain entretien",
+    "empty": "Aucune échéance planifiée",
+    "create": "Créer un rappel",
+    "viewReminders": "Voir les rappels"
+  },
   "urgentRemindersBanner": {
     "viewTheReminders": "Consulter les rappels",
     "overdue": "Entretien(s) en retard",

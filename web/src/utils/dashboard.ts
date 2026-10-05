@@ -65,6 +65,36 @@ export function summarizeUrgentReminders(reminders: { title: string; status: str
   return { urgent, hasOverdue: reminders.some((r) => r.status === 'OVERDUE'), summary }
 }
 
+interface ScheduledReminder {
+  status: string
+  interval_km?: number | null
+  interval_months?: number | null
+  remaining_km?: number | null
+  remaining_days?: number | null
+}
+
+const DAYS_PER_MONTH = 30.4375
+
+/** How far a reminder is through its interval, 0 (just done) to 1 (due): the closer of its mileage and calendar due points. */
+export function reminderProgress(r: ScheduledReminder): number | null {
+  const parts: number[] = []
+  if ((r.interval_km ?? 0) > 0 && r.remaining_km != null) parts.push(1 - r.remaining_km / (r.interval_km as number))
+  if ((r.interval_months ?? 0) > 0 && r.remaining_days != null) parts.push(1 - r.remaining_days / ((r.interval_months as number) * DAYS_PER_MONTH))
+  if (!parts.length) return null
+  return Math.min(1, Math.max(0, Math.max(...parts)))
+}
+
+/** The scheduled reminder that comes due first and is not overdue yet (overdue ones have their own banner). */
+export function nextDueReminder<T extends ScheduledReminder>(reminders: T[]): { reminder: T; progress: number } | null {
+  let best: { reminder: T; progress: number } | null = null
+  for (const reminder of reminders) {
+    if (reminder.status === 'OVERDUE') continue
+    const progress = reminderProgress(reminder)
+    if (progress !== null && (!best || progress > best.progress)) best = { reminder, progress }
+  }
+  return best
+}
+
 /** Follow-up figures of a lease (LOA / LLD) contract: elapsed time, mileage against the allowance, status. */
 export function buildLeaseSummary(tco: any, now = new Date()) {
   if (!tco || !['LOA', 'LLD'].includes(tco.acquisition_type)) {

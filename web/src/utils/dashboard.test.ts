@@ -7,6 +7,8 @@ import {
   currentMonthStats,
   filterMonthsByRange,
   formatMonthName,
+  nextDueReminder,
+  reminderProgress,
   summarizeUrgentReminders,
 } from './dashboard'
 
@@ -255,5 +257,40 @@ describe('computeMonthFixedVariable', () => {
     expect(res.fixedAmount).toBe(260)
     expect(res.totalAmount).toBe(360)
     expect(res.fixedPct + res.variablePct).toBe(100)
+  })
+})
+
+describe('reminderProgress / nextDueReminder', () => {
+  const base = { status: 'OK', interval_km: 10000, interval_months: 12, remaining_km: 8000, remaining_days: 300 }
+
+  it('takes the closer of the mileage and calendar due points', () => {
+    expect(reminderProgress({ ...base, remaining_km: 2000, remaining_days: 300 })).toBeCloseTo(0.8)
+    expect(reminderProgress({ ...base, remaining_km: 8000, remaining_days: 30 })).toBeCloseTo(1 - 30 / (12 * 30.4375))
+  })
+
+  it('works with a single criterion and clamps to 0..1', () => {
+    expect(reminderProgress({ status: 'OK', interval_km: 10000, remaining_km: 4000 })).toBeCloseTo(0.6)
+    expect(reminderProgress({ status: 'OK', interval_km: 10000, remaining_km: 20000 })).toBe(0)
+    expect(reminderProgress({ status: 'DUE_SOON', interval_km: 10000, remaining_km: -5 })).toBe(1)
+  })
+
+  it('has no progress without a schedule', () => {
+    expect(reminderProgress({ status: 'OK' })).toBeNull()
+    expect(reminderProgress({ status: 'OK', interval_km: 0, remaining_km: 5 })).toBeNull()
+  })
+
+  it('picks the reminder closest to its due point and skips overdue and unscheduled ones', () => {
+    const list = [
+      { title: 'late', ...base, status: 'OVERDUE', remaining_km: -10 },
+      { title: 'none', status: 'OK' },
+      { title: 'far', ...base, remaining_km: 9000 },
+      { title: 'near', ...base, status: 'DUE_SOON', remaining_km: 500 },
+    ]
+    expect(nextDueReminder(list)!.reminder.title).toBe('near')
+  })
+
+  it('returns null when nothing qualifies', () => {
+    expect(nextDueReminder([{ ...base, status: 'OVERDUE' }, { status: 'OK' }])).toBeNull()
+    expect(nextDueReminder([])).toBeNull()
   })
 })

@@ -9,6 +9,7 @@ import { api, type MaintenanceReminder } from '@/services/api'
 import ResidualValuePanel from '@/components/dashboard/ResidualValuePanel.vue'
 import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
 import UrgentRemindersBanner from '@/components/dashboard/UrgentRemindersBanner.vue'
+import NextDueCard from '@/components/dashboard/NextDueCard.vue'
 import DataQualityCard from '@/components/dashboard/DataQualityCard.vue'
 import LeaseContractCard from '@/components/dashboard/LeaseContractCard.vue'
 import TcoMetricsGrid from '@/components/dashboard/TcoMetricsGrid.vue'
@@ -146,6 +147,8 @@ onMounted(() => {
       <LeaseContractCard :tco="tco" />
 
       <TcoMetricsGrid :tco="tco" />
+
+      <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
 
       <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" @open-month="openMonthDetail" />
 

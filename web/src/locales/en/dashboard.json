@@ -217,6 +217,12 @@
     "energy": "Energy (charges)",
     "kwhOnly": "{total_kwh_added} kWh charged"
   },
+  "nextDueCard": {
+    "title": "Next maintenance",
+    "empty": "No upcoming maintenance scheduled",
+    "create": "Create a reminder",
+    "viewReminders": "View reminders"
+  },
   "urgentRemindersBanner": {
     "viewTheReminders": "View the reminders",
     "overdue": "Overdue maintenance",
