@@ -15,7 +15,7 @@
     "webhook": "Webhook",
     "homelabWebhook": "Webhook Homelab",
     "setUpTheWebhookTo": "Configurer le webhook pour recevoir des notifications en temps réel",
-    "maintenanceFixed": "Entretien / Fixe",
+    "maintenanceFixed": "Ajouter une dépense",
     "tollParking": "Péage / Parking",
     "tollsParkingRecurringMaintenanceInsurance": "Péages, parkings, entretien récurrent, assurance et recharges",
     "expensesAndMaintenance": "Dépenses & Entretien",
@@ -174,7 +174,14 @@
     "smoothedOverKm": "Lissé sur {coverage_km} {unit}",
     "until": "jusqu'au {recurrence_end_date}",
     "everyMonths": "tous les {recurrence_interval_months} mois",
-    "noMaintenanceOrFixedExpense": "Aucune dépense d'entretien ou fixe enregistrée."
+    "noMaintenanceOrFixedExpense": "Aucune dépense d'entretien ou fixe enregistrée.",
+    "categoryFilter": "Filtrer par catégorie",
+    "allCategories": "Toutes les catégories",
+    "yearFilter": "Filtrer par année",
+    "allYears": "Toutes les années",
+    "total": "Total",
+    "count": "{n} dépense(s)",
+    "noMatch": "Aucune dépense ne correspond à ces filtres."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Envoyer une notification webhook automatique (Discord / Telegram / Gotify) lors du franchissement du seuil",

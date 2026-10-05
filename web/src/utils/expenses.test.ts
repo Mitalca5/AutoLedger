@@ -5,7 +5,10 @@ import {
   currencyPayload,
   findCloseCandidate,
   formatFileSize,
+  filterMaintenance,
   hasReminderSchedule,
+  maintenanceTotal,
+  maintenanceYears,
   toLocalDateTimeInput,
 } from './expenses'
 
@@ -93,5 +96,31 @@ describe('hasReminderSchedule', () => {
     expect(hasReminderSchedule({ interval_km: 15000 })).toBe(true)
     expect(hasReminderSchedule({ interval_months: 12 })).toBe(true)
     expect(hasReminderSchedule({ interval_km: 15000, interval_months: 12 })).toBe(true)
+  })
+})
+
+describe('maintenance list helpers', () => {
+  const items = [
+    { category: 'MAINTENANCE', date: '2026-03-10T00:00:00Z', amount: 100, currency: 'EUR' },
+    { category: 'INSURANCE', date: '2026-01-05T00:00:00Z', amount: '50.5', currency: 'EUR' },
+    { category: 'MAINTENANCE', date: '2025-11-20T00:00:00Z', amount: 20, currency: 'USD', fx_rate: 0.9 },
+  ]
+
+  it('filters by category and by year, an empty value meaning any', () => {
+    expect(filterMaintenance(items, { category: '', year: '' })).toHaveLength(3)
+    expect(filterMaintenance(items, { category: 'MAINTENANCE', year: '' })).toHaveLength(2)
+    expect(filterMaintenance(items, { category: '', year: '2026' })).toHaveLength(2)
+    expect(filterMaintenance(items, { category: 'MAINTENANCE', year: '2025' })).toEqual([items[2]])
+  })
+
+  it('lists the years present, latest first', () => {
+    expect(maintenanceYears(items)).toEqual([2026, 2025])
+    expect(maintenanceYears([])).toEqual([])
+  })
+
+  it('totals in the vehicle currency, converting foreign amounts with their rate', () => {
+    expect(maintenanceTotal(items, 'EUR')).toBeCloseTo(168.5)
+    expect(maintenanceTotal([{ category: 'OTHER', date: '2026-01-01', amount: 10, currency: 'USD', fx_rate: null }], 'EUR')).toBe(0)
+    expect(maintenanceTotal([], 'EUR')).toBe(0)
   })
 })

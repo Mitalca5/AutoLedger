@@ -119,3 +119,37 @@ export function findCloseCandidate(maintenances: any[] | null | undefined, editi
     ) || null
   )
 }
+
+interface MaintenanceLike {
+  category: string
+  date: string
+  amount: number | string
+  currency?: string | null
+  fx_rate?: number | string | null
+}
+
+export interface MaintenanceFilter {
+  category: string
+  year: string
+}
+
+/** Maintenance and fixed expenses matching a category and a year; an empty value means "any". */
+export function filterMaintenance<T extends MaintenanceLike>(items: T[], filter: MaintenanceFilter): T[] {
+  return items.filter(
+    (m) => (!filter.category || m.category === filter.category) && (!filter.year || new Date(m.date).getUTCFullYear() === Number(filter.year))
+  )
+}
+
+/** Years that hold at least one expense, most recent first. */
+export function maintenanceYears(items: MaintenanceLike[]): number[] {
+  return [...new Set(items.map((m) => new Date(m.date).getUTCFullYear()))].sort((a, b) => b - a)
+}
+
+/** Sum of the expenses in the vehicle's currency; a foreign-currency amount is converted with its own rate. */
+export function maintenanceTotal(items: MaintenanceLike[], baseCurrency: string): number {
+  return items.reduce((sum, m) => {
+    const amount = Number(m.amount) || 0
+    if (!m.currency || m.currency === baseCurrency) return sum + amount
+    return sum + amount * (Number(m.fx_rate) || 0)
+  }, 0)
+}
