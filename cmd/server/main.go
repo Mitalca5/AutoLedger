@@ -355,6 +355,7 @@ func main() {
 		mileageService := services.NewMileageService(repo, cfg.ReportingTimezone)
 		mileageHandler := handlers.NewMileageHandler(repo, mileageService)
 		residualHandler := handlers.NewResidualHandler(repo, services.NewResidualService(repo, energyStatsService))
+		serviceBookHandler := handlers.NewServiceBookHandler(repo, services.NewServiceBookService(repo, storageService.Read))
 		exportHandler := handlers.NewExportHandler(repo, services.NewExportService(repo).WithMileage(mileageService))
 
 		tariffService := services.NewTariffServiceIn(cfg.ReportingTimezone)
@@ -524,6 +525,7 @@ func main() {
 
 				// Export (CSV / JSON)
 				r.Get("/{vehicleId}/export", exportHandler.Export)
+				r.Get("/{vehicleId}/service-book", serviceBookHandler.Download)
 				r.Get("/{vehicleId}/mileage-report", mileageHandler.Report)
 				r.Get("/{vehicleId}/battery-health", residualHandler.BatteryHealth)
 				r.Post("/{vehicleId}/battery-health", residualHandler.SaveReading)

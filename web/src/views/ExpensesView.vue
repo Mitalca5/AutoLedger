@@ -550,6 +550,7 @@ const tabs = computed<TabItem[]>(() => {
     <MaintenancePanel
       v-if="activeTab === 'MAINTENANCE' || activeTab === 'FIXED'"
       :kind="activeTab === 'FIXED' ? 'fixed' : 'service'"
+      :vehicle-id="vehicleId"
       :maintenance-expenses="maintenanceExpenses"
       :loading="loading"
       @edit="openEditMaintModal"

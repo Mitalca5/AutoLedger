@@ -152,6 +152,23 @@ async function request<T>(endpoint: string, options: RequestInit = {}, offlineLa
   return data as T
 }
 
+// Fetches a generated file, taking its name from Content-Disposition; the server's error message is kept when it sends one.
+async function fetchDownload(path: string, fallbackName: string): Promise<{ blob: Blob; filename: string }> {
+  const res = await fetch(`${BASE_URL}${path}`, { credentials: 'include' })
+  if (!res.ok) {
+    let errorMsg = t('import.exportFailed')
+    try {
+      const errorData = await res.json()
+      if (errorData && errorData.error) errorMsg = errorData.error
+    } catch {
+      // Non-JSON response
+    }
+    throw new Error(errorMsg)
+  }
+  const match = (res.headers.get('content-disposition') || '').match(/filename="?([^";]+)"?/)
+  return { blob: await res.blob(), filename: match?.[1] || fallbackName }
+}
+
 export const api = {
   // Auth
   login: (credentials: any) => request<any>('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
@@ -475,25 +492,21 @@ export const api = {
     return { blob, filename }
   },
 
-  downloadExport: async (vehicleId: string, params: { type: string; format: string; from?: string; to?: string; tag?: string; rates?: string }): Promise<{ blob: Blob; filename: string }> => {
+  downloadExport: (vehicleId: string, params: { type: string; format: string; from?: string; to?: string; tag?: string; rates?: string }): Promise<{ blob: Blob; filename: string }> => {
     const qs = new URLSearchParams({ type: params.type, format: params.format })
     if (params.from) qs.set('from', params.from)
     if (params.to) qs.set('to', params.to)
     if (params.tag) qs.set('tag', params.tag)
     if (params.rates) qs.set('rates', params.rates)
-    const res = await fetch(`${BASE_URL}/vehicles/${vehicleId}/export?${qs}`, { credentials: 'include' })
-    if (!res.ok) {
-      let errorMsg = t('import.exportFailed')
-      try {
-        const errorData = await res.json()
-        if (errorData && errorData.error) errorMsg = errorData.error
-      } catch {
-        // Non-JSON response
-      }
-      throw new Error(errorMsg)
-    }
-    const match = (res.headers.get('content-disposition') || '').match(/filename="?([^";]+)"?/)
-    return { blob: await res.blob(), filename: match?.[1] || `export.${params.format}` }
+    return fetchDownload(`/vehicles/${vehicleId}/export?${qs}`, `export.${params.format}`)
+  },
+
+  downloadServiceBook: (vehicleId: string, params: { from?: string; to?: string; attachments?: boolean }): Promise<{ blob: Blob; filename: string }> => {
+    const qs = new URLSearchParams()
+    if (params.from) qs.set('from', params.from)
+    if (params.to) qs.set('to', params.to)
+    if (params.attachments) qs.set('attachments', '1')
+    return fetchDownload(`/vehicles/${vehicleId}/service-book?${qs}`, 'service-book.pdf')
   },
 
   // Maintenance Reminders & Webhooks

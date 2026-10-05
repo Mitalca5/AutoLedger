@@ -198,7 +198,10 @@
     "count": "{n} dépense(s)",
     "noMatch": "Aucune dépense ne correspond à ces filtres.",
     "noMaintenanceExpense": "Aucune dépense d'entretien enregistrée.",
-    "noFixedExpense": "Aucun frais fixe enregistré (assurance, taxe, abonnement, financement)."
+    "noFixedExpense": "Aucun frais fixe enregistré (assurance, taxe, abonnement, financement).",
+    "serviceBook": "Carnet d'entretien (PDF)",
+    "serviceBookWithProofs": "Joindre les justificatifs (images)",
+    "serviceBookHint": "Le carnet reprend les entretiens du véhicule, sans les frais fixes, pour l'année choisie ci-dessus ou toutes les années."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Envoyer une notification webhook automatique (Discord / Telegram / Gotify) lors du franchissement du seuil",

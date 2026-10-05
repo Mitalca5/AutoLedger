@@ -44,6 +44,28 @@ var catalog = map[string]map[string]string{
 
 	"expense.multi_leg_trip": {"en": "Multi-leg trip", "fr": "Trajet multi-étapes"},
 
+	"servicebook.title":           {"en": "Service book", "fr": "Carnet d'entretien"},
+	"servicebook.vehicle":         {"en": "Vehicle", "fr": "Véhicule"},
+	"servicebook.vin":             {"en": "VIN", "fr": "VIN"},
+	"servicebook.odometer":        {"en": "Odometer", "fr": "Kilométrage"},
+	"servicebook.generated":       {"en": "Generated on %s", "fr": "Généré le %s"},
+	"servicebook.period":          {"en": "Period: %s to %s", "fr": "Période : du %s au %s"},
+	"servicebook.col_date":        {"en": "Date", "fr": "Date"},
+	"servicebook.col_km":          {"en": "Odometer", "fr": "Kilométrage"},
+	"servicebook.col_work":        {"en": "Work", "fr": "Intervention"},
+	"servicebook.col_amount":      {"en": "Amount", "fr": "Montant"},
+	"servicebook.col_doc":         {"en": "Proof", "fr": "Justificatif"},
+	"servicebook.total":           {"en": "Total (%s)", "fr": "Total (%s)"},
+	"servicebook.empty":           {"en": "No maintenance recorded for this period.", "fr": "Aucun entretien enregistré sur cette période."},
+	"servicebook.annex_page":      {"en": "Proof %d: %s", "fr": "Justificatif %d : %s"},
+	"servicebook.not_embedded":    {"en": "Not embedded (file format): download it from the app", "fr": "Non intégré (format du fichier) : à télécharger depuis l'application"},
+	"servicebook.page":            {"en": "Page %d", "fr": "Page %d"},
+	"servicebook.cat.MAINTENANCE": {"en": "Maintenance", "fr": "Entretien"},
+	"servicebook.cat.REPAIR":      {"en": "Repair", "fr": "Réparation"},
+	"servicebook.cat.TIRES":       {"en": "Tires", "fr": "Pneumatiques"},
+	"servicebook.cat.ACCESSORY":   {"en": "Accessory", "fr": "Accessoire"},
+	"servicebook.cat.OTHER":       {"en": "Other", "fr": "Autre"},
+
 	"trip.departure": {"en": "Start", "fr": "Départ"},
 	"trip.arrival":   {"en": "Arrival", "fr": "Arrivée"},
 }

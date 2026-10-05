@@ -4,18 +4,43 @@ import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { computed, ref } from 'vue'
-import { Repeat, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
+import { Repeat, Pencil, Trash2, Paperclip, FileDown } from 'lucide-vue-next'
+import { api } from '@/services/api'
+import { useConfirm } from '@/composables/useConfirm'
+import { saveBlob } from '@/utils/download'
+import { t } from '@/i18n'
 import { categoryLabel, expensesOfKind, filterMaintenance, formatDate, maintenanceTotal, maintenanceYears } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistanceValue } from '@/units'
 
-const props = defineProps<{ maintenanceExpenses: any[]; loading: boolean; kind: 'service' | 'fixed' }>()
+const props = defineProps<{ vehicleId: string; maintenanceExpenses: any[]; loading: boolean; kind: 'service' | 'fixed' }>()
 const emit = defineEmits<{
   edit: [expense: any]
   delete: [expense: any]
   'view-document': [docId: string | null | undefined, filename?: string | null, download?: boolean]
 }>()
 const vehicleStore = useVehicleStore()
+const { showAlert } = useConfirm()
+const bookWithProofs = ref(false)
+const bookLoading = ref(false)
+
+// The service book follows the year filter; the category filter does not apply to it.
+async function downloadServiceBook() {
+  bookLoading.value = true
+  try {
+    const year = filter.value.year
+    const { blob, filename } = await api.downloadServiceBook(props.vehicleId, {
+      from: year ? `${year}-01-01` : undefined,
+      to: year ? `${year}-12-31` : undefined,
+      attachments: bookWithProofs.value,
+    })
+    saveBlob(blob, filename)
+  } catch (err: any) {
+    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+  } finally {
+    bookLoading.value = false
+  }
+}
 
 const filter = ref({ category: '', year: '' })
 const ofKind = computed(() => expensesOfKind(props.maintenanceExpenses, props.kind))
@@ -48,6 +73,22 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
           <span class="font-extrabold text-white">{{ formatAmount(total, vehicleStore.currency) }}</span>
           <span class="text-xs"> · {{ $t('expenses.maintenancePanel.count', { n: visible.length }) }}</span>
         </p>
+      </div>
+      <div v-if="kind === 'service'" class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3">
+        <button
+          type="button"
+          class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-700 inline-flex items-center gap-2 disabled:opacity-50"
+          :disabled="bookLoading"
+          @click="downloadServiceBook"
+        >
+          <FileDown class="w-4 h-4" />
+          {{ $t('expenses.maintenancePanel.serviceBook') }}
+        </button>
+        <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+          <input v-model="bookWithProofs" type="checkbox" class="rounded border-slate-700 bg-slate-800 text-rose-600" />
+          {{ $t('expenses.maintenancePanel.serviceBookWithProofs') }}
+        </label>
+        <p class="text-xs text-slate-400 basis-full">{{ $t('expenses.maintenancePanel.serviceBookHint') }}</p>
       </div>
       <EmptyState v-if="!visible.length">{{ $t('expenses.maintenancePanel.noMatch') }}</EmptyState>
       <div

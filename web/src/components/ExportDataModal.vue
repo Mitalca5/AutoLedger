@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { saveBlob } from '@/utils/download'
 import { ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
@@ -39,14 +40,7 @@ async function download() {
       tag: type.value === 'drives' || type.value === 'mileage' ? tag.value : '',
       rates: type.value === 'mileage' ? rates.value : '',
     })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    saveBlob(blob, filename)
     emit('update:open', false)
   } catch (e) {
     error.value = e instanceof Error ? e.message : t('import.exportFailed')

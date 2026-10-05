@@ -198,7 +198,10 @@
     "count": "{n} expense(s)",
     "noMatch": "No expense matches these filters.",
     "noMaintenanceExpense": "No maintenance expense recorded.",
-    "noFixedExpense": "No fixed cost recorded (insurance, tax, subscription, financing)."
+    "noFixedExpense": "No fixed cost recorded (insurance, tax, subscription, financing).",
+    "serviceBook": "Service book (PDF)",
+    "serviceBookWithProofs": "Attach proofs (pictures)",
+    "serviceBookHint": "The book lists the vehicle's maintenance, without fixed costs, for the year chosen above or for all years."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Send an automatic webhook notification (Discord / Telegram / Gotify) when the threshold is crossed",
