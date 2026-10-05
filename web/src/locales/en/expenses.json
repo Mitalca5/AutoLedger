@@ -92,13 +92,19 @@
     "expenseLabel": "Expense label",
     "000IfFree": "0.00 if free",
     "invoiceCost": "Invoice cost ({cur})",
-    "alsoRecordAMaintenanceExpense": "Also record a maintenance expense",
     "odometerAtTheWorkKm": "Odometer at the work ({unit})",
     "workDate": "Work date",
     "confirmingThisWorkResetsThe": "Confirming this work resets the interval counter and restarts from the odometer and date entered below.",
     "confirmCompletion": "Confirm completion: {title}",
     "expenseDescription": "Maintenance done: {title}",
-    "done": "Maintenance marked as done and interval reset!"
+    "done": "Maintenance marked as done and interval reset!",
+    "expenseMode": "Related maintenance expense",
+    "modeNone": "None",
+    "modeCreate": "Record a new expense",
+    "modeExisting": "Link to an existing maintenance",
+    "existingMaintenance": "Maintenance",
+    "chooseMaintenance": "Choose a maintenance",
+    "existingHint": "The date and odometer of the chosen maintenance are used above."
   },
   "documentPreviewModal": {
     "downloadToView": "Download to view",

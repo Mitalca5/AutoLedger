@@ -4,12 +4,13 @@ import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
 import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
+import { useMaintenanceChoices } from '@/composables/useMaintenanceChoices'
 import { X, Bell, Sparkles } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { reminderPresets, nextOccurrenceDate, categoryLabel, formatDate, maintenanceStartPoint, sortMaintenanceByDate, isFixedCost, type ReminderPreset } from '@/utils/expenses'
+import { reminderPresets, nextOccurrenceDate, maintenanceStartPoint, type ReminderPreset } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { distanceUnit, formatDistanceValue } from '@/units'
+import { distanceUnit } from '@/units'
 
 // Creates a maintenance reminder, or edits `editing`. `preset` pre-fills a new one from a suggestion.
 const props = defineProps<{ vehicleId: string; editing: MaintenanceReminder | null; preset: ReminderPreset | null; currentOdometer: number }>()
@@ -22,25 +23,11 @@ const editingReminderId = computed(() => props.editing?.id ?? null)
 
 const scheduleMode = ref<'interval' | 'date'>('interval')
 
-const maintenanceChoices = ref<any[]>([])
-const maintenanceOptions = computed(() => sortMaintenanceByDate(maintenanceChoices.value.filter((m) => !isFixedCost(m.category))))
-
-async function loadMaintenanceChoices() {
-  try {
-    maintenanceChoices.value = props.vehicleId ? await api.getMaintenance(props.vehicleId) : []
-  } catch {
-    maintenanceChoices.value = []
-  }
-}
-
-function maintenanceOptionLabel(m: any): string {
-  const km = m.odometer != null ? ` · ${t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(m.odometer) })}` : ''
-  return `${formatDate(m.date)} · ${m.description || categoryLabel(m.category)}${km}`
-}
+const { options: maintenanceOptions, load: loadMaintenanceChoices, label: maintenanceOptionLabel, find: findMaintenance } = useMaintenanceChoices(() => props.vehicleId)
 
 // Basing a reminder on a recorded maintenance takes that maintenance's day and odometer as starting point.
 function onMaintenanceChosen() {
-  const m = maintenanceChoices.value.find((x) => x.id === reminderForm.value.maintenance_id)
+  const m = findMaintenance(reminderForm.value.maintenance_id)
   if (!m) return
   const start = maintenanceStartPoint(m)
   reminderForm.value.last_service_date = start.date

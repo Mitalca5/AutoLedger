@@ -92,13 +92,19 @@
     "expenseLabel": "Libellé de la dépense",
     "000IfFree": "0.00 si gratuit",
     "invoiceCost": "Coût de la facture ({cur})",
-    "alsoRecordAMaintenanceExpense": "Enregistrer simultanément une dépense d'entretien financière",
     "odometerAtTheWorkKm": "Odomètre de l'intervention ({unit})",
     "workDate": "Date d'intervention",
     "confirmingThisWorkResetsThe": "Valider cette intervention réinitialise le compteur d'intervalle et repart sur le nouvel odomètre et la date renseignés ci-dessous.",
     "confirmCompletion": "Valider la réalisation : {title}",
     "expenseDescription": "Entretien effectué : {title}",
-    "done": "Entretien marqué comme fait et intervalle réinitialisé !"
+    "done": "Entretien marqué comme fait et intervalle réinitialisé !",
+    "expenseMode": "Dépense d'entretien associée",
+    "modeNone": "Aucune",
+    "modeCreate": "Enregistrer une nouvelle dépense",
+    "modeExisting": "Associer à un entretien déjà enregistré",
+    "existingMaintenance": "Entretien",
+    "chooseMaintenance": "Choisir un entretien",
+    "existingHint": "La date et l'odomètre de l'entretien choisi sont repris ci-dessus."
   },
   "documentPreviewModal": {
     "downloadToView": "Télécharger pour consulter",

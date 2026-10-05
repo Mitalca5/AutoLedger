@@ -4,15 +4,17 @@ import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
 import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
+import { useMaintenanceChoices } from '@/composables/useMaintenanceChoices'
 import { useVehicleStore } from '@/stores/vehicle'
 import { X, CheckCircle2 } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { todayIso } from '@/utils/dates'
+import { maintenanceStartPoint } from '@/utils/expenses'
 import { currencySymbol } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
 
-// Marks a reminder as done, optionally logging the maintenance expense. saved carries whether an expense was logged.
+// Marks a reminder as done, optionally logging a new maintenance expense or linking an existing one. saved carries whether an expense was logged.
 const props = defineProps<{ vehicleId: string; reminder: MaintenanceReminder | null; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [expenseLogged: boolean] }>()
 const open = defineModel<boolean>('open', { required: true })
@@ -22,21 +24,37 @@ const vehicleStore = useVehicleStore()
 
 const completingReminder = computed(() => props.reminder)
 
+type ExpenseMode = 'none' | 'create' | 'existing'
+
+const { options: maintenanceOptions, load: loadMaintenanceChoices, label: maintenanceOptionLabel, find: findMaintenance } = useMaintenanceChoices(() => props.vehicleId)
+
+// Linking an existing maintenance takes its day and odometer as the date of the work.
+function onMaintenanceChosen() {
+  const m = findMaintenance(completeForm.value.maintenance_id)
+  if (!m) return
+  const start = maintenanceStartPoint(m)
+  completeForm.value.service_date = start.date
+  if (start.odometer !== '') completeForm.value.service_odometer = start.odometer
+}
+
 const completeForm = ref({
   service_date: todayIso(),
   service_odometer: '' as number | '',
-  log_expense: false,
+  expense_mode: 'none' as ExpenseMode,
+  maintenance_id: '',
   expense_amount: '',
   expense_description: '',
 })
 
 watch(open, (isOpen) => {
   if (!isOpen || !props.reminder) return
+  void loadMaintenanceChoices()
   const currentOdo = props.currentOdometer ? Math.round(props.currentOdometer) : ''
   completeForm.value = {
     service_date: todayIso(),
     service_odometer: currentOdo,
-    log_expense: false,
+    expense_mode: 'none' as ExpenseMode,
+    maintenance_id: '',
     expense_amount: '',
     expense_description: t('expenses.completeReminderModal.expenseDescription', { title: props.reminder.title }),
   }
@@ -48,7 +66,7 @@ async function handleCompleteReminder() {
   try {
     // The expense is recorded first so the reminder can point at it.
     let maintenanceId: string | undefined
-    if (completeForm.value.log_expense && Number(completeForm.value.expense_amount) > 0) {
+    if (completeForm.value.expense_mode === 'create' && Number(completeForm.value.expense_amount) > 0) {
       const created = await api.createMaintenance(props.vehicleId, {
         category: reminder.category === 'TIRES' ? 'TIRES' : 'MAINTENANCE',
         amount: Number(completeForm.value.expense_amount),
@@ -60,6 +78,8 @@ async function handleCompleteReminder() {
         is_recurring: false,
       })
       maintenanceId = created?.id
+    } else if (completeForm.value.expense_mode === 'existing' && completeForm.value.maintenance_id) {
+      maintenanceId = completeForm.value.maintenance_id
     }
     await api.completeReminder(props.vehicleId, reminder.id, {
       completed_date: completeForm.value.service_date,
@@ -69,7 +89,7 @@ async function handleCompleteReminder() {
 
     showAlert(t('expenses.completeReminderModal.done'), t('common.success'), 'success')
     open.value = false
-    emit('saved', completeForm.value.log_expense)
+    emit('saved', completeForm.value.expense_mode === 'create')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
@@ -120,21 +140,27 @@ async function handleCompleteReminder() {
           </div>
         </div>
 
-        <!-- Option to log an expense -->
+        <!-- Option to log an expense or link an existing maintenance -->
         <div class="p-3.5 bg-slate-800/40 rounded-xl border border-slate-800 space-y-3">
-          <div class="flex items-center gap-2">
-            <input
-              id="complete-form-log-expense"
-              v-model="completeForm.log_expense"
-              type="checkbox"
-              class="rounded border-slate-700 bg-slate-800 text-success-600 focus:ring-success-500"
-            />
-            <label for="complete-form-log-expense" class="text-xs font-semibold text-slate-200 cursor-pointer">
-              {{ $t('expenses.completeReminderModal.alsoRecordAMaintenanceExpense') }}
-            </label>
+          <div>
+            <label for="complete-form-expense-mode" class="block text-xs font-semibold text-slate-200 mb-1">{{ $t('expenses.completeReminderModal.expenseMode') }}</label>
+            <select id="complete-form-expense-mode" v-model="completeForm.expense_mode" class="field">
+              <option value="none">{{ $t('expenses.completeReminderModal.modeNone') }}</option>
+              <option value="create">{{ $t('expenses.completeReminderModal.modeCreate') }}</option>
+              <option v-if="maintenanceOptions.length" value="existing">{{ $t('expenses.completeReminderModal.modeExisting') }}</option>
+            </select>
           </div>
 
-          <div v-if="completeForm.log_expense" class="space-y-3 pt-1">
+          <div v-if="completeForm.expense_mode === 'existing'" class="space-y-1">
+            <label for="complete-form-maintenance" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.completeReminderModal.existingMaintenance') }}</label>
+            <select id="complete-form-maintenance" v-model="completeForm.maintenance_id" class="field" required @change="onMaintenanceChosen">
+              <option value="" disabled>{{ $t('expenses.completeReminderModal.chooseMaintenance') }}</option>
+              <option v-for="m in maintenanceOptions" :key="m.id" :value="m.id">{{ maintenanceOptionLabel(m) }}</option>
+            </select>
+            <p class="text-xs text-slate-400">{{ $t('expenses.completeReminderModal.existingHint') }}</p>
+          </div>
+
+          <div v-if="completeForm.expense_mode === 'create'" class="space-y-3 pt-1">
             <div>
               <label for="complete-form-expense-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.completeReminderModal.invoiceCost', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
               <input
