@@ -5,11 +5,11 @@ import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { computed, ref } from 'vue'
 import { Repeat, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
-import { categoryLabel, filterMaintenance, formatDate, maintenanceTotal, maintenanceYears } from '@/utils/expenses'
+import { categoryLabel, expensesOfKind, filterMaintenance, formatDate, maintenanceTotal, maintenanceYears } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistanceValue } from '@/units'
 
-const props = defineProps<{ maintenanceExpenses: any[]; loading: boolean }>()
+const props = defineProps<{ maintenanceExpenses: any[]; loading: boolean; kind: 'service' | 'fixed' }>()
 const emit = defineEmits<{
   edit: [expense: any]
   delete: [expense: any]
@@ -18,17 +18,18 @@ const emit = defineEmits<{
 const vehicleStore = useVehicleStore()
 
 const filter = ref({ category: '', year: '' })
-const categories = computed(() => [...new Set(props.maintenanceExpenses.map((m) => m.category as string))])
-const years = computed(() => maintenanceYears(props.maintenanceExpenses))
-const visible = computed(() => filterMaintenance(props.maintenanceExpenses, filter.value))
+const ofKind = computed(() => expensesOfKind(props.maintenanceExpenses, props.kind))
+const categories = computed(() => [...new Set(ofKind.value.map((m) => m.category as string))])
+const years = computed(() => maintenanceYears(ofKind.value))
+const visible = computed(() => filterMaintenance(ofKind.value, filter.value))
 const total = computed(() => maintenanceTotal(visible.value, vehicleStore.currency))
 </script>
 
 <template>
   <div>
     <ListSkeleton v-if="loading" />
-    <EmptyState v-else-if="!maintenanceExpenses.length">
-      {{ $t('expenses.maintenancePanel.noMaintenanceOrFixedExpense') }}
+    <EmptyState v-else-if="!ofKind.length">
+      {{ kind === 'fixed' ? $t('expenses.maintenancePanel.noFixedExpense') : $t('expenses.maintenancePanel.noMaintenanceExpense') }}
     </EmptyState>
     <div v-else class="space-y-3">
       <div class="grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap">

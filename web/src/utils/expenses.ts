@@ -189,6 +189,15 @@ interface MaintenanceLike {
   fx_rate?: number | string | null
 }
 
+/** Recurring costs of owning the car, listed apart from servicing and repairs. */
+export const FIXED_COST_CATEGORIES = ['INSURANCE', 'SUBSCRIPTION', 'TAX', 'FINANCING']
+
+export const isFixedCost = (category: string): boolean => FIXED_COST_CATEGORIES.includes(category)
+
+/** The expenses of one kind: servicing (maintenance, repairs, accessories, other) or fixed costs. */
+export const expensesOfKind = <T extends { category: string }>(items: T[], kind: 'service' | 'fixed'): T[] =>
+  items.filter((m) => isFixedCost(m.category) === (kind === 'fixed'))
+
 export interface MaintenanceFilter {
   category: string
   year: string

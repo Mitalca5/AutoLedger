@@ -22,6 +22,7 @@ const props = defineProps<{
   documents: ExpenseDocumentHeader[]
   maintenanceExpenses: any[]
   currentOdometer?: number
+  defaultCategory?: string
 }>()
 const emit = defineEmits<{
   saved: []
@@ -141,7 +142,7 @@ watch(open, (isOpen) => {
     shouldClosePrevious.value = false
     autofilledOdometer = props.currentOdometer ? Math.round(props.currentOdometer) : 0
     maintForm.value = {
-      category: 'MAINTENANCE',
+      category: props.defaultCategory ?? 'MAINTENANCE',
       amount: '',
       currency: baseCurrency.value,
       fx_rate: '',

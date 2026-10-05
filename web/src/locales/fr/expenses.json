@@ -29,13 +29,14 @@
     "deleteReminderMessage": "Êtes-vous sûr de vouloir supprimer le rappel d'entretien « {title} » ?",
     "reminderDeleted": "Rappel supprimé",
     "expensesTitle": "Dépenses",
-    "expensesSubtitle": "Péages, parkings, recharges et justificatifs",
+    "expensesSubtitle": "Péages, parkings, frais fixes et justificatifs",
     "maintenanceTitle": "Entretien",
-    "maintenanceSubtitle": "Entretien, assurance, dépenses récurrentes et rappels",
+    "maintenanceSubtitle": "Entretien, réparations et rappels",
     "efficiency": "Efficacité",
     "estimate": "Estimation",
     "energyTitle": "Énergie",
-    "energySubtitle": "Consommation, recharges et estimation de repli"
+    "energySubtitle": "Consommation, recharges et estimation de repli",
+    "fixedCosts": "Frais fixes"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF ou image (reçu Superchargeur, borne publique, etc.).",
@@ -183,14 +184,15 @@
     "smoothedOverKm": "Lissé sur {coverage_km} {unit}",
     "until": "jusqu'au {recurrence_end_date}",
     "everyMonths": "tous les {recurrence_interval_months} mois",
-    "noMaintenanceOrFixedExpense": "Aucune dépense d'entretien ou fixe enregistrée.",
     "categoryFilter": "Filtrer par catégorie",
     "allCategories": "Toutes les catégories",
     "yearFilter": "Filtrer par année",
     "allYears": "Toutes les années",
     "total": "Total",
     "count": "{n} dépense(s)",
-    "noMatch": "Aucune dépense ne correspond à ces filtres."
+    "noMatch": "Aucune dépense ne correspond à ces filtres.",
+    "noMaintenanceExpense": "Aucune dépense d'entretien enregistrée.",
+    "noFixedExpense": "Aucun frais fixe enregistré (assurance, taxe, abonnement, financement)."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Envoyer une notification webhook automatique (Discord / Telegram / Gotify) lors du franchissement du seuil",

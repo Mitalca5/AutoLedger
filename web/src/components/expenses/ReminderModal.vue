@@ -6,7 +6,7 @@ import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { X, Bell, Sparkles } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { reminderPresets, nextOccurrenceDate, categoryLabel, formatDate, maintenanceStartPoint, sortMaintenanceByDate, type ReminderPreset } from '@/utils/expenses'
+import { reminderPresets, nextOccurrenceDate, categoryLabel, formatDate, maintenanceStartPoint, sortMaintenanceByDate, isFixedCost, type ReminderPreset } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -23,7 +23,7 @@ const editingReminderId = computed(() => props.editing?.id ?? null)
 const scheduleMode = ref<'interval' | 'date'>('interval')
 
 const maintenanceChoices = ref<any[]>([])
-const maintenanceOptions = computed(() => sortMaintenanceByDate(maintenanceChoices.value))
+const maintenanceOptions = computed(() => sortMaintenanceByDate(maintenanceChoices.value.filter((m) => !isFixedCost(m.category))))
 
 async function loadMaintenanceChoices() {
   try {

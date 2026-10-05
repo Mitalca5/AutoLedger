@@ -29,13 +29,14 @@
     "deleteReminderMessage": "Are you sure you want to delete the maintenance reminder “{title}”?",
     "reminderDeleted": "Reminder deleted",
     "expensesTitle": "Expenses",
-    "expensesSubtitle": "Tolls, parking, charging sessions and receipts",
+    "expensesSubtitle": "Tolls, parking, fixed costs and receipts",
     "maintenanceTitle": "Maintenance",
-    "maintenanceSubtitle": "Maintenance, insurance, recurring costs and reminders",
+    "maintenanceSubtitle": "Maintenance, repairs and reminders",
     "efficiency": "Efficiency",
     "estimate": "Estimate",
     "energyTitle": "Energy",
-    "energySubtitle": "Consumption, charging sessions and fallback estimate"
+    "energySubtitle": "Consumption, charging sessions and fallback estimate",
+    "fixedCosts": "Fixed costs"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF or image (Supercharger receipt, public charger, etc.).",
@@ -183,14 +184,15 @@
     "smoothedOverKm": "Smoothed over {coverage_km} {unit}",
     "until": "until {recurrence_end_date}",
     "everyMonths": "every {recurrence_interval_months} months",
-    "noMaintenanceOrFixedExpense": "No maintenance or fixed expense recorded.",
     "categoryFilter": "Filter by category",
     "allCategories": "All categories",
     "yearFilter": "Filter by year",
     "allYears": "All years",
     "total": "Total",
     "count": "{n} expense(s)",
-    "noMatch": "No expense matches these filters."
+    "noMatch": "No expense matches these filters.",
+    "noMaintenanceExpense": "No maintenance expense recorded.",
+    "noFixedExpense": "No fixed cost recorded (insurance, tax, subscription, financing)."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Send an automatic webhook notification (Discord / Telegram / Gotify) when the threshold is crossed",

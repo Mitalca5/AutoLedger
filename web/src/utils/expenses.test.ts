@@ -7,7 +7,9 @@ import {
   recentDescriptions,
   findCloseCandidate,
   formatFileSize,
+  expensesOfKind,
   filterMaintenance,
+  isFixedCost,
   groupChargesByMonth,
   hasReminderSchedule,
   nextOccurrenceDate,
@@ -241,5 +243,27 @@ describe('reminder maintenance link helpers', () => {
     expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z', odometer: null })).toEqual({ date: '2026-03-10', odometer: '' })
     expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z' }).odometer).toBe('')
     expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z', odometer: 0 }).odometer).toBe(0)
+  })
+})
+
+describe('fixed costs', () => {
+  const items = [
+    { id: 1, category: 'MAINTENANCE' },
+    { id: 2, category: 'INSURANCE' },
+    { id: 3, category: 'REPAIR' },
+    { id: 4, category: 'TAX' },
+    { id: 5, category: 'SUBSCRIPTION' },
+    { id: 6, category: 'FINANCING' },
+    { id: 7, category: 'ACCESSORY' },
+    { id: 8, category: 'OTHER' },
+  ]
+
+  it('recognises insurance, tax, subscription and financing', () => {
+    expect(items.filter((m) => isFixedCost(m.category)).map((m) => m.id)).toEqual([2, 4, 5, 6])
+  })
+
+  it('splits the expenses between servicing and fixed costs', () => {
+    expect(expensesOfKind(items, 'service').map((m) => m.id)).toEqual([1, 3, 7, 8])
+    expect(expensesOfKind(items, 'fixed').map((m) => m.id)).toEqual([2, 4, 5, 6])
   })
 })

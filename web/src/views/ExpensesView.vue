@@ -25,7 +25,7 @@ import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.v
 import WebhookModal from '@/components/expenses/WebhookModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
-import { Receipt, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
+import { Receipt, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud, Landmark } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
 import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
@@ -42,16 +42,16 @@ const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
 const { previewDoc, loadingDocId, closeDocPreview, viewOrDownloadDocument } = useDocumentPreview(() => vehicleStore.activeVehicle?.id)
 
-type TabType = 'TOLLS' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS' | 'EFFICIENCY' | 'ESTIMATE'
+type TabType = 'TOLLS' | 'FIXED' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS' | 'EFFICIENCY' | 'ESTIMATE'
 
-// One view, three menu entries: /expenses (tolls, receipts), /maintenance (maintenance, reminders)
+// One view, three menu entries: /expenses (tolls, fixed costs, receipts), /maintenance (maintenance, reminders)
 // and /energy (efficiency, charges, estimate)
 const isMaintenanceSection = computed(() => route.meta.section === 'maintenance')
 const isEnergySection = computed(() => route.meta.section === 'energy')
 const sectionTabs = computed<TabType[]>(() => {
   if (isMaintenanceSection.value) return ['MAINTENANCE', 'REMINDERS']
   if (isEnergySection.value) return vehicleStore.canRefuel ? ['EFFICIENCY', 'CHARGES'] : ['EFFICIENCY', 'CHARGES', 'ESTIMATE']
-  return ['TOLLS', 'DOCUMENTS']
+  return ['TOLLS', 'FIXED', 'DOCUMENTS']
 })
 
 function parseTab(raw: unknown): TabType {
@@ -163,7 +163,7 @@ async function loadData() {
   try {
     if (activeTab.value === 'TOLLS') {
       driveExpenses.value = await api.getDriveExpenses(vehicleStore.activeVehicle.id)
-    } else if (activeTab.value === 'MAINTENANCE') {
+    } else if (activeTab.value === 'MAINTENANCE' || activeTab.value === 'FIXED') {
       maintenanceExpenses.value = await api.getMaintenance(vehicleStore.activeVehicle.id)
     } else if (activeTab.value === 'REMINDERS') {
       await loadReminders()
@@ -244,8 +244,10 @@ async function handleDeleteToll(e: any) {
 }
 
 // Maintenance & fixed expenses
+const newExpenseCategory = ref('MAINTENANCE')
 function openAddMaintModal() {
   editingMaint.value = null
+  newExpenseCategory.value = activeTab.value === 'FIXED' ? 'INSURANCE' : 'MAINTENANCE'
   showAddMaintModal.value = true
   ensureDocumentsLoaded()
 }
@@ -440,7 +442,10 @@ const tabs = computed<TabItem[]>(() => {
     if (!vehicleStore.canRefuel) list.push({ key: 'ESTIMATE', label: t('expenses.expensesView.estimate'), icon: Calculator })
     return list
   }
-  const list: TabItem[] = [{ key: 'TOLLS', label: t('expenses.expensesView.tolls'), icon: Receipt }]
+  const list: TabItem[] = [
+    { key: 'TOLLS', label: t('expenses.expensesView.tolls'), icon: Receipt },
+    { key: 'FIXED', label: t('expenses.expensesView.fixedCosts'), icon: Landmark },
+  ]
   list.push({
     key: 'DOCUMENTS',
     label: t('expenses.expensesView.receipts'),
@@ -467,7 +472,7 @@ const tabs = computed<TabItem[]>(() => {
           {{ $t('expenses.expensesView.tollParking') }}
         </button>
         <button
-          v-if="activeTab === 'MAINTENANCE'"
+          v-if="activeTab === 'MAINTENANCE' || activeTab === 'FIXED'"
           @click="openAddMaintModal"
           class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
         >
@@ -543,7 +548,8 @@ const tabs = computed<TabItem[]>(() => {
     />
 
     <MaintenancePanel
-      v-if="activeTab === 'MAINTENANCE'"
+      v-if="activeTab === 'MAINTENANCE' || activeTab === 'FIXED'"
+      :kind="activeTab === 'FIXED' ? 'fixed' : 'service'"
       :maintenance-expenses="maintenanceExpenses"
       :loading="loading"
       @edit="openEditMaintModal"
@@ -644,6 +650,7 @@ const tabs = computed<TabItem[]>(() => {
       :documents="documents"
       :maintenance-expenses="maintenanceExpenses"
       :current-odometer="currentOdometer"
+      :default-category="newExpenseCategory"
       @saved="loadData"
       @document-added="onDocumentAdded"
       @view-document="viewOrDownloadDocument"
