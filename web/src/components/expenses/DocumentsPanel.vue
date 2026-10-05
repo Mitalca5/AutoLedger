@@ -36,7 +36,7 @@ const vehicleStore = useVehicleStore()
       <button
         v-if="vehicleStore.canEdit"
         @click="emit('upload')"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+        class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-rose-600/20"
       >
         <UploadCloud class="w-4 h-4" />
         {{ $t('expenses.documentsPanel.uploadAFirstDocument') }}

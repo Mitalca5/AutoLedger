@@ -825,7 +825,7 @@ async function handleDeleteExpense(exp: any) {
           <button
             type="button"
             @click="emit('create-trip', selectedCostDrive)"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/25 transition-all"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/25 transition-all"
           >
             <Layers class="w-4 h-4" />
             <span>{{ $t('drives.tripSuggestions.create') }}</span>

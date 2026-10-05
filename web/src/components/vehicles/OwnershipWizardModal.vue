@@ -503,7 +503,7 @@ async function handleDeleteOwnership() {
             v-if="currentOwnershipStep < 3"
             type="button"
             @click="nextOwnershipStep"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
           >
             <span>{{ $t('vehicles.ownershipWizardModal.next') }}</span>
             <ChevronRight class="w-4 h-4" />

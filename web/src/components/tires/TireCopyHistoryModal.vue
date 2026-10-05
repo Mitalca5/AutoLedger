@@ -217,7 +217,7 @@ async function handleCopyHistorySubmit() {
           type="button"
           @click="handleCopyHistorySubmit()"
           :disabled="copyingHistory || copyHistoryTargetTireIds.length === 0"
-          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-1.5"
+          class="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center gap-1.5"
         >
           <Copy class="w-4 h-4" />
           <span>{{ copyingHistory ? $t('tires.tireCopyHistoryModal.copying') : $t('tires.tireCopyHistoryModal.copyTo', { count: copyHistoryTargetTireIds.length }) }}</span>

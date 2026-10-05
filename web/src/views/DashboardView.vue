@@ -86,7 +86,7 @@ onMounted(() => {
         </router-link>
         <router-link
           to="/drives"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/20 transition-colors"
+          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
         >
           {{ $t('dashboard.dashboardView.viewDrives') }}
         </router-link>

@@ -340,7 +340,7 @@ async function handleExecute() {
                 type="button"
                 :disabled="loading"
                 @click="handlePreview"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shrink-0 transition-colors disabled:opacity-50"
+                class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shrink-0 transition-colors disabled:opacity-50"
               >
                 {{ loading ? $t('common.loading') : $t('import.previewBtn') }}
               </button>
@@ -497,7 +497,7 @@ async function handleExecute() {
                 :disabled="loading || previewResult.invalid_rows > 0 || previewResult.valid_rows === 0"
                 :title="previewResult.invalid_rows > 0 ? $t('import.fixFirst') : undefined"
                 @click="handleExecute"
-                class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                class="px-5 py-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/25 transition-all flex items-center gap-1.5 disabled:opacity-50"
               >
                 <span>{{ loading ? $t('import.importing') : $t('import.confirmImport') }}</span>
                 <ArrowRight class="w-3.5 h-3.5" />

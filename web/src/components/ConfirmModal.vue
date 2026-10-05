@@ -121,7 +121,7 @@ watch(isOpen, async (open) => {
                 :class="{
                   'bg-danger-600 hover:bg-danger-500 shadow-danger-600/30': options.type === 'danger',
                   'bg-warning-600 hover:bg-warning-500 shadow-warning-600/30': options.type === 'warning',
-                  'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30': options.type === 'info',
+                  'bg-rose-600 hover:bg-rose-500 shadow-rose-600/30': options.type === 'info',
                   'bg-success-600 hover:bg-success-500 shadow-success-600/30': options.type === 'success',
                 }"
               >

@@ -203,7 +203,7 @@ async function handleDeleteWebhook() {
             type="submit"
             form="webhook-modal-form"
             :disabled="isSavingWebhook"
-            class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1.5"
           >
             <Loader2 v-if="isSavingWebhook" class="w-3.5 h-3.5 animate-spin" />
             <span>{{ $t('common.save') }}</span>

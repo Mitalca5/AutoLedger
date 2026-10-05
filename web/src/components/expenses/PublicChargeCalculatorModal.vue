@@ -316,7 +316,7 @@ onMounted(() => {
               type="button"
               :disabled="savingPreset || !savePresetName.trim()"
               @click="handleSavePreset"
-              class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold disabled:opacity-50"
+              class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold disabled:opacity-50"
             >
               {{ t('common.save') }}
             </button>
@@ -373,7 +373,7 @@ onMounted(() => {
           type="button"
           :disabled="!breakdown || breakdown.total_cost_cents <= 0"
           @click="applyToCharge"
-          class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
+          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
         >
           {{ t('tariffs.publicModal.applyButton') }}
         </button>

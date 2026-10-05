@@ -123,7 +123,7 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
       <div v-if="vehicleStore.canEdit" class="pt-2">
         <button
           @click="emit('add', null)"
-          class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-violet-600/20"
+          class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-rose-600/20"
         >
           <Plus class="w-4 h-4" />
           {{ $t('expenses.remindersPanel.createACustomReminder') }}

@@ -240,7 +240,7 @@ async function handleRemoveMember(m: any) {
               <button
                 type="submit"
                 :disabled="addingMember || !newMemberEmail.trim()"
-                class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors shadow-lg shadow-violet-600/20"
+                class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors shadow-lg shadow-rose-600/20"
               >
                 <RefreshCw v-if="addingMember" class="w-3.5 h-3.5 animate-spin" />
                 <UserPlus v-else class="w-3.5 h-3.5" />
@@ -418,7 +418,7 @@ async function handleRemoveMember(m: any) {
             <button
               type="submit"
               :disabled="addingPerson || !newPersonName.trim()"
-              class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
+              class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
             >
               <UserPlus class="w-3.5 h-3.5" />
               <span>{{ $t('vehicles.vehicleMembersModal.add') }}</span>

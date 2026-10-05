@@ -246,7 +246,7 @@ async function handleCreateMaint() {
                 class="field"
               />
             </div>
-            <button type="button" @click="applyMonthlyPremium" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl">
+            <button type="button" @click="applyMonthlyPremium" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl">
               {{ $t('expenses.maintenanceModal.spreadMonthly') }}
             </button>
           </div>

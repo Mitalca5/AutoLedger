@@ -124,7 +124,7 @@ function openInNewTab() {
           <button
             type="button"
             @click="downloadFile"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-2 transition-colors"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-2 transition-colors"
           >
             <Download class="w-4 h-4" />
             {{ $t('expenses.documentPreviewModal.downloadToView') }}
