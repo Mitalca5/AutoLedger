@@ -5,7 +5,7 @@ import { canRefuel, isElectricOnly } from '@/utils/vehicles'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
-import { AlertTriangle, CheckCircle2 } from 'lucide-vue-next'
+import { AlertTriangle, CheckCircle2, ChevronDown } from 'lucide-vue-next'
 
 // TCO completeness score with the reasons it is not 100 %, and the odometer inconsistencies on demand
 const props = defineProps<{ tco: any | null; vehicleId: string }>()
@@ -30,90 +30,100 @@ const issueLabels: Record<string, () => string> = {
   ODOMETER_REGRESSION: () => t('dashboard.dataQualityCard.odometerRegression'),
   DISTANCE_MISMATCH: () => t('dashboard.dataQualityCard.distanceMismatch'),
 }
+
+const RING_LENGTH = 2 * Math.PI * 15.5
+
+// Below half the card turns amber: that is when the figures above are really unreliable. Above, it is a to-do, not an alert.
+const score = computed(() => props.tco?.completeness?.score_pct ?? 0)
+const low = computed(() => score.value < 50)
+const ringColor = computed(() => (low.value ? 'stroke-amber-400' : score.value >= 90 ? 'stroke-emerald-400' : 'stroke-sky-400'))
+
+interface Action {
+  key: string
+  to: string
+  label: string
+  hint?: string
+}
+
+const actions = computed<Action[]>(() => {
+  const c = props.tco?.completeness
+  if (!c) return []
+  const list: (Action & { show: boolean })[] = [
+    { key: 'charges', to: '/expenses', label: t('dashboard.dataQualityCard.completeTheCharges'), show: c.charges_without_cost > 0 },
+    { key: 'drives', to: '/drives', label: t('dashboard.dataQualityCard.qualifyTheDrives'), show: c.unqualified_drives > 0 },
+    { key: 'insurance', to: '/expenses', label: t('dashboard.dataQualityCard.enterTheInsurance'), show: !!c.insurance_missing },
+    { key: 'acquisition', to: '/vehicles', label: t('dashboard.dataQualityCard.enterTheAcquisition'), show: !!c.acquisition_missing },
+    {
+      key: 'startOdometer',
+      to: '/vehicles',
+      label: t('dashboard.dataQualityCard.enterTheStartOdometer'),
+      hint: t('dashboard.dataQualityCard.enterTheStartOdometerHint'),
+      show: !!c.start_odometer_missing,
+    },
+    { key: 'fillUp', to: '/manual?tab=FUEL', label: t('dashboard.dataQualityCard.enterAFillUp'), show: canRefuel(props.tco.powertrain) && !props.tco.fuel_fill_ups },
+    {
+      key: 'consumption',
+      to: '/manual?tab=ENERGY',
+      label: t('dashboard.dataQualityCard.enterAverageConsumption'),
+      hint: t('dashboard.dataQualityCard.enterAverageConsumptionHint'),
+      show: isElectricOnly(props.tco.powertrain) && c.untracked_distance_km > 0 && !props.tco.estimated_energy_cost,
+    },
+  ]
+  return list.filter((a) => a.show)
+})
+const hasOdometerIssues = computed(() => (props.tco?.completeness?.odometer_gaps ?? 0) > 0 || (props.tco?.completeness?.odometer_anomalies ?? 0) > 0)
+const todoCount = computed(() => actions.value.length + (hasOdometerIssues.value ? 1 : 0))
+const showTodo = ref(false)
 </script>
 
 <template>
   <div
     v-if="tco?.completeness"
     class="p-4 rounded-2xl space-y-2 border"
-    :class="tco.completeness.is_complete ? 'bg-success-500/5 border-success-500/20' : 'bg-warning-500/10 border-warning-500/30'"
+    :class="tco.completeness.is_complete ? 'bg-emerald-500/5 border-emerald-500/20' : low ? 'bg-amber-500/10 border-amber-500/30' : 'bg-slate-900 border-slate-800'"
   >
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-      <div class="flex items-center gap-2 text-sm font-bold" :class="tco.completeness.is_complete ? 'text-success-400' : 'text-warning-400'">
-        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-4 h-4 text-success-400" />
-        <AlertTriangle v-else class="w-4 h-4" />
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div class="flex items-center gap-2.5 text-sm font-bold min-w-0" :class="tco.completeness.is_complete ? 'text-emerald-400' : low ? 'text-amber-400' : 'text-slate-200'">
+        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-5 h-5 shrink-0 text-emerald-400" />
+        <svg v-else class="w-7 h-7 shrink-0 -rotate-90" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <circle cx="18" cy="18" r="15.5" stroke-width="3.5" class="stroke-slate-800" />
+          <circle cx="18" cy="18" r="15.5" stroke-width="3.5" stroke-linecap="round" :stroke-dasharray="RING_LENGTH" :stroke-dashoffset="RING_LENGTH * (1 - score / 100)" :class="ringColor" />
+        </svg>
+        <AlertTriangle v-if="low && !tco.completeness.is_complete" class="w-4 h-4 shrink-0" />
         <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
         <span
           v-if="['MANUAL', 'SEMI_AUTO'].includes(vehicleStore.activeVehicle?.telemetry_mode)"
-          class="ml-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
+          class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
         >
           {{ $t('dashboard.dataQualityCard.manualTrackingNotice') }}
         </span>
       </div>
-      <div class="w-full sm:w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div
-          class="h-full rounded-full"
-          :class="tco.completeness.score_pct >= 90 ? 'bg-success-500' : tco.completeness.score_pct >= 60 ? 'bg-warning-500' : 'bg-rose-500'"
-          :style="{ width: tco.completeness.score_pct + '%' }"
-        ></div>
-      </div>
+      <button
+        v-if="todoCount > 0"
+        type="button"
+        class="tap-text px-3 text-xs font-semibold rounded-xl gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+        :aria-expanded="showTodo"
+        @click="showTodo = !showTodo"
+      >
+        {{ $t('dashboard.dataQualityCard.complete', { count: todoCount }) }}
+        <ChevronDown class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': showTodo }" aria-hidden="true" />
+      </button>
     </div>
-    <div class="flex flex-wrap gap-2 pt-1">
+    <div v-if="showTodo" class="flex flex-wrap gap-2 pt-1">
       <router-link
-        v-if="tco.completeness.charges_without_cost > 0"
-        to="/expenses"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        v-for="action in actions"
+        :key="action.key"
+        :to="action.to"
+        :title="action.hint"
+        class="tap-text text-xs font-semibold px-3 rounded-lg bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700"
       >
-        {{ $t('dashboard.dataQualityCard.completeTheCharges') }}
-      </router-link>
-      <router-link
-        v-if="tco.completeness.unqualified_drives > 0"
-        to="/drives"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.qualifyTheDrives') }}
-      </router-link>
-      <router-link
-        v-if="tco.completeness.insurance_missing"
-        to="/expenses"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.enterTheInsurance') }}
-      </router-link>
-      <router-link
-        v-if="tco.completeness.acquisition_missing"
-        to="/vehicles"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.enterTheAcquisition') }}
-      </router-link>
-      <router-link
-        v-if="tco.completeness.start_odometer_missing"
-        to="/vehicles"
-        :title="$t('dashboard.dataQualityCard.enterTheStartOdometerHint')"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.enterTheStartOdometer') }}
-      </router-link>
-      <router-link
-        v-if="canRefuel(tco.powertrain) && !tco.fuel_fill_ups"
-        to="/manual?tab=FUEL"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.enterAFillUp') }}
-      </router-link>
-      <router-link
-        v-if="isElectricOnly(tco.powertrain) && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
-        to="/manual?tab=ENERGY"
-        :title="$t('dashboard.dataQualityCard.enterAverageConsumptionHint')"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
-      >
-        {{ $t('dashboard.dataQualityCard.enterAverageConsumption') }}
+        {{ action.label }}
       </router-link>
       <button
-        v-if="tco.completeness.odometer_gaps > 0 || tco.completeness.odometer_anomalies > 0"
+        v-if="hasOdometerIssues"
+        type="button"
+        class="tap-text text-xs font-semibold px-3 rounded-lg bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700"
         @click="toggleDataQuality"
-        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ showDataQuality ? $t('dashboard.dataQualityCard.hideIssues') : $t('dashboard.dataQualityCard.showIssues') }}
       </button>

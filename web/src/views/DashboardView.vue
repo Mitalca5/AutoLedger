@@ -142,11 +142,11 @@ onMounted(() => {
     <div v-else class="space-y-6">
       <UrgentRemindersBanner :reminders="dashboardReminders" />
 
-      <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
+      <TcoMetricsGrid :tco="tco" />
 
       <LeaseContractCard :tco="tco" />
 
-      <TcoMetricsGrid :tco="tco" />
+      <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
 
       <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
 

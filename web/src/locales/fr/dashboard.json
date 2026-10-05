@@ -36,7 +36,8 @@
     "showIssues": "Voir les incohérences d'odomètre",
     "odometerGap": "Trou d'odomètre avant ce trajet",
     "odometerRegression": "Odomètre en recul par rapport au trajet précédent",
-    "distanceMismatch": "Distance différente du relevé d'odomètre"
+    "distanceMismatch": "Distance différente du relevé d'odomètre",
+    "complete": "Compléter ({count})"
   },
   "energyBatterySection": {
     "teslamateGrafana": "Grafana TeslaMate",
@@ -205,7 +206,7 @@
     "tollsAndParking": "Péages & Parkings",
     "chargeSWithoutACost": "{charges_without_cost} recharge(s) sans coût",
     "depreciationKm": "• décote {value}/{unit}",
-    "fullCostPerKm": "Coût complet au {unit}",
+    "fullCostPerKm": "Coût complet / {unit}",
     "totalCost": "Coût Total",
     "kmKwh": "{energy_cost_per_km}/{unit} • {total_kwh_added} kWh",
     "overKm": "Sur {distance_basis_km} {unit}",

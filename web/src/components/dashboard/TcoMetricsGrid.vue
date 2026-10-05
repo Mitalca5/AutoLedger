@@ -11,35 +11,15 @@ const vehicleStore = useVehicleStore()
 // Every TCO figure is in the vehicle's own currency
 const money = (v: number, digits = 2) => formatAmount(v || 0, vehicleStore.currency, digits)
 // A cost per km from the API, per the account's distance unit
+// A headline amount drops its cents from 1 000 on: they are noise next to the digits that matter
+const headline = (v: number) => money(v, Math.abs(v || 0) >= 1000 ? 0 : 2)
 const perUnit = (v: number) => money(perDistance(v || 0), 3)
 </script>
 
 <template>
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-    <!-- Total Cost -->
-    <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.totalCost') }}</span>
-        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
-          <Coins class="w-5 h-5" />
-        </div>
-      </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-white">
-        {{ money(tco?.total_cost) }}
-      </div>
-      <div class="mt-2 space-y-0.5">
-        <p class="text-xs text-slate-300">
-          {{ $t('dashboard.tcoMetricsGrid.fullCost', { full_cost: money(tco?.full_cost) }) }}
-          <span v-if="tco?.depreciation_cost" class="text-slate-400 text-xs"> {{ $t('dashboard.tcoMetricsGrid.includingDepreciation', { depreciation_cost: money(tco.depreciation_cost, 0) }) }}</span>
-        </p>
-        <p v-if="tco?.carpool_revenue" class="text-xs text-success-400">
-          {{ $t('dashboard.tcoMetricsGrid.netOfCarpooling', { full_cost_net: money(tco.full_cost_net) }) }}
-        </p>
-      </div>
-    </div>
-
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
     <!-- Cost per km -->
-    <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
+    <div class="col-span-2 lg:col-span-2 bg-gradient-to-br from-slate-900 to-emerald-950/30 border border-emerald-500/20 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.fullCostPerKm', { unit: distanceUnit() }) }}</span>
         <div class="p-2 bg-success-500/10 text-success-400 rounded-xl">
@@ -47,7 +27,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         </div>
       </div>
       <div class="text-2xl sm:text-3xl font-extrabold text-success-400">
-        {{ perUnit(tco?.full_cost_per_km) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
+        {{ perUnit(tco?.full_cost_per_km) }}<span class="text-base font-normal text-slate-400">/{{ distanceUnit() }}</span>
       </div>
       <div class="mt-2 space-y-0.5">
         <p class="text-xs text-slate-400">
@@ -56,6 +36,28 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         <p class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.overKm', { unit: distanceUnit(), distance_basis_km: formatDistanceValue(tco?.distance_basis_km || 0) }) }}
           <template v-if="tco?.depreciation_cost_per_km"> {{ $t('dashboard.tcoMetricsGrid.depreciationKm', { unit: distanceUnit(), value: perUnit(tco.depreciation_cost_per_km) }) }}</template>
+        </p>
+      </div>
+    </div>
+
+    <!-- Total Cost -->
+    <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.totalCost') }}</span>
+        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
+          <Coins class="w-5 h-5" />
+        </div>
+      </div>
+      <div class="text-2xl sm:text-3xl font-extrabold text-white">
+        {{ headline(tco?.total_cost) }}
+      </div>
+      <div class="mt-2 space-y-0.5">
+        <p class="text-xs text-slate-300">
+          {{ $t('dashboard.tcoMetricsGrid.fullCost', { full_cost: money(tco?.full_cost) }) }}
+          <span v-if="tco?.depreciation_cost" class="text-slate-400 text-xs"> {{ $t('dashboard.tcoMetricsGrid.includingDepreciation', { depreciation_cost: money(tco.depreciation_cost, 0) }) }}</span>
+        </p>
+        <p v-if="tco?.carpool_revenue" class="text-xs text-success-400">
+          {{ $t('dashboard.tcoMetricsGrid.netOfCarpooling', { full_cost_net: money(tco.full_cost_net) }) }}
         </p>
       </div>
     </div>
@@ -69,7 +71,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         </div>
       </div>
       <div class="text-2xl sm:text-3xl font-extrabold text-info-400">
-        {{ money(tco?.energy_cost) }}
+        {{ headline(tco?.energy_cost) }}
       </div>
       <div class="mt-2 space-y-0.5">
         <p v-if="canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
@@ -96,7 +98,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         </div>
       </div>
       <div class="text-2xl sm:text-3xl font-extrabold text-warning-400">
-        {{ money(tco?.tolls_cost) }}
+        {{ headline(tco?.tolls_cost) }}
       </div>
       <div class="mt-2">
         <p class="text-xs text-slate-400">{{ perUnit(tco?.tolls_cost_per_km) }}/{{ distanceUnit() }}</p>

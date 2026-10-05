@@ -36,7 +36,8 @@
     "showIssues": "View the odometer inconsistencies",
     "odometerGap": "Odometer gap before this drive",
     "odometerRegression": "Odometer lower than at the previous drive",
-    "distanceMismatch": "Distance differs from the odometer reading"
+    "distanceMismatch": "Distance differs from the odometer reading",
+    "complete": "Complete ({count})"
   },
   "energyBatterySection": {
     "teslamateGrafana": "TeslaMate Grafana",
@@ -205,7 +206,7 @@
     "tollsAndParking": "Tolls and parking",
     "chargeSWithoutACost": "{charges_without_cost} charge(s) without a cost",
     "depreciationKm": "• depreciation {value}/{unit}",
-    "fullCostPerKm": "Full cost per {unit}",
+    "fullCostPerKm": "Full cost / {unit}",
     "totalCost": "Total cost",
     "kmKwh": "{energy_cost_per_km}/{unit} • {total_kwh_added} kWh",
     "overKm": "Over {distance_basis_km} {unit}",
