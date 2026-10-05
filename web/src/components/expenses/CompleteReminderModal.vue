@@ -46,14 +46,10 @@ async function handleCompleteReminder() {
   const reminder = props.reminder
   if (!props.vehicleId || !reminder) return
   try {
-    const payload = {
-      completed_date: completeForm.value.service_date,
-      completed_odometer: completeForm.value.service_odometer !== '' ? Number(completeForm.value.service_odometer) : undefined,
-    }
-    await api.completeReminder(props.vehicleId, reminder.id, payload)
-
+    // The expense is recorded first so the reminder can point at it.
+    let maintenanceId: string | undefined
     if (completeForm.value.log_expense && Number(completeForm.value.expense_amount) > 0) {
-      await api.createMaintenance(props.vehicleId, {
+      const created = await api.createMaintenance(props.vehicleId, {
         category: reminder.category === 'TIRES' ? 'TIRES' : 'MAINTENANCE',
         amount: Number(completeForm.value.expense_amount),
         currency: vehicleStore.currency,
@@ -63,7 +59,13 @@ async function handleCompleteReminder() {
         odometer: completeForm.value.service_odometer ? Number(completeForm.value.service_odometer) : null,
         is_recurring: false,
       })
+      maintenanceId = created?.id
     }
+    await api.completeReminder(props.vehicleId, reminder.id, {
+      completed_date: completeForm.value.service_date,
+      completed_odometer: completeForm.value.service_odometer !== '' ? Number(completeForm.value.service_odometer) : undefined,
+      maintenance_id: maintenanceId,
+    })
 
     showAlert(t('expenses.completeReminderModal.done'), t('common.success'), 'success')
     open.value = false

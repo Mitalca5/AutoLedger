@@ -505,7 +505,7 @@ export const api = {
     request<MaintenanceReminder>(`/vehicles/${vehicleId}/reminders/${reminderId}`, { method: 'PUT', body: JSON.stringify(data) }, t('shell.api.reminderUpdated')),
   deleteReminder: (vehicleId: string, reminderId: string) =>
     request<{ success: boolean }>(`/vehicles/${vehicleId}/reminders/${reminderId}`, { method: 'DELETE' }, t('shell.api.reminderDeleted')),
-  completeReminder: (vehicleId: string, reminderId: string, data: { completed_date: string; completed_odometer?: number }) =>
+  completeReminder: (vehicleId: string, reminderId: string, data: { completed_date: string; completed_odometer?: number; maintenance_id?: string }) =>
     request<MaintenanceReminder>(`/vehicles/${vehicleId}/reminders/${reminderId}/complete`, { method: 'POST', body: JSON.stringify(data) }, t('shell.api.maintenanceDone')),
   getReminderTemplates: () => request<{ templates: ReminderTemplate[] }>('/reminder-templates/'),
   createReminderTemplate: (data: { name: string; from_vehicle_id: string }) =>
@@ -582,6 +582,8 @@ export interface MaintenanceReminder {
   repeat_yearly?: boolean
   last_service_odometer?: number | null
   last_service_date?: string | null
+  maintenance_id?: string | null
+  maintenance?: { id: string; date: string; category: string; description: string; odometer?: number | null } | null
   lead_km: number
   lead_days: number
   webhook_enabled: boolean

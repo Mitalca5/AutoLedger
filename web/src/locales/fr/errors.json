@@ -300,7 +300,8 @@
   "reminder": {
     "title_required": "Le titre est requis",
     "invalid_date": "Date planifiée invalide",
-    "schedule_conflict": "Choisissez un intervalle en mois ou une date fixe, pas les deux"
+    "schedule_conflict": "Choisissez un intervalle en mois ou une date fixe, pas les deux",
+    "invalid_maintenance": "L'entretien lié n'existe pas pour ce véhicule"
   },
   "sync": {
     "unreachable": "Impossible de joindre TeslaMate ({p0}) : {p1}",

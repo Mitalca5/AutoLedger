@@ -104,7 +104,7 @@ func TestReminderTemplatesApplyAndObservedIntervals(t *testing.T) {
 		odo float64
 	}{{"2025-01-10", 20000}, {"2026-01-10", 32000}} {
 		d, _ := time.Parse("2006-01-02", c.day)
-		if err := repo.CompleteMaintenanceReminder(ctx, dst.ID, rem.ID, d, c.odo); err != nil {
+		if err := repo.CompleteMaintenanceReminder(ctx, dst.ID, rem.ID, d, c.odo, nil); err != nil {
 			t.Fatal(err)
 		}
 	}

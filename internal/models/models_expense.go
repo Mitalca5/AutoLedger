@@ -101,6 +101,7 @@ type MaintenanceReminder struct {
 	RepeatYearly         bool       `json:"repeat_yearly"`
 	LastServiceOdometer  *float64   `json:"last_service_odometer,omitempty"`
 	LastServiceDate      *time.Time `json:"last_service_date,omitempty"`
+	MaintenanceID        *string    `json:"maintenance_id,omitempty"` // the maintenance record this reminder follows from
 	LeadKm               int        `json:"lead_km"`
 	LeadDays             int        `json:"lead_days"`
 	WebhookEnabled       bool       `json:"webhook_enabled"`
@@ -108,6 +109,9 @@ type MaintenanceReminder struct {
 	LastNotifiedOdometer *float64   `json:"last_notified_odometer,omitempty"`
 	CreatedAt            time.Time  `json:"created_at"`
 	UpdatedAt            time.Time  `json:"updated_at"`
+
+	// Summary of the linked maintenance record, filled when listing.
+	Maintenance *LinkedMaintenance `json:"maintenance,omitempty"`
 
 	// Computed dynamic status
 	Status        string     `json:"status"` // OK, DUE_SOON, OVERDUE
@@ -119,6 +123,15 @@ type MaintenanceReminder struct {
 	// Intervals the user really followed, averaged over the gaps between completions; absent below two completions.
 	ObservedIntervalKm     *int     `json:"observed_interval_km,omitempty"`
 	ObservedIntervalMonths *float64 `json:"observed_interval_months,omitempty"`
+}
+
+// LinkedMaintenance is what a reminder shows of the maintenance record it follows from.
+type LinkedMaintenance struct {
+	ID          string    `json:"id"`
+	Date        time.Time `json:"date"`
+	Category    string    `json:"category"`
+	Description string    `json:"description"`
+	Odometer    *float64  `json:"odometer,omitempty"`
 }
 
 // ComputeStatus calculates the status (OK, DUE_SOON, OVERDUE) and remaining km/days.

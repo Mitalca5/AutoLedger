@@ -232,6 +232,9 @@ const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
                 {{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(r.last_service_odometer) }) }}
               </span>
             </span>
+            <span v-if="r.maintenance" class="mt-1 block text-xs text-violet-300">
+              {{ $t('expenses.remindersPanel.basedOnMaintenance', { date: formatDate(r.maintenance.date) }) }}
+            </span>
           </div>
         </div>
 

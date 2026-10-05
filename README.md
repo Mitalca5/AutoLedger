@@ -91,6 +91,7 @@ Home Assistant, Node-RED, n8n or any script can also push charging sessions, dri
 ### 🔔 Maintenance Reminders & Homelab Notifications
 - **Dual Trigger Monitoring**: Proactive notifications based on due dates and/or mileage thresholds calculated against the real odometer.
 - **Fixed dates**: pin a reminder to a calendar day (winter tires on November 1), once or every year, instead of an interval; marking it done within its lead window moves a yearly one to the next year.
+- **Based on a past service**: link a reminder to a maintenance already recorded; its date and odometer become the starting point and follow the record when it is edited. Completing a reminder together with an expense links the new record.
 - **Your own templates**: no manufacturer plan is built in. Save a vehicle's reminders as a template, apply it to another vehicle, and see the interval you really follow once a reminder has been completed twice.
 - **Multi-Channel Dispatchers**: Native integrations for **Discord** (rich embeds), **Telegram** (Markdown bot API), **Gotify** (push notifications), and **Generic JSON Webhooks** (Home Assistant, Node-RED, n8n).
 

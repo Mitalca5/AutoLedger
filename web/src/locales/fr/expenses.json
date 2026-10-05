@@ -224,7 +224,11 @@
     "scheduleTitleDate": "Date prévue",
     "scheduledDate": "Date de l'entretien",
     "repeatYearly": "Répéter chaque année",
-    "dateRequired": "Choisissez la date de l'entretien"
+    "dateRequired": "Choisissez la date de l'entretien",
+    "basedOn": "Basé sur un entretien déjà enregistré",
+    "basedOnNone": "Aucun (saisir le point de départ à la main)",
+    "basedOnHint": "Le point de départ suit cet entretien : le modifier met le rappel à jour.",
+    "maintenanceFallback": "Entretien"
   },
   "remindersPanel": {
     "deleteThisReminder": "Supprimer ce rappel",
@@ -285,7 +289,8 @@
     "observedInterval": "Vous le faites en moyenne tous les {km} {unit} / {months} mois",
     "dueToday": "Aujourd'hui",
     "everyYearOn": "Chaque année le {date}",
-    "onDate": "Le {date}"
+    "onDate": "Le {date}",
+    "basedOnMaintenance": "Basé sur l'entretien du {date}"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Déposez la facture ici ou cliquez pour parcourir",

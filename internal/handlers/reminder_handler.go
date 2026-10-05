@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"math"
@@ -37,6 +38,7 @@ type ReminderPayload struct {
 	RepeatYearly        bool     `json:"repeat_yearly"`
 	LastServiceOdometer *float64 `json:"last_service_odometer"`
 	LastServiceDate     *string  `json:"last_service_date"`
+	MaintenanceID       *string  `json:"maintenance_id"`
 	LeadKm              int      `json:"lead_km"`
 	LeadDays            int      `json:"lead_days"`
 	WebhookEnabled      bool     `json:"webhook_enabled"`
@@ -114,6 +116,7 @@ func (h *ReminderHandler) buildReminder(req ReminderPayload, vehicleID, reminder
 		ScheduledDate:       scheduled,
 		RepeatYearly:        scheduled != nil && req.RepeatYearly,
 		LastServiceOdometer: req.LastServiceOdometer,
+		MaintenanceID:       blankToNil(req.MaintenanceID),
 		LeadKm:              leadKm,
 		LeadDays:            leadDays,
 		WebhookEnabled:      req.WebhookEnabled,
@@ -128,6 +131,38 @@ func (h *ReminderHandler) buildReminder(req ReminderPayload, vehicleID, reminder
 	}
 
 	return rem, nil
+}
+
+var errInvalidMaintenance = apierror.New("reminder.invalid_maintenance", "The linked maintenance does not exist for this vehicle")
+
+// applyMaintenanceLink checks that the linked maintenance belongs to the vehicle and, when the payload gives no
+// starting point of its own, takes the record's date and odometer as the last service.
+func (h *ReminderHandler) applyMaintenanceLink(ctx context.Context, rem *models.MaintenanceReminder) error {
+	if rem.MaintenanceID == nil {
+		return nil
+	}
+	date, odo, err := h.repo.GetMaintenanceLink(ctx, rem.VehicleID, *rem.MaintenanceID)
+	if errors.Is(err, database.ErrNotFound) {
+		return errInvalidMaintenance
+	}
+	if err != nil {
+		return err
+	}
+	if rem.LastServiceDate == nil {
+		rem.LastServiceDate = &date
+	}
+	if rem.LastServiceOdometer == nil {
+		rem.LastServiceOdometer = odo
+	}
+	return nil
+}
+
+// reminderErrorStatus maps a validation error to 400 and anything else (a failed lookup) to 500.
+func reminderErrorStatus(err error) int {
+	if _, ok := apierror.As(err); ok {
+		return http.StatusBadRequest
+	}
+	return http.StatusInternalServerError
 }
 
 // parseReminderDate reads a calendar date ("2006-01-02", or an RFC 3339 timestamp whose date part counts); empty means none.
@@ -158,8 +193,11 @@ func (h *ReminderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rem, err := h.buildReminder(req, vehicleID, "")
+	if err == nil {
+		err = h.applyMaintenanceLink(r.Context(), rem)
+	}
 	if err != nil {
-		writeErr(w, http.StatusBadRequest, err)
+		writeErr(w, reminderErrorStatus(err), err)
 		return
 	}
 
@@ -188,8 +226,11 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rem, err := h.buildReminder(req, vehicleID, reminderID)
+	if err == nil {
+		err = h.applyMaintenanceLink(r.Context(), rem)
+	}
 	if err != nil {
-		writeErr(w, http.StatusBadRequest, err)
+		writeErr(w, reminderErrorStatus(err), err)
 		return
 	}
 
@@ -205,6 +246,7 @@ func (h *ReminderHandler) Update(w http.ResponseWriter, r *http.Request) {
 type CompletePayload struct {
 	CompletedDate     string   `json:"completed_date"`
 	CompletedOdometer *float64 `json:"completed_odometer"`
+	MaintenanceID     *string  `json:"maintenance_id"`
 }
 
 func (h *ReminderHandler) Complete(w http.ResponseWriter, r *http.Request) {
@@ -234,7 +276,19 @@ func (h *ReminderHandler) Complete(w http.ResponseWriter, r *http.Request) {
 		completedOdo = *req.CompletedOdometer
 	}
 
-	if err := h.repo.CompleteMaintenanceReminder(r.Context(), vehicleID, reminderID, completedDate, completedOdo); err != nil {
+	maintenanceID := blankToNil(req.MaintenanceID)
+	if maintenanceID != nil {
+		if _, _, err := h.repo.GetMaintenanceLink(r.Context(), vehicleID, *maintenanceID); err != nil {
+			if errors.Is(err, database.ErrNotFound) {
+				writeAPIError(w, http.StatusBadRequest, errInvalidMaintenance)
+				return
+			}
+			writeRepoError(w, r, err, "Failed to check the linked maintenance")
+			return
+		}
+	}
+
+	if err := h.repo.CompleteMaintenanceReminder(r.Context(), vehicleID, reminderID, completedDate, completedOdo, maintenanceID); err != nil {
 		writeRepoError(w, r, err, "Failed to complete maintenance reminder")
 		return
 	}

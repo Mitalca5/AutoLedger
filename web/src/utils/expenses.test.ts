@@ -14,8 +14,10 @@ import {
   reminderDaysLabel,
   reminderDaysOver,
   formatCalendarDay,
+  maintenanceStartPoint,
   maintenanceTotal,
   maintenanceYears,
+  sortMaintenanceByDate,
   toLocalDateTimeInput,
 } from './expenses'
 
@@ -217,5 +219,27 @@ describe('groupChargesByMonth', () => {
   it('has no average price when nothing has a cost, and no month for no charge', () => {
     expect(groupChargesByMonth([{ date: at(2026, 1, 5), kwh_added: 8, cost: null }], 'EUR')[0].pricePerKwh).toBeNull()
     expect(groupChargesByMonth([], 'EUR')).toEqual([])
+  })
+})
+
+describe('reminder maintenance link helpers', () => {
+  it('sorts recorded maintenance from the most recent', () => {
+    const items = [
+      { id: 'a', date: '2026-01-05T00:00:00Z' },
+      { id: 'c', date: '2026-09-01T00:00:00Z' },
+      { id: 'b', date: '2026-03-10T00:00:00Z' },
+    ]
+    expect(sortMaintenanceByDate(items).map((m) => m.id)).toEqual(['c', 'b', 'a'])
+    expect(items[0].id).toBe('a')
+  })
+
+  it('takes the day and the rounded odometer as starting point', () => {
+    expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z', odometer: 24000.4 })).toEqual({ date: '2026-03-10', odometer: 24000 })
+  })
+
+  it('leaves the odometer empty when the maintenance has none', () => {
+    expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z', odometer: null })).toEqual({ date: '2026-03-10', odometer: '' })
+    expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z' }).odometer).toBe('')
+    expect(maintenanceStartPoint({ id: 'a', date: '2026-03-10T00:00:00Z', odometer: 0 }).odometer).toBe(0)
   })
 })

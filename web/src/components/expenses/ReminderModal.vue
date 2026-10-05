@@ -6,10 +6,10 @@ import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { X, Bell, Sparkles } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { reminderPresets, nextOccurrenceDate, type ReminderPreset } from '@/utils/expenses'
+import { reminderPresets, nextOccurrenceDate, categoryLabel, formatDate, maintenanceStartPoint, sortMaintenanceByDate, type ReminderPreset } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { distanceUnit } from '@/units'
+import { distanceUnit, formatDistanceValue } from '@/units'
 
 // Creates a maintenance reminder, or edits `editing`. `preset` pre-fills a new one from a suggestion.
 const props = defineProps<{ vehicleId: string; editing: MaintenanceReminder | null; preset: ReminderPreset | null; currentOdometer: number }>()
@@ -21,6 +21,31 @@ const { showAlert } = useConfirm()
 const editingReminderId = computed(() => props.editing?.id ?? null)
 
 const scheduleMode = ref<'interval' | 'date'>('interval')
+
+const maintenanceChoices = ref<any[]>([])
+const maintenanceOptions = computed(() => sortMaintenanceByDate(maintenanceChoices.value))
+
+async function loadMaintenanceChoices() {
+  try {
+    maintenanceChoices.value = props.vehicleId ? await api.getMaintenance(props.vehicleId) : []
+  } catch {
+    maintenanceChoices.value = []
+  }
+}
+
+function maintenanceOptionLabel(m: any): string {
+  const km = m.odometer != null ? ` · ${t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(m.odometer) })}` : ''
+  return `${formatDate(m.date)} · ${m.description || categoryLabel(m.category)}${km}`
+}
+
+// Basing a reminder on a recorded maintenance takes that maintenance's day and odometer as starting point.
+function onMaintenanceChosen() {
+  const m = maintenanceChoices.value.find((x) => x.id === reminderForm.value.maintenance_id)
+  if (!m) return
+  const start = maintenanceStartPoint(m)
+  reminderForm.value.last_service_date = start.date
+  if (start.odometer !== '') reminderForm.value.last_service_odometer = start.odometer
+}
 
 const reminderForm = ref({
   title: '',
@@ -34,6 +59,7 @@ const reminderForm = ref({
   lead_km: 1000,
   lead_days: 15,
   webhook_enabled: true,
+  maintenance_id: '',
 })
 
 function applyReminderPreset(preset: ReminderPreset) {
@@ -72,6 +98,7 @@ watch(open, (isOpen) => {
       lead_km: 1000,
       lead_days: 15,
       webhook_enabled: true,
+      maintenance_id: '',
     }
     scheduleMode.value = 'interval'
     if (props.preset) applyReminderPreset(props.preset)
@@ -89,8 +116,10 @@ watch(open, (isOpen) => {
       lead_km: r.lead_km,
       lead_days: r.lead_days,
       webhook_enabled: r.webhook_enabled,
+      maintenance_id: r.maintenance_id ?? '',
     }
   }
+  loadMaintenanceChoices()
 })
 
 // A fixed-date reminder is settled by a service date close to its occurrence, so a new one starts without a last service date.
@@ -129,6 +158,7 @@ async function handleSaveReminder() {
       lead_km: Number(reminderForm.value.lead_km || 0),
       lead_days: Number(reminderForm.value.lead_days || 0),
       webhook_enabled: reminderForm.value.webhook_enabled,
+      maintenance_id: reminderForm.value.maintenance_id || null,
     }
     if (editingReminderId.value) {
       await api.updateReminder(props.vehicleId, editingReminderId.value, payload)
@@ -260,6 +290,16 @@ async function handleSaveReminder() {
             />
             <label for="reminder-form-repeat-yearly" class="text-xs text-slate-300 cursor-pointer">{{ $t('expenses.reminderModal.repeatYearly') }}</label>
           </div>
+        </div>
+
+        <!-- Previous maintenance this reminder is based on -->
+        <div v-if="maintenanceOptions.length || reminderForm.maintenance_id" class="space-y-1">
+          <label for="reminder-form-maintenance" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.reminderModal.basedOn') }}</label>
+          <select id="reminder-form-maintenance" v-model="reminderForm.maintenance_id" class="field" @change="onMaintenanceChosen">
+            <option value="">{{ $t('expenses.reminderModal.basedOnNone') }}</option>
+            <option v-for="m in maintenanceOptions" :key="m.id" :value="m.id">{{ maintenanceOptionLabel(m) }}</option>
+          </select>
+          <p v-if="reminderForm.maintenance_id" class="text-xs text-slate-400">{{ $t('expenses.reminderModal.basedOnHint') }}</p>
         </div>
 
         <!-- Last service date & odometer -->

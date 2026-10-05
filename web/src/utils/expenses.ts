@@ -206,6 +206,22 @@ export function maintenanceYears(items: MaintenanceLike[]): number[] {
   return [...new Set(items.map((m) => new Date(m.date).getUTCFullYear()))].sort((a, b) => b - a)
 }
 
+export interface LinkableMaintenance {
+  id: string
+  date: string
+  odometer?: number | null
+}
+
+/** Recorded maintenance, most recent first, as offered for a reminder to be based on. */
+export const sortMaintenanceByDate = <T extends LinkableMaintenance>(items: T[]): T[] =>
+  [...items].sort((a, b) => b.date.localeCompare(a.date))
+
+/** Starting point a reminder takes from a recorded maintenance: its day and its odometer (empty when not recorded). */
+export const maintenanceStartPoint = (m: LinkableMaintenance): { date: string; odometer: number | '' } => ({
+  date: m.date.substring(0, 10),
+  odometer: m.odometer != null ? Math.round(m.odometer) : '',
+})
+
 /** Sum of the expenses in the vehicle's currency; a foreign-currency amount is converted with its own rate. */
 export function maintenanceTotal(items: MaintenanceLike[], baseCurrency: string): number {
   return items.reduce((sum, m) => {

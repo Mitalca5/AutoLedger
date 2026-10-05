@@ -224,7 +224,11 @@
     "scheduleTitleDate": "Scheduled date",
     "scheduledDate": "Maintenance date",
     "repeatYearly": "Repeat every year",
-    "dateRequired": "Pick the maintenance date"
+    "dateRequired": "Pick the maintenance date",
+    "basedOn": "Based on a recorded maintenance",
+    "basedOnNone": "None (enter the starting point by hand)",
+    "basedOnHint": "The starting point follows this maintenance: editing it updates the reminder.",
+    "maintenanceFallback": "Maintenance"
   },
   "remindersPanel": {
     "deleteThisReminder": "Delete this reminder",
@@ -285,7 +289,8 @@
     "observedInterval": "You do it every {km} {unit} / {months} months on average",
     "dueToday": "Today",
     "everyYearOn": "Every year on {date}",
-    "onDate": "On {date}"
+    "onDate": "On {date}",
+    "basedOnMaintenance": "Based on the maintenance of {date}"
   },
   "tollModal": {
     "dropTheInvoiceHereOr": "Drop the invoice here or click to browse",

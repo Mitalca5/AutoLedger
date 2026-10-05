@@ -300,7 +300,8 @@
   "reminder": {
     "title_required": "Title is required",
     "invalid_date": "The scheduled date is invalid",
-    "schedule_conflict": "Use either a months interval or a fixed date, not both"
+    "schedule_conflict": "Use either a months interval or a fixed date, not both",
+    "invalid_maintenance": "The linked maintenance does not exist for this vehicle"
   },
   "sync": {
     "unreachable": "Cannot reach TeslaMate ({p0}): {p1}",
