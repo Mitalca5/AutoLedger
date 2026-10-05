@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  checkOdometer,
+  describeQuickDate,
   buildChargePayload,
   buildExpensePayload,
   buildFuelPayload,
@@ -247,5 +249,50 @@ describe('isQueued', () => {
     expect(isQueued({ queued: false })).toBe(false)
     expect(isQueued(null)).toBe(false)
     expect(isQueued(undefined)).toBe(false)
+  })
+})
+
+describe('checkOdometer', () => {
+  it('flags a reading lower than the last one', () => {
+    expect(checkOdometer('26000', 26673)).toBe('below')
+    expect(checkOdometer('26671', 26673)).toBe('below')
+  })
+
+  it('accepts a reading equal to or above the last one', () => {
+    expect(checkOdometer('26673', 26673)).toBe('ok')
+    expect(checkOdometer('26673.4', 26673.4)).toBe('ok')
+    expect(checkOdometer('30000', 26673)).toBe('ok')
+  })
+
+  it('ignores a 1 km rounding gap, such as a reading converted from miles', () => {
+    expect(checkOdometer('26672.2', 26673)).toBe('ok')
+  })
+
+  it('has nothing to compare when the field is empty or the vehicle has no reading', () => {
+    expect(checkOdometer('', 26673)).toBe('none')
+    expect(checkOdometer('abc', 26673)).toBe('none')
+    expect(checkOdometer('100', undefined)).toBe('none')
+    expect(checkOdometer('100', 0)).toBe('none')
+  })
+
+  it('reads a decimal comma', () => {
+    expect(checkOdometer('26000,5', 26673)).toBe('below')
+  })
+})
+
+describe('describeQuickDate', () => {
+  const now = new Date(2026, 9, 5, 14, 30)
+
+  it('says today for the current day, with the time for a date-time field', () => {
+    expect(describeQuickDate('2026-10-05', false, now, 'fr-FR', "Aujourd'hui")).toBe("Aujourd'hui")
+    expect(describeQuickDate('2026-10-05T09:05', true, now, 'fr-FR', "Aujourd'hui")).toMatch(/^Aujourd'hui, 09[:h]05$/)
+  })
+
+  it('formats another day in the locale', () => {
+    expect(describeQuickDate('2026-09-28', false, now, 'fr-FR', 'x')).toBe('28 sept. 2026')
+  })
+
+  it('returns the raw value when it is not a date', () => {
+    expect(describeQuickDate('nope', false, now, 'fr-FR', 'x')).toBe('nope')
   })
 })

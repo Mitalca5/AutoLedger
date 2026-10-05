@@ -9,10 +9,8 @@
     "saved": "{message}: saved"
   },
   "quickChargeForm": {
-    "odometerKm": "Odometer ({unit})",
     "chargerHome": "Charger, home…",
     "place": "Place",
-    "dateAndTime": "Date and time",
     "moreDetails": "More details",
     "thatIsKwh": "That is {pricePerKwh}/kWh.",
     "calculatedAtTheLastRate": "Calculated at the last rate ({pricePerKwh}/kWh). Edit the cost if needed.",
@@ -25,7 +23,6 @@
     "saveFailed": "Could not save the charge."
   },
   "quickExpenseForm": {
-    "dateAndTime": "Date and time",
     "moreDetails": "More details",
     "amount": "Amount ({cur})",
     "expenseType": "Expense type",
@@ -38,7 +35,6 @@
     "saveFailed": "Could not save the expense."
   },
   "quickFuelForm": {
-    "odometerKm": "Odometer ({unit})",
     "moreDetails": "More details",
     "fullTank": "Full tank",
     "thatIsL": "That is {pricePerLiter}/L.",
@@ -76,5 +72,18 @@
   },
   "quickFormShell": {
     "saving": "Saving…"
+  },
+  "odometerField": {
+    "label": "Odometer ({unit})",
+    "below": "Lower than the last reading: {last}",
+    "fix": "Fix it",
+    "keep": "Keep this value",
+    "kept": "Value kept, lower than the last reading ({last}).",
+    "confirmRequired": "The odometer is lower than the last reading ({last}): fix it or keep it explicitly."
+  },
+  "dateLine": {
+    "label": "Date",
+    "today": "Today",
+    "edit": "Edit"
   }
 }

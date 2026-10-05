@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import QuickFormShell from './QuickFormShell.vue'
 import QuickPhotoField from './QuickPhotoField.vue'
+import QuickDateLine from './QuickDateLine.vue'
 import { currencySymbol, formatAmount } from '@/currency'
 import { buildExpensePayload, isQueued, toLocalDateTimeInput, type ExpenseType } from '@/utils/quickAdd'
 
@@ -79,6 +80,8 @@ async function submit() {
       <input id="qe-amount" ref="amountInput" v-model="form.amount" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
     </div>
 
+    <QuickDateLine id="qe-date" v-model="form.date" with-time />
+
     <button
       type="button"
       class="flex min-h-11 w-full items-center justify-between rounded-xl px-1 text-sm font-semibold text-slate-300"
@@ -91,10 +94,6 @@ async function submit() {
     </button>
 
     <div v-show="showDetails" id="qe-details" class="space-y-4">
-      <div>
-        <label for="qe-date" class="quick-label">{{ $t('quickadd.quickExpenseForm.dateAndTime') }}</label>
-        <input id="qe-date" v-model="form.date" type="datetime-local" class="quick-input" />
-      </div>
       <div>
         <label for="qe-notes" class="quick-label">{{ $t('common.notes') }}</label>
         <input id="qe-notes" v-model="form.notes" autocomplete="off" class="quick-input" />

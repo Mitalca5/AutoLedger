@@ -9,10 +9,8 @@
     "saved": "{message} : enregistré"
   },
   "quickChargeForm": {
-    "odometerKm": "Odomètre ({unit})",
     "chargerHome": "Borne, domicile…",
     "place": "Lieu",
-    "dateAndTime": "Date et heure",
     "moreDetails": "Plus de détails",
     "thatIsKwh": "Soit {pricePerKwh}/kWh.",
     "calculatedAtTheLastRate": "Calculé au dernier tarif ({pricePerKwh}/kWh). Modifiez le coût si besoin.",
@@ -25,7 +23,6 @@
     "saveFailed": "Impossible d'enregistrer la recharge."
   },
   "quickExpenseForm": {
-    "dateAndTime": "Date et heure",
     "moreDetails": "Plus de détails",
     "amount": "Montant ({cur})",
     "expenseType": "Type de dépense",
@@ -38,7 +35,6 @@
     "saveFailed": "Impossible d'enregistrer la dépense."
   },
   "quickFuelForm": {
-    "odometerKm": "Odomètre ({unit})",
     "moreDetails": "Plus de détails",
     "fullTank": "Plein complet",
     "thatIsL": "Soit {pricePerLiter}/L.",
@@ -76,5 +72,18 @@
   },
   "quickFormShell": {
     "saving": "Enregistrement…"
+  },
+  "odometerField": {
+    "label": "Odomètre ({unit})",
+    "below": "Inférieur au dernier relevé : {last}",
+    "fix": "Corriger",
+    "keep": "Garder cette valeur",
+    "kept": "Valeur conservée, inférieure au dernier relevé ({last}).",
+    "confirmRequired": "Le kilométrage est inférieur au dernier relevé ({last}) : corrigez-le ou gardez-le explicitement."
+  },
+  "dateLine": {
+    "label": "Date",
+    "today": "Aujourd’hui",
+    "edit": "Modifier"
   }
 }

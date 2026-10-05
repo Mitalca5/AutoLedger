@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
-import DistanceInput from '@/components/DistanceInput.vue'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import QuickFormShell from './QuickFormShell.vue'
+import QuickOdometerField from './QuickOdometerField.vue'
+import QuickDateLine from './QuickDateLine.vue'
 import { currencySymbol, formatAmount } from '@/currency'
-import { buildFuelPayload, isQueued, toLocalDateInput, toNumber } from '@/utils/quickAdd'
-import { distanceUnit } from '@/units'
+import { buildFuelPayload, checkOdometer, isQueued, toLocalDateInput, toNumber } from '@/utils/quickAdd'
+import { formatDistance } from '@/units'
 
 const props = defineProps<{ vehicle: any }>()
 const currency: string = props.vehicle.currency || 'EUR'
@@ -25,6 +26,8 @@ const form = reactive({
 const saving = ref(false)
 const error = ref('')
 const showDetails = ref(false)
+const odometerConfirmed = ref(false)
+watch(odometerConfirmed, () => (error.value = ''))
 const amountInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => amountInput.value?.focus())
@@ -39,6 +42,11 @@ const fmtPrice = (v: number) => formatAmount(v, currency, 3)
 
 async function submit() {
   error.value = ''
+  if (checkOdometer(form.odometer, props.vehicle.current_odometer) === 'below' && !odometerConfirmed.value) {
+    showDetails.value = true
+    error.value = t('quickadd.odometerField.confirmRequired', { last: formatDistance(Math.round(props.vehicle.current_odometer)) })
+    return
+  }
   let payload: ReturnType<typeof buildFuelPayload>
   try {
     payload = buildFuelPayload({ ...form })
@@ -78,6 +86,8 @@ async function submit() {
       <input v-model="form.fullTank" type="checkbox" class="h-6 w-6 accent-rose-500" />
     </label>
 
+    <QuickDateLine id="qf-date" v-model="form.date" />
+
     <button
       type="button"
       class="flex min-h-11 w-full items-center justify-between rounded-xl px-1 text-sm font-semibold text-slate-300"
@@ -90,14 +100,7 @@ async function submit() {
     </button>
 
     <div v-show="showDetails" id="qf-details" class="space-y-4">
-      <div>
-        <label for="qf-date" class="quick-label">{{ $t('common.date') }}</label>
-        <input id="qf-date" v-model="form.date" type="date" class="quick-input" />
-      </div>
-      <div>
-        <label for="qf-odometer" class="quick-label">{{ $t('quickadd.quickFuelForm.odometerKm', { unit: distanceUnit() }) }}</label>
-        <DistanceInput text id="qf-odometer" v-model="form.odometer" inputmode="numeric" min="0" class="quick-input" />
-      </div>
+      <QuickOdometerField id="qf-odometer" v-model="form.odometer" v-model:confirmed="odometerConfirmed" :last="vehicle.current_odometer" />
       <div>
         <label for="qf-notes" class="quick-label">{{ $t('common.notes') }}</label>
         <input id="qf-notes" v-model="form.notes" maxlength="200" autocomplete="off" class="quick-input" />

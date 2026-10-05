@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
-import DistanceInput from '@/components/DistanceInput.vue'
-import { distanceUnit } from '@/units'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import QuickFormShell from './QuickFormShell.vue'
 import QuickPhotoField from './QuickPhotoField.vue'
+import QuickOdometerField from './QuickOdometerField.vue'
+import QuickDateLine from './QuickDateLine.vue'
 import { currencySymbol, formatAmount } from '@/currency'
+import { formatDistance } from '@/units'
 import {
   buildChargePayload,
+  checkOdometer,
   costFromTariff,
   effectivePricePerKwh,
   isQueued,
@@ -41,6 +43,8 @@ const saving = ref(false)
 const error = ref('')
 const showDetails = ref(false)
 const costTouched = ref(false)
+const odometerConfirmed = ref(false)
+watch(odometerConfirmed, () => (error.value = ''))
 const kwhInput = ref<HTMLInputElement | null>(null)
 
 onMounted(() => kwhInput.value?.focus())
@@ -66,6 +70,11 @@ function setFree() {
 
 async function submit() {
   error.value = ''
+  if (checkOdometer(form.odometer, props.vehicle.current_odometer) === 'below' && !odometerConfirmed.value) {
+    showDetails.value = true
+    error.value = t('quickadd.odometerField.confirmRequired', { last: formatDistance(Math.round(props.vehicle.current_odometer)) })
+    return
+  }
   let payload: ReturnType<typeof buildChargePayload>
   try {
     payload = buildChargePayload({ ...form }, currency)
@@ -107,6 +116,8 @@ async function submit() {
       </p>
     </div>
 
+    <QuickDateLine id="qc-date" v-model="form.date" with-time />
+
     <button
       type="button"
       class="flex min-h-11 w-full items-center justify-between rounded-xl px-1 text-sm font-semibold text-slate-300"
@@ -120,17 +131,10 @@ async function submit() {
 
     <div v-show="showDetails" id="qc-details" class="space-y-4">
       <div>
-        <label for="qc-date" class="quick-label">{{ $t('quickadd.quickChargeForm.dateAndTime') }}</label>
-        <input id="qc-date" v-model="form.date" type="datetime-local" class="quick-input" />
-      </div>
-      <div>
         <label for="qc-address" class="quick-label">{{ $t('quickadd.quickChargeForm.place') }}</label>
         <input id="qc-address" v-model="form.address" :placeholder="$t('quickadd.quickChargeForm.chargerHome')" autocomplete="off" class="quick-input" />
       </div>
-      <div>
-        <label for="qc-odometer" class="quick-label">{{ $t('quickadd.quickChargeForm.odometerKm', { unit: distanceUnit() }) }}</label>
-        <DistanceInput text id="qc-odometer" v-model="form.odometer" inputmode="numeric" min="0" class="quick-input" />
-      </div>
+      <QuickOdometerField id="qc-odometer" v-model="form.odometer" v-model:confirmed="odometerConfirmed" :last="vehicle.current_odometer" />
       <div>
         <label for="qc-notes" class="quick-label">{{ $t('common.notes') }}</label>
         <input id="qc-notes" v-model="form.notes" autocomplete="off" class="quick-input" />

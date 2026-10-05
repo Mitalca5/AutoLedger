@@ -61,6 +61,28 @@ export function toLocalDateInput(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+export type OdometerCheck = 'none' | 'below' | 'ok'
+
+// Distances are stored in whole km and can come back from a miles field with a fraction: a reading within 1 km of the last one is the same reading.
+const ODOMETER_TOLERANCE_KM = 1
+
+/** Compares a typed odometer (km) with the vehicle's last reading: 'below' only when it is lower, 'none' when there is nothing to compare. */
+export function checkOdometer(value: unknown, lastReading: number | null | undefined): OdometerCheck {
+  const typed = toNumber(value)
+  if (typed === null || !lastReading || lastReading <= 0) return 'none'
+  return typed < Math.round(lastReading) - ODOMETER_TOLERANCE_KM ? 'below' : 'ok'
+}
+
+/** A form date ("YYYY-MM-DD" or "YYYY-MM-DDTHH:mm") as one readable line, "Today" standing in for the current day. */
+export function describeQuickDate(value: string, withTime: boolean, now: Date, locale: string, todayLabel: string): string {
+  const date = withTime ? new Date(value) : new Date(`${value}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return value
+  const time = withTime ? date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : ''
+  if (toLocalDateInput(date) === toLocalDateInput(now)) return time ? `${todayLabel}, ${time}` : todayLabel
+  const day = date.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+  return time ? `${day}, ${time}` : day
+}
+
 const clean = (v: string) => (v.trim() === '' ? null : v.trim())
 
 export interface ChargeFormValues {
