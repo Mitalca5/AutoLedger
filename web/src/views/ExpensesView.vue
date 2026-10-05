@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
-import { Receipt as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -40,11 +39,20 @@ const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
 const { previewDoc, loadingDocId, closeDocPreview, viewOrDownloadDocument } = useDocumentPreview(() => vehicleStore.activeVehicle?.id)
 
-const validTabs = ['TOLLS', 'MAINTENANCE', 'REMINDERS', 'CHARGES', 'DOCUMENTS'] as const
-type TabType = typeof validTabs[number]
+type TabType = 'TOLLS' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS'
 
-const initialTab = (route.query.tab as string)?.toUpperCase()
-const activeTab = ref<TabType>(validTabs.includes(initialTab as TabType) ? (initialTab as TabType) : 'TOLLS')
+// One view, two menu entries: /expenses (tolls, charges, receipts) and /maintenance (maintenance, reminders)
+const isMaintenanceSection = computed(() => route.meta.section === 'maintenance')
+const sectionTabs = computed<TabType[]>(() =>
+  isMaintenanceSection.value ? ['MAINTENANCE', 'REMINDERS'] : ['TOLLS', 'CHARGES', 'DOCUMENTS'],
+)
+
+function parseTab(raw: unknown): TabType {
+  const upper = String(Array.isArray(raw) ? raw[0] : (raw ?? '')).toUpperCase() as TabType
+  return sectionTabs.value.includes(upper) ? upper : sectionTabs.value[0]
+}
+
+const activeTab = ref<TabType>(parseTab(route.query.tab))
 
 // A fuel-only vehicle has no charges: its fill-ups live in the manual tracking page
 watch([() => vehicleStore.canCharge, activeTab], ([charges, tab]) => {
@@ -57,11 +65,9 @@ watch(activeTab, (newTab) => {
   }
 })
 
-watch(() => route.query.tab, (qTab) => {
-  const upper = (qTab as string)?.toUpperCase()
-  if (upper && validTabs.includes(upper as TabType) && activeTab.value !== upper) {
-    activeTab.value = upper as TabType
-  }
+watch([() => route.query.tab, isMaintenanceSection], ([qTab]) => {
+  const tab = parseTab(qTab)
+  if (activeTab.value !== tab) activeTab.value = tab
 })
 
 const driveExpenses = ref<any[]>([])
@@ -176,15 +182,6 @@ async function loadData() {
 }
 
 watch(
-  () => route.query.tab,
-  (tab) => {
-    if (tab && ['TOLLS', 'MAINTENANCE', 'REMINDERS', 'CHARGES', 'DOCUMENTS'].includes(String(tab))) {
-      activeTab.value = tab as any
-    }
-  }
-)
-
-watch(
   () => [vehicleStore.activeVehicle?.id, activeTab.value, vehicleStore.lastSyncTimestamp],
   () => {
     loadData()
@@ -205,9 +202,6 @@ watch(
 )
 
 onMounted(() => {
-  if (route.query.tab && ['TOLLS', 'MAINTENANCE', 'REMINDERS', 'CHARGES', 'DOCUMENTS'].includes(String(route.query.tab))) {
-    activeTab.value = route.query.tab as any
-  }
   loadData()
   loadReminders()
 })
@@ -407,7 +401,22 @@ async function openWebhookModal() {
   showWebhookModal.value = true
 }
 
+const pageTitle = computed(() => t(isMaintenanceSection.value ? 'expenses.expensesView.maintenanceTitle' : 'expenses.expensesView.expensesTitle'))
+const pageSubtitle = computed(() => t(isMaintenanceSection.value ? 'expenses.expensesView.maintenanceSubtitle' : 'expenses.expensesView.expensesSubtitle'))
+
 const tabs = computed<TabItem[]>(() => {
+  if (isMaintenanceSection.value) {
+    return [
+      { key: 'MAINTENANCE', label: t('expenses.expensesView.maintenance'), icon: Wrench },
+      {
+        key: 'REMINDERS',
+        label: t('expenses.expensesView.reminders'),
+        icon: Bell,
+        badge: urgentRemindersCount.value > 0 ? urgentRemindersCount.value : undefined,
+        badgeTone: overdueReminders.value.length > 0 ? 'danger' : 'warning',
+      },
+    ]
+  }
   const list: TabItem[] = [{ key: 'TOLLS', label: t('expenses.expensesView.tolls'), icon: Receipt }]
   if (vehicleStore.canCharge) {
     list.push({
@@ -418,22 +427,12 @@ const tabs = computed<TabItem[]>(() => {
       badgeTone: 'warning',
     })
   }
-  list.push(
-    { key: 'MAINTENANCE', label: t('expenses.expensesView.maintenance'), icon: Wrench },
-    {
-      key: 'REMINDERS',
-      label: t('expenses.expensesView.reminders'),
-      icon: Bell,
-      badge: urgentRemindersCount.value > 0 ? urgentRemindersCount.value : undefined,
-      badgeTone: overdueReminders.value.length > 0 ? 'danger' : 'warning',
-    },
-    {
-      key: 'DOCUMENTS',
-      label: t('expenses.expensesView.receipts'),
-      icon: Paperclip,
-      badge: documents.value.length > 0 ? documents.value.length : undefined,
-    },
-  )
+  list.push({
+    key: 'DOCUMENTS',
+    label: t('expenses.expensesView.receipts'),
+    icon: Paperclip,
+    badge: documents.value.length > 0 ? documents.value.length : undefined,
+  })
   return list
 })
 </script>
@@ -441,8 +440,8 @@ const tabs = computed<TabItem[]>(() => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <PageHeader :title="$t('expenses.expensesView.expensesAndMaintenance')" :icon="PageIcon">
-      {{ $t('expenses.expensesView.tollsParkingRecurringMaintenanceInsurance') }}
+    <PageHeader :title="pageTitle" :icon="isMaintenanceSection ? Wrench : Receipt">
+      {{ pageSubtitle }}
       <template #actions>
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
         <button
@@ -517,7 +516,7 @@ const tabs = computed<TabItem[]>(() => {
       <span>{{ $t('expenses.expensesView.youAreViewingThisVehicle') }} <strong>{{ $t('expenses.expensesView.readOnly') }}</strong>{{ $t('expenses.expensesView.modeAdditionsAndChangesAre') }}</span>
     </div>
 
-    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('expenses.expensesView.expensesAndMaintenance')" id-prefix="expenses-tab" @update:model-value="activeTab = $event as TabType" />
+    <TabBar :model-value="activeTab" :tabs="tabs" :label="pageTitle" id-prefix="expenses-tab" @update:model-value="activeTab = $event as TabType" />
 
     <!-- Content -->
     <TollsPanel

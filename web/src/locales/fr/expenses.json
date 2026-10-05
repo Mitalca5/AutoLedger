@@ -15,8 +15,6 @@
     "setUpTheWebhookTo": "Configurer le webhook pour recevoir des notifications en temps réel",
     "maintenanceFixed": "Ajouter une dépense",
     "tollParking": "Péage / Parking",
-    "tollsParkingRecurringMaintenanceInsurance": "Péages, parkings, entretien récurrent, assurance et recharges",
-    "expensesAndMaintenance": "Dépenses & Entretien",
     "addCharge": "Ajouter une recharge",
     "importCsv": "Importer CSV",
     "deleteExpenseTitle": "Supprimer la dépense",
@@ -29,7 +27,11 @@
     "receiptDeleted": "Justificatif supprimé",
     "deleteReminderTitle": "Supprimer le rappel",
     "deleteReminderMessage": "Êtes-vous sûr de vouloir supprimer le rappel d'entretien « {title} » ?",
-    "reminderDeleted": "Rappel supprimé"
+    "reminderDeleted": "Rappel supprimé",
+    "expensesTitle": "Dépenses",
+    "expensesSubtitle": "Péages, parkings, recharges et justificatifs",
+    "maintenanceTitle": "Entretien",
+    "maintenanceSubtitle": "Entretien, assurance, dépenses récurrentes et rappels"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF ou image (reçu Superchargeur, borne publique, etc.).",

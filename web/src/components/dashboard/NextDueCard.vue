@@ -53,7 +53,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
     </div>
     <router-link
       v-if="next || canEdit"
-      to="/expenses?tab=REMINDERS"
+      to="/maintenance?tab=REMINDERS"
       :class="{ 'self-start': next }"
       class="tap-text px-3.5 text-xs font-semibold rounded-xl shrink-0 sm:self-auto gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
     >

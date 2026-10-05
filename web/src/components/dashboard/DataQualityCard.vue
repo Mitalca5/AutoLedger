@@ -49,9 +49,9 @@ const actions = computed<Action[]>(() => {
   const c = props.tco?.completeness
   if (!c) return []
   const list: (Action & { show: boolean })[] = [
-    { key: 'charges', to: '/expenses', label: t('dashboard.dataQualityCard.completeTheCharges'), show: c.charges_without_cost > 0 },
+    { key: 'charges', to: '/expenses?tab=CHARGES', label: t('dashboard.dataQualityCard.completeTheCharges'), show: c.charges_without_cost > 0 },
     { key: 'drives', to: '/drives', label: t('dashboard.dataQualityCard.qualifyTheDrives'), show: c.unqualified_drives > 0 },
-    { key: 'insurance', to: '/expenses', label: t('dashboard.dataQualityCard.enterTheInsurance'), show: !!c.insurance_missing },
+    { key: 'insurance', to: '/maintenance', label: t('dashboard.dataQualityCard.enterTheInsurance'), show: !!c.insurance_missing },
     { key: 'acquisition', to: '/vehicles', label: t('dashboard.dataQualityCard.enterTheAcquisition'), show: !!c.acquisition_missing },
     {
       key: 'startOdometer',

@@ -66,6 +66,21 @@ const router = createRouter({
       name: 'expenses',
       component: ExpensesView,
       meta: { requiresAuth: true },
+      // Maintenance and reminders moved to their own menu entry
+      beforeEnter: (to) => {
+        const tab = String(to.query.tab ?? '').toUpperCase()
+        if (tab === 'MAINTENANCE' || tab === 'REMINDERS') return { name: 'maintenance', query: to.query, replace: true }
+      },
+    },
+    {
+      path: '/maintenance',
+      name: 'maintenance',
+      component: ExpensesView,
+      meta: { requiresAuth: true, section: 'maintenance' },
+      beforeEnter: (to) => {
+        const tab = String(to.query.tab ?? '').toUpperCase()
+        if (['TOLLS', 'CHARGES', 'DOCUMENTS'].includes(tab)) return { name: 'expenses', query: to.query, replace: true }
+      },
     },
     {
       path: '/vehicles',

@@ -42,7 +42,7 @@ const urgentRemindersSummary = computed(() => summary.value.summary)
       </div>
     </div>
     <router-link
-      to="/expenses?tab=REMINDERS"
+      to="/maintenance?tab=REMINDERS"
       class="px-3.5 py-1.5 text-xs font-semibold rounded-xl shrink-0 transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto shadow-sm"
       :class="hasOverdueReminders ? 'bg-danger-600 hover:bg-danger-500 text-white' : 'bg-warning-600 hover:bg-warning-500 text-white'"
     >

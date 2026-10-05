@@ -37,7 +37,7 @@ const quickAdd = useQuickAddStore()
 // A maintenance carries a category, a coverage and documents: the full form opens with today's date and the detected odometer.
 function openMaintenance() {
   quickAdd.close()
-  router.push({ path: '/expenses', query: { tab: 'MAINTENANCE', add: 'maintenance' } })
+  router.push({ path: '/maintenance', query: { tab: 'MAINTENANCE', add: 'maintenance' } })
 }
 
 const saving = ref(false)

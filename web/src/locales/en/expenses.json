@@ -15,8 +15,6 @@
     "setUpTheWebhookTo": "Set up the webhook to receive real-time notifications",
     "maintenanceFixed": "Add an expense",
     "tollParking": "Toll / Parking",
-    "tollsParkingRecurringMaintenanceInsurance": "Tolls, parking, recurring maintenance, insurance and charges",
-    "expensesAndMaintenance": "Expenses and maintenance",
     "addCharge": "Add a charge",
     "importCsv": "Import CSV",
     "deleteExpenseTitle": "Delete the expense",
@@ -29,7 +27,11 @@
     "receiptDeleted": "Receipt deleted",
     "deleteReminderTitle": "Delete the reminder",
     "deleteReminderMessage": "Are you sure you want to delete the maintenance reminder “{title}”?",
-    "reminderDeleted": "Reminder deleted"
+    "reminderDeleted": "Reminder deleted",
+    "expensesTitle": "Expenses",
+    "expensesSubtitle": "Tolls, parking, charging sessions and receipts",
+    "maintenanceTitle": "Maintenance",
+    "maintenanceSubtitle": "Maintenance, insurance, recurring costs and reminders"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF or image (Supercharger receipt, public charger, etc.).",
