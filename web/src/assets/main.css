@@ -292,3 +292,36 @@ select option:checked {
 select option:disabled {
   color: #64748b;
 }
+
+/* Browsers that can style the picker itself (Chromium) draw the list in the app's theme, hover included,
+   instead of the system highlight; the others keep the native list styled above. */
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+  select::picker(select) {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+    margin-top: 0.25rem;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+  }
+  select option {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+  }
+  select option:hover,
+  select option:focus-visible {
+    background: #334155;
+    color: #ffffff;
+  }
+  select option:checked {
+    background: #be123c;
+    color: #ffffff;
+  }
+  select option::checkmark {
+    display: none;
+  }
+}
