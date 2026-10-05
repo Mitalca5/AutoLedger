@@ -61,8 +61,8 @@ onMounted(load)
 </script>
 
 <template>
-  <details class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs">
-    <summary class="font-bold text-white cursor-pointer">{{ $t('expenses.remindersPanel.templates.title') }}</summary>
+  <div class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs">
+    <h4 class="font-bold text-white">{{ $t('expenses.remindersPanel.templates.title') }}</h4>
     <div class="mt-3 space-y-3">
       <p class="text-slate-400">{{ $t('expenses.remindersPanel.templates.hint') }}</p>
       <div v-if="templates.length" class="flex flex-wrap gap-2 items-center">
@@ -87,5 +87,5 @@ onMounted(load)
       <p v-if="message" class="text-success-400" role="status">{{ message }}</p>
       <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
     </div>
-  </details>
+  </div>
 </template>

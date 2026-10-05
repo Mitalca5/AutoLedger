@@ -84,6 +84,17 @@ export function reminderProgress(r: ScheduledReminder): number | null {
   return Math.min(1, Math.max(0, Math.max(...parts)))
 }
 
+const STATUS_RANK: Record<string, number> = { OVERDUE: 0, DUE_SOON: 1, OK: 2 }
+
+/** Reminders by urgency: overdue, then due soon, then up to date; inside a status the one furthest through its interval first, unscheduled ones last. */
+export function sortRemindersByUrgency<T extends ScheduledReminder>(reminders: T[]): T[] {
+  return [...reminders].sort((a, b) => {
+    const rank = (STATUS_RANK[a.status] ?? 3) - (STATUS_RANK[b.status] ?? 3)
+    if (rank !== 0) return rank
+    return (reminderProgress(b) ?? -1) - (reminderProgress(a) ?? -1)
+  })
+}
+
 /** The scheduled reminder that comes due first and is not overdue yet (overdue ones have their own banner). */
 export function nextDueReminder<T extends ScheduledReminder>(reminders: T[]): { reminder: T; progress: number } | null {
   let best: { reminder: T; progress: number } | null = null

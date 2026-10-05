@@ -9,6 +9,7 @@ import {
   formatMonthName,
   nextDueReminder,
   reminderProgress,
+  sortRemindersByUrgency,
   summarizeUrgentReminders,
 } from './dashboard'
 
@@ -292,5 +293,28 @@ describe('reminderProgress / nextDueReminder', () => {
   it('returns null when nothing qualifies', () => {
     expect(nextDueReminder([{ ...base, status: 'OVERDUE' }, { status: 'OK' }])).toBeNull()
     expect(nextDueReminder([])).toBeNull()
+  })
+})
+
+describe('sortRemindersByUrgency', () => {
+  const sched = { interval_km: 10000, interval_months: 12, remaining_days: 300 }
+
+  it('puts overdue first, then due soon, then up to date, without mutating the input', () => {
+    const list = [
+      { title: 'ok', status: 'OK', ...sched, remaining_km: 9000 },
+      { title: 'soon', status: 'DUE_SOON', ...sched, remaining_km: 500 },
+      { title: 'late', status: 'OVERDUE', ...sched, remaining_km: -50 },
+    ]
+    expect(sortRemindersByUrgency(list).map((r) => r.title)).toEqual(['late', 'soon', 'ok'])
+    expect(list[0].title).toBe('ok')
+  })
+
+  it('orders a status by progress and sends unscheduled reminders last', () => {
+    const list = [
+      { title: 'none', status: 'OK' },
+      { title: 'far', status: 'OK', ...sched, remaining_km: 9000 },
+      { title: 'near', status: 'OK', ...sched, remaining_km: 3000 },
+    ]
+    expect(sortRemindersByUrgency(list).map((r) => r.title)).toEqual(['near', 'far', 'none'])
   })
 })

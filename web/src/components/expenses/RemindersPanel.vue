@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { intlLocale } from '@/i18n'
+import { computed, ref } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
-import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed, Settings } from 'lucide-vue-next'
 import { reminderPresets, formatDate, hasReminderSchedule, type ReminderPreset } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import { sortRemindersByUrgency } from '@/utils/dashboard'
 import ReminderTemplatesBar from '@/components/expenses/ReminderTemplatesBar.vue'
 
-defineProps<{
+const props = defineProps<{
   reminders: MaintenanceReminder[]
   overdueReminders: MaintenanceReminder[]
   dueSoonReminders: MaintenanceReminder[]
@@ -25,72 +26,68 @@ const emit = defineEmits<{
   reload: []
 }>()
 const vehicleStore = useVehicleStore()
+const showSettings = ref(false)
+const sortedReminders = computed(() => sortRemindersByUrgency(props.reminders))
 </script>
 
 <template>
   <div class="space-y-4">
-    <!-- Webhook homelab info banner -->
-    <div class="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 shrink-0">
-          <Radio class="w-5 h-5" />
-        </div>
-        <div>
-          <div class="font-bold text-white flex items-center gap-2">
-            <span>{{ $t('expenses.remindersPanel.homelabWebhook') }}</span>
-            <span
-              class="px-2 py-0.5 text-xs rounded-full font-bold border"
-              :class="vehicleWebhook?.enabled ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
-            >
-              {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.active', { type: vehicleWebhook.type }) : $t('expenses.remindersPanel.notConfigured') }}
-            </span>
-          </div>
-          <p class="text-slate-400 text-xs mt-0.5">
-            {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.alertsSent') : $t('expenses.remindersPanel.alertsHint') }}
-          </p>
-        </div>
-      </div>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <ul class="flex flex-wrap items-center gap-2 text-xs font-semibold" :aria-label="$t('expenses.remindersPanel.summary')">
+        <li class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">{{ $t('expenses.remindersPanel.totalCount', { count: reminders.length }) }}</li>
+        <li v-if="overdueReminders.length" class="px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1.5">
+          <AlertTriangle class="w-3 h-3" />{{ overdueReminders.length }} {{ $t('expenses.remindersPanel.overdue') }}
+        </li>
+        <li v-if="dueSoonReminders.length" class="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
+          <Clock class="w-3 h-3" />{{ dueSoonReminders.length }} {{ $t('expenses.remindersPanel.comingUp') }}
+        </li>
+        <li v-if="okReminders.length" class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+          <CheckCircle2 class="w-3 h-3" />{{ okReminders.length }} {{ $t('expenses.remindersPanel.upToDate') }}
+        </li>
+      </ul>
       <button
-        v-if="vehicleStore.canEdit"
-        @click="emit('open-webhook')"
-        class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 shrink-0 transition-colors self-start sm:self-auto"
+        type="button"
+        class="tap-text px-3 text-xs font-semibold rounded-xl gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+        :aria-expanded="showSettings"
+        @click="showSettings = !showSettings"
       >
-        {{ vehicleWebhook ? $t('expenses.remindersPanel.editWebhook') : $t('expenses.remindersPanel.setUpWebhook') }}
+        <Settings class="w-3.5 h-3.5" />
+        {{ $t('expenses.remindersPanel.settings') }}
+        <span v-if="vehicleWebhook?.enabled" class="w-1.5 h-1.5 rounded-full bg-emerald-400" :title="$t('expenses.remindersPanel.active', { type: vehicleWebhook.type })"></span>
       </button>
     </div>
 
-    <ReminderTemplatesBar v-if="vehicleStore.canEdit" :has-reminders="reminders.length > 0" @changed="emit('reload')" />
+    <div v-if="showSettings" class="space-y-4">
+      <div class="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 shrink-0">
+            <Radio class="w-5 h-5" />
+          </div>
+          <div>
+            <div class="font-bold text-white flex items-center gap-2">
+              <span>{{ $t('expenses.remindersPanel.homelabWebhook') }}</span>
+              <span
+                class="px-2 py-0.5 text-xs rounded-full font-bold border"
+                :class="vehicleWebhook?.enabled ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
+              >
+                {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.active', { type: vehicleWebhook.type }) : $t('expenses.remindersPanel.notConfigured') }}
+              </span>
+            </div>
+            <p class="text-slate-400 text-xs mt-0.5">
+              {{ vehicleWebhook?.enabled ? $t('expenses.remindersPanel.alertsSent') : $t('expenses.remindersPanel.alertsHint') }}
+            </p>
+          </div>
+        </div>
+        <button
+          v-if="vehicleStore.canEdit"
+          @click="emit('open-webhook')"
+          class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 shrink-0 transition-colors self-start sm:self-auto"
+        >
+          {{ vehicleWebhook ? $t('expenses.remindersPanel.editWebhook') : $t('expenses.remindersPanel.setUpWebhook') }}
+        </button>
+      </div>
 
-    <!-- Quick summary stats -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-slate-400">{{ $t('expenses.remindersPanel.totalReminders') }}</span>
-        <span class="text-xl font-bold text-white mt-1">{{ reminders.length }}</span>
-        <span v-if="unscheduledReminders.length" class="text-xs text-slate-400 mt-0.5">
-          {{ $t('expenses.remindersPanel.withoutScheduleCount', { count: unscheduledReminders.length }) }}
-        </span>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-success-400 flex items-center gap-1.5">
-          <CheckCircle2 class="w-3.5 h-3.5" />
-          {{ $t('expenses.remindersPanel.upToDate') }}
-        </span>
-        <span class="text-xl font-bold text-success-400 mt-1">{{ okReminders.length }}</span>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-warning-400 flex items-center gap-1.5">
-          <Clock class="w-3.5 h-3.5" />
-          {{ $t('expenses.remindersPanel.comingUp') }}
-        </span>
-        <span class="text-xl font-bold text-warning-400 mt-1">{{ dueSoonReminders.length }}</span>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
-        <span class="text-xs text-rose-400 flex items-center gap-1.5">
-          <AlertTriangle class="w-3.5 h-3.5" />
-          {{ $t('expenses.remindersPanel.overdue') }}
-        </span>
-        <span class="text-xl font-bold text-danger-400 mt-1">{{ overdueReminders.length }}</span>
-      </div>
+      <ReminderTemplatesBar v-if="vehicleStore.canEdit" :has-reminders="reminders.length > 0" @changed="emit('reload')" />
     </div>
 
     <div v-if="loadingReminders" class="text-center py-12 text-slate-400">{{ $t('expenses.remindersPanel.loadingTheReminders') }}</div>
@@ -137,7 +134,7 @@ const vehicleStore = useVehicleStore()
     <!-- Reminders List -->
     <div v-else class="space-y-3">
       <div
-        v-for="r in reminders"
+        v-for="r in sortedReminders"
         :key="r.id"
         class="bg-slate-900 border p-4 rounded-2xl flex flex-col justify-between gap-3 transition-colors"
         :class="r.status === 'OVERDUE' ? 'border-danger-500/40 bg-danger-500/5' : r.status === 'DUE_SOON' ? 'border-warning-500/40 bg-warning-500/5' : 'border-slate-800'"
