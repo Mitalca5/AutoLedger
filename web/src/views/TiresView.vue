@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Disc as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t } from '@/i18n'
@@ -49,6 +50,11 @@ const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odome
 
 // Active tab: 'chassis' (Montés) or 'storage' (Au garage)
 const activeTab = ref<'chassis' | 'storage' | 'disposed'>('chassis')
+const tabs = computed<TabItem[]>(() => [
+  { key: 'chassis', label: t('tires.tiresView.tiresFittedOnTheVehicle'), icon: Disc },
+  { key: 'storage', label: t('tires.tiresView.catalogueAndGarageStock', { length: storageTires.value.length }), icon: Package },
+  { key: 'disposed', label: t('tires.tiresView.scrapped', { length: disposedTires.value.length }), icon: Archive, muted: disposedTires.value.length === 0 },
+])
 
 const wheels = [
   { pos: 'FL', labelKey: 'tires.wheels.FL' },
@@ -426,7 +432,7 @@ async function handleDeleteLog(l: any) {
           :title="$t('tires.tiresView.swapTheFittedSetWith')"
         >
           <Snowflake class="w-4 h-4 text-info-400" />
-          <span class="hidden md:inline">{{ $t('tires.tiresView.changeSet') }}</span>
+          <span>{{ $t('tires.tiresView.changeSet') }}</span>
         </button>
 
         <button
@@ -448,30 +454,6 @@ async function handleDeleteLog(l: any) {
     >
       <Disc class="w-4 h-4 text-slate-400 shrink-0" />
       <span>{{ $t('tires.tiresView.youAreViewingThisVehicle') }} <strong>{{ $t('tires.tiresView.readOnly') }}</strong>{{ $t('tires.tiresView.modeChangesToTiresRotations') }}</span>
-    </div>
-
-    <!-- Quick Permutations Bar -->
-    <div v-if="vehicleStore.canEdit" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-2 text-slate-300 font-semibold">
-        <RefreshCw class="w-4 h-4 text-rose-400" />
-        <span>{{ $t('tires.tiresView.quickVehicleRotationsIn1') }}</span>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <button
-          @click="handleQuickRotate('FRONT_BACK')"
-          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
-        >
-          <ArrowUpDown class="w-3.5 h-3.5 text-blue-400" />
-          {{ $t('tires.tiresView.frontRear') }}
-        </button>
-        <button
-          @click="handleQuickRotate('CROSS')"
-          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
-        >
-          <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
-          {{ $t('tires.tiresView.crossRotation') }}
-        </button>
-      </div>
     </div>
 
     <!-- Sticky Bulk Selection Bar -->
@@ -502,6 +484,8 @@ async function handleDeleteLog(l: any) {
       </button>
     </BulkSelectionBar>
 
+    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
+
     <!-- Header row: Select all toggle & Total info -->
     <div v-if="vehicleStore.canEdit" class="flex items-center justify-between text-xs text-slate-400 px-2">
       <SelectAllToggle
@@ -513,47 +497,30 @@ async function handleDeleteLog(l: any) {
       <span>{{ $t('tires.tiresView.tireSInThisView', { length: currentTabTireIds.length }) }}</span>
     </div>
 
-    <!-- View Switcher Tabs -->
-    <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
-      <button
-        @click="activeTab = 'chassis'"
-        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
-        :class="
-          activeTab === 'chassis'
-            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-            : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-        "
-      >
-        <Disc class="w-4 h-4" />
-        {{ $t('tires.tiresView.tiresFittedOnTheVehicle') }}
-      </button>
-
-      <button
-        @click="activeTab = 'storage'"
-        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
-        :class="
-          activeTab === 'storage'
-            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-            : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-        "
-      >
-        <Package class="w-4 h-4" />
-        {{ $t('tires.tiresView.catalogueAndGarageStock', { length: storageTires.length }) }}
-      </button>
-
-      <button
-        v-if="disposedTires.length"
-        @click="activeTab = 'disposed'"
-        class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
-        :class="activeTab === 'disposed' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'"
-      >
-        <Archive class="w-4 h-4" />
-        {{ $t('tires.tiresView.scrapped', { length: disposedTires.length }) }}
-      </button>
-    </div>
-
     <!-- TAB 1: CHASSIS INTERACTIF (PNEUS MONTÉS) -->
     <div v-if="activeTab === 'chassis'" class="space-y-6">
+      <div v-if="vehicleStore.canEdit" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-slate-300 font-semibold">
+          <RefreshCw class="w-4 h-4 text-rose-400" />
+          <span>{{ $t('tires.tiresView.quickVehicleRotationsIn1') }}</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button
+            @click="handleQuickRotate('FRONT_BACK')"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+          >
+            <ArrowUpDown class="w-3.5 h-3.5 text-blue-400" />
+            {{ $t('tires.tiresView.frontRear') }}
+          </button>
+          <button
+            @click="handleQuickRotate('CROSS')"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+          >
+            <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
+            {{ $t('tires.tiresView.crossRotation') }}
+          </button>
+        </div>
+      </div>
       <TireOdometerTimeline
         :tires="tires"
         :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"

@@ -7,8 +7,7 @@
     "energy": "energy",
     "independent": ". Each entry is independent.",
     "mileage": "Mileage",
-    "fillUpsTab": "Fill-ups",
-    "estimatedEnergy": "Estimated energy"
+    "energyTab": "Energy"
   },
   "estimatedEnergyPanel": {
     "chargesOutsideTeslamate": "Go to charges",

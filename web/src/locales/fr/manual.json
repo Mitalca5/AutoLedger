@@ -7,8 +7,7 @@
     "energy": "énergie",
     "independent": ". Chaque saisie est indépendante.",
     "mileage": "Kilométrage",
-    "fillUpsTab": "Pleins",
-    "estimatedEnergy": "Énergie estimée"
+    "energyTab": "Énergie"
   },
   "estimatedEnergyPanel": {
     "chargesOutsideTeslamate": "Aller aux recharges",

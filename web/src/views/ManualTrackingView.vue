@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { ClipboardList as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
@@ -27,10 +28,10 @@ const router = useRouter()
 const vehicleStore = useVehicleStore()
 
 // Readings are shared by every vehicle; fill-ups only exist for combustion vehicles, the energy estimate for electric ones
-const tabs = computed<{ key: Tab; label: string; icon: any }[]>(() => {
-  const list: { key: Tab; label: string; icon: any }[] = [{ key: 'KM', label: t('manual.manualTrackingView.mileage'), icon: Gauge }]
-  if (vehicleStore.canRefuel) list.push({ key: 'FUEL', label: t('manual.manualTrackingView.fillUpsTab'), icon: Fuel })
-  else list.push({ key: 'ENERGY', label: t('manual.manualTrackingView.estimatedEnergy'), icon: Zap })
+const tabs = computed<TabItem[]>(() => {
+  const list: TabItem[] = [{ key: 'KM', label: t('manual.manualTrackingView.mileage'), icon: Gauge }]
+  if (vehicleStore.canRefuel) list.push({ key: 'FUEL', label: t('manual.manualTrackingView.energyTab'), icon: Fuel })
+  else list.push({ key: 'ENERGY', label: t('manual.manualTrackingView.energyTab'), icon: Zap })
   return list
 })
 
@@ -38,7 +39,7 @@ const requested = String(route.query.tab || '').toUpperCase()
 const activeTab = ref<Tab>('KM')
 
 function resolveTab(value: string): Tab {
-  return (tabs.value.find((t) => t.key === value)?.key) || 'KM'
+  return ((tabs.value.find((t) => t.key === value)?.key) as Tab | undefined) || 'KM'
 }
 
 activeTab.value = resolveTab(requested)
@@ -69,22 +70,7 @@ function select(tab: Tab) {
     </div>
 
     <template v-else>
-      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1 w-fit max-w-full overflow-x-auto" role="tablist">
-          <button
-            v-for="t in tabs"
-            :key="t.key"
-            type="button"
-            role="tab"
-            :aria-selected="activeTab === t.key"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-            :class="activeTab === t.key ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
-            @click="select(t.key)"
-          >
-            <component :is="t.icon" class="w-3.5 h-3.5" />
-            <span>{{ t.label }}</span>
-          </button>
-        </div>
+      <div class="flex justify-end">
         <div class="flex items-center gap-2">
           <button
             v-if="vehicleStore.canEdit && activeTab !== 'ENERGY'"
@@ -105,6 +91,7 @@ function select(tab: Tab) {
           </button>
         </div>
       </div>
+      <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('manual.manualTrackingView.manualTracking')" id-prefix="manual-tab" @update:model-value="select($event as Tab)" />
 
       <OdometerReadingsPanel v-if="activeTab === 'KM'" :key="reloadKey" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />
       <FuelLogsPanel
