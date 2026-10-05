@@ -200,7 +200,11 @@ onBeforeUnmount(() => {
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiency') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmtPercent(stats?.summary.charge_efficiency) }}</dd>
-        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
+        <p v-if="stats?.summary.charge_efficiency == null" class="mt-0.5 text-xs text-slate-400">
+          {{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyEmpty') }}
+          <router-link to="/expenses?tab=CHARGES" class="font-semibold text-sky-400 underline">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyAction') }}</router-link>
+        </p>
+        <p v-else class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>

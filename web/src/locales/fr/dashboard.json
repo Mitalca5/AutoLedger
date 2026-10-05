@@ -98,7 +98,9 @@
       }
     },
     "consumption": "Consommation",
-    "threeMonthAverage": "Moyenne sur 3 mois"
+    "threeMonthAverage": "Moyenne sur 3 mois",
+    "chargingEfficiencyEmpty": "Ajoutez des recharges avec le niveau de batterie pour calculer le rendement.",
+    "chargingEfficiencyAction": "Voir les recharges"
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Trajets d'au moins {min}, groupés par température extérieure moyenne ; tranches de moins de {band} masquées.",

@@ -135,8 +135,8 @@ export const fmtMoney = (v: number | undefined, currency: string, digits = 2) =>
 // A figure per 100 km from the API, per 100 of the account's distance unit
 export const perUnit = (v: number | undefined | null): number | undefined => (v === undefined || v === null ? undefined : perDistance(v))
 
-export const fmtPercent = (v: number | undefined) =>
-  v === undefined ? '—' : `${(v * 100).toLocaleString(intlLocale(), { maximumFractionDigits: 0 })} %`
+export const fmtPercent = (v: number | null | undefined) =>
+  v == null ? '—' : `${(v * 100).toLocaleString(intlLocale(), { maximumFractionDigits: 0 })} %`
 
 export const AXIS_TEXT = '#94a3b8'
 export const GRID_COLOR = '#1e293b'

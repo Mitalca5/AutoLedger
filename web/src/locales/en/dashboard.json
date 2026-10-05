@@ -98,7 +98,9 @@
       }
     },
     "consumption": "Consumption",
-    "threeMonthAverage": "3-month average"
+    "threeMonthAverage": "3-month average",
+    "chargingEfficiencyEmpty": "Add charges with the battery level to work out the efficiency.",
+    "chargingEfficiencyAction": "See the charges"
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Drives of at least {min}, grouped by average outside temperature; bands under {band} are hidden.",

@@ -69,37 +69,41 @@ function select(tab: Tab) {
     </div>
 
     <template v-else>
-      <div class="flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1 w-fit max-w-full overflow-x-auto" role="tablist">
-        <button
-          v-for="t in tabs"
-          :key="t.key"
-          type="button"
-          role="tab"
-          :aria-selected="activeTab === t.key"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
-          :class="activeTab === t.key ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:text-white border border-transparent'"
-          @click="select(t.key)"
-        >
-          <component :is="t.icon" class="w-3.5 h-3.5" />
-          <span>{{ t.label }}</span>
-        </button>
-        <button
-          v-if="vehicleStore.canEdit && activeTab !== 'ENERGY'"
-          type="button"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white shrink-0"
-          @click="showImport = true"
-        >
-          <UploadCloud class="w-3.5 h-3.5 text-info-400" />
-          <span>{{ $t('expenses.expensesView.importCsv') }}</span>
-        </button>
-        <button
-          type="button"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white shrink-0"
-          @click="showExport = true"
-        >
-          <Download class="w-3.5 h-3.5 text-info-400" />
-          <span>{{ $t('import.export') }}</span>
-        </button>
+      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1 w-fit max-w-full overflow-x-auto" role="tablist">
+          <button
+            v-for="t in tabs"
+            :key="t.key"
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === t.key"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0"
+            :class="activeTab === t.key ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm' : 'text-slate-400 hover:text-white'"
+            @click="select(t.key)"
+          >
+            <component :is="t.icon" class="w-3.5 h-3.5" />
+            <span>{{ t.label }}</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="vehicleStore.canEdit && activeTab !== 'ENERGY'"
+            type="button"
+            class="tap-text flex items-center gap-1.5 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+            @click="showImport = true"
+          >
+            <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
+            <span>{{ $t('expenses.expensesView.importCsv') }}</span>
+          </button>
+          <button
+            type="button"
+            class="tap-text flex items-center gap-1.5 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+            @click="showExport = true"
+          >
+            <Download class="w-3.5 h-3.5 text-sky-400" />
+            <span>{{ $t('import.export') }}</span>
+          </button>
+        </div>
       </div>
 
       <OdometerReadingsPanel v-if="activeTab === 'KM'" :key="reloadKey" :vehicle="vehicleStore.activeVehicle" :can-edit="vehicleStore.canEdit" />

@@ -112,8 +112,8 @@ onMounted(() => {
       </div>
 
       <form class="space-y-3" @submit.prevent="save">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
+        <div class="flex flex-wrap items-end gap-3">
+          <div class="w-full sm:w-56">
             <label for="pre-tm-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.estimatedEnergyPanel.averageConsumptionKwh100km', { unit: distanceUnit() }) }}</label>
             <DistanceInput kind="per-distance"
               id="pre-tm-kwh"
@@ -126,7 +126,7 @@ onMounted(() => {
               class="field"
             />
           </div>
-          <div>
+          <div class="w-full sm:w-56">
             <label for="pre-tm-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.estimatedEnergyPanel.electricityRateKwh', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
             <input
               id="pre-tm-rate"
