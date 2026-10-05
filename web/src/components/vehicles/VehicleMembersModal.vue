@@ -75,13 +75,12 @@ async function handleAddMember() {
   }
 }
 
-async function runPersonAction(action: () => Promise<unknown>, successMessage: string) {
+async function runPersonAction(action: () => Promise<unknown>) {
   if (!membersVehicle.value) return
   try {
     await action()
     await loadMembers(membersVehicle.value.id)
     await vehicleStore.fetchVehicles()
-    showAlert(successMessage, t('common.success'), 'info')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
@@ -91,18 +90,18 @@ async function handleAddPerson() {
   const name = newPersonName.value.trim()
   if (!membersVehicle.value || !name) return
   addingPerson.value = true
-  await runPersonAction(() => api.createVehiclePerson(membersVehicle.value!.id, name), t('vehicles.vehicleMembersModal.personAdded'))
+  await runPersonAction(() => api.createVehiclePerson(membersVehicle.value!.id, name))
   newPersonName.value = ''
   addingPerson.value = false
 }
 
 function handleSetDefaultPerson(p: VehiclePerson) {
-  return runPersonAction(() => api.setDefaultVehiclePerson(membersVehicle.value!.id, p.id), t('vehicles.vehicleMembersModal.defaultDriverUpdated'))
+  return runPersonAction(() => api.setDefaultVehiclePerson(membersVehicle.value!.id, p.id))
 }
 
 function handleLinkPerson(p: VehiclePerson, userId: string) {
   if (!userId) return
-  return runPersonAction(() => api.linkVehiclePerson(membersVehicle.value!.id, p.id, userId), t('vehicles.vehicleMembersModal.accountLinked'))
+  return runPersonAction(() => api.linkVehiclePerson(membersVehicle.value!.id, p.id, userId))
 }
 
 async function handleDeletePerson(p: VehiclePerson) {
@@ -113,7 +112,7 @@ async function handleDeletePerson(p: VehiclePerson) {
     type: 'danger',
   })
   if (!ok) return
-  await runPersonAction(() => api.deleteVehiclePerson(membersVehicle.value!.id, p.id), t('vehicles.vehicleMembersModal.personRemoved'))
+  await runPersonAction(() => api.deleteVehiclePerson(membersVehicle.value!.id, p.id))
 }
 
 async function handleUpdateMemberRole(m: any, newRole: string) {
