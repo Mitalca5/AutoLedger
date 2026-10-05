@@ -120,6 +120,7 @@
     scrollbar-color: #334155 #0f172a;
   }
   body {
+    font-variant-numeric: tabular-nums;
     @apply bg-slate-950 text-slate-100 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -196,14 +197,30 @@
   }
 }
 
-/* Icon buttons and row checkboxes reach a 40px hit area on touch screens without growing on desktop. */
+/* Icon buttons and row checkboxes: 36px hit area with a mouse, 44px on touch screens. */
+.tap {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 @media (pointer: coarse) {
   .tap {
-    min-width: 2.5rem;
-    min-height: 2.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+
+/* Text buttons, links and chips: same hit area as .tap, laid out inline. */
+.tap-text {
+  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+}
+@media (pointer: coarse) {
+  .tap-text {
+    min-height: 2.75rem;
   }
 }
 

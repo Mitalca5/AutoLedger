@@ -25,6 +25,7 @@ import CSVImportModal from '@/components/CSVImportModal.vue'
 import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
 import { Receipt, Plus, Wrench, Zap, Navigation, Paperclip, Eye, Bell, Radio, UploadCloud } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
+import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 
 // The page owns the lists, the active tab and which modal is open; each modal owns its form and its API
@@ -97,7 +98,8 @@ const vehicleWebhook = ref<VehicleWebhook | null>(null)
 
 const overdueReminders = computed(() => reminders.value.filter((r) => r.status === 'OVERDUE'))
 const dueSoonReminders = computed(() => reminders.value.filter((r) => r.status === 'DUE_SOON'))
-const okReminders = computed(() => reminders.value.filter((r) => r.status === 'OK'))
+const okReminders = computed(() => reminders.value.filter((r) => r.status === 'OK' && hasReminderSchedule(r)))
+const unscheduledReminders = computed(() => reminders.value.filter((r) => !hasReminderSchedule(r)))
 const urgentRemindersCount = computed(() => overdueReminders.value.length + dueSoonReminders.value.length)
 
 async function ensureDocumentsLoaded() {
@@ -571,6 +573,7 @@ async function openWebhookModal() {
       :overdue-reminders="overdueReminders"
       :due-soon-reminders="dueSoonReminders"
       :ok-reminders="okReminders"
+      :unscheduled-reminders="unscheduledReminders"
       :loading-reminders="loadingReminders"
       :vehicle-webhook="vehicleWebhook"
       @open-webhook="openWebhookModal"

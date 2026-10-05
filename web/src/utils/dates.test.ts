@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { formatDayTime, todayIso, toIsoDay, toLocalDateTimeInput } from './dates'
+import { setLocale } from '@/i18n'
+import { formatDayTime, formatMonthLabel, todayIso, toIsoDay, toLocalDateTimeInput } from './dates'
 
 describe('dates', () => {
   it('gives the UTC day of a date', () => {
@@ -36,5 +37,18 @@ describe('dates', () => {
     const s = formatDayTime('2026-05-02T08:30:00')
     expect(s).toContain('02')
     expect(s).toContain('08:30')
+  })
+})
+
+describe('formatMonthLabel', () => {
+  it('renders a month key as a short localized month', () => {
+    setLocale('fr')
+    expect(formatMonthLabel('2026-02')).toMatch(/^févr\.? 26$/)
+    setLocale('en')
+    expect(formatMonthLabel('2026-02')).toMatch(/^Feb 26$/)
+  })
+
+  it('leaves anything that is not a month key untouched', () => {
+    expect(formatMonthLabel('Total')).toBe('Total')
   })
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { intlLocale, t } from '@/i18n'
+import { formatMonthLabel } from '@/utils/dates'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Activity, PieChart } from 'lucide-vue-next'
@@ -26,7 +27,7 @@ function renderChart() {
   if (mileageChartInstance) mileageChartInstance.destroy()
 
   const filteredMileageList = filteredMileageCosts.value
-  const mileageLabels = filteredMileageList.map((m: any) => m.month)
+  const mileageLabels = filteredMileageList.map((m: any) => formatMonthLabel(m.month))
   const distanceData = filteredMileageList.map((m: any) => Math.round(kmToDisplayDistance(m.distance_km || 0)))
   const costPerKmData = filteredMileageList.map((m: any) => perDistance(m.cost_per_km || 0))
 

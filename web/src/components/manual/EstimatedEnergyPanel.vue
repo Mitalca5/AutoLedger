@@ -160,7 +160,7 @@ onMounted(() => {
           <button
             v-if="vehicle?.estimated_kwh_100km || vehicle?.estimated_price_per_kwh"
             type="button"
-            class="text-xs text-slate-400 hover:text-rose-400 transition-colors"
+            class="tap-text text-xs text-slate-400 hover:text-rose-400 transition-colors"
             @click="clear"
           >
             {{ $t('manual.estimatedEnergyPanel.resetDisable') }}

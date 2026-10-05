@@ -214,10 +214,10 @@ onBeforeUnmount(() => {
       <div class="flex flex-wrap items-center justify-between gap-2">
         <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.budget.title') }}</span>
         <div v-if="!editingBudget" class="flex items-center gap-3 text-xs font-semibold">
-          <button type="button" @click="startEditBudget" class="text-rose-400 hover:text-rose-300">
+          <button type="button" @click="startEditBudget" class="tap-text text-rose-400 hover:text-rose-300">
             {{ summary.monthly_budget ? t('fleet.budget.edit') : t('fleet.budget.set') }}
           </button>
-          <button v-if="summary.monthly_budget" type="button" :disabled="savingBudget" @click="saveBudget(null)" class="text-slate-400 hover:text-white">
+          <button v-if="summary.monthly_budget" type="button" :disabled="savingBudget" @click="saveBudget(null)" class="tap-text text-slate-400 hover:text-white">
             {{ t('fleet.budget.remove') }}
           </button>
         </div>

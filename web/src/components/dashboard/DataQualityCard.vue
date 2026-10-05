@@ -62,28 +62,28 @@ const issueLabels: Record<string, () => string> = {
       <router-link
         v-if="tco.completeness.charges_without_cost > 0"
         to="/expenses"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.completeTheCharges') }}
       </router-link>
       <router-link
         v-if="tco.completeness.unqualified_drives > 0"
         to="/drives"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.qualifyTheDrives') }}
       </router-link>
       <router-link
         v-if="tco.completeness.insurance_missing"
         to="/expenses"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheInsurance') }}
       </router-link>
       <router-link
         v-if="tco.completeness.acquisition_missing"
         to="/vehicles"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheAcquisition') }}
       </router-link>
@@ -91,14 +91,14 @@ const issueLabels: Record<string, () => string> = {
         v-if="tco.completeness.start_odometer_missing"
         to="/vehicles"
         :title="$t('dashboard.dataQualityCard.enterTheStartOdometerHint')"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterTheStartOdometer') }}
       </router-link>
       <router-link
         v-if="canRefuel(tco.powertrain) && !tco.fuel_fill_ups"
         to="/manual?tab=FUEL"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterAFillUp') }}
       </router-link>
@@ -106,14 +106,14 @@ const issueLabels: Record<string, () => string> = {
         v-if="isElectricOnly(tco.powertrain) && tco.completeness.untracked_distance_km > 0 && !tco.estimated_energy_cost"
         to="/manual?tab=ENERGY"
         :title="$t('dashboard.dataQualityCard.enterAverageConsumptionHint')"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ $t('dashboard.dataQualityCard.enterAverageConsumption') }}
       </router-link>
       <button
         v-if="tco.completeness.odometer_gaps > 0 || tco.completeness.odometer_anomalies > 0"
         @click="toggleDataQuality"
-        class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
+        class="tap-text text-xs font-semibold px-2.5 rounded-lg bg-warning-500/20 text-warning-300 hover:bg-warning-500/30"
       >
         {{ showDataQuality ? $t('dashboard.dataQualityCard.hideIssues') : $t('dashboard.dataQualityCard.showIssues') }}
       </button>

@@ -13,6 +13,13 @@ export function toLocalDateTimeInput(d: string | Date = new Date()): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+/** A "YYYY-MM" month key as a short month in the current language ("févr. 26"); anything else is returned untouched. */
+export function formatMonthLabel(month: string): string {
+  const m = /^(\d{4})-(\d{2})$/.exec(month)
+  if (!m) return month
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 1)).toLocaleDateString(intlLocale(), { month: 'short', year: '2-digit', timeZone: 'UTC' })
+}
+
 /** Short date with the time in the current language, e.g. "02 mai, 08:30". */
 export function formatDayTime(dateStr: string) {
   return new Date(dateStr).toLocaleDateString(intlLocale(), {

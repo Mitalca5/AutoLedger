@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
+import { formatMonthLabel } from '@/utils/dates'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { Gauge } from 'lucide-vue-next'
@@ -97,7 +98,7 @@ function drawCharts() {
   costChart = null
   const months = visibleMonths.value
   if (months.length === 0) return
-  const labels = months.map((m) => m.month)
+  const labels = months.map((m) => formatMonthLabel(m.month))
 
   if (consumptionRef.value) {
     consumptionChart = new Chart(consumptionRef.value, {

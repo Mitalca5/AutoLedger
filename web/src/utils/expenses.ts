@@ -71,6 +71,10 @@ export const reminderPresets = (): ReminderPreset[] => [
 ]
 
 /** datetime-local inputs expect local time, not UTC. */
+// A reminder only has a due point when it carries a mileage or a calendar interval
+export const hasReminderSchedule = (r: { interval_km?: number | null; interval_months?: number | null }): boolean =>
+  (r.interval_km ?? 0) > 0 || (r.interval_months ?? 0) > 0
+
 export function toLocalDateTimeInput(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`

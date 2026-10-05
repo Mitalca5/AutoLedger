@@ -2,8 +2,8 @@
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
-import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles } from 'lucide-vue-next'
-import { reminderPresets, formatDate, type ReminderPreset } from '@/utils/expenses'
+import { Plus, Pencil, Trash2, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed } from 'lucide-vue-next'
+import { reminderPresets, formatDate, hasReminderSchedule, type ReminderPreset } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
 import ReminderTemplatesBar from '@/components/expenses/ReminderTemplatesBar.vue'
 
@@ -12,6 +12,7 @@ defineProps<{
   overdueReminders: MaintenanceReminder[]
   dueSoonReminders: MaintenanceReminder[]
   okReminders: MaintenanceReminder[]
+  unscheduledReminders: MaintenanceReminder[]
   loadingReminders: boolean
   vehicleWebhook: VehicleWebhook | null
 }>()
@@ -65,6 +66,9 @@ const vehicleStore = useVehicleStore()
       <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
         <span class="text-xs text-slate-400">{{ $t('expenses.remindersPanel.totalReminders') }}</span>
         <span class="text-xl font-bold text-white mt-1">{{ reminders.length }}</span>
+        <span v-if="unscheduledReminders.length" class="text-xs text-slate-400 mt-0.5">
+          {{ $t('expenses.remindersPanel.withoutScheduleCount', { count: unscheduledReminders.length }) }}
+        </span>
       </div>
       <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex flex-col justify-between">
         <span class="text-xs text-success-400 flex items-center gap-1.5">
@@ -143,12 +147,13 @@ const vehicleStore = useVehicleStore()
           <div class="flex items-center gap-2.5 flex-wrap">
             <span
               class="text-xs px-2.5 py-0.5 rounded-full font-bold border flex items-center gap-1"
-              :class="r.status === 'OVERDUE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : r.status === 'DUE_SOON' ? 'bg-warning-500/20 text-warning-300 border-warning-500/30' : 'bg-success-500/10 text-success-400 border-success-500/20'"
+              :class="r.status === 'OVERDUE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : r.status === 'DUE_SOON' ? 'bg-warning-500/20 text-warning-300 border-warning-500/30' : hasReminderSchedule(r) ? 'bg-success-500/10 text-success-400 border-success-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'"
             >
               <AlertTriangle v-if="r.status === 'OVERDUE'" class="w-3 h-3" />
               <Clock v-else-if="r.status === 'DUE_SOON'" class="w-3 h-3" />
-              <CheckCircle2 v-else class="w-3 h-3" />
-              {{ r.status === 'OVERDUE' ? $t('expenses.remindersPanel.overdue') : r.status === 'DUE_SOON' ? $t('expenses.remindersPanel.dueSoon') : $t('expenses.remindersPanel.upToDate') }}
+              <CheckCircle2 v-else-if="hasReminderSchedule(r)" class="w-3 h-3" />
+              <CircleDashed v-else class="w-3 h-3" />
+              {{ r.status === 'OVERDUE' ? $t('expenses.remindersPanel.overdue') : r.status === 'DUE_SOON' ? $t('expenses.remindersPanel.dueSoon') : hasReminderSchedule(r) ? $t('expenses.remindersPanel.upToDate') : $t('expenses.remindersPanel.withoutSchedule') }}
             </span>
 
             <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
@@ -187,10 +192,10 @@ const vehicleStore = useVehicleStore()
         </div>
 
         <!-- Card details grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs text-slate-300">
-          <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+        <div class="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-2.5 pt-1 text-xs text-slate-300">
+          <div v-if="r.interval_km" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
             <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.mileageDue') }}</span>
-            <span v-if="r.interval_km" class="font-medium text-white">
+            <span class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyKm', { unit: distanceUnit(), interval_km: formatDistanceValue(r.interval_km) }) }}
               <span v-if="r.observed_interval_km" class="text-slate-400 block text-xs">
                 {{ $t('expenses.remindersPanel.observedInterval', { km: formatDistanceValue(r.observed_interval_km), unit: distanceUnit(), months: r.observed_interval_months ?? '–' }) }}
@@ -199,18 +204,16 @@ const vehicleStore = useVehicleStore()
                 {{ $t('expenses.remindersPanel.dueAtKm', { unit: distanceUnit(), due_odometer: formatDistanceValue(r.due_odometer) }) }}
               </span>
             </span>
-            <span v-else class="text-slate-400 italic">{{ $t('expenses.remindersPanel.notApplicable') }}</span>
           </div>
 
-          <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+          <div v-if="r.interval_months" class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
             <span class="text-xs text-slate-400 block mb-0.5">{{ $t('expenses.remindersPanel.calendarDueDate') }}</span>
-            <span v-if="r.interval_months" class="font-medium text-white">
+            <span class="font-medium text-white">
               {{ $t('expenses.remindersPanel.everyMonths', { interval_months: r.interval_months }) }}
               <span v-if="r.due_date" class="text-slate-400 block text-xs">
                 {{ $t('expenses.remindersPanel.due', { due_date: formatDate(r.due_date) }) }}
               </span>
             </span>
-            <span v-else class="text-slate-400 italic">{{ $t('expenses.remindersPanel.notApplicable') }}</span>
           </div>
 
           <div class="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">

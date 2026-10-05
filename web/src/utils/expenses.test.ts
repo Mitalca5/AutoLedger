@@ -5,6 +5,7 @@ import {
   currencyPayload,
   findCloseCandidate,
   formatFileSize,
+  hasReminderSchedule,
   toLocalDateTimeInput,
 } from './expenses'
 
@@ -82,5 +83,15 @@ describe('reminderPresets', () => {
       expect(p.title).not.toBe('')
       expect(p.interval_km !== '' || p.interval_months !== '').toBe(true)
     }
+  })
+})
+
+describe('hasReminderSchedule', () => {
+  it('needs a mileage or a calendar interval to have a due point', () => {
+    expect(hasReminderSchedule({})).toBe(false)
+    expect(hasReminderSchedule({ interval_km: 0, interval_months: null })).toBe(false)
+    expect(hasReminderSchedule({ interval_km: 15000 })).toBe(true)
+    expect(hasReminderSchedule({ interval_months: 12 })).toBe(true)
+    expect(hasReminderSchedule({ interval_km: 15000, interval_months: 12 })).toBe(true)
   })
 })

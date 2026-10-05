@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
+import { formatMonthLabel } from '@/utils/dates'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { computeMonthFixedVariable, filterMonthsByRange, type MonthlyRangeKey } from '@/utils/dashboard'
@@ -25,7 +26,7 @@ function renderChart() {
   if (monthlyChartInstance) monthlyChartInstance.destroy()
 
   const filteredList = filteredMonthlyCosts.value
-  const filteredLabels = filteredList.map((m: any) => m.month)
+  const filteredLabels = filteredList.map((m: any) => formatMonthLabel(m.month))
   const energyData = filteredList.map((m: any) => m.energy)
   const tollsData = filteredList.map((m: any) => m.tolls)
   const tiresData = filteredList.map((m: any) => m.tires || 0)

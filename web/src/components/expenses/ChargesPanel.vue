@@ -6,6 +6,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, Pencil, Trash2, AlertTriangle, Paperclip } from 'lucide-vue-next'
 import { formatDate } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
+import { formatNumber } from '@/utils/numbers'
 import { distanceUnit, formatPerDistanceValue, perDistance } from '@/units'
 
 defineProps<{
@@ -79,7 +80,7 @@ const vehicleStore = useVehicleStore()
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs px-2 py-0.5 rounded-full font-bold bg-info-500/10 text-info-400 border border-info-500/20 shrink-0">
-              {{ $t('expenses.chargesPanel.kwh2', { kwh_added: c.kwh_added }) }}
+              {{ $t('expenses.chargesPanel.kwh2', { kwh_added: formatNumber(c.kwh_added, 2) }) }}
             </span>
             <span class="text-xs text-slate-400 shrink-0">{{ formatDate(c.date) }}</span>
             <span v-if="c.is_manual" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
