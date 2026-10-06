@@ -284,6 +284,9 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
               <div
                 v-for="d in recentDrives"
                 :key="d.id"
+                v-clickable
+                role="checkbox"
+                :aria-checked="selectedDriveIds.includes(d.id)"
                 @click="toggleMultiDrive(d.id)"
                 class="flex items-center justify-between p-2 rounded-lg cursor-pointer text-xs border transition-colors"
                 :class="selectedDriveIds.includes(d.id) ? 'bg-warning-500/10 border-warning-500/40 text-warning-200' : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'"

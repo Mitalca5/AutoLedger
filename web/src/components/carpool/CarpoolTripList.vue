@@ -74,6 +74,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
     <div
       v-for="trip in trips"
       :key="trip.id"
+      v-clickable
       @click="emit('open', trip)"
       class="bg-slate-900 border rounded-2xl p-4 transition-all shadow-sm space-y-3 cursor-pointer"
       :class="selectedTripIds.includes(trip.id) ? 'border-rose-500/50 bg-rose-500/[0.02]' : 'border-slate-800 hover:border-slate-700'"

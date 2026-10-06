@@ -35,6 +35,7 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
     <div
       v-for="s in visible"
       :key="key(s)"
+      v-clickable
       @click="emit('open', s)"
       class="bg-slate-900/60 border border-dashed border-warning-500/30 hover:border-warning-500/60 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 cursor-pointer transition-colors"
     >

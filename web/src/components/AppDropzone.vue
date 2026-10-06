@@ -176,6 +176,7 @@ function removeFile() {
     <!-- Empty State / Dropzone -->
     <div
       v-if="!modelValue"
+      v-clickable
       @click="triggerFileInput"
       @dragover="onDragOver"
       @dragleave="onDragLeave"

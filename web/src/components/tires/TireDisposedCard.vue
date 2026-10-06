@@ -12,6 +12,7 @@ const vehicleStore = useVehicleStore()
 
 <template>
   <div
+    v-clickable
     @click="emit('open', t)"
     class="bg-slate-900/60 border border-slate-800 hover:border-rose-500/40 cursor-pointer rounded-2xl p-4 space-y-2 transition-all group"
     :class="{ 'ring-2 ring-rose-500/50 border-rose-500/60': selected }"

@@ -28,6 +28,7 @@ const formatDate = formatDayTime
 
 <template>
   <div
+    v-clickable
     @click="emit('open', d)"
     class="bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group"
     :class="{ 'border-rose-500/40 bg-slate-800/40 shadow-lg shadow-rose-950/20': selected }"
