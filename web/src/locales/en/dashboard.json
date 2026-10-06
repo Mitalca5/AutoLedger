@@ -143,7 +143,9 @@
     "upcoming": "Contract not started",
     "monthsLeft": "{count} months left",
     "kmOver": "+{km} {unit} over",
-    "kmAhead": "{km} {unit} ahead"
+    "kmAhead": "{km} {unit} ahead",
+    "durationProgress": "Lease duration elapsed",
+    "mileageProgress": "Allowed mileage used"
   },
   "mileageCostChart": {
     "monthlyMileageAndCostPer": "Monthly mileage and cost per {unit}",

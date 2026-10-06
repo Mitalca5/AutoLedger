@@ -74,6 +74,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
     <div
       v-for="trip in trips"
       :key="trip.id"
+      v-clickable
       @click="emit('open', trip)"
       class="bg-slate-900 border rounded-2xl p-4 transition-all shadow-sm space-y-3 cursor-pointer"
       :class="selectedTripIds.includes(trip.id) ? 'border-rose-500/50 bg-rose-500/[0.02]' : 'border-slate-800 hover:border-slate-700'"
@@ -122,14 +123,14 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
             @click="emit('recalculate', trip)"
             :disabled="recalculating"
             class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-            :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')"
+            :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')" :aria-label="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')"
           >
             <RotateCw class="w-4 h-4" />
           </button>
-          <button @click="emit('edit', trip)" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" :title="$t('common.edit')">
+          <button @click="emit('edit', trip)" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" :title="$t('common.edit')" :aria-label="$t('common.edit')">
             <Edit2 class="w-4 h-4" />
           </button>
-          <button @click="emit('delete', trip)" class="p-2 text-slate-400 hover:text-danger-400 hover:bg-danger-500/10 rounded-lg transition-colors" :title="$t('common.delete')">
+          <button @click="emit('delete', trip)" class="p-2 text-slate-400 hover:text-danger-400 hover:bg-danger-500/10 rounded-lg transition-colors" :title="$t('common.delete')" :aria-label="$t('common.delete')">
             <Trash2 class="w-4 h-4" />
           </button>
         </div>

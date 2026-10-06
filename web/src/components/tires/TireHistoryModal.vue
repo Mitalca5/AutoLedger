@@ -4,9 +4,12 @@ import { Archive, ClipboardPaste, Copy, Edit2, History, Pencil, Plus, Ruler, Shu
 import { useVehicleStore } from '@/stores/vehicle'
 import { apiMessageText } from '@/services/apiError'
 import { formatAmount } from '@/currency'
-import { formatDate, type SessionForm } from '@/utils/tires'
+import { formatDate, WEAR_TONE_TEXT, wearTone, type SessionForm } from '@/utils/tires'
+import { formatNumber, formatPercent } from '@/utils/numbers'
+import TireWearBar from '@/components/tires/TireWearBar.vue'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceValue, perDistance } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 const vehicleStore = useVehicleStore()
 
@@ -58,21 +61,21 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-          <button @click="emit('edit-tire')" class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.editTheTire')">
+          <button @click="emit('edit-tire')" class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.editTheTire')" :aria-label="$t('tires.tireHistoryModal.editTheTire')">
             <Pencil class="w-4 h-4" />
           </button>
           <button
             v-if="selectedTire.current_position !== 'DISPOSED'"
             @click="emit('dispose-tire')"
             class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-warning-400 rounded-lg transition-colors"
-            :title="$t('tires.tireHistoryModal.scrapWornPuncturedSold')"
+            :title="$t('tires.tireHistoryModal.scrapWornPuncturedSold')" :aria-label="$t('tires.tireHistoryModal.scrapWornPuncturedSold')"
           >
             <Archive class="w-4 h-4" />
           </button>
-          <button @click="emit('delete-tire')" class="tap p-1.5 bg-slate-800 hover:bg-danger-900/40 text-slate-400 hover:text-danger-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')">
+          <button @click="emit('delete-tire')" class="tap p-1.5 ml-1.5 bg-slate-800 hover:bg-danger-900/40 text-slate-400 hover:text-danger-400 rounded-lg transition-colors" :title="$t('tires.tireHistoryModal.deleteEntryError')" :aria-label="$t('tires.tireHistoryModal.deleteEntryError')">
             <Trash2 class="w-4 h-4" />
           </button>
-          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <button @click="open = false" :aria-label="$t('common.close')" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -91,26 +94,20 @@ useEscapeToClose(open, () => (open.value = false))
           </span>
         </div>
 
-        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="(selectedTireStats?.life_progress_pct || 0) > 80 ? 'bg-rose-500' : 'bg-success-500'"
-            :style="{ width: `${Math.min(100, selectedTireStats?.life_progress_pct || 0)}%` }"
-          ></div>
-        </div>
+        <TireWearBar thick :pct="selectedTireStats?.life_progress_pct || 0" :condition="selectedTireStats?.condition" />
 
         <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.currentTread') }}</div>
-            <div class="font-bold text-success-400">{{ selectedTireStats?.current_depth_mm }} mm</div>
+            <div class="font-bold" :class="WEAR_TONE_TEXT[wearTone(0, selectedTireStats?.condition)]">{{ selectedTireStats?.current_depth_mm != null ? `${formatNumber(selectedTireStats.current_depth_mm, 1)} mm` : '—' }}</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.lifespanUsed') }}</div>
-            <div class="font-bold text-slate-200">{{ selectedTireStats?.life_progress_pct }}%</div>
+            <div class="font-bold text-slate-200">{{ formatPercent(Number(selectedTireStats?.life_progress_pct || 0)) }}</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>
-            <div class="font-bold text-warning-400">{{ formatAmount(perDistance(Number(selectedTireStats?.cost_per_km)), vehicleStore.currency, 4) }}</div>
+            <div class="font-bold text-warning-400" :title="Number(selectedTire?.purchase_price) > 0 ? undefined : $t('tires.costPerKmUnset')">{{ formatCostPerDistance(selectedTireStats?.cost_per_km, vehicleStore.currency, 4) }}</div>
           </div>
         </div>
       </div>
@@ -172,7 +169,7 @@ useEscapeToClose(open, () => (open.value = false))
               v-if="copiedSession"
               @click="emit('paste-session')"
               class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors bg-indigo-950/40 border border-indigo-800/60 px-2 py-1 rounded-lg"
-              :title="$t('tires.tireHistoryModal.pasteCopied', { date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' })"
+              :title="$t('tires.tireHistoryModal.pasteCopied', { date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' })" :aria-label="$t('tires.tireHistoryModal.pasteCopied', { date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' })"
             >
               <ClipboardPaste class="w-3.5 h-3.5" />
               <span>{{ $t('tires.tireHistoryModal.paste') }}</span>
@@ -213,28 +210,28 @@ useEscapeToClose(open, () => (open.value = false))
                   @click="emit('copy-session', s)"
                   class="tap p-1 rounded transition-colors"
                   :class="copiedSession?.mounted_date === (s.mounted_date ? new Date(s.mounted_date).toISOString().substring(0, 10) : '') && copiedSession?.mounted_odometer === s.mounted_odometer ? 'text-indigo-400 bg-indigo-950/60' : 'text-slate-400 hover:text-indigo-400'"
-                  :title="$t('tires.tireHistoryModal.copyThisSessionSData')"
+                  :title="$t('tires.tireHistoryModal.copyThisSessionSData')" :aria-label="$t('tires.tireHistoryModal.copyThisSessionSData')"
                 >
                   <Copy class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="emit('duplicate-session', s)"
                   class="tap p-1 text-slate-400 hover:text-info-400 rounded transition-colors"
-                  :title="$t('tires.tireHistoryModal.duplicateToOtherTires')"
+                  :title="$t('tires.tireHistoryModal.duplicateToOtherTires')" :aria-label="$t('tires.tireHistoryModal.duplicateToOtherTires')"
                 >
                   <Shuffle class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="emit('edit-session', s)"
                   class="tap p-1 text-slate-400 hover:text-white rounded"
-                  :title="$t('tires.tireHistoryModal.editTheSession')"
+                  :title="$t('tires.tireHistoryModal.editTheSession')" :aria-label="$t('tires.tireHistoryModal.editTheSession')"
                 >
                   <Edit2 class="w-3.5 h-3.5" />
                 </button>
                 <button
                   @click="emit('delete-session', s)"
                   class="tap p-1 text-slate-400 hover:text-rose-400 rounded"
-                  :title="$t('tires.tireHistoryModal.deleteTheSession')"
+                  :title="$t('tires.tireHistoryModal.deleteTheSession')" :aria-label="$t('tires.tireHistoryModal.deleteTheSession')"
                 >
                   <Trash2 class="w-3.5 h-3.5" />
                 </button>
@@ -293,10 +290,10 @@ useEscapeToClose(open, () => (open.value = false))
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span>{{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(l.odometer) }) }}</span>
               <span class="flex items-center gap-1">
-                <button @click="emit('edit-log', l)" class="text-slate-400 hover:text-success-400" :title="$t('tires.tireHistoryModal.editTheReading')">
+                <button @click="emit('edit-log', l)" class="tap text-slate-400 hover:text-success-400" :title="$t('tires.tireHistoryModal.editTheReading')" :aria-label="$t('tires.tireHistoryModal.editTheReading')">
                   <Pencil class="w-3 h-3" />
                 </button>
-                <button @click="emit('delete-log', l)" class="text-slate-400 hover:text-danger-400" :title="$t('tires.tireHistoryModal.deleteTheReading')">
+                <button @click="emit('delete-log', l)" class="tap text-slate-400 hover:text-danger-400" :title="$t('tires.tireHistoryModal.deleteTheReading')" :aria-label="$t('tires.tireHistoryModal.deleteTheReading')">
                   <Trash2 class="w-3 h-3" />
                 </button>
               </span>

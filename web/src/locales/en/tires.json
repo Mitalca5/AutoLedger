@@ -1,4 +1,5 @@
 {
+  "costPerKmUnset": "Purchase price not set",
   "tiresView": {
     "addAPastSessionOn": "Add a past session on a set",
     "recordAPastSessionOn": "Record a past session on a set of garage tires",
@@ -40,7 +41,12 @@
     "deleteSessionTitle": "Delete the fitting session",
     "deleteSessionMessage": "Do you confirm the deletion of this fitting session?",
     "deleteReadingTitle": "Delete the tread reading",
-    "deleteReadingMessage": "Delete the {depth} mm reading of {date}?"
+    "deleteReadingMessage": "Delete the {depth} mm reading of {date}?",
+    "changeSetNeedsStorage": "There is no tire set in garage storage to swap with. Add one first with \"Add tires\".",
+    "noScrappedTire": "No scrapped tire",
+    "noScrappedTireHint": "Tires you scrap (worn, punctured, sold) appear here with their final mileage and cost.",
+    "noTireYet": "No tire recorded yet",
+    "noTireYetHint": "Add the set fitted on the vehicle to track its wear, mileage and cost per distance."
   },
   "tireAddModal": {
     "createTheTires": "Create the tires",
@@ -79,11 +85,15 @@
     "unitPrice": "unit price",
     "totalPriceMode": "total price",
     "customSize": "Custom size...",
-    "requiredFields": "Please enter the brand, model and size",
-    "requiredFieldsTitle": "Required fields",
     "front": "Front",
     "rear": "Rear",
-    "customDimension": "Size"
+    "customDimension": "Size",
+    "errors": {
+      "required": "Required",
+      "priceNegative": "The price cannot be negative",
+      "depth": "Must be above the legal wear indicator",
+      "lifespan": "Must be greater than 0"
+    }
   },
   "tireBatchDisposeModal": {
     "finalOdometerIfRemovedOn": "Final odometer if removed on that date.",
@@ -143,7 +153,7 @@
     "odometerAtRemovalKm": "Odometer at removal ({unit})"
   },
   "tireDisposedCard": {
-    "kmDrivenWear": "{total_distance_km} {unit} driven • Wear: {life_progress_pct}% • {purchase_price}",
+    "kmDrivenWear": "{total_distance_km} {unit} driven • Wear: {life_progress_pct} • {purchase_price}",
     "scrapped": "Scrapped",
     "selectForABulkAction": "Select for a bulk action"
   },
@@ -239,7 +249,8 @@
     "currentOdometerKm": "Current odometer ({unit})",
     "measuredDepthMm": "Measured depth (mm)",
     "edit": "Edit the reading",
-    "new": "Tread reading"
+    "new": "Tread reading",
+    "depthRange": "Enter a depth above 0 and up to 20 mm"
   },
   "tireOdometerTimeline": {
     "details": "Details",
@@ -248,7 +259,8 @@
     "noFittingSessionWithMileage": "No fitting session with mileage recorded.",
     "tiresFittedByMileage": "Tires fitted by mileage",
     "noTire": "No tire recorded ({from} → {to})",
-    "segment": "{lane}: {tire}, from {from} to {to}"
+    "segment": "{lane}: {tire}, from {from} to {to}",
+    "tick": "{value}k"
   },
   "tirePackSwapModal": {
     "confirmTheRotation": "Confirm the rotation",
@@ -294,7 +306,8 @@
     "costKm": "Cost / {unit}",
     "totalDriven": "Total driven",
     "removeFromSelection": "Remove from the selection",
-    "selectForBulk": "Select for a bulk action"
+    "selectForBulk": "Select for a bulk action",
+    "fitATire": "Fit a tire"
   },
   "wheels": {
     "FL": "Front left",
@@ -331,5 +344,8 @@
     "rearShort": "Rear",
     "allShort": "All"
   },
-  "sessionCount": "{count} session | {count} sessions"
+  "sessionCount": "{count} session | {count} sessions",
+  "wearBar": {
+    "label": "Estimated wear"
+  }
 }

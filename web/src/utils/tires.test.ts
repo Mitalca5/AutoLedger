@@ -9,6 +9,9 @@ import {
   isMountedPosition,
   sessionFormFromCopy,
   sessionFormFromSession,
+  validateTireForm,
+  validateTreadDepth,
+  wearTone,
 } from './tires'
 
 const entry = (id: string, brand: string, model: string, sessions: any[] = []) => ({
@@ -144,5 +147,60 @@ describe('session forms', () => {
     expect(sessionFormFromCopy(copied, { current_position: 'STORAGE' }).position).toBe('RL')
     expect(sessionFormFromCopy(copied, { current_position: 'DISPOSED' }).position).toBe('RL')
     expect(sessionFormFromCopy({ ...copied, position: '' }, null).position).toBe('FL')
+  })
+})
+
+describe('validateTreadDepth', () => {
+  it('accepts worn and deep treads', () => {
+    expect(validateTreadDepth(0.8)).toBeNull()
+    expect(validateTreadDepth(12)).toBeNull()
+    expect(validateTreadDepth(20)).toBeNull()
+  })
+
+  it('refuses empty, zero, negative and above 20 mm', () => {
+    for (const v of ['', null, 0, -1, 20.1]) expect(validateTreadDepth(v)).not.toBeNull()
+  })
+})
+
+describe('wearTone', () => {
+  it('follows the tread condition', () => {
+    expect(wearTone(10, 'GOOD')).toBe('ok')
+    expect(wearTone(10, 'WARNING')).toBe('warning')
+    expect(wearTone(10, 'CRITICAL')).toBe('danger')
+  })
+
+  it('is danger past 80 % of the lifespan whatever the tread says', () => {
+    expect(wearTone(81, 'GOOD')).toBe('danger')
+    expect(wearTone(80, 'GOOD')).toBe('ok')
+  })
+
+  it('falls back on the lifespan alone without a condition', () => {
+    expect(wearTone(50)).toBe('ok')
+  })
+})
+
+describe('validateTireForm', () => {
+  const valid = { brand: 'B', model: 'M', dimension: '205/55 R16', price: '', initial_depth_mm: 8, min_legal_depth_mm: 1.6, estimated_lifespan_km: 45000 }
+
+  it('accepts a form with an empty price', () => {
+    expect(validateTireForm(valid)).toEqual({})
+  })
+
+  it('flags blank identity fields, ignoring whitespace', () => {
+    expect(Object.keys(validateTireForm({ ...valid, brand: '  ', model: '', dimension: ' ' })).sort()).toEqual(['brand', 'dimension', 'model'])
+  })
+
+  it('refuses a negative price but not zero', () => {
+    expect(validateTireForm({ ...valid, price: -5 }).price).toBeDefined()
+    expect(validateTireForm({ ...valid, price: 0 }).price).toBeUndefined()
+  })
+
+  it('requires a tread depth above the legal wear indicator', () => {
+    expect(validateTireForm({ ...valid, initial_depth_mm: 1.6 }).initial_depth_mm).toBeDefined()
+    expect(validateTireForm({ ...valid, initial_depth_mm: 0 }).initial_depth_mm).toBeDefined()
+  })
+
+  it('requires a positive lifespan', () => {
+    expect(validateTireForm({ ...valid, estimated_lifespan_km: 0 }).estimated_lifespan_km).toBeDefined()
   })
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { api, type MaintenanceReminder } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useMaintenanceChoices } from '@/composables/useMaintenanceChoices'
@@ -11,6 +11,7 @@ import { reminderPresets, nextOccurrenceDate, maintenanceStartPoint, type Remind
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Creates a maintenance reminder, or edits `editing`. `preset` pre-fills a new one from a suggestion.
 const props = defineProps<{ vehicleId: string; editing: MaintenanceReminder | null; preset: ReminderPreset | null; currentOdometer: number }>()
@@ -70,6 +71,7 @@ function applyReminderPreset(preset: ReminderPreset) {
 
 watch(open, (isOpen) => {
   if (!isOpen) return
+  submitted.value = false
   const r = props.editing
   if (!r) {
     const currentOdo = props.currentOdometer ? Math.round(props.currentOdometer) : ''
@@ -117,19 +119,28 @@ function setScheduleMode(mode: 'interval' | 'date') {
   else if (!reminderForm.value.last_service_date) reminderForm.value.last_service_date = todayIso()
 }
 
-async function handleSaveReminder() {
-  if (!props.vehicleId) return
-  if (!reminderForm.value.title.trim()) {
-    showAlert(t('expenses.reminderModal.titleRequired'), t('common.requiredField'), 'warning')
-    return
-  }
+const { pending: submitting, run: runOnce } = useSubmit()
+
+const submitted = ref(false)
+const errors = computed(() => {
   const byDate = scheduleMode.value === 'date'
-  if (byDate && !reminderForm.value.scheduled_date) {
-    showAlert(t('expenses.reminderModal.dateRequired'), t('common.requiredField'), 'warning')
-    return
+  return {
+    title: !reminderForm.value.title.trim() ? t('expenses.reminderModal.titleRequired') : '',
+    date: byDate && !reminderForm.value.scheduled_date ? t('expenses.reminderModal.dateRequired') : '',
+    interval: !byDate && !reminderForm.value.interval_km && !reminderForm.value.interval_months
+      ? t('expenses.reminderModal.intervalRequired', { unit: distanceUnit() })
+      : '',
   }
-  if (!byDate && !reminderForm.value.interval_km && !reminderForm.value.interval_months) {
-    showAlert(t('expenses.reminderModal.intervalRequired', { unit: distanceUnit() }), t('common.requiredField'), 'warning')
+})
+const visibleErrors = computed(() => (submitted.value ? errors.value : { title: '', date: '', interval: '' }))
+
+async function handleSaveReminderAction() {
+  if (!props.vehicleId) return
+  submitted.value = true
+  const byDate = scheduleMode.value === 'date'
+  if (errors.value.title || errors.value.date || errors.value.interval) {
+    await nextTick()
+    document.querySelector<HTMLElement>('[data-reminder-form] [aria-invalid="true"]')?.focus()
     return
   }
   try {
@@ -160,6 +171,7 @@ async function handleSaveReminder() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSaveReminder = () => runOnce(handleSaveReminderAction)
 </script>
 
 <template>
@@ -174,12 +186,12 @@ async function handleSaveReminder() {
           <Bell class="w-5 h-5 text-violet-400" />
           {{ editingReminderId ? $t('expenses.reminderModal.edit') : $t('expenses.reminderModal.new') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
 
-      <form id="reminder-modal-form" @submit.prevent="handleSaveReminder" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
+      <form id="reminder-modal-form" data-reminder-form novalidate @submit.prevent="handleSaveReminder" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
         <!-- Preset chips (only when adding new) -->
         <div v-if="!editingReminderId" class="space-y-1.5">
           <span class="block text-xs font-semibold text-slate-300">{{ $t('expenses.reminderModal.quickTemplates') }}</span>
@@ -206,9 +218,12 @@ async function handleSaveReminder() {
               v-model="reminderForm.title"
               type="text"
               required
+              :aria-invalid="!!visibleErrors.title"
+              :aria-describedby="visibleErrors.title ? 'reminder-form-title-error' : undefined"
               :placeholder="$t('expenses.reminderModal.eGTireRotation')"
               class="field"
             />
+            <p v-if="visibleErrors.title" id="reminder-form-title-error" class="text-xs text-danger-400 mt-1">{{ visibleErrors.title }}</p>
           </div>
           <div>
             <label for="reminder-form-category" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.category') }}</label>
@@ -247,9 +262,12 @@ async function handleSaveReminder() {
                 v-model="reminderForm.interval_km"
                 min="500"
                 step="500"
+                :aria-invalid="!!visibleErrors.interval"
+                :aria-describedby="visibleErrors.interval ? 'reminder-form-interval-error' : undefined"
                 :placeholder="$t('expenses.reminderModal.eG10000EmptyIgnored')"
                 class="field"
               />
+              <p v-if="visibleErrors.interval" id="reminder-form-interval-error" class="text-xs text-danger-400 mt-1">{{ visibleErrors.interval }}</p>
             </div>
             <div v-if="scheduleMode === 'interval'">
               <label for="reminder-form-interval-months" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.intervalInMonths') }}</label>
@@ -266,6 +284,7 @@ async function handleSaveReminder() {
             <div v-else>
               <label for="reminder-form-scheduled-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.reminderModal.scheduledDate') }}</label>
               <AppDatePicker id="reminder-form-scheduled-date" v-model="reminderForm.scheduled_date" size="sm" :required="true" />
+              <p v-if="visibleErrors.date" class="text-xs text-danger-400 mt-1">{{ visibleErrors.date }}</p>
             </div>
           </div>
           <div v-if="scheduleMode === 'date'" class="flex items-center gap-2">
@@ -362,7 +381,7 @@ async function handleSaveReminder() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="reminder-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="reminder-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ editingReminderId ? $t('expenses.update') : $t('expenses.reminderModal.create') }}
         </button>
       </div>

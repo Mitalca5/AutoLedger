@@ -20,6 +20,7 @@ import {
 } from '@/utils/vehicles'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceValue } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // The acquisition contract of a vehicle (purchase, loan, LOA, LLD) in three steps. \`ownership\` is the saved
 // contract (null when there is none); saving reports the stored contract, deleting reports deleted.
@@ -69,7 +70,7 @@ function prevOwnershipStep() {
   }
 }
 
-async function handleSaveOwnership() {
+async function saveOwnershipAction() {
   if (!props.vehicle) return
   if (!validateOwnershipStep(1) || !validateOwnershipStep(2)) return
   try {
@@ -81,7 +82,11 @@ async function handleSaveOwnership() {
   }
 }
 
-async function handleDeleteOwnership() {
+const { pending: submitting, run: runOnce } = useSubmit()
+const handleSaveOwnership = () => runOnce(saveOwnershipAction)
+const handleDeleteOwnership = () => runOnce(deleteOwnershipAction)
+
+async function deleteOwnershipAction() {
   if (!props.vehicle) return
   const ok = await showConfirm({
     title: t('vehicles.ownershipWizardModal.deleteTitle'),
@@ -114,7 +119,7 @@ async function handleDeleteOwnership() {
             <FileText class="w-5 h-5 text-indigo-400 shrink-0" />
             <span class="truncate">{{ $t('vehicles.ownershipWizardModal.acquisitionAndFinancing', { name: ownershipVehicle.name }) }}</span>
           </h3>
-          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0" :aria-label="$t('common.close')">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -474,6 +479,7 @@ async function handleDeleteOwnership() {
             v-if="ownership"
             type="button"
             @click="handleDeleteOwnership"
+            :disabled="submitting"
             class="px-4 py-2 bg-slate-800 hover:bg-rose-900/40 text-rose-400 text-xs font-semibold rounded-xl transition-colors"
           >
             {{ $t('vehicles.ownershipWizardModal.deleteTheContract') }}
@@ -513,6 +519,7 @@ async function handleDeleteOwnership() {
             v-else
             type="button"
             @click="handleSaveOwnership"
+            :disabled="submitting"
             class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
           >
             <Check class="w-4 h-4" />

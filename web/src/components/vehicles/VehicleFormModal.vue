@@ -22,6 +22,7 @@ import { CURRENCIES } from '@/utils/expenses'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue, formatPerDistanceValue } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds a vehicle, or edits \`editing\`.
 const props = withDefaults(
@@ -94,7 +95,9 @@ watch(open, (isOpen) => {
   loadTariffPlans()
 })
 
-async function handleSave() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleSaveAction() {
   try {
     const payload: Record<string, any> = { ...form.value }
     if (!canLinkTeslaMate(payload.powertrain)) {
@@ -130,6 +133,7 @@ async function handleSave() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSave = () => runOnce(handleSaveAction)
 
 async function testModalConnection() {
   if (!form.value.teslamate_api_url) {
@@ -158,7 +162,7 @@ async function testModalConnection() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white">{{ isEditing ? $t('vehicles.vehicleFormModal.edit') : $t('shell.topBar.addAVehicle') }}</h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -467,7 +471,7 @@ async function testModalConnection() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="vehicle-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors shadow-lg shadow-rose-600/20">
+        <button type="submit" :disabled="submitting" form="vehicle-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors shadow-lg shadow-rose-600/20">
           {{ $t('common.save') }}
         </button>
       </div>

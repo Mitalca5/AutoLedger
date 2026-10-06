@@ -143,7 +143,9 @@
     "upcoming": "Contrat à venir",
     "monthsLeft": "{count} mois restants",
     "kmOver": "+{km} {unit} de dépassement",
-    "kmAhead": "{km} {unit} d'avance"
+    "kmAhead": "{km} {unit} d'avance",
+    "durationProgress": "Durée de location écoulée",
+    "mileageProgress": "Kilométrage autorisé utilisé"
   },
   "mileageCostChart": {
     "monthlyMileageAndCostPer": "Kilométrage mensuel et coût au {unit}",

@@ -14,6 +14,7 @@ import { CURRENCIES, currencyPayload, defaultAmortizationMode, findCloseCandidat
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds a maintenance / fixed expense, or edits it when `editing` is set. maintenanceExpenses lets a new one close an earlier revision.
 const props = defineProps<{
@@ -190,7 +191,9 @@ watch(() => maintForm.value.date, (newDate) => {
   }
 })
 
-async function handleCreateMaint() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleCreateMaintAction() {
   if (!props.vehicleId) return
   try {
     let closesId: string | null = null
@@ -230,6 +233,7 @@ async function handleCreateMaint() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleCreateMaint = () => runOnce(handleCreateMaintAction)
 </script>
 
 <template>
@@ -244,7 +248,7 @@ async function handleCreateMaint() {
           <Wrench class="w-5 h-5 text-pink-400" />
           {{ editingMaintId ? $t('expenses.maintenanceModal.edit') : $t('expenses.maintenanceModal.add') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -476,7 +480,7 @@ async function handleCreateMaint() {
                 type="button"
                 @click="emit('view-document', maintForm.document_id, maintForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.maintenanceModal.viewTheDocument')"
+                :title="$t('expenses.maintenanceModal.viewTheDocument')" :aria-label="$t('expenses.maintenanceModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -484,7 +488,7 @@ async function handleCreateMaint() {
                 type="button"
                 @click="maintForm.document_id = null; maintForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.maintenanceModal.detachTheReceipt')"
+                :title="$t('expenses.maintenanceModal.detachTheReceipt')" :aria-label="$t('expenses.maintenanceModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
@@ -524,7 +528,7 @@ async function handleCreateMaint() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="maint-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="maint-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ editingMaintId ? $t('expenses.update') : $t('common.save') }}
         </button>
       </div>

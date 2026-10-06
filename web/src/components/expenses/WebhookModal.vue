@@ -107,7 +107,7 @@ async function handleDeleteWebhook() {
           <Radio class="w-5 h-5 text-violet-400" />
           {{ $t('expenses.webhookModal.homelabWebhookNotifications') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>

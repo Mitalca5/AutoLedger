@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Scale as PageIcon } from 'lucide-vue-next'
@@ -25,6 +26,7 @@ type Mode = 'RETROSPECTIVE' | 'PROJECTION'
 
 const scenarios = ref<any[]>([])
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 const saving = ref(false)
 const defaults = ref<any | null>(null)
 
@@ -118,10 +120,12 @@ function fmtKm(v: number): string {
 
 async function loadScenarios() {
   loading.value = true
+  loadError.value = null
   try {
     scenarios.value = await api.getComparisonScenarios()
   } catch (err) {
     console.error('Failed to load comparisons', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -509,6 +513,7 @@ onBeforeUnmount(destroyChart)
     <!-- Scenario list -->
     <div v-if="view === 'list'">
       <div v-if="loading" class="text-sm text-slate-400">{{ $t('comparison.comparisonView.loading') }}</div>
+      <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadScenarios" />
       <EmptyState v-else-if="scenarios.length === 0">
         {{ $t('comparison.comparisonView.noComparisonYetCreateOne') }}
       </EmptyState>

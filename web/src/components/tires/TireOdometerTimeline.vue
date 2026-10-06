@@ -105,7 +105,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
             <span class="sm:hidden">{{ lane.shortLabel }}</span>
             <span class="hidden sm:inline">{{ lane.label }}</span>
           </span>
-          <div class="relative flex-1 h-5">
+          <div class="relative flex-1 h-5 pointer-coarse:h-9">
             <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 rounded-full overflow-hidden bg-slate-950 border border-slate-800" :class="barHeight">
               <div
                 v-for="(gap, i) in lane.gaps"
@@ -157,7 +157,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
           :class="i === 0 ? '' : i === ticks.length - 1 ? '-translate-x-full' : '-translate-x-1/2'"
           :style="{ left: pct(km) + '%' }"
         >
-          {{ (km / 1000).toLocaleString(intlLocale()) }}k
+          {{ $t('tires.tireOdometerTimeline.tick', { value: (Math.round(kmToDisplayDistance(km)) / 1000).toLocaleString(intlLocale()) }) }}
         </span>
 
         <div

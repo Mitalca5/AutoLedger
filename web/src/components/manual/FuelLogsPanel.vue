@@ -11,6 +11,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { currencySymbol, formatAmount } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, formatPerDistanceValue, perDistance } from '@/units'
+import LoadError from '@/components/LoadError.vue'
 
 const props = defineProps<{
   vehicleId: string
@@ -23,6 +24,7 @@ const { showConfirm, showAlert } = useConfirm()
 
 const stats = ref<any | null>(null)
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 const saving = ref(false)
 const showForm = ref(false)
 useEscapeToClose(showForm, () => (showForm.value = false))
@@ -79,10 +81,12 @@ function fmtDate(d: string): string {
 
 async function load() {
   loading.value = true
+  loadError.value = null
   try {
     stats.value = await api.getFuelLogs(props.vehicleId)
   } catch (err: any) {
     console.error('Failed to load fuel logs', err)
+    loadError.value = err?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -217,6 +221,7 @@ onMounted(load)
     </p>
 
     <div v-if="loading && !stats" class="text-sm text-slate-400">{{ $t('manual.fuelLogsPanel.loading') }}</div>
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="load" />
     <EmptyState v-else-if="logs.length === 0">
       {{ $t('manual.fuelLogsPanel.noFillUpRecordedEnter', { unit: distanceUnit() }) }}
     </EmptyState>

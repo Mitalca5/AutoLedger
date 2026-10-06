@@ -71,7 +71,7 @@ async function handleSave() {
           <Layers class="w-5 h-5 text-indigo-400" />
           {{ $t('drives.tripEditModal.editTheTrip') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :title="$t('common.close')">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :title="$t('common.close')" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>

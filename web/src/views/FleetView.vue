@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import PageHeader from '@/components/PageHeader.vue'
 import { Gauge as PageIcon } from 'lucide-vue-next'
@@ -15,6 +17,7 @@ import { t } from '@/i18n'
 Chart.register(...registerables)
 
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 const summary = ref<FleetSummaryResponse | null>(null)
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
@@ -57,6 +60,7 @@ function submitBudget() {
 
 async function loadFleetSummary() {
   loading.value = true
+  loadError.value = null
   try {
     const data = await api.getFleetSummary()
     summary.value = data
@@ -64,6 +68,7 @@ async function loadFleetSummary() {
     renderChart()
   } catch (err) {
     console.error('Failed to load fleet summary', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -208,6 +213,9 @@ onBeforeUnmount(() => {
     
       </template>
     </PageHeader>
+
+    <LoadError v-if="loadError !== null" :message="loadError" @retry="loadFleetSummary" />
+    <ListSkeleton v-else-if="loading && !summary" :rows="3" />
 
     <!-- Monthly budget -->
     <div v-if="summary" class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
@@ -422,7 +430,7 @@ onBeforeUnmount(() => {
             </div>
             <div>
               <dt class="text-slate-400">{{ t('fleet.compare.completeness') }}</dt>
-              <dd class="font-semibold tabular-nums" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</dd>
+              <dd class="font-semibold tabular-nums" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</dd>
             </div>
           </dl>
         </li>
@@ -452,7 +460,7 @@ onBeforeUnmount(() => {
               <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ energyPer100(v) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</td>
-              <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</td>
+              <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</td>
             </tr>
           </tbody>
         </table>
@@ -497,7 +505,7 @@ onBeforeUnmount(() => {
                 {{ formatDistance(member.distance_km) }} ({{ formatPercent(member.percentage) }})
               </span>
             </div>
-            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, Math.max(0, member.percentage)))" :aria-label="member.display_name">
               <div
                 class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
                 :style="{ width: `${Math.min(100, Math.max(0, member.percentage))}%` }"

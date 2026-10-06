@@ -137,3 +137,51 @@ export interface TireLogForm {
   notes: string
   date: string
 }
+
+export const MAX_TREAD_DEPTH_MM = 20
+
+/** Message key when a measured tread depth is outside what the API accepts (above 0, up to 20 mm), otherwise null. */
+export function validateTreadDepth(depth: number | string | null): string | null {
+  const n = Number(depth)
+  return depth !== '' && depth !== null && n > 0 && n <= MAX_TREAD_DEPTH_MM ? null : 'tires.tireLogModal.depthRange'
+}
+
+export type WearTone = 'ok' | 'warning' | 'danger'
+
+/** Wear tone of a tire: the worse of the tread-depth condition computed by the server and the lifespan used (over 80 % is danger). */
+export function wearTone(lifeProgressPct: number, condition?: string): WearTone {
+  if (condition === 'CRITICAL' || lifeProgressPct > 80) return 'danger'
+  if (condition === 'WARNING') return 'warning'
+  return 'ok'
+}
+
+export const WEAR_TONE_BG: Record<WearTone, string> = { ok: 'bg-success-500', warning: 'bg-warning-500', danger: 'bg-rose-500' }
+export const WEAR_TONE_TEXT: Record<WearTone, string> = { ok: 'text-success-400', warning: 'text-warning-400', danger: 'text-rose-400' }
+
+export type TireFormField = 'brand' | 'model' | 'dimension' | 'price' | 'initial_depth_mm' | 'estimated_lifespan_km'
+
+/** Fields of the add-tire form that can be wrong, each mapped to the message key explaining what to fix. */
+export interface TireFormInput {
+  brand: string
+  model: string
+  dimension: string
+  price: number | string | null
+  initial_depth_mm: number | string | null
+  min_legal_depth_mm: number | string | null
+  estimated_lifespan_km: number | string | null
+}
+
+/** Validation of the add-tire form. An empty price is allowed (it is then recorded as 0, "not set"); a negative one is not. */
+export function validateTireForm(f: TireFormInput): Partial<Record<TireFormField, string>> {
+  const errors: Partial<Record<TireFormField, string>> = {}
+  if (!f.brand.trim()) errors.brand = 'tires.tireAddModal.errors.required'
+  if (!f.model.trim()) errors.model = 'tires.tireAddModal.errors.required'
+  if (!f.dimension.trim()) errors.dimension = 'tires.tireAddModal.errors.required'
+  if (f.price !== '' && f.price !== null && !(Number(f.price) >= 0)) errors.price = 'tires.tireAddModal.errors.priceNegative'
+  const depth = Number(f.initial_depth_mm)
+  const legal = Number(f.min_legal_depth_mm)
+  if (!(depth > 0) || (legal > 0 && depth <= legal)) errors.initial_depth_mm = 'tires.tireAddModal.errors.depth'
+  const lifespan = Number(f.estimated_lifespan_km)
+  if (!(lifespan > 0)) errors.estimated_lifespan_km = 'tires.tireAddModal.errors.lifespan'
+  return errors
+}

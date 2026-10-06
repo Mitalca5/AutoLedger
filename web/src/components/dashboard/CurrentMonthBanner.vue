@@ -6,6 +6,7 @@ import { currentMonthStats as buildCurrentMonthStats } from '@/utils/dashboard'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { distanceUnit, formatDistanceValue, perDistance } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // Highlight of the current month; opens its cost detail
 const props = defineProps<{ monthlyCosts: any[] | undefined }>()
@@ -27,7 +28,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
         <div class="text-base sm:text-lg font-bold text-white flex items-center gap-x-3 gap-y-0.5 mt-0.5 flex-wrap">
           <span>{{ $t('dashboard.currentMonthBanner.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(currentMonthStats.distance_km) }) }}</span>
           <span class="text-slate-400 hidden sm:inline">•</span>
-          <span class="text-success-400">{{ formatAmount(perDistance(currentMonthStats.cost_per_km > 0 ? currentMonthStats.cost_per_km : 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}</span>
+          <span class="text-success-400">{{ formatCostPerDistance(currentMonthStats.cost_per_km, vehicleStore.currency, 3, true) }}</span>
           <span class="text-slate-400 hidden sm:inline">•</span>
           <span class="text-slate-300">{{ $t('dashboard.currentMonthBanner.spent', { value: formatAmount(currentMonthStats.total, vehicleStore.currency) }) }}</span>
           <template v-if="currentMonthStats.fixedVar && currentMonthStats.fixedVar.totalAmount > 0">

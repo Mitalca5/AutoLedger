@@ -3,6 +3,7 @@ import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistanceValue } from '@/units'
+import { formatPercent } from '@/utils/numbers'
 
 // A tire that was disposed of: its cost stays in the TCO
 defineProps<{ t: any; selected: boolean }>()
@@ -12,6 +13,7 @@ const vehicleStore = useVehicleStore()
 
 <template>
   <div
+    v-clickable
     @click="emit('open', t)"
     class="bg-slate-900/60 border border-slate-800 hover:border-rose-500/40 cursor-pointer rounded-2xl p-4 space-y-2 transition-all group"
     :class="{ 'ring-2 ring-rose-500/50 border-rose-500/60': selected }"
@@ -37,7 +39,7 @@ const vehicleStore = useVehicleStore()
       </span>
     </div>
     <div class="text-xs text-slate-400">
-      {{ $t('tires.tireDisposedCard.kmDrivenWear', { unit: distanceUnit(), total_distance_km: formatDistanceValue(t.total_distance_km), life_progress_pct: t.life_progress_pct, purchase_price: formatAmount(Number(t.tire.purchase_price || 0), vehicleStore.currency) }) }}
+      {{ $t('tires.tireDisposedCard.kmDrivenWear', { unit: distanceUnit(), total_distance_km: formatDistanceValue(t.total_distance_km), life_progress_pct: formatPercent(Number(t.life_progress_pct)), purchase_price: formatAmount(Number(t.tire.purchase_price || 0), vehicleStore.currency) }) }}
     </div>
   </div>
 </template>

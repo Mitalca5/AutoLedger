@@ -69,14 +69,14 @@ function clearCardTestResult() {
         <button
           @click="emit('edit', v)"
           class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
-          :title="$t('common.edit')"
+          :title="$t('common.edit')" :aria-label="$t('common.edit')"
         >
           <Edit2 class="w-4 h-4" />
         </button>
         <button
           @click="emit('delete', v.id)"
           class="p-2 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-          :title="$t('common.delete')"
+          :title="$t('common.delete')" :aria-label="$t('common.delete')"
         >
           <Trash2 class="w-4 h-4" />
         </button>

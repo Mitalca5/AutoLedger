@@ -10,6 +10,7 @@ import { emptySessionForm, formatDate, type SessionForm } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds or edits (editingSessionId set) a mount session of selectedTire; initialForm seeds the fields when the modal opens
 const props = defineProps<{
@@ -73,7 +74,9 @@ function onSessionOdometerChange() {
   }
 }
 
-async function handleSaveSession() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleSaveSessionAction() {
   if (!props.vehicleId || !props.selectedTire) return
 
   try {
@@ -108,6 +111,7 @@ async function handleSaveSession() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSaveSession = () => runOnce(handleSaveSessionAction)
 </script>
 
 <template>
@@ -121,7 +125,7 @@ async function handleSaveSession() {
         <h3 class="text-base font-bold text-white">
           {{ editingSessionId ? $t('tires.tireSessionModal.edit') : $t('tires.tireSessionModal.add') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -227,7 +231,7 @@ async function handleSaveSession() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handleSaveSession"
           class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"

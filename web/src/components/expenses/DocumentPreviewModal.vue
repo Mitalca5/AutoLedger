@@ -88,7 +88,7 @@ function openInNewTab() {
             type="button"
             @click="emit('close')"
             class="tap text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition-colors ml-1"
-            :title="$t('common.close')"
+            :title="$t('common.close')" :aria-label="$t('common.close')"
           >
             <X class="w-5 h-5" />
           </button>

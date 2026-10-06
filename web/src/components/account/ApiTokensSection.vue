@@ -5,11 +5,13 @@ import { api, type APITokenInfo, type APITokenCreatedResponse } from '@/services
 import { describeRelativeTime } from '@/utils/userAgent'
 import { useConfirm } from '@/composables/useConfirm'
 import { t } from '@/i18n'
+import LoadError from '@/components/LoadError.vue'
 
 const { showConfirm } = useConfirm()
 
 const tokens = ref<APITokenInfo[]>([])
 const loading = ref(true)
+const loadError = ref<string | null>(null)
 const creating = ref(false)
 const showCreateModal = ref(false)
 const tokenName = ref('')
@@ -20,11 +22,13 @@ const copied = ref(false)
 
 async function loadTokens() {
   loading.value = true
+  loadError.value = null
   try {
     const res = await api.getAPITokens()
     tokens.value = res.tokens || []
   } catch (err) {
     console.error('Failed to load API tokens', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -141,6 +145,7 @@ onMounted(() => {
     <div v-if="loading" class="text-sm text-slate-400 py-2">
       {{ t('account.tokens.loading') }}
     </div>
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadTokens" />
     <div v-else-if="tokens.length === 0" class="text-center py-6 text-xs text-slate-400">
       {{ t('account.tokens.noTokens') }}
     </div>
@@ -173,7 +178,7 @@ onMounted(() => {
           type="button"
           @click="revokeToken(tok)"
           class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-          :title="t('account.tokens.revoke')"
+          :title="t('account.tokens.revoke')" :aria-label="t('account.tokens.revoke')"
         >
           <Trash2 class="h-4 w-4" />
         </button>
@@ -266,7 +271,7 @@ onMounted(() => {
                 type="button"
                 @click="copyToken"
                 class="absolute right-2 top-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                :title="t('account.tokens.copy')"
+                :title="t('account.tokens.copy')" :aria-label="t('account.tokens.copy')"
               >
                 <Check v-if="copied" class="h-4 w-4 text-success-400" />
                 <Copy v-else class="h-4 w-4" />

@@ -11,6 +11,7 @@ import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Dispose (worn out, damaged, sold) keeps history and cost; deleting a tire removes an erroneous entry
 const props = defineProps<{ vehicleId: string; selectedTire: any | null; tires: any[]; currentOdometer: number }>()
@@ -44,7 +45,9 @@ watch(open, (isOpen) => {
   odometerPrefill.reset(isMounted ? Math.round(props.currentOdometer || 0) : null)
 })
 
-async function handleDisposeTire() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleDisposeTireAction() {
   if (!props.vehicleId || !props.selectedTire) return
   const tireId = props.selectedTire.id
   try {
@@ -58,6 +61,7 @@ async function handleDisposeTire() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleDisposeTire = () => runOnce(handleDisposeTireAction)
 </script>
 
 <template>
@@ -72,7 +76,7 @@ async function handleDisposeTire() {
           <Archive class="w-4 h-4 text-warning-400" />
           {{ $t('tires.tireDisposeModal.scrap') }}
         </h3>
-        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -100,7 +104,7 @@ async function handleDisposeTire() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="tire-dispose-modal-form" class="bg-warning-600 hover:bg-warning-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="tire-dispose-modal-form" class="bg-warning-600 hover:bg-warning-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
           {{ $t('tires.tireDisposeModal.scrap') }}
         </button>
       </div>

@@ -8,6 +8,7 @@ import { needsTollQualification } from '@/utils/drives'
 import { formatDayTime } from '@/utils/dates'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistance, perDistance } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // One drive of the list: click opens its cost breakdown.
 defineProps<{ d: any; selected: boolean }>()
@@ -27,6 +28,7 @@ const formatDate = formatDayTime
 
 <template>
   <div
+    v-clickable
     @click="emit('open', d)"
     class="bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group"
     :class="{ 'border-rose-500/40 bg-slate-800/40 shadow-lg shadow-rose-950/20': selected }"
@@ -124,7 +126,7 @@ const formatDate = formatDayTime
           <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
             <span>{{ d.costs?.has_estimates ? '~' : '' }}{{ formatAmount(d.costs?.total_cost || 0, vehicleStore.currency) }}</span>
             <span class="text-xs font-normal text-success-400 font-mono">
-              {{ formatAmount(perDistance(d.costs?.cost_per_km || 0), vehicleStore.currency, 3) }}/{{ distanceUnit() }}
+              {{ formatCostPerDistance(d.costs?.cost_per_km, vehicleStore.currency, 3, true) }}
             </span>
           </div>
         </div>
@@ -146,14 +148,14 @@ const formatDate = formatDayTime
         <button
           @click="emit('edit', d)"
           class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
-          :title="$t('common.edit')"
+          :title="$t('common.edit')" :aria-label="$t('common.edit')"
         >
           <Pencil class="w-3.5 h-3.5" />
         </button>
         <button
           @click="emit('delete', d)"
           class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
-          :title="$t('common.delete')"
+          :title="$t('common.delete')" :aria-label="$t('common.delete')"
         >
           <Trash2 class="w-3.5 h-3.5" />
         </button>

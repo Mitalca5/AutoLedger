@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Ruler, X } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { type TireLogForm } from '@/utils/tires'
+import { type TireLogForm, validateTreadDepth } from '@/utils/tires'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds or edits (editingLogId set) a tread depth measurement of selectedTire; initialForm seeds the fields when the modal opens
 const props = defineProps<{ vehicleId: string; selectedTire: any | null; editingLogId: string | null; initialForm: TireLogForm }>()
@@ -26,11 +27,23 @@ const newLogForm = ref<TireLogForm>({
 })
 
 watch(open, (isOpen) => {
-  if (isOpen) newLogForm.value = { ...props.initialForm }
+  if (!isOpen) return
+  submitted.value = false
+  newLogForm.value = { ...props.initialForm }
 })
 
-async function handleAddLog() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+const submitted = ref(false)
+const depthError = computed(() => (submitted.value ? validateTreadDepth(newLogForm.value.depth_mm) : null))
+
+async function handleAddLogAction() {
   if (!props.vehicleId || !props.selectedTire) return
+  submitted.value = true
+  if (validateTreadDepth(newLogForm.value.depth_mm)) {
+    document.getElementById('tire-new-log-depth-mm')?.focus()
+    return
+  }
   try {
     const payload = {
       depth_mm: Number(newLogForm.value.depth_mm),
@@ -49,6 +62,7 @@ async function handleAddLog() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleAddLog = () => runOnce(handleAddLogAction)
 </script>
 
 <template>
@@ -63,7 +77,7 @@ async function handleAddLog() {
           <Ruler class="w-4 h-4 text-success-400" />
           {{ editingLogId ? $t('tires.tireLogModal.edit') : $t('tires.tireLogModal.new') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -75,10 +89,13 @@ async function handleAddLog() {
             v-model.number="newLogForm.depth_mm"
             type="number"
             step="0.1"
-            min="1.0"
-            max="10.0"
+            min="0.1"
+            max="20"
+            :aria-invalid="depthError ? 'true' : undefined"
+            aria-describedby="tire-new-log-depth-error"
             class="field font-bold"
           />
+          <p v-if="depthError" id="tire-new-log-depth-error" class="mt-1 text-xs text-danger-400">{{ $t(depthError) }}</p>
         </div>
         <div>
           <label for="tire-new-log-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.currentOdometerKm', { unit: distanceUnit() }) }}</label>
@@ -110,7 +127,7 @@ async function handleAddLog() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handleAddLog"
           class="bg-success-600 hover:bg-success-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"

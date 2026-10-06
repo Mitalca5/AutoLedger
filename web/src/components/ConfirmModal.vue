@@ -91,7 +91,7 @@ watch(isOpen, async (open) => {
                 type="button"
                 @click="onCancel"
                 class="tap p-1.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
-                :title="$t('common.close')"
+                :title="$t('common.close')" :aria-label="$t('common.close')"
               >
                 <X class="w-4 h-4" />
               </button>

@@ -13,6 +13,7 @@ import { currencySymbol } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Empty fields are left unchanged. fallbackTire / fallbackStats stand in for a tire the list does not carry (opened from its history).
 const props = defineProps<{ vehicleId: string; tires: any[]; tireIds: string[]; fallbackTire: any | null; fallbackStats: any | null }>()
@@ -93,7 +94,9 @@ function init(ids: string[]) {
   tireEditForm.value = form
 }
 
-async function handleSaveTireEdit() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleSaveTireEditAction() {
   if (!props.vehicleId || !tireEditIds.value.length) return
   const f = tireEditForm.value
   const text = (v: string) => (v.trim() ? v.trim() : undefined)
@@ -124,6 +127,7 @@ async function handleSaveTireEdit() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSaveTireEdit = () => runOnce(handleSaveTireEditAction)
 </script>
 
 <template>
@@ -138,7 +142,7 @@ async function handleSaveTireEdit() {
           <Pencil class="w-4 h-4 text-rose-400" />
           {{ tireEditIds.length > 1 ? $t('tires.tireEditModal.editMany', { count: tireEditIds.length }) : $t('tires.tireEditModal.editOne') }}
         </h3>
-        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -241,7 +245,7 @@ async function handleSaveTireEdit() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="tire-edit-modal-form" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="tire-edit-modal-form" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
           {{ $t('common.save') }}
         </button>
       </div>

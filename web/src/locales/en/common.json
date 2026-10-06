@@ -2,6 +2,8 @@
   "cancel": "Cancel",
   "close": "Close",
   "save": "Save",
+  "loadFailed": "Could not load this data.",
+  "retry": "Try again",
   "loading": "Loading...",
   "notes": "Notes",
   "date": "Date",

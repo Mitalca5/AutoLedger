@@ -143,7 +143,7 @@ function handleLogout() {
         <button
           @click="handleLogout"
           class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-          :title="$t('shell.navigation.signOut')"
+          :title="$t('shell.navigation.signOut')" :aria-label="$t('shell.navigation.signOut')"
         >
           <LogOut class="w-4 h-4" />
         </button>

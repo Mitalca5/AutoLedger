@@ -12,6 +12,7 @@ import { CURRENCIES, currencyPayload, formatDate, toLocalDateTimeInput } from '@
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import PublicChargeCalculatorModal from '@/components/expenses/PublicChargeCalculatorModal.vue'
 import { formatNumber } from '@/utils/numbers'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Records a charge made outside TeslaMate, or completes / corrects the cost of `editing`.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[]; currentOdometer: number }>()
@@ -94,7 +95,9 @@ watch(open, (isOpen) => {
   }
 })
 
-async function handleSaveCharge() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleSaveChargeAction() {
   if (!props.vehicleId) return
   const payload = {
     date: new Date(chargeForm.value.date).toISOString(),
@@ -118,6 +121,7 @@ async function handleSaveCharge() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSaveCharge = () => runOnce(handleSaveChargeAction)
 </script>
 
 <template>
@@ -137,7 +141,7 @@ async function handleSaveCharge() {
             {{ $t('expenses.chargeModal.teslamateChargeOfKwhThe', { date: formatDate(editingCharge.date), kwh_added: formatNumber(editingCharge.kwh_added, 2) }) }}
           </p>
         </div>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -215,7 +219,7 @@ async function handleSaveCharge() {
                 type="button"
                 @click="emit('view-document', chargeForm.document_id, chargeForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.chargeModal.viewTheDocument')"
+                :title="$t('expenses.chargeModal.viewTheDocument')" :aria-label="$t('expenses.chargeModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -223,7 +227,7 @@ async function handleSaveCharge() {
                 type="button"
                 @click="chargeForm.document_id = null; chargeForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.chargeModal.detachTheReceipt')"
+                :title="$t('expenses.chargeModal.detachTheReceipt')" :aria-label="$t('expenses.chargeModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
@@ -268,7 +272,7 @@ async function handleSaveCharge() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="charge-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="charge-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.save') }}
         </button>
       </div>

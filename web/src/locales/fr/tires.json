@@ -1,4 +1,5 @@
 {
+  "costPerKmUnset": "Prix d'achat non renseigné",
   "tiresView": {
     "addAPastSessionOn": "Ajouter une session passée sur un lot",
     "recordAPastSessionOn": "Enregistrer une session passée sur un lot de pneus du garage",
@@ -40,7 +41,12 @@
     "deleteSessionTitle": "Supprimer la session de montage",
     "deleteSessionMessage": "Confirmez-vous la suppression de cette session de montage ?",
     "deleteReadingTitle": "Supprimer le relevé de gomme",
-    "deleteReadingMessage": "Supprimer le relevé de {depth} mm du {date} ?"
+    "deleteReadingMessage": "Supprimer le relevé de {depth} mm du {date} ?",
+    "changeSetNeedsStorage": "Aucun jeu de pneus n’est stocké au garage pour l’échange. Ajoutez-en un d’abord avec « Ajouter des pneus ».",
+    "noScrappedTire": "Aucun pneu au rebut",
+    "noScrappedTireHint": "Les pneus mis au rebut (usés, crevés, vendus) apparaissent ici avec leur kilométrage et leur coût final.",
+    "noTireYet": "Aucun pneu enregistré",
+    "noTireYetHint": "Ajoutez le jeu monté sur le véhicule pour suivre son usure, son kilométrage et son coût par distance."
   },
   "tireAddModal": {
     "createTheTires": "Créer les pneus",
@@ -79,11 +85,15 @@
     "unitPrice": "prix unitaire",
     "totalPriceMode": "prix total",
     "customSize": "Dimension personnalisée...",
-    "requiredFields": "Veuillez renseigner la marque, le modèle et la dimension",
-    "requiredFieldsTitle": "Champs requis",
     "front": "Av",
     "rear": "Ar",
-    "customDimension": "Dimension"
+    "customDimension": "Dimension",
+    "errors": {
+      "required": "Obligatoire",
+      "priceNegative": "Le prix ne peut pas être négatif",
+      "depth": "Doit dépasser l'indicateur d'usure légal",
+      "lifespan": "Doit être supérieur à 0"
+    }
   },
   "tireBatchDisposeModal": {
     "finalOdometerIfRemovedOn": "Odomètre final si démonté à cette date.",
@@ -143,7 +153,7 @@
     "odometerAtRemovalKm": "Odomètre au démontage ({unit})"
   },
   "tireDisposedCard": {
-    "kmDrivenWear": "{total_distance_km} {unit} parcourus • Usure : {life_progress_pct}% • {purchase_price}",
+    "kmDrivenWear": "{total_distance_km} {unit} parcourus • Usure : {life_progress_pct} • {purchase_price}",
     "scrapped": "Au rebut",
     "selectForABulkAction": "Sélectionner pour une action par lot"
   },
@@ -239,7 +249,8 @@
     "currentOdometerKm": "Odomètre actuel ({unit})",
     "measuredDepthMm": "Profondeur mesurée (mm)",
     "edit": "Modifier le relevé",
-    "new": "Relevé de sculpture"
+    "new": "Relevé de sculpture",
+    "depthRange": "Saisissez une profondeur supérieure à 0 et d’au plus 20 mm"
   },
   "tireOdometerTimeline": {
     "details": "Fiche",
@@ -248,7 +259,8 @@
     "noFittingSessionWithMileage": "Aucune session de montage avec kilométrage enregistrée.",
     "tiresFittedByMileage": "Pneus montés selon le kilométrage",
     "noTire": "Aucun pneu enregistré ({from} → {to})",
-    "segment": "{lane} : {tire}, de {from} à {to}"
+    "segment": "{lane} : {tire}, de {from} à {to}",
+    "tick": "{value} k"
   },
   "tirePackSwapModal": {
     "confirmTheRotation": "Confirmer la permutation",
@@ -294,7 +306,8 @@
     "costKm": "Coût / {unit}",
     "totalDriven": "Total parcouru",
     "removeFromSelection": "Retirer de la sélection",
-    "selectForBulk": "Sélectionner pour une action par lot"
+    "selectForBulk": "Sélectionner pour une action par lot",
+    "fitATire": "Monter un pneu"
   },
   "wheels": {
     "FL": "Avant gauche",
@@ -331,5 +344,8 @@
     "rearShort": "AR",
     "allShort": "Tous"
   },
-  "sessionCount": "{count} session | {count} sessions"
+  "sessionCount": "{count} session | {count} sessions",
+  "wearBar": {
+    "label": "Usure estimée"
+  }
 }

@@ -56,7 +56,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
             <p class="text-xs text-slate-400">{{ formatDate(trip.date) }}</p>
           </div>
         </div>
-        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0" :title="$t('common.close')">
+        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0" :title="$t('common.close')" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -241,7 +241,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
             @click="emit('recalculate', trip)"
             :disabled="recalculating"
             class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50"
-            :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')"
+            :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')" :aria-label="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')"
           >
             <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': recalculating }" />
           </button>

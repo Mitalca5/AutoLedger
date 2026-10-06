@@ -241,7 +241,7 @@ async function handleExecute() {
           <UploadCloud class="w-5 h-5 text-indigo-400" />
           {{ $t('import.modalTitle') }}
         </h3>
-        <button @click="close" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+        <button @click="close" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>

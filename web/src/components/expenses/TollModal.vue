@@ -12,6 +12,7 @@ import AppDropzone from '@/components/AppDropzone.vue'
 import { CURRENCIES, countUnlistedDrives, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
 import { formatDayTime } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds a toll / parking expense, or edits it when `editing` is set. Its form is seeded when the modal opens.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[] }>()
@@ -143,7 +144,9 @@ function toggleMultiDrive(id: string) {
   }
 }
 
-async function handleCreateToll() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleCreateTollAction() {
   if (!props.vehicleId) return
   try {
     const payload: any = {
@@ -174,6 +177,7 @@ async function handleCreateToll() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleCreateToll = () => runOnce(handleCreateTollAction)
 </script>
 
 <template>
@@ -188,7 +192,7 @@ async function handleCreateToll() {
           <Receipt class="w-5 h-5 text-warning-400" />
           {{ editingTollId ? $t('expenses.tollModal.edit') : $t('expenses.tollModal.add') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -230,6 +234,7 @@ async function handleCreateToll() {
             <button
               type="button"
               @click="associationMode = 'NONE'"
+              :aria-pressed="associationMode === 'NONE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'NONE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -238,6 +243,7 @@ async function handleCreateToll() {
             <button
               type="button"
               @click="associationMode = 'SINGLE'"
+              :aria-pressed="associationMode === 'SINGLE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'SINGLE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -246,6 +252,7 @@ async function handleCreateToll() {
             <button
               type="button"
               @click="associationMode = 'MULTI'"
+              :aria-pressed="associationMode === 'MULTI'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'MULTI' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -280,6 +287,9 @@ async function handleCreateToll() {
               <div
                 v-for="d in recentDrives"
                 :key="d.id"
+                v-clickable
+                role="checkbox"
+                :aria-checked="selectedDriveIds.includes(d.id)"
                 @click="toggleMultiDrive(d.id)"
                 class="flex items-center justify-between p-2 rounded-lg cursor-pointer text-xs border transition-colors"
                 :class="selectedDriveIds.includes(d.id) ? 'bg-warning-500/10 border-warning-500/40 text-warning-200' : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'"
@@ -326,7 +336,7 @@ async function handleCreateToll() {
                 type="button"
                 @click="emit('view-document', tollForm.document_id, tollForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.tollModal.viewTheDocument')"
+                :title="$t('expenses.tollModal.viewTheDocument')" :aria-label="$t('expenses.tollModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -334,7 +344,7 @@ async function handleCreateToll() {
                 type="button"
                 @click="tollForm.document_id = null; tollForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.tollModal.detachTheReceipt')"
+                :title="$t('expenses.tollModal.detachTheReceipt')" :aria-label="$t('expenses.tollModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
@@ -374,7 +384,7 @@ async function handleCreateToll() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="toll-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="toll-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ editingTollId ? $t('expenses.update') : $t('common.save') }}
         </button>
       </div>

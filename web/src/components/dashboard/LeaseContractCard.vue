@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { computed } from 'vue'
 import { Coins, Gauge, Calendar, FileText, CheckCircle2 } from 'lucide-vue-next'
@@ -60,12 +61,12 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
           </span>
           <span class="font-bold text-indigo-300">
             {{ $t('dashboard.leaseContractCard.months', { elapsedMonths: leaseContract.elapsedMonths, totalMonths: leaseContract.totalMonths }) }}
-            <span class="text-slate-400 font-normal">({{ leaseContract.durationProgressPct }} %)</span>
+            <span class="text-slate-400 font-normal">({{ formatPercent(leaseContract.durationProgressPct, 0) }})</span>
           </span>
         </div>
 
         <!-- Progress Bar Track -->
-        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, leaseContract.durationProgressPct))" :aria-label="$t('dashboard.leaseContractCard.durationProgress')">
           <div
             class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
             :style="{ width: `${leaseContract.durationProgressPct}%` }"
@@ -105,7 +106,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         </div>
 
         <!-- Progress Bar Track -->
-        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, leaseContract.mileageProgressPct))" :aria-label="$t('dashboard.leaseContractCard.mileageProgress')">
           <div
             class="h-full rounded-full transition-all duration-500"
             :class="leaseContract.mileageColor"

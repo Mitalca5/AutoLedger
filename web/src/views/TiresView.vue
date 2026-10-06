@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSubmit } from '@/composables/useSubmit'
+import LoadError from '@/components/LoadError.vue'
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import { Disc as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t } from '@/i18n'
 import { ref, onMounted, computed, watch } from 'vue'
@@ -44,6 +47,10 @@ const vehicleStore = useVehicleStore()
 const { showConfirm, showAlert } = useConfirm()
 const tires = ref<any[]>([])
 const loading = ref(false)
+const loadError = ref('')
+const loadFailed = ref(false)
+const ready = computed(() => loadedVehicleId.value === vehicleId.value)
+const loadedVehicleId = ref('')
 
 const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
@@ -162,11 +169,20 @@ const canBatchDispose = computed(() => {
 
 async function loadTires() {
   if (!vehicleStore.activeVehicle) return
+  const id = vehicleStore.activeVehicle.id
   loading.value = true
+  loadError.value = ''
+  loadFailed.value = false
   try {
-    tires.value = (await api.getTires(vehicleStore.activeVehicle.id)) ?? []
-  } catch (err) {
+    const res = (await api.getTires(id)) ?? []
+    if (vehicleStore.activeVehicle?.id !== id) return
+    tires.value = res
+    loadedVehicleId.value = id
+  } catch (err: any) {
     console.error('Failed to load tires', err)
+    loadError.value = err?.message || ''
+    loadFailed.value = true
+    if (loadedVehicleId.value !== id) tires.value = []
   } finally {
     loading.value = false
   }
@@ -191,7 +207,8 @@ onMounted(() => {
 })
 
 // Quick rotations
-async function handleQuickRotate(mode: 'FRONT_BACK' | 'CROSS') {
+const { pending: rotating, run: runOnce } = useSubmit()
+async function quickRotateAction(mode: 'FRONT_BACK' | 'CROSS') {
   if (!vehicleStore.activeVehicle) return
   const odo = Math.round(vehicleStore.activeVehicle.current_odometer || 0)
   const label = mode === 'FRONT_BACK' ? t('tires.tiresView.rotateFrontBack') : t('tires.tiresView.rotateCross')
@@ -213,10 +230,20 @@ async function handleQuickRotate(mode: 'FRONT_BACK' | 'CROSS') {
     showAlert(t('tires.tiresView.rotationError', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleQuickRotate = (mode: 'FRONT_BACK' | 'CROSS') => runOnce(() => quickRotateAction(mode))
 
 function openPackSwapModal() {
   if (!vehicleStore.activeVehicle) return
+  if (storageTires.value.length === 0) {
+    showAlert(t('tires.tiresView.changeSetNeedsStorage'), t('tires.tiresView.changeSet'), 'info')
+    return
+  }
   showPackSwapModal.value = true
+}
+
+function mountOnEmptyWheel() {
+  if (storageTires.value.length > 0) activeTab.value = 'storage'
+  else openAddModal()
 }
 
 function openAddModal() {
@@ -427,8 +454,8 @@ async function handleDeleteLog(l: any) {
       <div v-if="vehicleStore.canEdit" class="flex items-center gap-2 flex-wrap">
         <button
           @click="openPackSwapModal()"
-          :disabled="storageTires.length === 0"
-          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-40"
+          :class="{ 'opacity-60': storageTires.length === 0 }"
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-colors"
           :title="$t('tires.tiresView.swapTheFittedSetWith')"
         >
           <Snowflake class="w-4 h-4 text-info-400" />
@@ -487,7 +514,7 @@ async function handleDeleteLog(l: any) {
     <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
 
     <!-- Header row: Select all toggle & Total info -->
-    <div v-if="vehicleStore.canEdit" class="flex items-center justify-between text-xs text-slate-400 px-2">
+    <div v-if="vehicleStore.canEdit && activeTab !== 'chassis' && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
       <SelectAllToggle
         :checked="isCurrentTabAllSelected"
         :indeterminate="isCurrentTabPartlySelected"
@@ -497,8 +524,16 @@ async function handleDeleteLog(l: any) {
       <span>{{ $t('tires.tiresView.tireSInThisView', { length: currentTabTireIds.length }) }}</span>
     </div>
 
+    <LoadError v-if="loadFailed" :message="loadError" @retry="loadTires" />
+    <ListSkeleton v-else-if="!ready && vehicleId" :rows="3" />
+
     <!-- TAB 1: CHASSIS INTERACTIF (PNEUS MONTÉS) -->
-    <div v-if="activeTab === 'chassis'" class="space-y-6">
+    <div v-if="ready && activeTab === 'chassis'" class="space-y-6">
+      <TireOdometerTimeline
+        :tires="tires"
+        :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"
+        @select-tire="openTimelineTire"
+      />
       <div v-if="vehicleStore.canEdit" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 text-slate-300 font-semibold">
           <RefreshCw class="w-4 h-4 text-rose-400" />
@@ -507,6 +542,7 @@ async function handleDeleteLog(l: any) {
         <div class="flex items-center gap-2 flex-wrap">
           <button
             @click="handleQuickRotate('FRONT_BACK')"
+            :disabled="rotating"
             class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
           >
             <ArrowUpDown class="w-3.5 h-3.5 text-blue-400" />
@@ -514,6 +550,7 @@ async function handleDeleteLog(l: any) {
           </button>
           <button
             @click="handleQuickRotate('CROSS')"
+            :disabled="rotating"
             class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
           >
             <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
@@ -521,14 +558,28 @@ async function handleDeleteLog(l: any) {
           </button>
         </div>
       </div>
-      <TireOdometerTimeline
-        :tires="tires"
-        :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"
-        @select-tire="openTimelineTire"
-      />
+
+      <div v-if="vehicleStore.canEdit && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
+        <SelectAllToggle
+          :checked="isCurrentTabAllSelected"
+          :indeterminate="isCurrentTabPartlySelected"
+          :label="isCurrentTabAllSelected ? $t('tires.tiresView.deselectAll') : $t('tires.tiresView.selectAll')"
+          @toggle="toggleSelectAllCurrentTab"
+        />
+        <span>{{ $t('tires.tiresView.tireSInThisView', { length: currentTabTireIds.length }) }}</span>
+      </div>
+
+      <div v-if="tires.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-10 text-center text-slate-400 space-y-3">
+        <Disc class="w-10 h-10 mx-auto text-slate-400" />
+        <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noTireYet') }}</h3>
+        <p class="text-xs text-slate-400 max-w-sm mx-auto">{{ $t('tires.tiresView.noTireYetHint') }}</p>
+        <button v-if="vehicleStore.canEdit" type="button" @click="openAddModal()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl">
+          {{ $t('tires.tiresView.addTires') }}
+        </button>
+      </div>
 
       <!-- Cartes des 4 roues -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TireWheelCard
           v-for="w in wheels"
           :key="w.pos"
@@ -536,14 +587,16 @@ async function handleDeleteLog(l: any) {
           :label="$t(w.labelKey)"
           :stat="mountedTires[w.pos]"
           :selected="!!mountedTires[w.pos] && selectedTireIds.includes(mountedTires[w.pos].tire.id)"
+          :can-mount="vehicleStore.canEdit"
           @open="openHistoryModal"
           @toggle="toggleTireSelection"
+          @mount="mountOnEmptyWheel"
         />
       </div>
     </div>
 
     <!-- TAB 2: CATALOGUE & STOCK AU GARAGE -->
-    <div v-if="activeTab === 'storage'" class="space-y-4">
+    <div v-if="ready && activeTab === 'storage'" class="space-y-4">
       <div v-if="storageTires.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center text-slate-400 space-y-3">
         <Package class="w-10 h-10 mx-auto text-slate-400" />
         <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noTireInGarageStorage') }}</h3>
@@ -595,7 +648,13 @@ async function handleDeleteLog(l: any) {
     </div>
 
     <!-- TAB 3: PNEUS MIS AU REBUT -->
-    <div v-if="activeTab === 'disposed'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="ready && activeTab === 'disposed' && disposedTires.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center text-slate-400 space-y-3">
+      <Archive class="w-10 h-10 mx-auto text-slate-400" />
+      <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noScrappedTire') }}</h3>
+      <p class="text-xs text-slate-400 max-w-sm mx-auto">{{ $t('tires.tiresView.noScrappedTireHint') }}</p>
+    </div>
+
+    <div v-if="ready && activeTab === 'disposed' && disposedTires.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <TireDisposedCard
         v-for="t in disposedTires"
         :key="t.tire.id"

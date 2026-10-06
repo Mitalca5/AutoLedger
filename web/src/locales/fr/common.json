@@ -2,6 +2,8 @@
   "cancel": "Annuler",
   "close": "Fermer",
   "save": "Enregistrer",
+  "loadFailed": "Impossible de charger ces données.",
+  "retry": "Réessayer",
   "loading": "Chargement...",
   "notes": "Notes",
   "date": "Date",

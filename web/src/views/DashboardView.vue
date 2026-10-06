@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { LayoutDashboard as PageIcon } from 'lucide-vue-next'
 import { ref, onMounted, watch, computed } from 'vue'
@@ -29,6 +30,7 @@ const prefs = usePreferencesStore()
 const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const tco = ref<any | null>(null)
 const loading = ref(true)
+const loadError = ref<string | null>(null)
 const dashboardReminders = ref<MaintenanceReminder[]>([])
 const selectedMonth = ref<any | null>(null)
 
@@ -46,6 +48,7 @@ async function loadTCO() {
     return
   }
   loading.value = true
+  loadError.value = null
   try {
     const [tcoData, remindersData] = await Promise.all([
       api.getTCO(vehicleStore.activeVehicle.id),
@@ -55,6 +58,7 @@ async function loadTCO() {
     dashboardReminders.value = remindersData
   } catch (err) {
     console.error('Failed to load TCO or reminders', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -140,6 +144,8 @@ onMounted(() => {
     </div>
 
     <!-- REAL CONTENT WHEN LOADED -->
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadTCO" />
+
     <div v-else class="space-y-4 sm:space-y-6">
       <UrgentRemindersBanner :reminders="dashboardReminders" />
 
