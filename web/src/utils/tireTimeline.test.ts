@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTireTimeline } from './tireTimeline'
+import { buildTireTimeline, groupTimelineTires, type TimelineTireInfo } from './tireTimeline'
 
 const tire = (id: string, model: string, season: string, sessions: any[]) => ({ tire: { id, brand: 'Hankook', model, dimension: '255/45 R19', season }, sessions })
 const session = (position: string, from: number, to: number | null, mountedDate = '2025-04-28', dismountedDate: string | null = '2025-11-16T00:00:00Z') => ({
@@ -52,5 +52,21 @@ describe('buildTireTimeline', () => {
     expect(info.ongoing).toBe(true)
     expect(info.dismountedDate).toBeNull()
     expect(info.endKm).toBe(25000)
+  })
+})
+
+describe('groupTimelineTires', () => {
+  const tire = (tireId: string, position: string): TimelineTireInfo => ({
+    tireId, label: 'B M', dimension: '195/55R16', position, startKm: 0, endKm: 10, ongoing: false, season: 'WINTER', mountedDate: '2024-11-01', dismountedDate: '2025-04-01',
+  })
+
+  it('counts identical tires fitted without a wheel instead of repeating them', () => {
+    const groups = groupTimelineTires([tire('a', 'STORAGE'), tire('b', 'STORAGE'), tire('c', 'STORAGE'), tire('d', 'STORAGE')])
+    expect(groups).toHaveLength(1)
+    expect(groups[0].count).toBe(4)
+  })
+
+  it('keeps one line per wheel', () => {
+    expect(groupTimelineTires([tire('a', 'FL'), tire('b', 'FR')]).map((g) => g.count)).toEqual([1, 1])
   })
 })

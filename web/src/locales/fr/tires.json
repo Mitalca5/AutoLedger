@@ -211,7 +211,6 @@
     "editTheSession": "Modifier la session",
     "duplicateToOtherTires": "Dupliquer vers d'autres pneus...",
     "copyThisSessionSData": "Copier les données de cette session",
-    "wheel": "Roue : {position}",
     "noSessionRecordedForThis": "Aucune session enregistrée pour ce pneu.",
     "addAPastSession": "Ajouter une session passée",
     "paste": "Coller",
@@ -296,9 +295,10 @@
     "add": "Ajouter une session de montage passée"
   },
   "tireStorageCard": {
+    "lastUsed": "Retiré le {date}",
+    "neverFitted": "Jamais monté",
     "estimatedWear": "Usure estimée",
     "totalDriven": "Total parcouru",
-    "inStorage": "Au garage",
     "selectForABulkAction": "Sélectionner pour une action par lot"
   },
   "tireWheelCard": {
@@ -316,6 +316,7 @@
     "RL": "Arrière gauche",
     "RR": "Arrière droit"
   },
+  "positionUnspecified": "Position non précisée",
   "wheel": "Roue {position}",
   "garage": "Garage",
   "inStorage": "Au garage",

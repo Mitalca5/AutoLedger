@@ -32,6 +32,8 @@ function resolveParams(params: Record<string, unknown> | undefined): Record<stri
       out[name] = perDistance(Number(value.slice(6))).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })
     } else if (typeof value === 'string' && value.startsWith('kw:') && i18n.global.te(`messages.keywords.${value.slice(3)}`)) {
       out[name] = t(`messages.keywords.${value.slice(3)}`)
+    } else if (typeof value === 'number') {
+      out[name] = value.toLocaleString(intlLocale(), { useGrouping: false, maximumFractionDigits: 2 })
     } else {
       out[name] = value
     }

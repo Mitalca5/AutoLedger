@@ -4,7 +4,7 @@ import { Archive, ClipboardPaste, Copy, Edit2, History, Pencil, Plus, Ruler, Shu
 import { useVehicleStore } from '@/stores/vehicle'
 import { apiMessageText } from '@/services/apiError'
 import { formatAmount } from '@/currency'
-import { formatDate, WEAR_TONE_TEXT, wearTone, type SessionForm } from '@/utils/tires'
+import { formatDate, positionLabel, WEAR_TONE_TEXT, wearTone, type SessionForm } from '@/utils/tires'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import TireWearBar from '@/components/tires/TireWearBar.vue'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
@@ -129,18 +129,18 @@ useEscapeToClose(open, () => (open.value = false))
                 : 'bg-info-500/15 text-info-400 border-info-500/30'
             "
           >
-            {{ selectedTireStats.driving_style === 'SPORT' ? $t('tires.tireHistoryModal.sport') : selectedTireStats.driving_style === 'ECO' ? $t('tires.tireHistoryModal.eco') : $t('tires.tireHistoryModal.balanced') }} {{ $t('tires.tireHistoryModal.index', { index: selectedTireStats.driving_stress_index }) }}
+            {{ selectedTireStats.driving_style === 'SPORT' ? $t('tires.tireHistoryModal.sport') : selectedTireStats.driving_style === 'ECO' ? $t('tires.tireHistoryModal.eco') : $t('tires.tireHistoryModal.balanced') }} {{ $t('tires.tireHistoryModal.index', { index: formatNumber(selectedTireStats.driving_stress_index, 2) }) }}
           </span>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.peakAcceleration') }}</div>
-            <div class="font-bold text-rose-400 text-sm mt-0.5">+{{ selectedTireStats.avg_power_max_kw }} kW</div>
+            <div class="font-bold text-rose-400 text-sm mt-0.5">+{{ formatNumber(selectedTireStats.avg_power_max_kw, 0) }} kW</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.peakRegeneration') }}</div>
-            <div class="font-bold text-success-400 text-sm mt-0.5">{{ selectedTireStats.avg_power_min_kw }} kW</div>
+            <div class="font-bold text-success-400 text-sm mt-0.5">{{ formatNumber(selectedTireStats.avg_power_min_kw, 0) }} kW</div>
           </div>
           <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.averageConsumption') }}</div>
@@ -202,7 +202,7 @@ useEscapeToClose(open, () => (open.value = false))
                 >
                   {{ s.dismounted_date ? $t('tires.tireHistoryModal.sessionOver') : $t('tires.tireHistoryModal.currentlyFitted') }}
                 </span>
-                <span class="font-bold text-white">{{ $t('tires.tireHistoryModal.wheel', { position: s.position }) }}</span>
+                <span class="font-bold text-white">{{ positionLabel(s.position) }}</span>
               </div>
 
               <div class="flex items-center gap-1.5">

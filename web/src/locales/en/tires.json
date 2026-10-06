@@ -211,7 +211,6 @@
     "editTheSession": "Edit the session",
     "duplicateToOtherTires": "Duplicate to other tires...",
     "copyThisSessionSData": "Copy this session's data",
-    "wheel": "Wheel: {position}",
     "noSessionRecordedForThis": "No session recorded for this tire.",
     "addAPastSession": "Add a past session",
     "paste": "Paste",
@@ -296,9 +295,10 @@
     "add": "Add a past fitting session"
   },
   "tireStorageCard": {
+    "lastUsed": "Removed on {date}",
+    "neverFitted": "Never fitted",
     "estimatedWear": "Estimated wear",
     "totalDriven": "Total driven",
-    "inStorage": "In storage",
     "selectForABulkAction": "Select for a bulk action"
   },
   "tireWheelCard": {
@@ -316,6 +316,7 @@
     "RL": "Rear left",
     "RR": "Rear right"
   },
+  "positionUnspecified": "Position not specified",
   "wheel": "Wheel {position}",
   "garage": "Garage",
   "inStorage": "In storage",

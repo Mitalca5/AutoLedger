@@ -3,8 +3,8 @@ import { intlLocale } from '@/i18n'
 import { displayDistanceToKm, formatDistance, kmToDisplayDistance } from '@/units'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { X } from 'lucide-vue-next'
-import { buildTireTimeline, tickStep, type TimelineSegment, type TimelineTireInfo } from '../../utils/tireTimeline'
-import { formatDate, getSeasonIcon } from '@/utils/tires'
+import { buildTireTimeline, groupTimelineTires, tickStep, type TimelineSegment, type TimelineTireInfo } from '../../utils/tireTimeline'
+import { formatDate, getSeasonIcon, positionLabel } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 // The tires fitted over the odometer, one thin bar per axle or wheel. A segment shows its detail in a card anchored to
@@ -185,11 +185,12 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
             </button>
           </div>
           <ul class="space-y-1.5">
-            <li v-for="t in shown.tires" :key="t.tireId + t.position" class="text-slate-300">
+            <li v-for="t in groupTimelineTires(shown.tires)" :key="t.tireId + t.position" class="text-slate-300">
               <div class="flex items-center justify-between gap-2">
                 <span class="min-w-0">
-                  <span class="font-mono text-rose-400 mr-1">{{ t.position }}</span>{{ t.label }}
+                  <span class="text-rose-400 font-semibold mr-1">{{ positionLabel(t.position) }}</span>{{ t.label }}
                   <span class="text-slate-400 font-mono">{{ t.dimension }}</span>
+                  <span v-if="t.count > 1" class="text-slate-400 font-semibold">×{{ t.count }}</span>
                 </span>
                 <button v-if="pinned" type="button" class="text-rose-400 hover:text-rose-300 font-semibold shrink-0" @click="selectTire(t.tireId)">
                   {{ $t('tires.tireOdometerTimeline.details') }}

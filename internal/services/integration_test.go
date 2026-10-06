@@ -2486,6 +2486,41 @@ func TestIntegrationUnmountedTireWithoutSessionCounts(t *testing.T) {
 	}
 }
 
+func TestIntegrationHistoricalSessionWithoutWheelIsAmortizedMonthly(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	tco := NewTCOService(db.Pool, "UTC")
+	v := mustVehicle(t, repo, "historical@example.com")
+	v.CurrentOdometer = 20000
+	if err := repo.UpdateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	tire := &models.Tire{VehicleID: &v.ID, Brand: "B", Model: "Winter", Dimension: "205/55 R16", Season: models.TireSeasonWinter,
+		PurchaseDate: time.Now().UTC().AddDate(-1, 0, 0), PurchasePrice: 40000, CurrentPosition: models.TirePosStorage,
+		InitialDepthMm: 8, MinLegalDepthMm: 1.6, EstimatedLifespanKm: 40000}
+	if err := repo.CreateTire(ctx, tire); err != nil {
+		t.Fatal(err)
+	}
+	mounted := time.Now().UTC().AddDate(0, -6, 0)
+	dismounted := time.Now().UTC().AddDate(0, -3, 0)
+	end := 10000.0
+	if err := repo.CreateTireMountSession(ctx, &models.TireMountSession{TireID: tire.ID, VehicleID: v.ID, Position: models.TirePosStorage,
+		MountedDate: mounted, MountedOdometer: 4000, DismountedDate: &dismounted, DismountedOdometer: &end, DistanceKm: 6000}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var booked money.Cents
+	for _, m := range sum.MonthlyCosts {
+		booked += m.TiresAmortized
+	}
+	if booked != 6000 {
+		t.Fatalf("expected the 6,000 km driven on a wheel-less historical session amortized monthly, got %s", booked)
+	}
+}
+
 func TestIntegrationOpenTireSessionIsReplaced(t *testing.T) {
 	_, repo := setupIntegrationDB(t, false)
 	ctx := context.Background()
