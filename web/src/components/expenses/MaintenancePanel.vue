@@ -9,7 +9,7 @@ import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { saveBlob } from '@/utils/download'
 import { t } from '@/i18n'
-import { categoryLabel, expensesOfKind, filterMaintenance, formatDate, maintenanceTotal, maintenanceYears } from '@/utils/expenses'
+import { categoryLabel, categoryStyle, expensesOfKind, filterMaintenance, formatDate, maintenanceTotal, maintenanceYears } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistanceValue } from '@/units'
 
@@ -94,11 +94,12 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
       <div
         v-for="m in visible"
         :key="m.id"
-        class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        class="bg-slate-900 border border-slate-800 border-l-4 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        :class="categoryStyle(m.category).accent"
       >
         <div class="space-y-1 min-w-0 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
+            <span class="text-xs px-2 py-0.5 rounded-full font-bold border shrink-0" :class="categoryStyle(m.category).badge">
               {{ categoryLabel(m.category) }}
             </span>
             <span class="text-xs text-slate-400 shrink-0">{{ formatDate(m.date) }}</span>
@@ -132,7 +133,7 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
           <p class="text-sm font-semibold text-slate-200 truncate">{{ m.description }}</p>
         </div>
         <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-          <div class="text-lg font-extrabold text-white">
+          <div class="text-lg font-extrabold" :class="kind === 'fixed' ? 'text-warning-400' : 'text-white'">
             {{ formatAmount(m.amount, m.currency || vehicleStore.currency) }}
           </div>
           <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">

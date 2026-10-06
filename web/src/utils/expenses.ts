@@ -203,6 +203,22 @@ interface MaintenanceLike {
 }
 
 /** Recurring costs of owning the car, listed apart from servicing and repairs. */
+const CATEGORY_STYLES: Record<string, { badge: string; accent: string }> = {
+  INSURANCE: { badge: 'bg-purple-500/10 text-purple-300 border-purple-500/30', accent: 'border-l-purple-500' },
+  SUBSCRIPTION: { badge: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30', accent: 'border-l-cyan-500' },
+  TAX: { badge: 'bg-amber-500/10 text-amber-300 border-amber-500/30', accent: 'border-l-amber-500' },
+  FINANCING: { badge: 'bg-orange-500/10 text-orange-300 border-orange-500/30', accent: 'border-l-orange-500' },
+  MAINTENANCE: { badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30', accent: 'border-l-emerald-500' },
+  REPAIR: { badge: 'bg-rose-500/10 text-rose-300 border-rose-500/30', accent: 'border-l-rose-500' },
+  ACCESSORY: { badge: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30', accent: 'border-l-indigo-500' },
+}
+const NEUTRAL_STYLE = { badge: 'bg-slate-800 text-slate-300 border-slate-700', accent: 'border-l-slate-600' }
+
+/** Colour classes of an expense category: the badge and the accent bar of its row. */
+export function categoryStyle(category: string): { badge: string; accent: string } {
+  return CATEGORY_STYLES[category] ?? NEUTRAL_STYLE
+}
+
 export const FIXED_COST_CATEGORIES = ['INSURANCE', 'SUBSCRIPTION', 'TAX', 'FINANCING']
 
 export const isFixedCost = (category: string): boolean => FIXED_COST_CATEGORIES.includes(category)

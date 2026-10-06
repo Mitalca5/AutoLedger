@@ -22,6 +22,7 @@ import {
   maintenanceYears,
   sortMaintenanceByDate,
   toLocalDateTimeInput,
+  categoryStyle,
 } from './expenses'
 
 describe('currencyPayload', () => {
@@ -274,5 +275,13 @@ describe('reminderDueTile', () => {
     expect(reminderDueTile({ due_date: '2026-11-01T00:00:00Z', due_odometer: 90000 })).toMatchObject({ kind: 'date', day: 1 })
     expect(reminderDueTile({ due_odometer: 90000 })).toEqual({ kind: 'km', km: 90000 })
     expect(reminderDueTile({})).toBeNull()
+  })
+})
+
+describe('categoryStyle', () => {
+  it('gives each known category its own colour and falls back to neutral', () => {
+    const known = ['INSURANCE', 'SUBSCRIPTION', 'TAX', 'FINANCING', 'MAINTENANCE', 'REPAIR', 'ACCESSORY'].map((c) => categoryStyle(c).accent)
+    expect(new Set(known).size).toBe(known.length)
+    expect(categoryStyle('OTHER').accent).toBe('border-l-slate-600')
   })
 })
