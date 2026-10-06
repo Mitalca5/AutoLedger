@@ -119,7 +119,7 @@ async function deleteOwnershipAction() {
             <FileText class="w-5 h-5 text-indigo-400 shrink-0" />
             <span class="truncate">{{ $t('vehicles.ownershipWizardModal.acquisitionAndFinancing', { name: ownershipVehicle.name }) }}</span>
           </h3>
-          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+          <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0" :aria-label="$t('common.close')">
             <X class="w-5 h-5" />
           </button>
         </div>

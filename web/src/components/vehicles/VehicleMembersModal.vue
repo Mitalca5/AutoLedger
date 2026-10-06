@@ -176,7 +176,7 @@ async function handleRemoveMember(m: any) {
         <button
           @click="open = false"
           class="tap p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-        >
+         :aria-label="$t('common.close')">
           <X class="w-4 h-4" />
         </button>
       </div>

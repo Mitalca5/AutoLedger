@@ -67,7 +67,7 @@ const handleAddLog = () => runOnce(handleAddLogAction)
           <Ruler class="w-4 h-4 text-success-400" />
           {{ editingLogId ? $t('tires.tireLogModal.edit') : $t('tires.tireLogModal.new') }}
         </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-4 h-4" />
         </button>
       </div>

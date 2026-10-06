@@ -370,7 +370,7 @@ async function handleDeleteExpense(exp: any) {
           <ExternalLink class="w-3.5 h-3.5 text-info-400" />
           <span class="hidden sm:inline">TeslaMate</span>
         </a>
-        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0">
+        <button @click="open = false" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>

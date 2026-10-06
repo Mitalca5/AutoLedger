@@ -126,7 +126,7 @@ async function handleSubmit() {
           <Plus class="w-5 h-5 text-rose-400" />
           {{ drive ? $t('drives.manualModal.titleEdit') : $t('drives.manualModal.titleNew') }}
         </h3>
-        <button @click="close" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+        <button @click="close" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
           <X class="w-5 h-5" />
         </button>
       </div>
