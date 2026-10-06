@@ -41,7 +41,12 @@
     "deleteSessionTitle": "Delete the fitting session",
     "deleteSessionMessage": "Do you confirm the deletion of this fitting session?",
     "deleteReadingTitle": "Delete the tread reading",
-    "deleteReadingMessage": "Delete the {depth} mm reading of {date}?"
+    "deleteReadingMessage": "Delete the {depth} mm reading of {date}?",
+    "changeSetNeedsStorage": "There is no tire set in garage storage to swap with. Add one first with \"Add tires\".",
+    "noScrappedTire": "No scrapped tire",
+    "noScrappedTireHint": "Tires you scrap (worn, punctured, sold) appear here with their final mileage and cost.",
+    "noTireYet": "No tire recorded yet",
+    "noTireYetHint": "Add the set fitted on the vehicle to track its wear, mileage and cost per distance."
   },
   "tireAddModal": {
     "createTheTires": "Create the tires",
@@ -300,7 +305,8 @@
     "costKm": "Cost / {unit}",
     "totalDriven": "Total driven",
     "removeFromSelection": "Remove from the selection",
-    "selectForBulk": "Select for a bulk action"
+    "selectForBulk": "Select for a bulk action",
+    "fitATire": "Fit a tire"
   },
   "wheels": {
     "FL": "Front left",

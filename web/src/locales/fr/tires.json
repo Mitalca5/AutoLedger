@@ -41,7 +41,12 @@
     "deleteSessionTitle": "Supprimer la session de montage",
     "deleteSessionMessage": "Confirmez-vous la suppression de cette session de montage ?",
     "deleteReadingTitle": "Supprimer le relevé de gomme",
-    "deleteReadingMessage": "Supprimer le relevé de {depth} mm du {date} ?"
+    "deleteReadingMessage": "Supprimer le relevé de {depth} mm du {date} ?",
+    "changeSetNeedsStorage": "Aucun jeu de pneus n’est stocké au garage pour l’échange. Ajoutez-en un d’abord avec « Ajouter des pneus ».",
+    "noScrappedTire": "Aucun pneu au rebut",
+    "noScrappedTireHint": "Les pneus mis au rebut (usés, crevés, vendus) apparaissent ici avec leur kilométrage et leur coût final.",
+    "noTireYet": "Aucun pneu enregistré",
+    "noTireYetHint": "Ajoutez le jeu monté sur le véhicule pour suivre son usure, son kilométrage et son coût par distance."
   },
   "tireAddModal": {
     "createTheTires": "Créer les pneus",
@@ -300,7 +305,8 @@
     "costKm": "Coût / {unit}",
     "totalDriven": "Total parcouru",
     "removeFromSelection": "Retirer de la sélection",
-    "selectForBulk": "Sélectionner pour une action par lot"
+    "selectForBulk": "Sélectionner pour une action par lot",
+    "fitATire": "Monter un pneu"
   },
   "wheels": {
     "FL": "Avant gauche",

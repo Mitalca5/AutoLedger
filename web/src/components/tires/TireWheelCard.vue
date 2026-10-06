@@ -10,8 +10,8 @@ import { distanceUnit, formatDistance, formatDistanceValue, perDistance } from '
 import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // One wheel of the chassis view: the mounted tire with its wear, or a placeholder when the wheel is empty
-defineProps<{ pos: string; label: string; stat: any | null; selected: boolean }>()
-const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string] }>()
+defineProps<{ pos: string; label: string; stat: any | null; selected: boolean; canMount?: boolean }>()
+const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string]; mount: [] }>()
 const vehicleStore = useVehicleStore()
 </script>
 
@@ -70,5 +70,8 @@ const vehicleStore = useVehicleStore()
   <div v-else class="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8 text-center text-slate-400 flex flex-col items-center justify-center space-y-2">
     <Disc class="w-8 h-8 opacity-30" />
     <span>{{ $t('tires.tireWheelCard.noTireFittedAtThe', { label, pos }) }}</span>
+    <button v-if="canMount" type="button" @click="emit('mount')" class="text-xs font-semibold text-rose-400 hover:text-rose-300 underline">
+      {{ $t('tires.tireWheelCard.fitATire') }}
+    </button>
   </div>
 </template>
