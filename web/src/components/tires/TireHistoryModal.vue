@@ -7,6 +7,7 @@ import { formatAmount } from '@/currency'
 import { formatDate, type SessionForm } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceValue, perDistance } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 const vehicleStore = useVehicleStore()
 
@@ -110,7 +111,7 @@ useEscapeToClose(open, () => (open.value = false))
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>
-            <div class="font-bold text-warning-400">{{ formatAmount(perDistance(Number(selectedTireStats?.cost_per_km)), vehicleStore.currency, 4) }}</div>
+            <div class="font-bold text-warning-400" :title="Number(selectedTire?.purchase_price) > 0 ? undefined : $t('tires.costPerKmUnset')">{{ formatCostPerDistance(selectedTireStats?.cost_per_km, vehicleStore.currency, 4) }}</div>
           </div>
         </div>
       </div>

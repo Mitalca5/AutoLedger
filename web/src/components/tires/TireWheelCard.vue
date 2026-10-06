@@ -6,6 +6,7 @@ import { getConditionBadge } from '@/utils/tires'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { distanceUnit, formatDistance, formatDistanceValue, perDistance } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // One wheel of the chassis view: the mounted tire with its wear, or a placeholder when the wheel is empty
 defineProps<{ pos: string; label: string; stat: any | null; selected: boolean }>()
@@ -51,7 +52,7 @@ const vehicleStore = useVehicleStore()
       </div>
       <div>
         <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireWheelCard.costKm', { unit: distanceUnit() }) }}</div>
-        <div class="text-sm font-bold text-warning-400">{{ formatAmount(perDistance(Number(stat.cost_per_km)), vehicleStore.currency, 4) }}</div>
+        <div class="text-sm font-bold text-warning-400" :title="Number(stat.tire.purchase_price) > 0 ? undefined : $t('tires.costPerKmUnset')">{{ formatCostPerDistance(stat.cost_per_km, vehicleStore.currency, 4) }}</div>
       </div>
     </div>
 

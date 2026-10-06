@@ -1,4 +1,5 @@
 {
+  "costPerKmUnset": "Purchase price not set",
   "tiresView": {
     "addAPastSessionOn": "Add a past session on a set",
     "recordAPastSessionOn": "Record a past session on a set of garage tires",

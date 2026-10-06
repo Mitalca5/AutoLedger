@@ -17,6 +17,7 @@ import CostDonut from '@/components/costs/CostDonut.vue'
 import CostItemRow from '@/components/costs/CostItemRow.vue'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, kmToDisplayDistance, perDistance, speedUnit } from '@/units'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // Cost breakdown of a drive, or of a trip group (drive.is_trip_group, whose drives are tripDriveIds), with its
 // expenses (edit, delete, add a toll) and the toll detection. A detected trip that is not created yet
@@ -796,7 +797,7 @@ async function handleDeleteExpense(exp: any) {
           <div class="text-right">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
             <div class="text-lg font-extrabold text-success-400 font-mono">
-              {{ formatAmount(perDistance(selectedCostDrive.costs?.cost_per_km || 0), vehicleCurrency, 3) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
+              {{ formatCostPerDistance(selectedCostDrive.costs?.cost_per_km, vehicleCurrency, 3, true) }}
             </div>
           </div>
         </div>

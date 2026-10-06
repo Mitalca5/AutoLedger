@@ -1,4 +1,5 @@
 {
+  "costPerKmUnset": "Prix d'achat non renseigné",
   "tiresView": {
     "addAPastSessionOn": "Ajouter une session passée sur un lot",
     "recordAPastSessionOn": "Enregistrer une session passée sur un lot de pneus du garage",
