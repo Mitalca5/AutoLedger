@@ -290,7 +290,7 @@
     "ev_required": "Les données du véhicule électrique sont requises en mode projection",
     "ev_consumption": "Consommation électrique invalide ({p0} à {p1} kWh/100 {unit})",
     "electricity_price": "Prix de l'électricité invalide (0 à 5 par kWh)",
-    "needs_ev": "Le comparatif « véhicule suivi » s'appuie sur un véhicule électrique ; utilisez le mode projection",
+    "needs_ev": "Le comparatif suivi nécessite un véhicule électrique ou hybride rechargeable ; utilisez la projection pour un véhicule thermique",
     "mode_invalid": "Mode invalide (RETROSPECTIVE ou PROJECTION)"
   },
   "webhook": {

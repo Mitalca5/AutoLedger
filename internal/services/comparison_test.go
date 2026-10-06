@@ -236,3 +236,42 @@ func TestEVBaselineFromInputsAndAnnualKm(t *testing.T) {
 		t.Errorf("no distance should fall back, got %v (%v)", km, ok)
 	}
 }
+
+func TestHybridComparisonInflationAndFuelSensitivity(t *testing.T) {
+	sc := baseScenario()
+	sc.Years = 2
+	sc.Options.FuelInflationPct = 10
+	sc.Options.ElectricityInflationPct = 20
+	// 10,000 km/year: fuel 400/year, electricity 200/year.
+	ev := EVBaseline{EnergyPerKm: 0.06, FuelPerKm: 0.04}
+	res := ComputeComparison(sc, ev)
+	if res.EV.Energy != eur(1280) {
+		t.Fatalf("hybrid energy = %v, want 400+440+200+240", res.EV.Energy)
+	}
+	for _, row := range res.Sensitivity {
+		// Fuel-price changes affect both the conventional vehicle and the hybrid.
+		if row.Label.Code == "comparison.sensitivity.fuel_up" && row.DeltaShift != eur(210) {
+			t.Errorf("fuel-up shift = %v, want 210", row.DeltaShift)
+		}
+		if row.Label.Code == "comparison.sensitivity.fuel_down" && row.DeltaShift != eur(-210) {
+			t.Errorf("fuel-down shift = %v, want -210", row.DeltaShift)
+		}
+	}
+}
+
+func TestHybridBaselineUsesRecordedCosts(t *testing.T) {
+	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV} {
+		t.Run(powertrain, func(t *testing.T) {
+			sum := &TCOSummary{Powertrain: powertrain, DistanceBasisKm: 1000, EnergyCost: eur(90), FuelEnergyCost: eur(60)}
+			baseline, _ := evBaselineFromTCO(sum, 10000, 2)
+			if baseline.EnergyPerKm != 0.09 || baseline.FuelPerKm != 0.06 {
+				t.Fatalf("unexpected baseline: %+v", baseline)
+			}
+			sc := baseScenario()
+			sc.Years = 1
+			if result := ComputeComparison(sc, baseline); result.EV.Energy != eur(900) {
+				t.Errorf("energy = %v, want 900", result.EV.Energy)
+			}
+		})
+	}
+}

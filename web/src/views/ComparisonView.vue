@@ -41,8 +41,8 @@ const fuelTypes = computed<any[]>(() => defaults.value?.ice || [])
 // The server names each fuel in English; the catalog has the current language's name.
 const fuelLabel = (f: { fuel_type: string; label: string }) => (te(`comparison.fuelTypes.${f.fuel_type}`) ? t(`comparison.fuelTypes.${f.fuel_type}`) : f.label)
 
-// The tracked-vehicle comparison relies on an electric vehicle's real costs
-const canCompareTrackedVehicle = computed(() => !!vehicleStore.activeVehicle && vehicleStore.electricOnly)
+// Electric and plug-in hybrid vehicles use their recorded energy costs.
+const canCompareTrackedVehicle = computed(() => !!vehicleStore.activeVehicle && vehicleStore.canCharge)
 
 function emptyForm() {
   return {

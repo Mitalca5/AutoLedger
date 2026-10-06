@@ -25,9 +25,9 @@
       "break_even": "The break-even compares cumulative outlays (purchase + running costs), without resale",
       "inflation": "Yearly inflation: fuel {p0} %, electricity {p1} %, maintenance/insurance/taxes {p2} %",
       "constant_prices": "Constant prices (no inflation applied)",
-      "ev_actual": "Electric side: actual costs of the tracked vehicle per {unit} (insurance and depreciation included)",
-      "ev_price_unknown": "Electric purchase price unknown (lease or missing entry): electric depreciation not included",
-      "ev_no_distance": "No tracked mileage: the actual electric costs are zero"
+      "ev_actual": "Reference side: recorded costs per {unit}, including fuel and electricity for hybrids (insurance and depreciation included)",
+      "ev_price_unknown": "Reference purchase price unknown (lease or missing entry): depreciation not included",
+      "ev_no_distance": "No tracked mileage: recorded costs cannot provide a reliable comparison"
     },
     "defaults_source": "Indicative values for France, to adjust"
   },

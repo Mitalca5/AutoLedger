@@ -138,7 +138,9 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	// 3. Ledger totals per category
 	byCategory := map[string]money.Cents{}
 	rows, err := s.pool.Query(ctx, `
-		SELECT category, COALESCE(SUM(amount_eur), 0) FROM cost_ledger WHERE vehicle_id = $1 GROUP BY category;
+		SELECT category, COALESCE(SUM(amount_eur), 0),
+		       COALESCE(SUM(amount_eur) FILTER (WHERE source_table = 'fuel_logs'), 0)
+		FROM cost_ledger WHERE vehicle_id = $1 GROUP BY category;
 	`, vehicleID)
 	if err != nil {
 		return nil, fmt.Errorf("ledger: %w", err)
@@ -146,11 +148,15 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	for rows.Next() {
 		var category string
 		var amount money.Cents
-		if err := rows.Scan(&category, &amount); err != nil {
+		var fuelAmount money.Cents
+		if err := rows.Scan(&category, &amount, &fuelAmount); err != nil {
 			rows.Close()
 			return nil, err
 		}
 		byCategory[category] = amount
+		if category == LedgerEnergy {
+			sum.FuelEnergyCost = fuelAmount
+		}
 	}
 	rows.Close()
 	if err := rows.Err(); err != nil {

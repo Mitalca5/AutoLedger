@@ -19,8 +19,8 @@ const minMonthsForAnnualKm = 3
 // ErrComparisonNeedsVehicle is returned when a RETROSPECTIVE comparison has no reference vehicle.
 var ErrComparisonNeedsVehicle = errors.New("comparison: retrospective mode requires a vehicle")
 
-// ErrComparisonNeedsEV is returned when a RETROSPECTIVE comparison references a vehicle that is not purely electric.
-var ErrComparisonNeedsEV = errors.New("comparison: retrospective mode requires an electric vehicle")
+// ErrComparisonNeedsEV is returned when the tracked vehicle cannot record charging sessions.
+var ErrComparisonNeedsEV = errors.New("comparison: retrospective mode requires an electric or plug-in hybrid vehicle")
 
 // ICEDefault is an indicative starting point for the equivalent combustion vehicle of a given fuel.
 type ICEDefault struct {
@@ -77,20 +77,21 @@ func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int) (EVBaseline
 	basis := sum.DistanceBasisKm
 	ev := EVBaseline{
 		EnergyPerKm:      ratePerKm(sum.EnergyCost, basis),
+		FuelPerKm:        ratePerKm(sum.FuelEnergyCost, basis),
 		MaintenancePerKm: ratePerKm(sum.TiresAmortizedCost+sum.MaintenanceCost+sum.RepairCost, basis),
 		InsurancePerKm:   ratePerKm(sum.InsuranceCost, basis),
 		PurchaseNet:      sum.AcquisitionCost.Float(),
 	}
-	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: actual costs of the tracked vehicle per km (insurance and depreciation included)")}
+	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Reference side: recorded costs per km, including fuel and electricity for hybrids (insurance and depreciation included)")}
 
 	if ev.PurchaseNet > 0 {
 		dep := ratePerKm(sum.DepreciationCost, basis) * annualKm * float64(years)
 		ev.ResaleValue = math.Max(ev.PurchaseNet-dep, 0)
 	} else {
-		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Electric purchase price unknown (lease or missing entry): electric depreciation not included"))
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Reference purchase price unknown (lease or missing entry): depreciation not included"))
 	}
 	if basis <= 0 {
-		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_no_distance", "No tracked mileage: the actual electric costs are zero"))
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_no_distance", "No tracked mileage: recorded costs cannot provide a reliable comparison"))
 	}
 	return ev, notes
 }
@@ -120,7 +121,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		if err != nil {
 			return nil, err
 		}
-		if !models.PowertrainIsElectricOnly(sum.Powertrain) {
+		if !models.PowertrainCanCharge(sum.Powertrain) {
 			return nil, ErrComparisonNeedsEV
 		}
 		ev, notes = evBaselineFromTCO(sum, sc.AnnualKm, sc.Years)
