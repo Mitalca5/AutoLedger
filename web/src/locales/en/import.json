@@ -85,5 +85,7 @@
   "rateAdd": "Add slice",
   "rateDelete": "Delete",
   "rateSlice": "{from} – {to} km: {rate} / km",
-  "rateOpenEnded": "no limit"
+  "rateOpenEnded": "no limit",
+  "profileNameRequired": "Enter a profile name first",
+  "rateRequired": "Enter a scale name and a rate first"
 }

@@ -454,7 +454,7 @@ async function handleExecute() {
                 <label for="csv-profile-name" class="block text-slate-400 mb-1">{{ $t('import.profileSaveLabel') }}</label>
                 <div class="flex items-center gap-2">
                   <input id="csv-profile-name" v-model="profileName" maxlength="60" type="text" :placeholder="$t('import.profileNamePlaceholder')" class="field flex-1" />
-                  <button type="button" :disabled="!profileName.trim()" @click="saveProfile" class="shrink-0 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg disabled:opacity-50">{{ $t('common.save') }}</button>
+                  <button type="button" :disabled="!profileName.trim()" :title="!profileName.trim() ? $t('import.profileNameRequired') : undefined" @click="saveProfile" class="shrink-0 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg disabled:opacity-50">{{ $t('common.save') }}</button>
                 </div>
                 <ul v-if="profilesForType.length" class="mt-2 space-y-1">
                   <li v-for="p in profilesForType" :key="p.id" class="flex items-center justify-between gap-2 text-slate-400">

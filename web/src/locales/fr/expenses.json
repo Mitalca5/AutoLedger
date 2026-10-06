@@ -295,7 +295,9 @@
       "saveName": "Nom du modèle",
       "save": "Enregistrer les rappels actuels comme modèle",
       "applied": "{created} rappel(s) ajouté(s), {skipped} déjà présent(s).",
-      "saved": "Modèle enregistré."
+      "saved": "Modèle enregistré.",
+      "pickFirst": "Choisissez d'abord un modèle",
+      "nameFirst": "Saisissez d'abord un nom de modèle"
     },
     "observedInterval": "Vous le faites en moyenne tous les {km} {unit} / {months} mois",
     "dueToday": "Aujourd'hui",

@@ -70,17 +70,17 @@ onMounted(load)
           <option value="">{{ $t('expenses.remindersPanel.templates.pick') }}</option>
           <option v-for="tpl in templates" :key="tpl.id" :value="tpl.id">{{ tpl.name }} ({{ tpl.items.length }})</option>
         </select>
-        <button type="button" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!selected" @click="apply">
+        <button type="button" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!selected" :title="!selected ? $t('expenses.remindersPanel.templates.pickFirst') : undefined" @click="apply">
           {{ $t('expenses.remindersPanel.templates.apply') }}
         </button>
-        <button type="button" class="text-slate-400 hover:text-danger-400 disabled:opacity-40" :disabled="!selected" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
+        <button type="button" class="text-slate-400 hover:text-danger-400 disabled:opacity-40" :disabled="!selected" :title="!selected ? $t('expenses.remindersPanel.templates.pickFirst') : undefined" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">
           <Trash2 class="w-4 h-4" />
         </button>
       </div>
       <p v-else class="text-slate-400 italic">{{ $t('expenses.remindersPanel.templates.none') }}</p>
       <div v-if="hasReminders" class="flex flex-wrap gap-2 items-center">
         <input v-model="newName" maxlength="100" :placeholder="$t('expenses.remindersPanel.templates.saveName')" :aria-label="$t('expenses.remindersPanel.templates.saveName')" class="w-auto field" />
-        <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-semibold disabled:opacity-50" :disabled="!newName.trim()" @click="save">
+        <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-semibold disabled:opacity-50" :disabled="!newName.trim()" :title="!newName.trim() ? $t('expenses.remindersPanel.templates.nameFirst') : undefined" @click="save">
           {{ $t('expenses.remindersPanel.templates.save') }}
         </button>
       </div>

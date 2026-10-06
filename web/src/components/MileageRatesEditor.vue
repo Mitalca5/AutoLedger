@@ -78,7 +78,7 @@ onMounted(load)
       <input v-model.number="toKm" type="number" min="1" :placeholder="$t('import.rateTo')" :aria-label="$t('import.rateTo')" class="field" />
     </div>
     <p v-if="error" class="text-xs text-danger-400" role="alert">{{ error }}</p>
-    <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold disabled:opacity-50" :disabled="!label || rate === null" @click="add">
+    <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold disabled:opacity-50" :disabled="!label || rate === null" :title="!label || rate === null ? $t('import.rateRequired') : undefined" @click="add">
       {{ $t('import.rateAdd') }}
     </button>
   </div>
