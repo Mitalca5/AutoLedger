@@ -258,7 +258,7 @@ useEscapeToClose(open, () => (open.value = false))
             <div class="flex items-center justify-between text-xs pt-1">
               <span v-if="s.notes" class="text-slate-400 italic">"{{ s.notes }}"</span>
               <span v-else></span>
-              <span class="font-bold text-rose-400">{{ $t('tires.tireHistoryModal.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(s.distance_km) }) }}</span>
+              <span class="font-bold text-rose-400">{{ $t('tires.tireHistoryModal.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(s.dismounted_date ? s.distance_km : selectedTireStats?.current_run_km ?? s.distance_km) }) }}</span>
             </div>
           </div>
         </div>

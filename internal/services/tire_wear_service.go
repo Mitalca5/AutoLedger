@@ -21,6 +21,7 @@ type TireWearStats struct {
 	WearPercentage       float64                   `json:"wear_percentage"`
 	DistanceTraveledKm   float64                   `json:"distance_traveled_km"`
 	TotalDistanceKm      float64                   `json:"total_distance_km"`
+	CurrentRunKm         float64                   `json:"current_run_km"` // Driven since the open mount session started
 	EstimatedLifespanKm  int                       `json:"estimated_lifespan_km"`
 	LifeProgressPct      float64                   `json:"life_progress_pct"`
 	CostPerKm            float64                   `json:"cost_per_km"`
@@ -286,6 +287,7 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 		WearPercentage:         math.Round(wearPct*10) / 10,
 		DistanceTraveledKm:     math.Round(distanceTraveled),
 		TotalDistanceKm:        math.Round(totalDistance*10) / 10,
+		CurrentRunKm:           math.Round(currentRunKm*10) / 10,
 		EstimatedLifespanKm:    lifespan,
 		LifeProgressPct:        lifeProgressPct,
 		CostPerKm:              costPerKm,
