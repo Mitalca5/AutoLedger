@@ -127,9 +127,9 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
         <p v-else class="text-slate-400">{{ $t('dashboard.residualPanel.noHealth') }}</p>
         <p class="text-slate-400">{{ $t('dashboard.residualPanel.healthHint') }}</p>
         <form class="flex flex-wrap gap-2 items-end" @submit.prevent="saveReading">
-          <input v-model="readingDate" type="date" :aria-label="$t('dashboard.residualPanel.date')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-          <input v-model="readingPercent" type="number" min="1" max="100" step="0.1" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-          <input v-model="readingMax" type="number" min="1" step="0.1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+          <input v-model="readingDate" type="date" :aria-label="$t('dashboard.residualPanel.date')" class="w-auto field" />
+          <input v-model="readingPercent" type="number" min="1" max="100" step="0.1" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 field" />
+          <input v-model="readingMax" type="number" min="1" step="0.1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 field" />
           <button type="submit" class="px-3 py-2 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!readingPercent && !readingMax">{{ $t('dashboard.residualPanel.addReading') }}</button>
         </form>
         <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
@@ -145,7 +145,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
         <h4 class="font-bold text-slate-200">{{ $t('dashboard.residualPanel.residual') }}</h4>
         <div class="flex flex-wrap gap-2 items-end">
           <label class="text-slate-400">{{ $t('dashboard.residualPanel.expectedKm') }}
-            <input v-model="expectedKm" type="number" min="0" step="1000" class="block w-32 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
+            <input v-model="expectedKm" type="number" min="0" step="1000" class="block w-32 field" @change="loadResidual" />
           </label>
         </div>
         <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2">
@@ -153,10 +153,10 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
           <p class="mt-2 text-slate-400">{{ $t('dashboard.residualPanel.advancedHint') }}</p>
           <div class="mt-2 flex flex-wrap items-end gap-2">
             <label class="text-slate-400">{{ $t('dashboard.residualPanel.kmShare') }}
-              <input v-model="kmShare" type="number" min="0" max="100" step="5" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
+              <input v-model="kmShare" type="number" min="0" max="100" step="5" class="block w-24 field" @change="loadResidual" />
             </label>
             <label v-if="showBattery" class="text-slate-400">{{ $t('dashboard.residualPanel.healthWeight') }}
-              <input v-model="healthWeight" type="number" min="0" max="2" step="0.1" class="block w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" @change="loadResidual" />
+              <input v-model="healthWeight" type="number" min="0" max="2" step="0.1" class="block w-24 field" @change="loadResidual" />
             </label>
           </div>
         </details>

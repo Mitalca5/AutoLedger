@@ -66,7 +66,7 @@ onMounted(load)
     <div class="mt-3 space-y-3">
       <p class="text-slate-400">{{ $t('expenses.remindersPanel.templates.hint') }}</p>
       <div v-if="templates.length" class="flex flex-wrap gap-2 items-center">
-        <select v-model="selected" :aria-label="$t('expenses.remindersPanel.templates.pick')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+        <select v-model="selected" :aria-label="$t('expenses.remindersPanel.templates.pick')" class="w-auto field">
           <option value="">{{ $t('expenses.remindersPanel.templates.pick') }}</option>
           <option v-for="tpl in templates" :key="tpl.id" :value="tpl.id">{{ tpl.name }} ({{ tpl.items.length }})</option>
         </select>
@@ -79,7 +79,7 @@ onMounted(load)
       </div>
       <p v-else class="text-slate-400 italic">{{ $t('expenses.remindersPanel.templates.none') }}</p>
       <div v-if="hasReminders" class="flex flex-wrap gap-2 items-center">
-        <input v-model="newName" maxlength="100" :placeholder="$t('expenses.remindersPanel.templates.saveName')" :aria-label="$t('expenses.remindersPanel.templates.saveName')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+        <input v-model="newName" maxlength="100" :placeholder="$t('expenses.remindersPanel.templates.saveName')" :aria-label="$t('expenses.remindersPanel.templates.saveName')" class="w-auto field" />
         <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-semibold disabled:opacity-50" :disabled="!newName.trim()" @click="save">
           {{ $t('expenses.remindersPanel.templates.save') }}
         </button>

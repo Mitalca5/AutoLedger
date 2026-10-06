@@ -71,11 +71,11 @@ onMounted(load)
       </li>
     </ul>
     <div class="grid grid-cols-2 gap-2">
-      <input v-model="label" :placeholder="$t('import.rateLabel')" :aria-label="$t('import.rateLabel')" maxlength="100" class="col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-      <input v-model.number="year" type="number" :aria-label="$t('import.rateYear')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-      <input v-model.number="rate" type="number" step="0.001" min="0" :placeholder="$t('import.ratePerKm')" :aria-label="$t('import.ratePerKm')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-      <input v-model.number="fromKm" type="number" min="0" :placeholder="$t('import.rateFrom')" :aria-label="$t('import.rateFrom')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
-      <input v-model.number="toKm" type="number" min="1" :placeholder="$t('import.rateTo')" :aria-label="$t('import.rateTo')" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+      <input v-model="label" :placeholder="$t('import.rateLabel')" :aria-label="$t('import.rateLabel')" maxlength="100" class="col-span-2 field" />
+      <input v-model.number="year" type="number" :aria-label="$t('import.rateYear')" class="field" />
+      <input v-model.number="rate" type="number" step="0.001" min="0" :placeholder="$t('import.ratePerKm')" :aria-label="$t('import.ratePerKm')" class="field" />
+      <input v-model.number="fromKm" type="number" min="0" :placeholder="$t('import.rateFrom')" :aria-label="$t('import.rateFrom')" class="field" />
+      <input v-model.number="toKm" type="number" min="1" :placeholder="$t('import.rateTo')" :aria-label="$t('import.rateTo')" class="field" />
     </div>
     <p v-if="error" class="text-xs text-danger-400" role="alert">{{ error }}</p>
     <button type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold disabled:opacity-50" :disabled="!label || rate === null" @click="add">
