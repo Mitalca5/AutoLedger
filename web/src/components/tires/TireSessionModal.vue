@@ -50,8 +50,10 @@ const dismountedPrefill = useOdometerPrefill({
 watch(open, (isOpen) => {
   if (!isOpen) return
   sessionForm.value = { ...props.initialForm }
-  mountedPrefill.reset()
-  dismountedPrefill.reset()
+  // A stored reading counts as filled for the user: changing the date recomputes it, as for a new session.
+  const stored = sessionForm.value
+  mountedPrefill.reset(props.editingSessionId ? stored.mounted_odometer || null : null)
+  dismountedPrefill.reset(props.editingSessionId ? stored.dismounted_odometer || null : null)
 })
 
 function applyCopiedSessionToForm() {

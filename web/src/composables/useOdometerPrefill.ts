@@ -31,7 +31,7 @@ export function useOdometerPrefill(opts: Options) {
       const mine = ++request
       try {
         const res = await api.getOdometerEstimate(vehicleId, date)
-        if (mine !== request || typeof res?.odometer !== 'number' || res.odometer <= 0) return
+        if (mine !== request || typeof res?.odometer !== 'number' || res.odometer < 0) return
         if (!canPrefillOdometer(opts.current(), lastFilled)) return
         lastFilled = res.odometer
         opts.fill(res.odometer)

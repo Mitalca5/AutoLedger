@@ -62,7 +62,7 @@ const mountedPrefill = useOdometerPrefill({
 watch(open, (isOpen) => {
   if (isOpen) {
     init([...props.tireIds])
-    mountedPrefill.reset()
+    mountedPrefill.reset(Number(tireEditForm.value.mounted_odometer) || null)
   }
 })
 

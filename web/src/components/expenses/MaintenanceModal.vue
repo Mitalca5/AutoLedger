@@ -116,7 +116,7 @@ async function checkOdometerForDate(dateVal: string) {
   detectingOdometer.value = true
   try {
     const res = await api.getOdometerAt(props.vehicleId, dateVal)
-    if (res && typeof res.odometer === 'number' && res.odometer > 0) {
+    if (res && typeof res.odometer === 'number' && res.source !== 'none') {
       detectedOdometer.value = res.odometer
       if (!maintForm.value.odometer || maintForm.value.odometer === autofilledOdometer) {
         maintForm.value.odometer = Math.round(res.odometer)
