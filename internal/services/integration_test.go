@@ -2457,3 +2457,31 @@ func TestIntegrationOdometerEstimateFromOwnershipOrigin(t *testing.T) {
 		t.Fatalf("expected about 15,000 km one year into a two-year ownership at 30,000 km, got %v %q %v", km, source, ok)
 	}
 }
+
+func TestIntegrationUnmountedTireWithoutSessionCounts(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	tco := NewTCOService(db.Pool, "UTC")
+	v := mustVehicle(t, repo, "winter@example.com")
+	v.CurrentOdometer = 20000
+	if err := repo.UpdateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	tire := &models.Tire{VehicleID: &v.ID, Brand: "Nokian", Model: "WR", Dimension: "205/55 R16", Season: models.TireSeasonWinter,
+		PurchaseDate: time.Now().UTC().AddDate(0, -2, 0), PurchasePrice: 40000, CurrentPosition: models.TirePosStorage,
+		InitialDepthMm: 8, MinLegalDepthMm: 1.6, EstimatedLifespanKm: 40000}
+	if err := repo.CreateTire(ctx, tire); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var booked money.Cents
+	for _, m := range sum.MonthlyCosts {
+		booked += m.TiresAmortized
+	}
+	if sum.TiresAmortizedCost != 40000 || booked != 40000 {
+		t.Fatalf("expected the paid, never mounted tire counted in full, got total %s and monthly %s", sum.TiresAmortizedCost, booked)
+	}
+}

@@ -217,6 +217,8 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		SELECT COALESCE(SUM(
 		           CASE
 		               WHEN t.current_position = 'DISPOSED' OR t.is_archived THEN t.purchase_price
+		               WHEN t.current_position NOT IN ('FL', 'FR', 'RL', 'RR') AND t.accumulated_distance_km - t.initial_distance_km <= 0
+		                    AND NOT EXISTS (SELECT 1 FROM tire_mount_sessions s WHERE s.tire_id = t.id) THEN t.purchase_price
 		               ELSE t.purchase_price * LEAST(1.0, GREATEST(0,
 		                   (t.accumulated_distance_km - t.initial_distance_km
 		                    + CASE WHEN t.current_position IN ('FL', 'FR', 'RL', 'RR') AND t.mounted_odometer IS NOT NULL

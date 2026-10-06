@@ -22,22 +22,27 @@ func (s *TCOService) computeMonthlyTireAmortization(ctx context.Context, vehicle
 		lifespanKm        float64
 		disposed          bool
 		lastDismountMonth string
+		purchaseMonth     string
+		neverUsed         bool
 	}
 	tires := make(map[string]*tireInfo)
 
 	rows, err := s.pool.Query(ctx, `
 		SELECT id::text, purchase_price, GREATEST(estimated_lifespan_km - initial_distance_km, 1),
-		       (current_position = 'DISPOSED' OR is_archived)
+		       (current_position = 'DISPOSED' OR is_archived),
+		       TO_CHAR(purchase_date AT TIME ZONE $2, 'YYYY-MM'),
+		       (current_position NOT IN ('FL', 'FR', 'RL', 'RR') AND accumulated_distance_km - initial_distance_km <= 0
+		        AND NOT EXISTS (SELECT 1 FROM tire_mount_sessions s WHERE s.tire_id = tires.id))
 		FROM tires
 		WHERE vehicle_id = $1 AND purchase_price > 0;
-	`, vehicleID)
+	`, vehicleID, s.timezone)
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		var id string
 		info := &tireInfo{}
-		if err := rows.Scan(&id, &info.purchasePrice, &info.lifespanKm, &info.disposed); err != nil {
+		if err := rows.Scan(&id, &info.purchasePrice, &info.lifespanKm, &info.disposed, &info.purchaseMonth, &info.neverUsed); err != nil {
 			rows.Close()
 			return nil, err
 		}
@@ -244,6 +249,13 @@ func (s *TCOService) computeMonthlyTireAmortization(ctx context.Context, vehicle
 				result[m] += delta
 				cumAmortized = newCum
 			}
+		}
+
+		// A tire bought and paid for but never mounted has no wear to spread: it counts when it was bought,
+		// until a mount session says where it was driven.
+		if info.neverUsed && !info.disposed && info.purchaseMonth != "" {
+			result[info.purchaseMonth] += info.purchasePrice
+			continue
 		}
 
 		// If a tire was disposed with 0 km driven, book purchase price to dismount/disposal month
