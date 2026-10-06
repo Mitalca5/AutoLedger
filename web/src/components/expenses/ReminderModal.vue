@@ -11,6 +11,7 @@ import { reminderPresets, nextOccurrenceDate, maintenanceStartPoint, type Remind
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Creates a maintenance reminder, or edits `editing`. `preset` pre-fills a new one from a suggestion.
 const props = defineProps<{ vehicleId: string; editing: MaintenanceReminder | null; preset: ReminderPreset | null; currentOdometer: number }>()
@@ -117,7 +118,9 @@ function setScheduleMode(mode: 'interval' | 'date') {
   else if (!reminderForm.value.last_service_date) reminderForm.value.last_service_date = todayIso()
 }
 
-async function handleSaveReminder() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleSaveReminderAction() {
   if (!props.vehicleId) return
   if (!reminderForm.value.title.trim()) {
     showAlert(t('expenses.reminderModal.titleRequired'), t('common.requiredField'), 'warning')
@@ -160,6 +163,7 @@ async function handleSaveReminder() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleSaveReminder = () => runOnce(handleSaveReminderAction)
 </script>
 
 <template>
@@ -362,7 +366,7 @@ async function handleSaveReminder() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="reminder-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="reminder-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ editingReminderId ? $t('expenses.update') : $t('expenses.reminderModal.create') }}
         </button>
       </div>

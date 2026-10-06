@@ -11,6 +11,7 @@ import { currencySymbol } from '@/currency'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 const props = defineProps<{ vehicleId: string; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [] }>()
@@ -45,7 +46,9 @@ watch(open, (isOpen) => {
   if (props.currentOdometer) addTireForm.value.mounted_odometer = Math.round(props.currentOdometer)
 })
 
-async function handleCreateTires() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleCreateTiresAction() {
   if (!props.vehicleId) return
   if (!addTireForm.value.brand || !addTireForm.value.model || !addTireForm.value.dimension) {
     showAlert(t('tires.tireAddModal.requiredFields'), t('tires.tireAddModal.requiredFieldsTitle'), 'warning')
@@ -94,6 +97,7 @@ async function handleCreateTires() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleCreateTires = () => runOnce(handleCreateTiresAction)
 </script>
 
 <template>
@@ -318,7 +322,7 @@ async function handleCreateTires() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handleCreateTires"
           class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-5 py-2 rounded-xl shadow-lg shadow-rose-600/20 transition-colors"

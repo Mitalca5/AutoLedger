@@ -8,6 +8,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { distanceUnit, formatDistance, formatDistanceValue } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 const props = defineProps<{
   vehicle: any
@@ -55,7 +56,9 @@ function startEdit(r: any) {
   }
 }
 
-async function save() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function saveAction() {
   const odo = Number(form.value.odometer)
   if (form.value.odometer === '' || Number.isNaN(odo) || odo < 0) {
     showAlert(t('manual.odometerReadingsPanel.validOdometer'), t('common.requiredField'), 'warning')
@@ -81,6 +84,7 @@ async function save() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const save = () => runOnce(saveAction)
 
 async function remove(r: any) {
   const ok = await showConfirm({
@@ -156,7 +160,7 @@ onMounted(() => {
       </div>
 
       <div class="flex justify-end pt-1">
-        <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
+        <button type="submit" :disabled="submitting" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
           <span>{{ editingId ? $t('manual.odometerReadingsPanel.update') : $t('manual.odometerReadingsPanel.add') }}</span>
         </button>
       </div>

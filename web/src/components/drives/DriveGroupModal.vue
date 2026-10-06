@@ -7,6 +7,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Layers, X } from 'lucide-vue-next'
 import { currencySymbol } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Merges the selected drives into a trip group, optionally with one expense (toll, parking, ferry) for the whole trip.
 const props = defineProps<{ vehicleId: string; selectedDriveIds: string[]; selectedList: any[] }>()
@@ -20,7 +21,9 @@ const groupName = ref('')
 const tollAmount = ref<number | ''>('')
 const expenseType = ref('TOLL')
 
-async function handleCreateGroupAndExpense() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleCreateGroupAndExpenseAction() {
   if (!props.vehicleId || !props.selectedDriveIds.length) return
   if (!groupName.value) {
     showAlert(t('drives.driveGroupModal.nameRequired'), t('drives.driveGroupModal.requiredField'), 'warning')
@@ -55,6 +58,7 @@ async function handleCreateGroupAndExpense() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleCreateGroupAndExpense = () => runOnce(handleCreateGroupAndExpenseAction)
 </script>
 
 <template>
@@ -122,7 +126,7 @@ async function handleCreateGroupAndExpense() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handleCreateGroupAndExpense"
           class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/20 transition-colors"

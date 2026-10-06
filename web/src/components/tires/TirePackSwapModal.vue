@@ -8,6 +8,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { getTireSelectLabel } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 const props = defineProps<{ vehicleId: string; storageTires: any[]; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [] }>()
@@ -36,7 +37,9 @@ watch(open, (isOpen) => {
   packSwapForm.value.tires.RR = st[3]?.tire.id || ''
 })
 
-async function handlePackSwapSubmit() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handlePackSwapSubmitAction() {
   if (!props.vehicleId) return
   const selectedIDs = [
     packSwapForm.value.tires.FL,
@@ -62,6 +65,7 @@ async function handlePackSwapSubmit() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handlePackSwapSubmit = () => runOnce(handlePackSwapSubmitAction)
 </script>
 
 <template>
@@ -153,7 +157,7 @@ async function handlePackSwapSubmit() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handlePackSwapSubmit"
           class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"

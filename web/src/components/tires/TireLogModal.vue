@@ -10,6 +10,7 @@ import { type TireLogForm } from '@/utils/tires'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Adds or edits (editingLogId set) a tread depth measurement of selectedTire; initialForm seeds the fields when the modal opens
 const props = defineProps<{ vehicleId: string; selectedTire: any | null; editingLogId: string | null; initialForm: TireLogForm }>()
@@ -29,7 +30,9 @@ watch(open, (isOpen) => {
   if (isOpen) newLogForm.value = { ...props.initialForm }
 })
 
-async function handleAddLog() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleAddLogAction() {
   if (!props.vehicleId || !props.selectedTire) return
   try {
     const payload = {
@@ -49,6 +52,7 @@ async function handleAddLog() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleAddLog = () => runOnce(handleAddLogAction)
 </script>
 
 <template>
@@ -110,7 +114,7 @@ async function handleAddLog() {
         >
           {{ $t('common.cancel') }}
         </button>
-        <button
+        <button :disabled="submitting"
           type="button"
           @click="handleAddLog"
           class="bg-success-600 hover:bg-success-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"

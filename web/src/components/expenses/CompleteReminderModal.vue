@@ -13,6 +13,7 @@ import { maintenanceStartPoint } from '@/utils/expenses'
 import { currencySymbol } from '@/currency'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
+import { useSubmit } from '@/composables/useSubmit'
 
 // Marks a reminder as done, optionally logging a new maintenance expense or linking an existing one. saved carries whether an expense was logged.
 const props = defineProps<{ vehicleId: string; reminder: MaintenanceReminder | null; currentOdometer: number }>()
@@ -60,7 +61,9 @@ watch(open, (isOpen) => {
   }
 })
 
-async function handleCompleteReminder() {
+const { pending: submitting, run: runOnce } = useSubmit()
+
+async function handleCompleteReminderAction() {
   const reminder = props.reminder
   if (!props.vehicleId || !reminder) return
   try {
@@ -94,6 +97,7 @@ async function handleCompleteReminder() {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
 }
+const handleCompleteReminder = () => runOnce(handleCompleteReminderAction)
 </script>
 
 <template>
@@ -190,7 +194,7 @@ async function handleCompleteReminder() {
         <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="complete-reminder-form" class="px-4 py-2 bg-success-600 hover:bg-success-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="complete-reminder-form" class="px-4 py-2 bg-success-600 hover:bg-success-500 text-white text-xs font-semibold rounded-xl transition-colors">
           {{ $t('expenses.completeReminderModal.confirmTheMaintenance') }}
         </button>
       </div>
