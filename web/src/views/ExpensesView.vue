@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
 import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { t } from '@/i18n'
@@ -86,6 +87,7 @@ const chargesPage = ref(1)
 const loadingMoreCharges = ref(false)
 const missingCostOnly = ref(false)
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 
 // Documents & Invoices
 const documents = ref<ExpenseDocumentHeader[]>([])
@@ -136,6 +138,7 @@ async function loadReminders() {
     reminders.value = await api.getReminders(vehicleStore.activeVehicle.id)
   } catch (err: any) {
     console.error('Failed to load reminders', err)
+    if (activeTab.value === 'REMINDERS') loadError.value = err?.message ?? ''
   } finally {
     loadingReminders.value = false
   }
@@ -160,6 +163,7 @@ async function onChargesAssigned() {
 async function loadData() {
   if (!vehicleStore.activeVehicle) return
   loading.value = true
+  loadError.value = null
   try {
     if (activeTab.value === 'TOLLS') {
       driveExpenses.value = await api.getDriveExpenses(vehicleStore.activeVehicle.id)
@@ -183,6 +187,7 @@ async function loadData() {
     }
   } catch (err) {
     console.error('Failed to load expenses', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -536,6 +541,8 @@ const tabs = computed<TabItem[]>(() => {
     </div>
 
     <TabBar :model-value="activeTab" :tabs="tabs" :label="pageTitle" id-prefix="expenses-tab" @update:model-value="activeTab = $event as TabType" />
+
+    <LoadError v-if="loadError !== null" :message="loadError" @retry="loadData" />
 
     <!-- Content -->
     <TollsPanel

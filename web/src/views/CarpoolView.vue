@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Users as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
@@ -26,6 +27,7 @@ const route = useRoute()
 const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 
 const loading = ref(true)
+const loadError = ref<string | null>(null)
 const trips = ref<any[]>([])
 const summary = ref<any>({
   total_trips: 0,
@@ -93,12 +95,14 @@ function exportSelectedCarpools() {
 async function loadData() {
   if (!vehicleStore.activeVehicle) return
   loading.value = true
+  loadError.value = null
   try {
     const res = await api.getCarpools(vehicleStore.activeVehicle.id)
     trips.value = res.trips || []
     summary.value = res.summary || summary.value
   } catch (err) {
     console.error('Failed to load carpool trips', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -284,6 +288,8 @@ onMounted(() => {
     </div>
 
     <!-- Empty State -->
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadData" />
+
     <div v-else-if="trips.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center max-w-2xl mx-auto space-y-4">
       <div class="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto">
         <Users class="w-8 h-8" />

@@ -5,11 +5,13 @@ import { api, type APITokenInfo, type APITokenCreatedResponse } from '@/services
 import { describeRelativeTime } from '@/utils/userAgent'
 import { useConfirm } from '@/composables/useConfirm'
 import { t } from '@/i18n'
+import LoadError from '@/components/LoadError.vue'
 
 const { showConfirm } = useConfirm()
 
 const tokens = ref<APITokenInfo[]>([])
 const loading = ref(true)
+const loadError = ref<string | null>(null)
 const creating = ref(false)
 const showCreateModal = ref(false)
 const tokenName = ref('')
@@ -20,11 +22,13 @@ const copied = ref(false)
 
 async function loadTokens() {
   loading.value = true
+  loadError.value = null
   try {
     const res = await api.getAPITokens()
     tokens.value = res.tokens || []
   } catch (err) {
     console.error('Failed to load API tokens', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -141,6 +145,7 @@ onMounted(() => {
     <div v-if="loading" class="text-sm text-slate-400 py-2">
       {{ t('account.tokens.loading') }}
     </div>
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadTokens" />
     <div v-else-if="tokens.length === 0" class="text-center py-6 text-xs text-slate-400">
       {{ t('account.tokens.noTokens') }}
     </div>

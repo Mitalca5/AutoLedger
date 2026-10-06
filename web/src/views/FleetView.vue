@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
+import ListSkeleton from '@/components/ListSkeleton.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import PageHeader from '@/components/PageHeader.vue'
 import { Gauge as PageIcon } from 'lucide-vue-next'
@@ -15,6 +17,7 @@ import { t } from '@/i18n'
 Chart.register(...registerables)
 
 const loading = ref(false)
+const loadError = ref<string | null>(null)
 const summary = ref<FleetSummaryResponse | null>(null)
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
@@ -57,6 +60,7 @@ function submitBudget() {
 
 async function loadFleetSummary() {
   loading.value = true
+  loadError.value = null
   try {
     const data = await api.getFleetSummary()
     summary.value = data
@@ -64,6 +68,7 @@ async function loadFleetSummary() {
     renderChart()
   } catch (err) {
     console.error('Failed to load fleet summary', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -208,6 +213,9 @@ onBeforeUnmount(() => {
     
       </template>
     </PageHeader>
+
+    <LoadError v-if="loadError !== null" :message="loadError" @retry="loadFleetSummary" />
+    <ListSkeleton v-else-if="loading && !summary" :rows="3" />
 
     <!-- Monthly budget -->
     <div v-if="summary" class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">

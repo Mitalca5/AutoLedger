@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LoadError from '@/components/LoadError.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Navigation as PageIcon } from 'lucide-vue-next'
@@ -65,6 +66,7 @@ const hasTollOnly = ref(false)
 const tollSource = ref('')
 const unqualifiedCount = ref(0)
 const loading = ref(true)
+const loadError = ref<string | null>(null)
 
 // Manual drive and CSV import modals
 const showManualDriveModal = ref(false)
@@ -234,6 +236,7 @@ async function loadDrives(silent = false) {
     return
   }
   if (!silent) loading.value = true
+  loadError.value = null
   try {
     let fromStr: string | undefined
     let toStr: string | undefined
@@ -263,6 +266,7 @@ async function loadDrives(silent = false) {
     unqualifiedCount.value = res.unqualified_count || 0
   } catch (err) {
     console.error('Failed to load drives', err)
+    loadError.value = (err as Error)?.message ?? ''
   } finally {
     loading.value = false
   }
@@ -275,6 +279,7 @@ const tripSuggestions = ref<any[]>([])
 const suggestionBusyKey = ref<string | null>(null)
 const tripQualifyOnly = ref(false)
 const loadingTrips = ref(false)
+const tripsLoadError = ref<string | null>(null)
 const expandedTripId = ref<string | null>(null)
 const tripDrives = ref<any[]>([])
 
@@ -353,6 +358,7 @@ function openTollEntry(d: any) {
 async function loadTripGroups(silent = false) {
   if (!vehicleStore.activeVehicle) return
   if (!silent) loadingTrips.value = true
+  tripsLoadError.value = null
   try {
     const vehicleId = vehicleStore.activeVehicle.id
     const [groups, suggestions] = await Promise.all([api.getTripGroups(vehicleId), api.getTripSuggestions(vehicleId).catch(() => [])])
@@ -360,6 +366,7 @@ async function loadTripGroups(silent = false) {
     tripSuggestions.value = suggestions
   } catch (err) {
     console.error('Failed to load trip groups', err)
+    tripsLoadError.value = (err as Error)?.message ?? ''
   } finally {
     loadingTrips.value = false
   }
@@ -828,6 +835,8 @@ async function handleBulkApplyToll() {
       </div>
     </div>
 
+    <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadDrives()" />
+
     <!-- EMPTY STATE -->
     <EmptyState v-else-if="!drives.length">
       {{ $t('drives.drivesView.noDriveFoundForThis') }}
@@ -885,6 +894,7 @@ async function handleBulkApplyToll() {
 
     <!-- TRIP GROUPS ("VOYAGES") -->
     <template v-else>
+    <LoadError v-if="tripsLoadError !== null" :message="tripsLoadError" @retry="loadTripGroups()" />
     <TripSuggestions
       v-if="tripQualifyOnly"
       :suggestions="filteredSuggestions"
