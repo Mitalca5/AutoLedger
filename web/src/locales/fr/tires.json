@@ -249,7 +249,8 @@
     "noFittingSessionWithMileage": "Aucune session de montage avec kilométrage enregistrée.",
     "tiresFittedByMileage": "Pneus montés selon le kilométrage",
     "noTire": "Aucun pneu enregistré ({from} → {to})",
-    "segment": "{lane} : {tire}, de {from} à {to}"
+    "segment": "{lane} : {tire}, de {from} à {to}",
+    "tick": "{value} k"
   },
   "tirePackSwapModal": {
     "confirmTheRotation": "Confirmer la permutation",

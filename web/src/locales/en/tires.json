@@ -249,7 +249,8 @@
     "noFittingSessionWithMileage": "No fitting session with mileage recorded.",
     "tiresFittedByMileage": "Tires fitted by mileage",
     "noTire": "No tire recorded ({from} → {to})",
-    "segment": "{lane}: {tire}, from {from} to {to}"
+    "segment": "{lane}: {tire}, from {from} to {to}",
+    "tick": "{value}k"
   },
   "tirePackSwapModal": {
     "confirmTheRotation": "Confirm the rotation",
