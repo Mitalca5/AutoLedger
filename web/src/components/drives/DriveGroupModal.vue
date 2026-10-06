@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -21,12 +21,19 @@ const groupName = ref('')
 const tollAmount = ref<number | ''>('')
 const expenseType = ref('TOLL')
 
+const submitted = ref(false)
+const nameError = computed(() => (!groupName.value.trim() ? t('drives.driveGroupModal.nameRequired') : ''))
+watch(open, (isOpen) => {
+  if (isOpen) submitted.value = false
+})
+
 const { pending: submitting, run: runOnce } = useSubmit()
 
 async function handleCreateGroupAndExpenseAction() {
   if (!props.vehicleId || !props.selectedDriveIds.length) return
-  if (!groupName.value) {
-    showAlert(t('drives.driveGroupModal.nameRequired'), t('drives.driveGroupModal.requiredField'), 'warning')
+  submitted.value = true
+  if (nameError.value) {
+    document.getElementById('drive-group-name')?.focus()
     return
   }
 
@@ -89,8 +96,11 @@ const handleCreateGroupAndExpense = () => runOnce(handleCreateGroupAndExpenseAct
             v-model="groupName"
             type="text"
             :placeholder="$t('drives.driveGroupModal.eGBrittanyHolidayOutbound')"
+            :aria-invalid="submitted && !!nameError"
+            :aria-describedby="submitted && nameError ? 'drive-group-name-error' : undefined"
             class="field"
           />
+          <p v-if="submitted && nameError" id="drive-group-name-error" class="text-xs text-danger-400 mt-1">{{ nameError }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">

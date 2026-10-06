@@ -265,6 +265,7 @@ function initEdit(trip: any) {
 
 watch([open, () => props.openToken], ([isOpen]) => {
   if (!isOpen) return
+  submitted.value = false
   if (props.editing) initEdit(props.editing)
   else initCreate(props.createOptions)
 })
@@ -285,16 +286,18 @@ function applyFairPrice(index: number) {
   form.value.passengers[index].amount_paid = euros(live.value.shares[index])
 }
 
+const submitted = ref(false)
+const titleError = computed(() => (!form.value.title.trim() ? t('carpool.carpoolTripModal.titleRequired') : ''))
+const legError = computed(() => (!form.value.legs.length ? t('carpool.carpoolTripModal.legRequired') : ''))
+
 async function handleSave() {
   if (!props.vehicleId) return
-  if (!form.value.title.trim()) {
-    showAlert(t('carpool.carpoolTripModal.titleRequired'), t('common.requiredField'), 'warning')
+  submitted.value = true
+  if (titleError.value) {
+    document.getElementById('carpool-title')?.focus()
     return
   }
-  if (!form.value.legs.length) {
-    showAlert(t('carpool.carpoolTripModal.legRequired'), t('common.requiredField'), 'warning')
-    return
-  }
+  if (legError.value) return
   modalSubmitting.value = true
   try {
     const payload = {
@@ -406,8 +409,11 @@ async function handleModalRecalculate() {
             v-model="form.title"
             @input="titleTouched = true"
             :placeholder="$t('carpool.carpoolTripModal.eGAnnecyValence')"
+            :aria-invalid="submitted && !!titleError"
+            :aria-describedby="submitted && titleError ? 'carpool-title-error' : undefined"
             class="field"
           />
+          <p v-if="submitted && titleError" id="carpool-title-error" class="text-xs text-danger-400 mt-1">{{ titleError }}</p>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
@@ -455,7 +461,7 @@ async function handleModalRecalculate() {
             </button>
           </div>
         </div>
-        <p v-if="!form.legs.length" class="text-xs text-slate-400">{{ $t('carpool.carpoolTripModal.selectAtLeastOneDrive') }}</p>
+        <p v-if="!form.legs.length" role="status" :class="['text-xs', submitted ? 'text-danger-400' : 'text-slate-400']">{{ $t('carpool.carpoolTripModal.selectAtLeastOneDrive') }}</p>
 
         <div v-for="(leg, i) in form.legs" :key="i" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
           <div class="flex flex-wrap items-center gap-2 text-xs">
