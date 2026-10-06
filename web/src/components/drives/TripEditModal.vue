@@ -102,10 +102,10 @@ async function handleSave() {
       </form>
 
       <div class="px-5 py-3.5 border-t border-slate-800/80 flex justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
+        <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" form="trip-edit-form" :disabled="saving" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors disabled:opacity-50">
+        <button type="submit" form="trip-edit-form" :disabled="saving" class="btn btn-lg btn-primary">
           {{ $t('common.save') }}
         </button>
       </div>

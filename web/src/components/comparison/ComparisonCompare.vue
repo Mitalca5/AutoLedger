@@ -100,7 +100,7 @@ onBeforeUnmount(() => chart?.destroy())
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
       <div class="flex items-center justify-between mb-3 gap-3">
         <h2 class="text-sm font-semibold text-white">{{ $t('comparison.comparisonCompare.comparisonOfScenarios', { length: rows.length }) }}</h2>
-        <button type="button" class="no-print bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-2 rounded-xl" @click="exportCsv">
+        <button type="button" class="btn btn-secondary no-print" @click="exportCsv">
           {{ $t('comparison.comparisonCompare.exportAsCsv') }}
         </button>
       </div>

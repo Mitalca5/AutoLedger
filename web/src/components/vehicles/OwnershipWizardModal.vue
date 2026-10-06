@@ -490,7 +490,7 @@ async function deleteOwnershipAction() {
           <button
             type="button"
             @click="open = false"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+            class="btn btn-lg btn-secondary"
           >
             {{ $t('common.cancel') }}
           </button>
@@ -499,7 +499,7 @@ async function deleteOwnershipAction() {
             v-if="currentOwnershipStep > 1"
             type="button"
             @click="prevOwnershipStep"
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+            class="btn btn-lg btn-secondary"
           >
             <ChevronLeft class="w-4 h-4" />
             <span>{{ $t('vehicles.ownershipWizardModal.previous') }}</span>
@@ -509,7 +509,7 @@ async function deleteOwnershipAction() {
             v-if="currentOwnershipStep < 3"
             type="button"
             @click="nextOwnershipStep"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+            class="btn btn-lg btn-primary"
           >
             <span>{{ $t('vehicles.ownershipWizardModal.next') }}</span>
             <ChevronRight class="w-4 h-4" />
@@ -520,7 +520,7 @@ async function deleteOwnershipAction() {
             type="button"
             @click="handleSaveOwnership"
             :disabled="submitting"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+            class="btn btn-lg btn-primary"
           >
             <Check class="w-4 h-4" />
             <span>{{ $t('vehicles.ownershipWizardModal.saveTheContract') }}</span>

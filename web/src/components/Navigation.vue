@@ -110,7 +110,7 @@ function handleLogout() {
     <button
       v-if="canQuickAdd"
       type="button"
-      class="mb-3 flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-3 py-2.5 text-sm font-bold text-white shadow-lg shadow-rose-600/20 transition-colors hover:bg-rose-500"
+      class="btn btn-primary mb-3"
       @click="quickAdd.open()"
     >
       <Plus class="h-4 w-4" aria-hidden="true" />

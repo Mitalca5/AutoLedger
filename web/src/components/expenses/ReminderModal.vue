@@ -201,7 +201,7 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
               :key="preset.title"
               type="button"
               @click="applyReminderPreset(preset)"
-              class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition-colors flex items-center gap-1"
+              class="btn btn-secondary"
             >
               <Sparkles class="w-3 h-3 text-violet-400" />
               {{ preset.title }}
@@ -378,10 +378,10 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
       </form>
 
       <div class="px-5 py-3.5 border-t border-slate-800/80 flex justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
+        <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
           {{ $t('common.cancel') }}
         </button>
-        <button :disabled="submitting" type="submit" form="reminder-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors">
+        <button :disabled="submitting" type="submit" form="reminder-modal-form" class="btn btn-lg btn-primary">
           {{ editingReminderId ? $t('expenses.update') : $t('expenses.reminderModal.create') }}
         </button>
       </div>

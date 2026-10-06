@@ -334,14 +334,14 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <div class="flex items-center gap-2">
           <router-link
             to="/drives"
-            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
+            class="btn btn-secondary"
           >
             <Activity class="w-3.5 h-3.5 text-indigo-400" />
             <span>{{ $t('dashboard.monthDetailModal.vehicleDrives') }}</span>
           </router-link>
           <router-link
             to="/expenses"
-            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
+            class="btn btn-secondary"
           >
             <Receipt class="w-3.5 h-3.5 text-warning-400" />
             <span>{{ $t('dashboard.monthDetailModal.expensesAndInvoices') }}</span>
@@ -351,7 +351,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <button
           type="button"
           @click="closeMonthDetail"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors self-end sm:self-auto"
+          class="btn btn-lg btn-secondary self-end sm:self-auto"
         >
           {{ $t('common.close') }}
         </button>

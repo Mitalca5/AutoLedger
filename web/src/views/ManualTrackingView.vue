@@ -73,7 +73,7 @@ function select(tab: Tab) {
           <button
             v-if="vehicleStore.canEdit"
             type="button"
-            class="tap-text flex items-center gap-1.5 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+            class="btn btn-secondary tap-text"
             @click="showImport = true"
           >
             <UploadCloud class="w-3.5 h-3.5 text-sky-400" />
@@ -81,7 +81,7 @@ function select(tab: Tab) {
           </button>
           <button
             type="button"
-            class="tap-text flex items-center gap-1.5 px-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200"
+            class="btn btn-secondary tap-text"
             @click="showExport = true"
           >
             <Download class="w-3.5 h-3.5 text-sky-400" />

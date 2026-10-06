@@ -698,14 +698,14 @@ async function handleBulkApplyToll() {
         <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
           <button
             @click="openCSVImportModal"
-            class="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:border-slate-600 hover:bg-slate-700 transition-colors"
+            class="btn btn-lg btn-secondary hover:border-slate-600"
           >
             <UploadCloud class="w-4 h-4 text-info-400" />
             <span>{{ $t('drives.drivesView.importCsv') }}</span>
           </button>
           <button
             @click="openManualDriveModal()"
-            class="flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-900/30 transition-all"
+            class="btn btn-lg btn-primary"
           >
             <Plus class="w-4 h-4" />
             <span>{{ $t('drives.drivesView.newDrive') }}</span>
@@ -848,7 +848,7 @@ async function handleBulkApplyToll() {
       <button
         v-if="searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly"
         @click="resetAllFilters"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition-colors"
+        class="btn btn-secondary"
       >
         <RotateCcw class="w-3.5 h-3.5" />
         {{ $t('drives.drivesView.resetTheFilters') }}

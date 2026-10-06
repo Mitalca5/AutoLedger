@@ -73,7 +73,7 @@ onUnmounted(() => {
         type="button"
         @click="emit('clear')"
         :disabled="disabled"
-        class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors border border-slate-700/60"
+        class="btn btn-secondary"
         :title="$t('shell.bulkSelectionBar.clearTheSelectionEsc')"
       >
         <X class="w-3.5 h-3.5" />

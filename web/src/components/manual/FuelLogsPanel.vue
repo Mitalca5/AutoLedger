@@ -184,7 +184,7 @@ onMounted(load)
       <button
         v-if="canEdit"
         type="button"
-        class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+        class="btn btn-lg btn-primary"
         @click="openAdd"
       >
         <Plus class="w-3.5 h-3.5" /> {{ $t('manual.fuelLogsPanel.newFillUp') }}
@@ -316,8 +316,8 @@ onMounted(load)
         <p v-if="formError" class="text-xs text-red-300" role="alert">{{ formError }}</p>
 
         <div class="flex justify-end gap-2 pt-1">
-          <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl" @click="showForm = false">{{ $t('common.cancel') }}</button>
-          <button type="submit" :disabled="saving" class="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl">
+          <button type="button" class="btn btn-lg btn-secondary" @click="showForm = false">{{ $t('common.cancel') }}</button>
+          <button type="submit" :disabled="saving" class="btn btn-lg btn-primary">
             {{ saving ? $t('manual.fuelLogsPanel.saving') : $t('common.save') }}
           </button>
         </div>

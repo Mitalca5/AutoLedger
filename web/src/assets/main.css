@@ -366,7 +366,7 @@ select option:disabled {
     @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-lg {
-    @apply gap-2 px-4 py-2.5;
+    @apply gap-2 px-4 py-2;
   }
   .btn-primary {
     @apply bg-rose-600 text-white hover:bg-rose-500;

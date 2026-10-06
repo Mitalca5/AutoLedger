@@ -144,7 +144,7 @@ async function handleDuplicateSessionSubmit() {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>
@@ -152,7 +152,7 @@ async function handleDuplicateSessionSubmit() {
           type="button"
           @click="handleDuplicateSessionSubmit()"
           :disabled="duplicatingSession || duplicateTargetTireIds.length === 0"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center gap-1.5"
+          class="btn btn-lg btn-primary"
         >
           <Copy class="w-4 h-4" />
           <span>{{ duplicatingSession ? $t('tires.tireDuplicateSessionModal.duplicating') : $t('tires.tireDuplicateSessionModal.duplicateTo', { count: duplicateTargetTireIds.length }) }}</span>

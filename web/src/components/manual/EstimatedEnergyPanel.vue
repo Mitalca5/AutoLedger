@@ -170,7 +170,7 @@ onMounted(() => {
           <button
             type="submit"
             :disabled="saving"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-info-600/20"
+            class="btn btn-lg btn-primary"
           >
             <Zap class="w-3.5 h-3.5" />
             <span>{{ saving ? $t('common.loading') : $t('manual.estimatedEnergyPanel.saveEstimate') }}</span>

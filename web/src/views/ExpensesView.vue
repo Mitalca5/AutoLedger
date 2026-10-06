@@ -471,7 +471,7 @@ const tabs = computed<TabItem[]>(() => {
         <button
           v-if="activeTab === 'TOLLS'"
           @click="openAddTollModal"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.tollParking') }}
@@ -479,7 +479,7 @@ const tabs = computed<TabItem[]>(() => {
         <button
           v-if="activeTab === 'MAINTENANCE' || activeTab === 'FIXED'"
           @click="openAddMaintModal"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.maintenanceFixed') }}
@@ -487,7 +487,7 @@ const tabs = computed<TabItem[]>(() => {
         <button
           v-if="activeTab === 'REMINDERS'"
           @click="openWebhookModal"
-          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 border border-slate-700 transition-colors"
+          class="btn btn-lg btn-secondary"
           :title="$t('expenses.expensesView.setUpTheWebhookTo')"
         >
           <Radio class="w-3.5 h-3.5 text-violet-400" />
@@ -497,7 +497,7 @@ const tabs = computed<TabItem[]>(() => {
         <button
           v-if="activeTab === 'REMINDERS'"
           @click="openAddReminderModal()"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.newReminder') }}
@@ -505,14 +505,14 @@ const tabs = computed<TabItem[]>(() => {
         <template v-if="activeTab === 'CHARGES' && vehicleStore.canCharge">
           <button
             @click="openCSVImportModal"
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 border border-slate-700 transition-colors"
+            class="btn btn-lg btn-secondary"
           >
             <UploadCloud class="w-3.5 h-3.5 text-info-400" />
             <span>{{ $t('expenses.expensesView.importCsv') }}</span>
           </button>
           <button
             @click="openAddChargeModal"
-            class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+            class="btn btn-lg btn-primary"
           >
             <Plus class="w-3.5 h-3.5" />
             {{ $t('expenses.expensesView.addCharge') }}
@@ -521,7 +521,7 @@ const tabs = computed<TabItem[]>(() => {
         <button
           v-if="activeTab === 'DOCUMENTS'"
           @click="openUploadDocumentModal"
-          class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.addAReceipt') }}

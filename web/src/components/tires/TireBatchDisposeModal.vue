@@ -137,7 +137,7 @@ async function handleBatchDisposeSubmit() {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>

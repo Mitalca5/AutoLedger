@@ -715,7 +715,7 @@ async function handleModalRecalculate() {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>
@@ -723,7 +723,7 @@ async function handleModalRecalculate() {
           type="button"
           @click="handleSave"
           :disabled="modalSubmitting || estimating"
-          class="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold px-5 py-2 rounded-xl transition-colors"
+          class="btn btn-lg btn-primary"
         >
           {{ modalSubmitting ? $t('carpool.carpoolTripModal.saving') : $t('common.save') }}
         </button>

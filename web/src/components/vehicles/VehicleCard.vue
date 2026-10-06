@@ -165,7 +165,7 @@ function clearCardTestResult() {
     <div class="mt-4 pt-3 flex items-center justify-between gap-2 flex-wrap">
       <button
         @click="emit('members', v)"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+        class="btn btn-secondary"
         :title="$t('vehicles.vehicleCard.manageAccessAndCoDrivers')"
       >
         <Users class="w-3.5 h-3.5 text-violet-400" />
@@ -174,14 +174,14 @@ function clearCardTestResult() {
       <button
         v-if="v.role === 'OWNER'"
         @click="emit('ownership', v)"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+        class="btn btn-secondary"
       >
         <FileText class="w-3.5 h-3.5 text-indigo-400" />
         <span>{{ $t('vehicles.vehicleCard.acquisitionAndFinancing') }}</span>
       </button>
       <button
         @click="emit('dataSources', v)"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+        class="btn btn-secondary"
       >
         <Database class="w-3.5 h-3.5 text-cyan-400" />
         <span>{{ $t('vehicles.vehicleCard.dataSources') }}</span>
@@ -189,7 +189,7 @@ function clearCardTestResult() {
       <router-link
         to="/manual"
         @click="vehicleStore.setActiveVehicle(v.id)"
-        class="tap-text px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg gap-1.5 border border-slate-700"
+        class="btn btn-secondary tap-text"
         :title="$t('vehicles.vehicleCard.odometerReadingsAndManualEntries')"
       >
         <Gauge class="w-3.5 h-3.5 text-cyan-400" />
@@ -199,7 +199,7 @@ function clearCardTestResult() {
         v-if="v.role === 'OWNER' && v.teslamate_api_url"
         @click="testCardConnection()"
         :disabled="cardTest?.loading"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700"
+        class="btn btn-secondary"
       >
         <RefreshCw v-if="cardTest?.loading" class="w-3.5 h-3.5 animate-spin text-rose-400" />
         <Link2 v-else class="w-3.5 h-3.5" />

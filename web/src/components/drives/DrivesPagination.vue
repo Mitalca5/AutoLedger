@@ -125,7 +125,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
         <button
           @click="applyJump"
           :disabled="!jumpInput"
-          class="px-2 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+          class="btn btn-secondary"
         >
           {{ $t('drives.drivesPagination.go') }}
         </button>

@@ -48,7 +48,7 @@ const groups = computed(() => groupRemindersByDue(props.reminders))
       </ul>
       <button
         type="button"
-        class="tap-text px-3 text-xs font-semibold rounded-xl gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+        class="btn btn-secondary tap-text"
         :aria-expanded="showSettings"
         @click="showSettings = !showSettings"
       >
@@ -82,7 +82,7 @@ const groups = computed(() => groupRemindersByDue(props.reminders))
         <button
           v-if="vehicleStore.canEdit"
           @click="emit('open-webhook')"
-          class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 shrink-0 transition-colors self-start sm:self-auto"
+          class="btn btn-secondary shrink-0 self-start sm:self-auto"
         >
           {{ vehicleWebhook ? $t('expenses.remindersPanel.editWebhook') : $t('expenses.remindersPanel.setUpWebhook') }}
         </button>
@@ -113,7 +113,7 @@ const groups = computed(() => groupRemindersByDue(props.reminders))
             :key="preset.title"
             type="button"
             @click="emit('add', preset)"
-            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5"
+            class="btn btn-secondary"
           >
             <Sparkles class="w-3 h-3 text-violet-400" />
             {{ preset.title }}
@@ -124,7 +124,7 @@ const groups = computed(() => groupRemindersByDue(props.reminders))
       <div v-if="vehicleStore.canEdit" class="pt-2">
         <button
           @click="emit('add', null)"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-rose-600/20"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-4 h-4" />
           {{ $t('expenses.remindersPanel.createACustomReminder') }}

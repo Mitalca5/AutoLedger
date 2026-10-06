@@ -93,7 +93,7 @@ async function complete(c: PendingCharge) {
             <button
               type="submit"
               :disabled="busyId === c.id"
-              class="min-h-12 shrink-0 rounded-xl bg-rose-600 px-4 text-sm font-bold text-white hover:bg-rose-500 disabled:opacity-60"
+              class="btn btn-lg btn-primary min-h-12 shrink-0"
             >
               {{ busyId === c.id ? '…' : $t('quickadd.quickPendingCosts.confirm') }}
             </button>

@@ -364,7 +364,7 @@ async function handleDeleteExpense(exp: any) {
           :href="teslamateDriveUrl(selectedCostDrive)!"
           target="_blank"
           rel="noopener noreferrer"
-          class="ml-auto mr-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 shrink-0"
+          class="btn btn-secondary ml-auto mr-1 shrink-0"
           :title="$t('drives.driveCostModal.openThisDriveInThe')"
         >
           <ExternalLink class="w-3.5 h-3.5 text-info-400" />
@@ -719,7 +719,7 @@ async function handleDeleteExpense(exp: any) {
                     type="button"
                     @click="handleApplyTollEstimate"
                     :disabled="applyingToll"
-                    class="px-2 py-0.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
+                    class="btn btn-primary"
                   >
                     {{ applyingToll ? '...' : existingTollExpense ? $t('drives.driveCostModal.update') : $t('drives.drivesView.apply') }}
                   </button>
@@ -810,7 +810,7 @@ async function handleDeleteExpense(exp: any) {
       <div class="px-5 py-3.5 border-t border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <button
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.close') }}
         </button>
@@ -818,7 +818,7 @@ async function handleDeleteExpense(exp: any) {
           <button
             type="button"
             @click="emit('dismiss-trip', selectedCostDrive)"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+            class="btn btn-lg btn-secondary"
             :title="$t('drives.tripSuggestions.dismissTitle')"
           >
             {{ $t('drives.tripSuggestions.dismiss') }}
@@ -826,7 +826,7 @@ async function handleDeleteExpense(exp: any) {
           <button
             type="button"
             @click="emit('create-trip', selectedCostDrive)"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/25 transition-all"
+            class="btn btn-lg btn-primary"
           >
             <Layers class="w-4 h-4" />
             <span>{{ $t('drives.tripSuggestions.create') }}</span>
@@ -837,14 +837,14 @@ async function handleDeleteExpense(exp: any) {
             v-if="selectedCostDrive.is_trip_group && vehicleStore.canEdit"
             type="button"
             @click="emit('edit-trip', selectedCostDrive)"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 transition-colors"
+            class="btn btn-lg btn-secondary"
           >
             <Pencil class="w-4 h-4" />
             <span>{{ $t('common.edit') }}</span>
           </button>
           <button
             @click="open = false; router.push({ path: '/carpools', query: selectedCostDrive.is_trip_group ? { new_trip_group_id: selectedCostDrive.id } : { new_drive_id: selectedCostDrive.id } })"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/25 transition-all"
+            class="btn btn-lg btn-primary"
           >
             <Users class="w-4 h-4" />
             <span>{{ $t('drives.driveCostModal.shareAsACarpool') }}</span>

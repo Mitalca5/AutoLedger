@@ -175,7 +175,7 @@ async function handleDeleteWebhook() {
             type="button"
             @click="handleTestWebhook"
             :disabled="isTestingWebhook || !webhookForm.url"
-            class="w-full px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            class="btn btn-lg btn-secondary w-full"
           >
             <Loader2 v-if="isTestingWebhook" class="w-4 h-4 animate-spin text-violet-400" />
             <Radio v-else class="w-4 h-4 text-violet-400" />
@@ -196,14 +196,14 @@ async function handleDeleteWebhook() {
           </button>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
+          <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
             {{ $t('common.cancel') }}
           </button>
           <button
             type="submit"
             form="webhook-modal-form"
             :disabled="isSavingWebhook"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            class="btn btn-lg btn-primary"
           >
             <Loader2 v-if="isSavingWebhook" class="w-3.5 h-3.5 animate-spin" />
             <span>{{ $t('common.save') }}</span>

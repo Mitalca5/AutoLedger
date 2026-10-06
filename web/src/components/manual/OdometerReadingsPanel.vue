@@ -160,7 +160,7 @@ onMounted(() => {
       </div>
 
       <div class="flex justify-end pt-1">
-        <button type="submit" :disabled="submitting" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-cyan-600/20">
+        <button type="submit" :disabled="submitting" class="btn btn-lg btn-primary">
           <span>{{ editingId ? $t('manual.odometerReadingsPanel.update') : $t('manual.odometerReadingsPanel.add') }}</span>
         </button>
       </div>

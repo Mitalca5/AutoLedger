@@ -340,7 +340,7 @@ async function handleExecute() {
                 type="button"
                 :disabled="loading"
                 @click="handlePreview"
-                class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shrink-0 transition-colors disabled:opacity-50"
+                class="btn btn-lg btn-primary shrink-0"
               >
                 {{ loading ? $t('common.loading') : $t('import.previewBtn') }}
               </button>

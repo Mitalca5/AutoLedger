@@ -205,7 +205,7 @@ onBeforeUnmount(() => {
       <button
         @click="loadFleetSummary"
         :disabled="loading"
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition-colors border border-slate-700/60 shadow-sm"
+        class="btn btn-secondary"
       >
         <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
         {{ t('fleet.refresh') }}
@@ -239,8 +239,8 @@ onBeforeUnmount(() => {
           :placeholder="t('fleet.budget.placeholder', { currency: summary.currency })"
           class="field flex-1"
         />
-        <button type="submit" :disabled="savingBudget" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50">{{ t('common.save') }}</button>
-        <button type="button" @click="editingBudget = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">{{ t('common.cancel') }}</button>
+        <button type="submit" :disabled="savingBudget" class="btn btn-lg btn-primary">{{ t('common.save') }}</button>
+        <button type="button" @click="editingBudget = false" class="btn btn-lg btn-secondary">{{ t('common.cancel') }}</button>
       </form>
       <template v-if="usage && summary.monthly_budget && !editingBudget">
         <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(usage.percent)" aria-valuemin="0" aria-valuemax="100">

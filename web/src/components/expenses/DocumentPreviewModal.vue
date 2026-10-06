@@ -65,7 +65,7 @@ function openInNewTab() {
           <button
             type="button"
             @click="downloadFile"
-            class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-700/60 transition-colors"
+            class="btn btn-secondary"
             :title="$t('expenses.documentPreviewModal.downloadTheFile')"
           >
             <Download class="w-3.5 h-3.5 text-indigo-400" />
@@ -76,7 +76,7 @@ function openInNewTab() {
           <button
             type="button"
             @click="openInNewTab"
-            class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-700/60 transition-colors"
+            class="btn btn-secondary"
             :title="$t('expenses.documentPreviewModal.openInANewTab')"
           >
             <ExternalLink class="w-3.5 h-3.5 text-slate-400" />
@@ -124,7 +124,7 @@ function openInNewTab() {
           <button
             type="button"
             @click="downloadFile"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-2 transition-colors"
+            class="btn btn-lg btn-primary"
           >
             <Download class="w-4 h-4" />
             {{ $t('expenses.documentPreviewModal.downloadToView') }}

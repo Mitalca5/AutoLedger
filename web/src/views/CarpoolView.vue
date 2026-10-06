@@ -245,7 +245,7 @@ onMounted(() => {
       <button
         v-if="vehicleStore.canEdit"
         @click="openCreateModal()"
-        class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20 transition-all self-start sm:self-auto"
+        class="btn btn-lg btn-primary self-start sm:self-auto"
       >
         <Plus class="w-4 h-4" />
         {{ $t('carpool.carpoolView.newCarpool') }}
@@ -287,7 +287,7 @@ onMounted(() => {
       <button
         v-if="vehicleStore.canEdit"
         @click="openCreateModal()"
-        class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-5 py-2.5 rounded-xl inline-flex items-center gap-2 shadow-lg shadow-rose-600/20"
+        class="btn btn-lg btn-primary"
       >
         <Plus class="w-4 h-4" />
         {{ $t('carpool.carpoolView.createMyFirstCarpool') }}

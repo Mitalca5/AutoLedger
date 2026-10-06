@@ -85,13 +85,13 @@ onMounted(() => {
       <div class="flex items-center gap-2">
         <router-link
           to="/expenses"
-          class="tap-text px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
+          class="btn btn-lg btn-secondary tap-text"
         >
           {{ $t('dashboard.dashboardView.expense') }}
         </router-link>
         <router-link
           to="/drives"
-          class="tap-text px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-colors"
+          class="btn btn-lg btn-secondary tap-text"
         >
           {{ $t('dashboard.dashboardView.viewDrives') }}
         </router-link>
@@ -103,7 +103,7 @@ onMounted(() => {
     <!-- Empty state if no vehicle -->
     <div v-if="!vehicleStore.activeVehicle" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl">
       <p class="text-slate-400 mb-4">{{ $t('dashboard.dashboardView.noVehicleConfigured') }}</p>
-      <router-link to="/vehicles" class="px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl">
+      <router-link to="/vehicles" class="btn btn-lg btn-primary">
         {{ $t('dashboard.dashboardView.createYourFirstVehicle') }}
       </router-link>
     </div>

@@ -112,7 +112,7 @@ onMounted(() => {
       <button
         type="button"
         @click="showCreateModal = true"
-        class="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500 transition-colors shadow-sm"
+        class="btn btn-primary"
       >
         <Plus class="h-3.5 w-3.5" />
         {{ t('account.tokens.create') }}
@@ -237,14 +237,14 @@ onMounted(() => {
               <button
                 type="button"
                 @click="closeCreateModal"
-                class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800"
+                class="btn btn-lg btn-secondary"
               >
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="submit"
                 :disabled="creating || !tokenName.trim()"
-                class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
+                class="btn btn-lg btn-primary"
               >
                 {{ creating ? t('account.tokens.generating') : t('account.tokens.generate') }}
               </button>
@@ -282,7 +282,7 @@ onMounted(() => {
               <button
                 type="button"
                 @click="closeCreateModal"
-                class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors"
+                class="btn btn-lg btn-primary"
               >
                 {{ t('common.done') }}
               </button>
