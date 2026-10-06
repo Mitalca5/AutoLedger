@@ -80,11 +80,15 @@
     "unitPrice": "unit price",
     "totalPriceMode": "total price",
     "customSize": "Custom size...",
-    "requiredFields": "Please enter the brand, model and size",
-    "requiredFieldsTitle": "Required fields",
     "front": "Front",
     "rear": "Rear",
-    "customDimension": "Size"
+    "customDimension": "Size",
+    "errors": {
+      "required": "Required",
+      "priceNegative": "The price cannot be negative",
+      "depth": "Must be above the legal wear indicator",
+      "lifespan": "Must be greater than 0"
+    }
   },
   "tireBatchDisposeModal": {
     "finalOdometerIfRemovedOn": "Final odometer if removed on that date.",

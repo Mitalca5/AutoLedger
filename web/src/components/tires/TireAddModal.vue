@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { Plus, X } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
@@ -12,6 +12,7 @@ import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
+import { validateTireForm } from '@/utils/tires'
 
 const props = defineProps<{ vehicleId: string; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [] }>()
@@ -29,8 +30,8 @@ const addTireForm = ref({
   dimension: '',
   season: 'SUMMER',
   purchase_date: todayIso(),
-  total_price: 880,
-  unit_price: 220,
+  total_price: '' as number | '',
+  unit_price: '' as number | '',
   initial_depth_mm: 8.0,
   min_legal_depth_mm: 1.6,
   dot_code: '',
@@ -43,17 +44,34 @@ const addTireForm = ref({
 // Mounted tires start at the vehicle's current odometer
 watch(open, (isOpen) => {
   if (!isOpen) return
+  submitted.value = false
   if (props.currentOdometer) addTireForm.value.mounted_odometer = Math.round(props.currentOdometer)
 })
 
 const { pending: submitting, run: runOnce } = useSubmit()
 
+const submitted = ref(false)
+const priceModel = computed<number | ''>({
+  get: () => (isTotalPrice.value ? addTireForm.value.total_price : addTireForm.value.unit_price),
+  set: (v) => {
+    if (isTotalPrice.value) addTireForm.value.total_price = v
+    else addTireForm.value.unit_price = v
+  },
+})
+const errors = computed(() => (submitted.value ? validateTireForm({ ...addTireForm.value, price: priceModel.value }) : {}))
+
+
 async function handleCreateTiresAction() {
   if (!props.vehicleId) return
-  if (!addTireForm.value.brand || !addTireForm.value.model || !addTireForm.value.dimension) {
-    showAlert(t('tires.tireAddModal.requiredFields'), t('tires.tireAddModal.requiredFieldsTitle'), 'warning')
+  submitted.value = true
+  const found = validateTireForm({ ...addTireForm.value, price: priceModel.value })
+  if (Object.keys(found).length > 0) {
+    await nextTick()
+    document.querySelector<HTMLElement>('[data-tire-add] [aria-invalid="true"]')?.focus()
     return
   }
+  const totalPrice = Number(addTireForm.value.total_price) || 0
+  const unitPrice = Number(addTireForm.value.unit_price) || 0
 
   try {
     if (addType.value === 'SINGLE') {
@@ -63,7 +81,7 @@ async function handleCreateTiresAction() {
         dimension: addTireForm.value.dimension,
         season: addTireForm.value.season,
         purchase_date: addTireForm.value.purchase_date,
-        purchase_price: addTireForm.value.unit_price,
+        purchase_price: unitPrice,
         current_position: addTireForm.value.current_position,
         initial_depth_mm: addTireForm.value.initial_depth_mm,
         min_legal_depth_mm: addTireForm.value.min_legal_depth_mm,
@@ -80,8 +98,8 @@ async function handleCreateTiresAction() {
         dimension: addTireForm.value.dimension,
         season: addTireForm.value.season,
         purchase_date: addTireForm.value.purchase_date,
-        total_price: isTotalPrice.value ? addTireForm.value.total_price : 0,
-        unit_price: !isTotalPrice.value ? addTireForm.value.unit_price : 0,
+        total_price: isTotalPrice.value ? totalPrice : 0,
+        unit_price: !isTotalPrice.value ? unitPrice : 0,
         initial_depth_mm: addTireForm.value.initial_depth_mm,
         min_legal_depth_mm: addTireForm.value.min_legal_depth_mm,
         dot_code: addTireForm.value.dot_code || null,
@@ -106,7 +124,7 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
     class="fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     @click.self="open = false"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
+    <div v-dialog data-tire-add class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <Plus class="w-5 h-5 text-rose-500" />
@@ -201,28 +219,37 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
           <label for="tire-add-tire-brand" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.brand') }}</label>
           <input id="tire-add-tire-brand"
             v-model="addTireForm.brand"
+            :aria-invalid="errors.brand ? 'true' : undefined"
+            aria-describedby="tire-add-error-brand"
             type="text"
             :placeholder="$t('tires.tireAddModal.brand')"
             class="field"
           />
+          <p v-if="errors.brand" id="tire-add-error-brand" class="mt-1 text-xs text-danger-400">{{ $t(errors.brand) }}</p>
         </div>
         <div>
           <label for="tire-add-tire-model" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.model') }}</label>
           <input id="tire-add-tire-model"
             v-model="addTireForm.model"
+            :aria-invalid="errors.model ? 'true' : undefined"
+            aria-describedby="tire-add-error-model"
             type="text"
             :placeholder="$t('tires.tireAddModal.model')"
             class="field"
           />
+          <p v-if="errors.model" id="tire-add-error-model" class="mt-1 text-xs text-danger-400">{{ $t(errors.model) }}</p>
         </div>
         <div>
           <label for="tire-add-tire-dimension" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.dimension') }}</label>
           <input id="tire-add-tire-dimension"
             v-model="addTireForm.dimension"
+            :aria-invalid="errors.dimension ? 'true' : undefined"
+            aria-describedby="tire-add-error-dimension"
             type="text"
             placeholder="235/45 R18 98Y"
             class="field font-mono"
           />
+          <p v-if="errors.dimension" id="tire-add-error-dimension" class="mt-1 text-xs text-danger-400">{{ $t(errors.dimension) }}</p>
         </div>
         <div>
           <label for="tire-add-tire-season" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.season') }}</label>
@@ -241,7 +268,7 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800">
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label for="tire-add-tire-total-price" class="text-xs font-semibold text-slate-400">
+            <label for="tire-add-tire-price" class="text-xs font-semibold text-slate-400">
               {{ isTotalPrice ? $t('tires.tireAddModal.totalPrice', { cur: currencySymbol(vehicleStore.currency) }) : $t('tires.tireAddModal.pricePerTire', { cur: currencySymbol(vehicleStore.currency) }) }}
             </label>
             <button
@@ -252,20 +279,17 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
               {{ $t('tires.tireAddModal.switchTo', { mode: isTotalPrice ? $t('tires.tireAddModal.unitPrice') : $t('tires.tireAddModal.totalPriceMode') }) }}
             </button>
           </div>
-          <input id="tire-add-tire-total-price"
-            v-if="isTotalPrice"
-            v-model.number="addTireForm.total_price"
+          <input id="tire-add-tire-price"
+            v-model.number="priceModel"
             type="number"
-            step="10"
+            min="0"
+            :step="isTotalPrice ? 10 : 5"
+            placeholder="0"
+            :aria-invalid="errors.price ? 'true' : undefined"
+            aria-describedby="tire-add-error-price"
             class="field text-success-400 font-bold"
           />
-          <input id="tire-add-tire-total-price"
-            v-else
-            v-model.number="addTireForm.unit_price"
-            type="number"
-            step="5"
-            class="field text-success-400 font-bold"
-          />
+          <p v-if="errors.price" id="tire-add-error-price" class="mt-1 text-xs text-danger-400">{{ $t(errors.price) }}</p>
         </div>
 
         <div>
@@ -273,8 +297,11 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
           <DistanceInput whole id="tire-add-tire-estimated-lifespan-km"
             v-model="addTireForm.estimated_lifespan_km"
             step="5000"
+            :aria-invalid="errors.estimated_lifespan_km ? 'true' : undefined"
+            aria-describedby="tire-add-error-lifespan"
             class="field"
           />
+          <p v-if="errors.estimated_lifespan_km" id="tire-add-error-lifespan" class="mt-1 text-xs text-danger-400">{{ $t(errors.estimated_lifespan_km) }}</p>
         </div>
       </div>
 
@@ -304,8 +331,11 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
             v-model.number="addTireForm.initial_depth_mm"
             type="number"
             step="0.1"
+            :aria-invalid="errors.initial_depth_mm ? 'true' : undefined"
+            aria-describedby="tire-add-error-depth"
             class="field"
           />
+          <p v-if="errors.initial_depth_mm" id="tire-add-error-depth" class="mt-1 text-xs text-danger-400">{{ $t(errors.initial_depth_mm) }}</p>
         </div>
         <div>
           <label for="tire-add-tire-min-legal-depth-mm" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>

@@ -80,11 +80,15 @@
     "unitPrice": "prix unitaire",
     "totalPriceMode": "prix total",
     "customSize": "Dimension personnalisée...",
-    "requiredFields": "Veuillez renseigner la marque, le modèle et la dimension",
-    "requiredFieldsTitle": "Champs requis",
     "front": "Av",
     "rear": "Ar",
-    "customDimension": "Dimension"
+    "customDimension": "Dimension",
+    "errors": {
+      "required": "Obligatoire",
+      "priceNegative": "Le prix ne peut pas être négatif",
+      "depth": "Doit dépasser l'indicateur d'usure légal",
+      "lifespan": "Doit être supérieur à 0"
+    }
   },
   "tireBatchDisposeModal": {
     "finalOdometerIfRemovedOn": "Odomètre final si démonté à cette date.",

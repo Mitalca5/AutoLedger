@@ -9,6 +9,7 @@ import {
   isMountedPosition,
   sessionFormFromCopy,
   sessionFormFromSession,
+  validateTireForm,
   wearTone,
 } from './tires'
 
@@ -162,5 +163,31 @@ describe('wearTone', () => {
 
   it('falls back on the lifespan alone without a condition', () => {
     expect(wearTone(50)).toBe('ok')
+  })
+})
+
+describe('validateTireForm', () => {
+  const valid = { brand: 'B', model: 'M', dimension: '205/55 R16', price: '', initial_depth_mm: 8, min_legal_depth_mm: 1.6, estimated_lifespan_km: 45000 }
+
+  it('accepts a form with an empty price', () => {
+    expect(validateTireForm(valid)).toEqual({})
+  })
+
+  it('flags blank identity fields, ignoring whitespace', () => {
+    expect(Object.keys(validateTireForm({ ...valid, brand: '  ', model: '', dimension: ' ' })).sort()).toEqual(['brand', 'dimension', 'model'])
+  })
+
+  it('refuses a negative price but not zero', () => {
+    expect(validateTireForm({ ...valid, price: -5 }).price).toBeDefined()
+    expect(validateTireForm({ ...valid, price: 0 }).price).toBeUndefined()
+  })
+
+  it('requires a tread depth above the legal wear indicator', () => {
+    expect(validateTireForm({ ...valid, initial_depth_mm: 1.6 }).initial_depth_mm).toBeDefined()
+    expect(validateTireForm({ ...valid, initial_depth_mm: 0 }).initial_depth_mm).toBeDefined()
+  })
+
+  it('requires a positive lifespan', () => {
+    expect(validateTireForm({ ...valid, estimated_lifespan_km: 0 }).estimated_lifespan_km).toBeDefined()
   })
 })
