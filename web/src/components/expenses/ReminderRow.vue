@@ -158,14 +158,14 @@ const tile = computed(() => reminderDueTile(r.value))
           <button
             @click="emit('edit', r)"
             class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-violet-400 rounded-xl transition-colors border border-slate-700/60"
-            :title="$t('expenses.remindersPanel.editThisReminder')"
+            :title="$t('expenses.remindersPanel.editThisReminder')" :aria-label="$t('expenses.remindersPanel.editThisReminder')"
           >
             <Pencil class="w-3.5 h-3.5" />
           </button>
           <button
             @click="emit('delete', r)"
             class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
-            :title="$t('expenses.remindersPanel.deleteThisReminder')"
+            :title="$t('expenses.remindersPanel.deleteThisReminder')" :aria-label="$t('expenses.remindersPanel.deleteThisReminder')"
           >
             <Trash2 class="w-3.5 h-3.5" />
           </button>

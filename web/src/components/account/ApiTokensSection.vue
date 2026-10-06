@@ -178,7 +178,7 @@ onMounted(() => {
           type="button"
           @click="revokeToken(tok)"
           class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-          :title="t('account.tokens.revoke')"
+          :title="t('account.tokens.revoke')" :aria-label="t('account.tokens.revoke')"
         >
           <Trash2 class="h-4 w-4" />
         </button>
@@ -271,7 +271,7 @@ onMounted(() => {
                 type="button"
                 @click="copyToken"
                 class="absolute right-2 top-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                :title="t('account.tokens.copy')"
+                :title="t('account.tokens.copy')" :aria-label="t('account.tokens.copy')"
               >
                 <Check v-if="copied" class="h-4 w-4 text-success-400" />
                 <Copy v-else class="h-4 w-4" />

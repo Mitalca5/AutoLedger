@@ -480,7 +480,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
                 type="button"
                 @click="emit('view-document', maintForm.document_id, maintForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.maintenanceModal.viewTheDocument')"
+                :title="$t('expenses.maintenanceModal.viewTheDocument')" :aria-label="$t('expenses.maintenanceModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -488,7 +488,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
                 type="button"
                 @click="maintForm.document_id = null; maintForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.maintenanceModal.detachTheReceipt')"
+                :title="$t('expenses.maintenanceModal.detachTheReceipt')" :aria-label="$t('expenses.maintenanceModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>

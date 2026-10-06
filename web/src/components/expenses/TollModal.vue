@@ -333,7 +333,7 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
                 type="button"
                 @click="emit('view-document', tollForm.document_id, tollForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.tollModal.viewTheDocument')"
+                :title="$t('expenses.tollModal.viewTheDocument')" :aria-label="$t('expenses.tollModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -341,7 +341,7 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
                 type="button"
                 @click="tollForm.document_id = null; tollForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.tollModal.detachTheReceipt')"
+                :title="$t('expenses.tollModal.detachTheReceipt')" :aria-label="$t('expenses.tollModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>

@@ -105,7 +105,7 @@ const vehicleStore = useVehicleStore()
             v-if="vehicleStore.canEdit"
             @click="emit('delete', d)"
             class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors border border-slate-700/60"
-            :title="$t('expenses.documentsPanel.deleteThisDocument')"
+            :title="$t('expenses.documentsPanel.deleteThisDocument')" :aria-label="$t('expenses.documentsPanel.deleteThisDocument')"
           >
             <Trash2 class="w-3.5 h-3.5" />
           </button>

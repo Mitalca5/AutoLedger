@@ -256,7 +256,7 @@ function removeFile() {
           @click="removeFile"
           :disabled="disabled"
           class="tap p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-          :title="$t('shell.appDropzone.removeThisFile')"
+          :title="$t('shell.appDropzone.removeThisFile')" :aria-label="$t('shell.appDropzone.removeThisFile')"
         >
           <X class="w-4 h-4" />
         </button>

@@ -219,7 +219,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
                 type="button"
                 @click="emit('view-document', chargeForm.document_id, chargeForm.document_filename, false)"
                 class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.chargeModal.viewTheDocument')"
+                :title="$t('expenses.chargeModal.viewTheDocument')" :aria-label="$t('expenses.chargeModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
               </button>
@@ -227,7 +227,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
                 type="button"
                 @click="chargeForm.document_id = null; chargeForm.document_filename = null"
                 class="tap p-1 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800"
-                :title="$t('expenses.chargeModal.detachTheReceipt')"
+                :title="$t('expenses.chargeModal.detachTheReceipt')" :aria-label="$t('expenses.chargeModal.detachTheReceipt')"
               >
                 <X class="w-3.5 h-3.5" />
               </button>

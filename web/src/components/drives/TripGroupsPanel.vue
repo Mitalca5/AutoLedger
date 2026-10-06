@@ -112,14 +112,14 @@ const formatDate = formatDayTime
             <button
               @click="emit('edit', tg)"
               class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-indigo-400 rounded-lg border border-slate-700/60 transition-colors"
-              :title="$t('drives.tripGroupsPanel.renameTheTrip')"
+              :title="$t('drives.tripGroupsPanel.renameTheTrip')" :aria-label="$t('drives.tripGroupsPanel.renameTheTrip')"
             >
               <Pencil class="w-3.5 h-3.5" />
             </button>
             <button
               @click="emit('delete', tg)"
               class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 rounded-lg border border-slate-700/60 transition-colors"
-              :title="$t('drives.tripGroupsPanel.deleteTheTrip')"
+              :title="$t('drives.tripGroupsPanel.deleteTheTrip')" :aria-label="$t('drives.tripGroupsPanel.deleteTheTrip')"
             >
               <Trash2 class="w-3.5 h-3.5" />
             </button>
@@ -133,7 +133,7 @@ const formatDate = formatDayTime
             {{ formatDate(d.start_time) }}{{ $t('drives.tripGroupsPanel.dateSeparator') }}{{ (d.start_address || $t('drives.driveCostModal.start')).split(',')[0] }} → {{ (d.end_address || $t('drives.driveCostModal.end')).split(',')[0] }}
             <span class="text-slate-400">({{ formatDistance(d.distance_km, 1) }})</span>
           </span>
-          <button v-if="vehicleStore.canEdit" @click="emit('remove-drive', tg, d.id)" class="tap text-slate-400 hover:text-danger-400 shrink-0 p-1" :title="$t('drives.tripGroupsPanel.removeThisDriveFromThe')">
+          <button v-if="vehicleStore.canEdit" @click="emit('remove-drive', tg, d.id)" class="tap text-slate-400 hover:text-danger-400 shrink-0 p-1" :title="$t('drives.tripGroupsPanel.removeThisDriveFromThe')" :aria-label="$t('drives.tripGroupsPanel.removeThisDriveFromThe')">
             <X class="w-3.5 h-3.5" />
           </button>
         </div>

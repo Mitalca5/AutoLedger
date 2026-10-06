@@ -128,7 +128,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
             <button
               @click="emit('edit', c)"
               class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors border border-slate-700/60"
-              :title="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
+              :title="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')" :aria-label="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
             >
               <Pencil class="w-3.5 h-3.5" />
             </button>
@@ -136,7 +136,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
               v-if="c.is_manual"
               @click="emit('delete', c)"
               class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-400/80 hover:text-rose-300 focus-visible:text-rose-300 rounded-xl transition-colors border border-slate-700/60 hover:border-rose-500/40"
-              :title="$t('expenses.chargesPanel.deleteThisCharge')"
+              :title="$t('expenses.chargesPanel.deleteThisCharge')" :aria-label="$t('expenses.chargesPanel.deleteThisCharge')"
             >
               <Trash2 class="w-3.5 h-3.5" />
             </button>

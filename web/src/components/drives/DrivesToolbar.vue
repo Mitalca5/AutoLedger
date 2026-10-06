@@ -107,7 +107,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           <button
             @click="prevMonth"
             class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            :title="$t('drives.drivesToolbar.previousMonth')"
+            :title="$t('drives.drivesToolbar.previousMonth')" :aria-label="$t('drives.drivesToolbar.previousMonth')"
           >
             <ChevronLeft class="w-4 h-4" />
           </button>
@@ -125,7 +125,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           <button
             @click="nextMonth"
             class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            :title="$t('drives.drivesToolbar.nextMonth')"
+            :title="$t('drives.drivesToolbar.nextMonth')" :aria-label="$t('drives.drivesToolbar.nextMonth')"
           >
             <ChevronRight class="w-4 h-4" />
           </button>
@@ -178,7 +178,7 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
           v-if="searchQuery"
           @click="clearSearch"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
-          :title="$t('drives.drivesToolbar.clearTheSearch')"
+          :title="$t('drives.drivesToolbar.clearTheSearch')" :aria-label="$t('drives.drivesToolbar.clearTheSearch')"
         >
           <X class="w-3.5 h-3.5" />
         </button>

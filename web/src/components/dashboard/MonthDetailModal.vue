@@ -104,7 +104,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               :disabled="!hasPrevMonth"
               @click="selectPrevMonth"
               class="tap p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
-              :title="$t('dashboard.monthDetailModal.previousMonth')"
+              :title="$t('dashboard.monthDetailModal.previousMonth')" :aria-label="$t('dashboard.monthDetailModal.previousMonth')"
             >
               <ChevronLeft class="w-4 h-4" />
             </button>
@@ -113,7 +113,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               :disabled="!hasNextMonth"
               @click="selectNextMonth"
               class="tap p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 rounded-lg hover:bg-slate-700/50 transition-colors"
-              :title="$t('dashboard.monthDetailModal.nextMonth')"
+              :title="$t('dashboard.monthDetailModal.nextMonth')" :aria-label="$t('dashboard.monthDetailModal.nextMonth')"
             >
               <ChevronRight class="w-4 h-4" />
             </button>
@@ -122,7 +122,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             type="button"
             @click="closeMonthDetail"
             class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
-            :title="$t('dashboard.monthDetailModal.closeEsc')"
+            :title="$t('dashboard.monthDetailModal.closeEsc')" :aria-label="$t('dashboard.monthDetailModal.closeEsc')"
           >
             <X class="w-5 h-5" />
           </button>

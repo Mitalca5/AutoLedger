@@ -140,14 +140,14 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
             <button
               @click="emit('edit', m)"
               class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors border border-slate-700/60"
-              :title="$t('expenses.maintenancePanel.editThisExpense')"
+              :title="$t('expenses.maintenancePanel.editThisExpense')" :aria-label="$t('expenses.maintenancePanel.editThisExpense')"
             >
               <Pencil class="w-3.5 h-3.5" />
             </button>
             <button
               @click="emit('delete', m)"
               class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-400/80 hover:text-rose-300 focus-visible:text-rose-300 rounded-xl transition-colors border border-slate-700/60 hover:border-rose-500/40"
-              :title="$t('expenses.maintenancePanel.deleteThisExpense')"
+              :title="$t('expenses.maintenancePanel.deleteThisExpense')" :aria-label="$t('expenses.maintenancePanel.deleteThisExpense')"
             >
               <Trash2 class="w-3.5 h-3.5" />
             </button>

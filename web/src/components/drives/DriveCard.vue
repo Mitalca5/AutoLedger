@@ -148,14 +148,14 @@ const formatDate = formatDayTime
         <button
           @click="emit('edit', d)"
           class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
-          :title="$t('common.edit')"
+          :title="$t('common.edit')" :aria-label="$t('common.edit')"
         >
           <Pencil class="w-3.5 h-3.5" />
         </button>
         <button
           @click="emit('delete', d)"
           class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
-          :title="$t('common.delete')"
+          :title="$t('common.delete')" :aria-label="$t('common.delete')"
         >
           <Trash2 class="w-3.5 h-3.5" />
         </button>

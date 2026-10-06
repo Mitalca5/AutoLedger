@@ -62,7 +62,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
       <button
         @click="goToPage(1)"
         :disabled="page <= 1"
-        :title="$t('drives.drivesPagination.firstPage')"
+        :title="$t('drives.drivesPagination.firstPage')" :aria-label="$t('drives.drivesPagination.firstPage')"
         class="tap p-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronsLeft class="w-4 h-4" />
@@ -71,7 +71,7 @@ const paginationPages = computed(() => buildPaginationPages(props.page, props.to
       <button
         @click="goToPage(page - 1)"
         :disabled="page <= 1"
-        :title="$t('drives.drivesPagination.previousPage')"
+        :title="$t('drives.drivesPagination.previousPage')" :aria-label="$t('drives.drivesPagination.previousPage')"
         class="tap p-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeft class="w-4 h-4" />

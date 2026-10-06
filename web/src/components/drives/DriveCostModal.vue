@@ -345,7 +345,7 @@ async function handleDeleteExpense(exp: any) {
             type="button"
             @click="parentTrip ? backToTrip() : emit('back')"
             class="tap p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
-            :title="parentTrip ? $t('drives.driveCostModal.backToTrip') : backLabel"
+            :title="parentTrip ? $t('drives.driveCostModal.backToTrip') : backLabel" :aria-label="parentTrip ? $t('drives.driveCostModal.backToTrip') : backLabel"
           >
             <ArrowLeft class="w-4 h-4" />
           </button>
@@ -642,7 +642,7 @@ async function handleDeleteExpense(exp: any) {
                 v-if="!selectedCostDrive.is_suggestion"
                 @click="showAddTollInline = !showAddTollInline"
                 class="tap p-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs"
-                :title="$t('drives.driveCostModal.addATollOrParking')"
+                :title="$t('drives.driveCostModal.addATollOrParking')" :aria-label="$t('drives.driveCostModal.addATollOrParking')"
               >
                 <Plus class="w-3.5 h-3.5" />
               </button>
@@ -661,10 +661,10 @@ async function handleDeleteExpense(exp: any) {
                 </span>
                 <span class="flex items-center gap-1.5">
                   <span class="font-mono text-warning-400">{{ formatAmount(exp.allocated_amount ?? exp.amount, vehicleCurrency) }}</span>
-                  <button v-if="!selectedCostDrive.is_suggestion" @click="startEditExpense(exp)" class="p-0.5 text-slate-400 hover:text-warning-400" :title="$t('drives.driveCostModal.editThisCost')">
+                  <button v-if="!selectedCostDrive.is_suggestion" @click="startEditExpense(exp)" class="p-0.5 text-slate-400 hover:text-warning-400" :title="$t('drives.driveCostModal.editThisCost')" :aria-label="$t('drives.driveCostModal.editThisCost')">
                     <Pencil class="w-3 h-3" />
                   </button>
-                  <button v-if="!selectedCostDrive.is_suggestion" @click="handleDeleteExpense(exp)" class="p-0.5 text-slate-400 hover:text-danger-400" :title="$t('drives.driveCostModal.deleteThisCost')">
+                  <button v-if="!selectedCostDrive.is_suggestion" @click="handleDeleteExpense(exp)" class="p-0.5 text-slate-400 hover:text-danger-400" :title="$t('drives.driveCostModal.deleteThisCost')" :aria-label="$t('drives.driveCostModal.deleteThisCost')">
                     <Trash2 class="w-3 h-3" />
                   </button>
                 </span>
@@ -681,10 +681,10 @@ async function handleDeleteExpense(exp: any) {
                 <input :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" type="number" step="0.01" min="0.01" class="field col-span-3" />
                 <label :for="`drive-expense-notes-${exp.id}`" class="sr-only">{{ $t('common.notes') }}</label>
                 <input :id="`drive-expense-notes-${exp.id}`" v-model="expenseEditForm.notes" :placeholder="$t('common.notes')" class="field col-span-4" />
-                <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-success-400 hover:text-success-300" :title="$t('common.save')">
+                <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-success-400 hover:text-success-300" :title="$t('common.save')" :aria-label="$t('common.save')">
                   <Save class="w-3.5 h-3.5" />
                 </button>
-                <button @click="editingExpenseId = null" class="col-span-1 p-1 text-slate-400 hover:text-white" :title="$t('common.cancel')">
+                <button @click="editingExpenseId = null" class="col-span-1 p-1 text-slate-400 hover:text-white" :title="$t('common.cancel')" :aria-label="$t('common.cancel')">
                   <X class="w-3.5 h-3.5" />
                 </button>
                 <p v-if="exp.trip_group_id" class="col-span-12 text-xs text-indigo-300/80">{{ $t('drives.driveCostModal.totalAmountOfTheTrip') }}</p>

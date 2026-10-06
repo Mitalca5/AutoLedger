@@ -186,7 +186,7 @@ onMounted(() => {
                 :disabled="dismissingId === charge.id"
                 @click="handleDismiss(charge)"
                 class="tap p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                :title="t('pendingCharges.dismiss')"
+                :title="t('pendingCharges.dismiss')" :aria-label="t('pendingCharges.dismiss')"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

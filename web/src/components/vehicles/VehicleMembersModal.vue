@@ -323,7 +323,7 @@ async function handleRemoveMember(m: any) {
                     type="button"
                     @click="handleRemoveMember(m)"
                     class="tap p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                    :title="$t('vehicles.vehicleMembersModal.removeAccess')"
+                    :title="$t('vehicles.vehicleMembersModal.removeAccess')" :aria-label="$t('vehicles.vehicleMembersModal.removeAccess')"
                   >
                     <Trash2 class="w-4 h-4" />
                   </button>
@@ -396,7 +396,7 @@ async function handleRemoveMember(m: any) {
                     type="button"
                     @click="handleDeletePerson(p)"
                     class="tap p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                    :title="$t('vehicles.vehicleMembersModal.removeDriver')"
+                    :title="$t('vehicles.vehicleMembersModal.removeDriver')" :aria-label="$t('vehicles.vehicleMembersModal.removeDriver')"
                   >
                     <Trash2 class="w-4 h-4" />
                   </button>
