@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
+
+import { DONUT_KEYS, donutAmounts, type DonutMode } from '@/utils/donutBreakdown'
 
 Chart.register(...registerables)
 
-// Share of each cost item in the full cost of ownership
+// Share of each cost item: in the full cost of ownership, or in what was actually paid
 const props = defineProps<{ tco: any | null }>()
 
 const donutChartRef = ref<HTMLCanvasElement | null>(null)
 let donutChartInstance: Chart | null = null
+const mode = ref<DonutMode>('full')
+const modes: DonutMode[] = ['full', 'cash']
+const keys = computed(() => DONUT_KEYS.filter((k) => mode.value === 'full' || k !== 'depreciation'))
 
 function renderChart() {
   if (!donutChartRef.value || !props.tco) return
@@ -19,20 +24,11 @@ function renderChart() {
   donutChartInstance = new Chart(donutChartRef.value, {
     type: 'doughnut',
     data: {
-      labels: ['energy', 'tolls', 'tires', 'maintenance', 'insurance', 'financing', 'depreciation', 'other'].map((k) => t(`dashboard.donut.${k}`)),
+      labels: keys.value.map((k) => t(`dashboard.donut.${k === 'tires' && mode.value === 'cash' ? 'tiresCash' : k}`)),
       datasets: [
         {
-          data: [
-            tco.energy_cost || 0,
-            tco.tolls_cost || 0,
-            tco.tires_amortized_cost || 0,
-            (tco.maintenance_cost || 0) + (tco.repair_cost || 0),
-            tco.insurance_cost || 0,
-            Math.max(0, tco.financing_full_cost || 0),
-            tco.depreciation_cost || 0,
-            (tco.subscription_cost || 0) + (tco.tax_cost || 0) + (tco.other_cost || 0),
-          ],
-          backgroundColor: ['#38bdf8', '#f59e0b', '#10b981', '#ec4899', '#a855f7', '#f97316', '#e11d48', '#64748b'],
+          data: donutAmounts(tco, mode.value).filter((_, i) => mode.value === 'full' || DONUT_KEYS[i] !== 'depreciation'),
+          backgroundColor: ['#38bdf8', '#f59e0b', '#10b981', '#ec4899', '#a855f7', '#f97316', '#e11d48', '#64748b'].filter((_, i) => mode.value === 'full' || DONUT_KEYS[i] !== 'depreciation'),
           borderWidth: 0,
         },
       ],
@@ -49,7 +45,7 @@ function renderChart() {
 }
 
 onMounted(renderChart)
-watch(() => props.tco, renderChart, { flush: 'post' })
+watch([() => props.tco, mode], renderChart, { flush: 'post' })
 onUnmounted(() => {
   if (donutChartInstance) donutChartInstance.destroy()
 })
@@ -57,7 +53,23 @@ onUnmounted(() => {
 
 <template>
   <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-    <h3 class="text-sm font-bold text-white mb-4">{{ $t('dashboard.costBreakdownDonut.fullCostBreakdown') }}</h3>
+    <div class="flex items-center justify-between gap-2 mb-1">
+      <h3 class="text-sm font-bold text-white">{{ $t(mode === 'full' ? 'dashboard.costBreakdownDonut.fullCostBreakdown' : 'dashboard.donut.cashTitle') }}</h3>
+      <div class="inline-flex rounded-lg bg-slate-800 p-0.5 text-xs" role="group">
+        <button
+          v-for="m in modes"
+          :key="m"
+          type="button"
+          :aria-pressed="mode === m"
+          class="px-2.5 py-1 rounded-md font-medium transition-colors"
+          :class="mode === m ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'"
+          @click="mode = m"
+        >
+          {{ $t(m === 'full' ? 'dashboard.donut.modeFull' : 'dashboard.donut.modeCash') }}
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mb-4">{{ $t(mode === 'full' ? 'dashboard.donut.hintFull' : 'dashboard.donut.hintCash') }}</p>
     <div class="h-48 sm:h-64">
       <canvas ref="donutChartRef" role="img" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
     </div>

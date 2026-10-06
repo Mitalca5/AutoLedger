@@ -242,7 +242,13 @@
     "insurance": "Assurance",
     "financing": "Financement & location",
     "depreciation": "Décote",
-    "other": "Abonnements, taxes & autres"
+    "other": "Abonnements, taxes & autres",
+    "tiresCash": "Pneus (achats)",
+    "modeFull": "Coût complet",
+    "modeCash": "Décaissé",
+    "hintFull": "Coût économique : usure des pneus amortie et décote incluses.",
+    "hintCash": "Sommes réellement payées : pneus au moment de l'achat, sans décote.",
+    "cashTitle": "Répartition des dépenses décaissées"
   },
   "range": {
     "all": "Tout",

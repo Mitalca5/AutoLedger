@@ -242,7 +242,13 @@
     "insurance": "Insurance",
     "financing": "Financing and leasing",
     "depreciation": "Depreciation",
-    "other": "Subscriptions, taxes and other"
+    "other": "Subscriptions, taxes and other",
+    "tiresCash": "Tires (purchases)",
+    "modeFull": "Full cost",
+    "modeCash": "Cash out",
+    "hintFull": "Economic cost: tire wear spread over use, depreciation included.",
+    "hintCash": "Money actually paid: tires when bought, no depreciation.",
+    "cashTitle": "Breakdown of cash spent"
   },
   "range": {
     "all": "All",
