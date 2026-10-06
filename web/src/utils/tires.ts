@@ -122,13 +122,14 @@ export const copiedSessionFromSession = (s: any): SessionForm => ({
   notes: s.notes || '',
 })
 
-/** Form for pasting a copied session on a tire: a mounted tire keeps its own wheel, otherwise the copied position wins. */
+/** Position a copied session takes on a tire: a mounted tire keeps its own wheel, otherwise the copied position wins. */
+export const positionOnTire = (copiedPosition: string | null | undefined, tire: { current_position?: string } | null | undefined): string =>
+  tire?.current_position && isMountedPosition(tire.current_position) ? tire.current_position : copiedPosition || 'FL'
+
+/** Form for pasting a copied session on a tire. */
 export const sessionFormFromCopy = (copied: SessionForm, tire: { current_position?: string } | null | undefined): SessionForm => ({
   ...copied,
-  position:
-    tire && tire.current_position !== 'STORAGE' && tire.current_position !== 'DISPOSED'
-      ? (tire.current_position as string)
-      : copied.position || 'FL',
+  position: positionOnTire(copied.position, tire),
 })
 
 export interface TireLogForm {

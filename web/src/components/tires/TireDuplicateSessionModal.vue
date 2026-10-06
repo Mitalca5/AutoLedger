@@ -5,7 +5,7 @@ import { ref, watch } from 'vue'
 import { Copy, X } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { defaultTargetTireIds, formatDate } from '@/utils/tires'
+import { defaultTargetTireIds, formatDate, positionOnTire } from '@/utils/tires'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 // Copies one mount session of the open tire onto other tires
@@ -55,7 +55,8 @@ async function handleDuplicateSessionSubmit() {
     }
 
     for (const targetId of duplicateTargetTireIds.value) {
-      await api.createTireSession(props.vehicleId, targetId, payload)
+      const target = props.tires.find((x) => x.tire.id === targetId)?.tire
+      await api.createTireSession(props.vehicleId, targetId, { ...payload, position: positionOnTire(s.position, target) })
     }
 
     open.value = false

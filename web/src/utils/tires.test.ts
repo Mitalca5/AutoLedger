@@ -7,6 +7,7 @@ import {
   getSeasonIcon,
   getTireSelectLabel,
   isMountedPosition,
+  positionOnTire,
   sessionFormFromCopy,
   sessionFormFromSession,
   validateTireForm,
@@ -147,6 +148,18 @@ describe('session forms', () => {
     expect(sessionFormFromCopy(copied, { current_position: 'STORAGE' }).position).toBe('RL')
     expect(sessionFormFromCopy(copied, { current_position: 'DISPOSED' }).position).toBe('RL')
     expect(sessionFormFromCopy({ ...copied, position: '' }, null).position).toBe('FL')
+  })
+})
+
+describe('positionOnTire', () => {
+  it('keeps the wheel of a mounted tire, whatever the copied position', () => {
+    expect(positionOnTire('FL', { current_position: 'RR' })).toBe('RR')
+  })
+
+  it('uses the copied position for a stored or disposed tire, falling back on FL', () => {
+    expect(positionOnTire('RL', { current_position: 'STORAGE' })).toBe('RL')
+    expect(positionOnTire('RL', { current_position: 'DISPOSED' })).toBe('RL')
+    expect(positionOnTire('', undefined)).toBe('FL')
   })
 })
 
