@@ -80,7 +80,7 @@ services:
     environment:
       PORT: 8080
       ENVIRONMENT: ${ENVIRONMENT:-production}
-      AUTOLEDGER_BASE_URL: ${AUTOLEDGER_BASE_URL:-${APP_BASE_URL:-http://localhost:${AUTOLEDGER_PORT:-8080}}}
+      AUTOLEDGER_BASE_URL: ${AUTOLEDGER_BASE_URL:-${APP_BASE_URL:-http://localhost:${AUTOLEDGER_PORT:-${PORT:-8080}}}}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
@@ -109,8 +109,8 @@ services:
       APP_TIMEZONE: ${APP_TIMEZONE:-America/Argentina/Buenos_Aires}
       AUTOLEDGER_STORAGE_DIR: ${AUTOLEDGER_STORAGE_DIR:-${STORAGE_DIR:-/data/documents}}
     ports:
-      # Host port (set AUTOLEDGER_PORT in Portainer); the app listens on 8080 inside the container.
-      - "${AUTOLEDGER_PORT:-8080}:8080"
+      # Host port: AUTOLEDGER_PORT, then PORT, then 8080; the app listens on 8080 inside the container.
+      - "${AUTOLEDGER_PORT:-${PORT:-8080}}:8080"
     volumes:
       - autoledger_documents:/data/documents
       - autoledger_secrets:/secrets:ro
