@@ -477,6 +477,8 @@ async function handleDeleteLog(l: any) {
       <span>{{ $t('tires.tiresView.youAreViewingThisVehicle') }} <strong>{{ $t('tires.tiresView.readOnly') }}</strong>{{ $t('tires.tiresView.modeChangesToTiresRotations') }}</span>
     </div>
 
+    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
+
     <!-- Sticky Bulk Selection Bar -->
     <BulkSelectionBar
       v-if="vehicleStore.canEdit"
@@ -505,10 +507,8 @@ async function handleDeleteLog(l: any) {
       </button>
     </BulkSelectionBar>
 
-    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
-
     <!-- Header row: Select all toggle & Total info -->
-    <div v-if="vehicleStore.canEdit && activeTab !== 'chassis' && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
+    <div v-if="vehicleStore.canEdit && activeTab === 'disposed' && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
       <SelectAllToggle
         :checked="isCurrentTabAllSelected"
         :indeterminate="isCurrentTabPartlySelected"
@@ -604,9 +604,15 @@ async function handleDeleteLog(l: any) {
       <div v-else class="space-y-4">
         <!-- Garage batch actions bar -->
         <div class="flex items-center justify-between flex-wrap gap-2 bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">
-          <div class="flex items-center gap-2">
-            <Package class="w-4 h-4 text-slate-400" />
-            <span class="text-xs text-slate-300 font-semibold">{{ $t('tires.tiresView.tireSInGarageStorage', { length: storageTires.length }) }}</span>
+          <div class="flex items-center gap-3 px-1 text-xs text-slate-400">
+            <SelectAllToggle
+              v-if="vehicleStore.canEdit"
+              :checked="isCurrentTabAllSelected"
+              :indeterminate="isCurrentTabPartlySelected"
+              :label="isCurrentTabAllSelected ? $t('tires.tiresView.deselectAll') : $t('tires.tiresView.selectAll')"
+              @toggle="toggleSelectAllCurrentTab"
+            />
+            <span class="font-semibold text-slate-300">{{ $t('tires.tiresView.tireSInGarageStorage', { length: storageTires.length }) }}</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <button
