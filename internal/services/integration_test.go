@@ -2485,3 +2485,60 @@ func TestIntegrationUnmountedTireWithoutSessionCounts(t *testing.T) {
 		t.Fatalf("expected the paid, never mounted tire counted in full, got total %s and monthly %s", sum.TiresAmortizedCost, booked)
 	}
 }
+
+func TestIntegrationOpenTireSessionIsReplaced(t *testing.T) {
+	_, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "opensession@example.com")
+	odo := 100.0
+	newTire := func(model string, pos models.TirePosition) *models.Tire {
+		tire := &models.Tire{MountedOdometer: &odo, VehicleID: &v.ID, Brand: "B", Model: model, Dimension: "205/55 R16", Season: models.TireSeasonSummer,
+			PurchaseDate: time.Now().UTC().AddDate(-1, 0, 0), PurchasePrice: 10000, CurrentPosition: pos,
+			InitialDepthMm: 8, MinLegalDepthMm: 1.6, EstimatedLifespanKm: 40000}
+		if err := repo.CreateTire(ctx, tire); err != nil {
+			t.Fatal(err)
+		}
+		return tire
+	}
+	openCount := func(tireID string) int {
+		list, err := repo.ListTireMountSessions(ctx, tireID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		n := 0
+		for _, s := range list {
+			if s.DismountedDate == nil {
+				n++
+			}
+		}
+		return n
+	}
+	a, b := newTire("A", models.TirePosFL), newTire("B", models.TirePosFR)
+	day := time.Now().UTC().AddDate(0, -6, 0)
+	for _, pos := range []models.TirePosition{models.TirePosFL, models.TirePosFR} {
+		if err := repo.CreateTireMountSession(ctx, &models.TireMountSession{TireID: a.ID, VehicleID: v.ID, Position: pos, MountedDate: day, MountedOdometer: 100}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if n := openCount(a.ID); n != 1 {
+		t.Fatalf("a new open session must replace the previous one, got %d open", n)
+	}
+	if err := repo.CreateTireMountSession(ctx, &models.TireMountSession{TireID: b.ID, VehicleID: v.ID, Position: models.TirePosFR, MountedDate: day.AddDate(0, -3, 0), MountedOdometer: 50}); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.CopyTireHistory(ctx, v.ID, a.ID, []string{b.ID}, true, false, false); err != nil {
+		t.Fatal(err)
+	}
+	if n := openCount(b.ID); n != 1 {
+		t.Fatalf("a copied open session must replace the target's open session, got %d open", n)
+	}
+	list, err := repo.ListTireMountSessions(ctx, b.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range list {
+		if s.DismountedDate == nil && s.Position != models.TirePosFR {
+			t.Fatalf("the copied open session must take the position where the target is fitted, got %s", s.Position)
+		}
+	}
+}

@@ -114,6 +114,16 @@ func (r *Repository) CopyTireHistory(ctx context.Context, vehicleID, sourceTireI
 				if adaptPosition && isMountedPosition(target.CurrentPosition) {
 					pos = target.CurrentPosition
 				}
+				if s.dismountedDate == nil {
+					// The session still open is where the target tire is fitted now, and replaces its own.
+					if !isMountedPosition(target.CurrentPosition) {
+						continue
+					}
+					pos = target.CurrentPosition
+					if err := replaceOpenTireSessions(ctx, tx, targetID, ""); err != nil {
+						return err
+					}
+				}
 				if _, err := tx.Exec(ctx, `
 					INSERT INTO tire_mount_sessions (
 						tire_id, vehicle_id, position, mounted_date, mounted_odometer,
@@ -206,6 +216,11 @@ func (r *Repository) CreateTireMountSession(ctx context.Context, s *models.TireM
 	if err := ensureTiresOwned(ctx, tx, s.VehicleID, []string{s.TireID}); err != nil {
 		return ErrNotFound
 	}
+	if s.DismountedDate == nil {
+		if err := replaceOpenTireSessions(ctx, tx, s.TireID, ""); err != nil {
+			return err
+		}
+	}
 	err = tx.QueryRow(ctx, `
 		INSERT INTO tire_mount_sessions (
 			tire_id, vehicle_id, position, mounted_date, mounted_odometer,
@@ -253,6 +268,11 @@ func (r *Repository) UpdateTireMountSession(ctx context.Context, s *models.TireM
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
 	}
+	if s.DismountedDate == nil {
+		if err := replaceOpenTireSessions(ctx, tx, s.TireID, s.ID); err != nil {
+			return err
+		}
+	}
 	if err := recalcTireDistance(ctx, tx, s.TireID); err != nil {
 		return err
 	}
@@ -281,6 +301,16 @@ func (r *Repository) DeleteTireMountSession(ctx context.Context, vehicleID, sess
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+// replaceOpenTireSessions removes the sessions of a tire that are still open (except keepID): a tire is fitted at one place at a time,
+// so a new open session replaces the previous one.
+func replaceOpenTireSessions(ctx context.Context, tx pgx.Tx, tireID, keepID string) error {
+	_, err := tx.Exec(ctx, `
+		DELETE FROM tire_mount_sessions
+		WHERE tire_id::text = $1 AND dismounted_date IS NULL AND ($2 = '' OR id::text <> $2);
+	`, tireID, keepID)
+	return err
 }
 
 // recalcTireDistance derives accumulated distance (initial + closed sessions) and the active mount odometer.
