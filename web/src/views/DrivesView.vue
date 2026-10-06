@@ -744,6 +744,7 @@ async function handleBulkApplyToll() {
         <template v-if="prefs.proPersoEnabled">
           <button
             @click="selectedTag = ''"
+            :aria-pressed="selectedTag === ''"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
             :class="selectedTag === '' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
@@ -751,6 +752,7 @@ async function handleBulkApplyToll() {
           </button>
           <button
             @click="selectedTag = 'Pro'"
+            :aria-pressed="selectedTag === 'Pro'"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
             :class="selectedTag === 'Pro' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
@@ -758,6 +760,7 @@ async function handleBulkApplyToll() {
           </button>
           <button
             @click="selectedTag = 'Perso'"
+            :aria-pressed="selectedTag === 'Perso'"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
             :class="selectedTag === 'Perso' ? 'bg-success-500/20 text-success-400 border border-success-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >

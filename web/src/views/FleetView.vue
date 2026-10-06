@@ -430,7 +430,7 @@ onBeforeUnmount(() => {
             </div>
             <div>
               <dt class="text-slate-400">{{ t('fleet.compare.completeness') }}</dt>
-              <dd class="font-semibold tabular-nums" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</dd>
+              <dd class="font-semibold tabular-nums" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</dd>
             </div>
           </dl>
         </li>
@@ -460,7 +460,7 @@ onBeforeUnmount(() => {
               <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ energyPer100(v) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</td>
-              <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ v.completeness_pct }}%</td>
+              <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</td>
             </tr>
           </tbody>
         </table>
@@ -505,7 +505,7 @@ onBeforeUnmount(() => {
                 {{ formatDistance(member.distance_km) }} ({{ formatPercent(member.percentage) }})
               </span>
             </div>
-            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, Math.max(0, member.percentage)))" :aria-label="member.display_name">
               <div
                 class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
                 :style="{ width: `${Math.min(100, Math.max(0, member.percentage))}%` }"

@@ -234,6 +234,7 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
             <button
               type="button"
               @click="associationMode = 'NONE'"
+              :aria-pressed="associationMode === 'NONE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'NONE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -242,6 +243,7 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
             <button
               type="button"
               @click="associationMode = 'SINGLE'"
+              :aria-pressed="associationMode === 'SINGLE'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'SINGLE' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >
@@ -250,6 +252,7 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
             <button
               type="button"
               @click="associationMode = 'MULTI'"
+              :aria-pressed="associationMode === 'MULTI'"
               class="py-1.5 px-2 text-xs font-medium rounded-lg transition-colors text-center border"
               :class="associationMode === 'MULTI' ? 'bg-warning-500/20 text-warning-300 border-warning-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
             >

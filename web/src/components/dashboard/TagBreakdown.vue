@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
@@ -30,7 +31,7 @@ const vehicleStore = useVehicleStore()
           <p v-if="item.tolls_amount" class="text-xs text-warning-400">{{ $t('dashboard.tagBreakdown.ofTollsAndParking', { value: formatAmount(item.tolls_amount, vehicleStore.currency) }) }}</p>
         </div>
         <div class="text-right">
-          <span class="text-lg font-extrabold text-white">{{ item.percentage }}%</span>
+          <span class="text-lg font-extrabold text-white">{{ formatPercent(item.percentage, 0) }}</span>
         </div>
       </div>
     </div>

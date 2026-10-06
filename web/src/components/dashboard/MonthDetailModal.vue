@@ -180,12 +180,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           <div class="flex items-center gap-3 text-xs flex-wrap">
             <span class="flex items-center gap-1.5 text-purple-300">
               <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-              <span>{{ $t('dashboard.monthDetailModal.fixedCosts') }} : <strong class="text-white">{{ selectedMonthBreakdown.fixedVar.fixedPct }}%</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.fixedAmount, currency) }})</span>
+              <span>{{ $t('dashboard.monthDetailModal.fixedCosts') }} : <strong class="text-white">{{ formatPercent(selectedMonthBreakdown.fixedVar.fixedPct, 0) }}</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.fixedAmount, currency) }})</span>
             </span>
             <span class="text-slate-400">•</span>
             <span class="flex items-center gap-1.5 text-info-300">
               <span class="w-2 h-2 rounded-full bg-info-500"></span>
-              <span>{{ $t('dashboard.monthDetailModal.variableCosts') }} : <strong class="text-white">{{ selectedMonthBreakdown.fixedVar.variablePct }}%</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.variableAmount, currency) }})</span>
+              <span>{{ $t('dashboard.monthDetailModal.variableCosts') }} : <strong class="text-white">{{ formatPercent(selectedMonthBreakdown.fixedVar.variablePct, 0) }}</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.variableAmount, currency) }})</span>
             </span>
           </div>
         </div>
@@ -220,6 +220,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           <button
             type="button"
             @click="monthDetailViewMode = 'economic'"
+            :aria-pressed="monthDetailViewMode === 'economic'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
               monthDetailViewMode === 'economic' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
@@ -230,6 +231,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           <button
             type="button"
             @click="monthDetailViewMode = 'cash'"
+            :aria-pressed="monthDetailViewMode === 'cash'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
               monthDetailViewMode === 'cash' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
