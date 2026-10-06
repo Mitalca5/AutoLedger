@@ -487,7 +487,7 @@ async function handleDeleteLog(l: any) {
     <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
 
     <!-- Header row: Select all toggle & Total info -->
-    <div v-if="vehicleStore.canEdit" class="flex items-center justify-between text-xs text-slate-400 px-2">
+    <div v-if="vehicleStore.canEdit && activeTab !== 'chassis'" class="flex items-center justify-between text-xs text-slate-400 px-2">
       <SelectAllToggle
         :checked="isCurrentTabAllSelected"
         :indeterminate="isCurrentTabPartlySelected"
@@ -499,6 +499,11 @@ async function handleDeleteLog(l: any) {
 
     <!-- TAB 1: CHASSIS INTERACTIF (PNEUS MONTÉS) -->
     <div v-if="activeTab === 'chassis'" class="space-y-6">
+      <TireOdometerTimeline
+        :tires="tires"
+        :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"
+        @select-tire="openTimelineTire"
+      />
       <div v-if="vehicleStore.canEdit" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 text-slate-300 font-semibold">
           <RefreshCw class="w-4 h-4 text-rose-400" />
@@ -521,11 +526,16 @@ async function handleDeleteLog(l: any) {
           </button>
         </div>
       </div>
-      <TireOdometerTimeline
-        :tires="tires"
-        :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"
-        @select-tire="openTimelineTire"
-      />
+
+      <div v-if="vehicleStore.canEdit" class="flex items-center justify-between text-xs text-slate-400 px-2">
+        <SelectAllToggle
+          :checked="isCurrentTabAllSelected"
+          :indeterminate="isCurrentTabPartlySelected"
+          :label="isCurrentTabAllSelected ? $t('tires.tiresView.deselectAll') : $t('tires.tiresView.selectAll')"
+          @toggle="toggleSelectAllCurrentTab"
+        />
+        <span>{{ $t('tires.tiresView.tireSInThisView', { length: currentTabTireIds.length }) }}</span>
+      </div>
 
       <!-- Cartes des 4 roues -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
