@@ -4,7 +4,9 @@ import { Archive, ClipboardPaste, Copy, Edit2, History, Pencil, Plus, Ruler, Shu
 import { useVehicleStore } from '@/stores/vehicle'
 import { apiMessageText } from '@/services/apiError'
 import { formatAmount } from '@/currency'
-import { formatDate, type SessionForm } from '@/utils/tires'
+import { formatDate, WEAR_TONE_TEXT, wearTone, type SessionForm } from '@/utils/tires'
+import { formatNumber, formatPercent } from '@/utils/numbers'
+import TireWearBar from '@/components/tires/TireWearBar.vue'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistance, formatDistanceValue, formatPerDistanceValue, perDistance } from '@/units'
 import { formatCostPerDistance } from '@/utils/costPerDistance'
@@ -92,22 +94,16 @@ useEscapeToClose(open, () => (open.value = false))
           </span>
         </div>
 
-        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="(selectedTireStats?.life_progress_pct || 0) > 80 ? 'bg-rose-500' : 'bg-success-500'"
-            :style="{ width: `${Math.min(100, selectedTireStats?.life_progress_pct || 0)}%` }"
-          ></div>
-        </div>
+        <TireWearBar thick :pct="selectedTireStats?.life_progress_pct || 0" :condition="selectedTireStats?.condition" />
 
         <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.currentTread') }}</div>
-            <div class="font-bold text-success-400">{{ selectedTireStats?.current_depth_mm }} mm</div>
+            <div class="font-bold" :class="WEAR_TONE_TEXT[wearTone(0, selectedTireStats?.condition)]">{{ selectedTireStats?.current_depth_mm != null ? `${formatNumber(selectedTireStats.current_depth_mm, 1)} mm` : '—' }}</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.lifespanUsed') }}</div>
-            <div class="font-bold text-slate-200">{{ selectedTireStats?.life_progress_pct }}%</div>
+            <div class="font-bold text-slate-200">{{ formatPercent(Number(selectedTireStats?.life_progress_pct || 0)) }}</div>
           </div>
           <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
             <div class="text-xs text-slate-400">{{ $t('tires.tireHistoryModal.actualCostKm', { unit: distanceUnit() }) }}</div>

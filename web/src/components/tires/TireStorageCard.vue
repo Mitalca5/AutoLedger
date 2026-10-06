@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { intlLocale } from '@/i18n'
 import { formatDistance } from '@/units'
-import { getSeasonIcon } from '@/utils/tires'
+import { getSeasonIcon, WEAR_TONE_TEXT, wearTone } from '@/utils/tires'
+import { formatPercent } from '@/utils/numbers'
+import TireWearBar from '@/components/tires/TireWearBar.vue'
 
 // A tire kept in the garage
 defineProps<{ t: any; selected: boolean }>()
@@ -47,18 +49,10 @@ const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string] }>()
       </div>
       <div>
         <div class="text-xs text-slate-400">{{ $t('tires.tireStorageCard.estimatedWear') }}</div>
-        <div class="font-bold" :class="t.life_progress_pct > 80 ? 'text-rose-400' : 'text-success-400'">{{ t.life_progress_pct }}%</div>
+        <div class="font-bold" :class="WEAR_TONE_TEXT[wearTone(t.life_progress_pct, t.condition)]">{{ formatPercent(Number(t.life_progress_pct)) }}</div>
       </div>
     </div>
 
-    <div class="space-y-1">
-      <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-        <div
-          class="h-full rounded-full transition-all"
-          :class="t.life_progress_pct > 80 ? 'bg-rose-500' : 'bg-success-500'"
-          :style="{ width: `${Math.min(100, t.life_progress_pct)}%` }"
-        ></div>
-      </div>
-    </div>
+    <TireWearBar :pct="t.life_progress_pct" :condition="t.condition" />
   </div>
 </template>

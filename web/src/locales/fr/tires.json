@@ -144,7 +144,7 @@
     "odometerAtRemovalKm": "Odomètre au démontage ({unit})"
   },
   "tireDisposedCard": {
-    "kmDrivenWear": "{total_distance_km} {unit} parcourus • Usure : {life_progress_pct}% • {purchase_price}",
+    "kmDrivenWear": "{total_distance_km} {unit} parcourus • Usure : {life_progress_pct} • {purchase_price}",
     "scrapped": "Au rebut",
     "selectForABulkAction": "Sélectionner pour une action par lot"
   },
@@ -332,5 +332,8 @@
     "rearShort": "AR",
     "allShort": "Tous"
   },
-  "sessionCount": "{count} session | {count} sessions"
+  "sessionCount": "{count} session | {count} sessions",
+  "wearBar": {
+    "label": "Usure estimée"
+  }
 }

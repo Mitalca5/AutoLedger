@@ -137,3 +137,15 @@ export interface TireLogForm {
   notes: string
   date: string
 }
+
+export type WearTone = 'ok' | 'warning' | 'danger'
+
+/** Wear tone of a tire: the worse of the tread-depth condition computed by the server and the lifespan used (over 80 % is danger). */
+export function wearTone(lifeProgressPct: number, condition?: string): WearTone {
+  if (condition === 'CRITICAL' || lifeProgressPct > 80) return 'danger'
+  if (condition === 'WARNING') return 'warning'
+  return 'ok'
+}
+
+export const WEAR_TONE_BG: Record<WearTone, string> = { ok: 'bg-success-500', warning: 'bg-warning-500', danger: 'bg-rose-500' }
+export const WEAR_TONE_TEXT: Record<WearTone, string> = { ok: 'text-success-400', warning: 'text-warning-400', danger: 'text-rose-400' }
