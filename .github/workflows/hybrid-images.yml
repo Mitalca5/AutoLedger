@@ -1,8 +1,8 @@
-name: Publish hybrid homelab images
+name: Publish fork images
 
 on:
   push:
-    branches: [homelab/hybrid-docker]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

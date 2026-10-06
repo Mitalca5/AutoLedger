@@ -365,7 +365,7 @@ onMounted(() => {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ t('common.cancel') }}
         </button>
@@ -373,7 +373,7 @@ onMounted(() => {
           type="button"
           :disabled="!breakdown || breakdown.total_cost_cents <= 0"
           @click="applyToCharge"
-          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
+          class="btn btn-lg btn-primary"
         >
           {{ t('tariffs.publicModal.applyButton') }}
         </button>

@@ -91,7 +91,7 @@ const formatDate = formatDayTime
           <!-- Details toggle button -->
           <button
             @click="emit('toggle-details', tg)"
-            class="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white transition-colors"
+            class="btn btn-secondary"
           >
             {{ expandedTripId === tg.id ? $t('drives.tripGroupsPanel.hide') : $t('drives.tripGroupsPanel.legs') }}
           </button>
@@ -100,7 +100,7 @@ const formatDate = formatDayTime
           <button
             v-if="vehicleStore.canEdit"
             @click="router.push({ path: '/carpools', query: { new_trip_group_id: tg.id } })"
-            class="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 flex items-center gap-1.5 transition-all"
+            class="btn btn-secondary hover:text-rose-400 hover:border-rose-500/40"
             :title="$t('drives.tripGroupsPanel.carpoolThisTrip')"
           >
             <Users class="w-3.5 h-3.5 text-rose-500" />

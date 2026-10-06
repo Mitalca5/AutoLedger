@@ -51,7 +51,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
       v-if="next || canEdit"
       to="/maintenance?tab=REMINDERS"
       :class="{ 'self-start': next }"
-      class="tap-text px-3.5 text-xs font-semibold rounded-xl shrink-0 sm:self-auto gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+      class="btn btn-lg btn-secondary tap-text shrink-0 sm:self-auto"
     >
       {{ next ? $t('dashboard.nextDueCard.viewReminders') : $t('dashboard.nextDueCard.create') }}
       <ArrowRight class="w-3.5 h-3.5" />

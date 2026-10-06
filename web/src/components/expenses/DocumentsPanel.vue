@@ -37,7 +37,7 @@ const vehicleStore = useVehicleStore()
       <button
         v-if="vehicleStore.canEdit"
         @click="emit('upload')"
-        class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-2 shadow-lg shadow-rose-600/20"
+        class="btn btn-lg btn-primary"
       >
         <UploadCloud class="w-4 h-4" />
         {{ $t('expenses.documentsPanel.uploadAFirstDocument') }}
@@ -84,7 +84,7 @@ const vehicleStore = useVehicleStore()
             <button
               @click="emit('view-document', d.id, d.filename, false)"
               :disabled="loadingDocId === d.id"
-              class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-700/60 transition-colors disabled:opacity-50"
+              class="btn btn-secondary"
               :title="$t('expenses.documentsPanel.viewTheFile')"
             >
               <Loader2 v-if="loadingDocId === d.id" class="w-3.5 h-3.5 text-indigo-400 animate-spin" />
@@ -93,7 +93,7 @@ const vehicleStore = useVehicleStore()
             </button>
             <button
               @click="emit('view-document', d.id, d.filename, true)"
-              class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-700/60 transition-colors"
+              class="btn btn-secondary"
               :title="$t('expenses.documentsPanel.downloadTheFile')"
             >
               <Download class="w-3.5 h-3.5 text-indigo-400" />

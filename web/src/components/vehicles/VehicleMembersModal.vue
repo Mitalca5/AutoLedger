@@ -67,7 +67,7 @@ async function handleAddMember() {
     newMemberEmail.value = ''
     newMemberPersonId.value = ''
     await loadMembers(membersVehicle.value.id)
-    showAlert(t('vehicles.vehicleMembersModal.added'), t('common.success'), 'info')
+    showAlert(t('vehicles.vehicleMembersModal.added'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -121,7 +121,7 @@ async function handleUpdateMemberRole(m: any, newRole: string) {
   try {
     await api.updateVehicleMemberRole(membersVehicle.value.id, m.user_id, { role: newRole })
     await loadMembers(membersVehicle.value.id)
-    showAlert(t('vehicles.vehicleMembersModal.roleUpdated'), t('common.success'), 'info')
+    showAlert(t('vehicles.vehicleMembersModal.roleUpdated'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -149,7 +149,7 @@ async function handleRemoveMember(m: any) {
     } else {
       await loadMembers(membersVehicle.value.id)
     }
-    showAlert(isSelf ? t('vehicles.vehicleMembersModal.left') : t('vehicles.vehicleMembersModal.revoked'), t('common.success'), 'info')
+    showAlert(isSelf ? t('vehicles.vehicleMembersModal.left') : t('vehicles.vehicleMembersModal.revoked'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
@@ -240,7 +240,7 @@ async function handleRemoveMember(m: any) {
               <button
                 type="submit"
                 :disabled="addingMember || !newMemberEmail.trim()"
-                class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors shadow-lg shadow-rose-600/20"
+                class="btn btn-primary shrink-0"
               >
                 <RefreshCw v-if="addingMember" class="w-3.5 h-3.5 animate-spin" />
                 <UserPlus v-else class="w-3.5 h-3.5" />
@@ -376,7 +376,7 @@ async function handleRemoveMember(m: any) {
                   v-if="!p.is_default"
                   type="button"
                   @click="handleSetDefaultPerson(p)"
-                  class="tap px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors"
+                  class="btn btn-secondary tap"
                 >
                   {{ $t('vehicles.vehicleMembersModal.makeDefault') }}
                 </button>
@@ -418,7 +418,7 @@ async function handleRemoveMember(m: any) {
             <button
               type="submit"
               :disabled="addingPerson || !newPersonName.trim()"
-              class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shrink-0 transition-colors"
+              class="btn btn-primary shrink-0"
             >
               <UserPlus class="w-3.5 h-3.5" />
               <span>{{ $t('vehicles.vehicleMembersModal.add') }}</span>
@@ -432,7 +432,7 @@ async function handleRemoveMember(m: any) {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.close') }}
         </button>

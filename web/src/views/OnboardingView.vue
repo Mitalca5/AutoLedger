@@ -498,7 +498,7 @@ async function addFirstEntry() {
                 type="button"
                 @click="testConnection"
                 :disabled="loading || !teslamate.url"
-                class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border border-slate-700 disabled:opacity-50 transition-colors"
+                class="btn btn-lg btn-secondary w-full"
               >
                 <RefreshCw v-if="loading" class="w-3.5 h-3.5 animate-spin text-rose-400" />
                 <Link2 v-else class="w-3.5 h-3.5 text-rose-400" />
@@ -541,7 +541,7 @@ async function addFirstEntry() {
                 :key="type"
                 type="button"
                 @click="downloadTemplate(type)"
-                class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-700 transition-colors"
+                class="btn btn-secondary"
               >
                 <Download class="w-3.5 h-3.5 text-rose-400" />
                 {{ $t(`onboarding.csvTemplate.${type}`) }}
@@ -555,7 +555,7 @@ async function addFirstEntry() {
             <button
               type="button"
               @click="currentStep = 2"
-              class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-sm transition-colors"
+              class="btn btn-lg btn-secondary"
             >
               {{ $t('onboarding.onboardingView.back') }}
             </button>
@@ -614,7 +614,7 @@ async function addFirstEntry() {
         <button
           type="button"
           @click="addFirstEntry"
-          class="mt-3 w-full py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl border border-slate-700 transition-colors"
+          class="btn btn-lg btn-secondary mt-3 w-full"
         >
           {{ $t('onboarding.onboardingView.addFirstEntry') }}
         </button>

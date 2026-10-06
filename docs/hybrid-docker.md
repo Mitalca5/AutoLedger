@@ -22,7 +22,7 @@ In Portainer, create a Docker Standalone stack from your Git repository and sele
 
 Deploy the stack, open the configured URL and create your account. Compose initializes secrets and PostgreSQL and stores the database, documents, secrets and backups in named volumes. PostgreSQL has no published host port in this stack.
 
-To update, use Portainer's update/redeploy operation and enable pulling the image again. The `hybrid` tag follows successful publications from `homelab/hybrid-docker`; commits on upstream or other branches do not update it automatically.
+To update, use Portainer's update/redeploy operation and enable pulling the image again. The `hybrid` tag follows successful publications from `main`; commits on upstream or other branches do not update it automatically.
 
 For a fixed version, set HYBRID_TAG to `hybrid-<full commit SHA>`. The same tag is published for both images. The first successful build published `hybrid-c8f29eb02cb39bdd45e4d06fb129fb2c447a5da8`.
 
@@ -35,7 +35,7 @@ This Compose targets Docker Standalone, not Docker Swarm. Keep the data volumes 
 If you prefer building on your Docker host:
 
 ```sh
-git clone --branch homelab/hybrid-docker --single-branch https://github.com/Mitalca5/AutoLedger.git autoledger-hybrid
+git clone --branch main --single-branch https://github.com/Mitalca5/AutoLedger.git autoledger-hybrid
 cd autoledger-hybrid
 cp .env.homelab.example .env
 # Edit .env: set AUTOLEDGER_BASE_URL to the address used by your browser.

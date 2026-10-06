@@ -68,18 +68,18 @@ async function download() {
 
         <label class="block space-y-1">
           <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportType') }}</span>
-          <select v-model="type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+          <select v-model="type" class="field">
             <option v-for="k in TYPES" :key="k" :value="k">{{ $t(`import.exportTypes.${k}`) }}</option>
           </select>
         </label>
         <template v-if="type === 'mileage'">
           <label class="block space-y-1">
             <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportTag') }}</span>
-            <input v-model="tag" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+            <input v-model="tag" class="field" />
           </label>
           <label class="block space-y-1">
             <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportRates') }}</span>
-            <select v-model="rates" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+            <select v-model="rates" class="field">
               <option value="">{{ $t('import.exportNoRates') }}</option>
               <option v-for="l in scaleLabels" :key="l" :value="l">{{ l }}</option>
             </select>
@@ -87,7 +87,7 @@ async function download() {
         </template>
         <label class="block space-y-1">
           <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportFormat') }}</span>
-          <select v-model="format" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white">
+          <select v-model="format" class="field">
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
           </select>
@@ -95,11 +95,11 @@ async function download() {
         <div class="grid grid-cols-2 gap-3">
           <label class="block space-y-1">
             <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportFrom') }}</span>
-            <input v-model="from" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+            <input v-model="from" type="date" class="field" />
           </label>
           <label class="block space-y-1">
             <span class="text-xs font-semibold text-slate-300">{{ $t('import.exportTo') }}</span>
-            <input v-model="to" type="date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white" />
+            <input v-model="to" type="date" class="field" />
           </label>
         </div>
 
@@ -108,7 +108,7 @@ async function download() {
         <p v-if="error" class="text-xs text-danger-400" role="alert">{{ error }}</p>
         <button
           type="button"
-          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 text-sm font-semibold disabled:opacity-50"
+          class="btn btn-lg btn-primary w-full"
           :disabled="loading"
           @click="download"
         >

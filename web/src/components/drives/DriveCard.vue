@@ -136,7 +136,7 @@ const formatDate = formatDayTime
       <button
         v-if="vehicleStore.canEdit"
         @click="router.push({ path: '/carpools', query: { new_drive_id: d.id } })"
-        class="tap px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-rose-400 hover:border-rose-500/40 flex items-center gap-1.5 transition-all"
+        class="btn btn-secondary tap hover:text-rose-400 hover:border-rose-500/40"
         :title="$t('drives.driveCard.createACarpoolFromThis')"
       >
         <Users class="w-3.5 h-3.5 text-rose-500" />

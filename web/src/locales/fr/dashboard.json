@@ -294,6 +294,7 @@
     "percent": "Santé (%)",
     "newCapacity": "Capacité neuve (kWh)",
     "addReading": "Ajouter",
+    "readingRequired": "Saisissez d'abord un pourcentage de santé ou une capacité de batterie neuve.",
     "deleteReading": "Supprimer la mesure du {date}",
     "residual": "Valeur de revente projetée",
     "expectedKm": "Distance prévue (km)",

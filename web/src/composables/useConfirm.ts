@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { t } from '@/i18n'
+import { useToast } from '@/composables/useToast'
 
 export interface ConfirmOptions {
   title?: string
@@ -50,7 +51,12 @@ export function useConfirm() {
     })
   }
 
+  /** A success is a transient toast; anything else that needs reading blocks behind a dialog. */
   function showAlert(message: string, title?: string, type: 'info' | 'warning' | 'danger' | 'success' = 'info'): Promise<void> {
+    if (type === 'success') {
+      useToast().showToast(message)
+      return Promise.resolve()
+    }
     options.value = {
       title: title || (type === 'danger' ? t('shell.confirm.error') : t('shell.confirm.information')),
       message,

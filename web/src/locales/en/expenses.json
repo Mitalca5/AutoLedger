@@ -295,7 +295,9 @@
       "saveName": "Template name",
       "save": "Save current reminders as a template",
       "applied": "{created} reminder(s) added, {skipped} already present.",
-      "saved": "Template saved."
+      "saved": "Template saved.",
+      "pickFirst": "Choose a template first",
+      "nameFirst": "Enter a template name first"
     },
     "observedInterval": "You do it every {km} {unit} / {months} months on average",
     "dueToday": "Today",

@@ -10,7 +10,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { currencySymbol } from '@/currency'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { distanceUnit } from '@/units'
+import { distanceUnit, formatDistanceValue } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
 import { validateTireForm } from '@/utils/tires'
 
@@ -32,12 +32,12 @@ const addTireForm = ref({
   purchase_date: todayIso(),
   total_price: '' as number | '',
   unit_price: '' as number | '',
-  initial_depth_mm: 8.0,
+  initial_depth_mm: '' as number | '',
   min_legal_depth_mm: 1.6,
   dot_code: '',
   mounted_odometer: 0,
   accumulated_distance_km: 0,
-  estimated_lifespan_km: 45000,
+  estimated_lifespan_km: '' as number | string,
   current_position: 'FL',
 })
 
@@ -83,12 +83,12 @@ async function handleCreateTiresAction() {
         purchase_date: addTireForm.value.purchase_date,
         purchase_price: unitPrice,
         current_position: addTireForm.value.current_position,
-        initial_depth_mm: addTireForm.value.initial_depth_mm,
+        initial_depth_mm: Number(addTireForm.value.initial_depth_mm),
         min_legal_depth_mm: addTireForm.value.min_legal_depth_mm,
         dot_code: addTireForm.value.dot_code || null,
         mounted_odometer: addTireForm.value.current_position !== 'STORAGE' ? addTireForm.value.mounted_odometer : null,
         accumulated_distance_km: addTireForm.value.accumulated_distance_km,
-        estimated_lifespan_km: addTireForm.value.estimated_lifespan_km,
+        estimated_lifespan_km: Number(addTireForm.value.estimated_lifespan_km),
       })
     } else {
       await api.batchCreateTires(props.vehicleId, {
@@ -100,12 +100,12 @@ async function handleCreateTiresAction() {
         purchase_date: addTireForm.value.purchase_date,
         total_price: isTotalPrice.value ? totalPrice : 0,
         unit_price: !isTotalPrice.value ? unitPrice : 0,
-        initial_depth_mm: addTireForm.value.initial_depth_mm,
+        initial_depth_mm: Number(addTireForm.value.initial_depth_mm),
         min_legal_depth_mm: addTireForm.value.min_legal_depth_mm,
         dot_code: addTireForm.value.dot_code || null,
         mounted_odometer: addType.value.includes('STORAGE') ? null : addTireForm.value.mounted_odometer,
         accumulated_distance_km: addTireForm.value.accumulated_distance_km,
-        estimated_lifespan_km: addTireForm.value.estimated_lifespan_km,
+        estimated_lifespan_km: Number(addTireForm.value.estimated_lifespan_km),
       })
     }
 
@@ -267,18 +267,9 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
       <!-- Pricing & Lifespan -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800">
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="tire-add-tire-price" class="text-xs font-semibold text-slate-400">
-              {{ isTotalPrice ? $t('tires.tireAddModal.totalPrice', { cur: currencySymbol(vehicleStore.currency) }) : $t('tires.tireAddModal.pricePerTire', { cur: currencySymbol(vehicleStore.currency) }) }}
-            </label>
-            <button
-              type="button"
-              @click="isTotalPrice = !isTotalPrice"
-              class="text-xs text-rose-400 hover:text-rose-300 underline"
-            >
-              {{ $t('tires.tireAddModal.switchTo', { mode: isTotalPrice ? $t('tires.tireAddModal.unitPrice') : $t('tires.tireAddModal.totalPriceMode') }) }}
-            </button>
-          </div>
+          <label for="tire-add-tire-price" class="block text-xs font-semibold text-slate-400 mb-1">
+            {{ isTotalPrice ? $t('tires.tireAddModal.totalPrice', { cur: currencySymbol(vehicleStore.currency) }) : $t('tires.tireAddModal.pricePerTire', { cur: currencySymbol(vehicleStore.currency) }) }}
+          </label>
           <input id="tire-add-tire-price"
             v-model.number="priceModel"
             type="number"
@@ -290,6 +281,13 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
             class="field text-success-400 font-bold"
           />
           <p v-if="errors.price" id="tire-add-error-price" class="mt-1 text-xs text-danger-400">{{ $t(errors.price) }}</p>
+          <button
+            type="button"
+            @click="isTotalPrice = !isTotalPrice"
+            class="mt-1 text-xs text-rose-400 hover:text-rose-300 underline"
+          >
+            {{ $t('tires.tireAddModal.switchTo', { mode: isTotalPrice ? $t('tires.tireAddModal.unitPrice') : $t('tires.tireAddModal.totalPriceMode') }) }}
+          </button>
         </div>
 
         <div>
@@ -297,6 +295,7 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
           <DistanceInput whole id="tire-add-tire-estimated-lifespan-km"
             v-model="addTireForm.estimated_lifespan_km"
             step="5000"
+            :placeholder="$t('common.example', { value: formatDistanceValue(45000) })"
             :aria-invalid="errors.estimated_lifespan_km ? 'true' : undefined"
             aria-describedby="tire-add-error-lifespan"
             class="field"
@@ -315,22 +314,22 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
       </div>
 
       <!-- Date & Sculptures -->
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label for="tire-add-tire-purchase-date" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.purchaseDate') }}</label>
+          <label for="tire-add-tire-purchase-date" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.purchaseDate') }}</label>
           <AppDatePicker
             id="tire-add-tire-purchase-date"
             v-model="addTireForm.purchase_date"
-            size="xs"
             :clearable="true"
           />
         </div>
         <div>
-          <label for="tire-add-tire-initial-depth-mm" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.newTreadMm') }}</label>
+          <label for="tire-add-tire-initial-depth-mm" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.newTreadMm') }}</label>
           <input id="tire-add-tire-initial-depth-mm"
             v-model.number="addTireForm.initial_depth_mm"
             type="number"
             step="0.1"
+            :placeholder="$t('common.example', { value: $n(8) })"
             :aria-invalid="errors.initial_depth_mm ? 'true' : undefined"
             aria-describedby="tire-add-error-depth"
             class="field"
@@ -338,7 +337,7 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
           <p v-if="errors.initial_depth_mm" id="tire-add-error-depth" class="mt-1 text-xs text-danger-400">{{ $t(errors.initial_depth_mm) }}</p>
         </div>
         <div>
-          <label for="tire-add-tire-min-legal-depth-mm" class="block text-xs text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>
+          <label for="tire-add-tire-min-legal-depth-mm" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>
           <input id="tire-add-tire-min-legal-depth-mm"
             v-model.number="addTireForm.min_legal_depth_mm"
             type="number"
@@ -354,14 +353,14 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>
         <button :disabled="submitting"
           type="button"
           @click="handleCreateTires"
-          class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-5 py-2 rounded-xl shadow-lg shadow-rose-600/20 transition-colors"
+          class="btn btn-lg btn-primary"
         >
           {{ $t('tires.tireAddModal.createTheTires') }}
         </button>

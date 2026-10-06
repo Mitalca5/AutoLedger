@@ -232,7 +232,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
 
       <!-- Footer Actions -->
       <div class="px-5 py-3.5 border-t border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <button @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
+        <button @click="open = false" class="btn btn-lg btn-secondary">
           {{ $t('common.close') }}
         </button>
         <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
@@ -240,7 +240,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
             type="button"
             @click="emit('recalculate', trip)"
             :disabled="recalculating"
-            class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            class="btn btn-secondary"
             :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')" :aria-label="$t('carpool.carpoolTripList.recalculateTheActualCostsOf')"
           >
             <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': recalculating }" />
@@ -248,7 +248,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           <button
             type="button"
             @click="emit('edit', trip)"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/25 transition-all"
+            class="btn btn-lg btn-primary"
           >
             <Pencil class="w-4 h-4" />
             <span>{{ $t('common.edit') }}</span>

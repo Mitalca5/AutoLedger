@@ -101,7 +101,7 @@ const showTodo = ref(false)
       <button
         v-if="todoCount > 0"
         type="button"
-        class="tap-text px-3 text-xs font-semibold rounded-xl gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+        class="btn btn-secondary tap-text"
         :aria-expanded="showTodo"
         @click="showTodo = !showTodo"
       >
@@ -115,14 +115,14 @@ const showTodo = ref(false)
         :key="action.key"
         :to="action.to"
         :title="action.hint"
-        class="tap-text text-xs font-semibold px-3 rounded-lg bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700"
+        class="btn btn-secondary tap-text"
       >
         {{ action.label }}
       </router-link>
       <button
         v-if="hasOdometerIssues"
         type="button"
-        class="tap-text text-xs font-semibold px-3 rounded-lg bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700"
+        class="btn btn-secondary tap-text"
         @click="toggleDataQuality"
       >
         {{ showDataQuality ? $t('dashboard.dataQualityCard.hideIssues') : $t('dashboard.dataQualityCard.showIssues') }}

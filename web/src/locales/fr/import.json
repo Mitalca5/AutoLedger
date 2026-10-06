@@ -85,5 +85,7 @@
   "rateAdd": "Ajouter la tranche",
   "rateDelete": "Supprimer",
   "rateSlice": "{from} – {to} km : {rate} / km",
-  "rateOpenEnded": "sans limite"
+  "rateOpenEnded": "sans limite",
+  "profileNameRequired": "Saisissez d'abord un nom de profil",
+  "rateRequired": "Saisissez d'abord un nom de barème et un taux"
 }

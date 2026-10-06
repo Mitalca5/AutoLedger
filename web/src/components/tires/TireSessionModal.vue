@@ -227,14 +227,14 @@ const handleSaveSession = () => runOnce(handleSaveSessionAction)
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>
         <button :disabled="submitting"
           type="button"
           @click="handleSaveSession"
-          class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+          class="btn btn-lg btn-primary"
         >
           {{ $t('common.save') }}
         </button>

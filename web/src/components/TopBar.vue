@@ -74,7 +74,7 @@ function onVehicleChange(event: Event) {
         <div v-else>
           <button
             @click="router.push('/vehicles')"
-            class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            class="btn btn-primary"
           >
             <Plus class="w-3.5 h-3.5" />
             {{ $t('shell.topBar.addAVehicle') }}

@@ -9,6 +9,7 @@ import { useOfflineStore } from '@/stores/offline'
 import Navigation from '@/components/Navigation.vue'
 import TopBar from '@/components/TopBar.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import ToastHost from '@/components/ToastHost.vue'
 import QuickAddSheet from '@/components/quickadd/QuickAddSheet.vue'
 
 const route = useRoute()
@@ -106,4 +107,5 @@ onMounted(async () => {
 
   <QuickAddSheet v-if="showDashboardLayout" />
   <ConfirmModal />
+  <ToastHost />
 </template>

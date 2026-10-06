@@ -501,7 +501,7 @@ onBeforeUnmount(destroyChart)
       <template #actions>
       <button
         v-if="view === 'list'"
-        class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20 transition-colors"
+        class="btn btn-lg btn-primary"
         @click="startNew"
       >
         <Plus class="w-4 h-4" /> {{ $t('comparison.comparisonView.newComparison') }}
@@ -686,10 +686,10 @@ onBeforeUnmount(destroyChart)
       <p v-if="formError" class="text-xs text-red-300" role="alert">{{ formError }}</p>
 
       <div class="flex items-center justify-between pt-1">
-        <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2" @click="prevStep">
+        <button type="button" class="btn btn-lg btn-secondary" @click="prevStep">
           <ArrowLeft class="w-4 h-4" /> {{ step === 1 ? $t('common.cancel') : $t('comparison.comparisonView.back') }}
         </button>
-        <button type="submit" :disabled="saving" class="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2">
+        <button type="submit" :disabled="saving" class="btn btn-lg btn-primary">
           {{ step === 2 ? (saving ? $t('comparison.comparisonView.calculating') : $t('comparison.comparisonView.viewResult')) : $t('comparison.comparisonView.next') }} <ArrowRight class="w-4 h-4" />
         </button>
       </div>
@@ -702,10 +702,10 @@ onBeforeUnmount(destroyChart)
           <ArrowLeft class="w-4 h-4" /> {{ $t('comparison.comparisonView.myComparisons') }}
         </button>
         <div v-if="result" class="flex items-center gap-2">
-          <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5" @click="exportResultCsv">
+          <button type="button" class="btn btn-secondary" @click="exportResultCsv">
             <Download class="w-4 h-4" /> {{ $t('comparison.comparisonView.csv') }}
           </button>
-          <button type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5" @click="printResult">
+          <button type="button" class="btn btn-secondary" @click="printResult">
             <Printer class="w-4 h-4" /> {{ $t('comparison.comparisonView.printPdf') }}
           </button>
         </div>
@@ -801,7 +801,7 @@ onBeforeUnmount(destroyChart)
         </div>
 
         <div class="flex gap-2 no-print">
-          <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2" @click="editScenario(currentScenario)">
+          <button class="btn btn-lg btn-secondary" @click="editScenario(currentScenario)">
             <Pencil class="w-4 h-4" /> {{ $t('comparison.comparisonView.editTheAssumptions') }}
           </button>
         </div>

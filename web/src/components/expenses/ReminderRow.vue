@@ -48,7 +48,7 @@ const tile = computed(() => reminderDueTile(r.value))
         <span class="min-w-0 flex-1 space-y-1">
           <span class="flex items-center gap-2 flex-wrap">
             <span class="text-sm font-bold text-white">{{ r.title }}</span>
-            <span class="text-xs px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
+            <span class="btn btn-secondary">
               {{ r.category === 'TIRES' ? $t('expenses.remindersPanel.tires') : $t('expenses.remindersPanel.maintenance') }}
             </span>
             <span

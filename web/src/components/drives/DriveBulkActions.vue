@@ -32,7 +32,7 @@ const prefs = usePreferencesStore()
     <button
       type="button"
       @click="emit('carpool')"
-      class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-rose-600/25 transition-all"
+      class="btn btn-primary"
     >
       <Users class="w-3.5 h-3.5" />
       <span>{{ selectedDriveIds.length > 1 ? $t('drives.driveBulkActions.carpoolMany', { count: selectedDriveIds.length }) : $t('drives.driveBulkActions.carpool') }}</span>
@@ -54,7 +54,7 @@ const prefs = usePreferencesStore()
       type="button"
       @click="emit('bulk-toll')"
       :disabled="bulkApplyingToll"
-      class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors disabled:opacity-50"
+      class="btn btn-primary"
       :title="$t('drives.driveBulkActions.detectsTheTollsAndRecords')"
     >
       <Receipt class="w-3.5 h-3.5" />
@@ -85,7 +85,7 @@ const prefs = usePreferencesStore()
     <button
       type="button"
       @click="emit('export')"
-      class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors border border-slate-700/60"
+      class="btn btn-secondary"
       :title="$t('drives.driveBulkActions.exportTheSelectionAsCsv')"
     >
       <Download class="w-3.5 h-3.5 text-slate-300" />

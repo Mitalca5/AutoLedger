@@ -132,14 +132,14 @@ const handleCreateGroupAndExpense = () => runOnce(handleCreateGroupAndExpenseAct
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+          class="btn btn-lg btn-secondary"
         >
           {{ $t('common.cancel') }}
         </button>
         <button :disabled="submitting"
           type="button"
           @click="handleCreateGroupAndExpense"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-600/20 transition-colors"
+          class="btn btn-lg btn-primary"
         >
           {{ $t('drives.driveGroupModal.saveTheGroup') }}
         </button>

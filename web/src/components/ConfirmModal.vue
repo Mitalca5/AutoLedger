@@ -109,7 +109,7 @@ watch(isOpen, async (open) => {
                 ref="cancelBtnRef"
                 type="button"
                 @click="onCancel"
-                class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white transition-all border border-slate-700/60"
+                class="btn btn-lg btn-secondary"
               >
                 {{ options.cancelText || $t('common.cancel') }}
               </button>

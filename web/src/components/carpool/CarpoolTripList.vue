@@ -42,7 +42,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
         type="button"
         @click="emit('batch-recalculate')"
         :disabled="recalculating"
-        class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-600/20 disabled:opacity-50 transition-all"
+        class="btn btn-primary"
         :title="$t('carpool.carpoolTripList.recalculateTheActualCostsOf2')"
       >
         <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': recalculating }" />
@@ -52,7 +52,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
       <button
         type="button"
         @click="emit('export')"
-        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors border border-slate-700/60"
+        class="btn btn-secondary"
         :title="$t('carpool.carpoolTripList.exportTheSelectionAsCsv')"
       >
         <Download class="w-3.5 h-3.5 text-slate-300" />

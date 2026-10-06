@@ -385,7 +385,7 @@ async function testModalConnection() {
               type="button"
               @click="testModalConnection"
               :disabled="modalTestLoading"
-              class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border border-slate-700 disabled:opacity-50 transition-colors"
+              class="btn btn-secondary w-full"
             >
               <RefreshCw v-if="modalTestLoading" class="w-3.5 h-3.5 animate-spin text-rose-400" />
               <Link2 v-else class="w-3.5 h-3.5 text-rose-400" />
@@ -468,10 +468,10 @@ async function testModalConnection() {
       </form>
 
       <div class="px-5 py-3.5 border-t border-slate-800/80 flex justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button type="button" @click="open = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors">
+        <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
           {{ $t('common.cancel') }}
         </button>
-        <button type="submit" :disabled="submitting" form="vehicle-modal-form" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors shadow-lg shadow-rose-600/20">
+        <button type="submit" :disabled="submitting" form="vehicle-modal-form" class="btn btn-lg btn-primary">
           {{ $t('common.save') }}
         </button>
       </div>

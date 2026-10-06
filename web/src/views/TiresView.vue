@@ -37,9 +37,9 @@ import {
   sessionFormFromSession,
   type SessionForm,
   type TireLogForm,
+  getLastDismountInfo,
 } from '@/utils/tires'
 import { todayIso, toIsoDay } from '@/utils/dates'
-import { distanceUnit, formatDistanceValue } from '@/units'
 
 // The page owns the tire list, the selection and which modal is open; each modal owns its form and
 // its API call and reports back with "saved".
@@ -121,6 +121,8 @@ const mountedTires = computed(() => {
   })
   return map
 })
+
+const hasMountedTires = computed(() => Object.values(mountedTires.value).some(Boolean))
 
 const storageTires = computed(() => {
   return tires.value.filter((t) => t.tire.current_position === 'STORAGE')
@@ -211,14 +213,6 @@ const { pending: rotating, run: runOnce } = useSubmit()
 async function quickRotateAction(mode: 'FRONT_BACK' | 'CROSS') {
   if (!vehicleStore.activeVehicle) return
   const odo = Math.round(vehicleStore.activeVehicle.current_odometer || 0)
-  const label = mode === 'FRONT_BACK' ? t('tires.tiresView.rotateFrontBack') : t('tires.tiresView.rotateCross')
-  const ok = await showConfirm({
-    title: t('tires.tiresView.quickRotationTitle'),
-    message: t('tires.tiresView.quickRotationMessage', { unit: distanceUnit(), label, odometer: formatDistanceValue(odo) }),
-    confirmText: t('tires.tiresView.rotate'),
-    type: 'warning',
-  })
-  if (!ok) return
 
   try {
     await api.quickRotateTires(vehicleStore.activeVehicle.id, {
@@ -455,7 +449,7 @@ async function handleDeleteLog(l: any) {
         <button
           @click="openPackSwapModal()"
           :class="{ 'opacity-60': storageTires.length === 0 }"
-          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition-colors"
+          class="btn btn-lg btn-secondary"
           :title="$t('tires.tiresView.swapTheFittedSetWith')"
         >
           <Snowflake class="w-4 h-4 text-info-400" />
@@ -464,7 +458,7 @@ async function handleDeleteLog(l: any) {
 
         <button
           @click="openAddModal()"
-          class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-rose-600/20 transition-all"
+          class="btn btn-lg btn-primary"
         >
           <Plus class="w-4 h-4" />
           {{ $t('tires.tiresView.addTires') }}
@@ -483,6 +477,8 @@ async function handleDeleteLog(l: any) {
       <span>{{ $t('tires.tiresView.youAreViewingThisVehicle') }} <strong>{{ $t('tires.tiresView.readOnly') }}</strong>{{ $t('tires.tiresView.modeChangesToTiresRotations') }}</span>
     </div>
 
+    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
+
     <!-- Sticky Bulk Selection Bar -->
     <BulkSelectionBar
       v-if="vehicleStore.canEdit"
@@ -493,9 +489,9 @@ async function handleDeleteLog(l: any) {
       <button
         type="button"
         @click="openTireEdit(selectedTireIds)"
-        class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg flex items-center gap-1 transition-colors text-xs"
+        class="btn btn-primary"
       >
-        <Pencil class="w-3 h-3" />
+        <Pencil class="w-3.5 h-3.5" />
         <span>{{ $t('tires.tiresView.editInBulk') }}</span>
       </button>
 
@@ -503,18 +499,16 @@ async function handleDeleteLog(l: any) {
         v-if="canBatchDispose"
         type="button"
         @click="openBatchDisposeModal()"
-        class="px-2.5 py-1 bg-warning-600 hover:bg-warning-500 text-white font-semibold rounded-lg flex items-center gap-1 transition-colors text-xs"
+        class="btn btn-warning"
         :title="$t('tires.tiresView.scrapTheSelectedTires')"
       >
-        <Archive class="w-3 h-3" />
+        <Archive class="w-3.5 h-3.5" />
         <span>{{ $t('tires.tiresView.scrap') }}</span>
       </button>
     </BulkSelectionBar>
 
-    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
-
     <!-- Header row: Select all toggle & Total info -->
-    <div v-if="vehicleStore.canEdit && activeTab !== 'chassis' && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
+    <div v-if="vehicleStore.canEdit && activeTab === 'disposed' && currentTabTireIds.length > 0" class="flex items-center justify-between text-xs text-slate-400 px-2">
       <SelectAllToggle
         :checked="isCurrentTabAllSelected"
         :indeterminate="isCurrentTabPartlySelected"
@@ -542,16 +536,18 @@ async function handleDeleteLog(l: any) {
         <div class="flex items-center gap-2 flex-wrap">
           <button
             @click="handleQuickRotate('FRONT_BACK')"
-            :disabled="rotating"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            :disabled="rotating || !hasMountedTires"
+            :title="$t('tires.tiresView.rotateTooltip', { pairs: 'FL ⇄ RL, FR ⇄ RR' })"
+            class="tap btn btn-secondary"
           >
             <ArrowUpDown class="w-3.5 h-3.5 text-blue-400" />
             {{ $t('tires.tiresView.frontRear') }}
           </button>
           <button
             @click="handleQuickRotate('CROSS')"
-            :disabled="rotating"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            :disabled="rotating || !hasMountedTires"
+            :title="$t('tires.tiresView.rotateTooltip', { pairs: 'FL ⇄ RR, FR ⇄ RL' })"
+            class="tap btn btn-secondary"
           >
             <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
             {{ $t('tires.tiresView.crossRotation') }}
@@ -573,7 +569,7 @@ async function handleDeleteLog(l: any) {
         <Disc class="w-10 h-10 mx-auto text-slate-400" />
         <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noTireYet') }}</h3>
         <p class="text-xs text-slate-400 max-w-sm mx-auto">{{ $t('tires.tiresView.noTireYetHint') }}</p>
-        <button v-if="vehicleStore.canEdit" type="button" @click="openAddModal()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl">
+        <button v-if="vehicleStore.canEdit" type="button" @click="openAddModal()" class="btn btn-lg btn-primary">
           {{ $t('tires.tiresView.addTires') }}
         </button>
       </div>
@@ -608,15 +604,21 @@ async function handleDeleteLog(l: any) {
       <div v-else class="space-y-4">
         <!-- Garage batch actions bar -->
         <div class="flex items-center justify-between flex-wrap gap-2 bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">
-          <div class="flex items-center gap-2">
-            <Package class="w-4 h-4 text-slate-400" />
-            <span class="text-xs text-slate-300 font-semibold">{{ $t('tires.tiresView.tireSInGarageStorage', { length: storageTires.length }) }}</span>
+          <div class="flex items-center gap-3 px-1 text-xs text-slate-400">
+            <SelectAllToggle
+              v-if="vehicleStore.canEdit"
+              :checked="isCurrentTabAllSelected"
+              :indeterminate="isCurrentTabPartlySelected"
+              :label="isCurrentTabAllSelected ? $t('tires.tiresView.deselectAll') : $t('tires.tiresView.selectAll')"
+              @toggle="toggleSelectAllCurrentTab"
+            />
+            <span class="font-semibold text-slate-300">{{ $t('tires.tiresView.tireSInGarageStorage', { length: storageTires.length }) }}</span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <button
               v-if="vehicleStore.canEdit"
               @click="openCopyHistoryModal()"
-              class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors"
+              class="btn btn-secondary"
               :title="$t('tires.tiresView.copyATireSWhole')"
             >
               <Copy class="w-3.5 h-3.5 text-indigo-400" />
@@ -625,7 +627,7 @@ async function handleDeleteLog(l: any) {
             <button
               v-if="vehicleStore.canEdit"
               @click="openBatchSessionModal()"
-              class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors"
+              class="btn btn-secondary"
               :title="$t('tires.tiresView.recordAPastSessionOn')"
             >
               <History class="w-3.5 h-3.5 text-rose-400" />
@@ -660,6 +662,7 @@ async function handleDeleteLog(l: any) {
         :key="t.tire.id"
         :t="t"
         :selected="selectedTireIds.includes(t.tire.id)"
+        :dismount="getLastDismountInfo(tires, t.tire.id)"
         @open="openHistoryModal"
         @toggle="toggleTireSelection"
       />

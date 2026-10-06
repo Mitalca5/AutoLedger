@@ -50,7 +50,8 @@
     "drives": "{name} ({length} trajets)",
     "trip": "Voyage",
     "noExistingTripUseMerge": "Aucun voyage existant : utilisez « Fusionner & Péage » pour en créer un.",
-    "addDriveSToA": "Ajouter {length} trajet(s) à un voyage"
+    "addDriveSToA": "Ajouter {length} trajet(s) à un voyage",
+    "noTrip": "Aucun trajet auquel ajouter ces trajets pour l'instant"
   },
   "driveBulkActions": {
     "addToTrip": "Ajouter voyage",

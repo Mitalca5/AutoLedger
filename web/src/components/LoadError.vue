@@ -12,7 +12,7 @@ defineEmits<{ retry: [] }>()
       <p class="font-semibold text-danger-200">{{ $t('common.loadFailed') }}</p>
       <p v-if="message" class="text-xs text-danger-300/80 mt-0.5 break-words">{{ message }}</p>
     </div>
-    <button type="button" class="tap shrink-0 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5" @click="$emit('retry')">
+    <button type="button" class="btn btn-secondary tap shrink-0" @click="$emit('retry')">
       <RefreshCw class="w-3.5 h-3.5" aria-hidden="true" />
       {{ $t('common.retry') }}
     </button>

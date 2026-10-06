@@ -66,15 +66,15 @@ async function endLocalSession() {
 
 async function revoke(session: Session) {
   sessionError.value = ''
-  const ok = await showConfirm({
-    title: session.current ? t('account.signOut') : t('account.disconnectThisDevice'),
-    message: session.current
-      ? t('account.signOutThisDeviceMessage')
-      : t('account.disconnectDeviceMessage', { device: describeUserAgent(session.user_agent) }),
-    confirmText: t('account.disconnect'),
-    type: 'warning',
-  })
-  if (!ok) return
+  if (!session.current) {
+    const ok = await showConfirm({
+      title: t('account.disconnectThisDevice'),
+      message: t('account.disconnectDeviceMessage', { device: describeUserAgent(session.user_agent) }),
+      confirmText: t('account.disconnect'),
+      type: 'warning',
+    })
+    if (!ok) return
+  }
   busyId.value = session.id
   try {
     await api.revokeSession(session.id)
@@ -219,7 +219,7 @@ onMounted(load)
         <button
           type="submit"
           :disabled="saving || !current || !next || !confirmation"
-          class="min-h-12 rounded-xl bg-rose-600 px-5 text-sm font-bold text-white hover:bg-rose-500 disabled:opacity-50"
+          class="btn btn-lg btn-primary min-h-12"
         >
           {{ saving ? $t('account.saving') : $t('account.changePassword') }}
         </button>
@@ -270,7 +270,7 @@ onMounted(load)
           <button
             type="button"
             :disabled="busyId === s.id"
-            class="flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+            class="btn btn-secondary min-h-11 shrink-0"
             :aria-label="s.current ? $t('account.signOutThisDevice') : $t('account.signOutDevice', { device: describeUserAgent(s.user_agent) })"
             @click="revoke(s)"
           >

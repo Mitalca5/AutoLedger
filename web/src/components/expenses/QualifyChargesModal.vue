@@ -200,7 +200,7 @@ onMounted(() => {
         <button
           type="button"
           @click="open = false"
-          class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800"
+          class="btn btn-lg btn-secondary"
         >
           {{ t('common.close') }}
         </button>

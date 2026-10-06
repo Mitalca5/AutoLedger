@@ -70,7 +70,7 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
             <button
               v-if="e.drive_id || e.trip_group_id"
               @click="router.push({ path: '/carpools', query: e.drive_id ? { new_drive_id: e.drive_id } : { new_trip_group_id: e.trip_group_id } })"
-              class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors border border-slate-700/60"
+              class="btn btn-secondary"
               :title="$t('expenses.tollsPanel.createACarpoolForThis')"
             >
               <Users class="w-3.5 h-3.5 text-cyan-400" />

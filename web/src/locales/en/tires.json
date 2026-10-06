@@ -1,6 +1,7 @@
 {
   "costPerKmUnset": "Purchase price not set",
   "tiresView": {
+    "rotateTooltip": "Swaps {pairs}",
     "addAPastSessionOn": "Add a past session on a set",
     "recordAPastSessionOn": "Record a past session on a set of garage tires",
     "copyATireSHistory": "Copy a tire's history",
@@ -30,8 +31,6 @@
     "selectAll": "Select all",
     "rotateFrontBack": "Front ⇄ Rear (FL ⇄ RL, FR ⇄ RR)",
     "rotateCross": "Cross (FL ⇄ RR, FR ⇄ RL)",
-    "quickRotationTitle": "Quick rotation",
-    "quickRotationMessage": "Do you confirm the quick rotation {label} at {odometer} {unit}?",
     "rotate": "Rotate",
     "rotationError": "Rotation failed: {message}",
     "loadError": "Loading error: {message}",
@@ -153,6 +152,8 @@
     "odometerAtRemovalKm": "Odometer at removal ({unit})"
   },
   "tireDisposedCard": {
+    "scrappedOn": "Scrapped on {date}",
+    "scrappedOnAt": "Scrapped on {date} at {odometer} {unit}",
     "kmDrivenWear": "{total_distance_km} {unit} driven • Wear: {life_progress_pct} • {purchase_price}",
     "scrapped": "Scrapped",
     "selectForABulkAction": "Select for a bulk action"

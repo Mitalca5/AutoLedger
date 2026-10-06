@@ -36,7 +36,6 @@
   "disconnect": "Sign out",
   "loadFailed": "Could not load the sessions.",
   "disconnectThisDevice": "Sign out this device",
-  "signOutThisDeviceMessage": "You are about to be signed out of this device.",
   "disconnectDeviceMessage": "{device} will be signed out. It keeps its access for up to 15 minutes, the lifetime of the access token.",
   "disconnectFailed": "Could not sign out this device.",
   "signOutAllTitle": "Sign out all devices",

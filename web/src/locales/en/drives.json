@@ -50,7 +50,8 @@
     "drives": "{name} ({length} drives)",
     "trip": "Trip",
     "noExistingTripUseMerge": "No existing trip: use “Merge & toll” to create one.",
-    "addDriveSToA": "Add {length} drive(s) to a trip"
+    "addDriveSToA": "Add {length} drive(s) to a trip",
+    "noTrip": "No trip to add these drives to yet"
   },
   "driveBulkActions": {
     "addToTrip": "Add to trip",
