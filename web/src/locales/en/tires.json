@@ -249,7 +249,8 @@
     "currentOdometerKm": "Current odometer ({unit})",
     "measuredDepthMm": "Measured depth (mm)",
     "edit": "Edit the reading",
-    "new": "Tread reading"
+    "new": "Tread reading",
+    "depthRange": "Enter a depth above 0 and up to 20 mm"
   },
   "tireOdometerTimeline": {
     "details": "Details",

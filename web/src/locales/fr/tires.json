@@ -249,7 +249,8 @@
     "currentOdometerKm": "Odomètre actuel ({unit})",
     "measuredDepthMm": "Profondeur mesurée (mm)",
     "edit": "Modifier le relevé",
-    "new": "Relevé de sculpture"
+    "new": "Relevé de sculpture",
+    "depthRange": "Saisissez une profondeur supérieure à 0 et d’au plus 20 mm"
   },
   "tireOdometerTimeline": {
     "details": "Fiche",

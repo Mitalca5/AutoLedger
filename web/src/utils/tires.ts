@@ -138,6 +138,14 @@ export interface TireLogForm {
   date: string
 }
 
+export const MAX_TREAD_DEPTH_MM = 20
+
+/** Message key when a measured tread depth is outside what the API accepts (above 0, up to 20 mm), otherwise null. */
+export function validateTreadDepth(depth: number | string | null): string | null {
+  const n = Number(depth)
+  return depth !== '' && depth !== null && n > 0 && n <= MAX_TREAD_DEPTH_MM ? null : 'tires.tireLogModal.depthRange'
+}
+
 export type WearTone = 'ok' | 'warning' | 'danger'
 
 /** Wear tone of a tire: the worse of the tread-depth condition computed by the server and the lifespan used (over 80 % is danger). */

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Ruler, X } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { type TireLogForm } from '@/utils/tires'
+import { type TireLogForm, validateTreadDepth } from '@/utils/tires'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
@@ -27,13 +27,23 @@ const newLogForm = ref<TireLogForm>({
 })
 
 watch(open, (isOpen) => {
-  if (isOpen) newLogForm.value = { ...props.initialForm }
+  if (!isOpen) return
+  submitted.value = false
+  newLogForm.value = { ...props.initialForm }
 })
 
 const { pending: submitting, run: runOnce } = useSubmit()
 
+const submitted = ref(false)
+const depthError = computed(() => (submitted.value ? validateTreadDepth(newLogForm.value.depth_mm) : null))
+
 async function handleAddLogAction() {
   if (!props.vehicleId || !props.selectedTire) return
+  submitted.value = true
+  if (validateTreadDepth(newLogForm.value.depth_mm)) {
+    document.getElementById('tire-new-log-depth-mm')?.focus()
+    return
+  }
   try {
     const payload = {
       depth_mm: Number(newLogForm.value.depth_mm),
@@ -79,10 +89,13 @@ const handleAddLog = () => runOnce(handleAddLogAction)
             v-model.number="newLogForm.depth_mm"
             type="number"
             step="0.1"
-            min="1.0"
-            max="10.0"
+            min="0.1"
+            max="20"
+            :aria-invalid="depthError ? 'true' : undefined"
+            aria-describedby="tire-new-log-depth-error"
             class="field font-bold"
           />
+          <p v-if="depthError" id="tire-new-log-depth-error" class="mt-1 text-xs text-danger-400">{{ $t(depthError) }}</p>
         </div>
         <div>
           <label for="tire-new-log-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.currentOdometerKm', { unit: distanceUnit() }) }}</label>
