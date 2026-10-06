@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -155,7 +156,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
             </div>
             <div>
               <label for="charge-form-kwh-added" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.energyAddedKwh') }}</label>
-              <input id="charge-form-kwh-added" v-model="chargeForm.kwh_added" type="number" inputmode="decimal" step="0.001" min="0.001" required class="field" />
+              <NumberInput text id="charge-form-kwh-added" v-model="chargeForm.kwh_added" min="0.001" required class="field" />
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
@@ -183,7 +184,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
             </button>
           </div>
           <div class="flex gap-1.5">
-            <input id="charge-form-cost" v-model="chargeForm.cost" type="number" inputmode="decimal" step="0.01" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field" />
+            <NumberInput text id="charge-form-cost" v-model="chargeForm.cost" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field" />
             <label for="charge-form-currency" class="sr-only">{{ $t('expenses.chargeModal.currency') }}</label>
             <select id="charge-form-currency" v-model="chargeForm.currency" class="field">
               <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
@@ -192,7 +193,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
         </div>
         <div v-if="chargeForm.currency !== baseCurrency">
           <label for="charge-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.conversionRate1', { currency: chargeForm.currency, base: baseCurrency }) }}</label>
-          <input id="charge-form-fx-rate" v-model="chargeForm.fx_rate" type="number" inputmode="decimal" step="0.000001" min="0.000001" required class="field" />
+          <NumberInput text id="charge-form-fx-rate" v-model="chargeForm.fx_rate" min="0.000001" required class="field" />
         </div>
         <div>
           <label for="charge-form-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.notesOptional') }}</label>

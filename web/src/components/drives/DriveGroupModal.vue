@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
 import { api } from '@/services/api'
@@ -117,10 +118,8 @@ const handleCreateGroupAndExpense = () => runOnce(handleCreateGroupAndExpenseAct
           </div>
           <div>
             <label for="drive-toll-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.driveGroupModal.amount', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-            <input id="drive-toll-amount"
+            <NumberInput text id="drive-toll-amount"
               v-model="tollAmount"
-              type="number"
-              step="0.01"
               placeholder="0.00"
               class="field"
             />

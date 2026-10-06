@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
@@ -172,11 +173,9 @@ async function handleSubmit() {
             <label for="manual-drive-energy" class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
               {{ $t('drives.manualModal.energy') }}
             </label>
-            <input
+            <NumberInput
               id="manual-drive-energy"
-              v-model.number="energyKwh"
-              type="number"
-              step="0.1"
+              v-model="energyKwh"
               min="0"
               :placeholder="$t('drives.manualModal.energyPlaceholder')"
               class="field placeholder-slate-500"

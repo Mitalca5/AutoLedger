@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -276,15 +277,15 @@ async function deleteOwnershipAction() {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label for="own-purchase-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.purchasePriceInclTax', { cur: currencySymbol(currency) }) }} <span class="text-rose-400">*</span></label>
-                <input id="own-purchase-price" v-model.number="ownershipForm.purchase_price" type="number" step="0.01" min="0" required :placeholder="$t('common.example', { value: '42000' })" class="field" />
+                <NumberInput id="own-purchase-price" v-model="ownershipForm.purchase_price" min="0" required :placeholder="$t('common.example', { value: '42000' })" class="field" />
               </div>
               <div>
                 <label for="own-purchase-fees" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.additionalFeesRegistrationSetUp', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-purchase-fees" v-model.number="ownershipForm.purchase_fees" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '350' })" class="field" />
+                <NumberInput id="own-purchase-fees" v-model="ownershipForm.purchase_fees" min="0" :placeholder="$t('common.example', { value: '350' })" class="field" />
               </div>
               <div>
                 <label for="own-incentives" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.bonusesAndGrants', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-incentives" v-model.number="ownershipForm.incentives" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '4000' })" class="field" />
+                <NumberInput id="own-incentives" v-model="ownershipForm.incentives" min="0" :placeholder="$t('common.example', { value: '4000' })" class="field" />
               </div>
             </div>
           </div>
@@ -298,11 +299,11 @@ async function deleteOwnershipAction() {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label for="own-loan-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.amountBorrowed', { cur: currencySymbol(currency) }) }} <span class="text-rose-400">*</span></label>
-                <input id="own-loan-amount" v-model.number="ownershipForm.loan_amount" type="number" step="0.01" min="0" required :placeholder="$t('common.example', { value: '30000' })" class="field" />
+                <NumberInput id="own-loan-amount" v-model="ownershipForm.loan_amount" min="0" required :placeholder="$t('common.example', { value: '30000' })" class="field" />
               </div>
               <div>
                 <label for="own-loan-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.annualRate') }} <span class="text-rose-400">*</span></label>
-                <input id="own-loan-rate" v-model.number="ownershipForm.loan_rate_pct" type="number" step="0.001" min="0" max="30" required :placeholder="$t('common.example', { value: $n(3.8) })" class="field" />
+                <NumberInput id="own-loan-rate" v-model="ownershipForm.loan_rate_pct" min="0" max="30" required :placeholder="$t('common.example', { value: $n(3.8) })" class="field" />
               </div>
               <div>
                 <label for="own-loan-duration" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.durationMonths') }} <span class="text-rose-400">*</span></label>
@@ -310,11 +311,11 @@ async function deleteOwnershipAction() {
               </div>
               <div>
                 <label for="own-loan-fees" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.arrangementFees', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-loan-fees" v-model.number="ownershipForm.loan_fees" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '200' })" class="field" />
+                <NumberInput id="own-loan-fees" v-model="ownershipForm.loan_fees" min="0" :placeholder="$t('common.example', { value: '200' })" class="field" />
               </div>
               <div>
                 <label for="own-loan-insurance" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.borrowerInsuranceMonth', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-loan-insurance" v-model.number="ownershipForm.loan_insurance_monthly" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '15' })" class="field" />
+                <NumberInput id="own-loan-insurance" v-model="ownershipForm.loan_insurance_monthly" min="0" :placeholder="$t('common.example', { value: '15' })" class="field" />
               </div>
             </div>
 
@@ -344,11 +345,11 @@ async function deleteOwnershipAction() {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label for="own-lease-down" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.downPaymentIncreasedFirstRent', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-lease-down" v-model.number="ownershipForm.lease_down_payment" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '3000' })" class="field" />
+                <NumberInput id="own-lease-down" v-model="ownershipForm.lease_down_payment" min="0" :placeholder="$t('common.example', { value: '3000' })" class="field" />
               </div>
               <div>
                 <label for="own-lease-rent" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.monthlyRent', { cur: currencySymbol(currency) }) }} <span class="text-rose-400">*</span></label>
-                <input id="own-lease-rent" v-model.number="ownershipForm.lease_monthly_rent" type="number" step="0.01" min="0" required :placeholder="$t('common.example', { value: '450' })" class="field" />
+                <NumberInput id="own-lease-rent" v-model="ownershipForm.lease_monthly_rent" min="0" required :placeholder="$t('common.example', { value: '450' })" class="field" />
               </div>
               <div>
                 <label for="own-lease-duration" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.durationMonths') }} <span class="text-rose-400">*</span></label>
@@ -356,11 +357,11 @@ async function deleteOwnershipAction() {
               </div>
               <div>
                 <label for="own-lease-fees" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.arrangementFees', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-lease-fees" v-model.number="ownershipForm.lease_fees" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '150' })" class="field" />
+                <NumberInput id="own-lease-fees" v-model="ownershipForm.lease_fees" min="0" :placeholder="$t('common.example', { value: '150' })" class="field" />
               </div>
               <div>
                 <label for="own-lease-deposit" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.refundableSecurityDeposit', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-lease-deposit" v-model.number="ownershipForm.lease_deposit" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '500' })" class="field" />
+                <NumberInput id="own-lease-deposit" v-model="ownershipForm.lease_deposit" min="0" :placeholder="$t('common.example', { value: '500' })" class="field" />
               </div>
             </div>
 
@@ -398,7 +399,7 @@ async function deleteOwnershipAction() {
               </div>
               <div>
                 <label for="own-lease-end-fees" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.estimatedReturnFees', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-lease-end-fees" v-model.number="ownershipForm.lease_end_fees_estimate" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '400' })" class="field" />
+                <NumberInput id="own-lease-end-fees" v-model="ownershipForm.lease_end_fees_estimate" min="0" :placeholder="$t('common.example', { value: '400' })" class="field" />
               </div>
             </div>
 
@@ -426,7 +427,7 @@ async function deleteOwnershipAction() {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label for="own-lease-option" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.residualPurchaseOptionInclTax', { cur: currencySymbol(currency) }) }}</label>
-                  <input id="own-lease-option" v-model.number="ownershipForm.lease_purchase_option_price" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '18000' })" class="field" />
+                  <NumberInput id="own-lease-option" v-model="ownershipForm.lease_purchase_option_price" min="0" :placeholder="$t('common.example', { value: '18000' })" class="field" />
                 </div>
                 <div>
                   <label for="own-option-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.optionExercisedOnEmptyIf') }}</label>
@@ -442,7 +443,7 @@ async function deleteOwnershipAction() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label for="own-resale" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.estimatedPlannedResale', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-resale" v-model.number="ownershipForm.expected_resale_value" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '22000' })" class="field" />
+                <NumberInput id="own-resale" v-model="ownershipForm.expected_resale_value" min="0" :placeholder="$t('common.example', { value: '22000' })" class="field" />
               </div>
               <div>
                 <label for="own-holding" class="block text-xs font-semibold text-slate-300 mb-1">
@@ -465,7 +466,7 @@ async function deleteOwnershipAction() {
               </div>
               <div v-if="isOwnedPhase">
                 <label for="own-sale-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.actualResalePrice', { cur: currencySymbol(currency) }) }}</label>
-                <input id="own-sale-price" v-model.number="ownershipForm.sale_price" type="number" step="0.01" min="0" :placeholder="$t('common.example', { value: '21500' })" class="field" />
+                <NumberInput id="own-sale-price" v-model="ownershipForm.sale_price" min="0" :placeholder="$t('common.example', { value: '21500' })" class="field" />
               </div>
             </div>
           </div>

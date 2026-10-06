@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -460,7 +461,7 @@ async function testModalConnection() {
               </div>
               <div>
                 <label for="vehicle-pre-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.rateKwh', { currency: form.currency }) }}</label>
-                <input id="vehicle-pre-rate" v-model.number="form.estimated_price_per_kwh" type="number" step="0.0001" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="field" />
+                <NumberInput id="vehicle-pre-rate" v-model="form.estimated_price_per_kwh" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="field" />
               </div>
             </div>
           </div>

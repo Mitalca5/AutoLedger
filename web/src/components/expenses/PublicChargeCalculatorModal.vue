@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { Calculator, X, Sparkles, Check, BookmarkPlus, Info } from 'lucide-vue-next'
 import { api, type PublicChargingPreset, type PublicChargingBreakdown } from '@/services/api'
@@ -188,11 +189,9 @@ onMounted(() => {
         <div class="grid grid-cols-3 gap-3 p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
           <div>
             <label for="public-charge-kwh" class="block text-slate-400 mb-1 font-medium">{{ t('tariffs.publicModal.energyKwh') }}</label>
-            <input
+            <NumberInput text
               id="public-charge-kwh"
               v-model="kwh"
-              type="number"
-              step="0.01"
               min="0"
               placeholder="0.00"
               class="field focus:border-blue-500"
@@ -230,11 +229,9 @@ onMounted(() => {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="public-charge-conn-fee" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.connectionFee') }} ({{ currency }})</label>
-              <input
+              <NumberInput text
                 id="public-charge-conn-fee"
                 v-model="connectionFee"
-                type="number"
-                step="0.01"
                 min="0"
                 placeholder="0.00"
                 class="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
@@ -242,11 +239,9 @@ onMounted(() => {
             </div>
             <div>
               <label for="public-charge-kwh-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerKwh') }} ({{ currency }}/kWh)</label>
-              <input
+              <NumberInput text
                 id="public-charge-kwh-cost"
                 v-model="costPerKwh"
-                type="number"
-                step="0.001"
                 min="0"
                 placeholder="0.00"
                 class="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
@@ -254,11 +249,9 @@ onMounted(() => {
             </div>
             <div>
               <label for="public-charge-min-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.costPerMin') }} ({{ currency }}/min)</label>
-              <input
+              <NumberInput text
                 id="public-charge-min-cost"
                 v-model="costPerMinute"
-                type="number"
-                step="0.01"
                 min="0"
                 placeholder="0.00"
                 class="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"
@@ -266,11 +259,9 @@ onMounted(() => {
             </div>
             <div>
               <label for="public-charge-idle-cost" class="block text-slate-400 mb-1">{{ t('tariffs.publicModal.idleFeePerMin') }} ({{ currency }}/min)</label>
-              <input
+              <NumberInput text
                 id="public-charge-idle-cost"
                 v-model="idleFeePerMinute"
-                type="number"
-                step="0.01"
                 min="0"
                 placeholder="0.00"
                 class="w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none"

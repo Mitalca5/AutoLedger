@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -167,11 +168,9 @@ const handleCompleteReminder = () => runOnce(handleCompleteReminderAction)
           <div v-if="completeForm.expense_mode === 'create'" class="space-y-3 pt-1">
             <div>
               <label for="complete-form-expense-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.completeReminderModal.invoiceCost', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-              <input
+              <NumberInput text
                 id="complete-form-expense-amount"
                 v-model="completeForm.expense_amount"
-                type="number"
-                step="0.01"
                 min="0"
                 :placeholder="$t('expenses.completeReminderModal.000IfFree')"
                 class="field"

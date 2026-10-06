@@ -28,5 +28,8 @@
     "quickAdd": "Ajout rapide",
     "csv": "Importer un CSV",
     "webhook": "Webhook / Home Assistant"
-  }
+  },
+  "numberInvalid": "Saisissez un nombre.",
+  "numberMin": "Saisissez une valeur supérieure ou égale à {min}.",
+  "numberMax": "Saisissez une valeur inférieure ou égale à {max}."
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
@@ -86,17 +87,17 @@ async function submit() {
   <QuickFormShell :submit-label="$t('quickadd.quickFuelForm.saveTheFillUp')" :saving="saving" :error="error" @submit="submit">
     <div>
       <label for="qf-amount" class="quick-label">{{ $t('quickadd.quickFuelForm.amount', { cur: currencySymbol(currency) }) }}</label>
-      <input id="qf-amount" ref="amountInput" v-model="form.amount" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onAmountInput" />
+      <NumberInput text id="qf-amount" ref="amountInput" v-model="form.amount" min="0" class="quick-input" @input="onAmountInput" />
     </div>
 
     <div>
       <label for="qf-liters" class="quick-label">{{ $t('quickadd.quickFuelForm.quantityL') }}</label>
-      <input id="qf-liters" v-model="form.liters" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="sync" />
+      <NumberInput text id="qf-liters" v-model="form.liters" min="0" class="quick-input" @input="sync" />
     </div>
 
     <div>
       <label for="qf-price" class="quick-label">{{ $t('quickadd.quickFuelForm.pricePerLiter', { cur: currencySymbol(currency) }) }}</label>
-      <input id="qf-price" v-model="form.price" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onPriceInput" />
+      <NumberInput text id="qf-price" v-model="form.price" min="0" class="quick-input" @input="onPriceInput" />
     </div>
 
     <label class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-700 bg-slate-800 px-4 text-sm font-semibold text-white">

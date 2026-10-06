@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -510,11 +511,9 @@ async function handleModalRecalculate() {
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
             <div v-for="f in COST_FIELDS" :key="f.key">
               <label :for="`leg-${f.key}-${i}`" class="block text-xs text-slate-400 mb-0.5">{{ $t(`carpool.costFields.${f.label}`) }} ({{ currencySymbol(vehicleStore.currency) }})</label>
-              <input
+              <NumberInput
                 :id="`leg-${f.key}-${i}`"
-                v-model.number="(leg as any)[f.key]"
-                type="number"
-                step="0.01"
+                v-model="(leg as any)[f.key]"
                 min="0"
                 class="field"
               />
@@ -579,11 +578,9 @@ async function handleModalRecalculate() {
             </div>
             <div class="sm:col-span-2">
               <label :for="`passenger-paid-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.paid', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-              <input
+              <NumberInput
                 :id="`passenger-paid-${index}`"
-                v-model.number="p.amount_paid"
-                type="number"
-                step="0.5"
+                v-model="p.amount_paid"
                 min="0"
                 class="field font-bold text-success-400"
               />

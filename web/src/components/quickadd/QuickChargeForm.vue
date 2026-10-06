@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
@@ -122,18 +123,18 @@ async function submit() {
 
     <div>
       <label for="qc-kwh" class="quick-label">{{ $t('quickadd.quickChargeForm.energyAddedKwh') }}</label>
-      <input id="qc-kwh" ref="kwhInput" v-model="form.kwh" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
+      <NumberInput text id="qc-kwh" ref="kwhInput" v-model="form.kwh" min="0" class="quick-input" />
     </div>
 
     <div>
       <label for="qc-price" class="quick-label">{{ $t('quickadd.quickChargeForm.pricePerKwh', { cur: currencySymbol(currency) }) }}</label>
-      <input id="qc-price" v-model="form.price" type="number" inputmode="decimal" step="any" min="0" class="quick-input" @input="onPriceInput" />
+      <NumberInput text id="qc-price" v-model="form.price" min="0" class="quick-input" @input="onPriceInput" />
     </div>
 
     <div>
       <label for="qc-cost" class="quick-label">{{ $t('quickadd.quickChargeForm.cost', { cur: currencySymbol(currency) }) }}</label>
       <div class="flex gap-2">
-        <input id="qc-cost" v-model="form.cost" type="number" inputmode="decimal" step="any" min="0" class="quick-input min-w-0" @input="onCostInput" />
+        <NumberInput text id="qc-cost" v-model="form.cost" min="0" class="quick-input min-w-0" @input="onCostInput" />
         <button type="button" class="quick-chip shrink-0 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" @click="setFree">{{ $t('quickadd.quickChargeForm.free') }}</button>
       </div>
       <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">

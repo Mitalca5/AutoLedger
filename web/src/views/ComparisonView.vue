@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import LoadError from '@/components/LoadError.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -617,14 +618,14 @@ onBeforeUnmount(destroyChart)
             </div>
             <div>
               <label for="cmp-ice-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuelPriceL', { cur: currencySign }) }}</label>
-              <input id="cmp-ice-price" v-model.number="form.ice.fuel_price" type="number" min="0" step="any" class="field" />
+              <NumberInput id="cmp-ice-price" v-model="form.ice.fuel_price" min="0" class="field" />
             </div>
           </div>
           <p class="text-xs text-slate-400 flex items-center gap-1"><Info class="w-3 h-3" /> {{ defaults?.source ? apiMessageText(defaults.source) : $t('comparison.comparisonView.indicative') }}</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in iceFields" :key="f.key">
               <label :for="`cmp-ice-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
-              <input :id="`cmp-ice-${f.key}`" v-model.number="form.ice[f.key]" type="number" min="0" step="any" class="field" />
+              <NumberInput :id="`cmp-ice-${f.key}`" v-model="form.ice[f.key]" min="0" class="field" />
             </div>
           </div>
         </div>
@@ -638,13 +639,13 @@ onBeforeUnmount(destroyChart)
             </div>
             <div>
               <label for="cmp-ev-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.averageElectricityPriceKwh', { cur: currencySign }) }}</label>
-              <input id="cmp-ev-price" v-model.number="form.ev.eur_per_kwh" type="number" min="0" step="any" class="field" />
+              <NumberInput id="cmp-ev-price" v-model="form.ev.eur_per_kwh" min="0" class="field" />
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in evFields" :key="f.key">
               <label :for="`cmp-ev-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
-              <input :id="`cmp-ev-${f.key}`" v-model.number="form.ev[f.key]" type="number" min="0" step="any" class="field" />
+              <NumberInput :id="`cmp-ev-${f.key}`" v-model="form.ev[f.key]" min="0" class="field" />
             </div>
           </div>
         </div>
@@ -665,20 +666,20 @@ onBeforeUnmount(destroyChart)
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label for="cmp-infl-fuel" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.fuelYear') }}</label>
-              <input id="cmp-infl-fuel" v-model.number="form.options.fuel_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
+              <NumberInput id="cmp-infl-fuel" v-model="form.options.fuel_inflation_pct" min="-10" max="30" class="field" />
             </div>
             <div>
               <label for="cmp-infl-elec" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.electricityYear') }}</label>
-              <input id="cmp-infl-elec" v-model.number="form.options.electricity_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
+              <NumberInput id="cmp-infl-elec" v-model="form.options.electricity_inflation_pct" min="-10" max="30" class="field" />
             </div>
             <div>
               <label for="cmp-infl-cost" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.maintenanceInsuranceTaxesYear') }}</label>
-              <input id="cmp-infl-cost" v-model.number="form.options.cost_inflation_pct" type="number" min="-10" max="30" step="any" class="field" />
+              <NumberInput id="cmp-infl-cost" v-model="form.options.cost_inflation_pct" min="-10" max="30" class="field" />
             </div>
           </div>
           <div v-if="!isRetro">
             <label for="cmp-ev-incentives" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.electricPurchaseGrantsDeductedFrom', { cur: currencySign }) }}</label>
-            <input id="cmp-ev-incentives" v-model.number="form.options.ev_incentives" type="number" min="0" step="any" class="field sm:w-1/2" />
+            <NumberInput id="cmp-ev-incentives" v-model="form.options.ev_incentives" min="0" class="field sm:w-1/2" />
           </div>
         </div>
       </div>

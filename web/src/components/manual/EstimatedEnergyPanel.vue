@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { ref, computed, watch, onMounted } from 'vue'
@@ -128,11 +129,9 @@ onMounted(() => {
           </div>
           <div class="w-full sm:w-56">
             <label for="pre-tm-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.estimatedEnergyPanel.electricityRateKwh', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-            <input
+            <NumberInput
               id="pre-tm-rate"
-              v-model.number="form.price_per_kwh"
-              type="number"
-              step="0.0001"
+              v-model="form.price_per_kwh"
               min="0.01"
               max="5"
               :placeholder="$t('common.example', { value: $n(0.22) })"

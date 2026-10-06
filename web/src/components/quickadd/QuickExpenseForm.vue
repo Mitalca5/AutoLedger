@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -97,7 +98,7 @@ async function submit() {
 
     <div>
       <label for="qe-amount" class="quick-label">{{ $t('quickadd.quickExpenseForm.amount', { cur: currencySymbol(currency) }) }}</label>
-      <input id="qe-amount" ref="amountInput" v-model="form.amount" type="number" inputmode="decimal" step="any" min="0" class="quick-input" />
+      <NumberInput text id="qe-amount" ref="amountInput" v-model="form.amount" min="0" class="quick-input" />
     </div>
 
     <QuickDateLine id="qe-date" v-model="form.date" with-time />
