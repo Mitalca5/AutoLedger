@@ -294,6 +294,7 @@
     "percent": "Health (%)",
     "newCapacity": "New capacity (kWh)",
     "addReading": "Add",
+    "readingRequired": "Enter a health percentage or a new-battery capacity first.",
     "deleteReading": "Delete the reading of {date}",
     "residual": "Projected resale value",
     "expectedKm": "Planned distance (km)",
