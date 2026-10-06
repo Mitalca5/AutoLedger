@@ -1,0 +1,11 @@
+# Merge with docker-compose.yml to build this fork locally.
+services:
+  api:
+    image: autoledger-hybrid:local
+    pull_policy: never
+    build:
+      args:
+        APP_VERSION: hybrid-local
+  backup:
+    image: autoledger-hybrid-backup:local
+    pull_policy: never
