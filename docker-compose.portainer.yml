@@ -1,0 +1,155 @@
+# Standalone Portainer stack: registry images, no source checkout or build.
+services:
+  secrets-init:
+    image: postgres:16-alpine
+    restart: 'no'
+    user: root
+    entrypoint:
+    - /bin/sh
+    - -c
+    command:
+    - 'gen() { head -c 32 /dev/urandom | od -An -tx1 | tr -d '' \n''; }
+
+      if [ -n "$$DB_PASSWORD" ]; then printf %s "$$DB_PASSWORD" > /secrets/db_password
+
+      elif [ ! -s /secrets/db_password ]; then gen > /secrets/db_password; fi
+
+      [ -s /secrets/jwt_secret ] || gen > /secrets/jwt_secret
+
+      [ -s /secrets/encryption_key ] || gen > /secrets/encryption_key
+
+      chmod 644 /secrets/db_password /secrets/jwt_secret /secrets/encryption_key
+
+      '
+    environment:
+      DB_PASSWORD: ${AUTOLEDGER_DB_PASSWORD:-${DB_PASSWORD:-}}
+    volumes:
+    - autoledger_secrets:/secrets
+  postgres:
+    image: postgres:16-alpine
+    container_name: autoledger-hybrid-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      POSTGRES_PASSWORD_FILE: /secrets/db_password
+      POSTGRES_DB: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+    volumes:
+    - autoledger_db_data:/var/lib/postgresql/data
+    - autoledger_secrets:/secrets:ro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}} -d ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  api:
+    image: ghcr.io/mitalca5/autoledger:${HYBRID_TAG:-hybrid}
+    pull_policy: always
+    container_name: autoledger-hybrid-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - -q
+      - --spider
+      - http://127.0.0.1:8080/api/health
+      interval: 30s
+      timeout: 5s
+      start_period: 3m30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    environment:
+      PORT: 8080
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      AUTOLEDGER_BASE_URL: ${AUTOLEDGER_BASE_URL:-${APP_BASE_URL:-http://localhost:8080}}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_PASSWORD_FILE: /secrets/db_password
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+      DB_SSLMODE: disable
+      AUTOLEDGER_JWT_SECRET_FILE: /secrets/jwt_secret
+      AUTOLEDGER_ENCRYPTION_KEY_FILE: /secrets/encryption_key
+      AUTOLEDGER_ENCRYPTION_KEY: ${AUTOLEDGER_ENCRYPTION_KEY:-${APP_ENCRYPTION_KEY:-}}
+      AUTOLEDGER_JWT_SECRET: ${AUTOLEDGER_JWT_SECRET:-${JWT_SECRET:-}}
+      JWT_ACCESS_EXPIRATION_MINUTES: ${JWT_ACCESS_EXPIRATION_MINUTES:-}
+      JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS:-}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      SECURITY_HEADERS: ${SECURITY_HEADERS:-}
+      CONTENT_SECURITY_POLICY: ${CONTENT_SECURITY_POLICY:-}
+      GEOCODING_ENABLED: ${GEOCODING_ENABLED:-false}
+      GEOCODING_URL: ${GEOCODING_URL:-}
+      GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-}
+      DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
+      AUTOLEDGER_DEMO: ${AUTOLEDGER_DEMO:-false}
+      AUTOLEDGER_DEMO_EMAIL: ${AUTOLEDGER_DEMO_EMAIL:-}
+      AUTOLEDGER_DEMO_PASSWORD: ${AUTOLEDGER_DEMO_PASSWORD:-}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/Argentina/Buenos_Aires}
+      AUTOLEDGER_STORAGE_DIR: ${AUTOLEDGER_STORAGE_DIR:-${STORAGE_DIR:-/data/documents}}
+    ports:
+    - ${AUTOLEDGER_PORT:-${PORT:-8080}}:8080
+    volumes:
+    - autoledger_documents:/data/documents
+    - autoledger_secrets:/secrets:ro
+    extra_hosts:
+    - host.docker.internal:host-gateway
+  backup:
+    image: ghcr.io/mitalca5/autoledger-backup:${HYBRID_TAG:-hybrid}
+    pull_policy: always
+    container_name: autoledger-hybrid-backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_PASSWORD_FILE: /secrets/db_password
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-24}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    volumes:
+    - autoledger_documents:/data/documents:ro
+    - autoledger_backups:/backups
+    - autoledger_secrets:/secrets:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+volumes:
+  autoledger_db_data:
+    name: ${DB_VOLUME_NAME:-autoledger_hybrid_db_data}
+    driver: local
+  autoledger_documents:
+    name: ${DOCUMENTS_VOLUME_NAME:-autoledger_hybrid_documents}
+    driver: local
+  autoledger_backups:
+    name: ${BACKUPS_VOLUME_NAME:-autoledger_hybrid_backups}
+    driver: local
+  autoledger_secrets:
+    name: ${SECRETS_VOLUME_NAME:-autoledger_hybrid_secrets}
+    driver: local
