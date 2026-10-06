@@ -13,14 +13,10 @@
     "csvFileName": "carpools_export",
     "deleteTitle": "Delete the carpool",
     "deleteMessage": "Do you confirm the deletion of the carpool \"{title}\"?",
-    "recalcTitle": "Recalculate the carpool",
-    "recalcMessage": "Do you want to recalculate the actual costs of \"{title}\" with the current rates and tolls?\n(Amounts received from the passengers stay unchanged)",
     "recalc": "Recalculate",
     "recalcDone": "The carpool \"{title}\" has been recalculated.",
     "recalcDoneTitle": "Recalculation done",
     "recalcError": "Recalculation failed: {message}",
-    "recalcSelectedTitle": "Recalculate the selected carpools",
-    "recalcSelectedMessage": "Do you want to recalculate the actual costs of {count} carpool(s) with the current electricity rates, tolls, tires and maintenance?\n(Amounts received from the passengers stay unchanged)",
     "recalcSelectedDone": "{count} carpool(s) recalculated."
   },
   "carpoolSummaryGrid": {

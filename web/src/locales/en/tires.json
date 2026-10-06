@@ -31,8 +31,6 @@
     "selectAll": "Select all",
     "rotateFrontBack": "Front ⇄ Rear (FL ⇄ RL, FR ⇄ RR)",
     "rotateCross": "Cross (FL ⇄ RR, FR ⇄ RL)",
-    "quickRotationTitle": "Quick rotation",
-    "quickRotationMessage": "Do you confirm the quick rotation {label} at {odometer} {unit}?",
     "rotate": "Rotate",
     "rotationError": "Rotation failed: {message}",
     "loadError": "Loading error: {message}",

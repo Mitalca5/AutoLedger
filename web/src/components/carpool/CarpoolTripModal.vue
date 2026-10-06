@@ -342,7 +342,7 @@ async function handleModalRecalculate() {
       }
     }
   }
-  showAlert(t('carpool.carpoolTripModal.reestimated'), t('carpool.carpoolTripModal.reestimatedTitle'), 'info')
+  showAlert(t('carpool.carpoolTripModal.reestimated'), t('carpool.carpoolTripModal.reestimatedTitle'), 'success')
 }
 </script>
 

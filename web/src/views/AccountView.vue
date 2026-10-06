@@ -66,15 +66,15 @@ async function endLocalSession() {
 
 async function revoke(session: Session) {
   sessionError.value = ''
-  const ok = await showConfirm({
-    title: session.current ? t('account.signOut') : t('account.disconnectThisDevice'),
-    message: session.current
-      ? t('account.signOutThisDeviceMessage')
-      : t('account.disconnectDeviceMessage', { device: describeUserAgent(session.user_agent) }),
-    confirmText: t('account.disconnect'),
-    type: 'warning',
-  })
-  if (!ok) return
+  if (!session.current) {
+    const ok = await showConfirm({
+      title: t('account.disconnectThisDevice'),
+      message: t('account.disconnectDeviceMessage', { device: describeUserAgent(session.user_agent) }),
+      confirmText: t('account.disconnect'),
+      type: 'warning',
+    })
+    if (!ok) return
+  }
   busyId.value = session.id
   try {
     await api.revokeSession(session.id)

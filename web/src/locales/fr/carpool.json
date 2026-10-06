@@ -13,14 +13,10 @@
     "csvFileName": "covoiturages_export",
     "deleteTitle": "Supprimer le covoiturage",
     "deleteMessage": "Confirmez-vous la suppression du covoiturage \"{title}\" ?",
-    "recalcTitle": "Recalculer le covoiturage",
-    "recalcMessage": "Voulez-vous recalculer les coûts réels de \"{title}\" selon les tarifs et péages actuels ?\n(Les montants perçus des passagers restent inchangés)",
     "recalc": "Recalculer",
     "recalcDone": "Le covoiturage \"{title}\" a été recalculé avec succès.",
     "recalcDoneTitle": "Recalcul terminé",
     "recalcError": "Erreur lors du recalcul : {message}",
-    "recalcSelectedTitle": "Recalculer les covoiturages sélectionnés",
-    "recalcSelectedMessage": "Voulez-vous recalculer les coûts réels de {count} covoiturage(s) selon les tarifs d'électricité, péages, pneus et entretien actuels ?\n(Les montants perçus des passagers restent inchangés)",
     "recalcSelectedDone": "{count} covoiturage(s) recalculé(s) avec succès."
   },
   "carpoolSummaryGrid": {

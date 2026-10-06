@@ -178,14 +178,6 @@ async function handleDelete(trip: any) {
 
 async function handleRecalculateSingle(trip: any) {
   if (!vehicleStore.activeVehicle) return
-  const ok = await showConfirm({
-    title: t('carpool.carpoolView.recalcTitle'),
-    message: t('carpool.carpoolView.recalcMessage', { title: trip.title }),
-    confirmText: t('carpool.carpoolView.recalc'),
-    type: 'info',
-  })
-  if (!ok) return
-
   recalculating.value = true
   try {
     await api.recalculateCarpools(vehicleStore.activeVehicle.id, [trip.id])
@@ -201,14 +193,6 @@ async function handleRecalculateSingle(trip: any) {
 async function handleBatchRecalculate() {
   if (!vehicleStore.activeVehicle || !selectedTripIds.value.length) return
   const count = selectedTripIds.value.length
-  const ok = await showConfirm({
-    title: t('carpool.carpoolView.recalcSelectedTitle'),
-    message: t('carpool.carpoolView.recalcSelectedMessage', { count }),
-    confirmText: t('carpool.carpoolView.recalc'),
-    type: 'info',
-  })
-  if (!ok) return
-
   recalculating.value = true
   try {
     const res = await api.recalculateCarpools(vehicleStore.activeVehicle.id, selectedTripIds.value)

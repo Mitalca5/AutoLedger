@@ -36,7 +36,6 @@
   "disconnect": "Déconnecter",
   "loadFailed": "Impossible de charger les sessions.",
   "disconnectThisDevice": "Déconnecter cet appareil",
-  "signOutThisDeviceMessage": "Vous allez être déconnecté de cet appareil.",
   "disconnectDeviceMessage": "{device} sera déconnecté. Il garde son accès jusqu'à 15 minutes, la durée du jeton d'accès.",
   "disconnectFailed": "Impossible de déconnecter cet appareil.",
   "signOutAllTitle": "Déconnecter tous les appareils",

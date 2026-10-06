@@ -66,7 +66,7 @@ async function save() {
     await vehicleStore.fetchVehicles()
     await loadTco()
     vehicleStore.lastSyncTimestamp = Date.now()
-    showAlert(t('manual.estimatedEnergyPanel.saved'), t('common.success'), 'info')
+    showAlert(t('manual.estimatedEnergyPanel.saved'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {

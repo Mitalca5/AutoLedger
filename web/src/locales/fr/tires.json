@@ -31,8 +31,6 @@
     "selectAll": "Tout sélectionner",
     "rotateFrontBack": "Avant ⇄ Arrière (FL ⇄ RL, FR ⇄ RR)",
     "rotateCross": "Croisée (FL ⇄ RR, FR ⇄ RL)",
-    "quickRotationTitle": "Permutation rapide",
-    "quickRotationMessage": "Confirmez-vous la permutation rapide {label} à {odometer} {unit} ?",
     "rotate": "Permuter",
     "rotationError": "Erreur lors de la permutation : {message}",
     "loadError": "Erreur de chargement : {message}",

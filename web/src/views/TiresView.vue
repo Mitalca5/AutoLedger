@@ -40,7 +40,6 @@ import {
   getLastDismountInfo,
 } from '@/utils/tires'
 import { todayIso, toIsoDay } from '@/utils/dates'
-import { distanceUnit, formatDistanceValue } from '@/units'
 
 // The page owns the tire list, the selection and which modal is open; each modal owns its form and
 // its API call and reports back with "saved".
@@ -214,14 +213,6 @@ const { pending: rotating, run: runOnce } = useSubmit()
 async function quickRotateAction(mode: 'FRONT_BACK' | 'CROSS') {
   if (!vehicleStore.activeVehicle) return
   const odo = Math.round(vehicleStore.activeVehicle.current_odometer || 0)
-  const label = mode === 'FRONT_BACK' ? t('tires.tiresView.rotateFrontBack') : t('tires.tiresView.rotateCross')
-  const ok = await showConfirm({
-    title: t('tires.tiresView.quickRotationTitle'),
-    message: t('tires.tiresView.quickRotationMessage', { unit: distanceUnit(), label, odometer: formatDistanceValue(odo) }),
-    confirmText: t('tires.tiresView.rotate'),
-    type: 'warning',
-  })
-  if (!ok) return
 
   try {
     await api.quickRotateTires(vehicleStore.activeVehicle.id, {

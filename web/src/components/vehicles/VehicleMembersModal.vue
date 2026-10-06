@@ -67,7 +67,7 @@ async function handleAddMember() {
     newMemberEmail.value = ''
     newMemberPersonId.value = ''
     await loadMembers(membersVehicle.value.id)
-    showAlert(t('vehicles.vehicleMembersModal.added'), t('common.success'), 'info')
+    showAlert(t('vehicles.vehicleMembersModal.added'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -121,7 +121,7 @@ async function handleUpdateMemberRole(m: any, newRole: string) {
   try {
     await api.updateVehicleMemberRole(membersVehicle.value.id, m.user_id, { role: newRole })
     await loadMembers(membersVehicle.value.id)
-    showAlert(t('vehicles.vehicleMembersModal.roleUpdated'), t('common.success'), 'info')
+    showAlert(t('vehicles.vehicleMembersModal.roleUpdated'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -149,7 +149,7 @@ async function handleRemoveMember(m: any) {
     } else {
       await loadMembers(membersVehicle.value.id)
     }
-    showAlert(isSelf ? t('vehicles.vehicleMembersModal.left') : t('vehicles.vehicleMembersModal.revoked'), t('common.success'), 'info')
+    showAlert(isSelf ? t('vehicles.vehicleMembersModal.left') : t('vehicles.vehicleMembersModal.revoked'), t('common.success'), 'success')
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
