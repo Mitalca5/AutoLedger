@@ -1,6 +1,7 @@
 {
   "costPerKmUnset": "Prix d'achat non renseigné",
   "tiresView": {
+    "rotateTooltip": "Permute {pairs}",
     "addAPastSessionOn": "Ajouter une session passée sur un lot",
     "recordAPastSessionOn": "Enregistrer une session passée sur un lot de pneus du garage",
     "copyATireSHistory": "Copier l'historique d'un pneu",
@@ -153,6 +154,8 @@
     "odometerAtRemovalKm": "Odomètre au démontage ({unit})"
   },
   "tireDisposedCard": {
+    "scrappedOn": "Mis au rebut le {date}",
+    "scrappedOnAt": "Mis au rebut le {date} à {odometer} {unit}",
     "kmDrivenWear": "{total_distance_km} {unit} parcourus • Usure : {life_progress_pct} • {purchase_price}",
     "scrapped": "Au rebut",
     "selectForABulkAction": "Sélectionner pour une action par lot"

@@ -37,6 +37,7 @@ import {
   sessionFormFromSession,
   type SessionForm,
   type TireLogForm,
+  getLastDismountInfo,
 } from '@/utils/tires'
 import { todayIso, toIsoDay } from '@/utils/dates'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -121,6 +122,8 @@ const mountedTires = computed(() => {
   })
   return map
 })
+
+const hasMountedTires = computed(() => Object.values(mountedTires.value).some(Boolean))
 
 const storageTires = computed(() => {
   return tires.value.filter((t) => t.tire.current_position === 'STORAGE')
@@ -542,16 +545,18 @@ async function handleDeleteLog(l: any) {
         <div class="flex items-center gap-2 flex-wrap">
           <button
             @click="handleQuickRotate('FRONT_BACK')"
-            :disabled="rotating"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            :disabled="rotating || !hasMountedTires"
+            :title="$t('tires.tiresView.rotateTooltip', { pairs: 'FL ⇄ RL, FR ⇄ RR' })"
+            class="tap disabled:opacity-50 disabled:cursor-not-allowed bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
           >
             <ArrowUpDown class="w-3.5 h-3.5 text-blue-400" />
             {{ $t('tires.tiresView.frontRear') }}
           </button>
           <button
             @click="handleQuickRotate('CROSS')"
-            :disabled="rotating"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            :disabled="rotating || !hasMountedTires"
+            :title="$t('tires.tiresView.rotateTooltip', { pairs: 'FL ⇄ RR, FR ⇄ RL' })"
+            class="tap disabled:opacity-50 disabled:cursor-not-allowed bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
           >
             <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
             {{ $t('tires.tiresView.crossRotation') }}
@@ -660,6 +665,7 @@ async function handleDeleteLog(l: any) {
         :key="t.tire.id"
         :t="t"
         :selected="selectedTireIds.includes(t.tire.id)"
+        :dismount="getLastDismountInfo(tires, t.tire.id)"
         @open="openHistoryModal"
         @toggle="toggleTireSelection"
       />

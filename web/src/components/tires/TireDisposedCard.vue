@@ -6,9 +6,10 @@ import { distanceUnit, formatDistanceValue } from '@/units'
 import { formatPercent } from '@/utils/numbers'
 
 // A tire that was disposed of: its cost stays in the TCO
-defineProps<{ t: any; selected: boolean }>()
+defineProps<{ t: any; selected: boolean; dismount?: { date: string; odometer: number | null } | null }>()
 const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string] }>()
 const vehicleStore = useVehicleStore()
+const day = (iso: string) => new Date(iso).toLocaleDateString(intlLocale(), { dateStyle: 'medium', timeZone: 'UTC' })
 </script>
 
 <template>
@@ -40,6 +41,11 @@ const vehicleStore = useVehicleStore()
     </div>
     <div class="text-xs text-slate-400">
       {{ $t('tires.tireDisposedCard.kmDrivenWear', { unit: distanceUnit(), total_distance_km: formatDistanceValue(t.total_distance_km), life_progress_pct: formatPercent(Number(t.life_progress_pct)), purchase_price: formatAmount(Number(t.tire.purchase_price || 0), vehicleStore.currency) }) }}
+    </div>
+    <div v-if="dismount" class="text-xs text-slate-500">
+      {{ dismount.odometer
+        ? $t('tires.tireDisposedCard.scrappedOnAt', { date: day(dismount.date), odometer: formatDistanceValue(dismount.odometer), unit: distanceUnit() })
+        : $t('tires.tireDisposedCard.scrappedOn', { date: day(dismount.date) }) }}
     </div>
   </div>
 </template>

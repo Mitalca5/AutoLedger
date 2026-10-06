@@ -20,7 +20,7 @@ const vehicleStore = useVehicleStore()
     v-if="stat"
     v-clickable
     @click="emit('open', stat)"
-    class="bg-slate-900 border border-slate-800 hover:border-rose-500/40 cursor-pointer rounded-3xl p-5 space-y-4 shadow-sm transition-all group"
+    class="bg-slate-900 border border-slate-800 hover:border-rose-500/40 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-sm transition-all group"
     :class="{ 'ring-2 ring-rose-500/50 border-rose-500/60': selected }"
   >
     <div class="flex items-start justify-between">
@@ -35,7 +35,7 @@ const vehicleStore = useVehicleStore()
           />
           <span>{{ label }} ({{ pos }})</span>
         </label>
-        <h3 class="text-base font-bold text-white group-hover:text-rose-300 transition-colors mt-0.5">{{ stat.tire.brand }} {{ stat.tire.model }}</h3>
+        <h3 class="text-sm sm:text-base font-bold text-white group-hover:text-rose-300 transition-colors mt-0.5">{{ stat.tire.brand }} {{ stat.tire.model }}</h3>
         <div class="text-xs text-slate-400 font-mono">{{ stat.tire.dimension }}</div>
       </div>
       <span
@@ -47,7 +47,7 @@ const vehicleStore = useVehicleStore()
     </div>
 
     <!-- Metrics Row -->
-    <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 text-center">
+    <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-800/80 text-center">
       <div>
         <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireWheelCard.totalDriven') }}</div>
         <div class="text-sm font-bold text-slate-200">{{ formatDistance(stat.total_distance_km) }}</div>
@@ -67,7 +67,7 @@ const vehicleStore = useVehicleStore()
       <TireWearBar :pct="stat.life_progress_pct" :condition="stat.condition" />
     </div>
   </div>
-  <div v-else class="bg-slate-900/40 border border-dashed border-slate-800 rounded-3xl p-8 text-center text-slate-400 flex flex-col items-center justify-center space-y-2">
+  <div v-else class="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-center text-slate-400 flex flex-col items-center justify-center space-y-2">
     <Disc class="w-8 h-8 opacity-30" />
     <span>{{ $t('tires.tireWheelCard.noTireFittedAtThe', { label, pos }) }}</span>
     <button v-if="canMount" type="button" @click="emit('mount')" class="text-xs font-semibold text-rose-400 hover:text-rose-300 underline">
