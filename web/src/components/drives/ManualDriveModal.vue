@@ -221,7 +221,7 @@ async function handleSubmit() {
             <DistanceInput
               id="manual-drive-start-odo"
               v-model="startOdometer"
-              step="1"
+              step="any"
               min="0"
               class="field"
             />
@@ -233,7 +233,7 @@ async function handleSubmit() {
             <DistanceInput
               id="manual-drive-end-odo"
               v-model="endOdometer"
-              step="1"
+              step="any"
               min="0"
               class="field"
             />
