@@ -25,7 +25,9 @@
       "break_even": "The break-even compares cumulative outlays (purchase + running costs), without resale",
       "inflation": "Yearly inflation: fuel {p0} %, electricity {p1} %, maintenance/insurance/taxes {p2} %",
       "constant_prices": "Constant prices (no inflation applied)",
-      "ev_actual": "Reference side: recorded costs per {unit}, including fuel and electricity for hybrids (insurance and depreciation included)",
+      "ev_actual": "Reference side: energy, maintenance and depreciation from recorded costs per {unit}; insurance from annual premiums",
+      "insurance_estimated": "Insurance payments without a coverage period: the last 12 months of payments are used as the annual estimate",
+      "insurance_expired": "Historical insurance payments have no current coverage: reference insurance is not projected; record the current premium",
       "ev_price_unknown": "Reference purchase price unknown (lease or missing entry): depreciation not included",
       "ev_no_distance": "No tracked mileage: recorded costs cannot provide a reliable comparison"
     },

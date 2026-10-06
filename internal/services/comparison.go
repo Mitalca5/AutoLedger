@@ -16,7 +16,6 @@ type EVBaseline struct {
 	FuelPerKm         float64 // Fuel portion of EnergyPerKm; the rest is electricity.
 	MaintenancePerKm  float64
 	MaintenanceYearly float64
-	InsurancePerKm    float64
 	InsuranceYearly   float64
 	TaxYearly         float64
 	PurchaseNet       float64 // Cash outlay at the start, net of incentives
@@ -79,10 +78,10 @@ type ComparisonResult struct {
 
 // sideRates is the internal, unit-free description of one vehicle.
 type sideRates struct {
-	energyPerKm, maintPerKm, maintYearly, insPerKm, insYearly, taxYearly float64
-	purchase, resale                                                     float64
-	energyInfl, costInfl                                                 float64
-	fuelPerKm, fuelInfl                                                  float64
+	energyPerKm, maintPerKm, maintYearly, insYearly, taxYearly float64
+	purchase, resale                                           float64
+	energyInfl, costInfl                                       float64
+	fuelPerKm, fuelInfl                                        float64
 }
 
 func iceRates(sc *models.ComparisonScenario) sideRates {
@@ -105,7 +104,6 @@ func evRates(sc *models.ComparisonScenario, ev EVBaseline) sideRates {
 		fuelInfl:    sc.Options.FuelInflationPct / 100,
 		maintPerKm:  ev.MaintenancePerKm,
 		maintYearly: ev.MaintenanceYearly,
-		insPerKm:    ev.InsurancePerKm,
 		insYearly:   ev.InsuranceYearly,
 		taxYearly:   ev.TaxYearly,
 		purchase:    ev.PurchaseNet,
@@ -129,7 +127,7 @@ func (s sideRates) run(km float64, years int) (CostSide, []float64) {
 		energyY += s.fuelPerKm * km * math.Pow(1+s.fuelInfl, float64(y-1))
 		costFactor := math.Pow(1+s.costInfl, float64(y-1))
 		maintY := (s.maintPerKm*km + s.maintYearly) * costFactor
-		insY := (s.insPerKm*km + s.insYearly) * costFactor
+		insY := s.insYearly * costFactor
 		taxY := s.taxYearly * costFactor
 
 		energy += energyY

@@ -25,7 +25,9 @@
       "break_even": "Le point d'équilibre compare les décaissements cumulés (achat + coûts d'usage), sans la revente",
       "inflation": "Inflation annuelle : carburant {p0} %, électricité {p1} %, entretien/assurance/taxes {p2} %",
       "constant_prices": "Prix constants (aucune inflation appliquée)",
-      "ev_actual": "Côté référence : coûts enregistrés par {unit}, carburant et électricité compris pour les hybrides (assurance et dépréciation incluses)",
+      "ev_actual": "Côté référence : énergie, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance à partir des primes annuelles",
+      "insurance_estimated": "Paiements d’assurance sans période de couverture : les paiements des 12 derniers mois servent d’estimation annuelle",
+      "insurance_expired": "Les paiements d’assurance historiques ne couvrent plus la période actuelle : assurance non projetée ; saisissez la prime actuelle",
       "ev_price_unknown": "Prix d'achat de référence inconnu (location ou saisie manquante) : dépréciation non incluse",
       "ev_no_distance": "Aucun kilométrage suivi : les coûts enregistrés ne permettent pas un comparatif fiable"
     },
