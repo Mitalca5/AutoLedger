@@ -1191,13 +1191,21 @@ func TestIntegrationMaintenanceAmortizationAndOdometer(t *testing.T) {
 	mustDrive(t, repo, v.ID, 101, base.Add(-10*24*time.Hour), 48000, 50)
 	mustDrive(t, repo, v.ID, 102, base, 48500, 100)
 
-	odo1, _, err := repo.GetOdometerAtDate(ctx, v.ID, base.Add(-5*24*time.Hour))
-	if err != nil || odo1 != 48050 {
-		t.Fatalf("expected 48050 odometer before second drive, got %v (err %v)", odo1, err)
+	stored, err := repo.ListOdometerAnchors(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
 	}
-	odo2, _, err := repo.GetOdometerAtDate(ctx, v.ID, base.Add(2*time.Hour))
-	if err != nil || odo2 != 48600 {
-		t.Fatalf("expected 48600 odometer after second drive, got %v (err %v)", odo2, err)
+	anchors := make([]OdometerAnchor, len(stored))
+	for i, a := range stored {
+		anchors[i] = OdometerAnchor{Date: a.Date, Km: a.Km, Origin: a.Origin}
+	}
+	odo1, _, _ := EstimateOdometerAt(anchors, base.Add(-5*24*time.Hour))
+	if odo1 <= 48050 || odo1 >= 48400 {
+		t.Fatalf("expected an odometer between the two drives, got %v", odo1)
+	}
+	odo2, _, _ := EstimateOdometerAt(anchors, base.Add(2*time.Hour))
+	if odo2 != 48600 {
+		t.Fatalf("expected 48600 odometer after second drive, got %v", odo2)
 	}
 
 	// 2. Create maintenance expenses:
@@ -2419,5 +2427,33 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 	d, err := svc.Defaults(ctx, both.ID)
 	if err != nil || d.EVKwhPer100Km != nil || d.ICELPer100Km != nil {
 		t.Errorf("hybrid defaults must not mix energies: %+v (%v)", d, err)
+	}
+}
+
+func TestIntegrationOdometerEstimateFromOwnershipOrigin(t *testing.T) {
+	_, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "origin@example.com")
+	v.CurrentOdometer = 30000
+	if err := repo.UpdateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	rent, months, startOdo := money.Cents(20000), 36, 0.0
+	start := time.Now().UTC().AddDate(-2, 0, 0)
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{VehicleID: v.ID, AcquisitionType: models.AcquisitionLLD,
+		StartDate: start, StartOdometer: &startOdo, LeaseMonthlyRent: &rent, LeaseDurationMonths: &months}); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := repo.ListOdometerAnchors(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	anchors := make([]OdometerAnchor, len(stored))
+	for i, a := range stored {
+		anchors[i] = OdometerAnchor{Date: a.Date, Km: a.Km, Origin: a.Origin}
+	}
+	km, source, ok := EstimateOdometerAt(anchors, start.AddDate(1, 0, 0))
+	if !ok || source != OdometerEstimateInterpolated || km < 14000 || km > 16000 {
+		t.Fatalf("expected about 15,000 km one year into a two-year ownership at 30,000 km, got %v %q %v", km, source, ok)
 	}
 }

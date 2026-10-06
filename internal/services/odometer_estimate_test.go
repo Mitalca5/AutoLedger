@@ -7,7 +7,7 @@ import (
 
 func TestEstimateOdometerAt(t *testing.T) {
 	day := func(d int) time.Time { return time.Date(2026, 1, d, 0, 0, 0, 0, time.UTC) }
-	anchors := []OdometerAnchor{{day(11), 1100}, {day(1), 1000}, {day(21), 1500}}
+	anchors := []OdometerAnchor{{day(11), 1100, false}, {day(1), 1000, false}, {day(21), 1500, false}}
 
 	cases := []struct {
 		name    string
@@ -22,8 +22,13 @@ func TestEstimateOdometerAt(t *testing.T) {
 		{"between the last two readings", anchors, day(16), 1300, OdometerEstimateInterpolated, true},
 		{"before the first reading", anchors, day(1).AddDate(0, 0, -5), 1000, OdometerEstimateBounded, true},
 		{"after the last reading", anchors, day(30), 1500, OdometerEstimateBounded, true},
-		{"a lower reading later is ignored", []OdometerAnchor{{day(1), 1000}, {day(5), 900}, {day(11), 1100}}, day(6), 1050, OdometerEstimateInterpolated, true},
-		{"zero readings are ignored", []OdometerAnchor{{day(1), 0}, {day(11), 1100}}, day(5), 1100, OdometerEstimateBounded, true},
+		{"a lower reading later is ignored", []OdometerAnchor{{day(1), 1000, false}, {day(5), 900, false}, {day(11), 1100, false}}, day(6), 1050, OdometerEstimateInterpolated, true},
+		{"zero readings are ignored", []OdometerAnchor{{day(1), 0, false}, {day(11), 1100, false}}, day(5), 1100, OdometerEstimateBounded, true},
+		{"before the first reading, spread from the origin", []OdometerAnchor{{day(1), 0, true}, {day(11), 1000, false}}, day(6), 500, OdometerEstimateInterpolated, true},
+		{"on the origin", []OdometerAnchor{{day(1), 0, true}, {day(11), 1000, false}}, day(1), 0, OdometerEstimateExact, true},
+		{"before the origin", []OdometerAnchor{{day(11), 0, true}, {day(21), 1000, false}}, day(1), 0, OdometerEstimateBounded, true},
+		{"an origin on the date of a reading is ignored", []OdometerAnchor{{day(1), 0, true}, {day(1), 800, false}, {day(11), 1000, false}}, day(1), 800, OdometerEstimateExact, true},
+		{"only an origin", []OdometerAnchor{{day(1), 0, true}}, day(6), 0, OdometerEstimateBounded, true},
 		{"no reading", nil, day(5), 0, "", false},
 	}
 	for _, c := range cases {

@@ -146,57 +146,35 @@ func (r *Repository) DeleteMaintenanceExpense(ctx context.Context, vehicleID, ma
 	return nil
 }
 
-// GetOdometerAtDate resolves the vehicle odometer at or near a specific timestamp
-// using TeslaMate drives, falling back to current_odometer.
-func (r *Repository) GetOdometerAtDate(ctx context.Context, vehicleID string, at time.Time) (float64, string, error) {
-	query := `
-		SELECT COALESCE(
-			(SELECT end_odometer FROM drives
-			 WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND end_time <= $2 AND end_odometer > 0
-			 ORDER BY end_time DESC LIMIT 1),
-			(SELECT start_odometer FROM drives
-			 WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_time >= $2 AND start_odometer > 0
-			 ORDER BY start_time ASC LIMIT 1),
-			(SELECT current_odometer FROM vehicles WHERE id = $1),
-			0
-		);
-	`
-	var odo float64
-	err := r.pool.QueryRow(ctx, query, vehicleID, at).Scan(&odo)
-	if err != nil {
-		return 0, "unknown", err
-	}
-	return odo, "teslamate", nil
-}
-
 // ============================================================================
 // Charges
 // ============================================================================
 
 // OdometerAnchor is a dated odometer reading of a vehicle.
 type OdometerAnchor struct {
-	Date time.Time
-	Km   float64
+	Date   time.Time
+	Km     float64
+	Origin bool
 }
 
 // ListOdometerAnchors lists every dated odometer reading of a vehicle: drive starts and ends, checkpoints,
-// fill-ups, the start of the ownership and the current odometer (dated at the last change of the vehicle).
+// fill-ups, the start of the ownership (an ownership starting at 0 km marks the origin of the vehicle) and the current odometer (dated now, as the monthly mileage smoothing does).
 func (r *Repository) ListOdometerAnchors(ctx context.Context, vehicleID string) ([]OdometerAnchor, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT start_time, start_odometer FROM drives
+		SELECT start_time, start_odometer, false FROM drives
 		  WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_odometer > 0
 		UNION ALL
-		SELECT end_time, end_odometer FROM drives
+		SELECT end_time, end_odometer, false FROM drives
 		  WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND end_odometer > 0
 		UNION ALL
-		SELECT date::timestamptz, odometer FROM odometer_checkpoints WHERE vehicle_id = $1
+		SELECT date::timestamptz, odometer, false FROM odometer_checkpoints WHERE vehicle_id = $1
 		UNION ALL
-		SELECT date, odometer FROM fuel_logs WHERE vehicle_id = $1 AND odometer IS NOT NULL
+		SELECT date, odometer, false FROM fuel_logs WHERE vehicle_id = $1 AND odometer IS NOT NULL
 		UNION ALL
-		SELECT start_date::timestamptz, start_odometer FROM vehicle_ownership
+		SELECT start_date::timestamptz, start_odometer, start_odometer = 0 FROM vehicle_ownership
 		  WHERE vehicle_id = $1 AND start_odometer IS NOT NULL
 		UNION ALL
-		SELECT updated_at, current_odometer FROM vehicles WHERE id = $1 AND current_odometer > 0;
+		SELECT now(), current_odometer, false FROM vehicles WHERE id = $1 AND current_odometer > 0;
 	`, vehicleID)
 	if err != nil {
 		return nil, err
@@ -206,7 +184,7 @@ func (r *Repository) ListOdometerAnchors(ctx context.Context, vehicleID string) 
 	var out []OdometerAnchor
 	for rows.Next() {
 		var a OdometerAnchor
-		if err := rows.Scan(&a.Date, &a.Km); err != nil {
+		if err := rows.Scan(&a.Date, &a.Km, &a.Origin); err != nil {
 			return nil, err
 		}
 		out = append(out, a)

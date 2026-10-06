@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"math"
 	"net/http"
@@ -585,16 +586,31 @@ func (h *VehicleHandler) GetOdometerAtDate(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	odo, source, err := h.repo.GetOdometerAtDate(r.Context(), vehicleID, targetTime)
+	km, source, ok, err := estimateOdometer(r.Context(), h.repo, vehicleID, targetTime)
 	if err != nil {
 		writeRepoError(w, r, err, "Failed to resolve odometer")
 		return
 	}
+	if !ok {
+		writeJSON(w, http.StatusOK, map[string]any{"odometer": 0, "source": "none"})
+		return
+	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
-		"odometer": odo,
-		"source":   source,
-	})
+	writeJSON(w, http.StatusOK, map[string]any{"odometer": math.Round(km), "source": source})
+}
+
+// estimateOdometer estimates the odometer of a vehicle at a date from every reading it has.
+func estimateOdometer(ctx context.Context, repo *database.Repository, vehicleID string, at time.Time) (float64, string, bool, error) {
+	stored, err := repo.ListOdometerAnchors(ctx, vehicleID)
+	if err != nil {
+		return 0, "", false, err
+	}
+	anchors := make([]services.OdometerAnchor, len(stored))
+	for i, a := range stored {
+		anchors[i] = services.OdometerAnchor{Date: a.Date, Km: a.Km, Origin: a.Origin}
+	}
+	km, source, ok := services.EstimateOdometerAt(anchors, at)
+	return km, source, ok, nil
 }
 
 // GetOdometerEstimate estimates the odometer at a date from the readings on either side of it, the way the
@@ -612,16 +628,11 @@ func (h *VehicleHandler) GetOdometerEstimate(w http.ResponseWriter, r *http.Requ
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_date", "Invalid date"))
 		return
 	}
-	stored, err := h.repo.ListOdometerAnchors(r.Context(), vehicleID)
+	km, source, ok, err := estimateOdometer(r.Context(), h.repo, vehicleID, at)
 	if err != nil {
 		writeRepoError(w, r, err, "Failed to resolve odometer")
 		return
 	}
-	anchors := make([]services.OdometerAnchor, len(stored))
-	for i, a := range stored {
-		anchors[i] = services.OdometerAnchor{Date: a.Date, Km: a.Km}
-	}
-	km, source, ok := services.EstimateOdometerAt(anchors, at)
 	if !ok {
 		writeJSON(w, http.StatusOK, map[string]any{"odometer": nil, "source": "none"})
 		return

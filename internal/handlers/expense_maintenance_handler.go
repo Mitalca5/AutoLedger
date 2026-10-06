@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -144,7 +145,8 @@ func (h *ExpenseHandler) CreateMaintenance(w http.ResponseWriter, r *http.Reques
 	}
 
 	if m.Odometer == nil && m.AmortizationMode != "NONE" {
-		if odo, _, err := h.repo.GetOdometerAtDate(r.Context(), vehicleID, m.Date); err == nil && odo > 0 {
+		if km, _, ok, err := estimateOdometer(r.Context(), h.repo, vehicleID, m.Date); err == nil && ok && km > 0 {
+			odo := math.Round(km)
 			m.Odometer = &odo
 		}
 	}
@@ -197,7 +199,8 @@ func (h *ExpenseHandler) UpdateMaintenance(w http.ResponseWriter, r *http.Reques
 	m.ID = maintID
 
 	if m.Odometer == nil && m.AmortizationMode != "NONE" {
-		if odo, _, err := h.repo.GetOdometerAtDate(r.Context(), vehicleID, m.Date); err == nil && odo > 0 {
+		if km, _, ok, err := estimateOdometer(r.Context(), h.repo, vehicleID, m.Date); err == nil && ok && km > 0 {
+			odo := math.Round(km)
 			m.Odometer = &odo
 		}
 	}
