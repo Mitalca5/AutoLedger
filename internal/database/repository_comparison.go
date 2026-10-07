@@ -12,7 +12,7 @@ import (
 
 const comparisonColumns = `id, user_id, vehicle_id, name, mode, annual_km, years,
 	ice_fuel_type, ice_l_100km, ice_fuel_price, ice_purchase_price, ice_resale_value,
-	ice_maintenance_yearly, ice_insurance_yearly, ice_tax_yearly, ev_inputs, options, created_at, updated_at`
+	ice_maintenance_yearly, ice_insurance_yearly, ice_tax_yearly, tracked_inputs, options, created_at, updated_at`
 
 func scanComparison(row pgx.Row) (*models.ComparisonScenario, error) {
 	var s models.ComparisonScenario
@@ -24,8 +24,8 @@ func scanComparison(row pgx.Row) (*models.ComparisonScenario, error) {
 		return nil, err
 	}
 	if len(evJSON) > 0 {
-		s.EV = &models.EVInputs{}
-		if err := json.Unmarshal(evJSON, s.EV); err != nil {
+		s.Tracked = &models.TrackedInputs{}
+		if err := json.Unmarshal(evJSON, s.Tracked); err != nil {
 			return nil, err
 		}
 	}
@@ -37,10 +37,10 @@ func scanComparison(row pgx.Row) (*models.ComparisonScenario, error) {
 	return &s, nil
 }
 
-// marshalScenarioJSON encodes the JSONB columns of a scenario (ev_inputs is NULL when absent).
+// marshalScenarioJSON encodes the JSONB columns of a scenario (tracked_inputs is NULL when absent).
 func marshalScenarioJSON(s *models.ComparisonScenario) (ev []byte, opts []byte, err error) {
-	if s.EV != nil {
-		if ev, err = json.Marshal(s.EV); err != nil {
+	if s.Tracked != nil {
+		if ev, err = json.Marshal(s.Tracked); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -85,7 +85,7 @@ func (r *Repository) CreateComparisonScenario(ctx context.Context, s *models.Com
 	return r.pool.QueryRow(ctx, `
 		INSERT INTO comparison_scenarios (user_id, vehicle_id, name, mode, annual_km, years,
 			ice_fuel_type, ice_l_100km, ice_fuel_price, ice_purchase_price, ice_resale_value,
-			ice_maintenance_yearly, ice_insurance_yearly, ice_tax_yearly, ev_inputs, options)
+			ice_maintenance_yearly, ice_insurance_yearly, ice_tax_yearly, tracked_inputs, options)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		RETURNING id, created_at, updated_at;
 	`, s.UserID, s.VehicleID, s.Name, s.Mode, s.AnnualKm, s.Years,
@@ -105,7 +105,7 @@ func (r *Repository) UpdateComparisonScenario(ctx context.Context, s *models.Com
 		SET vehicle_id = $3, name = $4, mode = $5, annual_km = $6, years = $7,
 			ice_fuel_type = $8, ice_l_100km = $9, ice_fuel_price = $10, ice_purchase_price = $11, ice_resale_value = $12,
 			ice_maintenance_yearly = $13, ice_insurance_yearly = $14, ice_tax_yearly = $15,
-			ev_inputs = $16, options = $17, updated_at = NOW()
+			tracked_inputs = $16, options = $17, updated_at = NOW()
 		WHERE id = $1 AND user_id = $2
 		RETURNING user_id, created_at, updated_at;
 	`, s.ID, s.UserID, s.VehicleID, s.Name, s.Mode, s.AnnualKm, s.Years,

@@ -109,8 +109,8 @@ func TestIntegrationComparisonInsuranceIndependentOfMileage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if res.EV.Insurance != want || res.ICE.Insurance != want {
-				t.Fatalf("km=%v inflation=%v: reference=%v combustion=%v want=%v", km, inflation, res.EV.Insurance, res.ICE.Insurance, want)
+			if res.Tracked.Insurance != want || res.ICE.Insurance != want {
+				t.Fatalf("km=%v inflation=%v: reference=%v combustion=%v want=%v", km, inflation, res.Tracked.Insurance, res.ICE.Insurance, want)
 			}
 		}
 	}

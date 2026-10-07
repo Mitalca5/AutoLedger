@@ -32,8 +32,8 @@ func TestIntegrationHybridInsuranceIndependentOfMileage(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if result.EV.Insurance != eur(6000) || result.ICE.Insurance != eur(6000) {
-					t.Fatalf("km=%v: hybrid=%v combustion=%v, want 6000 each", km, result.EV.Insurance, result.ICE.Insurance)
+				if result.Tracked.Insurance != eur(6000) || result.ICE.Insurance != eur(6000) {
+					t.Fatalf("km=%v: hybrid=%v combustion=%v, want 6000 each", km, result.Tracked.Insurance, result.ICE.Insurance)
 				}
 			}
 		})

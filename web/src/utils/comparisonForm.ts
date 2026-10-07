@@ -24,9 +24,9 @@ export function emptyComparisonForm(canCompareTracked: boolean) {
       fuel_inflation_pct: 0,
       electricity_inflation_pct: 0,
       cost_inflation_pct: 0,
-      ev_incentives: 0,
+      tracked_incentives: 0,
     },
-    ev: {
+    tracked: {
       kwh_per_100km: 16,
       eur_per_kwh: 0.2,
       purchase_price: 0,
@@ -44,8 +44,8 @@ export interface ComparisonDefaults {
   annual_km: number
   maintenance_yearly: number
   insurance_yearly: number
-  ev_kwh_per_100km?: number
-  ev_eur_per_kwh?: number
+  tracked_kwh_per_100km?: number
+  tracked_eur_per_kwh?: number
   ice_l_per_100km?: number
   ice_fuel_price?: number
   indicative_prices?: boolean
@@ -59,9 +59,9 @@ export function applyComparisonDefaults(form: ComparisonForm, d: ComparisonDefau
   form.ice.maintenance_yearly = d.maintenance_yearly
   form.ice.insurance_yearly = d.insurance_yearly
   // Prices written for another currency are not shown as the vehicle's own: the user types them
-  if (d.indicative_prices === false) form.ev.eur_per_kwh = 0
-  if (d.ev_kwh_per_100km) form.ev.kwh_per_100km = d.ev_kwh_per_100km
-  if (d.ev_eur_per_kwh) form.ev.eur_per_kwh = d.ev_eur_per_kwh
+  if (d.indicative_prices === false) form.tracked.eur_per_kwh = 0
+  if (d.tracked_kwh_per_100km) form.tracked.kwh_per_100km = d.tracked_kwh_per_100km
+  if (d.tracked_eur_per_kwh) form.tracked.eur_per_kwh = d.tracked_eur_per_kwh
   const fuel = d.ice?.find((f) => f.fuel_type === form.ice.fuel_type)
   if (fuel) {
     form.ice.l_per_100km = fuel.l_per_100km
@@ -80,7 +80,7 @@ export function scenarioToForm(sc: any, canCompareTracked: boolean): ComparisonF
     annual_km: sc.annual_km,
     years: sc.years,
     ice: { ...sc.ice },
-    ev: sc.ev ? { ...sc.ev } : base.ev,
+    tracked: sc.tracked ? { ...sc.tracked } : base.tracked,
     options: { ...base.options, ...(sc.options || {}) },
   }
 }
@@ -106,19 +106,19 @@ export function buildComparisonPayload(form: ComparisonForm, vehicleId: string |
       electricity_inflation_pct: Number(form.options.electricity_inflation_pct) || 0,
       cost_inflation_pct: Number(form.options.cost_inflation_pct) || 0,
       // Incentives only apply when the electric vehicle is described by the user
-      ev_incentives: retro ? 0 : Number(form.options.ev_incentives) || 0,
+      tracked_incentives: retro ? 0 : Number(form.options.tracked_incentives) || 0,
     },
   }
   if (retro) {
     payload.vehicle_id = vehicleId
   } else {
-    payload.ev = {
-      ...form.ev,
-      kwh_per_100km: Number(form.ev.kwh_per_100km),
-      eur_per_kwh: Number(form.ev.eur_per_kwh),
+    payload.tracked = {
+      ...form.tracked,
+      kwh_per_100km: Number(form.tracked.kwh_per_100km),
+      eur_per_kwh: Number(form.tracked.eur_per_kwh),
     }
   }
-  for (const side of [payload.ice, payload.ev]) {
+  for (const side of [payload.ice, payload.tracked]) {
     if (!side) continue
     for (const k of COST_KEYS) side[k] = Number(side[k] || 0)
   }
@@ -138,8 +138,8 @@ export function comparisonStepErrorKey(step: number, form: ComparisonForm, canCo
     if (!(Number(form.ice.l_per_100km) > 0)) return 'comparison.errors.iceConsumption'
     if (!(Number(form.ice.fuel_price) > 0)) return 'comparison.errors.fuelPrice'
     if (!(Number(form.ice.purchase_price) > 0)) return 'comparison.errors.icePrice'
-    if (!retro && !(Number(form.ev.eur_per_kwh) > 0)) return 'comparison.errors.electricityPrice'
-    if (!retro && !(Number(form.ev.purchase_price) > 0)) return 'comparison.errors.evPrice'
+    if (!retro && !(Number(form.tracked.eur_per_kwh) > 0)) return 'comparison.errors.electricityPrice'
+    if (!retro && !(Number(form.tracked.purchase_price) > 0)) return 'comparison.errors.evPrice'
   }
   return ''
 }
@@ -149,7 +149,7 @@ export function toggleSelection(selected: string[], id: string, max = MAX_COMPAR
   return selected.length < max ? [...selected, id] : selected
 }
 
-export function costRowValues(result: any): { key: string; ev: number; ice: number }[] {
+export function costRowValues(result: any): { key: string; tracked: number; ice: number }[] {
   if (!result) return []
-  return ['energy', 'maintenance', 'insurance', 'tax', 'depreciation'].map((key) => ({ key, ev: result.ev[key], ice: result.ice[key] }))
+  return ['energy', 'maintenance', 'insurance', 'tax', 'depreciation'].map((key) => ({ key, tracked: result.tracked[key], ice: result.ice[key] }))
 }

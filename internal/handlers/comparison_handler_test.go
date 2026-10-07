@@ -54,15 +54,15 @@ func TestValidateComparisonRequest(t *testing.T) {
 		{"projection without EV", func(r *SaveComparisonRequest) { r.Mode = models.ComparisonModeProjection }, "comparison.ev_required"},
 		{"projection bad EV consumption", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
-			r.EV = &models.EVInputs{KwhPer100Km: 0, EurPerKwh: 0.2}
+			r.Tracked = &models.TrackedInputs{KwhPer100Km: 0, EurPerKwh: 0.2}
 		}, "comparison.ev_consumption"},
 		{"projection bad electricity price", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
-			r.EV = &models.EVInputs{KwhPer100Km: 16, EurPerKwh: 9}
+			r.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 9}
 		}, "comparison.electricity_price"},
 		{"projection negative EV amount", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
-			r.EV = &models.EVInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: -5}
+			r.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: -5}
 		}, "expense.amount_positive"},
 	}
 	for _, tt := range tests {
@@ -85,17 +85,17 @@ func TestValidateComparisonRequest(t *testing.T) {
 
 func TestValidateComparisonRequestNormalizesLinks(t *testing.T) {
 	req := validComparisonRequest()
-	req.EV = &models.EVInputs{KwhPer100Km: 16, EurPerKwh: 0.2}
+	req.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 0.2}
 	if err := validateComparisonRequest(&req); err != nil {
 		t.Fatal(err)
 	}
-	if req.Name != "Vs SUV essence" || req.EV != nil {
-		t.Errorf("retrospective must trim the name and drop EV inputs, got %q / %v", req.Name, req.EV)
+	if req.Name != "Vs SUV essence" || req.Tracked != nil {
+		t.Errorf("retrospective must trim the name and drop EV inputs, got %q / %v", req.Name, req.Tracked)
 	}
 
 	proj := validComparisonRequest()
 	proj.Mode = models.ComparisonModeProjection
-	proj.EV = &models.EVInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: money.FromFloat(38000)}
+	proj.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: money.FromFloat(38000)}
 	if err := validateComparisonRequest(&proj); err != nil {
 		t.Fatal(err)
 	}

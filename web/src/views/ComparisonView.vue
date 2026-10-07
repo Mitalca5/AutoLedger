@@ -220,7 +220,7 @@ async function removeScenario(sc: any) {
 
 // --- Result presentation ---
 
-const savings = computed<number>(() => Number(result.value?.ev_savings || 0))
+const savings = computed<number>(() => Number(result.value?.tracked_savings || 0))
 
 const verdict = computed(() => {
   if (!result.value) return ''
@@ -240,7 +240,7 @@ const breakEvenText = computed(() => {
   return t('comparison.breakEven.after', { years: Number(be).toLocaleString(intlLocale()) })
 })
 
-const costRows = computed(() => costRowValues(result.value).map((r) => ({ label: t(`comparison.rows.${r.key}`), ev: r.ev, ice: r.ice })))
+const costRows = computed(() => costRowValues(result.value).map((r) => ({ label: t(`comparison.rows.${r.key}`), tracked: r.tracked, ice: r.ice })))
 
 // --- Compare several scenarios ---
 
@@ -267,14 +267,14 @@ function exportResultCsv() {
   const r = result.value
   if (!r) return
   const name = (currentScenario.value?.name || t('comparison.csv.defaultName')).replace(/[^\w-]+/g, '-')
-  const rows: (string | number)[][] = costRows.value.map((row) => [row.label, Number(row.ev).toFixed(2), Number(row.ice).toFixed(2)])
-  rows.push([t('comparison.csv.total'), Number(r.ev.total).toFixed(2), Number(r.ice.total).toFixed(2)])
-  rows.push([t('comparison.csv.perMonth'), Number(r.ev.per_month).toFixed(2), Number(r.ice.per_month).toFixed(2)])
-  rows.push([t('comparison.csv.costPerKm', { unit: distanceUnit() }), perDistance(r.ev.cost_per_km).toFixed(3), perDistance(r.ice.cost_per_km).toFixed(3)])
-  rows.push([t(sk('comparison.csv.gap')), Number(r.ev_savings).toFixed(2), ''])
+  const rows: (string | number)[][] = costRows.value.map((row) => [row.label, Number(row.tracked).toFixed(2), Number(row.ice).toFixed(2)])
+  rows.push([t('comparison.csv.total'), Number(r.tracked.total).toFixed(2), Number(r.ice.total).toFixed(2)])
+  rows.push([t('comparison.csv.perMonth'), Number(r.tracked.per_month).toFixed(2), Number(r.ice.per_month).toFixed(2)])
+  rows.push([t('comparison.csv.costPerKm', { unit: distanceUnit() }), perDistance(r.tracked.cost_per_km).toFixed(3), perDistance(r.ice.cost_per_km).toFixed(3)])
+  rows.push([t(sk('comparison.csv.gap')), Number(r.tracked_savings).toFixed(2), ''])
   rows.push(['', '', ''])
   rows.push(t(sk('comparison.csv.cumulativeHeader')).split(','))
-  for (const p of r.cumulative) rows.push([p.year, Number(p.ev).toFixed(2), Number(p.ice).toFixed(2)])
+  for (const p of r.cumulative) rows.push([p.year, Number(p.tracked).toFixed(2), Number(p.ice).toFixed(2)])
   downloadCsv(`${t('comparison.csv.filePrefix')}-${name}`, t(sk('comparison.csv.header'), { cur: currency.value }).split(','), rows)
 }
 
@@ -427,17 +427,17 @@ onMounted(async () => {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="cmp-ev-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.consumptionKwh100Km', { unit: distanceUnit() }) }}</label>
-              <DistanceInput kind="per-distance" id="cmp-ev-kwh" v-model="form.ev.kwh_per_100km" min="0.1" step="any" class="field" />
+              <DistanceInput kind="per-distance" id="cmp-ev-kwh" v-model="form.tracked.kwh_per_100km" min="0.1" step="any" class="field" />
             </div>
             <div>
               <label for="cmp-ev-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.averageElectricityPriceKwh', { cur: currencySign }) }}</label>
-              <NumberInput id="cmp-ev-price" v-model="form.ev.eur_per_kwh" min="0" class="field" />
+              <NumberInput id="cmp-ev-price" v-model="form.tracked.eur_per_kwh" min="0" class="field" />
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div v-for="f in evFields" :key="f.key">
               <label :for="`cmp-ev-${f.key}`" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t(f.label, { cur: currencySign }) }}</label>
-              <NumberInput :id="`cmp-ev-${f.key}`" v-model="form.ev[f.key]" min="0" class="field" />
+              <NumberInput :id="`cmp-ev-${f.key}`" v-model="form.tracked[f.key]" min="0" class="field" />
             </div>
           </div>
         </div>
@@ -471,7 +471,7 @@ onMounted(async () => {
           </div>
           <div v-if="!isRetro">
             <label for="cmp-ev-incentives" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.electricPurchaseGrantsDeductedFrom', { cur: currencySign }) }}</label>
-            <NumberInput id="cmp-ev-incentives" v-model="form.options.ev_incentives" min="0" class="field sm:w-1/2" />
+            <NumberInput id="cmp-ev-incentives" v-model="form.options.tracked_incentives" min="0" class="field sm:w-1/2" />
           </div>
         </div>
       </div>
@@ -525,8 +525,8 @@ onMounted(async () => {
                 {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.actual') : $t('comparison.comparisonView.estimated') }}
               </span>
             </div>
-            <div class="text-2xl font-bold text-white">{{ fmtMoney(result.ev.total) }}</div>
-            <div class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.ev.per_month), cost_per_km: fmtMoney(perDistance(result.ev.cost_per_km), 3) }) }}</div>
+            <div class="text-2xl font-bold text-white">{{ fmtMoney(result.tracked.total) }}</div>
+            <div class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.tracked.per_month), cost_per_km: fmtMoney(perDistance(result.tracked.cost_per_km), 3) }) }}</div>
           </div>
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
@@ -551,12 +551,12 @@ onMounted(async () => {
             <tbody class="text-slate-200">
               <tr v-for="row in costRows" :key="row.label" class="border-t border-slate-800 text-right">
                 <th scope="row" class="text-left font-normal py-1.5">{{ row.label }}</th>
-                <td>{{ fmtMoney(row.ev) }}</td>
+                <td>{{ fmtMoney(row.tracked) }}</td>
                 <td>{{ fmtMoney(row.ice) }}</td>
               </tr>
               <tr class="border-t border-slate-700 text-right font-semibold text-white">
                 <th scope="row" class="text-left py-1.5">{{ $t('comparison.comparisonView.total') }}</th>
-                <td>{{ fmtMoney(result.ev.total) }}</td>
+                <td>{{ fmtMoney(result.tracked.total) }}</td>
                 <td>{{ fmtMoney(result.ice.total) }}</td>
               </tr>
             </tbody>

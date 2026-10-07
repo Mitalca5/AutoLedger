@@ -24,8 +24,8 @@ func baseScenario() *models.ComparisonScenario {
 	}
 }
 
-func baseEV() EVBaseline {
-	return EVBaseline{
+func baseEV() TrackedBaseline {
+	return TrackedBaseline{
 		EnergyPerKm:       15.0 * 0.20 / 100, // 15 kWh/100 km at 0.20 EUR/kWh
 		MaintenanceYearly: 300,
 		InsuranceYearly:   800,
@@ -47,15 +47,15 @@ func TestComputeComparisonTotals(t *testing.T) {
 	if res.ICE.Total != eur(4500+3000+3500+15000) {
 		t.Errorf("ICE total = %v, want 26000", res.ICE.Total)
 	}
-	// EV: energy 10000*0.03 = 300/yr; depreciation (35000-15000)/5 = 4000/yr
-	if res.EV.Energy != eur(1500) {
-		t.Errorf("EV energy = %v, want 1500", res.EV.Energy)
+	// Tracked: energy 10000*0.03 = 300/yr; depreciation (35000-15000)/5 = 4000/yr
+	if res.Tracked.Energy != eur(1500) {
+		t.Errorf("EV energy = %v, want 1500", res.Tracked.Energy)
 	}
-	if res.EV.Total != eur(1500+1500+4000+20000) {
-		t.Errorf("EV total = %v, want 27000", res.EV.Total)
+	if res.Tracked.Total != eur(1500+1500+4000+20000) {
+		t.Errorf("EV total = %v, want 27000", res.Tracked.Total)
 	}
-	if res.EVSavings != res.ICE.Total-res.EV.Total || res.EVSavings != eur(-1000) {
-		t.Errorf("EV savings = %v, want -1000", res.EVSavings)
+	if res.TrackedSavings != res.ICE.Total-res.Tracked.Total || res.TrackedSavings != eur(-1000) {
+		t.Errorf("EV savings = %v, want -1000", res.TrackedSavings)
 	}
 	if res.ICE.PerYear != eur(5200) || res.ICE.PerMonth != money.FromFloat(5200.0/12) {
 		t.Errorf("ICE per year/month = %v/%v", res.ICE.PerYear, res.ICE.PerMonth)
@@ -74,13 +74,13 @@ func TestComputeComparisonTotals(t *testing.T) {
 func TestComputeComparisonBreakEven(t *testing.T) {
 	tests := []struct {
 		name     string
-		mutate   func(sc *models.ComparisonScenario, ev *EVBaseline)
+		mutate   func(sc *models.ComparisonScenario, ev *TrackedBaseline)
 		wantNil  bool
 		wantYear float64
 	}{
 		{
 			name: "EV dearer to buy and to run never pays back",
-			mutate: func(sc *models.ComparisonScenario, ev *EVBaseline) {
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				sc.Years = 10
 			},
 			// Purchase gap 10000; yearly running: ICE 2200, EV 1100+... insurance makes the EV dearer to run
@@ -88,7 +88,7 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 		},
 		{
 			name: "cheap EV running costs repay the purchase gap",
-			mutate: func(sc *models.ComparisonScenario, ev *EVBaseline) {
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				sc.Years = 10
 				ev.InsuranceYearly = 0
 				ev.MaintenanceYearly = 0
@@ -98,7 +98,7 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 		},
 		{
 			name: "EV cheaper at purchase and cheaper to run",
-			mutate: func(sc *models.ComparisonScenario, ev *EVBaseline) {
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				ev.PurchaseNet = 20000
 				ev.InsuranceYearly = 0
 				ev.MaintenanceYearly = 0
@@ -107,7 +107,7 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 		},
 		{
 			name: "EV cheaper at purchase but dearer to run",
-			mutate: func(sc *models.ComparisonScenario, ev *EVBaseline) {
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				ev.PurchaseNet = 20000
 				ev.InsuranceYearly = 5000
 			},
@@ -115,7 +115,7 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 		},
 		{
 			name: "payback beyond the period",
-			mutate: func(sc *models.ComparisonScenario, ev *EVBaseline) {
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				sc.Years = 2
 				ev.InsuranceYearly = 0
 				ev.MaintenanceYearly = 0
@@ -150,8 +150,8 @@ func TestComputeComparisonInflationAndEdges(t *testing.T) {
 	if res.ICE.Energy != eur(1890) {
 		t.Errorf("inflated ICE energy = %v, want 1890", res.ICE.Energy)
 	}
-	if res.EV.Energy != eur(600) {
-		t.Errorf("EV energy must ignore fuel inflation, got %v", res.EV.Energy)
+	if res.Tracked.Energy != eur(600) {
+		t.Errorf("EV energy must ignore fuel inflation, got %v", res.Tracked.Energy)
 	}
 
 	// Resale above purchase never yields negative depreciation.
@@ -185,7 +185,7 @@ func TestComputeComparisonSensitivity(t *testing.T) {
 	}
 }
 
-func TestEVBaselineFromTCO(t *testing.T) {
+func TestTrackedBaselineFromTCO(t *testing.T) {
 	sum := &TCOSummary{
 		DistanceBasisKm:    10000,
 		EnergyCost:         eur(500),
@@ -196,7 +196,7 @@ func TestEVBaselineFromTCO(t *testing.T) {
 		AcquisitionCost:    eur(30000),
 		DepreciationCost:   eur(5000),
 	}
-	ev, notes := evBaselineFromTCO(sum, 10000, 4, time.Now())
+	ev, notes := trackedBaselineFromTCO(sum, 10000, 4, time.Now())
 	if ev.EnergyPerKm != 0.05 || ev.InsuranceYearly != 0 || ev.MaintenancePerKm != 0.035 {
 		t.Errorf("unexpected rates: %+v", ev)
 	}
@@ -209,20 +209,20 @@ func TestEVBaselineFromTCO(t *testing.T) {
 	}
 
 	// Unknown purchase price (lease) and no tracked distance are flagged.
-	ev2, notes2 := evBaselineFromTCO(&TCOSummary{}, 10000, 4, time.Now())
+	ev2, notes2 := trackedBaselineFromTCO(&TCOSummary{}, 10000, 4, time.Now())
 	if ev2.PurchaseNet != 0 || ev2.ResaleValue != 0 || len(notes2) != 3 {
 		t.Errorf("unexpected fallback: %+v %v", ev2, notes2)
 	}
 
 	// Depreciation exceeding the purchase price floors the resale at zero.
 	sum.DepreciationCost = eur(20000)
-	if ev3, _ := evBaselineFromTCO(sum, 10000, 4, time.Now()); ev3.ResaleValue != 0 {
+	if ev3, _ := trackedBaselineFromTCO(sum, 10000, 4, time.Now()); ev3.ResaleValue != 0 {
 		t.Errorf("resale = %v, want 0", ev3.ResaleValue)
 	}
 }
 
-func TestEVBaselineFromInputsAndAnnualKm(t *testing.T) {
-	ev := evBaselineFromInputs(&models.EVInputs{
+func TestTrackedBaselineFromInputsAndAnnualKm(t *testing.T) {
+	ev := trackedBaselineFromInputs(&models.TrackedInputs{
 		KwhPer100Km: 16, EurPerKwh: 0.25,
 		PurchasePrice: eur(40000), ResaleValue: eur(18000),
 		MaintenanceYearly: eur(250), InsuranceYearly: eur(900), TaxYearly: eur(0),
@@ -268,10 +268,10 @@ func TestHybridComparisonInflationAndFuelSensitivity(t *testing.T) {
 	sc.Options.FuelInflationPct = 10
 	sc.Options.ElectricityInflationPct = 20
 	// 10,000 km/year: fuel 400/year, electricity 200/year.
-	ev := EVBaseline{EnergyPerKm: 0.06, FuelPerKm: 0.04}
+	ev := TrackedBaseline{EnergyPerKm: 0.06, FuelPerKm: 0.04}
 	res := ComputeComparison(sc, ev)
-	if res.EV.Energy != eur(1280) {
-		t.Fatalf("hybrid energy = %v, want 400+440+200+240", res.EV.Energy)
+	if res.Tracked.Energy != eur(1280) {
+		t.Fatalf("hybrid energy = %v, want 400+440+200+240", res.Tracked.Energy)
 	}
 	for _, row := range res.Sensitivity {
 		// Fuel-price changes affect both the conventional vehicle and the hybrid.
@@ -290,7 +290,7 @@ func TestHybridComparisonInflationAndFuelSensitivity(t *testing.T) {
 	}
 }
 
-func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T) {
+func TestTrackedBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T) {
 	now := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
 	sum := &TCOSummary{
 		DistanceBasisKm: 1000,
@@ -298,7 +298,7 @@ func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T)
 		TollsCost:       eur(30),
 		MonthlyCosts:    []MonthlyCost{{Month: "2024-07"}, {Month: "2026-06"}},
 	}
-	ev, notes := evBaselineFromTCO(sum, 10000, 3, now)
+	ev, notes := trackedBaselineFromTCO(sum, 10000, 3, now)
 	if ev.TaxYearly != 120 {
 		t.Errorf("tax yearly = %v, want 120 (240 over 24 months)", ev.TaxYearly)
 	}
@@ -311,7 +311,7 @@ func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T)
 	if !excluded {
 		t.Error("tolls recorded but no costs_excluded assumption")
 	}
-	_, notes = evBaselineFromTCO(&TCOSummary{DistanceBasisKm: 1000, AcquisitionCost: eur(30000)}, 10000, 3, now)
+	_, notes = trackedBaselineFromTCO(&TCOSummary{DistanceBasisKm: 1000, AcquisitionCost: eur(30000)}, 10000, 3, now)
 	for _, n := range notes {
 		if n.Code == "comparison.assumption.costs_excluded" {
 			t.Error("costs_excluded flagged without any excluded cost")
@@ -323,14 +323,14 @@ func TestHybridBaselineUsesRecordedCosts(t *testing.T) {
 	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV} {
 		t.Run(powertrain, func(t *testing.T) {
 			sum := &TCOSummary{Powertrain: powertrain, DistanceBasisKm: 1000, EnergyCost: eur(90), FuelEnergyCost: eur(60)}
-			baseline, _ := evBaselineFromTCO(sum, 10000, 2, time.Now())
+			baseline, _ := trackedBaselineFromTCO(sum, 10000, 2, time.Now())
 			if baseline.EnergyPerKm != 0.09 || baseline.FuelPerKm != 0.06 {
 				t.Fatalf("unexpected baseline: %+v", baseline)
 			}
 			sc := baseScenario()
 			sc.Years = 1
-			if result := ComputeComparison(sc, baseline); result.EV.Energy != eur(900) {
-				t.Errorf("energy = %v, want 900", result.EV.Energy)
+			if result := ComputeComparison(sc, baseline); result.Tracked.Energy != eur(900) {
+				t.Errorf("energy = %v, want 900", result.Tracked.Energy)
 			}
 		})
 	}
@@ -358,7 +358,7 @@ func TestHybridWithOneEnergySourceIsFlagged(t *testing.T) {
 		"electric ignores": {models.PowertrainEV, eur(30), 0, false},
 	} {
 		sum := &TCOSummary{Powertrain: c.powertrain, DistanceBasisKm: 1000, EnergyCost: c.energy, FuelEnergyCost: c.fuel}
-		_, notes := evBaselineFromTCO(sum, 10000, 2, now)
+		_, notes := trackedBaselineFromTCO(sum, 10000, 2, now)
 		if got := has(notes, "comparison.assumption.hybrid_missing_energy_source"); got != c.want {
 			t.Errorf("%s: missing-source flag = %v, want %v", name, got, c.want)
 		}
@@ -380,7 +380,7 @@ func TestDefaultsForCurrency(t *testing.T) {
 			ICE:               iceDefaults,
 			MaintenanceYearly: money.FromFloat(700),
 			InsuranceYearly:   money.FromFloat(650),
-			EVEurPerKwh:       &kwh,
+			TrackedEurPerKwh:  &kwh,
 			ICEFuelPrice:      &measured,
 			ICELPer100Km:      &lper100,
 			IndicativePrices:  true,
@@ -390,14 +390,14 @@ func TestDefaultsForCurrency(t *testing.T) {
 	for _, currency := range []string{"", "EUR", "eur"} {
 		d := newDefaults()
 		d.ForCurrency(currency)
-		if !d.IndicativePrices || d.MaintenanceYearly != money.FromFloat(700) || d.ICE[0].FuelPrice != 1.75 || d.EVEurPerKwh == nil {
+		if !d.IndicativePrices || d.MaintenanceYearly != money.FromFloat(700) || d.ICE[0].FuelPrice != 1.75 || d.TrackedEurPerKwh == nil {
 			t.Errorf("currency %q: indicative prices must stay", currency)
 		}
 	}
 
 	d := newDefaults()
 	d.ForCurrency("USD")
-	if d.IndicativePrices || d.MaintenanceYearly != 0 || d.InsuranceYearly != 0 || d.EVEurPerKwh != nil {
+	if d.IndicativePrices || d.MaintenanceYearly != 0 || d.InsuranceYearly != 0 || d.TrackedEurPerKwh != nil {
 		t.Errorf("prices must be dropped for USD: %+v", d)
 	}
 	for _, f := range d.ICE {

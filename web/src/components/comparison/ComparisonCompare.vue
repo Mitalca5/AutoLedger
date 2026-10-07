@@ -36,11 +36,11 @@ const rows = computed(() =>
     mode: scenario.mode === 'RETROSPECTIVE' ? t('comparison.comparisonView.trackedVehicle') : t('comparison.comparisonView.projection'),
     years: result.years_count,
     km: result.annual_km,
-    ev: result.ev.total,
+    tracked: result.tracked.total,
     ice: result.ice.total,
-    evMonth: result.ev.per_month,
+    evMonth: result.tracked.per_month,
     iceMonth: result.ice.per_month,
-    savings: result.ev_savings,
+    savings: result.tracked_savings,
     breakEven: breakEven(result),
   }))
 )
@@ -56,7 +56,7 @@ function render() {
     data: {
       labels: rows.value.map((r) => r.name),
       datasets: [
-        { label: t(sk('comparison.electric')), data: rows.value.map((r) => r.ev), backgroundColor: '#38bdf8', borderRadius: 4 },
+        { label: t(sk('comparison.electric')), data: rows.value.map((r) => r.tracked), backgroundColor: '#38bdf8', borderRadius: 4 },
         { label: t('comparison.combustion'), data: rows.value.map((r) => r.ice), backgroundColor: '#f59e0b', borderRadius: 4 },
       ],
     },
@@ -84,7 +84,7 @@ function exportCsv() {
       r.mode,
       r.years,
       Math.round(kmToDisplayDistance(r.km)),
-      Number(r.ev).toFixed(2),
+      Number(r.tracked).toFixed(2),
       Number(r.ice).toFixed(2),
       Number(r.savings).toFixed(2),
       r.breakEven,
@@ -125,7 +125,7 @@ onBeforeUnmount(() => chart?.destroy())
               <div class="font-semibold text-white">{{ r.name }}</div>
               <div class="text-xs text-slate-400">{{ r.mode }} · {{ $t('comparison.comparisonCompare.usage', { unit: distanceUnit(), km: formatDistanceValue(r.km), years: r.years }) }}</div>
             </th>
-            <td>{{ fmtMoney(r.ev) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
+            <td>{{ fmtMoney(r.tracked) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
             <td>{{ fmtMoney(r.ice) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
             <td :class="r.savings >= 0 ? 'text-success-400' : 'text-warning-400'">
               {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings)) }}

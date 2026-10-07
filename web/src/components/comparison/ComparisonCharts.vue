@@ -11,7 +11,7 @@ const props = defineProps<{
   result: any
   side: TrackedSide
   currency: string
-  costRows: { label: string; ev: number; ice: number }[]
+  costRows: { label: string; tracked: number; ice: number }[]
   breakEvenText: string
 }>()
 
@@ -40,13 +40,13 @@ function render() {
   if (!r) return
 
   if (chartRef.value) {
-    const points = r.cumulative as { year: number; ev: number; ice: number }[]
+    const points = r.cumulative as { year: number; tracked: number; ice: number }[]
     charts.push(new Chart(chartRef.value, {
       type: 'line',
       data: {
         labels: points.map((p) => (p.year === 0 ? t('comparison.chart.purchase') : t('comparison.chart.year', { year: p.year }))),
         datasets: [
-          { label: t(sk('comparison.electric')), data: points.map((p) => p.ev), borderColor: '#38bdf8', backgroundColor: '#38bdf8', tension: 0.15 },
+          { label: t(sk('comparison.electric')), data: points.map((p) => p.tracked), borderColor: '#38bdf8', backgroundColor: '#38bdf8', tension: 0.15 },
           { label: t('comparison.combustion'), data: points.map((p) => p.ice), borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.15 },
         ],
       },
@@ -71,7 +71,7 @@ function render() {
         labels: [t(sk('comparison.electric')), t('comparison.combustion')],
         datasets: props.costRows.map((row, i) => ({
           label: row.label,
-          data: [row.ev, row.ice],
+          data: [row.tracked, row.ice],
           backgroundColor: colors[i % colors.length],
         })),
       },
@@ -139,7 +139,7 @@ onBeforeUnmount(destroyCharts)
       <ul class="text-xs text-slate-300 space-y-1">
         <li v-for="s in result.sensitivity" :key="s.label.code" class="flex justify-between">
           <span>{{ apiMessageText(s.label) }}</span>
-          <span>{{ s.ev_savings >= 0 ? $t(sk('comparison.comparisonView.evLess'), { amount: fmtMoney(s.ev_savings) }) : $t(sk('comparison.comparisonView.evMore'), { amount: fmtMoney(-s.ev_savings) }) }}</span>
+          <span>{{ s.tracked_savings >= 0 ? $t(sk('comparison.comparisonView.evLess'), { amount: fmtMoney(s.tracked_savings) }) : $t(sk('comparison.comparisonView.evMore'), { amount: fmtMoney(-s.tracked_savings) }) }}</span>
         </li>
       </ul>
     </div>

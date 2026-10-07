@@ -8,8 +8,8 @@ import (
 
 // Comparison scenario modes.
 const (
-	ComparisonModeRetrospective = "RETROSPECTIVE" // EV side comes from the tracked vehicle's real TCO
-	ComparisonModeProjection    = "PROJECTION"    // EV side is described by the user
+	ComparisonModeRetrospective = "RETROSPECTIVE" // tracked-vehicle side comes from the tracked vehicle's real TCO
+	ComparisonModeProjection    = "PROJECTION"    // tracked-vehicle side is described by the user
 )
 
 // FuelTypes lists the supported ICE fuels.
@@ -33,8 +33,8 @@ type ICEInputs struct {
 	TaxYearly         money.Cents `json:"tax_yearly"`
 }
 
-// EVInputs describes the electric vehicle of a PROJECTION comparison.
-type EVInputs struct {
+// TrackedInputs describes the electric vehicle of a PROJECTION comparison.
+type TrackedInputs struct {
 	KwhPer100Km       float64     `json:"kwh_per_100km"`
 	EurPerKwh         float64     `json:"eur_per_kwh"`
 	PurchasePrice     money.Cents `json:"purchase_price"`
@@ -49,20 +49,20 @@ type ScenarioOptions struct {
 	FuelInflationPct        float64     `json:"fuel_inflation_pct,omitempty"`
 	ElectricityInflationPct float64     `json:"electricity_inflation_pct,omitempty"`
 	CostInflationPct        float64     `json:"cost_inflation_pct,omitempty"` // Maintenance, insurance, taxes
-	EVIncentives            money.Cents `json:"ev_incentives,omitempty"`      // Deducted from the EV purchase price (PROJECTION)
+	TrackedIncentives       money.Cents `json:"tracked_incentives,omitempty"` // Deducted from the tracked vehicle purchase price (PROJECTION)
 }
 
 // ComparisonScenario is a saved EV vs ICE comparison. It is informative only and never changes real data.
 type ComparisonScenario struct {
 	ID        string          `json:"id"`
 	UserID    string          `json:"user_id"`
-	VehicleID *string         `json:"vehicle_id,omitempty"` // Reference EV (required in RETROSPECTIVE mode)
+	VehicleID *string         `json:"vehicle_id,omitempty"` // Reference tracked vehicle (required in RETROSPECTIVE mode)
 	Name      string          `json:"name"`
 	Mode      string          `json:"mode"`
 	AnnualKm  float64         `json:"annual_km"`
 	Years     int             `json:"years"`
 	ICE       ICEInputs       `json:"ice"`
-	EV        *EVInputs       `json:"ev,omitempty"`
+	Tracked   *TrackedInputs  `json:"tracked,omitempty"`
 	Options   ScenarioOptions `json:"options"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
