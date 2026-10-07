@@ -61,7 +61,28 @@ flowchart LR
 
 ### Vehicle comparison
 
-Compare a tracked vehicle (electric, plug-in hybrid or range-extender) with a configurable combustion one, or the reverse. The comparison uses recorded costs per kilometre; hybrids include fuel and electricity, and fuel and electricity price changes apply separately. See [Vehicle comparison](docs/vehicle-comparison.md) for assumptions and limitations.
+Compare a tracked vehicle (electric, plug-in hybrid or range-extender) with a configurable combustion one, or the reverse. The comparison uses recorded costs per kilometre; hybrids include fuel and electricity, and fuel and electricity price changes apply separately. See [Vehicle comparison](docs/vehicle-comparison.md) ([FR](docs/vehicle-comparison.fr.md)) for assumptions and limitations, including how insurance premiums are annualized.
+
+### Electricity tariffs
+
+A vehicle can carry a flat, peak / off-peak or multi-band [tariff plan](docs/tariffs.md) ([FR](docs/tariffs.fr.md)). A charge without a cost, from Home Assistant, a script or the charge form, is priced from its start and end times in the instance timezone, across midnight and between bands.
+
+### Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/energy.en.png" alt="Energy page of an electric car: efficiency, charges and estimate" width="48%">
+  <img src="docs/screenshots/energy-fuel.en.png" alt="Fill-ups of a petrol car on the Energy page" width="48%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/expenses.en.png" alt="Expenses of a vehicle" width="48%">
+  <img src="docs/screenshots/maintenance.en.png" alt="Maintenance reminders and records" width="48%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/tires.en.png" alt="Tire sets and wear" width="48%">
+  <img src="docs/screenshots/drives.en.png" alt="Drives and trips" width="48%">
+</p>
+
+French captures sit next to the English ones (`*.fr.png`); `scripts/screenshots/capture.mjs` regenerates all of them from a seeded demo instance.
 
 ---
 

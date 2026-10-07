@@ -1,5 +1,7 @@
 # Tariff plans
 
+Français : [tariffs.fr.md](tariffs.fr.md).
+
 A tariff plan prices the energy of a home charging session when no cost is given. Three plan types exist:
 
 | `plan_type` | Meaning |
