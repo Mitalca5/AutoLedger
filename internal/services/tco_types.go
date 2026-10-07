@@ -139,6 +139,7 @@ type TCOSummary struct {
 	FullCostNetPerKm float64     `json:"full_cost_net_per_km"`
 
 	EnergyCost      money.Cents `json:"energy_cost"`
+	FuelEnergyCost  money.Cents `json:"fuel_energy_cost"` // Fuel portion of EnergyCost, in the vehicle currency.
 	EnergyCostPerKm float64     `json:"energy_cost_per_km"`
 	TotalKwhAdded   float64     `json:"total_kwh_added"`
 	AvgCostPerKwh   float64     `json:"avg_cost_per_kwh"`

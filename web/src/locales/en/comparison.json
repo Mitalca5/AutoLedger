@@ -35,18 +35,18 @@
     "equivalentCombustionVehicle": "Equivalent combustion vehicle",
     "durationYears": "Duration (years)",
     "kilometresPerYear": "Distance per year ({unit})",
-    "theElectricVehicleSCosts": "The electric vehicle's costs are those actually recorded on your vehicle.",
+    "theElectricVehicleSCosts": "Uses the recorded costs of your vehicle, including fuel and electricity for a hybrid. Missing entries can underestimate costs.",
     "projectionICompareTwoVehicles": "Projection: I compare two vehicles that I enter",
     "comparisonType": "Comparison type",
     "eGComparedWithA": "E.g. Compared with a petrol SUV",
     "comparisonName": "Comparison name",
     "compare": "Compare ({length})",
     "tick2Or3Comparisons": "Tick 2 or 3 comparisons to compare them side by side.",
-    "noComparisonYetCreateOne": "No comparison yet. Create one to estimate what an equivalent combustion vehicle (or an electric one) would cost you over several years.",
+    "noComparisonYetCreateOne": "Compare a tracked electric or plug-in hybrid vehicle with a configurable combustion vehicle, or enter an electric and a combustion vehicle for a projection.",
     "loading": "Loading…",
     "newComparison": "New comparison",
     "forInformationOnlyNoneOf": "For information only: none of your actual data is changed.",
-    "electricCombustionComparison": "Electric / combustion comparison",
+    "electricCombustionComparison": "Electric or hybrid / combustion comparison",
     "selectFor": "Select {name} for the comparison",
     "trackedVehicle": "Tracked vehicle",
     "projection": "Projection",
@@ -57,7 +57,7 @@
     "usage": "Usage",
     "equivalentIce": "Equivalent combustion vehicle",
     "comparedVehicles": "Compared vehicles",
-    "myTrackedEv": "My tracked electric vehicle",
+    "myTrackedEv": "My tracked electric or hybrid vehicle",
     "vsIce": "vs a combustion vehicle",
     "fromHistory": "Estimated from your history",
     "defaultValue": "Default value (not enough history)",
@@ -101,7 +101,7 @@
     "name": "Name the comparison.",
     "annualKm": "Enter a yearly mileage.",
     "years": "The duration must be between 1 and 15 years.",
-    "trackedNeeded": "This mode needs a tracked electric vehicle: choose the projection mode.",
+    "trackedNeeded": "This mode needs a tracked electric or plug-in hybrid vehicle: choose projection mode for a combustion vehicle.",
     "iceConsumption": "Enter the combustion vehicle's consumption.",
     "icePrice": "Enter the purchase price of the combustion vehicle.",
     "evPrice": "Enter the purchase price of the electric vehicle.",
@@ -160,5 +160,41 @@
     "DIESEL": "Diesel",
     "E85": "Ethanol E85",
     "GPL": "LPG"
+  },
+  "hybrid": {
+    "comparisonView": {
+      "effectOnTheElectricSaving": "Effect on the hybrid vehicle saving when an assumption changes by 20%.",
+      "cumulativeCostElectricAndCombustion": "Cumulative cost, hybrid and combustion",
+      "costByCategoryElectricAnd": "Cost by category, hybrid and combustion",
+      "electric": "Hybrid vehicle",
+      "evLess": "hybrid −{amount}",
+      "evMore": "hybrid +{amount}"
+    },
+    "comparisonCompare": {
+      "totalElectricAndCombustionCost": "Total hybrid and combustion cost per scenario",
+      "electric": "Hybrid vehicle"
+    },
+    "verdict": {
+      "less": "Over {count} year, the hybrid vehicle costs you {amount} less. | Over {count} years, the hybrid vehicle costs you {amount} less.",
+      "more": "Over {count} year, the hybrid vehicle costs you {amount} more. | Over {count} years, the hybrid vehicle costs you {amount} more."
+    },
+    "breakEven": {
+      "immediate": "The hybrid vehicle is cheaper from purchase and stays so."
+    },
+    "chart": {
+      "gapLabel": "Gap in the hybrid vehicle saving",
+      "inFavor": "in favour of the hybrid vehicle"
+    },
+    "electric": "Hybrid vehicle",
+    "csv": {
+      "gap": "Gap in favour of the hybrid vehicle",
+      "cumulativeHeader": "Year,Cumulative hybrid cost,Cumulative combustion cost",
+      "header": "Category,Hybrid ({cur}),Combustion ({cur})",
+      "scenariosHeader": "Scenario,Type,Duration (years),{unit} per year,Hybrid total ({cur}),Combustion total ({cur}),Gap in favour of hybrid ({cur}),Break-even"
+    },
+    "compare": {
+      "saves": "hybrid saves",
+      "costsMore": "hybrid costs more"
+    }
   }
 }

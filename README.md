@@ -35,6 +35,10 @@ AutoLedger does not need any telemetry source. Any car, any brand, electric, hyb
 | **Ingestion API** | Any script, Node-RED or n8n pushing events with a token | [docs/ingestion-api.md](docs/ingestion-api.md) |
 | **TeslaMate** (optional) | Live odometer, charge and drive history for a Tesla | [TeslaMate](https://github.com/teslamate-org/teslamate) |
 
+### Vehicle comparison
+
+Tracked electric, plug-in hybrid and range-extender vehicles can be compared with a configurable combustion vehicle. The comparison uses recorded costs per kilometre; hybrids include fuel and electricity. Fuel and electricity price changes apply separately. See [Vehicle comparison](docs/vehicle-comparison.md) for assumptions and limitations.
+
 ### Compatibility
 
 | Powertrain | Charges | Fill-ups | Drives and efficiency | TeslaMate link |

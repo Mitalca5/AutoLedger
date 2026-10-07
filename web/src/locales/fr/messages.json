@@ -31,8 +31,10 @@
       "costs_excluded": "Péages, stationnement, abonnements et autres coûts ne sont pas comparés : le thermique n'a pas de saisie correspondante",
       "insurance_estimated": "Paiements d'assurance sans période de couverture : les paiements des 12 derniers mois servent d'estimation annuelle",
       "insurance_expired": "Les paiements d'assurance historiques ne couvrent plus la période actuelle : assurance non projetée ; saisissez la prime actuelle",
-      "ev_price_unknown": "Prix d'achat de l'électrique inconnu (location ou saisie manquante) : dépréciation électrique non incluse",
-      "ev_no_distance": "Aucun kilométrage suivi : les coûts réels de l'électrique sont nuls"
+      "ev_price_unknown": "Prix d'achat du véhicule suivi inconnu (location ou saisie manquante) : dépréciation non incluse",
+      "ev_no_distance": "Aucun kilométrage suivi : les coûts enregistrés ne permettent pas un comparatif fiable",
+      "hybrid_actual": "Côté hybride : carburant, électricité, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance et taxes à partir de montants annuels",
+      "hybrid_missing_energy_source": "Cet hybride n'a que des pleins ou que des recharges enregistrés : son coût d'énergie est incomplet, le comparatif est sous-estimé"
     },
     "defaults_source": "Valeurs indicatives pour la France, à ajuster"
   },

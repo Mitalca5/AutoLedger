@@ -290,7 +290,7 @@
     "ev_required": "The electric vehicle data is required in projection mode",
     "ev_consumption": "Invalid electric consumption ({p0} to {p1} kWh/100 {unit})",
     "electricity_price": "Invalid electricity price (0 to 5 per kWh)",
-    "needs_ev": "The “tracked vehicle” comparison relies on an electric vehicle; use the projection mode",
+    "needs_ev": "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle",
     "mode_invalid": "Invalid mode (RETROSPECTIVE or PROJECTION)"
   },
   "webhook": {

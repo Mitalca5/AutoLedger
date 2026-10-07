@@ -13,6 +13,7 @@ import (
 // from the tracked vehicle's real per-km costs (RETROSPECTIVE) or from user-entered yearly figures (PROJECTION).
 type EVBaseline struct {
 	EnergyPerKm       float64 // EUR per km
+	FuelPerKm         float64 // Fuel portion of EnergyPerKm; the rest is electricity.
 	MaintenancePerKm  float64
 	MaintenanceYearly float64
 	InsuranceYearly   float64
@@ -80,6 +81,7 @@ type sideRates struct {
 	energyPerKm, maintPerKm, maintYearly, insYearly, taxYearly float64
 	purchase, resale                                           float64
 	energyInfl, costInfl                                       float64
+	fuelPerKm, fuelInfl                                        float64
 }
 
 func iceRates(sc *models.ComparisonScenario) sideRates {
@@ -97,7 +99,9 @@ func iceRates(sc *models.ComparisonScenario) sideRates {
 
 func evRates(sc *models.ComparisonScenario, ev EVBaseline) sideRates {
 	return sideRates{
-		energyPerKm: ev.EnergyPerKm,
+		energyPerKm: ev.EnergyPerKm - ev.FuelPerKm,
+		fuelPerKm:   ev.FuelPerKm,
+		fuelInfl:    sc.Options.FuelInflationPct / 100,
 		maintPerKm:  ev.MaintenancePerKm,
 		maintYearly: ev.MaintenanceYearly,
 		insYearly:   ev.InsuranceYearly,
@@ -120,6 +124,7 @@ func (s sideRates) run(km float64, years int) (CostSide, []float64) {
 
 	for y := 1; y <= years; y++ {
 		energyY := s.energyPerKm * km * math.Pow(1+s.energyInfl, float64(y-1))
+		energyY += s.fuelPerKm * km * math.Pow(1+s.fuelInfl, float64(y-1))
 		costFactor := math.Pow(1+s.costInfl, float64(y-1))
 		maintY := (s.maintPerKm*km + s.maintYearly) * costFactor
 		insY := s.insYearly * costFactor
@@ -212,6 +217,7 @@ func computeCore(sc *models.ComparisonScenario, ev EVBaseline, km, fuelFactor, e
 
 	tracked := evRates(sc, ev)
 	tracked.energyPerKm *= electricityFactor
+	tracked.fuelPerKm *= fuelFactor
 	evSide, evCash := tracked.run(km, years)
 	iceSide, iceCash := ice.run(km, years)
 

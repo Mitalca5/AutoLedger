@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 )
@@ -261,6 +262,34 @@ func TestAnnualTaxKeepsShortHistoryAndAveragesLongOne(t *testing.T) {
 	}
 }
 
+func TestHybridComparisonInflationAndFuelSensitivity(t *testing.T) {
+	sc := baseScenario()
+	sc.Years = 2
+	sc.Options.FuelInflationPct = 10
+	sc.Options.ElectricityInflationPct = 20
+	// 10,000 km/year: fuel 400/year, electricity 200/year.
+	ev := EVBaseline{EnergyPerKm: 0.06, FuelPerKm: 0.04}
+	res := ComputeComparison(sc, ev)
+	if res.EV.Energy != eur(1280) {
+		t.Fatalf("hybrid energy = %v, want 400+440+200+240", res.EV.Energy)
+	}
+	for _, row := range res.Sensitivity {
+		// Fuel-price changes affect both the conventional vehicle and the hybrid.
+		if row.Label.Code == "comparison.sensitivity.fuel_up" && row.DeltaShift != eur(210) {
+			t.Errorf("fuel-up shift = %v, want 210", row.DeltaShift)
+		}
+		if row.Label.Code == "comparison.sensitivity.fuel_down" && row.DeltaShift != eur(-210) {
+			t.Errorf("fuel-down shift = %v, want -210", row.DeltaShift)
+		}
+		if row.Label.Code == "comparison.sensitivity.electricity_up" && row.DeltaShift != eur(-88) {
+			t.Errorf("electricity-up shift = %v, want -88", row.DeltaShift)
+		}
+		if row.Label.Code == "comparison.sensitivity.electricity_down" && row.DeltaShift != eur(88) {
+			t.Errorf("electricity-down shift = %v, want 88", row.DeltaShift)
+		}
+	}
+}
+
 func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T) {
 	now := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
 	sum := &TCOSummary{
@@ -286,6 +315,59 @@ func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T)
 	for _, n := range notes {
 		if n.Code == "comparison.assumption.costs_excluded" {
 			t.Error("costs_excluded flagged without any excluded cost")
+		}
+	}
+}
+
+func TestHybridBaselineUsesRecordedCosts(t *testing.T) {
+	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV} {
+		t.Run(powertrain, func(t *testing.T) {
+			sum := &TCOSummary{Powertrain: powertrain, DistanceBasisKm: 1000, EnergyCost: eur(90), FuelEnergyCost: eur(60)}
+			baseline, _ := evBaselineFromTCO(sum, 10000, 2, time.Now())
+			if baseline.EnergyPerKm != 0.09 || baseline.FuelPerKm != 0.06 {
+				t.Fatalf("unexpected baseline: %+v", baseline)
+			}
+			sc := baseScenario()
+			sc.Years = 1
+			if result := ComputeComparison(sc, baseline); result.EV.Energy != eur(900) {
+				t.Errorf("energy = %v, want 900", result.EV.Energy)
+			}
+		})
+	}
+}
+
+func TestHybridWithOneEnergySourceIsFlagged(t *testing.T) {
+	now := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+	has := func(notes []*apierror.Message, code string) bool {
+		for _, n := range notes {
+			if n.Code == code {
+				return true
+			}
+		}
+		return false
+	}
+	for name, c := range map[string]struct {
+		powertrain string
+		energy     money.Cents
+		fuel       money.Cents
+		want       bool
+	}{
+		"fuel only":        {models.PowertrainPHEV, eur(60), eur(60), true},
+		"charging only":    {models.PowertrainREEV, eur(30), 0, true},
+		"both recorded":    {models.PowertrainPHEV, eur(90), eur(60), false},
+		"electric ignores": {models.PowertrainEV, eur(30), 0, false},
+	} {
+		sum := &TCOSummary{Powertrain: c.powertrain, DistanceBasisKm: 1000, EnergyCost: c.energy, FuelEnergyCost: c.fuel}
+		_, notes := evBaselineFromTCO(sum, 10000, 2, now)
+		if got := has(notes, "comparison.assumption.hybrid_missing_energy_source"); got != c.want {
+			t.Errorf("%s: missing-source flag = %v, want %v", name, got, c.want)
+		}
+		wording := "comparison.assumption.ev_actual"
+		if models.PowertrainCanRefuel(c.powertrain) {
+			wording = "comparison.assumption.hybrid_actual"
+		}
+		if !has(notes, wording) {
+			t.Errorf("%s: missing %s", name, wording)
 		}
 	}
 }

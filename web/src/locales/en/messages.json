@@ -31,8 +31,10 @@
       "costs_excluded": "Tolls, parking, subscriptions and other costs are not compared: they have no combustion-side input",
       "insurance_estimated": "Insurance payments without a coverage period: the last 12 months of payments are used as the annual estimate",
       "insurance_expired": "Historical insurance payments have no current coverage: reference insurance is not projected; record the current premium",
-      "ev_price_unknown": "Electric purchase price unknown (lease or missing entry): electric depreciation not included",
-      "ev_no_distance": "No tracked mileage: the actual electric costs are zero"
+      "ev_price_unknown": "Tracked vehicle purchase price unknown (lease or missing entry): depreciation not included",
+      "ev_no_distance": "No tracked mileage: recorded costs cannot provide a reliable comparison",
+      "hybrid_actual": "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per {unit}; insurance and taxes from annual amounts",
+      "hybrid_missing_energy_source": "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"
     },
     "defaults_source": "Indicative values for France, to adjust"
   },

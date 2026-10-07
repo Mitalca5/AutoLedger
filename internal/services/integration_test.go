@@ -2420,9 +2420,41 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 		}
 	}
 
+	rangeExtender := newHybrid("range extender")
+	rangeExtender.Powertrain = models.PowertrainREEV
+	if err := repo.UpdateVehicle(ctx, rangeExtender); err != nil {
+		t.Fatal(err)
+	}
+	addFuel(rangeExtender)
+	addCharge(rangeExtender)
+
 	svc := NewComparisonService(tco)
-	if _, err := svc.Compare(ctx, &models.ComparisonScenario{Mode: models.ComparisonModeRetrospective, VehicleID: &both.ID, AnnualKm: 10000, Years: 3}); !errors.Is(err, ErrComparisonNeedsEV) {
-		t.Errorf("retrospective on a hybrid = %v, want ErrComparisonNeedsEV", err)
+	for _, v := range []*models.Vehicle{both, fuelOnly, chargeOnly, rangeExtender} {
+		snapshot, err := tco.ComputeVehicleTCO(ctx, v.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if snapshot.DistanceBasisKm == 0 {
+			checkpoint := &models.OdometerCheckpoint{VehicleID: v.ID, Date: now.AddDate(0, -2, 0), Odometer: 9000}
+			if err := repo.CreateOdometerCheckpoint(ctx, checkpoint); err != nil {
+				t.Fatal(err)
+			}
+			snapshot, err = tco.ComputeVehicleTCO(ctx, v.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		scenario := &models.ComparisonScenario{Mode: models.ComparisonModeRetrospective, VehicleID: &v.ID, AnnualKm: snapshot.DistanceBasisKm, Years: 2, ICE: models.ICEInputs{LPer100Km: 8, FuelPrice: 2}, Options: models.ScenarioOptions{FuelInflationPct: 10, ElectricityInflationPct: 20}}
+		result, err := svc.Compare(ctx, scenario)
+		if err != nil {
+			t.Fatalf("compare %s: %v", v.Name, err)
+		}
+		fuel := snapshot.FuelEnergyCost.Float()
+		electricity := (snapshot.EnergyCost - snapshot.FuelEnergyCost).Float()
+		want := money.FromFloat(fuel*2.1 + electricity*2.2)
+		if result.EV.Energy != want {
+			t.Errorf("%s energy = %v, want %v", v.Name, result.EV.Energy, want)
+		}
 	}
 	d, err := svc.Defaults(ctx, both.ID)
 	if err != nil || d.EVKwhPer100Km != nil || d.ICELPer100Km != nil {

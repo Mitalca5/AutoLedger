@@ -16,6 +16,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
 import { downloadCsv } from '@/utils/csv'
 import { currencySymbol } from '@/currency'
+import { scenarioSide, sideKey } from '@/utils/comparisonSide'
 import ComparisonCompare from '@/components/comparison/ComparisonCompare.vue'
 
 Chart.register(...registerables)
@@ -36,6 +37,7 @@ const view = ref<'list' | 'edit' | 'result' | 'compare'>('list')
 const step = ref(1)
 const editingId = ref<string | null>(null)
 const currentScenario = ref<any | null>(null)
+const sk = (key: string) => sideKey(key, scenarioSide(currentScenario.value, vehicleStore.vehicles))
 const result = ref<any | null>(null)
 const formError = ref('')
 
@@ -44,8 +46,8 @@ const fuelTypes = computed<any[]>(() => defaults.value?.ice || [])
 // The server names each fuel in English; the catalog has the current language's name.
 const fuelLabel = (f: { fuel_type: string; label: string }) => (te(`comparison.fuelTypes.${f.fuel_type}`) ? t(`comparison.fuelTypes.${f.fuel_type}`) : f.label)
 
-// The tracked-vehicle comparison relies on an electric vehicle's real costs
-const canCompareTrackedVehicle = computed(() => !!vehicleStore.activeVehicle && vehicleStore.electricOnly)
+// Electric and plug-in hybrid vehicles use their recorded energy costs.
+const canCompareTrackedVehicle = computed(() => !!vehicleStore.activeVehicle && vehicleStore.canCharge)
 
 function emptyForm() {
   return {
@@ -321,15 +323,15 @@ const verdict = computed(() => {
   const abs = fmtMoney(Math.abs(savings.value))
   if (Math.abs(savings.value) < 1) return t('comparison.verdict.same', n)
   return savings.value > 0
-    ? t('comparison.verdict.less', { count: n, amount: abs })
-    : t('comparison.verdict.more', { count: n, amount: abs })
+    ? t(sk('comparison.verdict.less'), { count: n, amount: abs })
+    : t(sk('comparison.verdict.more'), { count: n, amount: abs })
 })
 
 const breakEvenText = computed(() => {
   if (!result.value) return ''
   const be = result.value.break_even_year
   if (be === undefined || be === null) return t('comparison.breakEven.notReached')
-  if (be === 0) return t('comparison.breakEven.immediate')
+  if (be === 0) return t(sk('comparison.breakEven.immediate'))
   return t('comparison.breakEven.after', { years: Number(be).toLocaleString(intlLocale()) })
 })
 
@@ -370,7 +372,7 @@ function renderChart() {
       data: {
         labels: points.map((p) => (p.year === 0 ? t('comparison.chart.purchase') : t('comparison.chart.year', { year: p.year }))),
         datasets: [
-          { label: t('comparison.electric'), data: points.map((p) => p.ev), borderColor: '#38bdf8', backgroundColor: '#38bdf8', tension: 0.15 },
+          { label: t(sk('comparison.electric')), data: points.map((p) => p.ev), borderColor: '#38bdf8', backgroundColor: '#38bdf8', tension: 0.15 },
           { label: t('comparison.combustion'), data: points.map((p) => p.ice), borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.15 },
         ],
       },
@@ -392,7 +394,7 @@ function renderChart() {
     charts.push(new Chart(barRef.value, {
       type: 'bar',
       data: {
-        labels: [t('comparison.electric'), t('comparison.combustion')],
+        labels: [t(sk('comparison.electric')), t('comparison.combustion')],
         datasets: costRows.value.map((row, i) => ({
           label: row.label,
           data: [row.ev, row.ice],
@@ -418,7 +420,7 @@ function renderChart() {
       data: {
         labels: rows.map((s) => s.label),
         datasets: [{
-          label: t('comparison.chart.gapLabel'),
+          label: t(sk('comparison.chart.gapLabel')),
           data: rows.map((s) => s.delta_shift),
           backgroundColor: rows.map((s) => (s.delta_shift >= 0 ? '#34d399' : '#f87171')),
           borderRadius: 4,
@@ -430,7 +432,7 @@ function renderChart() {
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: (ctx) => ` ${Number(ctx.raw) >= 0 ? '+' : '−'}${fmtMoney(Math.abs(Number(ctx.raw)))} ${t('comparison.chart.inFavor')}` } },
+          tooltip: { callbacks: { label: (ctx) => ` ${Number(ctx.raw) >= 0 ? '+' : '−'}${fmtMoney(Math.abs(Number(ctx.raw)))} ${t(sk('comparison.chart.inFavor'))}` } },
         },
         scales: { x: eurAxis, y: axisStyle },
       },
@@ -473,11 +475,11 @@ function exportResultCsv() {
   rows.push([t('comparison.csv.total'), Number(r.ev.total).toFixed(2), Number(r.ice.total).toFixed(2)])
   rows.push([t('comparison.csv.perMonth'), Number(r.ev.per_month).toFixed(2), Number(r.ice.per_month).toFixed(2)])
   rows.push([t('comparison.csv.costPerKm', { unit: distanceUnit() }), perDistance(r.ev.cost_per_km).toFixed(3), perDistance(r.ice.cost_per_km).toFixed(3)])
-  rows.push([t('comparison.csv.gap'), Number(r.ev_savings).toFixed(2), ''])
+  rows.push([t(sk('comparison.csv.gap')), Number(r.ev_savings).toFixed(2), ''])
   rows.push(['', '', ''])
-  rows.push(t('comparison.csv.cumulativeHeader').split(','))
+  rows.push(t(sk('comparison.csv.cumulativeHeader')).split(','))
   for (const p of r.cumulative) rows.push([p.year, Number(p.ev).toFixed(2), Number(p.ice).toFixed(2)])
-  downloadCsv(`${t('comparison.csv.filePrefix')}-${name}`, t('comparison.csv.header', { cur: currency.value }).split(','), rows)
+  downloadCsv(`${t('comparison.csv.filePrefix')}-${name}`, t(sk('comparison.csv.header'), { cur: currency.value }).split(','), rows)
 }
 
 function printResult() {
@@ -728,7 +730,7 @@ onBeforeUnmount(destroyChart)
         <div class="grid gap-4 md:grid-cols-2">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
-              <h2 class="text-sm font-semibold text-info-300">{{ $t('comparison.comparisonView.electric') }}</h2>
+              <h2 class="text-sm font-semibold text-info-300">{{ $t(sk('comparison.comparisonView.electric')) }}</h2>
               <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-success-500/40 text-success-300' : 'border-slate-600 text-slate-400'">
                 {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.actual') : $t('comparison.comparisonView.estimated') }}
               </span>
@@ -752,7 +754,7 @@ onBeforeUnmount(destroyChart)
             <thead>
               <tr class="text-xs text-slate-400 text-right">
                 <th scope="col" class="text-left font-semibold pb-2">{{ $t('comparison.comparisonView.category') }}</th>
-                <th scope="col" class="font-semibold pb-2">{{ $t('comparison.comparisonView.electric') }}</th>
+                <th scope="col" class="font-semibold pb-2">{{ $t(sk('comparison.comparisonView.electric')) }}</th>
                 <th scope="col" class="font-semibold pb-2">{{ $t('comparison.comparisonView.combustion') }}</th>
               </tr>
             </thead>
@@ -773,23 +775,23 @@ onBeforeUnmount(destroyChart)
 
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <h2 class="text-sm font-semibold text-white mb-3">{{ $t('comparison.comparisonView.costBreakdownOverThePeriod') }}</h2>
-          <div class="h-64"><canvas ref="barRef" :aria-label="$t('comparison.comparisonView.costByCategoryElectricAnd')" role="img"></canvas></div>
+          <div class="h-64"><canvas ref="barRef" :aria-label="$t(sk('comparison.comparisonView.costByCategoryElectricAnd'))" role="img"></canvas></div>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <h2 class="text-sm font-semibold text-white mb-1">{{ $t('comparison.comparisonView.cumulativeCost') }}</h2>
           <p class="text-xs text-slate-400 mb-3">{{ breakEvenText }}</p>
-          <div class="h-64"><canvas ref="chartRef" :aria-label="$t('comparison.comparisonView.cumulativeCostElectricAndCombustion')" role="img"></canvas></div>
+          <div class="h-64"><canvas ref="chartRef" :aria-label="$t(sk('comparison.comparisonView.cumulativeCostElectricAndCombustion'))" role="img"></canvas></div>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <h2 class="text-sm font-semibold text-white mb-1">{{ $t('comparison.comparisonView.sensitivity') }}</h2>
-          <p class="text-xs text-slate-400 mb-3">{{ $t('comparison.comparisonView.effectOnTheElectricSaving') }}</p>
+          <p class="text-xs text-slate-400 mb-3">{{ $t(sk('comparison.comparisonView.effectOnTheElectricSaving')) }}</p>
           <div class="h-48 mb-3"><canvas ref="tornadoRef" :aria-label="$t('comparison.comparisonView.sensitivityOfTheGapTo')" role="img"></canvas></div>
           <ul class="text-xs text-slate-300 space-y-1">
             <li v-for="s in result.sensitivity" :key="s.label.code" class="flex justify-between">
               <span>{{ apiMessageText(s.label) }}</span>
-              <span>{{ s.ev_savings >= 0 ? $t('comparison.comparisonView.evLess', { amount: fmtMoney(s.ev_savings) }) : $t('comparison.comparisonView.evMore', { amount: fmtMoney(-s.ev_savings) }) }}</span>
+              <span>{{ s.ev_savings >= 0 ? $t(sk('comparison.comparisonView.evLess'), { amount: fmtMoney(s.ev_savings) }) : $t(sk('comparison.comparisonView.evMore'), { amount: fmtMoney(-s.ev_savings) }) }}</span>
             </li>
           </ul>
         </div>

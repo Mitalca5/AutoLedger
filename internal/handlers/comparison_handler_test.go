@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 	"github.com/teslacost/teslacost/internal/services"
@@ -106,6 +110,51 @@ func TestComparisonServiceErrorsAreClientErrors(t *testing.T) {
 		writeRepoError(rec, httptest.NewRequest(http.MethodGet, "/", nil), err, "Failed to compute comparison")
 		if rec.Code != http.StatusBadRequest {
 			t.Errorf("%s: status %d, want 400", name, rec.Code)
+		}
+	}
+}
+
+func TestCreateTrackedHybridComparisonAccess(t *testing.T) {
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	owner, err := repo.CreateUser(ctx, "hybrid-compare-owner@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outsider, err := repo.CreateUser(ctx, "hybrid-compare-other@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := NewComparisonHandler(repo, services.NewComparisonService(services.NewTCOService(repo.Pool(), "UTC")))
+	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV, models.PowertrainICE} {
+		v := &models.Vehicle{UserID: owner.ID, Name: powertrain, Powertrain: powertrain, TeslaMateAuthType: models.AuthModeNone}
+		if err := repo.CreateVehicle(ctx, v); err != nil {
+			t.Fatal(err)
+		}
+		payload := validComparisonRequest()
+		payload.VehicleID = &v.ID
+		body, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, userID := range []string{owner.ID, outsider.ID} {
+			req := httptest.NewRequest(http.MethodPost, "/api/comparisons", bytes.NewReader(body))
+			req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, userID))
+			rec := httptest.NewRecorder()
+			h.Create(rec, req)
+			if userID == outsider.ID {
+				if rec.Code != http.StatusForbidden && rec.Code != http.StatusNotFound {
+					t.Fatalf("non-member status = %d: %s", rec.Code, rec.Body)
+				}
+			} else {
+				want := http.StatusCreated
+				if powertrain == models.PowertrainICE {
+					want = http.StatusBadRequest
+				}
+				if rec.Code != want {
+					t.Fatalf("%s: status %d, want %d: %s", powertrain, rec.Code, want, rec.Body)
+				}
+			}
 		}
 	}
 }

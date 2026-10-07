@@ -35,18 +35,18 @@
     "equivalentCombustionVehicle": "Thermique équivalent",
     "durationYears": "Durée (années)",
     "kilometresPerYear": "Distance par an ({unit})",
-    "theElectricVehicleSCosts": "Les coûts de l'électrique sont ceux réellement constatés sur votre véhicule.",
+    "theElectricVehicleSCosts": "Utilise les coûts enregistrés de votre véhicule, carburant et électricité compris pour un hybride. Des saisies manquantes peuvent sous-estimer les coûts.",
     "projectionICompareTwoVehicles": "Projection : je compare deux véhicules que je saisis",
     "comparisonType": "Type de comparatif",
     "eGComparedWithA": "Ex. Comparé à un SUV essence",
     "comparisonName": "Nom du comparatif",
     "compare": "Comparer ({length})",
     "tick2Or3Comparisons": "Cochez 2 ou 3 comparatifs pour les comparer côte à côte.",
-    "noComparisonYetCreateOne": "Aucun comparatif pour l'instant. Créez-en un pour estimer ce qu'un thermique équivalent vous coûterait (ou ce qu'une électrique vous coûterait) sur plusieurs années.",
+    "noComparisonYetCreateOne": "Comparez un véhicule électrique ou hybride rechargeable suivi à un thermique configurable, ou saisissez un véhicule électrique et un thermique pour une projection.",
     "loading": "Chargement…",
     "newComparison": "Nouveau comparatif",
     "forInformationOnlyNoneOf": "Estimation informative : aucune de vos données réelles n'est modifiée.",
-    "electricCombustionComparison": "Comparatif électrique / thermique",
+    "electricCombustionComparison": "Comparatif électrique ou hybride / thermique",
     "selectFor": "Sélectionner {name} pour la comparaison",
     "trackedVehicle": "Véhicule suivi",
     "projection": "Projection",
@@ -57,7 +57,7 @@
     "usage": "Usage",
     "equivalentIce": "Thermique équivalent",
     "comparedVehicles": "Véhicules comparés",
-    "myTrackedEv": "Mon électrique suivie",
+    "myTrackedEv": "Mon véhicule électrique ou hybride suivi",
     "vsIce": "vs un thermique",
     "fromHistory": "Estimé depuis votre historique",
     "defaultValue": "Valeur par défaut (historique insuffisant)",
@@ -101,7 +101,7 @@
     "name": "Donnez un nom au comparatif.",
     "annualKm": "Indiquez un kilométrage annuel.",
     "years": "La durée doit être comprise entre 1 et 15 ans.",
-    "trackedNeeded": "Ce mode nécessite un véhicule électrique suivi : choisissez le mode projection.",
+    "trackedNeeded": "Ce mode nécessite un véhicule électrique ou hybride rechargeable suivi : choisissez le mode projection pour un véhicule thermique.",
     "iceConsumption": "Indiquez la consommation du thermique.",
     "icePrice": "Indiquez le prix d'achat du thermique.",
     "evPrice": "Indiquez le prix d'achat de l'électrique.",
@@ -160,5 +160,41 @@
     "DIESEL": "Gazole",
     "E85": "Éthanol E85",
     "GPL": "GPL"
+  },
+  "hybrid": {
+    "comparisonView": {
+      "effectOnTheElectricSaving": "Effet sur l'économie du véhicule hybride quand une hypothèse varie de 20 %.",
+      "cumulativeCostElectricAndCombustion": "Coût cumulé de l'hybride et du thermique",
+      "costByCategoryElectricAnd": "Coût par poste de l'hybride et du thermique",
+      "electric": "Véhicule hybride",
+      "evLess": "hybride −{amount}",
+      "evMore": "hybride +{amount}"
+    },
+    "comparisonCompare": {
+      "totalElectricAndCombustionCost": "Coût total de l'hybride et du thermique par scénario",
+      "electric": "Véhicule hybride"
+    },
+    "verdict": {
+      "less": "Sur {count} an, le véhicule hybride vous coûte {amount} de moins. | Sur {count} ans, le véhicule hybride vous coûte {amount} de moins.",
+      "more": "Sur {count} an, le véhicule hybride vous coûte {amount} de plus. | Sur {count} ans, le véhicule hybride vous coûte {amount} de plus."
+    },
+    "breakEven": {
+      "immediate": "Le véhicule hybride est moins cher dès l'achat et le reste."
+    },
+    "chart": {
+      "gapLabel": "Écart sur l'économie du véhicule hybride",
+      "inFavor": "en faveur du véhicule hybride"
+    },
+    "electric": "Véhicule hybride",
+    "csv": {
+      "gap": "Écart en faveur du véhicule hybride",
+      "cumulativeHeader": "Année,Coût cumulé hybride,Coût cumulé thermique",
+      "header": "Poste,Hybride ({cur}),Thermique ({cur})",
+      "scenariosHeader": "Scénario,Type,Durée (ans),{unit} par an,Total hybride ({cur}),Total thermique ({cur}),Écart en faveur de l'hybride ({cur}),Point d'équilibre"
+    },
+    "compare": {
+      "saves": "l'hybride économise",
+      "costsMore": "l'hybride coûte plus"
+    }
   }
 }

@@ -20,8 +20,8 @@ const minMonthsForAnnualKm = 3
 // ErrComparisonNeedsVehicle is returned when a RETROSPECTIVE comparison has no reference vehicle.
 var ErrComparisonNeedsVehicle = apierror.New("comparison.vehicle_required", "A vehicle is required in retrospective mode")
 
-// ErrComparisonNeedsEV is returned when a RETROSPECTIVE comparison references a vehicle that is not purely electric.
-var ErrComparisonNeedsEV = apierror.New("comparison.needs_ev", "The “tracked vehicle” comparison relies on an electric vehicle; use the projection mode")
+// ErrComparisonNeedsEV is returned when the tracked vehicle cannot record charging sessions.
+var ErrComparisonNeedsEV = apierror.New("comparison.needs_ev", "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle")
 
 // ICEDefault is an indicative starting point for the equivalent combustion vehicle of a given fuel.
 type ICEDefault struct {
@@ -79,11 +79,21 @@ func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now time.Ti
 	basis := sum.DistanceBasisKm
 	ev := EVBaseline{
 		EnergyPerKm:      ratePerKm(sum.EnergyCost, basis),
+		FuelPerKm:        ratePerKm(sum.FuelEnergyCost, basis),
 		MaintenancePerKm: ratePerKm(sum.TiresAmortizedCost+sum.MaintenanceCost+sum.RepairCost, basis),
 		TaxYearly:        annualTax(sum.TaxCost, observedMonths(sum.MonthlyCosts, now)).Float(),
 		PurchaseNet:      sum.AcquisitionCost.Float(),
 	}
-	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: energy, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts")}
+	hybrid := models.PowertrainCanCharge(sum.Powertrain) && models.PowertrainCanRefuel(sum.Powertrain)
+	var notes []*apierror.Message
+	if hybrid {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_actual", "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))
+		if basis > 0 && (sum.FuelEnergyCost <= 0 || sum.EnergyCost <= sum.FuelEnergyCost) {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_missing_energy_source", "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"))
+		}
+	} else {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: energy, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))
+	}
 	if sum.TollsCost+sum.SubscriptionCost+sum.OtherCost > 0 {
 		notes = append(notes, apierror.NewMessage("comparison.assumption.costs_excluded", "Tolls, parking, subscriptions and other costs are not compared: they have no combustion-side input"))
 	}
@@ -92,10 +102,10 @@ func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now time.Ti
 		dep := ratePerKm(sum.DepreciationCost, basis) * annualKm * float64(years)
 		ev.ResaleValue = math.Max(ev.PurchaseNet-dep, 0)
 	} else {
-		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Electric purchase price unknown (lease or missing entry): electric depreciation not included"))
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Tracked vehicle purchase price unknown (lease or missing entry): depreciation not included"))
 	}
 	if basis <= 0 {
-		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_no_distance", "No tracked mileage: the actual electric costs are zero"))
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_no_distance", "No tracked mileage: recorded costs cannot provide a reliable comparison"))
 	}
 	return ev, notes
 }
@@ -134,7 +144,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		if err != nil {
 			return nil, err
 		}
-		if !models.PowertrainIsElectricOnly(sum.Powertrain) {
+		if !models.PowertrainCanCharge(sum.Powertrain) {
 			return nil, ErrComparisonNeedsEV
 		}
 		now := time.Now()
