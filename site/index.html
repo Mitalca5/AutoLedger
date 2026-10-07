@@ -43,10 +43,10 @@ svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .links a:hover{color:#fff;background:var(--surface2)}
 .spacer{flex:1}
 .ver{font:600 .78rem ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent-text);border:1px solid rgba(244,63,94,.45);background:rgba(244,63,94,.1);padding:3px 10px;border-radius:999px;text-decoration:none;white-space:nowrap}
-.lang{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+.lang{display:inline-flex;flex-shrink:0;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
 .lang button{background:none;border:0;color:var(--muted);padding:6px 11px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
 .lang button[aria-pressed=true]{background:var(--btn-from);color:#fff}
-.gh{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--surface);color:var(--fg);text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:.9rem}
+.gh{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--surface);color:var(--fg);text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:.9rem;white-space:nowrap;flex-shrink:0}
 .gh:hover{border-color:var(--accent);color:#fff}
 .gh .count{border-left:1px solid var(--line2);padding-left:8px;color:var(--accent-text);display:inline-flex;align-items:center;gap:4px}
 .gh .count[hidden]{display:none}
@@ -163,6 +163,9 @@ footer{margin-top:96px;border-top:1px solid var(--line);background:#030818;paddi
   .c-tco,.c-src,.c-energy,.c-fleet,.c-remind,.c-own{grid-column:span 12;grid-row:auto}
   .split{grid-template-columns:1fr}
   .flow,.flow2,.two{grid-template-columns:1fr}
+}
+@media (max-width:1520px){
+  .gh .label{display:none}
 }
 @media (max-width:640px){
   .nav .wrap{gap:10px}
