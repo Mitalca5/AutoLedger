@@ -10,7 +10,8 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Receipt, X, CheckSquare, Square, Paperclip, FileText, Eye } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import AppDropzone from '@/components/AppDropzone.vue'
-import { CURRENCIES, countUnlistedDrives, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
+import { currencySymbol } from '@/currency'
+import { countUnlistedDrives, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
 import { formatDayTime } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useSubmit } from '@/composables/useSubmit'
@@ -210,14 +211,9 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
             </select>
           </div>
           <div>
-            <label for="toll-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.amount') }}</label>
-            <div class="flex gap-1.5">
-              <NumberInput text id="toll-form-amount" v-model="tollForm.amount" min="0.01" required placeholder="0.00" class="field" />
-              <label for="toll-form-currency" class="sr-only">{{ $t('expenses.tollModal.currency') }}</label>
-              <select id="toll-form-currency" v-model="tollForm.currency" class="field">
-                <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
-              </select>
-            </div>
+            <label for="toll-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.amount') }} ({{ currencySymbol(tollForm.currency) }})</label>
+            <NumberInput text id="toll-form-amount" v-model="tollForm.amount" min="0.01" required placeholder="0.00" class="field" />
+
           </div>
         </div>
         <div v-if="tollForm.currency !== baseCurrency">
