@@ -48,9 +48,11 @@ const router = createRouter({
       name: 'manual',
       component: ManualTrackingView,
       meta: { requiresAuth: true },
-      // The energy estimate of electric vehicles lives on the energy page
+      // The energy estimate and the fill-ups live on the energy page
       beforeEnter: (to) => {
-        if (String(to.query.tab ?? '').toUpperCase() === 'ENERGY') return { path: '/energy', query: { tab: 'ESTIMATE' }, replace: true }
+        const tab = String(to.query.tab ?? '').toUpperCase()
+        if (tab === 'ENERGY') return { path: '/energy', query: { tab: 'ESTIMATE' }, replace: true }
+        if (tab === 'FUEL') return { path: '/energy', query: { tab: 'FUEL' }, replace: true }
       },
     },
     {
@@ -85,7 +87,7 @@ const router = createRouter({
       beforeEnter: (to) => {
         const tab = String(to.query.tab ?? '').toUpperCase()
         if (['TOLLS', 'DOCUMENTS'].includes(tab)) return { name: 'expenses', query: to.query, replace: true }
-        if (['CHARGES', 'EFFICIENCY', 'ESTIMATE'].includes(tab)) return { name: 'energy', query: to.query, replace: true }
+        if (['CHARGES', 'EFFICIENCY', 'ESTIMATE', 'FUEL'].includes(tab)) return { name: 'energy', query: to.query, replace: true }
       },
     },
     {

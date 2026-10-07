@@ -35,8 +35,9 @@
     "efficiency": "Efficiency",
     "estimate": "Estimate",
     "energyTitle": "Energy",
-    "energySubtitle": "Consumption, charging sessions and fallback estimate",
-    "fixedCosts": "Fixed costs"
+    "energySubtitle": "Consumption, charging sessions and fill-ups",
+    "fixedCosts": "Fixed costs",
+    "fillUps": "Fill-ups"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF or image (Supercharger receipt, public charger, etc.).",
@@ -58,7 +59,9 @@
     "teslamateChargeOfKwhThe": "TeslaMate charge of {date} (+{kwh_added} kWh). The cost entered here will not be overwritten by the synchronizations.",
     "newCharge": "New charge",
     "editCharge": "Edit the charge",
-    "chargeCost": "Cost of the charge"
+    "chargeCost": "Cost of the charge",
+    "start": "Charge start",
+    "endOptional": "Charge end (optional)"
   },
   "chargesPanel": {
     "chargeSShownOutOf": "{length} charge(s) shown out of {chargesTotal}",

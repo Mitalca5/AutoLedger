@@ -570,8 +570,8 @@ export const api = {
     request<TariffPlan>(`/tariffs/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteTariffPlan: (id: string) =>
     request<{ success: boolean }>(`/tariffs/plans/${id}`, { method: 'DELETE' }),
-  calculateSessionCost: (data: { plan_id?: string; start_time: string; end_time: string; kwh: number }) =>
-    request<{ cost: number }>('/tariffs/calculate-session', { method: 'POST', body: JSON.stringify(data) }),
+  calculateSessionCost: (data: { plan_id?: string; vehicle_id?: string; start_time: string; end_time: string; kwh: number }) =>
+    request<{ cost: number; plan: string | null }>('/tariffs/calculate-session', { method: 'POST', body: JSON.stringify(data) }),
 
   getPublicPresets: () => request<{ presets: PublicChargingPreset[] }>('/tariffs/public-presets'),
   createPublicPreset: (data: Partial<PublicChargingPreset>) =>

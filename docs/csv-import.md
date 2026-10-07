@@ -74,7 +74,7 @@ When a header is not recognised, the import dialog shows every column of the fil
 The core has no parser for a specific app. A trip or fill-up log exported by an OBD2 application is imported through a profile, once.
 
 1. Export the log from the app as CSV (Car Scanner: *Trips* or *Fuel* log, Torque: *Trip log*).
-2. Open **Mileage → Import a CSV**, choose the file and the type (`Drives` for trips, `Fill-ups` for fuel logs).
+2. Open **Mileage → Import a CSV** (or **Energy → Fill-ups → Import CSV**), choose the file and the type (`Drives` for trips, `Fill-ups` for fuel logs).
 3. In the mapping step, match the app columns to the fields. Typical matches:
 
    | App column (example) | AutoLedger field |

@@ -13,6 +13,8 @@ const props = withDefaults(
     variant?: 'quick' | 'form'
     idPrefix?: string
     required?: boolean
+    /** The cost of the session under the vehicle's tariff: replaces the suggested price until the user types one. */
+    tariff?: { cost: number; plan: string } | null
     /** The energy is fixed (a synchronised charge): only the price and the cost are edited. */
     hideEnergy?: boolean
   }>(),
@@ -21,7 +23,7 @@ const props = withDefaults(
 const kwh = defineModel<string>('kwh', { required: true })
 const cost = defineModel<string>('cost', { required: true })
 
-const { price, driver, onPriceInput, onCostInput, setFree } = useChargeAmounts(kwh, cost, props.suggestedPrice)
+const { price, driver, onPriceInput, onCostInput, setFree } = useChargeAmounts(kwh, cost, props.suggestedPrice, computed(() => props.tariff?.cost ?? null))
 
 const kwhInput = ref<InstanceType<typeof NumberInput> | null>(null)
 defineExpose({ focus: () => kwhInput.value?.focus() })
@@ -29,7 +31,8 @@ defineExpose({ focus: () => kwhInput.value?.focus() })
 const quick = computed(() => props.variant === 'quick')
 const inputClass = computed(() => (quick.value ? 'quick-input' : 'field'))
 const labelClass = computed(() => (quick.value ? 'quick-label' : 'block text-xs font-semibold text-slate-300 mb-1'))
-const followsTariff = computed(() => driver.value === 'tariff' && props.suggestedPrice !== undefined && cost.value !== '')
+const followsPlan = computed(() => driver.value === 'tariff' && !!props.tariff && cost.value !== '')
+const followsTariff = computed(() => !followsPlan.value && driver.value === 'tariff' && props.suggestedPrice !== undefined && cost.value !== '')
 </script>
 
 <template>
@@ -54,7 +57,8 @@ const followsTariff = computed(() => driver.value === 'tariff' && props.suggeste
         <button type="button" :class="quick ? 'quick-chip shrink-0 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700' : 'btn btn-secondary shrink-0'" @click="setFree">{{ $t('quickadd.quickChargeForm.free') }}</button>
       </div>
       <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
-        <template v-if="followsTariff">{{ $t('quickadd.quickChargeForm.calculatedAtTheLastRate', { pricePerKwh: formatAmount(suggestedPrice!, currency, 4) }) }}</template>
+        <template v-if="followsPlan">{{ $t('quickadd.quickChargeForm.calculatedWithTariff', { plan: tariff!.plan }) }}</template>
+        <template v-else-if="followsTariff">{{ $t('quickadd.quickChargeForm.calculatedAtTheLastRate', { pricePerKwh: formatAmount(suggestedPrice!, currency, 4) }) }}</template>
       </p>
     </div>
   </div>

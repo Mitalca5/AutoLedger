@@ -35,8 +35,9 @@
     "efficiency": "Efficacité",
     "estimate": "Estimation",
     "energyTitle": "Énergie",
-    "energySubtitle": "Consommation, recharges et estimation de repli",
-    "fixedCosts": "Frais fixes"
+    "energySubtitle": "Consommation, recharges et pleins",
+    "fixedCosts": "Frais fixes",
+    "fillUps": "Pleins"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF ou image (reçu Superchargeur, borne publique, etc.).",
@@ -58,7 +59,9 @@
     "teslamateChargeOfKwhThe": "Recharge TeslaMate du {date} (+{kwh_added} kWh). Le coût saisi ici ne sera pas écrasé par les synchronisations.",
     "newCharge": "Nouvelle recharge",
     "editCharge": "Modifier la recharge",
-    "chargeCost": "Coût de la recharge"
+    "chargeCost": "Coût de la recharge",
+    "start": "Début de la charge",
+    "endOptional": "Fin de la charge (optionnel)"
   },
   "chargesPanel": {
     "chargeSShownOutOf": "{length} recharge(s) affichée(s) sur {chargesTotal}",

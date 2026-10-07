@@ -60,10 +60,10 @@ const actions = computed<Action[]>(() => {
       hint: t('dashboard.dataQualityCard.enterTheStartOdometerHint'),
       show: !!c.start_odometer_missing,
     },
-    { key: 'fillUp', to: '/manual?tab=FUEL', label: t('dashboard.dataQualityCard.enterAFillUp'), show: canRefuel(props.tco.powertrain) && !props.tco.fuel_fill_ups },
+    { key: 'fillUp', to: '/energy?tab=FUEL', label: t('dashboard.dataQualityCard.enterAFillUp'), show: canRefuel(props.tco.powertrain) && !props.tco.fuel_fill_ups },
     {
       key: 'consumption',
-      to: '/manual?tab=ENERGY',
+      to: '/energy?tab=ESTIMATE',
       label: t('dashboard.dataQualityCard.enterAverageConsumption'),
       hint: t('dashboard.dataQualityCard.enterAverageConsumptionHint'),
       show: isElectricOnly(props.tco.powertrain) && c.untracked_distance_km > 0 && !props.tco.estimated_energy_cost,

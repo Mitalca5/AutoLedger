@@ -16,6 +16,8 @@ import { loadMemory, rememberCharge } from '@/utils/quickAdd'
 import PublicChargeCalculatorModal from '@/components/expenses/PublicChargeCalculatorModal.vue'
 import { formatNumber } from '@/utils/numbers'
 import { useSubmit } from '@/composables/useSubmit'
+import { useSessionTariffCost } from '@/composables/useSessionTariffCost'
+import { sessionPriceRequest } from '@/utils/tariffSession'
 
 // Records a charge made outside TeslaMate, or completes / corrects the cost of `editing`.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[]; currentOdometer: number }>()
@@ -39,6 +41,7 @@ const baseCurrency = computed(() => vehicleStore.currency)
 
 const chargeForm = ref({
   date: toLocalDateTimeInput(new Date()),
+  end_date: '',
   kwh_added: '',
   cost: '',
   currency: baseCurrency.value,
@@ -49,6 +52,13 @@ const chargeForm = ref({
   document_id: null as string | null,
   document_filename: null as string | null,
 })
+
+// The vehicle's tariff prices a session that has no cost yet from its hours, whether it was typed here or synchronised
+const pricesFromTariff = computed(() => open.value && !(editingCharge.value && editingCharge.value.cost !== null && editingCharge.value.cost !== undefined))
+const tariffCost = useSessionTariffCost(
+  () => sessionPriceRequest(props.vehicleId, chargeForm.value.date, chargeForm.value.end_date, chargeForm.value.kwh_added),
+  pricesFromTariff,
+)
 
 const showPublicCalc = ref(false)
 const suggestedPrice = computed(() => (editingCharge.value ? undefined : loadMemory(props.vehicleId).pricePerKwh))
@@ -73,6 +83,7 @@ watch(open, (isOpen) => {
   if (!c) {
     chargeForm.value = {
       date: toLocalDateTimeInput(new Date()),
+      end_date: '',
       kwh_added: '',
       cost: '',
       currency: baseCurrency.value,
@@ -86,6 +97,7 @@ watch(open, (isOpen) => {
   } else {
     chargeForm.value = {
       date: toLocalDateTimeInput(new Date(c.date)),
+      end_date: c.end_date ? toLocalDateTimeInput(new Date(c.end_date)) : '',
       kwh_added: String(c.kwh_added),
       cost: c.cost !== null && c.cost !== undefined ? String(c.cost) : '',
       currency: c.currency || baseCurrency.value,
@@ -105,6 +117,7 @@ async function handleSaveChargeAction() {
   if (!props.vehicleId) return
   const payload = {
     date: new Date(chargeForm.value.date).toISOString(),
+    end_date: chargeForm.value.end_date ? new Date(chargeForm.value.end_date).toISOString() : null,
     kwh_added: Number(chargeForm.value.kwh_added),
     cost: Number(chargeForm.value.cost),
     ...currencyPayload(chargeForm.value, baseCurrency.value),
@@ -154,8 +167,12 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
       <form id="charge-modal-form" @submit.prevent="handleSaveCharge" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
         <template v-if="!editingCharge || editingCharge.is_manual">
           <div>
-            <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.dateAndTime') }}</label>
+            <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.start') }}</label>
             <AppDatePicker id="charge-form-date" v-model="chargeForm.date" enable-time-picker required size="xs" />
+          </div>
+          <div>
+            <label for="charge-form-end" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.endOptional') }}</label>
+            <AppDatePicker id="charge-form-end" v-model="chargeForm.end_date" enable-time-picker clearable size="xs" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -177,6 +194,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
           :hide-energy="!!editingCharge && !editingCharge.is_manual"
           :currency="chargeForm.currency"
           :suggested-price="suggestedPrice"
+          :tariff="tariffCost"
         >
           <template #cost-action>
             <button

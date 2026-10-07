@@ -20,7 +20,8 @@
     "saveTheCharge": "Enregistrer la recharge",
     "message": "Recharge de {kwh} kWh",
     "saveFailed": "Impossible d'enregistrer la recharge.",
-    "pricePerKwh": "Prix au kWh ({cur})"
+    "pricePerKwh": "Prix au kWh ({cur})",
+    "calculatedWithTariff": "Calculé avec le tarif « {plan} » selon les heures de charge"
   },
   "quickExpenseForm": {
     "moreDetails": "Plus de détails",
