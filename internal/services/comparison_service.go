@@ -162,9 +162,10 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 	return &res, nil
 }
 
-// annualKmFromTCO extrapolates the tracked mileage to a year, or falls back to DefaultAnnualKm.
-func annualKmFromTCO(sum *TCOSummary) (float64, bool) {
-	months := len(sum.MonthlyCosts)
+// annualKmFromTCO extrapolates the tracked mileage to a year over the calendar months since the first
+// recorded month (gaps included), or falls back to DefaultAnnualKm.
+func annualKmFromTCO(sum *TCOSummary, now time.Time) (float64, bool) {
+	months := observedMonths(sum.MonthlyCosts, now)
 	if sum.DistanceBasisKm <= 0 || months < minMonthsForAnnualKm {
 		return DefaultAnnualKm, false
 	}
@@ -188,7 +189,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 	if err != nil {
 		return nil, err
 	}
-	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum)
+	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum, time.Now())
 	d.Powertrain = sum.Powertrain
 	if models.PowertrainIsFuelOnly(sum.Powertrain) {
 		d.ICELPer100Km = sum.ConsumptionL100km

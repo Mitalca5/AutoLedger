@@ -184,31 +184,35 @@ func breakEven(evCash, iceCash []float64) *float64 {
 // ComputeComparison compares the EV baseline with the equivalent ICE of the scenario over its period.
 // It is a pure function: no I/O, informational only.
 func ComputeComparison(sc *models.ComparisonScenario, ev EVBaseline) ComparisonResult {
-	res := computeCore(sc, ev, sc.AnnualKm, 1)
+	res := computeCore(sc, ev, sc.AnnualKm, 1, 1)
 
 	base := res.EVSavings
 	variants := []struct {
-		label    *apierror.Message
-		km, fuel float64
+		label                 *apierror.Message
+		km, fuel, electricity float64
 	}{
-		{apierror.NewMessage("comparison.sensitivity.fuel_down", "Fuel −20%"), sc.AnnualKm, 0.8},
-		{apierror.NewMessage("comparison.sensitivity.fuel_up", "Fuel +20%"), sc.AnnualKm, 1.2},
-		{apierror.NewMessage("comparison.sensitivity.km_down", "Mileage −20%"), sc.AnnualKm * 0.8, 1},
-		{apierror.NewMessage("comparison.sensitivity.km_up", "Mileage +20%"), sc.AnnualKm * 1.2, 1},
+		{apierror.NewMessage("comparison.sensitivity.fuel_down", "Fuel −20%"), sc.AnnualKm, 0.8, 1},
+		{apierror.NewMessage("comparison.sensitivity.fuel_up", "Fuel +20%"), sc.AnnualKm, 1.2, 1},
+		{apierror.NewMessage("comparison.sensitivity.electricity_down", "Electricity −20%"), sc.AnnualKm, 1, 0.8},
+		{apierror.NewMessage("comparison.sensitivity.electricity_up", "Electricity +20%"), sc.AnnualKm, 1, 1.2},
+		{apierror.NewMessage("comparison.sensitivity.km_down", "Mileage −20%"), sc.AnnualKm * 0.8, 1, 1},
+		{apierror.NewMessage("comparison.sensitivity.km_up", "Mileage +20%"), sc.AnnualKm * 1.2, 1, 1},
 	}
 	for _, v := range variants {
-		savings := computeCore(sc, ev, v.km, v.fuel).EVSavings
+		savings := computeCore(sc, ev, v.km, v.fuel, v.electricity).EVSavings
 		res.Sensitivity = append(res.Sensitivity, SensitivityRow{Label: v.label, EVSavings: savings, DeltaShift: savings - base})
 	}
 	return res
 }
 
-func computeCore(sc *models.ComparisonScenario, ev EVBaseline, km, fuelFactor float64) ComparisonResult {
+func computeCore(sc *models.ComparisonScenario, ev EVBaseline, km, fuelFactor, electricityFactor float64) ComparisonResult {
 	years := sc.Years
 	ice := iceRates(sc)
 	ice.energyPerKm *= fuelFactor
 
-	evSide, evCash := evRates(sc, ev).run(km, years)
+	tracked := evRates(sc, ev)
+	tracked.energyPerKm *= electricityFactor
+	evSide, evCash := tracked.run(km, years)
 	iceSide, iceCash := ice.run(km, years)
 
 	res := ComparisonResult{

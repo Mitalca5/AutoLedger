@@ -65,7 +65,7 @@ func TestComputeComparisonTotals(t *testing.T) {
 	if len(res.ICE.Years) != 5 || len(res.Cumulative) != 6 {
 		t.Errorf("years = %d, cumulative points = %d", len(res.ICE.Years), len(res.Cumulative))
 	}
-	if len(res.Sensitivity) != 4 || len(res.Assumptions) == 0 {
+	if len(res.Sensitivity) != 6 || len(res.Assumptions) == 0 {
 		t.Errorf("sensitivity = %d, assumptions = %d", len(res.Sensitivity), len(res.Assumptions))
 	}
 }
@@ -171,6 +171,10 @@ func TestComputeComparisonSensitivity(t *testing.T) {
 	if byLabel["comparison.sensitivity.fuel_up"].DeltaShift <= 0 || byLabel["comparison.sensitivity.fuel_down"].DeltaShift >= 0 {
 		t.Errorf("unexpected fuel sensitivity: %+v", res.Sensitivity)
 	}
+	// A dearer electricity bill hurts the EV; a cheaper one helps it.
+	if byLabel["comparison.sensitivity.electricity_up"].DeltaShift >= 0 || byLabel["comparison.sensitivity.electricity_down"].DeltaShift <= 0 {
+		t.Errorf("unexpected electricity sensitivity: %+v", res.Sensitivity)
+	}
 	// Driving more favours the EV here (lower per-km energy).
 	if byLabel["comparison.sensitivity.km_up"].DeltaShift <= 0 {
 		t.Errorf("unexpected mileage sensitivity: %+v", res.Sensitivity)
@@ -226,14 +230,16 @@ func TestEVBaselineFromInputsAndAnnualKm(t *testing.T) {
 		t.Errorf("unexpected baseline: %+v", ev)
 	}
 
-	months := make([]MonthlyCost, 6)
-	if km, ok := annualKmFromTCO(&TCOSummary{DistanceBasisKm: 6000, MonthlyCosts: months}); !ok || km != 12000 {
+	now := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+	since := func(month string) []MonthlyCost { return []MonthlyCost{{Month: month}, {Month: "2026-06"}} }
+	// Two months carry data but they span six calendar months: the gap counts in the pace.
+	if km, ok := annualKmFromTCO(&TCOSummary{DistanceBasisKm: 6000, MonthlyCosts: since("2026-01")}, now); !ok || km != 12000 {
 		t.Errorf("annual km = %v (%v), want 12000 from data", km, ok)
 	}
-	if km, ok := annualKmFromTCO(&TCOSummary{DistanceBasisKm: 6000, MonthlyCosts: months[:2]}); ok || km != DefaultAnnualKm {
+	if km, ok := annualKmFromTCO(&TCOSummary{DistanceBasisKm: 6000, MonthlyCosts: since("2026-05")}, now); ok || km != DefaultAnnualKm {
 		t.Errorf("short history should fall back, got %v (%v)", km, ok)
 	}
-	if km, ok := annualKmFromTCO(&TCOSummary{MonthlyCosts: months}); ok || km != DefaultAnnualKm {
+	if km, ok := annualKmFromTCO(&TCOSummary{MonthlyCosts: since("2026-01")}, now); ok || km != DefaultAnnualKm {
 		t.Errorf("no distance should fall back, got %v (%v)", km, ok)
 	}
 }
