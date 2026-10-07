@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { setLocale } from '@/i18n'
-import { formatDayTime, formatMonthLabel, todayIso, toIsoDay, toLocalDateTimeInput } from './dates'
+import { formatDayTime, formatMonthLabel, formatChargeWindow, todayIso, toIsoDay, toLocalDateTimeInput } from './dates'
 
 describe('dates', () => {
   it('gives the UTC day of a date', () => {
@@ -50,5 +50,27 @@ describe('formatMonthLabel', () => {
 
   it('leaves anything that is not a month key untouched', () => {
     expect(formatMonthLabel('Total')).toBe('Total')
+  })
+})
+
+describe('formatChargeWindow', () => {
+  const at = (d: number, h: number, m = 0) => new Date(2026, 4, d, h, m).toISOString()
+
+  it('shows the end as a clock time within the same day', () => {
+    setLocale('en')
+    expect(formatChargeWindow(at(2, 8, 5), at(2, 9, 40))).toMatch(/^02 May 2026, 0?8:05(?: AM)? → 0?9:40(?: AM)?$/)
+  })
+
+  it('repeats the end day when the session crosses midnight', () => {
+    setLocale('en')
+    expect(formatChargeWindow(at(1, 22), at(2, 5, 30))).toMatch(/→ 02 May 2026, /)
+  })
+
+  it('falls back to the start when the end is missing or not after it', () => {
+    setLocale('en')
+    const start = at(2, 8)
+    expect(formatChargeWindow(start)).not.toContain('→')
+    expect(formatChargeWindow(start, start)).not.toContain('→')
+    expect(formatChargeWindow(start, 'nope')).not.toContain('→')
   })
 })
