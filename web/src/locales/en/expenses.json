@@ -50,6 +50,7 @@
     "conversionRate1": "Conversion rate (1 {currency} = ? {base})",
     "currency": "Currency",
     "000IfFree": "0.00 if free",
+    "freeChargeHelp": "Record the kWh normally, including for your own solar generation. Free charging has a known cost of zero; it is not a missing cost. Use notes to describe the energy source.",
     "cost": "Cost",
     "odometerOptional": "Odometer (optional)",
     "chargerHome": "Charger, home...",

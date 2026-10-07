@@ -15,3 +15,9 @@ Results show energy costs, maintenance, insurance, depreciation, total cost, cos
 - Both sides use the same annual distance. With less than three months of history, annual distance defaults to 12,000 km; edit it to suit your use.
 - Financing, loans and leases are excluded. Depreciation follows the existing purchase/resale calculation; break-even compares purchase plus running outlays without deducting resale.
 - **Projection** remains a manually entered electric-versus-combustion scenario. A tracked hybrid comparison needs recorded hybrid data.
+
+## Free charging and solar generation
+
+Record the energy in kWh and an explicit cost of **0** for a free charge, including your own solar generation when you choose to record it at zero cost. Quick charge entry and the full charge form both provide a **Free** action. Use the notes to identify solar generation or another source; no new charge fields or database migration are needed.
+
+A zero cost is known, not missing. The charging session counts as recorded energy with no charging expense, and must not trigger a missing-energy-source assumption when fuel is also recorded. A missing cost remains unknown. Home Assistant and ingestion clients can send `cost: 0` explicitly; this takes precedence over tariff calculation. Paid and free charging can be mixed without changing the previous paid tariff used to prefill quick entry.

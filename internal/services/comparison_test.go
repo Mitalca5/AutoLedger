@@ -350,14 +350,19 @@ func TestHybridWithOneEnergySourceIsFlagged(t *testing.T) {
 		powertrain string
 		energy     money.Cents
 		fuel       money.Cents
+		fillUps    int
+		charges    int
 		want       bool
 	}{
-		"fuel only":        {models.PowertrainPHEV, eur(60), eur(60), true},
-		"charging only":    {models.PowertrainREEV, eur(30), 0, true},
-		"both recorded":    {models.PowertrainPHEV, eur(90), eur(60), false},
-		"electric ignores": {models.PowertrainEV, eur(30), 0, false},
+		"fuel only":        {models.PowertrainPHEV, eur(60), eur(60), 1, 0, true},
+		"charging only":    {models.PowertrainREEV, eur(30), 0, 0, 1, true},
+		"both recorded":    {models.PowertrainPHEV, eur(90), eur(60), 1, 1, false},
+		"free charging":    {models.PowertrainPHEV, eur(60), eur(60), 1, 1, false},
+		"both free":        {models.PowertrainREEV, 0, 0, 1, 1, false},
+		"no records":       {models.PowertrainPHEV, 0, 0, 0, 0, true},
+		"electric ignores": {models.PowertrainEV, eur(30), 0, 0, 1, false},
 	} {
-		sum := &TCOSummary{Powertrain: c.powertrain, DistanceBasisKm: 1000, EnergyCost: c.energy, FuelEnergyCost: c.fuel}
+		sum := &TCOSummary{Powertrain: c.powertrain, DistanceBasisKm: 1000, EnergyCost: c.energy, FuelEnergyCost: c.fuel, FuelFillUps: c.fillUps, RecordedChargeCount: c.charges}
 		_, notes := evBaselineFromTCO(sum, 10000, 2, now)
 		if got := has(notes, "comparison.assumption.hybrid_missing_energy_source"); got != c.want {
 			t.Errorf("%s: missing-source flag = %v, want %v", name, got, c.want)

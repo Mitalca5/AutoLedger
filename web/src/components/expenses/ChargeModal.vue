@@ -50,6 +50,12 @@ const chargeForm = ref({
 
 const showPublicCalc = ref(false)
 
+function setFreeCharge() {
+  chargeForm.value.cost = '0'
+  chargeForm.value.currency = baseCurrency.value
+  chargeForm.value.fx_rate = ''
+}
+
 function handleApplyPublicCalc(cost: number, calculatedKwh?: number, summaryNote?: string) {
   chargeForm.value.cost = cost.toFixed(2)
   if (calculatedKwh && (!chargeForm.value.kwh_added || Number(chargeForm.value.kwh_added) <= 0)) {
@@ -190,6 +196,10 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
               <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
             </select>
           </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <button type="button" @click="setFreeCharge" class="btn btn-secondary shrink-0">{{ $t('quickadd.quickChargeForm.free') }}</button>
+          <p class="text-xs text-slate-400">{{ $t('expenses.chargeModal.freeChargeHelp') }}</p>
         </div>
         <div v-if="chargeForm.currency !== baseCurrency">
           <label for="charge-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.conversionRate1', { currency: chargeForm.currency, base: baseCurrency }) }}</label>

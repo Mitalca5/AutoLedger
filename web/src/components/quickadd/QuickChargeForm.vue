@@ -139,6 +139,7 @@ async function submit() {
       </div>
       <p class="mt-1.5 min-h-4 text-xs text-slate-400" aria-live="polite">
         <template v-if="followsTariff">{{ $t('quickadd.quickChargeForm.calculatedAtTheLastRate', { pricePerKwh: fmtPrice(memory.pricePerKwh!) }) }}</template>
+        <template v-else-if="toNumber(form.cost) === 0">{{ $t('expenses.chargeModal.freeChargeHelp') }}</template>
       </p>
     </div>
 

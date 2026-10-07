@@ -50,6 +50,7 @@
     "conversionRate1": "Taux de conversion (1 {currency} = ? {base})",
     "currency": "Devise",
     "000IfFree": "0.00 si gratuite",
+    "freeChargeHelp": "Saisissez normalement les kWh, y compris pour votre production solaire. Une recharge gratuite a un coût connu de zéro, pas un coût manquant. Précisez la source d'énergie dans les notes.",
     "cost": "Coût",
     "odometerOptional": "Odomètre (optionnel)",
     "chargerHome": "Borne, domicile...",
