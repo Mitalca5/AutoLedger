@@ -9,7 +9,7 @@ import DistanceInput from '@/components/DistanceInput.vue'
 import { distanceUnit, formatDistanceValue, perDistance } from '@/units'
 import { apiMessageText } from '@/services/apiError'
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Plus, Trash2, Pencil, ArrowLeft, ArrowRight, Info, TrendingDown, TrendingUp, ChevronDown, Download, Printer, GitCompare } from 'lucide-vue-next'
+import { Plus, Trash2, Pencil, ArrowLeft, ArrowRight, Info, ChevronDown, Download, Printer, GitCompare } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
@@ -18,6 +18,7 @@ import { currencySymbol } from '@/currency'
 import { scenarioSide, sideKey } from '@/utils/comparisonSide'
 import ComparisonCompare from '@/components/comparison/ComparisonCompare.vue'
 import ComparisonCharts from '@/components/comparison/ComparisonCharts.vue'
+import ComparisonSavingsSummary from '@/components/comparison/ComparisonSavingsSummary.vue'
 import {
   applyComparisonDefaults,
   buildComparisonPayload,
@@ -219,18 +220,6 @@ async function removeScenario(sc: any) {
 }
 
 // --- Result presentation ---
-
-const savings = computed<number>(() => Number(result.value?.ev_savings || 0))
-
-const verdict = computed(() => {
-  if (!result.value) return ''
-  const n = result.value.years_count
-  const abs = fmtMoney(Math.abs(savings.value))
-  if (Math.abs(savings.value) < 1) return t('comparison.verdict.same', n)
-  return savings.value > 0
-    ? t(sk('comparison.verdict.less'), { count: n, amount: abs })
-    : t(sk('comparison.verdict.more'), { count: n, amount: abs })
-})
 
 const breakEvenText = computed(() => {
   if (!result.value) return ''
@@ -506,16 +495,10 @@ onMounted(async () => {
 
       <div v-if="!result" class="text-sm text-slate-400">{{ $t('comparison.comparisonView.calculating') }}</div>
       <template v-else>
-        <div
-          class="rounded-2xl border p-5 flex items-center gap-4"
-          :class="savings >= 0 ? 'bg-success-500/10 border-success-500/30' : 'bg-warning-500/10 border-warning-500/30'"
-        >
-          <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
-          <div>
-            <div class="text-lg font-bold text-white">{{ verdict }}</div>
-            <div class="text-xs text-slate-400 mt-0.5">{{ currentScenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
-          </div>
+        <div class="text-xs text-slate-400">
+          {{ currentScenario?.name }} · {{ $t('comparison.comparisonView.scenarioUsage', { unit: distanceUnit(), km: fmtKm(result.annual_km), years: result.years_count }) }}
         </div>
+        <ComparisonSavingsSummary :result="result" :currency="currency" />
 
         <div class="grid gap-4 md:grid-cols-2">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">

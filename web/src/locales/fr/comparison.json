@@ -1,4 +1,17 @@
 {
+  "savings": {
+    "energy": "Économies d’énergie",
+    "total": "Économies totales",
+    "energyExtra": "Surcoût d’énergie",
+    "totalExtra": "Surcoût total",
+    "energyHelp": "Carburant et électricité uniquement.",
+    "totalHelp": "Énergie, entretien et pneus, assurance, taxes et dépréciation.",
+    "less": "{percent} % de moins que le véhicule thermique",
+    "more": "{percent} % de plus que le véhicule thermique",
+    "month": "{amount}/mois",
+    "reduced": "Les autres coûts réduisent les économies d’énergie de {amount} sur cette période.",
+    "increased": "Les autres coûts améliorent les économies totales de {amount} sur cette période."
+  },
   "comparisonView": {
     "editTheAssumptions": "Modifier les hypothèses",
     "assumptions": "Hypothèses",

@@ -1,4 +1,17 @@
 {
+  "savings": {
+    "energy": "Energy savings",
+    "total": "Total savings",
+    "energyExtra": "Additional energy cost",
+    "totalExtra": "Additional total cost",
+    "energyHelp": "Fuel and electricity only.",
+    "totalHelp": "Energy, maintenance and tires, insurance, taxes and depreciation.",
+    "less": "{percent}% less than the combustion vehicle",
+    "more": "{percent}% more than the combustion vehicle",
+    "month": "{amount}/month",
+    "reduced": "Other costs reduce the energy savings by {amount} over this period.",
+    "increased": "Other costs improve the total savings by {amount} over this period."
+  },
   "comparisonView": {
     "editTheAssumptions": "Edit the assumptions",
     "assumptions": "Assumptions",
