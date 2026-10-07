@@ -204,8 +204,8 @@ func TestTrackedBaselineFromTCO(t *testing.T) {
 	if ev.PurchaseNet != 30000 || ev.ResaleValue != 10000 {
 		t.Errorf("purchase/resale = %v/%v", ev.PurchaseNet, ev.ResaleValue)
 	}
-	if len(notes) != 1 {
-		t.Errorf("notes = %v", notes)
+	if len(notes) != 2 || notes[1].Code != "comparison.assumption.purchase_basis" {
+		t.Errorf("want the actor note then the purchase basis note, got %v", notes)
 	}
 
 	// Unknown purchase price (lease) and no tracked distance are flagged.
@@ -413,5 +413,43 @@ func TestDefaultsForCurrency(t *testing.T) {
 	}
 	if d.Source == nil || d.Source.Code != "comparison.defaults_source_no_prices" {
 		t.Errorf("unexpected source: %+v", d.Source)
+	}
+}
+
+func TestBreakEvenNet(t *testing.T) {
+	years := func(v float64) *float64 { return &v }
+	tests := []struct {
+		name          string
+		evNet, iceNet []float64
+		want          *float64
+	}{
+		{"tracked costlier at first then cheaper", []float64{0, 5, 8, 10}, []float64{0, 2, 7, 13}, years(2.3)},
+		{"tracked never costlier to own", []float64{0, 1, 2}, []float64{0, 2, 4}, years(0)},
+		{"tracked never repays", []float64{0, 5, 10}, []float64{0, 2, 4}, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := breakEvenNet(tt.evNet, tt.iceNet)
+			if (got == nil) != (tt.want == nil) || (got != nil && *got != *tt.want) {
+				t.Fatalf("breakEvenNet = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestComputeComparisonBreakEvenCountsResale(t *testing.T) {
+	sc := &models.ComparisonScenario{
+		Mode: models.ComparisonModeProjection, AnnualKm: 10000, Years: 10,
+		ICE: models.ICEInputs{LPer100Km: 6, FuelPrice: 2, PurchasePrice: money.FromFloat(20000), ResaleValue: money.FromFloat(2000)},
+	}
+	// The tracked vehicle costs 10000 more but keeps 12000 more value: its outlay never pays back within
+	// the period yet it is cheaper to own once resale is counted.
+	ev := TrackedBaseline{EnergyPerKm: 0.11, PurchaseNet: 30000, ResaleValue: 14000}
+	res := ComputeComparison(sc, ev)
+	if res.BreakEvenNetYear == nil {
+		t.Fatalf("net break-even missing, outlay break-even = %v", res.BreakEvenYear)
+	}
+	if res.BreakEvenYear != nil && *res.BreakEvenNetYear >= *res.BreakEvenYear {
+		t.Fatalf("net break-even %v should come before outlay break-even %v", *res.BreakEvenNetYear, *res.BreakEvenYear)
 	}
 }

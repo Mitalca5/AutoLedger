@@ -120,6 +120,9 @@
   "breakEven": {
     "notReached": "Break-even not reached over the period.",
     "immediate": "The electric vehicle is cheaper from the purchase and stays so.",
+    "netAfter": "Counting resale value, break-even after {years} year(s).",
+    "netNotReached": "Counting resale value, break-even is not reached over the period.",
+    "netImmediate": "Counting resale value, the electric vehicle is cheaper to own throughout.",
     "after": "Break-even after {years} year(s): running savings offset the purchase price gap."
   },
   "rows": {

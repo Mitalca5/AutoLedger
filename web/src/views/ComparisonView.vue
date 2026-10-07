@@ -232,12 +232,20 @@ const verdict = computed(() => {
     : t(sk('comparison.verdict.more'), { count: n, amount: abs })
 })
 
+function breakEvenSentence(be: number | null | undefined, keys: { none: string; now: string; after: string }): string {
+  if (be === undefined || be === null) return t(keys.none)
+  if (be === 0) return t(sk(keys.now))
+  return t(keys.after, { years: Number(be).toLocaleString(intlLocale()) })
+}
+
 const breakEvenText = computed(() => {
-  if (!result.value) return ''
-  const be = result.value.break_even_year
-  if (be === undefined || be === null) return t('comparison.breakEven.notReached')
-  if (be === 0) return t(sk('comparison.breakEven.immediate'))
-  return t('comparison.breakEven.after', { years: Number(be).toLocaleString(intlLocale()) })
+  const r = result.value
+  if (!r) return ''
+  const outlay = breakEvenSentence(r.break_even_year, { none: 'comparison.breakEven.notReached', now: 'comparison.breakEven.immediate', after: 'comparison.breakEven.after' })
+  const hasResale = Number(r.tracked?.depreciation) > 0 || Number(r.ice?.depreciation) > 0
+  if (!hasResale) return outlay
+  const net = breakEvenSentence(r.break_even_net_year, { none: 'comparison.breakEven.netNotReached', now: 'comparison.breakEven.netImmediate', after: 'comparison.breakEven.netAfter' })
+  return `${outlay} ${net}`
 })
 
 const costRows = computed(() => costRowValues(result.value).map((r) => ({ label: t(`comparison.rows.${r.key}`), tracked: r.tracked, ice: r.ice })))

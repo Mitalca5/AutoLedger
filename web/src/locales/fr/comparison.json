@@ -120,6 +120,9 @@
   "breakEven": {
     "notReached": "Point d'équilibre non atteint sur la période.",
     "immediate": "L'électrique est moins chère dès l'achat et le reste.",
+    "netAfter": "En tenant compte de la revente, point d'équilibre après {years} an(s).",
+    "netNotReached": "En tenant compte de la revente, point d'équilibre non atteint sur la période.",
+    "netImmediate": "En tenant compte de la revente, l'électrique est moins chère à posséder sur toute la période.",
     "after": "Point d'équilibre après {years} an(s) : les économies d'usage compensent l'écart d'achat."
   },
   "rows": {

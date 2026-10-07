@@ -127,6 +127,7 @@ func trackedBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now ti
 	}
 
 	if ev.PurchaseNet > 0 {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.purchase_basis", "Tracked vehicle at its real acquisition cost, combustion alternative at the purchase price you entered: both are compared as given"))
 		dep := ratePerKm(sum.DepreciationCost, basis) * annualKm * float64(years)
 		ev.ResaleValue = math.Max(ev.PurchaseNet-dep, 0)
 	} else {
