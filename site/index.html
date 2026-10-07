@@ -11,6 +11,7 @@
 <meta property="og:description" content="What does your vehicle really cost you? A self-hosted ledger for the total cost of ownership of any vehicle.">
 <meta property="og:image" content="https://rem7474.github.io/AutoLedger/img/dashboard.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="demo.css">
 <style>
 :root{
   --bg:#020617;--surface:#0b1224;--surface2:#111b33;--line:#1e293b;--line2:#334155;
@@ -246,7 +247,9 @@ footer{margin-top:96px;border-top:1px solid var(--line);background:#030818;paddi
     <div class="stage">
       <div class="browser">
         <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>autoledger.local</span></div>
-        <img src="img/dashboard.png" width="1280" height="800" alt="TCO dashboard of a diesel station wagon: total cost, full cost per km, fuel and tolls, monthly trend" data-i18n-alt="alt_dash" fetchpriority="high">
+        <div id="demo" class="demo">
+          <img src="img/dashboard.png" width="1280" height="800" alt="TCO dashboard of a diesel station wagon: total cost, full cost per km, fuel and tolls, monthly trend" data-i18n-alt="alt_dash" fetchpriority="high">
+        </div>
       </div>
       <div class="phone">
         <img src="img/mobile-quickadd.png" width="780" height="1560" alt="Quick add of a fill-up on a phone" data-i18n-alt="alt_mobile">
@@ -527,5 +530,6 @@ footer{margin-top:96px;border-top:1px solid var(--line);background:#030818;paddi
   }).catch(function(){});
 })();
 </script>
+<script src="demo.js" defer></script>
 </body>
 </html>
