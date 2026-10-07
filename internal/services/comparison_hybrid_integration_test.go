@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/teslacost/teslacost/internal/models"
 )
@@ -11,15 +10,8 @@ import (
 func TestIntegrationHybridInsuranceIndependentOfMileage(t *testing.T) {
 	for _, powertrain := range []string{models.PowertrainPHEV, models.PowertrainREEV} {
 		t.Run(powertrain, func(t *testing.T) {
-			db, repo := setupIntegrationDB(t, false)
+			db, repo, v, now := setupHybridComparison(t, powertrain, 988)
 			ctx := context.Background()
-			v := mustVehicle(t, repo, "hybrid-insurance@example.com")
-			v.Powertrain = powertrain
-			if err := repo.UpdateVehicle(ctx, v); err != nil {
-				t.Fatal(err)
-			}
-			now := time.Now().UTC()
-			mustDrive(t, repo, v.ID, 1, now.AddDate(0, 0, -10), 10000, 988)
 			year := 12
 			premium := &models.MaintenanceExpense{VehicleID: v.ID, Category: "INSURANCE", Currency: "EUR", Amount: eur(1200), Date: now.AddDate(0, 0, -5), IsRecurring: true, RecurrenceIntervalMonths: &year}
 			if err := repo.CreateMaintenanceExpense(ctx, premium); err != nil {

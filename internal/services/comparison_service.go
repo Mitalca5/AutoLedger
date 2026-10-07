@@ -116,8 +116,11 @@ func trackedBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now ti
 	var notes []*apierror.Message
 	if hybrid {
 		notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_actual", "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))
-		if basis > 0 && (sum.FuelEnergyCost <= 0 || sum.EnergyCost <= sum.FuelEnergyCost) {
-			notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_missing_energy_source", "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"))
+		if basis > 0 && (sum.FuelFillUps == 0 || sum.RecordedChargeCount == 0) {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_missing_energy_source", "This hybrid has no records for one or both energy sources. This may reflect your usage; check that all fill-ups and charging sessions are recorded"))
+		}
+		if sum.Completeness.ChargesWithoutCost > 0 {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_unpriced_charges", "Some recorded charging sessions have no cost: enter the actual cost, or zero for free charging"))
 		}
 	} else {
 		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: energy, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))

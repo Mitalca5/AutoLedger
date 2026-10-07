@@ -167,14 +167,14 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	var kwhAdded, kwhPriced float64
 	var unconvertedCharges int
 	if err := s.pool.QueryRow(ctx, `
-		SELECT COALESCE(SUM(kwh_added), 0),
+		SELECT COUNT(*), COALESCE(SUM(kwh_added), 0),
 		       COALESCE(SUM(kwh_added) FILTER (WHERE cost IS NOT NULL AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL)), 0),
 		       COUNT(*) FILTER (WHERE cost IS NULL),
 		       COALESCE(SUM(kwh_added) FILTER (WHERE cost IS NULL), 0),
 		       COUNT(*) FILTER (WHERE cost IS NOT NULL AND currency <> (SELECT currency FROM vehicles WHERE id = $1) AND fx_rate IS NULL)
 		FROM charge_logs
 		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL;
-	`, vehicleID).Scan(&kwhAdded, &kwhPriced, &comp.ChargesWithoutCost, &comp.KwhWithoutCost, &unconvertedCharges); err != nil {
+	`, vehicleID).Scan(&sum.RecordedChargeCount, &kwhAdded, &kwhPriced, &comp.ChargesWithoutCost, &comp.KwhWithoutCost, &unconvertedCharges); err != nil {
 		return nil, fmt.Errorf("energy: %w", err)
 	}
 	if comp.ChargesWithoutCost > 0 {

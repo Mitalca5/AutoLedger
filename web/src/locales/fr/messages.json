@@ -35,7 +35,8 @@
       "ev_price_unknown": "Prix d'achat du véhicule suivi inconnu (location ou saisie manquante) : dépréciation non incluse",
       "ev_no_distance": "Aucun kilométrage suivi : les coûts enregistrés ne permettent pas un comparatif fiable",
       "hybrid_actual": "Côté hybride : carburant, électricité, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance et taxes à partir de montants annuels",
-      "hybrid_missing_energy_source": "Cet hybride n'a que des pleins ou que des recharges enregistrés : son coût d'énergie est incomplet, le comparatif est sous-estimé"
+      "hybrid_missing_energy_source": "Cet hybride n'a pas de données pour une ou deux sources d'énergie. Cela peut correspondre à votre usage ; vérifiez que tous les pleins et toutes les recharges sont enregistrés",
+      "hybrid_unpriced_charges": "Certaines recharges enregistrées n'ont pas de coût : saisissez le coût réel, ou zéro pour une recharge gratuite"
     },
     "defaults_source": "Valeurs indicatives pour la France, à ajuster",
     "defaults_source_no_prices": "Pas de prix indicatifs pour cette devise : saisissez les vôtres"
