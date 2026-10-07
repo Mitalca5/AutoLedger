@@ -4,6 +4,9 @@
 # Runs as a simple loop rather than cron so failures are visible directly in
 # `docker logs` instead of being swallowed by a cron daemon.
 set -eu
+# The postgres:16-alpine image uses BusyBox ash, which supports pipefail.
+# A successful gzip must not hide a failed pg_dump (including partial output).
+set -o pipefail
 
 INTERVAL_HOURS="${BACKUP_INTERVAL_HOURS:-24}"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-14}"
@@ -29,7 +32,7 @@ run_backup() {
 		log "database dump OK -> ${db_dump} ($(du -h "${db_dump}" | cut -f1))"
 	else
 		rm -f "${db_dump}.tmp"
-		log "ERROR: pg_dump failed, no database backup produced this cycle"
+		log "ERROR: database dump or compression failed, no database backup produced this cycle"
 	fi
 
 	if tar -czf "${docs_archive}.tmp" -C /data documents 2>/dev/null; then
