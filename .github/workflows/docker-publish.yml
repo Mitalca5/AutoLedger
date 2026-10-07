@@ -7,6 +7,10 @@ on:
         description: Push the images to GHCR (false builds only)
         type: boolean
         default: true
+      platforms:
+        description: Target platforms
+        type: string
+        default: linux/amd64,linux/arm64
 
 permissions:
   contents: read
@@ -23,6 +27,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up QEMU
+        if: inputs.platforms != 'linux/amd64'
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
       - name: Set up Docker Buildx
@@ -57,7 +62,7 @@ jobs:
           context: .
           file: ./Dockerfile
           target: prod
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -86,7 +91,7 @@ jobs:
         with:
           context: ./backup
           file: ./backup/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ inputs.platforms }}
           push: ${{ inputs.push }}
           tags: ${{ steps.meta-backup.outputs.tags }}
           labels: ${{ steps.meta-backup.outputs.labels }}
