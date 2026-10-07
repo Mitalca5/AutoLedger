@@ -2,6 +2,7 @@ package services
 
 import (
 	"testing"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
@@ -190,7 +191,7 @@ func TestEVBaselineFromTCO(t *testing.T) {
 		AcquisitionCost:    eur(30000),
 		DepreciationCost:   eur(5000),
 	}
-	ev, notes := evBaselineFromTCO(sum, 10000, 4)
+	ev, notes := evBaselineFromTCO(sum, 10000, 4, time.Now())
 	if ev.EnergyPerKm != 0.05 || ev.InsuranceYearly != 0 || ev.MaintenancePerKm != 0.035 {
 		t.Errorf("unexpected rates: %+v", ev)
 	}
@@ -203,14 +204,14 @@ func TestEVBaselineFromTCO(t *testing.T) {
 	}
 
 	// Unknown purchase price (lease) and no tracked distance are flagged.
-	ev2, notes2 := evBaselineFromTCO(&TCOSummary{}, 10000, 4)
+	ev2, notes2 := evBaselineFromTCO(&TCOSummary{}, 10000, 4, time.Now())
 	if ev2.PurchaseNet != 0 || ev2.ResaleValue != 0 || len(notes2) != 3 {
 		t.Errorf("unexpected fallback: %+v %v", ev2, notes2)
 	}
 
 	// Depreciation exceeding the purchase price floors the resale at zero.
 	sum.DepreciationCost = eur(20000)
-	if ev3, _ := evBaselineFromTCO(sum, 10000, 4); ev3.ResaleValue != 0 {
+	if ev3, _ := evBaselineFromTCO(sum, 10000, 4, time.Now()); ev3.ResaleValue != 0 {
 		t.Errorf("resale = %v, want 0", ev3.ResaleValue)
 	}
 }
@@ -234,5 +235,51 @@ func TestEVBaselineFromInputsAndAnnualKm(t *testing.T) {
 	}
 	if km, ok := annualKmFromTCO(&TCOSummary{MonthlyCosts: months}); ok || km != DefaultAnnualKm {
 		t.Errorf("no distance should fall back, got %v (%v)", km, ok)
+	}
+}
+
+func TestAnnualTaxKeepsShortHistoryAndAveragesLongOne(t *testing.T) {
+	for _, c := range []struct {
+		total  money.Cents
+		months int
+		want   money.Cents
+	}{
+		{eur(0), 24, 0},
+		{eur(120), 1, eur(120)},
+		{eur(120), 12, eur(120)},
+		{eur(300), 24, eur(150)},
+	} {
+		if got := annualTax(c.total, c.months); got != c.want {
+			t.Errorf("annualTax(%v, %d) = %v, want %v", c.total, c.months, got, c.want)
+		}
+	}
+}
+
+func TestEVBaselineFromTCOIncludesRecordedTaxAndFlagsExcludedCosts(t *testing.T) {
+	now := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+	sum := &TCOSummary{
+		DistanceBasisKm: 1000,
+		TaxCost:         eur(240),
+		TollsCost:       eur(30),
+		MonthlyCosts:    []MonthlyCost{{Month: "2024-07"}, {Month: "2026-06"}},
+	}
+	ev, notes := evBaselineFromTCO(sum, 10000, 3, now)
+	if ev.TaxYearly != 120 {
+		t.Errorf("tax yearly = %v, want 120 (240 over 24 months)", ev.TaxYearly)
+	}
+	var excluded bool
+	for _, n := range notes {
+		if n.Code == "comparison.assumption.costs_excluded" {
+			excluded = true
+		}
+	}
+	if !excluded {
+		t.Error("tolls recorded but no costs_excluded assumption")
+	}
+	_, notes = evBaselineFromTCO(&TCOSummary{DistanceBasisKm: 1000, AcquisitionCost: eur(30000)}, 10000, 3, now)
+	for _, n := range notes {
+		if n.Code == "comparison.assumption.costs_excluded" {
+			t.Error("costs_excluded flagged without any excluded cost")
+		}
 	}
 }
