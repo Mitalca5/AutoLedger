@@ -209,7 +209,17 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 		}
 		return d, nil
 	}
-	if !models.PowertrainIsElectricOnly(sum.Powertrain) {
+	if models.PowertrainCanRefuel(sum.Powertrain) {
+		// A hybrid: both sides start from the fuel and electricity prices actually paid. Its
+		// consumption mixes electric and fuel kilometres, so no per-100 km figure is prefilled.
+		if sum.AvgCostPerLiter > 0 {
+			v := sum.AvgCostPerLiter
+			d.ICEFuelPrice = &v
+		}
+		if electricity := sum.EnergyCost - sum.FuelEnergyCost; electricity > 0 && sum.TotalKwhAdded > 0 {
+			v := round3(electricity.Float() / sum.TotalKwhAdded)
+			d.EVEurPerKwh = &v
+		}
 		return d, nil
 	}
 	if sum.TotalKwhAdded > 0 && sum.DistanceBasisKm > 0 {

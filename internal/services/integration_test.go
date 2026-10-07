@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -2459,6 +2460,16 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 	d, err := svc.Defaults(ctx, both.ID)
 	if err != nil || d.EVKwhPer100Km != nil || d.ICELPer100Km != nil {
 		t.Errorf("hybrid defaults must not mix energies: %+v (%v)", d, err)
+	}
+	// Both references start from the prices the hybrid paid: 120 over 70 L, 10 over 50 kWh.
+	if d.ICEFuelPrice == nil || math.Abs(*d.ICEFuelPrice-120.0/70) > 0.001 || d.EVEurPerKwh == nil || *d.EVEurPerKwh != 0.2 {
+		t.Errorf("hybrid price defaults: fuel=%v electricity=%v", d.ICEFuelPrice, d.EVEurPerKwh)
+	}
+	if d, err = svc.Defaults(ctx, fuelOnly.ID); err != nil || d.ICEFuelPrice == nil || d.EVEurPerKwh != nil {
+		t.Errorf("fuel-only hybrid must prefill the fuel price only: %+v (%v)", d, err)
+	}
+	if d, err = svc.Defaults(ctx, chargeOnly.ID); err != nil || d.ICEFuelPrice != nil || d.EVEurPerKwh == nil || *d.EVEurPerKwh != 0.2 {
+		t.Errorf("charge-only hybrid must prefill the electricity price only: %+v (%v)", d, err)
 	}
 }
 
