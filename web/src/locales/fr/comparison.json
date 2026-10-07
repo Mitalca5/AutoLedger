@@ -201,5 +201,12 @@
       "saves": "l'hybride économise",
       "costsMore": "l'hybride coûte plus"
     }
+  },
+  "savings": {
+    "less": "{percent} % de moins que le véhicule thermique",
+    "more": "{percent} % de plus que le véhicule thermique",
+    "month": "{amount} par mois",
+    "energyLess": "énergie seule : {amount} de moins",
+    "energyMore": "énergie seule : {amount} de plus"
   }
 }

@@ -201,5 +201,12 @@
       "saves": "hybrid saves",
       "costsMore": "hybrid costs more"
     }
+  },
+  "savings": {
+    "less": "{percent}% less than the combustion vehicle",
+    "more": "{percent}% more than the combustion vehicle",
+    "month": "{amount} per month",
+    "energyLess": "energy alone: {amount} less",
+    "energyMore": "energy alone: {amount} more"
   }
 }

@@ -15,6 +15,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
 import { downloadCsv } from '@/utils/csv'
 import { currencySymbol } from '@/currency'
+import { comparisonSavings } from '@/utils/comparisonSavings'
 import { scenarioSide, sideKey } from '@/utils/comparisonSide'
 import ComparisonCompare from '@/components/comparison/ComparisonCompare.vue'
 import ComparisonCharts from '@/components/comparison/ComparisonCharts.vue'
@@ -230,6 +231,21 @@ const verdict = computed(() => {
   return savings.value > 0
     ? t(sk('comparison.verdict.less'), { count: n, amount: abs })
     : t(sk('comparison.verdict.more'), { count: n, amount: abs })
+})
+
+// What the verdict does not say: the gap as a share of the combustion cost and per month, and the part due to energy alone.
+const savingsDetail = computed(() => {
+  const r = result.value
+  if (!r) return ''
+  const total = comparisonSavings(r.tracked.total, r.ice.total, r.years_count, r.annual_km)
+  const energy = comparisonSavings(r.tracked.energy, r.ice.energy, r.years_count, r.annual_km)
+  const parts: string[] = []
+  if (total.percent !== null && Math.abs(total.amount) >= 1) {
+    parts.push(t(total.amount > 0 ? 'comparison.savings.less' : 'comparison.savings.more', { percent: Math.abs(total.percent).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) }))
+  }
+  if (total.perMonth !== null && Math.abs(total.amount) >= 1) parts.push(t('comparison.savings.month', { amount: fmtMoney(Math.abs(total.perMonth)) }))
+  if (Math.abs(energy.amount) >= 1) parts.push(t(energy.amount > 0 ? 'comparison.savings.energyLess' : 'comparison.savings.energyMore', { amount: fmtMoney(Math.abs(energy.amount)) }))
+  return parts.join(' · ')
 })
 
 function breakEvenSentence(be: number | null | undefined, keys: { none: string; now: string; after: string }): string {
@@ -521,6 +537,7 @@ onMounted(async () => {
           <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
           <div>
             <div class="text-lg font-bold text-white">{{ verdict }}</div>
+            <div v-if="savingsDetail" class="text-sm text-slate-300 mt-0.5">{{ savingsDetail }}</div>
             <div class="text-xs text-slate-400 mt-0.5">{{ currentScenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
           </div>
         </div>
