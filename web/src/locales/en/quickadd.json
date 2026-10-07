@@ -20,7 +20,8 @@
     "saveTheCharge": "Save the charge",
     "message": "Charge of {kwh} kWh",
     "saveFailed": "Could not save the charge.",
-    "pricePerKwh": "Price per kWh ({cur})"
+    "pricePerKwh": "Price per kWh ({cur})",
+    "calculatedWithTariff": "Calculated with the “{plan}” tariff from the charging hours"
   },
   "quickExpenseForm": {
     "moreDetails": "More details",

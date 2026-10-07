@@ -14,6 +14,7 @@ import TollsPanel from '@/components/expenses/TollsPanel.vue'
 import MaintenancePanel from '@/components/expenses/MaintenancePanel.vue'
 import RemindersPanel from '@/components/expenses/RemindersPanel.vue'
 import ChargesPanel from '@/components/expenses/ChargesPanel.vue'
+import FuelLogsPanel from '@/components/manual/FuelLogsPanel.vue'
 import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
 import EstimatedEnergyPanel from '@/components/manual/EstimatedEnergyPanel.vue'
 import DocumentsPanel from '@/components/expenses/DocumentsPanel.vue'
@@ -26,7 +27,7 @@ import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.v
 import WebhookModal from '@/components/expenses/WebhookModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
-import { Receipt, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud, Landmark } from 'lucide-vue-next'
+import { Receipt, Fuel, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud, Landmark } from 'lucide-vue-next'
 import type { ReminderPreset } from '@/utils/expenses'
 import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
@@ -43,15 +44,20 @@ const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
 const { previewDoc, loadingDocId, closeDocPreview, viewOrDownloadDocument } = useDocumentPreview(() => vehicleStore.activeVehicle?.id)
 
-type TabType = 'TOLLS' | 'FIXED' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'DOCUMENTS' | 'EFFICIENCY' | 'ESTIMATE'
+type TabType = 'TOLLS' | 'FIXED' | 'MAINTENANCE' | 'REMINDERS' | 'CHARGES' | 'FUEL' | 'DOCUMENTS' | 'EFFICIENCY' | 'ESTIMATE'
 
 // One view, three menu entries: /expenses (tolls, fixed costs, receipts), /maintenance (maintenance, reminders)
 // and /energy (efficiency, charges, estimate)
 const isMaintenanceSection = computed(() => route.meta.section === 'maintenance')
 const isEnergySection = computed(() => route.meta.section === 'energy')
+// Electric: efficiency, charges, estimate. Combustion: fill-ups. Hybrid: efficiency, charges and fill-ups.
+function energyTabs(): TabType[] {
+  if (!vehicleStore.canCharge) return ['FUEL']
+  return vehicleStore.canRefuel ? ['EFFICIENCY', 'CHARGES', 'FUEL'] : ['EFFICIENCY', 'CHARGES', 'ESTIMATE']
+}
 const sectionTabs = computed<TabType[]>(() => {
   if (isMaintenanceSection.value) return ['MAINTENANCE', 'REMINDERS']
-  if (isEnergySection.value) return vehicleStore.canRefuel ? ['EFFICIENCY', 'CHARGES'] : ['EFFICIENCY', 'CHARGES', 'ESTIMATE']
+  if (isEnergySection.value) return energyTabs()
   return ['TOLLS', 'FIXED', 'DOCUMENTS']
 })
 
@@ -61,11 +67,6 @@ function parseTab(raw: unknown): TabType {
 }
 
 const activeTab = ref<TabType>(parseTab(route.query.tab))
-
-// A fuel-only vehicle has no charges: its fill-ups live in the manual tracking page
-watch([() => vehicleStore.canCharge, isEnergySection], ([charges, energy]) => {
-  if (!charges && energy) router.replace('/manual?tab=FUEL')
-}, { immediate: true })
 
 watch(activeTab, (newTab) => {
   if (route.query.tab !== newTab) {
@@ -158,6 +159,13 @@ async function checkPendingCharges() {
 
 async function onChargesAssigned() {
   await loadData()
+}
+
+// The fill-ups panel loads its own data when mounted: remounting it shows what an import added
+const fuelReloadKey = ref(0)
+function onImported() {
+  fuelReloadKey.value++
+  loadData()
 }
 
 async function loadData() {
@@ -445,6 +453,9 @@ const tabs = computed<TabItem[]>(() => {
       },
     ]
     if (!vehicleStore.canRefuel) list.push({ key: 'ESTIMATE', label: t('expenses.expensesView.estimate'), icon: Calculator })
+    const fuel: TabItem = { key: 'FUEL', label: t('expenses.expensesView.fillUps'), icon: Fuel }
+    if (!vehicleStore.canCharge) return [fuel]
+    if (vehicleStore.canRefuel) list.push(fuel)
     return list
   }
   const list: TabItem[] = [
@@ -501,6 +512,14 @@ const tabs = computed<TabItem[]>(() => {
         >
           <Plus class="w-3.5 h-3.5" />
           {{ $t('expenses.expensesView.newReminder') }}
+        </button>
+        <button
+          v-if="activeTab === 'FUEL' && vehicleStore.canEdit"
+          @click="openCSVImportModal"
+          class="btn btn-lg btn-secondary"
+        >
+          <UploadCloud class="w-3.5 h-3.5 text-info-400" />
+          <span>{{ $t('expenses.expensesView.importCsv') }}</span>
         </button>
         <template v-if="activeTab === 'CHARGES' && vehicleStore.canCharge">
           <button
@@ -615,6 +634,13 @@ const tabs = computed<TabItem[]>(() => {
       :can-edit="vehicleStore.canEdit"
     />
 
+    <FuelLogsPanel
+      v-if="activeTab === 'FUEL' && vehicleStore.canRefuel && vehicleStore.activeVehicle"
+      :key="fuelReloadKey"
+      :vehicle-id="vehicleStore.activeVehicle.id"
+      :can-edit="vehicleStore.canEdit"
+    />
+
     <ChargesPanel
       v-if="activeTab === 'CHARGES' && vehicleStore.canCharge"
       :charges="charges"
@@ -710,8 +736,8 @@ const tabs = computed<TabItem[]>(() => {
     <CSVImportModal
       v-model:open="showCSVImportModal"
       :vehicle-id="vehicleId"
-      default-type="CHARGES"
-      @imported="loadData"
+      :default-type="activeTab === 'FUEL' ? 'FUEL' : 'CHARGES'"
+      @imported="onImported"
     />
 
     <QualifyChargesModal

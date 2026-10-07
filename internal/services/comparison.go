@@ -8,10 +8,10 @@ import (
 	"github.com/teslacost/teslacost/internal/money"
 )
 
-// EVBaseline is the EV side of a comparison, expressed as running-cost rates (year-1 prices) plus
+// TrackedBaseline is the tracked-vehicle side of a comparison, expressed as running-cost rates (year-1 prices) plus
 // purchase and resale amounts. Every recurring line is perKm*km + yearly so that it can be filled either
 // from the tracked vehicle's real per-km costs (RETROSPECTIVE) or from user-entered yearly figures (PROJECTION).
-type EVBaseline struct {
+type TrackedBaseline struct {
 	EnergyPerKm       float64 // EUR per km
 	FuelPerKm         float64 // Fuel portion of EnergyPerKm; the rest is electricity.
 	MaintenancePerKm  float64
@@ -50,30 +50,32 @@ type CostSide struct {
 // CumulativePoint is the cumulated cash outlay of both vehicles after a number of years (0 = purchase).
 // Resale is not deducted: the curve shows when the running-cost savings repay the purchase difference.
 type CumulativePoint struct {
-	Year int         `json:"year"`
-	EV   money.Cents `json:"ev"`
-	ICE  money.Cents `json:"ice"`
+	Year    int         `json:"year"`
+	Tracked money.Cents `json:"tracked"`
+	ICE     money.Cents `json:"ice"`
 }
 
-// SensitivityRow is the EV savings when one assumption varies.
+// SensitivityRow is the tracked-vehicle savings when one assumption varies.
 type SensitivityRow struct {
-	Label      *apierror.Message `json:"label"`
-	EVSavings  money.Cents       `json:"ev_savings"`
-	DeltaShift money.Cents       `json:"delta_shift"` // Difference with the base savings
+	Label          *apierror.Message `json:"label"`
+	TrackedSavings money.Cents       `json:"tracked_savings"`
+	DeltaShift     money.Cents       `json:"delta_shift"` // Difference with the base savings
 }
 
-// ComparisonResult is the outcome of a comparison. EVSavings > 0 means the EV is cheaper.
+// ComparisonResult is the outcome of a comparison. TrackedSavings > 0 means the tracked vehicle is cheaper.
 type ComparisonResult struct {
-	Mode          string              `json:"mode"`
-	AnnualKm      float64             `json:"annual_km"`
-	YearsCount    int                 `json:"years_count"`
-	EV            CostSide            `json:"ev"`
-	ICE           CostSide            `json:"ice"`
-	EVSavings     money.Cents         `json:"ev_savings"`
-	BreakEvenYear *float64            `json:"break_even_year,omitempty"` // Years until cumulated EV cost drops below ICE
-	Cumulative    []CumulativePoint   `json:"cumulative"`
-	Sensitivity   []SensitivityRow    `json:"sensitivity"`
-	Assumptions   []*apierror.Message `json:"assumptions"`
+	Mode           string      `json:"mode"`
+	AnnualKm       float64     `json:"annual_km"`
+	YearsCount     int         `json:"years_count"`
+	Tracked        CostSide    `json:"tracked"`
+	ICE            CostSide    `json:"ice"`
+	TrackedSavings money.Cents `json:"tracked_savings"`
+	BreakEvenYear  *float64    `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
+	// BreakEvenNetYear is the same break-even once each vehicle is credited with its value at that point (resale)
+	BreakEvenNetYear *float64            `json:"break_even_net_year,omitempty"`
+	Cumulative       []CumulativePoint   `json:"cumulative"`
+	Sensitivity      []SensitivityRow    `json:"sensitivity"`
+	Assumptions      []*apierror.Message `json:"assumptions"`
 }
 
 // sideRates is the internal, unit-free description of one vehicle.
@@ -97,7 +99,7 @@ func iceRates(sc *models.ComparisonScenario) sideRates {
 	}
 }
 
-func evRates(sc *models.ComparisonScenario, ev EVBaseline) sideRates {
+func evRates(sc *models.ComparisonScenario, ev TrackedBaseline) sideRates {
 	return sideRates{
 		energyPerKm: ev.EnergyPerKm - ev.FuelPerKm,
 		fuelPerKm:   ev.FuelPerKm,
@@ -163,8 +165,46 @@ func (s sideRates) run(km float64, years int) (CostSide, []float64) {
 	return side, cash
 }
 
-// breakEven returns the number of years after which the cumulated ICE outlay exceeds the EV one.
-// It is 0 when the EV is never more expensive within the period, nil when the EV does not pay back.
+// netOfResale returns the cumulated cost of owning the vehicle for a number of years if it were sold then:
+// outlays minus the straight-line value left at that point (0 = bought and sold at once).
+func (s sideRates) netOfResale(cash []float64) []float64 {
+	years := len(cash) - 1
+	depPerYear := math.Max(s.purchase-s.resale, 0) / float64(years)
+	net := make([]float64, len(cash))
+	for i := range cash {
+		net[i] = cash[i] - (s.purchase - depPerYear*float64(i))
+	}
+	return net
+}
+
+// breakEvenNet is the break-even on netOfResale curves, which both start at 0: it is the year after which
+// the tracked vehicle, once cheaper to own than the combustion one, no longer is. It is 0 when the tracked
+// vehicle is never more expensive to own, nil when it does not pay back within the period.
+func breakEvenNet(evNet, iceNet []float64) *float64 {
+	diff := func(i int) float64 { return iceNet[i] - evNet[i] }
+	first := -1
+	for i := 1; i < len(evNet); i++ {
+		if diff(i) < 0 {
+			first = i
+			break
+		}
+	}
+	if first == -1 {
+		zero := 0.0
+		return &zero
+	}
+	for i := first + 1; i < len(evNet); i++ {
+		if diff(i) >= 0 {
+			frac := -diff(i-1) / (diff(i) - diff(i-1))
+			v := math.Round((float64(i-1)+frac)*10) / 10
+			return &v
+		}
+	}
+	return nil
+}
+
+// breakEven returns the number of years after which the cumulated ICE outlay exceeds the tracked-vehicle one.
+// It is 0 when the tracked vehicle is never more expensive within the period, nil when the tracked vehicle does not pay back.
 func breakEven(evCash, iceCash []float64) *float64 {
 	diff := func(i int) float64 { return iceCash[i] - evCash[i] }
 	if diff(0) >= 0 {
@@ -186,50 +226,54 @@ func breakEven(evCash, iceCash []float64) *float64 {
 	return nil
 }
 
-// ComputeComparison compares the EV baseline with the equivalent ICE of the scenario over its period.
+// ComputeComparison compares the tracked-vehicle baseline with the equivalent ICE of the scenario over its period.
 // It is a pure function: no I/O, informational only.
-func ComputeComparison(sc *models.ComparisonScenario, ev EVBaseline) ComparisonResult {
-	res := computeCore(sc, ev, sc.AnnualKm, 1)
+func ComputeComparison(sc *models.ComparisonScenario, ev TrackedBaseline) ComparisonResult {
+	res := computeCore(sc, ev, sc.AnnualKm, 1, 1)
 
-	base := res.EVSavings
+	base := res.TrackedSavings
 	variants := []struct {
-		label    *apierror.Message
-		km, fuel float64
+		label                 *apierror.Message
+		km, fuel, electricity float64
 	}{
-		{apierror.NewMessage("comparison.sensitivity.fuel_down", "Fuel −20%"), sc.AnnualKm, 0.8},
-		{apierror.NewMessage("comparison.sensitivity.fuel_up", "Fuel +20%"), sc.AnnualKm, 1.2},
-		{apierror.NewMessage("comparison.sensitivity.km_down", "Mileage −20%"), sc.AnnualKm * 0.8, 1},
-		{apierror.NewMessage("comparison.sensitivity.km_up", "Mileage +20%"), sc.AnnualKm * 1.2, 1},
+		{apierror.NewMessage("comparison.sensitivity.fuel_down", "Fuel −20%"), sc.AnnualKm, 0.8, 1},
+		{apierror.NewMessage("comparison.sensitivity.fuel_up", "Fuel +20%"), sc.AnnualKm, 1.2, 1},
+		{apierror.NewMessage("comparison.sensitivity.electricity_down", "Electricity −20%"), sc.AnnualKm, 1, 0.8},
+		{apierror.NewMessage("comparison.sensitivity.electricity_up", "Electricity +20%"), sc.AnnualKm, 1, 1.2},
+		{apierror.NewMessage("comparison.sensitivity.km_down", "Mileage −20%"), sc.AnnualKm * 0.8, 1, 1},
+		{apierror.NewMessage("comparison.sensitivity.km_up", "Mileage +20%"), sc.AnnualKm * 1.2, 1, 1},
 	}
 	for _, v := range variants {
-		savings := computeCore(sc, ev, v.km, v.fuel).EVSavings
-		res.Sensitivity = append(res.Sensitivity, SensitivityRow{Label: v.label, EVSavings: savings, DeltaShift: savings - base})
+		savings := computeCore(sc, ev, v.km, v.fuel, v.electricity).TrackedSavings
+		res.Sensitivity = append(res.Sensitivity, SensitivityRow{Label: v.label, TrackedSavings: savings, DeltaShift: savings - base})
 	}
 	return res
 }
 
-func computeCore(sc *models.ComparisonScenario, ev EVBaseline, km, fuelFactor float64) ComparisonResult {
+func computeCore(sc *models.ComparisonScenario, ev TrackedBaseline, km, fuelFactor, electricityFactor float64) ComparisonResult {
 	years := sc.Years
 	ice := iceRates(sc)
 	ice.energyPerKm *= fuelFactor
 
 	tracked := evRates(sc, ev)
+	tracked.energyPerKm *= electricityFactor
 	tracked.fuelPerKm *= fuelFactor
 	evSide, evCash := tracked.run(km, years)
 	iceSide, iceCash := ice.run(km, years)
 
 	res := ComparisonResult{
-		Mode:          sc.Mode,
-		AnnualKm:      km,
-		YearsCount:    years,
-		EV:            evSide,
-		ICE:           iceSide,
-		EVSavings:     iceSide.Total - evSide.Total,
-		BreakEvenYear: breakEven(evCash, iceCash),
-		Assumptions:   comparisonAssumptions(sc),
+		Mode:             sc.Mode,
+		AnnualKm:         km,
+		YearsCount:       years,
+		Tracked:          evSide,
+		ICE:              iceSide,
+		TrackedSavings:   iceSide.Total - evSide.Total,
+		BreakEvenYear:    breakEven(evCash, iceCash),
+		BreakEvenNetYear: breakEvenNet(tracked.netOfResale(evCash), ice.netOfResale(iceCash)),
+		Assumptions:      comparisonAssumptions(sc),
 	}
 	for i := range evCash {
-		res.Cumulative = append(res.Cumulative, CumulativePoint{Year: i, EV: money.FromFloat(evCash[i]), ICE: money.FromFloat(iceCash[i])})
+		res.Cumulative = append(res.Cumulative, CumulativePoint{Year: i, Tracked: money.FromFloat(evCash[i]), ICE: money.FromFloat(iceCash[i])})
 	}
 	return res
 }
@@ -239,7 +283,7 @@ func comparisonAssumptions(sc *models.ComparisonScenario) []*apierror.Message {
 		apierror.NewMessagef("comparison.assumption.usage", "%.0f km/year for %d year(s), same usage for both vehicles", apierror.Km(sc.AnnualKm), sc.Years),
 		apierror.NewMessage("comparison.assumption.depreciation", "Depreciation = (purchase price − resale) spread linearly over the period"),
 		apierror.NewMessage("comparison.assumption.no_financing", "Financing, loans and leases not included"),
-		apierror.NewMessage("comparison.assumption.break_even", "The break-even compares cumulative outlays (purchase + running costs), without resale"),
+		apierror.NewMessage("comparison.assumption.break_even", "The break-even compares cumulative outlays (purchase + running costs); a second figure credits each vehicle with its straight-line resale value"),
 	}
 	if sc.Options.FuelInflationPct != 0 || sc.Options.ElectricityInflationPct != 0 || sc.Options.CostInflationPct != 0 {
 		a = append(a, apierror.NewMessagef("comparison.assumption.inflation", "Yearly inflation: fuel %.1f%%, electricity %.1f%%, maintenance/insurance/taxes %.1f%%",

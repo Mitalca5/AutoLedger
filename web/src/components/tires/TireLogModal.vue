@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -85,10 +86,8 @@ const handleAddLog = () => runOnce(handleAddLogAction)
       <div class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4 text-xs">
         <div>
           <label for="tire-new-log-depth-mm" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.measuredDepthMm') }}</label>
-          <input id="tire-new-log-depth-mm"
-            v-model.number="newLogForm.depth_mm"
-            type="number"
-            step="0.1"
+          <NumberInput id="tire-new-log-depth-mm"
+            v-model="newLogForm.depth_mm"
             min="0.1"
             max="20"
             :aria-invalid="depthError ? 'true' : undefined"

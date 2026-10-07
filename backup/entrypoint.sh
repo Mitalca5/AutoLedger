@@ -4,6 +4,9 @@
 # Runs as a simple loop rather than cron so failures are visible directly in
 # `docker logs` instead of being swallowed by a cron daemon.
 set -eu
+# The postgres:16-alpine image uses BusyBox ash, which supports pipefail.
+# A successful gzip must not hide a failed pg_dump (including partial output).
+set -o pipefail
 
 INTERVAL_HOURS="${BACKUP_INTERVAL_HOURS:-24}"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-14}"
@@ -29,7 +32,7 @@ run_backup() {
 		log "database dump OK -> ${db_dump} ($(du -h "${db_dump}" | cut -f1))"
 	else
 		rm -f "${db_dump}.tmp"
-		log "ERROR: pg_dump failed, no database backup produced this cycle"
+		log "ERROR: database dump or compression failed, no database backup produced this cycle"
 	fi
 
 	if tar -czf "${docs_archive}.tmp" -C /data documents 2>/dev/null; then
@@ -55,9 +58,14 @@ run_backup() {
 	find "${BACKUP_DIR}" -maxdepth 1 \( -name 'autoledger-*.gz' -o -name 'teslacost-*.gz' \) -mtime "+${RETENTION_DAYS}" -print -delete
 }
 
-log "AutoLedger backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
+main() {
+	log "AutoLedger backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
 
-while true; do
-	run_backup || log "ERROR: backup cycle exited unexpectedly, will retry next interval"
-	sleep "$((INTERVAL_HOURS * 3600))"
-done
+	while true; do
+		run_backup || log "ERROR: backup cycle exited unexpectedly, will retry next interval"
+		sleep "$((INTERVAL_HOURS * 3600))"
+	done
+}
+
+# BACKUP_NO_MAIN lets the regression tests source the functions without starting the loop.
+[ "${BACKUP_NO_MAIN:-}" = 1 ] || main

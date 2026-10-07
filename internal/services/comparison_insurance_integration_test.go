@@ -84,9 +84,6 @@ func TestIntegrationComparisonInsuranceIndependentOfMileage(t *testing.T) {
 	db, repo := setupIntegrationDB(t, false)
 	ctx := context.Background()
 	v := mustVehicle(t, repo, "insurance-mileage@example.com")
-	if _, err := db.Pool.Exec(ctx, `UPDATE vehicles SET powertrain = 'PHEV' WHERE id = $1`, v.ID); err != nil {
-		t.Fatal(err)
-	}
 	now := time.Now().UTC()
 	// A recently paid annual premium must not be extrapolated from this short mileage history.
 	mustDrive(t, repo, v.ID, 1, now.AddDate(0, 0, -10), 10000, 988)
@@ -112,8 +109,8 @@ func TestIntegrationComparisonInsuranceIndependentOfMileage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if res.EV.Insurance != want || res.ICE.Insurance != want {
-				t.Fatalf("km=%v inflation=%v: reference=%v combustion=%v want=%v", km, inflation, res.EV.Insurance, res.ICE.Insurance, want)
+			if res.Tracked.Insurance != want || res.ICE.Insurance != want {
+				t.Fatalf("km=%v inflation=%v: reference=%v combustion=%v want=%v", km, inflation, res.Tracked.Insurance, res.ICE.Insurance, want)
 			}
 		}
 	}

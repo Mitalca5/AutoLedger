@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { intlLocale, t } from '@/i18n'
 import { reactive, ref } from 'vue'
 import { api } from '@/services/api'
@@ -80,12 +81,9 @@ async function complete(c: PendingCharge) {
 
           <form class="mt-2 flex gap-2" novalidate @submit.prevent="complete(c)">
             <label :for="`qp-cost-${c.id}`" class="sr-only">{{ $t('quickadd.quickPendingCosts.costOfTheChargeOf', { date: fmtDate(c.date), cur: currencySymbol(vehicleStore.currency) }) }}</label>
-            <input
+            <NumberInput text
               :id="`qp-cost-${c.id}`"
               v-model="costs[c.id]"
-              type="number"
-              inputmode="decimal"
-              step="any"
               min="0"
               :placeholder="$t('quickadd.quickPendingCosts.cost', { cur: currencySymbol(vehicleStore.currency) })"
               class="quick-input min-w-0"

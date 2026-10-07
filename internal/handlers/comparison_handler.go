@@ -34,7 +34,7 @@ type SaveComparisonRequest struct {
 	AnnualKm  float64                `json:"annual_km"`
 	Years     int                    `json:"years"`
 	ICE       models.ICEInputs       `json:"ice"`
-	EV        *models.EVInputs       `json:"ev"`
+	Tracked   *models.TrackedInputs  `json:"tracked"`
 	Options   models.ScenarioOptions `json:"options"`
 }
 
@@ -89,7 +89,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 			return err
 		}
 	}
-	if err := validateAmounts(req.Options.EVIncentives); err != nil {
+	if err := validateAmounts(req.Options.TrackedIncentives); err != nil {
 		return err
 	}
 
@@ -98,19 +98,19 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 		if req.VehicleID == nil || *req.VehicleID == "" {
 			return apierror.New("comparison.vehicle_required", "A vehicle is required in retrospective mode")
 		}
-		req.EV = nil
+		req.Tracked = nil
 	case models.ComparisonModeProjection:
 		req.VehicleID = nil
-		if req.EV == nil {
+		if req.Tracked == nil {
 			return apierror.New("comparison.ev_required", "The electric vehicle data is required in projection mode")
 		}
-		if err := validateRange(req.EV.KwhPer100Km, 0.1, 100, apierror.Newf("comparison.ev_consumption", "Invalid electric consumption (%.1f to %.0f kWh/100 km)", apierror.PerKm(0.1), apierror.PerKm(100))); err != nil {
+		if err := validateRange(req.Tracked.KwhPer100Km, 0.1, 100, apierror.Newf("comparison.ev_consumption", "Invalid electric consumption (%.1f to %.0f kWh/100 km)", apierror.PerKm(0.1), apierror.PerKm(100))); err != nil {
 			return err
 		}
-		if err := validateRange(req.EV.EurPerKwh, 0, 5, apierror.New("comparison.electricity_price", "Invalid electricity price (0 to 5 per kWh)")); err != nil {
+		if err := validateRange(req.Tracked.EurPerKwh, 0, 5, apierror.New("comparison.electricity_price", "Invalid electricity price (0 to 5 per kWh)")); err != nil {
 			return err
 		}
-		if err := validateAmounts(req.EV.PurchasePrice, req.EV.ResaleValue, req.EV.MaintenanceYearly, req.EV.InsuranceYearly, req.EV.TaxYearly); err != nil {
+		if err := validateAmounts(req.Tracked.PurchasePrice, req.Tracked.ResaleValue, req.Tracked.MaintenanceYearly, req.Tracked.InsuranceYearly, req.Tracked.TaxYearly); err != nil {
 			return err
 		}
 	}
@@ -126,7 +126,7 @@ func (r *SaveComparisonRequest) toScenario(userID string) *models.ComparisonScen
 		AnnualKm:  r.AnnualKm,
 		Years:     r.Years,
 		ICE:       r.ICE,
-		EV:        r.EV,
+		Tracked:   r.Tracked,
 		Options:   r.Options,
 	}
 }
@@ -228,5 +228,6 @@ func (h *ComparisonHandler) Defaults(w http.ResponseWriter, r *http.Request) {
 		writeRepoError(w, r, err, "Failed to compute defaults")
 		return
 	}
+	d.ForCurrency(r.URL.Query().Get("currency"))
 	writeJSON(w, http.StatusOK, d)
 }

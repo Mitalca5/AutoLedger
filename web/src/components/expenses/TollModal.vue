@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import { formatDistance } from '@/units'
 import { computed, ref, watch } from 'vue'
@@ -9,7 +10,8 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Receipt, X, CheckSquare, Square, Paperclip, FileText, Eye } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import AppDropzone from '@/components/AppDropzone.vue'
-import { CURRENCIES, countUnlistedDrives, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
+import { currencySymbol } from '@/currency'
+import { countUnlistedDrives, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
 import { formatDayTime } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useSubmit } from '@/composables/useSubmit'
@@ -209,19 +211,14 @@ const handleCreateToll = () => runOnce(handleCreateTollAction)
             </select>
           </div>
           <div>
-            <label for="toll-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.amount') }}</label>
-            <div class="flex gap-1.5">
-              <input id="toll-form-amount" v-model="tollForm.amount" type="number" step="0.01" min="0.01" required placeholder="0.00" class="field" />
-              <label for="toll-form-currency" class="sr-only">{{ $t('expenses.tollModal.currency') }}</label>
-              <select id="toll-form-currency" v-model="tollForm.currency" class="field">
-                <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
-              </select>
-            </div>
+            <label for="toll-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.amount') }} ({{ currencySymbol(tollForm.currency) }})</label>
+            <NumberInput text id="toll-form-amount" v-model="tollForm.amount" min="0.01" required placeholder="0.00" class="field" />
+
           </div>
         </div>
         <div v-if="tollForm.currency !== baseCurrency">
           <label for="toll-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.tollModal.conversionRate1', { currency: tollForm.currency, base: baseCurrency }) }}</label>
-          <input id="toll-form-fx-rate" v-model="tollForm.fx_rate" type="number" step="0.000001" min="0.000001" required :placeholder="$t('common.example', { value: $n(1.05) })" class="field" />
+          <NumberInput text id="toll-form-fx-rate" v-model="tollForm.fx_rate" min="0.000001" required :placeholder="$t('common.example', { value: $n(1.05) })" class="field" />
         </div>
 
         <!-- Association à un/des trajets TeslaMate -->

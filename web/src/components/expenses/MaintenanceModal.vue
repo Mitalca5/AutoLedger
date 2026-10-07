@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, nextTick, ref, watch } from 'vue'
@@ -10,7 +11,7 @@ import { currencySymbol, formatAmount } from '@/currency'
 import { ChevronDown, Wrench, X, Paperclip, FileText, Eye } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import AppDropzone from '@/components/AppDropzone.vue'
-import { CURRENCIES, currencyPayload, defaultAmortizationMode, findCloseCandidate, formatDate, recentDescriptions } from '@/utils/expenses'
+import { currencyPayload, defaultAmortizationMode, findCloseCandidate, formatDate, recentDescriptions } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -272,11 +273,9 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
           <div class="flex items-end gap-2">
             <div class="flex-1">
               <label for="expense-insurance-annual" class="block text-xs font-semibold text-indigo-200 mb-1">{{ $t('expenses.maintenanceModal.annualPremium', { cur: currencySymbol(baseCurrency) }) }}</label>
-              <input
+              <NumberInput text
                 id="expense-insurance-annual"
                 v-model="insuranceAnnualPremium"
-                type="number"
-                step="0.01"
                 min="0"
                 :placeholder="$t('common.example', { value: '850' })"
                 class="field"
@@ -308,19 +307,13 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
             <AppDatePicker id="expense-maint-date" v-model="maintForm.date" required size="sm" />
           </div>
           <div>
-            <label for="maint-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.amount') }}</label>
-            <div class="flex gap-1.5">
-              <input id="maint-form-amount" ref="amountInput" v-model="maintForm.amount" type="number" inputmode="decimal" step="0.01" min="0.01" required class="field" />
-              <label for="maint-form-currency" class="sr-only">{{ $t('expenses.maintenanceModal.currency') }}</label>
-              <select id="maint-form-currency" v-model="maintForm.currency" class="field !w-16 shrink-0 !px-1.5">
-                <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
-              </select>
-            </div>
+            <label for="maint-form-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.amount') }} ({{ currencySymbol(maintForm.currency) }})</label>
+            <NumberInput text id="maint-form-amount" ref="amountInput" v-model="maintForm.amount" min="0.01" required class="field" />
           </div>
         </div>
         <div v-if="maintForm.currency !== baseCurrency">
           <label for="maint-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.maintenanceModal.conversionRate1', { currency: maintForm.currency, base: baseCurrency }) }}</label>
-          <input id="maint-form-fx-rate" v-model="maintForm.fx_rate" type="number" step="0.000001" min="0.000001" required class="field" />
+          <NumberInput text id="maint-form-fx-rate" v-model="maintForm.fx_rate" min="0.000001" required class="field" />
         </div>
 
         <div>

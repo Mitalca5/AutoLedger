@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { computed, ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
@@ -128,8 +129,8 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
         <p class="text-slate-400">{{ $t('dashboard.residualPanel.healthHint') }}</p>
         <form class="flex flex-wrap gap-2 items-end" @submit.prevent="saveReading">
           <input v-model="readingDate" type="date" :aria-label="$t('dashboard.residualPanel.date')" class="w-auto field" />
-          <input v-model="readingPercent" type="number" min="1" max="100" step="0.1" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 field" />
-          <input v-model="readingMax" type="number" min="1" step="0.1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 field" />
+          <NumberInput text v-model="readingPercent" min="1" max="100" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 field" />
+          <NumberInput text v-model="readingMax" min="1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 field" />
           <button type="submit" class="px-3 py-2 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!readingPercent && !readingMax" :title="!readingPercent && !readingMax ? $t('dashboard.residualPanel.readingRequired') : undefined">{{ $t('dashboard.residualPanel.addReading') }}</button>
         </form>
         <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
@@ -155,8 +156,8 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
             <label class="text-slate-400">{{ $t('dashboard.residualPanel.kmShare') }}
               <input v-model="kmShare" type="number" min="0" max="100" step="5" class="block w-24 field" @change="loadResidual" />
             </label>
-            <label v-if="showBattery" class="text-slate-400">{{ $t('dashboard.residualPanel.healthWeight') }}
-              <input v-model="healthWeight" type="number" min="0" max="2" step="0.1" class="block w-24 field" @change="loadResidual" />
+            <label v-if="showBattery" for="residual-health-weight" class="text-slate-400">{{ $t('dashboard.residualPanel.healthWeight') }}
+              <NumberInput id="residual-health-weight" text v-model="healthWeight" min="0" max="2" class="block w-24 field" @change="loadResidual" />
             </label>
           </div>
         </details>

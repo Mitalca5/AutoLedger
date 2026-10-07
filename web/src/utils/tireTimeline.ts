@@ -198,3 +198,20 @@ export function tickStep(maxKm: number): number {
   if (maxKm <= 60000) return 10000
   return 20000
 }
+
+export interface TimelineTireGroup extends TimelineTireInfo {
+  count: number
+}
+
+/** Merges the tires of a tooltip that read the same (a set of four fitted without wheel positions) into one line with a count. */
+export function groupTimelineTires(tires: TimelineTireInfo[]): TimelineTireGroup[] {
+  const groups = new Map<string, TimelineTireGroup>()
+  for (const tire of tires) {
+    const wheel = (WHEELS as readonly string[]).includes(tire.position)
+    const key = wheel ? `${tire.tireId}|${tire.position}` : [tire.position, tire.label, tire.dimension, tire.season, tire.mountedDate, tire.dismountedDate, tire.ongoing].join('|')
+    const group = groups.get(key)
+    if (group) group.count++
+    else groups.set(key, { ...tire, count: 1 })
+  }
+  return [...groups.values()]
+}

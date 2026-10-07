@@ -7,6 +7,10 @@ export const MOUNTED_POSITIONS = ['FL', 'FR', 'RL', 'RR'] as const
 
 export const isMountedPosition = (position: string): boolean => (MOUNTED_POSITIONS as readonly string[]).includes(position)
 
+/** Name of the wheel a session sat on; a finished session recorded without one reads as unspecified. */
+export const positionLabel = (position: string): string =>
+  isMountedPosition(position) ? t(`tires.wheels.${position}`) : t('tires.positionUnspecified')
+
 export function getConditionBadge(condition: string) {
   switch (condition) {
     case 'GOOD':
@@ -68,6 +72,12 @@ export function getLastDismountInfo(tires: any[], tireId: string) {
     }
   }
   return null
+}
+
+/** Day of the most recent removal among a tire's sessions (YYYY-MM-DD), or null when it was never fitted and removed. */
+export function lastUsedDay(sessions: { dismounted_date?: string | null }[] | null | undefined): string | null {
+  const days = (sessions ?? []).filter((s) => s.dismounted_date).map((s) => toIsoDay(s.dismounted_date as string))
+  return days.reduce<string | null>((latest, day) => (latest === null || day > latest ? day : latest), null)
 }
 
 /** The tires a copy or duplication targets by default: same brand and model when there are some, otherwise every other tire. */

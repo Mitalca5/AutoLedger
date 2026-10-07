@@ -35,8 +35,9 @@
     "efficiency": "Efficiency",
     "estimate": "Estimate",
     "energyTitle": "Energy",
-    "energySubtitle": "Consumption, charging sessions and fallback estimate",
-    "fixedCosts": "Fixed costs"
+    "energySubtitle": "Consumption, charging sessions and fill-ups",
+    "fixedCosts": "Fixed costs",
+    "fillUps": "Fill-ups"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF or image (Supercharger receipt, public charger, etc.).",
@@ -48,7 +49,6 @@
     "receiptInvoice": "Receipt / Invoice",
     "notesOptional": "Notes (optional)",
     "conversionRate1": "Conversion rate (1 {currency} = ? {base})",
-    "currency": "Currency",
     "000IfFree": "0.00 if free",
     "cost": "Cost",
     "odometerOptional": "Odometer (optional)",
@@ -59,7 +59,9 @@
     "teslamateChargeOfKwhThe": "TeslaMate charge of {date} (+{kwh_added} kWh). The cost entered here will not be overwritten by the synchronizations.",
     "newCharge": "New charge",
     "editCharge": "Edit the charge",
-    "chargeCost": "Cost of the charge"
+    "chargeCost": "Cost of the charge",
+    "start": "Charge start",
+    "endOptional": "Charge end (optional)"
   },
   "chargesPanel": {
     "chargeSShownOutOf": "{length} charge(s) shown out of {chargesTotal}",
@@ -154,7 +156,6 @@
     "detectingTheMileage": "Detecting the mileage...",
     "odometerKm": "Odometer ({unit})",
     "conversionRate1": "Conversion rate (1 {currency} = ? {base})",
-    "currency": "Currency",
     "amount": "Amount",
     "eGCabinFilterReplacement": "e.g. Cabin filter replacement",
     "description": "Description",
@@ -331,7 +332,6 @@
     "noDrive": "No drive",
     "attachToATeslamateDrive": "Attach to a drive",
     "conversionRate1": "Conversion rate (1 {currency} = ? {base})",
-    "currency": "Currency",
     "amount": "Amount",
     "other": "Other",
     "ferry": "Ferry",

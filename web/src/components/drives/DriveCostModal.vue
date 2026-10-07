@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import { t } from '@/i18n'
 import { computed, ref, watch } from 'vue'
@@ -678,7 +679,7 @@ async function handleDeleteExpense(exp: any) {
                   <option value="OTHER">{{ $t('drives.driveCostModal.other') }}</option>
                 </select>
                 <label :for="`drive-expense-amount-${exp.id}`" class="sr-only">{{ $t('drives.driveCostModal.totalAmount') }}</label>
-                <input :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" type="number" step="0.01" min="0.01" class="field col-span-3" />
+                <NumberInput text :id="`drive-expense-amount-${exp.id}`" v-model="expenseEditForm.amount" min="0.01" class="field col-span-3" />
                 <label :for="`drive-expense-notes-${exp.id}`" class="sr-only">{{ $t('common.notes') }}</label>
                 <input :id="`drive-expense-notes-${exp.id}`" v-model="expenseEditForm.notes" :placeholder="$t('common.notes')" class="field col-span-4" />
                 <button @click="handleSaveExpenseEdit(exp)" class="col-span-1 p-1 text-success-400 hover:text-success-300" :title="$t('common.save')" :aria-label="$t('common.save')">
@@ -753,10 +754,8 @@ async function handleDeleteExpense(exp: any) {
                 <option value="FERRY">{{ $t('drives.driveCostModal.ferry') }}</option>
               </select>
               <label for="drive-inline-toll-amount" class="sr-only">{{ $t('drives.driveCostModal.amount', { cur: currencySymbol(vehicleCurrency) }) }}</label>
-              <input id="drive-inline-toll-amount"
+              <NumberInput text id="drive-inline-toll-amount"
                 v-model="inlineTollAmount"
-                type="number"
-                step="0.01"
                 :placeholder="$t('drives.driveCostModal.amount', { cur: currencySymbol(vehicleCurrency) })"
                 class="field"
               />

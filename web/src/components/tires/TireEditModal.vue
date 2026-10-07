@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -200,7 +201,7 @@ const handleSaveTireEdit = () => runOnce(handleSaveTireEditAction)
           </div>
           <div>
             <label for="tire-edit-price" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.price', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-            <input id="tire-edit-price" v-model.number="tireEditForm.price" type="number" step="0.01" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+            <NumberInput id="tire-edit-price" v-model="tireEditForm.price" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
           </div>
           <div>
             <label for="tire-edit-lifespan" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.estimatedLifespanKm', { unit: distanceUnit() }) }}</label>
@@ -208,11 +209,11 @@ const handleSaveTireEdit = () => runOnce(handleSaveTireEditAction)
           </div>
           <div>
             <label for="tire-edit-initial-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.newDepthMm') }}</label>
-            <input id="tire-edit-initial-depth" v-model.number="tireEditForm.initial_depth_mm" type="number" step="0.1" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+            <NumberInput id="tire-edit-initial-depth" v-model="tireEditForm.initial_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
           </div>
           <div>
             <label for="tire-edit-min-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.minimumDepthMm') }}</label>
-            <input id="tire-edit-min-depth" v-model.number="tireEditForm.min_legal_depth_mm" type="number" step="0.1" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+            <NumberInput id="tire-edit-min-depth" v-model="tireEditForm.min_legal_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
           </div>
           <div>
             <label for="tire-edit-initial-distance" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.kmBeforeTrackingUsed', { unit: distanceUnit() }) }}</label>

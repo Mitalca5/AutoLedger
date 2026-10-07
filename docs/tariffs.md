@@ -43,4 +43,10 @@ name (case-insensitive) are versions of one tariff: the version whose range cove
 new price is added as a new plan and never changes costs already stored. A session on a day no version covers is
 left to the manual cost entry.
 
+## Where the plan prices a session
+
+- Sessions pushed by Home Assistant or a script without a cost, and pending charges assigned to a vehicle, use the plan of the vehicle on the day the session started.
+- The charge form (Energy → Charges → Add) prices a session the same way as soon as the start, the optional end and the energy are filled: `POST /api/tariffs/calculate-session` with `vehicle_id`, `start_time`, `end_time` and `kwh` returns the `cost` and the `plan` name (`null` when no plan prices that day). The form sends instants; the server reads them in `APP_TIMEZONE`, so a session crossing midnight is split between the bands it spends time in. A price or a cost typed by hand replaces the calculation.
+- The same calculation fills the cost of a synchronised charge that has none, from its recorded start and end.
+
 `standing_charge_cents` records an optional monthly standing charge for the plan.

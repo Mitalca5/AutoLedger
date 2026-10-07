@@ -91,11 +91,12 @@ func (s *TCOService) computeMonthlyTireAmortization(ctx context.Context, vehicle
 		return nil, err
 	}
 
-	// 2. Fetch all mount sessions to incorporate smoothed mileage and manual session distances
+	// 2. Fetch all mount sessions to incorporate smoothed mileage and manual session distances.
+	// A finished session recorded without a wheel (position STORAGE) was still driven on.
 	sessionRows, err := s.pool.Query(ctx, `
 		SELECT s.tire_id::text, s.mounted_date, COALESCE(s.dismounted_date, $2), s.distance_km
 		FROM tire_mount_sessions s
-		WHERE s.vehicle_id = $1 AND s.position IN ('FL', 'FR', 'RL', 'RR');
+		WHERE s.vehicle_id = $1 AND (s.position IN ('FL', 'FR', 'RL', 'RR') OR s.dismounted_date IS NOT NULL);
 	`, vehicleID, now)
 	if err != nil {
 		return nil, err

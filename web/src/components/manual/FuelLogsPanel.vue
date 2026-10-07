@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
@@ -277,15 +278,15 @@ onMounted(load)
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label for="fuel-amount" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.amount', { cur: currencySymbol(currency) }) }}</label>
-            <input id="fuel-amount" v-model.number="form.amount" type="number" inputmode="decimal" min="0.01" step="0.01" class="field" />
+            <NumberInput id="fuel-amount" v-model="form.amount" min="0.01" class="field" />
           </div>
           <div>
             <label for="fuel-liters" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.litres') }}</label>
-            <input id="fuel-liters" v-model.number="form.liters" type="number" inputmode="decimal" min="0.01" step="0.01" class="field" />
+            <NumberInput id="fuel-liters" v-model="form.liters" min="0.01" class="field" />
           </div>
           <div>
             <label for="fuel-price" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('manual.fuelLogsPanel.priceL', { cur: currencySymbol(currency) }) }}</label>
-            <input id="fuel-price" v-model.number="form.price_per_liter" type="number" inputmode="decimal" min="0.001" step="0.001" class="field" />
+            <NumberInput id="fuel-price" v-model="form.price_per_liter" min="0.001" class="field" />
           </div>
         </div>
         <p class="text-xs text-slate-400 -mt-1.5">

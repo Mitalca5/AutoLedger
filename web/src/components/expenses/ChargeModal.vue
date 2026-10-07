@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
@@ -8,11 +9,15 @@ import { useDocumentAttach } from '@/composables/useDocumentAttach'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, X, Paperclip, FileText, Eye, UploadCloud, Calculator } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { CURRENCIES, currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
+import { currencyPayload, formatDate, toLocalDateTimeInput } from '@/utils/expenses'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
+import ChargeAmountFields from '@/components/charges/ChargeAmountFields.vue'
+import { loadMemory, rememberCharge } from '@/utils/quickAdd'
 import PublicChargeCalculatorModal from '@/components/expenses/PublicChargeCalculatorModal.vue'
 import { formatNumber } from '@/utils/numbers'
 import { useSubmit } from '@/composables/useSubmit'
+import { useSessionTariffCost } from '@/composables/useSessionTariffCost'
+import { sessionPriceRequest } from '@/utils/tariffSession'
 
 // Records a charge made outside TeslaMate, or completes / corrects the cost of `editing`.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[]; currentOdometer: number }>()
@@ -36,6 +41,7 @@ const baseCurrency = computed(() => vehicleStore.currency)
 
 const chargeForm = ref({
   date: toLocalDateTimeInput(new Date()),
+  end_date: '',
   kwh_added: '',
   cost: '',
   currency: baseCurrency.value,
@@ -47,7 +53,15 @@ const chargeForm = ref({
   document_filename: null as string | null,
 })
 
+// The vehicle's tariff prices a session that has no cost yet from its hours, whether it was typed here or synchronised
+const pricesFromTariff = computed(() => open.value && !(editingCharge.value && editingCharge.value.cost !== null && editingCharge.value.cost !== undefined))
+const tariffCost = useSessionTariffCost(
+  () => sessionPriceRequest(props.vehicleId, chargeForm.value.date, chargeForm.value.end_date, chargeForm.value.kwh_added),
+  pricesFromTariff,
+)
+
 const showPublicCalc = ref(false)
+const suggestedPrice = computed(() => (editingCharge.value ? undefined : loadMemory(props.vehicleId).pricePerKwh))
 
 function handleApplyPublicCalc(cost: number, calculatedKwh?: number, summaryNote?: string) {
   chargeForm.value.cost = cost.toFixed(2)
@@ -69,6 +83,7 @@ watch(open, (isOpen) => {
   if (!c) {
     chargeForm.value = {
       date: toLocalDateTimeInput(new Date()),
+      end_date: '',
       kwh_added: '',
       cost: '',
       currency: baseCurrency.value,
@@ -82,6 +97,7 @@ watch(open, (isOpen) => {
   } else {
     chargeForm.value = {
       date: toLocalDateTimeInput(new Date(c.date)),
+      end_date: c.end_date ? toLocalDateTimeInput(new Date(c.end_date)) : '',
       kwh_added: String(c.kwh_added),
       cost: c.cost !== null && c.cost !== undefined ? String(c.cost) : '',
       currency: c.currency || baseCurrency.value,
@@ -101,6 +117,7 @@ async function handleSaveChargeAction() {
   if (!props.vehicleId) return
   const payload = {
     date: new Date(chargeForm.value.date).toISOString(),
+    end_date: chargeForm.value.end_date ? new Date(chargeForm.value.end_date).toISOString() : null,
     kwh_added: Number(chargeForm.value.kwh_added),
     cost: Number(chargeForm.value.cost),
     ...currencyPayload(chargeForm.value, baseCurrency.value),
@@ -114,6 +131,7 @@ async function handleSaveChargeAction() {
       await api.updateCharge(props.vehicleId, editingCharge.value.id, payload)
     } else {
       await api.createCharge(props.vehicleId, payload)
+      rememberCharge(props.vehicleId, { kwh: payload.kwh_added, cost: payload.cost, address: payload.address })
     }
     open.value = false
     emit('saved')
@@ -148,15 +166,13 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
 
       <form id="charge-modal-form" @submit.prevent="handleSaveCharge" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
         <template v-if="!editingCharge || editingCharge.is_manual">
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.dateAndTime') }}</label>
-              <AppDatePicker id="charge-form-date" v-model="chargeForm.date" enable-time-picker required size="xs" />
-            </div>
-            <div>
-              <label for="charge-form-kwh-added" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.energyAddedKwh') }}</label>
-              <input id="charge-form-kwh-added" v-model="chargeForm.kwh_added" type="number" inputmode="decimal" step="0.001" min="0.001" required class="field" />
-            </div>
+          <div>
+            <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.start') }}</label>
+            <AppDatePicker id="charge-form-date" v-model="chargeForm.date" enable-time-picker required size="xs" />
+          </div>
+          <div>
+            <label for="charge-form-end" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.endOptional') }}</label>
+            <AppDatePicker id="charge-form-end" v-model="chargeForm.end_date" enable-time-picker clearable size="xs" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -170,9 +186,17 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
           </div>
         </template>
 
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label for="charge-form-cost" class="block text-xs font-semibold text-slate-300">{{ $t('expenses.chargeModal.cost') }}</label>
+        <ChargeAmountFields
+          v-model:kwh="chargeForm.kwh_added"
+          v-model:cost="chargeForm.cost"
+          id-prefix="charge-form"
+          required
+          :hide-energy="!!editingCharge && !editingCharge.is_manual"
+          :currency="chargeForm.currency"
+          :suggested-price="suggestedPrice"
+          :tariff="tariffCost"
+        >
+          <template #cost-action>
             <button
               type="button"
               @click="showPublicCalc = true"
@@ -181,18 +205,11 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
               <Calculator class="w-3.5 h-3.5" />
               {{ $t('tariffs.publicModal.openCalculator') }}
             </button>
-          </div>
-          <div class="flex gap-1.5">
-            <input id="charge-form-cost" v-model="chargeForm.cost" type="number" inputmode="decimal" step="0.01" min="0" required :placeholder="$t('expenses.chargeModal.000IfFree')" class="field" />
-            <label for="charge-form-currency" class="sr-only">{{ $t('expenses.chargeModal.currency') }}</label>
-            <select id="charge-form-currency" v-model="chargeForm.currency" class="field">
-              <option v-for="cur in CURRENCIES" :key="cur" :value="cur">{{ cur }}</option>
-            </select>
-          </div>
-        </div>
+          </template>
+        </ChargeAmountFields>
         <div v-if="chargeForm.currency !== baseCurrency">
           <label for="charge-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.conversionRate1', { currency: chargeForm.currency, base: baseCurrency }) }}</label>
-          <input id="charge-form-fx-rate" v-model="chargeForm.fx_rate" type="number" inputmode="decimal" step="0.000001" min="0.000001" required class="field" />
+          <NumberInput text id="charge-form-fx-rate" v-model="chargeForm.fx_rate" min="0.000001" required class="field" />
         </div>
         <div>
           <label for="charge-form-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.notesOptional') }}</label>

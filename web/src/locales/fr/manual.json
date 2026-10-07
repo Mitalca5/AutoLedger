@@ -1,12 +1,8 @@
 {
   "manualTrackingView": {
     "addAVehicleFirst": "Ajoutez d'abord un véhicule.",
-    "manualTracking": "Saisie manuelle",
-    "subtitle": "Kilométrage et {what} saisis à la main",
-    "fillUps": "pleins",
+    "manualTracking": "Kilométrage",
     "independent": ". Chaque saisie est indépendante.",
-    "mileage": "Kilométrage",
-    "energyTab": "Énergie",
     "subtitleMileage": "Kilométrage saisi à la main"
   },
   "estimatedEnergyPanel": {

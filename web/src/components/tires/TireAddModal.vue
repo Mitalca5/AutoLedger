@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, nextTick, ref, watch } from 'vue'
@@ -325,10 +326,8 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
         </div>
         <div>
           <label for="tire-add-tire-initial-depth-mm" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.newTreadMm') }}</label>
-          <input id="tire-add-tire-initial-depth-mm"
-            v-model.number="addTireForm.initial_depth_mm"
-            type="number"
-            step="0.1"
+          <NumberInput id="tire-add-tire-initial-depth-mm"
+            v-model="addTireForm.initial_depth_mm"
             :placeholder="$t('common.example', { value: $n(8) })"
             :aria-invalid="errors.initial_depth_mm ? 'true' : undefined"
             aria-describedby="tire-add-error-depth"
@@ -338,10 +337,8 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
         </div>
         <div>
           <label for="tire-add-tire-min-legal-depth-mm" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('tires.tireAddModal.legalWearIndicatorMm') }}</label>
-          <input id="tire-add-tire-min-legal-depth-mm"
-            v-model.number="addTireForm.min_legal_depth_mm"
-            type="number"
-            step="0.1"
+          <NumberInput id="tire-add-tire-min-legal-depth-mm"
+            v-model="addTireForm.min_legal_depth_mm"
             class="field"
           />
         </div>

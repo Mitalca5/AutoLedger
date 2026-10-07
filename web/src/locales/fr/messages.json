@@ -15,6 +15,8 @@
     "sensitivity": {
       "fuel_down": "Carburant −20 %",
       "fuel_up": "Carburant +20 %",
+      "electricity_down": "Électricité −20 %",
+      "electricity_up": "Électricité +20 %",
       "km_down": "Kilométrage −20 %",
       "km_up": "Kilométrage +20 %"
     },
@@ -22,16 +24,21 @@
       "usage": "{p0} {unit}/an pendant {p1} an(s), même usage pour les deux véhicules",
       "depreciation": "Dépréciation = (prix d'achat − revente) répartie linéairement sur la période",
       "no_financing": "Financement, crédit et location non inclus",
-      "break_even": "Le point d'équilibre compare les décaissements cumulés (achat + coûts d'usage), sans la revente",
+      "break_even": "Le point d'équilibre compare les décaissements cumulés (achat + coûts d'usage) ; un second chiffre crédite chaque véhicule de sa valeur de revente linéaire",
+      "purchase_basis": "Véhicule suivi à son coût d'acquisition réel, alternative thermique au prix d'achat saisi : les deux sont comparés tels quels",
       "inflation": "Inflation annuelle : carburant {p0} %, électricité {p1} %, entretien/assurance/taxes {p2} %",
       "constant_prices": "Prix constants (aucune inflation appliquée)",
-      "ev_actual": "Côté référence : énergie, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance à partir des primes annuelles",
-      "insurance_estimated": "Paiements d’assurance sans période de couverture : les paiements des 12 derniers mois servent d’estimation annuelle",
-      "insurance_expired": "Les paiements d’assurance historiques ne couvrent plus la période actuelle : assurance non projetée ; saisissez la prime actuelle",
-      "ev_price_unknown": "Prix d'achat de référence inconnu (location ou saisie manquante) : dépréciation non incluse",
-      "ev_no_distance": "Aucun kilométrage suivi : les coûts enregistrés ne permettent pas un comparatif fiable"
+      "ev_actual": "Côté électrique : énergie, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance et taxes à partir de montants annuels",
+      "costs_excluded": "Péages, stationnement, abonnements et autres coûts ne sont pas comparés : le thermique n'a pas de saisie correspondante",
+      "insurance_estimated": "Paiements d'assurance sans période de couverture : les paiements des 12 derniers mois servent d'estimation annuelle",
+      "insurance_expired": "Les paiements d'assurance historiques ne couvrent plus la période actuelle : assurance non projetée ; saisissez la prime actuelle",
+      "ev_price_unknown": "Prix d'achat du véhicule suivi inconnu (location ou saisie manquante) : dépréciation non incluse",
+      "ev_no_distance": "Aucun kilométrage suivi : les coûts enregistrés ne permettent pas un comparatif fiable",
+      "hybrid_actual": "Côté hybride : carburant, électricité, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance et taxes à partir de montants annuels",
+      "hybrid_missing_energy_source": "Cet hybride n'a que des pleins ou que des recharges enregistrés : son coût d'énergie est incomplet, le comparatif est sous-estimé"
     },
-    "defaults_source": "Valeurs indicatives pour la France, à ajuster"
+    "defaults_source": "Valeurs indicatives pour la France, à ajuster",
+    "defaults_source_no_prices": "Pas de prix indicatifs pour cette devise : saisissez les vôtres"
   },
   "tire": {
     "wear_explanation": "{p0}, {p1} : pointes de puissance moyennes de +{p2} kW et {p3} kW en régénération, consommation {p4} kWh/100 {unit}. Indice de contrainte : x{p5} (longévité estimée ajustée à ~{p6} {unit})."

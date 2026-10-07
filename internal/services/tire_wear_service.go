@@ -266,7 +266,7 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 		// Parameters: style and axle are keywords the front end translates.
 		wearExplanation = apierror.NewMessagef("tire.wear_explanation",
 			"%s driving, %s axle: average power peaks of +%.0f kW and %.0f kW in regeneration, consumption %.1f kWh/100km. Stress index: x%.2f (estimated lifespan adjusted to ~%.0f km).",
-			style, axle, avgPowerMax, avgPowerMin, apierror.PerKm(avgConsumption), stressIndex, apierror.Km(dynamicLifespan),
+			style, axle, math.Round(avgPowerMax), math.Round(avgPowerMin), apierror.PerKm(math.Round(avgConsumption*10)/10), stressIndex, apierror.Km(dynamicLifespan),
 		)
 	}
 

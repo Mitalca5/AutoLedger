@@ -74,7 +74,7 @@ Quand un en-tête n'est pas reconnu, la fenêtre d'import affiche chaque colonne
 Le cœur n'a pas d'analyseur propre à une application. Un journal de trajets ou de pleins exporté par une application OBD2 s'importe via un profil, configuré une seule fois.
 
 1. Exportez le journal de l'application en CSV (Car Scanner : journal des *trajets* ou du *carburant*, Torque : *journal de trajets*).
-2. Ouvrez **Suivi manuel → Importer un CSV**, choisissez le fichier et le type (`Trajets` pour les trajets, `Pleins` pour les journaux de carburant).
+2. Ouvrez **Kilométrage → Importer un CSV** (ou **Énergie → Pleins → Importer CSV**), choisissez le fichier et le type (`Trajets` pour les trajets, `Pleins` pour les journaux de carburant).
 3. À l'étape de correspondance, associez les colonnes de l'application aux champs. Correspondances usuelles :
 
    | Colonne de l'application (exemple) | Champ AutoLedger |

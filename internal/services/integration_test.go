@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -1686,7 +1687,7 @@ func TestIntegrationComparisonScenarios(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.EV != nil || got.Options.FuelInflationPct != 2 || got.ICE.FuelPrice != 1.8 || got.ICE.PurchasePrice != money.FromFloat(30000) {
+	if got.Tracked != nil || got.Options.FuelInflationPct != 2 || got.ICE.FuelPrice != 1.8 || got.ICE.PurchasePrice != money.FromFloat(30000) {
 		t.Fatalf("round trip mismatch: %+v", got)
 	}
 
@@ -1704,8 +1705,8 @@ func TestIntegrationComparisonScenarios(t *testing.T) {
 		t.Fatalf("comparison changed the TCO: %v -> %v", before.TotalCost, after.TotalCost)
 	}
 	// EV energy: 0.10 EUR/km (600 EUR / 6000 km) * 15000 km * 5 years = 7500 EUR.
-	if res.EV.Energy != money.FromFloat(7500) {
-		t.Errorf("EV energy = %v, want 7500 from the real charge cost", res.EV.Energy)
+	if res.Tracked.Energy != money.FromFloat(7500) {
+		t.Errorf("EV energy = %v, want 7500 from the real charge cost", res.Tracked.Energy)
 	}
 	if res.ICE.Energy <= money.FromFloat(7*1.8/100*15000*5) { // inflation makes it higher than the flat figure
 		t.Errorf("ICE energy = %v, expected fuel inflation to apply", res.ICE.Energy)
@@ -1715,14 +1716,14 @@ func TestIntegrationComparisonScenarios(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.EVEurPerKwh == nil || *d.EVEurPerKwh != 0.25 || len(d.ICE) == 0 {
+	if d.TrackedEurPerKwh == nil || *d.TrackedEurPerKwh != 0.25 || len(d.ICE) == 0 {
 		t.Errorf("unexpected defaults: %+v", d)
 	}
 
 	// PROJECTION scenarios need EV inputs and no vehicle; other users cannot read them.
 	proj := &models.ComparisonScenario{
 		UserID: v.UserID, Name: "Projection", Mode: models.ComparisonModeProjection, AnnualKm: 12000, Years: 4,
-		ICE: sc.ICE, EV: &models.EVInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: money.FromFloat(38000), ResaleValue: money.FromFloat(18000)},
+		ICE: sc.ICE, Tracked: &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 0.2, PurchasePrice: money.FromFloat(38000), ResaleValue: money.FromFloat(18000)},
 	}
 	if err := repo.CreateComparisonScenario(ctx, proj); err != nil {
 		t.Fatal(err)
@@ -1847,7 +1848,7 @@ func TestIntegrationICEVehicleFuelLogs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.ICELPer100Km == nil || *d.ICELPer100Km != 5.545 || d.ICEFuelPrice == nil || d.EVKwhPer100Km != nil {
+	if d.ICELPer100Km == nil || *d.ICELPer100Km != 5.545 || d.ICEFuelPrice == nil || d.TrackedKwhPer100Km != nil {
 		t.Errorf("ICE defaults: %+v", d)
 	}
 
@@ -2452,13 +2453,23 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 		fuel := snapshot.FuelEnergyCost.Float()
 		electricity := (snapshot.EnergyCost - snapshot.FuelEnergyCost).Float()
 		want := money.FromFloat(fuel*2.1 + electricity*2.2)
-		if result.EV.Energy != want {
-			t.Errorf("%s energy = %v, want %v", v.Name, result.EV.Energy, want)
+		if result.Tracked.Energy != want {
+			t.Errorf("%s energy = %v, want %v", v.Name, result.Tracked.Energy, want)
 		}
 	}
 	d, err := svc.Defaults(ctx, both.ID)
-	if err != nil || d.EVKwhPer100Km != nil || d.ICELPer100Km != nil {
+	if err != nil || d.TrackedKwhPer100Km != nil || d.ICELPer100Km != nil {
 		t.Errorf("hybrid defaults must not mix energies: %+v (%v)", d, err)
+	}
+	// Both references start from the prices the hybrid paid: 120 over 70 L, 10 over 50 kWh.
+	if d.ICEFuelPrice == nil || math.Abs(*d.ICEFuelPrice-120.0/70) > 0.001 || d.TrackedEurPerKwh == nil || *d.TrackedEurPerKwh != 0.2 {
+		t.Errorf("hybrid price defaults: fuel=%v electricity=%v", d.ICEFuelPrice, d.TrackedEurPerKwh)
+	}
+	if d, err = svc.Defaults(ctx, fuelOnly.ID); err != nil || d.ICEFuelPrice == nil || d.TrackedEurPerKwh != nil {
+		t.Errorf("fuel-only hybrid must prefill the fuel price only: %+v (%v)", d, err)
+	}
+	if d, err = svc.Defaults(ctx, chargeOnly.ID); err != nil || d.ICEFuelPrice != nil || d.TrackedEurPerKwh == nil || *d.TrackedEurPerKwh != 0.2 {
+		t.Errorf("charge-only hybrid must prefill the electricity price only: %+v (%v)", d, err)
 	}
 }
 
@@ -2515,6 +2526,41 @@ func TestIntegrationUnmountedTireWithoutSessionCounts(t *testing.T) {
 	}
 	if sum.TiresAmortizedCost != 40000 || booked != 40000 {
 		t.Fatalf("expected the paid, never mounted tire counted in full, got total %s and monthly %s", sum.TiresAmortizedCost, booked)
+	}
+}
+
+func TestIntegrationHistoricalSessionWithoutWheelIsAmortizedMonthly(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	tco := NewTCOService(db.Pool, "UTC")
+	v := mustVehicle(t, repo, "historical@example.com")
+	v.CurrentOdometer = 20000
+	if err := repo.UpdateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	tire := &models.Tire{VehicleID: &v.ID, Brand: "B", Model: "Winter", Dimension: "205/55 R16", Season: models.TireSeasonWinter,
+		PurchaseDate: time.Now().UTC().AddDate(-1, 0, 0), PurchasePrice: 40000, CurrentPosition: models.TirePosStorage,
+		InitialDepthMm: 8, MinLegalDepthMm: 1.6, EstimatedLifespanKm: 40000}
+	if err := repo.CreateTire(ctx, tire); err != nil {
+		t.Fatal(err)
+	}
+	mounted := time.Now().UTC().AddDate(0, -6, 0)
+	dismounted := time.Now().UTC().AddDate(0, -3, 0)
+	end := 10000.0
+	if err := repo.CreateTireMountSession(ctx, &models.TireMountSession{TireID: tire.ID, VehicleID: v.ID, Position: models.TirePosStorage,
+		MountedDate: mounted, MountedOdometer: 4000, DismountedDate: &dismounted, DismountedOdometer: &end, DistanceKm: 6000}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var booked money.Cents
+	for _, m := range sum.MonthlyCosts {
+		booked += m.TiresAmortized
+	}
+	if booked != 6000 {
+		t.Fatalf("expected the 6,000 km driven on a wheel-less historical session amortized monthly, got %s", booked)
 	}
 }
 

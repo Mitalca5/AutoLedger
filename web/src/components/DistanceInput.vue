@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { t } from '@/i18n'
+import { formatDecimalInput, parseDecimal } from '@/utils/numbers'
 import { displayDistanceToKm, kmToDisplayDistance, perDistance, perDistanceToPerKm } from '@/units'
 
 // A number input whose model stays in the API's unit (km, or a figure per km) while the user reads and types
@@ -48,21 +50,37 @@ const displayMax = computed(() => {
 let lastRaw = ''
 let lastEmitted: unknown = Symbol('none')
 
+const input = ref<HTMLInputElement | null>(null)
+
 const shown = computed(() => {
   const v = model.value
   if (v === lastEmitted) return lastRaw
   if (v === '' || v === null || v === undefined || Number.isNaN(Number(v))) return ''
   const factor = 10 ** props.digits
-  return Math.round(toDisplay(Number(v)) * factor) / factor
+  return formatDecimalInput(Math.round(toDisplay(Number(v)) * factor) / factor)
 })
+
+function problem(raw: string): string {
+  if (raw.trim() === '') return ''
+  const n = parseDecimal(raw)
+  if (Number.isNaN(n)) return t('common.numberInvalid')
+  if (displayMin.value !== undefined && n < displayMin.value) return t('common.numberMin', { min: formatDecimalInput(displayMin.value) })
+  if (displayMax.value !== undefined && n > displayMax.value) return t('common.numberMax', { max: formatDecimalInput(displayMax.value) })
+  return ''
+}
+
+const validate = () => input.value?.setCustomValidity(problem(input.value.value))
+onMounted(validate)
+watch([shown, displayMin, displayMax], () => input.value && void Promise.resolve().then(validate))
 
 function onInput(event: Event) {
   const raw = (event.target as HTMLInputElement).value
+  const parsed = parseDecimal(raw)
   let value: number | string
-  if (raw === '' || Number.isNaN(Number(raw))) {
+  if (Number.isNaN(parsed)) {
     value = props.text ? raw : ''
   } else {
-    const converted = toApi(Number(raw))
+    const converted = toApi(parsed)
     // Enough precision for a round trip; integer API fields get a whole number
     const rounded = props.whole ? Math.round(converted) : Math.round(converted * 10000) / 10000
     value = props.text ? String(rounded) : rounded
@@ -70,9 +88,10 @@ function onInput(event: Event) {
   lastRaw = raw
   lastEmitted = value
   model.value = value
+  validate()
 }
 </script>
 
 <template>
-  <input :id="id" type="number" :value="shown" :min="displayMin" :max="displayMax" @input="onInput" />
+  <input :id="id" ref="input" type="text" inputmode="decimal" autocomplete="off" :value="shown" @input="onInput" />
 </template>

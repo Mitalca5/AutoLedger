@@ -241,7 +241,10 @@ func (h *TariffHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 // CalculateSessionCostRequest helper for quick cost test from frontend
 type CalculateSessionCostRequest struct {
-	PlanID    *string   `json:"plan_id"`
+	PlanID *string `json:"plan_id"`
+	// VehicleID prices the session with the tariff of that vehicle on the session day (versions included); it
+	// takes precedence over PlanID.
+	VehicleID string    `json:"vehicle_id"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	Kwh       float64   `json:"kwh"`
@@ -258,7 +261,12 @@ func (h *TariffHandler) Calculate(w http.ResponseWriter, r *http.Request) {
 
 	var plan *models.TariffPlan
 	var err error
-	if req.PlanID != nil && *req.PlanID != "" {
+	if req.VehicleID != "" {
+		if requireVehicleAccess(w, r, h.repo, req.VehicleID, models.RoleViewer) == nil {
+			return
+		}
+		plan, _ = h.repo.GetVehicleTariffPlanAt(r.Context(), req.VehicleID, h.tariffService.DayOf(req.StartTime))
+	} else if req.PlanID != nil && *req.PlanID != "" {
 		plan, err = h.repo.GetTariffPlanByID(r.Context(), *req.PlanID, userID)
 		if err != nil {
 			writeAPIError(w, http.StatusNotFound, apierror.New("tariff.not_found", "Tariff plan not found"))
@@ -274,7 +282,12 @@ func (h *TariffHandler) Calculate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"cost": cost})
+	// plan is null when no tariff prices the session: the client keeps the cost the user types
+	var planName *string
+	if plan != nil && plan.AppliesOn(h.tariffService.DayOf(req.StartTime)) {
+		planName = &plan.Name
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"cost": cost, "plan": planName})
 }
 
 func (h *TariffHandler) CalculatePublic(w http.ResponseWriter, r *http.Request) {

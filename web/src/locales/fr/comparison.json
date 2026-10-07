@@ -3,15 +3,15 @@
     "editTheAssumptions": "Modifier les hypothèses",
     "assumptions": "Hypothèses",
     "sensitivityOfTheGapTo": "Sensibilité de l'écart aux hypothèses",
-    "effectOnTheElectricSaving": "Effet sur l'économie du véhicule de référence quand une hypothèse varie de 20 %.",
+    "effectOnTheElectricSaving": "Effet sur l'économie de l'électrique quand une hypothèse varie de 20 %.",
     "sensitivity": "Sensibilité",
-    "cumulativeCostElectricAndCombustion": "Coût cumulé des véhicules de référence et thermique",
+    "cumulativeCostElectricAndCombustion": "Coût cumulé électrique et thermique",
     "cumulativeCost": "Coût cumulé",
-    "costByCategoryElectricAnd": "Coût par poste des véhicules de référence et thermique",
+    "costByCategoryElectricAnd": "Coût par poste, électrique et thermique",
     "costBreakdownOverThePeriod": "Répartition des coûts sur la période",
     "total": "Total",
     "combustion": "Thermique",
-    "electric": "Véhicule de référence",
+    "electric": "Électrique",
     "category": "Poste",
     "costByCategoryOverYear": "Coût par poste sur {years_count} an(s)",
     "monthKm": "{per_month}/mois · {cost_per_km}/{unit}",
@@ -65,8 +65,8 @@
     "back": "Retour",
     "viewResult": "Voir le résultat",
     "actual": "réel",
-    "evLess": "référence −{amount}",
-    "evMore": "référence +{amount}",
+    "evLess": "électrique −{amount}",
+    "evMore": "électrique +{amount}",
     "title": "Comparatif",
     "deleteTitle": "Supprimer le comparatif",
     "deleteMessage": "Supprimer « {name} » ? Vos données réelles ne sont pas affectées.",
@@ -75,14 +75,14 @@
     "kmPerYear": "{km} {unit}/an"
   },
   "comparisonCompare": {
-    "totalElectricAndCombustionCost": "Coût total des véhicules de référence et thermique par scénario",
+    "totalElectricAndCombustionCost": "Coût total électrique et thermique par scénario",
     "totalCostPerScenario": "Coût total par scénario",
     "month": "{iceMonth}/mois",
     "month2": "{evMonth}/mois",
     "breakEven": "Équilibre",
     "gap": "Écart",
     "combustion": "Thermique",
-    "electric": "Véhicule de référence",
+    "electric": "Électrique",
     "scenario": "Scénario",
     "totalsPerScenario": "Totaux par scénario",
     "exportAsCsv": "Exporter en CSV",
@@ -102,6 +102,8 @@
     "annualKm": "Indiquez un kilométrage annuel.",
     "years": "La durée doit être comprise entre 1 et 15 ans.",
     "trackedNeeded": "Ce mode nécessite un véhicule électrique ou hybride rechargeable suivi : choisissez le mode projection pour un véhicule thermique.",
+    "fuelPrice": "Saisissez le prix du carburant.",
+    "electricityPrice": "Saisissez le prix de l’électricité.",
     "iceConsumption": "Indiquez la consommation du thermique.",
     "icePrice": "Indiquez le prix d'achat du thermique.",
     "evPrice": "Indiquez le prix d'achat de l'électrique.",
@@ -112,12 +114,15 @@
   },
   "verdict": {
     "same": "Sur {count} an, les deux véhicules coûtent autant. | Sur {count} ans, les deux véhicules coûtent autant.",
-    "less": "Sur {count} an, le véhicule de référence vous coûte {amount} de moins. | Sur {count} ans, le véhicule de référence vous coûte {amount} de moins.",
-    "more": "Sur {count} an, le véhicule de référence vous coûte {amount} de plus. | Sur {count} ans, le véhicule de référence vous coûte {amount} de plus."
+    "less": "Sur {count} an, l'électrique vous coûte {amount} de moins. | Sur {count} ans, l'électrique vous coûte {amount} de moins.",
+    "more": "Sur {count} an, l'électrique vous coûte {amount} de plus. | Sur {count} ans, l'électrique vous coûte {amount} de plus."
   },
   "breakEven": {
     "notReached": "Point d'équilibre non atteint sur la période.",
-    "immediate": "Le véhicule de référence est moins cher dès l'achat et le reste.",
+    "immediate": "L'électrique est moins chère dès l'achat et le reste.",
+    "netAfter": "En tenant compte de la revente, point d'équilibre après {years} an(s).",
+    "netNotReached": "En tenant compte de la revente, point d'équilibre non atteint sur la période.",
+    "netImmediate": "En tenant compte de la revente, l'électrique est moins chère à posséder sur toute la période.",
     "after": "Point d'équilibre après {years} an(s) : les économies d'usage compensent l'écart d'achat."
   },
   "rows": {
@@ -130,26 +135,26 @@
   "chart": {
     "purchase": "Achat",
     "year": "An {year}",
-    "gapLabel": "Écart sur l'économie du véhicule de référence",
-    "inFavor": "en faveur du véhicule de référence"
+    "gapLabel": "Écart sur l'économie de l'électrique",
+    "inFavor": "en faveur de l'électrique"
   },
-  "electric": "Véhicule de référence",
+  "electric": "Électrique",
   "combustion": "Thermique",
   "csv": {
     "defaultName": "comparatif",
     "total": "Total",
     "perMonth": "Par mois",
     "costPerKm": "Cout au {unit}",
-    "gap": "Écart en faveur du véhicule de référence",
-    "cumulativeHeader": "Année,Coût cumulé de référence,Coût cumulé thermique",
+    "gap": "Ecart en faveur de l'electrique",
+    "cumulativeHeader": "Annee,Cout cumule electrique,Cout cumule thermique",
     "filePrefix": "comparatif",
-    "header": "Poste,Référence ({cur}),Thermique ({cur})",
+    "header": "Poste,Electrique ({cur}),Thermique ({cur})",
     "scenariosFile": "comparatif-scenarios",
-    "scenariosHeader": "Scénario,Type,Durée (ans),{unit} par an,Total de référence ({cur}),Total thermique ({cur}),Écart en faveur de la référence ({cur}),Point d'équilibre"
+    "scenariosHeader": "Scenario,Type,Duree (ans),{unit} par an,Total electrique ({cur}),Total thermique ({cur}),Ecart en faveur de l'electrique ({cur}),Point d'equilibre"
   },
   "compare": {
-    "saves": "la référence économise",
-    "costsMore": "la référence coûte plus",
+    "saves": "l'électrique économise",
+    "costsMore": "l'électrique coûte plus",
     "notReached": "non atteint",
     "fromPurchase": "dès l'achat",
     "years": "{years} an(s)"
@@ -160,5 +165,56 @@
     "DIESEL": "Gazole",
     "E85": "Éthanol E85",
     "GPL": "GPL"
+  },
+  "hybrid": {
+    "comparisonView": {
+      "effectOnTheElectricSaving": "Effet sur l'économie du véhicule hybride quand une hypothèse varie de 20 %.",
+      "cumulativeCostElectricAndCombustion": "Coût cumulé de l'hybride et du thermique",
+      "costByCategoryElectricAnd": "Coût par poste de l'hybride et du thermique",
+      "electric": "Véhicule hybride",
+      "evLess": "hybride −{amount}",
+      "evMore": "hybride +{amount}"
+    },
+    "comparisonCompare": {
+      "totalElectricAndCombustionCost": "Coût total de l'hybride et du thermique par scénario",
+      "electric": "Véhicule hybride"
+    },
+    "verdict": {
+      "less": "Sur {count} an, le véhicule hybride vous coûte {amount} de moins. | Sur {count} ans, le véhicule hybride vous coûte {amount} de moins.",
+      "more": "Sur {count} an, le véhicule hybride vous coûte {amount} de plus. | Sur {count} ans, le véhicule hybride vous coûte {amount} de plus."
+    },
+    "breakEven": {
+      "immediate": "Le véhicule hybride est moins cher dès l'achat et le reste."
+    },
+    "chart": {
+      "gapLabel": "Écart sur l'économie du véhicule hybride",
+      "inFavor": "en faveur du véhicule hybride"
+    },
+    "electric": "Véhicule hybride",
+    "csv": {
+      "gap": "Écart en faveur du véhicule hybride",
+      "cumulativeHeader": "Année,Coût cumulé hybride,Coût cumulé thermique",
+      "header": "Poste,Hybride ({cur}),Thermique ({cur})",
+      "scenariosHeader": "Scénario,Type,Durée (ans),{unit} par an,Total hybride ({cur}),Total thermique ({cur}),Écart en faveur de l'hybride ({cur}),Point d'équilibre"
+    },
+    "compare": {
+      "saves": "l'hybride économise",
+      "costsMore": "l'hybride coûte plus"
+    }
+  },
+  "savings": {
+    "less": "{percent} % de moins que le véhicule thermique",
+    "more": "{percent} % de plus que le véhicule thermique",
+    "month": "{amount}/mois",
+    "energyLess": "énergie seule : {amount} de moins",
+    "energyMore": "énergie seule : {amount} de plus",
+    "energy": "Économies d’énergie",
+    "total": "Économies totales",
+    "energyExtra": "Surcoût d’énergie",
+    "totalExtra": "Surcoût total",
+    "energyHelp": "Carburant et électricité uniquement.",
+    "totalHelp": "Énergie, entretien et pneus, assurance, taxes et dépréciation.",
+    "reduced": "Les autres coûts réduisent les économies d’énergie de {amount} sur cette période.",
+    "increased": "Les autres coûts améliorent les économies totales de {amount} sur cette période."
   }
 }

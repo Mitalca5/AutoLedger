@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/teslacost/teslacost/internal/apierror"
@@ -18,10 +19,10 @@ const DefaultAnnualKm = 12000
 const minMonthsForAnnualKm = 3
 
 // ErrComparisonNeedsVehicle is returned when a RETROSPECTIVE comparison has no reference vehicle.
-var ErrComparisonNeedsVehicle = errors.New("comparison: retrospective mode requires a vehicle")
+var ErrComparisonNeedsVehicle = apierror.New("comparison.vehicle_required", "A vehicle is required in retrospective mode")
 
 // ErrComparisonNeedsEV is returned when the tracked vehicle cannot record charging sessions.
-var ErrComparisonNeedsEV = errors.New("comparison: retrospective mode requires an electric or plug-in hybrid vehicle")
+var ErrComparisonNeedsEV = apierror.New("comparison.needs_ev", "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle")
 
 // ICEDefault is an indicative starting point for the equivalent combustion vehicle of a given fuel.
 type ICEDefault struct {
@@ -42,17 +43,44 @@ var iceDefaults = []ICEDefault{
 
 // ComparisonDefaults prefills the comparison form. Every ICE value is an editable assumption.
 type ComparisonDefaults struct {
-	AnnualKm          float64           `json:"annual_km"`
-	AnnualKmFromData  bool              `json:"annual_km_from_data"` // False when the default mileage is a fallback
-	EVKwhPer100Km     *float64          `json:"ev_kwh_per_100km,omitempty"`
-	EVEurPerKwh       *float64          `json:"ev_eur_per_kwh,omitempty"`
-	Powertrain        string            `json:"powertrain,omitempty"`      // Of the reference vehicle
-	ICELPer100Km      *float64          `json:"ice_l_per_100km,omitempty"` // Measured on a tracked combustion vehicle
-	ICEFuelPrice      *float64          `json:"ice_fuel_price,omitempty"`  // Average EUR per litre paid
-	ICE               []ICEDefault      `json:"ice"`
-	MaintenanceYearly money.Cents       `json:"maintenance_yearly"`
-	InsuranceYearly   money.Cents       `json:"insurance_yearly"`
-	Source            *apierror.Message `json:"source"`
+	AnnualKm           float64           `json:"annual_km"`
+	AnnualKmFromData   bool              `json:"annual_km_from_data"` // False when the default mileage is a fallback
+	TrackedKwhPer100Km *float64          `json:"tracked_kwh_per_100km,omitempty"`
+	TrackedEurPerKwh   *float64          `json:"tracked_eur_per_kwh,omitempty"`
+	Powertrain         string            `json:"powertrain,omitempty"`      // Of the reference vehicle
+	ICELPer100Km       *float64          `json:"ice_l_per_100km,omitempty"` // Measured on a tracked combustion vehicle
+	ICEFuelPrice       *float64          `json:"ice_fuel_price,omitempty"`  // Average EUR per litre paid
+	ICE                []ICEDefault      `json:"ice"`
+	MaintenanceYearly  money.Cents       `json:"maintenance_yearly"`
+	InsuranceYearly    money.Cents       `json:"insurance_yearly"`
+	IndicativePrices   bool              `json:"indicative_prices"` // False when no price in the prefill is meant for the vehicle's currency
+	Source             *apierror.Message `json:"source"`
+}
+
+// indicativeCurrency is the only currency the built-in price figures are written for.
+const indicativeCurrency = "EUR"
+
+// ForCurrency drops the indicative prices (fuel, electricity, maintenance, insurance) when the
+// vehicle's currency is not the one they are written for: a euro figure shown as another currency
+// would be wrong, so the form asks for them instead. Consumption figures do not depend on a currency.
+func (d *ComparisonDefaults) ForCurrency(currency string) {
+	if currency == "" || strings.EqualFold(currency, indicativeCurrency) {
+		return
+	}
+	d.IndicativePrices = false
+	d.Source = apierror.NewMessage("comparison.defaults_source_no_prices", "No indicative prices for this currency: enter your own")
+	d.MaintenanceYearly = 0
+	d.InsuranceYearly = 0
+	d.TrackedEurPerKwh = nil
+	ice := make([]ICEDefault, len(d.ICE))
+	for i, f := range d.ICE {
+		f.FuelPrice = 0
+		ice[i] = f
+	}
+	d.ICE = ice
+	if d.ICEFuelPrice != nil && *d.ICEFuelPrice <= 0 {
+		d.ICEFuelPrice = nil
+	}
 }
 
 // ComparisonService builds EV baselines from the real TCO and evaluates comparison scenarios.
@@ -72,23 +100,38 @@ func ratePerKm(amount money.Cents, km float64) float64 {
 	return amount.Float() / km
 }
 
-// evBaselineFromTCO derives the EV side from the tracked vehicle's real costs.
-// Insurance is supplied separately from policy periods; financing is not included.
-func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int) (EVBaseline, []*apierror.Message) {
+// trackedBaselineFromTCO derives the EV side from the tracked vehicle's real costs.
+// Insurance is supplied separately from policy periods; financing, tolls, parking, subscriptions and
+// other costs are not included, since the combustion side has no matching input.
+func trackedBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now time.Time) (TrackedBaseline, []*apierror.Message) {
 	basis := sum.DistanceBasisKm
-	ev := EVBaseline{
+	ev := TrackedBaseline{
 		EnergyPerKm:      ratePerKm(sum.EnergyCost, basis),
 		FuelPerKm:        ratePerKm(sum.FuelEnergyCost, basis),
 		MaintenancePerKm: ratePerKm(sum.TiresAmortizedCost+sum.MaintenanceCost+sum.RepairCost, basis),
+		TaxYearly:        annualTax(sum.TaxCost, observedMonths(sum.MonthlyCosts, now)).Float(),
 		PurchaseNet:      sum.AcquisitionCost.Float(),
 	}
-	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Reference side: energy, maintenance and depreciation from recorded costs per km; insurance from annual premiums")}
+	hybrid := models.PowertrainCanCharge(sum.Powertrain) && models.PowertrainCanRefuel(sum.Powertrain)
+	var notes []*apierror.Message
+	if hybrid {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_actual", "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))
+		if basis > 0 && (sum.FuelEnergyCost <= 0 || sum.EnergyCost <= sum.FuelEnergyCost) {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.hybrid_missing_energy_source", "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"))
+		}
+	} else {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: energy, maintenance and depreciation from recorded costs per km; insurance and taxes from annual amounts"))
+	}
+	if sum.TollsCost+sum.SubscriptionCost+sum.OtherCost > 0 {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.costs_excluded", "Tolls, parking, subscriptions and other costs are not compared: they have no combustion-side input"))
+	}
 
 	if ev.PurchaseNet > 0 {
+		notes = append(notes, apierror.NewMessage("comparison.assumption.purchase_basis", "Tracked vehicle at its real acquisition cost, combustion alternative at the purchase price you entered: both are compared as given"))
 		dep := ratePerKm(sum.DepreciationCost, basis) * annualKm * float64(years)
 		ev.ResaleValue = math.Max(ev.PurchaseNet-dep, 0)
 	} else {
-		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Reference purchase price unknown (lease or missing entry): depreciation not included"))
+		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_price_unknown", "Tracked vehicle purchase price unknown (lease or missing entry): depreciation not included"))
 	}
 	if basis <= 0 {
 		notes = append(notes, apierror.NewMessage("comparison.assumption.ev_no_distance", "No tracked mileage: recorded costs cannot provide a reliable comparison"))
@@ -96,9 +139,18 @@ func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int) (EVBaseline
 	return ev, notes
 }
 
-// evBaselineFromInputs builds the EV side of a PROJECTION scenario.
-func evBaselineFromInputs(in *models.EVInputs, incentives money.Cents) EVBaseline {
-	return EVBaseline{
+// annualTax turns the recorded taxes into a yearly amount. Under twelve months of history the recorded
+// total is kept as is, so a one-off tax is never multiplied up.
+func annualTax(total money.Cents, months int) money.Cents {
+	if total <= 0 {
+		return 0
+	}
+	return money.Cents(math.Round(float64(total) * 12 / float64(max(months, 12))))
+}
+
+// trackedBaselineFromInputs builds the EV side of a PROJECTION scenario.
+func trackedBaselineFromInputs(in *models.TrackedInputs, incentives money.Cents) TrackedBaseline {
+	return TrackedBaseline{
 		EnergyPerKm:       in.KwhPer100Km * in.EurPerKwh / 100,
 		MaintenanceYearly: in.MaintenanceYearly.Float(),
 		InsuranceYearly:   in.InsuranceYearly.Float(),
@@ -110,7 +162,7 @@ func evBaselineFromInputs(in *models.EVInputs, incentives money.Cents) EVBaselin
 
 // Compare evaluates a scenario. It reads the vehicle's TCO in RETROSPECTIVE mode and writes nothing.
 func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonScenario) (*ComparisonResult, error) {
-	var ev EVBaseline
+	var ev TrackedBaseline
 	var notes []*apierror.Message
 
 	if sc.Mode == models.ComparisonModeRetrospective {
@@ -124,8 +176,9 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		if !models.PowertrainCanCharge(sum.Powertrain) {
 			return nil, ErrComparisonNeedsEV
 		}
-		ev, notes = evBaselineFromTCO(sum, sc.AnnualKm, sc.Years)
-		annualInsurance, estimated, err := s.annualInsurance(ctx, *sc.VehicleID, time.Now())
+		now := time.Now()
+		ev, notes = trackedBaselineFromTCO(sum, sc.AnnualKm, sc.Years, now)
+		annualInsurance, estimated, err := s.annualInsurance(ctx, *sc.VehicleID, now)
 		if err != nil {
 			return nil, err
 		}
@@ -137,10 +190,10 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 			notes = append(notes, apierror.NewMessage("comparison.assumption.insurance_expired", "Historical insurance payments have no current coverage: reference insurance is not projected; record the current premium"))
 		}
 	} else {
-		if sc.EV == nil {
+		if sc.Tracked == nil {
 			return nil, errors.New("comparison: projection mode requires EV inputs")
 		}
-		ev = evBaselineFromInputs(sc.EV, sc.Options.EVIncentives)
+		ev = trackedBaselineFromInputs(sc.Tracked, sc.Options.TrackedIncentives)
 	}
 
 	res := ComputeComparison(sc, ev)
@@ -148,9 +201,10 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 	return &res, nil
 }
 
-// annualKmFromTCO extrapolates the tracked mileage to a year, or falls back to DefaultAnnualKm.
-func annualKmFromTCO(sum *TCOSummary) (float64, bool) {
-	months := len(sum.MonthlyCosts)
+// annualKmFromTCO extrapolates the tracked mileage to a year over the calendar months since the first
+// recorded month (gaps included), or falls back to DefaultAnnualKm.
+func annualKmFromTCO(sum *TCOSummary, now time.Time) (float64, bool) {
+	months := observedMonths(sum.MonthlyCosts, now)
 	if sum.DistanceBasisKm <= 0 || months < minMonthsForAnnualKm {
 		return DefaultAnnualKm, false
 	}
@@ -164,6 +218,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 		ICE:               iceDefaults,
 		MaintenanceYearly: money.FromFloat(700),
 		InsuranceYearly:   money.FromFloat(650),
+		IndicativePrices:  true,
 		Source:            apierror.NewMessage("comparison.defaults_source", "Indicative values for France, to adjust"),
 	}
 	if vehicleID == "" {
@@ -174,7 +229,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 	if err != nil {
 		return nil, err
 	}
-	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum)
+	d.AnnualKm, d.AnnualKmFromData = annualKmFromTCO(sum, time.Now())
 	d.Powertrain = sum.Powertrain
 	if models.PowertrainIsFuelOnly(sum.Powertrain) {
 		d.ICELPer100Km = sum.ConsumptionL100km
@@ -184,16 +239,26 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 		}
 		return d, nil
 	}
-	if !models.PowertrainIsElectricOnly(sum.Powertrain) {
+	if models.PowertrainCanRefuel(sum.Powertrain) {
+		// A hybrid: both sides start from the fuel and electricity prices actually paid. Its
+		// consumption mixes electric and fuel kilometres, so no per-100 km figure is prefilled.
+		if sum.AvgCostPerLiter > 0 {
+			v := sum.AvgCostPerLiter
+			d.ICEFuelPrice = &v
+		}
+		if electricity := sum.EnergyCost - sum.FuelEnergyCost; electricity > 0 && sum.TotalKwhAdded > 0 {
+			v := round3(electricity.Float() / sum.TotalKwhAdded)
+			d.TrackedEurPerKwh = &v
+		}
 		return d, nil
 	}
 	if sum.TotalKwhAdded > 0 && sum.DistanceBasisKm > 0 {
 		v := round1(sum.TotalKwhAdded / sum.DistanceBasisKm * 100)
-		d.EVKwhPer100Km = &v
+		d.TrackedKwhPer100Km = &v
 	}
 	if sum.AvgCostPerKwh > 0 {
 		v := round3(sum.AvgCostPerKwh)
-		d.EVEurPerKwh = &v
+		d.TrackedEurPerKwh = &v
 	}
 	return d, nil
 }

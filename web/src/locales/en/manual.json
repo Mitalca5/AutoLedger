@@ -1,12 +1,8 @@
 {
   "manualTrackingView": {
     "addAVehicleFirst": "Add a vehicle first.",
-    "manualTracking": "Manual entry",
-    "subtitle": "Mileage and {what} entered by hand",
-    "fillUps": "fill-ups",
+    "manualTracking": "Mileage",
     "independent": ". Each entry is independent.",
-    "mileage": "Mileage",
-    "energyTab": "Energy",
     "subtitleMileage": "Mileage entered by hand"
   },
   "estimatedEnergyPanel": {

@@ -29,3 +29,16 @@ export function formatDayTime(dateStr: string) {
     minute: '2-digit',
   })
 }
+
+const day = (d: Date) => d.toLocaleDateString(intlLocale(), { day: '2-digit', month: 'short', year: 'numeric' })
+const clock = (d: Date) => d.toLocaleTimeString(intlLocale(), { hour: '2-digit', minute: '2-digit' })
+
+/** A session window: "02 mai 2026, 22:00 → 05:30", the end repeating its day only when it differs; just the start when the end is missing or not after it. */
+export function formatChargeWindow(start: string, end?: string | null): string {
+  const s = new Date(start)
+  const head = `${day(s)}, ${clock(s)}`
+  const e = end ? new Date(end) : null
+  if (!e || Number.isNaN(e.getTime()) || e <= s) return head
+  const sameDay = s.toDateString() === e.toDateString()
+  return `${head} → ${sameDay ? '' : `${day(e)}, `}${clock(e)}`
+}

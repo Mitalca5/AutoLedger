@@ -4,7 +4,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { Zap, Check, Trash2, X, Car, Calendar, User, ArrowRight, Clock } from 'lucide-vue-next'
 import { api, type PendingCharge } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
-import { formatDate } from '@/utils/expenses'
+import { formatChargeWindow } from '@/utils/dates'
 import { t } from '@/i18n'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import LoadError from '@/components/LoadError.vue'
@@ -151,7 +151,7 @@ onMounted(() => {
               <div class="flex items-center gap-3 text-xs text-slate-400">
                 <span class="flex items-center gap-1">
                   <Calendar class="w-3 h-3 text-slate-400" />
-                  {{ formatDate(charge.start_time) }}
+                  {{ formatChargeWindow(charge.start_time, charge.end_time) }}
                 </span>
               </div>
             </div>

@@ -1,39 +1,55 @@
-# AutoLedger 🚗⚡
+# AutoLedger 🚗
 
-> **Self-hosted, open-source Total Cost of Ownership (TCO) ledger for electric, hybrid, and combustion vehicles.**  
-> Track every cent—energy, financing (cash, loan, lease/LOA/LLD), axle-level tire wear, maintenance, tolls, and carpooling—whether connected via telemetry, imported via CSV, or managed 100% standalone.
+> **Self-hosted ledger of what your car really costs, per kilometre.**  
+> Electric, plug-in hybrid, range-extender or combustion, any make: energy or fuel, financing (cash, loan, lease), tires, maintenance, insurance, tolls and carpooling in one place, fed by hand, by CSV, by Home Assistant or a script, or synchronised from [TeslaMate](https://github.com/teslamate-org/teslamate).
 
 [![CI](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml/badge.svg)](https://github.com/Rem7474/AutoLedger/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Rem7474_TeslaCost&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Rem7474_TeslaCost)
 [![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Frem7474%2Fautoledger-blue?logo=docker)](https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger)
 
----
-
-## 🚀 No Tesla? Start here
-
-AutoLedger does not need any telemetry source. Any car, any brand, electric, hybrid or combustion:
-
-1. **Add a vehicle**: name, powertrain (electric, hybrid, range-extender or combustion), optional make and model.
-2. **Enter or import**: log fill-ups and charges from the phone in a few taps, or import a CSV ([format](docs/csv-import.md)): a spreadsheet or an OBD2 logger export.
-3. **See the cost per km**: energy, tolls, maintenance, tires, insurance and financing roll up into one real cost per km, with a completeness score telling what is still missing.
-
 <p align="center">
-  <img src="docs/screenshots/dashboard-ev.en.png" alt="TCO dashboard of an electric car" width="62%">
+  <img src="docs/screenshots/dashboard-ev.en.png" alt="Cost dashboard of an electric car" width="62%">
   <img src="docs/screenshots/mobile-quickadd.en.png" alt="Quick add of a fill-up on a phone" width="22%">
 </p>
 <p align="center">
   <img src="docs/screenshots/fleet.en.png" alt="Household fleet comparing an electric and a petrol car" width="86%">
 </p>
 
-### Works with
+---
+
+## ✨ What it does
+
+1. **Add a vehicle**: name, powertrain (electric, hybrid, range-extender or combustion), optional make and model, currency.
+2. **Record what you spend**: log fill-ups and charges from the phone in a few taps, import a CSV ([format](docs/csv-import.md)), let Home Assistant or a script push charging sessions, or connect a TeslaMate instance.
+3. **See the real cost per km**: energy, tolls, maintenance, tires, insurance and financing roll up into one figure, with a completeness score telling what is still missing.
+
+Everything stays on your server: no cloud account, no manufacturer login, no telemetry sent out.
+
+## 🔌 How data gets in
+
+Pick whichever fits each vehicle; they can be mixed in the same account.
 
 | Source | What it brings | Setup |
 | :--- | :--- | :--- |
 | **Manual / PWA** | Quick add of fill-ups, charges, expenses and odometer readings, offline queue, receipt photos | none |
-| **CSV import and export** | Charges, drives, fill-ups, odometer; saved column profiles; round-trip export | [docs/csv-import.md](docs/csv-import.md) |
+| **CSV import and export** | Charges, drives, fill-ups, odometer; saved column profiles; round-trip export; OBD2 logger recipe | [docs/csv-import.md](docs/csv-import.md) |
 | **Home Assistant** | Wallbox or energy-meter charging sessions sent automatically | [HACS integration](https://github.com/Rem7474/autoledger-homeassistant) |
-| **Ingestion API** | Any script, Node-RED or n8n pushing events with a token | [docs/ingestion-api.md](docs/ingestion-api.md) |
-| **TeslaMate** (optional) | Live odometer, charge and drive history for a Tesla | [TeslaMate](https://github.com/teslamate-org/teslamate) |
+| **Ingestion API** | Any script, Node-RED or n8n pushing charges, drives, fill-ups and odometer readings with a token | [docs/ingestion-api.md](docs/ingestion-api.md) |
+| **TeslaMate sync** (optional) | Continuous import of the odometer, charge and drive history of a Tesla already logged by [TeslaMate](https://github.com/teslamate-org/teslamate) | per vehicle, in the vehicle settings |
+
+```mermaid
+flowchart LR
+    A["📱 Manual / PWA"] --> Core
+    B["📄 CSV import"] --> Core
+    C["🏠 Home Assistant, scripts, n8n"] --> Core
+    D["🔄 TeslaMate sync (optional)"] --> Core
+    Core["AutoLedger ledger<br/>cost per km • financing • tires • reminders • documents"]
+```
+
+- **Manual / PWA**: offline-first progressive web app with a quick-add modal for drives, charges, fuel, tolls and maintenance, smart odometer progression, photo receipts and an IndexedDB queue.
+- **CSV**: separator detection, column mapping with live preview, deduplication on timestamps and coordinates.
+- **Push sources**: see the [ingestion API](docs/ingestion-api.md) ([FR](docs/ingestion-api.fr.md)), the [wallbox recipes](docs/wallbox-recipes.md) ([FR](docs/wallbox-recipes.fr.md)) and [CSV import and export](docs/csv-import.md) ([FR](docs/csv-import.fr.md)).
+- **TeslaMate**: resumable full import, sliding 30-day re-read, reconciliation of deleted drives and charges, battery and temperature panels. Nothing else in AutoLedger depends on it.
 
 ### Vehicle comparison
 
@@ -41,33 +57,15 @@ Tracked electric, plug-in hybrid and range-extender vehicles can be compared wit
 
 ### Compatibility
 
-| Powertrain | Charges | Fill-ups | Drives and efficiency | TeslaMate link |
+| Powertrain | Charges | Fill-ups | Efficiency | TeslaMate sync |
 | :--- | :---: | :---: | :---: | :---: |
 | Electric | ✅ | | kWh/100 km | ✅ |
 | Plug-in hybrid / range-extender | ✅ | ✅ | electricity and fuel combined | ✅ |
 | Combustion | | ✅ | L/100 km | |
 
----
+### Vehicle comparison
 
-## 🔄 The 3 Ingestion Modes
-
-AutoLedger adapts to your vehicle setup, never the other way around:
-
-```mermaid
-flowchart LR
-    subgraph Ingestion["How Data Enters AutoLedger"]
-        M1["🌐 Connected Telemetry\n- TeslaMate live sync\n- Real-time odometer\n- Automated charge & drive history"]
-        M2["📄 Semi-Automated CSV\n- Universal CSV importer\n- Smart column mapping\n- Duplicate deduplication"]
-        M3["📱 Standalone / Manual\n- Ultra-fast PWA interface\n- Predictive odometer\n- Camera receipt capture & offline sync"]
-    end
-    Ingestion --> Core["⚡ AutoLedger Core Ledger\nTCO Engine • Financing • Tires • Carpooling • Documents"]
-```
-
-1. **🌐 Connected Telemetry**: Automatic, continuous background sync with [TeslaMate](https://github.com/teslamate-org/teslamate). Features real-time odometer readbacks, resumable imports, and sliding re-reads for updated charging fees.
-2. **📄 Semi-Automated CSV Import**: Flexible file importer for trips and charges. Features automatic separator detection (comma or semicolon), custom column mapping with live preview, and intelligent deduplication based on timestamps and start/end coordinates.
-3. **📱 Standalone & Manual (PWA)**: Full offline-first progressive web app. Quick-add modal for drives, charges, fuel, tolls, and maintenance, with smart odometer progression, photo receipt uploads, and IndexedDB queuing.
-
-Home Assistant, Node-RED, n8n or any script can also push charging sessions, drives, fill-ups and odometer readings: see the [ingestion API](docs/ingestion-api.md) ([FR](docs/ingestion-api.fr.md)), and the [wallbox recipes](docs/wallbox-recipes.md) ([FR](docs/wallbox-recipes.fr.md)) for chargers read by Home Assistant. The CSV columns, import profiles, export and an OBD2 logger recipe are in [CSV import and export](docs/csv-import.md) ([FR](docs/csv-import.fr.md)).
+Compare a tracked vehicle (electric, plug-in hybrid or range-extender) with a configurable combustion one, or the reverse. The comparison uses recorded costs per kilometre; hybrids include fuel and electricity, and fuel and electricity price changes apply separately. See [Vehicle comparison](docs/vehicle-comparison.md) for assumptions and limitations.
 
 ---
 
@@ -108,7 +106,7 @@ Home Assistant, Node-RED, n8n or any script can also push charging sessions, dri
 - **Official HACS integration**: [Rem7474/autoledger-homeassistant](https://github.com/Rem7474/autoledger-homeassistant) detects charging sessions from your wallbox or energy meter and sends them to AutoLedger, with a configurable debounce for solar charging that pauses and resumes.
 - **Multi-vehicle**: one charger can serve several cars, assigned to a fixed vehicle, an `input_select`, automatic correlation, or left unassigned to qualify later in the web UI.
 - **Sensors and services**: last charge cost and cost per 100 km per vehicle, plus the `autoledger.sync` and `autoledger.submit_charge` services.
-- It talks to the [ingestion API](#-the-3-ingestion-modes) with an `al_live_` token; any other system can use the same API.
+- It talks to the [ingestion API](#-how-data-gets-in) with an `al_live_` token; any other system can use the same API.
 
 ### 📁 Document & Invoice Archiving
 - Attachments (PDF invoices, receipts, registration cards) stored securely on a dedicated volume (`/data/documents`) with non-root isolation and strict JWT authorization.
@@ -132,7 +130,7 @@ AutoLedger/
 │   ├── models/                     # Strongly-typed data models (Vehicles, Drives, TCO, Tires)
 │   ├── services/                   # TCO engine, tire wear projection, carpool math, webhooks
 │   ├── storage/                    # Document attachment storage on Docker volumes
-│   └── teslamate/                  # Telemetry client for optional TeslaMate live integration
+│   └── teslamate/                  # Client for the optional TeslaMate sync
 ├── migrations/                     # Versioned PostgreSQL schema migrations
 ├── web/                            # Vue 3 + TypeScript + Vite + Tailwind CSS SPA & PWA
 ├── docker-compose.yml              # Production container stack definition

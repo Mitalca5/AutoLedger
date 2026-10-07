@@ -35,8 +35,9 @@
     "efficiency": "Efficacité",
     "estimate": "Estimation",
     "energyTitle": "Énergie",
-    "energySubtitle": "Consommation, recharges et estimation de repli",
-    "fixedCosts": "Frais fixes"
+    "energySubtitle": "Consommation, recharges et pleins",
+    "fixedCosts": "Frais fixes",
+    "fillUps": "Pleins"
   },
   "chargeModal": {
     "pdfOrImageSuperchargerReceipt": "PDF ou image (reçu Superchargeur, borne publique, etc.).",
@@ -48,7 +49,6 @@
     "receiptInvoice": "Justificatif / Facture",
     "notesOptional": "Notes (optionnel)",
     "conversionRate1": "Taux de conversion (1 {currency} = ? {base})",
-    "currency": "Devise",
     "000IfFree": "0.00 si gratuite",
     "cost": "Coût",
     "odometerOptional": "Odomètre (optionnel)",
@@ -59,7 +59,9 @@
     "teslamateChargeOfKwhThe": "Recharge TeslaMate du {date} (+{kwh_added} kWh). Le coût saisi ici ne sera pas écrasé par les synchronisations.",
     "newCharge": "Nouvelle recharge",
     "editCharge": "Modifier la recharge",
-    "chargeCost": "Coût de la recharge"
+    "chargeCost": "Coût de la recharge",
+    "start": "Début de la charge",
+    "endOptional": "Fin de la charge (optionnel)"
   },
   "chargesPanel": {
     "chargeSShownOutOf": "{length} recharge(s) affichée(s) sur {chargesTotal}",
@@ -154,7 +156,6 @@
     "detectingTheMileage": "Détection du kilométrage...",
     "odometerKm": "Odomètre ({unit})",
     "conversionRate1": "Taux de conversion (1 {currency} = ? {base})",
-    "currency": "Devise",
     "amount": "Montant",
     "eGCabinFilterReplacement": "ex: Remplacement filtre habitacle",
     "description": "Description",
@@ -331,7 +332,6 @@
     "noDrive": "Sans trajet",
     "attachToATeslamateDrive": "Rattacher à un trajet",
     "conversionRate1": "Taux de conversion (1 {currency} = ? {base})",
-    "currency": "Devise",
     "amount": "Montant",
     "other": "Autre",
     "ferry": "Ferry",

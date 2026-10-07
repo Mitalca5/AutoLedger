@@ -3,15 +3,15 @@
     "editTheAssumptions": "Edit the assumptions",
     "assumptions": "Assumptions",
     "sensitivityOfTheGapTo": "Sensitivity of the gap to the assumptions",
-    "effectOnTheElectricSaving": "Effect on the reference vehicle saving when an assumption changes by 20%.",
+    "effectOnTheElectricSaving": "Effect on the electric saving when an assumption changes by 20%.",
     "sensitivity": "Sensitivity",
-    "cumulativeCostElectricAndCombustion": "Cumulative cost, reference and combustion",
+    "cumulativeCostElectricAndCombustion": "Cumulative cost, electric and combustion",
     "cumulativeCost": "Cumulative cost",
-    "costByCategoryElectricAnd": "Cost by category, reference and combustion",
+    "costByCategoryElectricAnd": "Cost by category, electric and combustion",
     "costBreakdownOverThePeriod": "Cost breakdown over the period",
     "total": "Total",
     "combustion": "Combustion",
-    "electric": "Reference vehicle",
+    "electric": "Electric",
     "category": "Category",
     "costByCategoryOverYear": "Cost by category over {years_count} year(s)",
     "monthKm": "{per_month}/month · {cost_per_km}/{unit}",
@@ -65,8 +65,8 @@
     "back": "Back",
     "viewResult": "View the result",
     "actual": "actual",
-    "evLess": "reference −{amount}",
-    "evMore": "reference +{amount}",
+    "evLess": "electric −{amount}",
+    "evMore": "electric +{amount}",
     "title": "Comparison",
     "deleteTitle": "Delete the comparison",
     "deleteMessage": "Delete “{name}”? Your actual data is not affected.",
@@ -75,14 +75,14 @@
     "kmPerYear": "{km} {unit}/year"
   },
   "comparisonCompare": {
-    "totalElectricAndCombustionCost": "Total reference and combustion cost per scenario",
+    "totalElectricAndCombustionCost": "Total electric and combustion cost per scenario",
     "totalCostPerScenario": "Total cost per scenario",
     "month": "{iceMonth}/month",
     "month2": "{evMonth}/month",
     "breakEven": "Break-even",
     "gap": "Gap",
     "combustion": "Combustion",
-    "electric": "Reference vehicle",
+    "electric": "Electric",
     "scenario": "Scenario",
     "totalsPerScenario": "Totals per scenario",
     "exportAsCsv": "Export as CSV",
@@ -102,6 +102,8 @@
     "annualKm": "Enter a yearly mileage.",
     "years": "The duration must be between 1 and 15 years.",
     "trackedNeeded": "This mode needs a tracked electric or plug-in hybrid vehicle: choose projection mode for a combustion vehicle.",
+    "fuelPrice": "Enter the fuel price.",
+    "electricityPrice": "Enter the electricity price.",
     "iceConsumption": "Enter the combustion vehicle's consumption.",
     "icePrice": "Enter the purchase price of the combustion vehicle.",
     "evPrice": "Enter the purchase price of the electric vehicle.",
@@ -112,12 +114,15 @@
   },
   "verdict": {
     "same": "Over {count} year, the two vehicles cost the same. | Over {count} years, the two vehicles cost the same.",
-    "less": "Over {count} year, the reference vehicle costs you {amount} less. | Over {count} years, the reference vehicle costs you {amount} less.",
-    "more": "Over {count} year, the reference vehicle costs you {amount} more. | Over {count} years, the reference vehicle costs you {amount} more."
+    "less": "Over {count} year, the electric vehicle costs you {amount} less. | Over {count} years, the electric vehicle costs you {amount} less.",
+    "more": "Over {count} year, the electric vehicle costs you {amount} more. | Over {count} years, the electric vehicle costs you {amount} more."
   },
   "breakEven": {
     "notReached": "Break-even not reached over the period.",
-    "immediate": "The reference vehicle is cheaper from purchase and stays so.",
+    "immediate": "The electric vehicle is cheaper from the purchase and stays so.",
+    "netAfter": "Counting resale value, break-even after {years} year(s).",
+    "netNotReached": "Counting resale value, break-even is not reached over the period.",
+    "netImmediate": "Counting resale value, the electric vehicle is cheaper to own throughout.",
     "after": "Break-even after {years} year(s): running savings offset the purchase price gap."
   },
   "rows": {
@@ -130,26 +135,26 @@
   "chart": {
     "purchase": "Purchase",
     "year": "Year {year}",
-    "gapLabel": "Gap in the reference vehicle saving",
-    "inFavor": "in favour of the electric or hybrid vehicle"
+    "gapLabel": "Gap in the electric saving",
+    "inFavor": "in favour of the electric vehicle"
   },
-  "electric": "Reference vehicle",
+  "electric": "Electric",
   "combustion": "Combustion",
   "csv": {
     "defaultName": "comparison",
     "total": "Total",
     "perMonth": "Per month",
     "costPerKm": "Cost per {unit}",
-    "gap": "Gap in favour of the electric or hybrid vehicle",
-    "cumulativeHeader": "Year,Cumulative reference cost,Cumulative combustion cost",
+    "gap": "Gap in favour of the electric vehicle",
+    "cumulativeHeader": "Year,Cumulative electric cost,Cumulative combustion cost",
     "filePrefix": "comparison",
-    "header": "Category,Reference ({cur}),Combustion ({cur})",
+    "header": "Category,Electric ({cur}),Combustion ({cur})",
     "scenariosFile": "comparison-scenarios",
-    "scenariosHeader": "Scenario,Type,Duration (years),{unit} per year,Reference total ({cur}),Combustion total ({cur}),Gap in favour of electric ({cur}),Break-even"
+    "scenariosHeader": "Scenario,Type,Duration (years),{unit} per year,Electric total ({cur}),Combustion total ({cur}),Gap in favour of electric ({cur}),Break-even"
   },
   "compare": {
-    "saves": "reference saves",
-    "costsMore": "reference costs more",
+    "saves": "electric saves",
+    "costsMore": "electric costs more",
     "notReached": "not reached",
     "fromPurchase": "from the purchase",
     "years": "{years} year(s)"
@@ -160,5 +165,56 @@
     "DIESEL": "Diesel",
     "E85": "Ethanol E85",
     "GPL": "LPG"
+  },
+  "hybrid": {
+    "comparisonView": {
+      "effectOnTheElectricSaving": "Effect on the hybrid vehicle saving when an assumption changes by 20%.",
+      "cumulativeCostElectricAndCombustion": "Cumulative cost, hybrid and combustion",
+      "costByCategoryElectricAnd": "Cost by category, hybrid and combustion",
+      "electric": "Hybrid vehicle",
+      "evLess": "hybrid −{amount}",
+      "evMore": "hybrid +{amount}"
+    },
+    "comparisonCompare": {
+      "totalElectricAndCombustionCost": "Total hybrid and combustion cost per scenario",
+      "electric": "Hybrid vehicle"
+    },
+    "verdict": {
+      "less": "Over {count} year, the hybrid vehicle costs you {amount} less. | Over {count} years, the hybrid vehicle costs you {amount} less.",
+      "more": "Over {count} year, the hybrid vehicle costs you {amount} more. | Over {count} years, the hybrid vehicle costs you {amount} more."
+    },
+    "breakEven": {
+      "immediate": "The hybrid vehicle is cheaper from purchase and stays so."
+    },
+    "chart": {
+      "gapLabel": "Gap in the hybrid vehicle saving",
+      "inFavor": "in favour of the hybrid vehicle"
+    },
+    "electric": "Hybrid vehicle",
+    "csv": {
+      "gap": "Gap in favour of the hybrid vehicle",
+      "cumulativeHeader": "Year,Cumulative hybrid cost,Cumulative combustion cost",
+      "header": "Category,Hybrid ({cur}),Combustion ({cur})",
+      "scenariosHeader": "Scenario,Type,Duration (years),{unit} per year,Hybrid total ({cur}),Combustion total ({cur}),Gap in favour of hybrid ({cur}),Break-even"
+    },
+    "compare": {
+      "saves": "hybrid saves",
+      "costsMore": "hybrid costs more"
+    }
+  },
+  "savings": {
+    "less": "{percent}% less than the combustion vehicle",
+    "more": "{percent}% more than the combustion vehicle",
+    "month": "{amount}/month",
+    "energyLess": "energy alone: {amount} less",
+    "energyMore": "energy alone: {amount} more",
+    "energy": "Energy savings",
+    "total": "Total savings",
+    "energyExtra": "Additional energy cost",
+    "totalExtra": "Additional total cost",
+    "energyHelp": "Fuel and electricity only.",
+    "totalHelp": "Energy, maintenance and tires, insurance, taxes and depreciation.",
+    "reduced": "Other costs reduce the energy savings by {amount} over this period.",
+    "increased": "Other costs improve the total savings by {amount} over this period."
   }
 }

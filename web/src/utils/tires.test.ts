@@ -7,6 +7,8 @@ import {
   getSeasonIcon,
   getTireSelectLabel,
   isMountedPosition,
+  lastUsedDay,
+  positionLabel,
   positionOnTire,
   sessionFormFromCopy,
   sessionFormFromSession,
@@ -215,5 +217,23 @@ describe('validateTireForm', () => {
 
   it('requires a positive lifespan', () => {
     expect(validateTireForm({ ...valid, estimated_lifespan_km: 0 }).estimated_lifespan_km).toBeDefined()
+  })
+})
+
+describe('positionLabel', () => {
+  it('names a wheel, and calls anything else unspecified', () => {
+    expect(positionLabel('FL')).toBe('Avant gauche')
+    expect(positionLabel('STORAGE')).toBe('Position non précisée')
+  })
+})
+
+describe('lastUsedDay', () => {
+  it('is the latest removal day, ignoring sessions still fitted', () => {
+    expect(lastUsedDay([{ dismounted_date: '2025-03-01T00:00:00Z' }, { dismounted_date: '2025-09-15T00:00:00Z' }, { dismounted_date: null }])).toBe('2025-09-15')
+  })
+
+  it('is null without any finished session', () => {
+    expect(lastUsedDay([{ dismounted_date: null }])).toBeNull()
+    expect(lastUsedDay(undefined)).toBeNull()
   })
 })

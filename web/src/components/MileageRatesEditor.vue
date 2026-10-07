@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NumberInput from '@/components/NumberInput.vue'
 import { ref, onMounted } from 'vue'
 import { t } from '@/i18n'
 import { api, type MileageRate } from '@/services/api'
@@ -73,7 +74,7 @@ onMounted(load)
     <div class="grid grid-cols-2 gap-2">
       <input v-model="label" :placeholder="$t('import.rateLabel')" :aria-label="$t('import.rateLabel')" maxlength="100" class="col-span-2 field" />
       <input v-model.number="year" type="number" :aria-label="$t('import.rateYear')" class="field" />
-      <input v-model.number="rate" type="number" step="0.001" min="0" :placeholder="$t('import.ratePerKm')" :aria-label="$t('import.ratePerKm')" class="field" />
+      <NumberInput v-model="rate" min="0" :placeholder="$t('import.ratePerKm')" :aria-label="$t('import.ratePerKm')" class="field" />
       <input v-model.number="fromKm" type="number" min="0" :placeholder="$t('import.rateFrom')" :aria-label="$t('import.rateFrom')" class="field" />
       <input v-model.number="toKm" type="number" min="1" :placeholder="$t('import.rateTo')" :aria-label="$t('import.rateTo')" class="field" />
     </div>
