@@ -6,10 +6,9 @@ trap 'rm -rf "$test_root"' EXIT
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 # Load the real functions without starting the periodic loop.
-sed '/^log "AutoLedger backup sidecar started/,$d' "$script_dir/entrypoint.sh" > "$test_root/functions.sh"
-DB_PASSWORD=test DB_HOST=test DB_USER=test DB_NAME=test
-export DB_PASSWORD DB_HOST DB_USER DB_NAME
-. "$test_root/functions.sh"
+DB_PASSWORD=test DB_HOST=test DB_USER=test DB_NAME=test BACKUP_NO_MAIN=1
+export DB_PASSWORD DB_HOST DB_USER DB_NAME BACKUP_NO_MAIN
+. "$script_dir/entrypoint.sh"
 
 pg_dump() {
 	printf 'database contents\n'
@@ -23,8 +22,8 @@ gzip() {
 	fi
 	command gzip "$@"
 }
-# Documents are independent of the database pipeline tested here.
-tar() { : > "$2"; }
+# tar stands in for the documents archive, which does not depend on the database pipeline.
+tar() { printf 'documents\n' > "$2"; }
 
 for test_mode in success dump_failure compression_failure; do
 	BACKUP_DIR="$test_root/$test_mode"
@@ -38,8 +37,14 @@ for test_mode in success dump_failure compression_failure; do
 	else
 		[ ! -e "$1" ]
 		[ -z "$(find "$BACKUP_DIR" -name 'autoledger-db-*.tmp' -print)" ]
-		! grep -q 'database dump OK' "$test_root/$test_mode.log"
+		if grep -q 'database dump OK' "$test_root/$test_mode.log"; then
+			printf 'FAIL: %s logged a successful dump\n' "$test_mode" >&2
+			exit 1
+		fi
 		grep -q 'ERROR: database dump or compression failed' "$test_root/$test_mode.log"
 	fi
+	# A failed database dump must not stop the documents archive.
+	set -- "$BACKUP_DIR"/autoledger-documents-*.tar.gz
+	[ -f "$1" ]
 	printf 'PASS: %s\n' "$test_mode"
 done

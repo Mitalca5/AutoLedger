@@ -58,9 +58,14 @@ run_backup() {
 	find "${BACKUP_DIR}" -maxdepth 1 \( -name 'autoledger-*.gz' -o -name 'teslacost-*.gz' \) -mtime "+${RETENTION_DAYS}" -print -delete
 }
 
-log "AutoLedger backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
+main() {
+	log "AutoLedger backup sidecar started (every ${INTERVAL_HOURS}h, retention ${RETENTION_DAYS}d, target dir ${BACKUP_DIR})"
 
-while true; do
-	run_backup || log "ERROR: backup cycle exited unexpectedly, will retry next interval"
-	sleep "$((INTERVAL_HOURS * 3600))"
-done
+	while true; do
+		run_backup || log "ERROR: backup cycle exited unexpectedly, will retry next interval"
+		sleep "$((INTERVAL_HOURS * 3600))"
+	done
+}
+
+# BACKUP_NO_MAIN lets the regression tests source the functions without starting the loop.
+[ "${BACKUP_NO_MAIN:-}" = 1 ] || main
