@@ -36,7 +36,8 @@
       "hybrid_actual": "Côté hybride : carburant, électricité, entretien et dépréciation à partir des coûts enregistrés par {unit} ; assurance et taxes à partir de montants annuels",
       "hybrid_missing_energy_source": "Cet hybride n'a que des pleins ou que des recharges enregistrés : son coût d'énergie est incomplet, le comparatif est sous-estimé"
     },
-    "defaults_source": "Valeurs indicatives pour la France, à ajuster"
+    "defaults_source": "Valeurs indicatives pour la France, à ajuster",
+    "defaults_source_no_prices": "Pas de prix indicatifs pour cette devise : saisissez les vôtres"
   },
   "tire": {
     "wear_explanation": "{p0}, {p1} : pointes de puissance moyennes de +{p2} kW et {p3} kW en régénération, consommation {p4} kWh/100 {unit}. Indice de contrainte : x{p5} (longévité estimée ajustée à ~{p6} {unit})."

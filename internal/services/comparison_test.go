@@ -371,3 +371,47 @@ func TestHybridWithOneEnergySourceIsFlagged(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultsForCurrency(t *testing.T) {
+	measured, lper100 := 1.9, 6.2
+	newDefaults := func() *ComparisonDefaults {
+		kwh := 0.2
+		return &ComparisonDefaults{
+			ICE:               iceDefaults,
+			MaintenanceYearly: money.FromFloat(700),
+			InsuranceYearly:   money.FromFloat(650),
+			EVEurPerKwh:       &kwh,
+			ICEFuelPrice:      &measured,
+			ICELPer100Km:      &lper100,
+			IndicativePrices:  true,
+		}
+	}
+
+	for _, currency := range []string{"", "EUR", "eur"} {
+		d := newDefaults()
+		d.ForCurrency(currency)
+		if !d.IndicativePrices || d.MaintenanceYearly != money.FromFloat(700) || d.ICE[0].FuelPrice != 1.75 || d.EVEurPerKwh == nil {
+			t.Errorf("currency %q: indicative prices must stay", currency)
+		}
+	}
+
+	d := newDefaults()
+	d.ForCurrency("USD")
+	if d.IndicativePrices || d.MaintenanceYearly != 0 || d.InsuranceYearly != 0 || d.EVEurPerKwh != nil {
+		t.Errorf("prices must be dropped for USD: %+v", d)
+	}
+	for _, f := range d.ICE {
+		if f.FuelPrice != 0 || f.LPer100Km <= 0 {
+			t.Errorf("fuel price must be dropped and consumption kept: %+v", f)
+		}
+	}
+	if iceDefaults[0].FuelPrice != 1.75 {
+		t.Error("the shared catalog must not be modified")
+	}
+	if d.ICELPer100Km == nil || *d.ICELPer100Km != 6.2 || d.ICEFuelPrice == nil || *d.ICEFuelPrice != 1.9 {
+		t.Error("figures measured on the vehicle must stay")
+	}
+	if d.Source == nil || d.Source.Code != "comparison.defaults_source_no_prices" {
+		t.Errorf("unexpected source: %+v", d.Source)
+	}
+}

@@ -102,6 +102,8 @@
     "annualKm": "Enter a yearly mileage.",
     "years": "The duration must be between 1 and 15 years.",
     "trackedNeeded": "This mode needs a tracked electric or plug-in hybrid vehicle: choose projection mode for a combustion vehicle.",
+    "fuelPrice": "Enter the fuel price.",
+    "electricityPrice": "Enter the electricity price.",
     "iceConsumption": "Enter the combustion vehicle's consumption.",
     "icePrice": "Enter the purchase price of the combustion vehicle.",
     "evPrice": "Enter the purchase price of the electric vehicle.",

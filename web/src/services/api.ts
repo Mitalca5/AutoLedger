@@ -425,8 +425,13 @@ export const api = {
   deleteComparisonScenario: (scenarioId: string) =>
     request<any>(`/comparison-scenarios/${scenarioId}`, { method: 'DELETE' }),
   getComparisonResult: (scenarioId: string) => request<any>(`/comparison-scenarios/${scenarioId}/result`),
-  getComparisonDefaults: (vehicleId?: string) =>
-    request<any>(`/comparison-scenarios/defaults${vehicleId ? `?vehicle_id=${encodeURIComponent(vehicleId)}` : ''}`),
+  getComparisonDefaults: (vehicleId?: string, currency?: string) => {
+    const params = new URLSearchParams()
+    if (vehicleId) params.set('vehicle_id', vehicleId)
+    if (currency) params.set('currency', currency)
+    const query = params.toString()
+    return request<any>(`/comparison-scenarios/defaults${query ? `?${query}` : ''}`)
+  },
 
   // Carpooling
   getCarpools: (vehicleId: string) => request<{ trips: any[]; summary: any }>(`/vehicles/${vehicleId}/carpools`),

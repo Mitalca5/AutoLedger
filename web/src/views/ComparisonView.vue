@@ -113,7 +113,7 @@ async function loadDefaults() {
   // A tracked combustion vehicle prefills the ICE side of a projection with its measured consumption and fuel price
   const vehicleId = isRetro.value || vehicleStore.fuelOnly ? vehicleStore.activeVehicle?.id : undefined
   try {
-    defaults.value = await api.getComparisonDefaults(vehicleId)
+    defaults.value = await api.getComparisonDefaults(vehicleId, vehicleStore.currency)
   } catch (err) {
     console.error('Failed to load comparison defaults', err)
   }

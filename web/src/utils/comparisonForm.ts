@@ -48,6 +48,7 @@ export interface ComparisonDefaults {
   ev_eur_per_kwh?: number
   ice_l_per_100km?: number
   ice_fuel_price?: number
+  indicative_prices?: boolean
   ice?: { fuel_type: string; l_per_100km: number; fuel_price: number }[]
 }
 
@@ -57,6 +58,8 @@ export function applyComparisonDefaults(form: ComparisonForm, d: ComparisonDefau
   form.annual_km = d.annual_km
   form.ice.maintenance_yearly = d.maintenance_yearly
   form.ice.insurance_yearly = d.insurance_yearly
+  // Prices written for another currency are not shown as the vehicle's own: the user types them
+  if (d.indicative_prices === false) form.ev.eur_per_kwh = 0
   if (d.ev_kwh_per_100km) form.ev.kwh_per_100km = d.ev_kwh_per_100km
   if (d.ev_eur_per_kwh) form.ev.eur_per_kwh = d.ev_eur_per_kwh
   const fuel = d.ice?.find((f) => f.fuel_type === form.ice.fuel_type)
@@ -133,7 +136,9 @@ export function comparisonStepErrorKey(step: number, form: ComparisonForm, canCo
   }
   if (step === 2) {
     if (!(Number(form.ice.l_per_100km) > 0)) return 'comparison.errors.iceConsumption'
+    if (!(Number(form.ice.fuel_price) > 0)) return 'comparison.errors.fuelPrice'
     if (!(Number(form.ice.purchase_price) > 0)) return 'comparison.errors.icePrice'
+    if (!retro && !(Number(form.ev.eur_per_kwh) > 0)) return 'comparison.errors.electricityPrice'
     if (!retro && !(Number(form.ev.purchase_price) > 0)) return 'comparison.errors.evPrice'
   }
   return ''

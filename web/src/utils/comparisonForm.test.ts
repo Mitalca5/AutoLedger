@@ -48,6 +48,14 @@ describe('applyComparisonDefaults', () => {
     expect(form.ev.eur_per_kwh).toBe(0.31)
   })
 
+  it('leaves prices empty when the defaults carry none for the currency', () => {
+    const form = emptyComparisonForm(false)
+    applyComparisonDefaults(form, { ...defaults, indicative_prices: false, ice: [{ fuel_type: 'SP95_E10', l_per_100km: 7, fuel_price: 0 }] })
+    expect(form.ev.eur_per_kwh).toBe(0)
+    expect(form.ice.l_per_100km).toBe(7)
+    expect(form.ice.fuel_price).toBe(0)
+  })
+
   it('keeps the form untouched without defaults or a matching fuel type', () => {
     const form = emptyComparisonForm(false)
     applyComparisonDefaults(form, null)
@@ -124,7 +132,13 @@ describe('comparisonStepErrorKey', () => {
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.iceConsumption')
     form.ice.l_per_100km = 6
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.icePrice')
+    form.ice.fuel_price = 0
+    expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.fuelPrice')
+    form.ice.fuel_price = 1.7
     form.ice.purchase_price = 20000
+    form.ev.eur_per_kwh = 0
+    expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.electricityPrice')
+    form.ev.eur_per_kwh = 0.2
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.evPrice')
     form.mode = 'RETROSPECTIVE'
     expect(comparisonStepErrorKey(2, form, true)).toBe('')

@@ -102,6 +102,8 @@
     "annualKm": "Indiquez un kilométrage annuel.",
     "years": "La durée doit être comprise entre 1 et 15 ans.",
     "trackedNeeded": "Ce mode nécessite un véhicule électrique ou hybride rechargeable suivi : choisissez le mode projection pour un véhicule thermique.",
+    "fuelPrice": "Saisissez le prix du carburant.",
+    "electricityPrice": "Saisissez le prix de l’électricité.",
     "iceConsumption": "Indiquez la consommation du thermique.",
     "icePrice": "Indiquez le prix d'achat du thermique.",
     "evPrice": "Indiquez le prix d'achat de l'électrique.",

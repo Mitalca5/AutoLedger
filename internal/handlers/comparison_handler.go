@@ -228,5 +228,6 @@ func (h *ComparisonHandler) Defaults(w http.ResponseWriter, r *http.Request) {
 		writeRepoError(w, r, err, "Failed to compute defaults")
 		return
 	}
+	d.ForCurrency(r.URL.Query().Get("currency"))
 	writeJSON(w, http.StatusOK, d)
 }

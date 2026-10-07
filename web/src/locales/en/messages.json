@@ -36,7 +36,8 @@
       "hybrid_actual": "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per {unit}; insurance and taxes from annual amounts",
       "hybrid_missing_energy_source": "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"
     },
-    "defaults_source": "Indicative values for France, to adjust"
+    "defaults_source": "Indicative values for France, to adjust",
+    "defaults_source_no_prices": "No indicative prices for this currency: enter your own"
   },
   "tire": {
     "wear_explanation": "{p0}, {p1}: average power peaks of +{p2} kW and {p3} kW in regeneration, consumption {p4} kWh/100 {unit}. Stress index: x{p5} (estimated lifespan adjusted to ~{p6} {unit})."

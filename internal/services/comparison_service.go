@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/teslacost/teslacost/internal/apierror"
@@ -52,7 +53,34 @@ type ComparisonDefaults struct {
 	ICE               []ICEDefault      `json:"ice"`
 	MaintenanceYearly money.Cents       `json:"maintenance_yearly"`
 	InsuranceYearly   money.Cents       `json:"insurance_yearly"`
+	IndicativePrices  bool              `json:"indicative_prices"` // False when no price in the prefill is meant for the vehicle's currency
 	Source            *apierror.Message `json:"source"`
+}
+
+// indicativeCurrency is the only currency the built-in price figures are written for.
+const indicativeCurrency = "EUR"
+
+// ForCurrency drops the indicative prices (fuel, electricity, maintenance, insurance) when the
+// vehicle's currency is not the one they are written for: a euro figure shown as another currency
+// would be wrong, so the form asks for them instead. Consumption figures do not depend on a currency.
+func (d *ComparisonDefaults) ForCurrency(currency string) {
+	if currency == "" || strings.EqualFold(currency, indicativeCurrency) {
+		return
+	}
+	d.IndicativePrices = false
+	d.Source = apierror.NewMessage("comparison.defaults_source_no_prices", "No indicative prices for this currency: enter your own")
+	d.MaintenanceYearly = 0
+	d.InsuranceYearly = 0
+	d.EVEurPerKwh = nil
+	ice := make([]ICEDefault, len(d.ICE))
+	for i, f := range d.ICE {
+		f.FuelPrice = 0
+		ice[i] = f
+	}
+	d.ICE = ice
+	if d.ICEFuelPrice != nil && *d.ICEFuelPrice <= 0 {
+		d.ICEFuelPrice = nil
+	}
 }
 
 // ComparisonService builds EV baselines from the real TCO and evaluates comparison scenarios.
@@ -189,6 +217,7 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 		ICE:               iceDefaults,
 		MaintenanceYearly: money.FromFloat(700),
 		InsuranceYearly:   money.FromFloat(650),
+		IndicativePrices:  true,
 		Source:            apierror.NewMessage("comparison.defaults_source", "Indicative values for France, to adjust"),
 	}
 	if vehicleID == "" {
