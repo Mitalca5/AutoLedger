@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/models"
@@ -72,16 +73,15 @@ func ratePerKm(amount money.Cents, km float64) float64 {
 }
 
 // evBaselineFromTCO derives the EV side from the tracked vehicle's real costs.
-// Insurance and depreciation are approximated per km, and financing is not included.
+// Insurance is supplied separately from policy periods; financing is not included.
 func evBaselineFromTCO(sum *TCOSummary, annualKm float64, years int) (EVBaseline, []*apierror.Message) {
 	basis := sum.DistanceBasisKm
 	ev := EVBaseline{
 		EnergyPerKm:      ratePerKm(sum.EnergyCost, basis),
 		MaintenancePerKm: ratePerKm(sum.TiresAmortizedCost+sum.MaintenanceCost+sum.RepairCost, basis),
-		InsurancePerKm:   ratePerKm(sum.InsuranceCost, basis),
 		PurchaseNet:      sum.AcquisitionCost.Float(),
 	}
-	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: actual costs of the tracked vehicle per km (insurance and depreciation included)")}
+	notes := []*apierror.Message{apierror.NewMessage("comparison.assumption.ev_actual", "Electric side: energy, maintenance and depreciation from recorded costs per km; insurance from annual premiums")}
 
 	if ev.PurchaseNet > 0 {
 		dep := ratePerKm(sum.DepreciationCost, basis) * annualKm * float64(years)
@@ -124,6 +124,17 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 			return nil, ErrComparisonNeedsEV
 		}
 		ev, notes = evBaselineFromTCO(sum, sc.AnnualKm, sc.Years)
+		annualInsurance, estimated, err := s.annualInsurance(ctx, *sc.VehicleID, time.Now())
+		if err != nil {
+			return nil, err
+		}
+		ev.InsuranceYearly = annualInsurance.Float()
+		if estimated {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.insurance_estimated", "Insurance payments without a coverage period: the last 12 months of payments are used as the annual estimate"))
+		}
+		if annualInsurance == 0 && sum.InsuranceCost > 0 {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.insurance_expired", "Historical insurance payments have no current coverage: reference insurance is not projected; record the current premium"))
+		}
 	} else {
 		if sc.EV == nil {
 			return nil, errors.New("comparison: projection mode requires EV inputs")

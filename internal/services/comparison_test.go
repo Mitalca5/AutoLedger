@@ -191,7 +191,7 @@ func TestEVBaselineFromTCO(t *testing.T) {
 		DepreciationCost:   eur(5000),
 	}
 	ev, notes := evBaselineFromTCO(sum, 10000, 4)
-	if ev.EnergyPerKm != 0.05 || ev.InsurancePerKm != 0.1 || ev.MaintenancePerKm != 0.035 {
+	if ev.EnergyPerKm != 0.05 || ev.InsuranceYearly != 0 || ev.MaintenancePerKm != 0.035 {
 		t.Errorf("unexpected rates: %+v", ev)
 	}
 	// depreciation 0.5 EUR/km * 10000 km * 4 years = 20000 -> resale 10000
