@@ -35,7 +35,8 @@
       "ev_price_unknown": "Tracked vehicle purchase price unknown (lease or missing entry): depreciation not included",
       "ev_no_distance": "No tracked mileage: recorded costs cannot provide a reliable comparison",
       "hybrid_actual": "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per {unit}; insurance and taxes from annual amounts",
-      "hybrid_missing_energy_source": "This hybrid has only fuel or only charging records: its recorded energy cost is incomplete, so the comparison is understated"
+      "hybrid_missing_energy_source": "This hybrid has no records for one or both energy sources. This may reflect your usage; check that all fill-ups and charging sessions are recorded",
+      "hybrid_unpriced_charges": "Some recorded charging sessions have no cost: enter the actual cost, or zero for free charging"
     },
     "defaults_source": "Indicative values for France, to adjust",
     "defaults_source_no_prices": "No indicative prices for this currency: enter your own"
