@@ -702,38 +702,36 @@ export interface TariffPlan {
   updated_at: string
 }
 
-export interface PublicChargingPreset {
+// Public charging amounts are currency units on the wire, like other money fields in the API.
+export interface PublicChargingRates {
+  connection_fee: number
+  price_per_kwh: number
+  price_per_minute: number
+  idle_fee_per_minute: number
+  idle_grace_minutes: number
+}
+
+export interface PublicChargingPreset extends PublicChargingRates {
   id: string
   user_id: string
   name: string
-  network?: string | null
   currency: string
-  connection_fee_cents?: number | null
-  cost_per_kwh_cents?: number | null
-  cost_per_minute_cents?: number | null
-  idle_fee_per_minute_cents?: number | null
-  idle_grace_minutes?: number | null
   created_at: string
 }
 
-export interface PublicChargingCalculationRequest {
-  connection_fee_cents?: number | null
-  cost_per_kwh_cents?: number | null
-  cost_per_minute_cents?: number | null
-  idle_fee_per_minute_cents?: number | null
-  idle_grace_minutes?: number | null
+export interface PublicChargingCalculationRequest extends PublicChargingRates {
   kwh: number
   charging_minutes: number
-  idle_minutes?: number | null
+  total_plugged_minutes: number
 }
 
 export interface PublicChargingBreakdown {
-  connection_fee_cents: number
-  energy_cost_cents: number
-  duration_cost_cents: number
-  idle_cost_cents: number
-  total_cost_cents: number
-  summary: string
+  connection_cost: number
+  energy_cost: number
+  duration_cost: number
+  idle_minutes: number
+  idle_cost: number
+  total_cost: number
 }
 
 // Pending Charges ("Recharges à qualifier")

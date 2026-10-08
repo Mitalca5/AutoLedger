@@ -5,6 +5,7 @@ import { Calculator, X, Sparkles, Check, BookmarkPlus, Info } from 'lucide-vue-n
 import { api, type PublicChargingPreset, type PublicChargingBreakdown } from '@/services/api'
 import { formatAmount } from '@/currency'
 import { t } from '@/i18n'
+import { publicChargingRates, publicChargingRequest } from '@/utils/publicCharging'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 const props = defineProps<{
@@ -34,10 +35,18 @@ const idleGraceMinutes = ref<number | ''>('')
 
 const breakdown = ref<PublicChargingBreakdown | null>(null)
 const calculating = ref(false)
+let latestCalculation = 0
 
 const savePresetName = ref('')
 const showSavePreset = ref(false)
 const savingPreset = ref(false)
+const rates = () => ({
+  connectionFee: connectionFee.value,
+  costPerKwh: costPerKwh.value,
+  costPerMinute: costPerMinute.value,
+  idleFeePerMinute: idleFeePerMinute.value,
+  idleGraceMinutes: idleGraceMinutes.value,
+})
 
 async function loadPresets() {
   try {
@@ -53,10 +62,10 @@ watch(selectedPresetId, (presetId) => {
   const preset = presets.value.find((p) => p.id === presetId)
   if (!preset) return
 
-  connectionFee.value = preset.connection_fee_cents ? preset.connection_fee_cents / 100 : ''
-  costPerKwh.value = preset.cost_per_kwh_cents ? preset.cost_per_kwh_cents / 100 : ''
-  costPerMinute.value = preset.cost_per_minute_cents ? preset.cost_per_minute_cents / 100 : ''
-  idleFeePerMinute.value = preset.idle_fee_per_minute_cents ? preset.idle_fee_per_minute_cents / 100 : ''
+  connectionFee.value = preset.connection_fee ?? ''
+  costPerKwh.value = preset.price_per_kwh ?? ''
+  costPerMinute.value = preset.price_per_minute ?? ''
+  idleFeePerMinute.value = preset.idle_fee_per_minute ?? ''
   idleGraceMinutes.value = preset.idle_grace_minutes ?? ''
   calculate()
 })
@@ -76,38 +85,22 @@ watch(open, (isOpen) => {
 })
 
 async function calculate() {
-  const k = Number(kwh.value) || 0
-  const cMin = Number(chargingMinutes.value) || 0
-  const iMin = Number(idleMinutes.value) || 0
-
-  const connCents = connectionFee.value !== '' ? Math.round(Number(connectionFee.value) * 100) : null
-  const kwhCents = costPerKwh.value !== '' ? Math.round(Number(costPerKwh.value) * 100) : null
-  const minCents = costPerMinute.value !== '' ? Math.round(Number(costPerMinute.value) * 100) : null
-  const idleCents = idleFeePerMinute.value !== '' ? Math.round(Number(idleFeePerMinute.value) * 100) : null
-  const grace = idleGraceMinutes.value !== '' ? Number(idleGraceMinutes.value) : null
-
-  if (k <= 0 && cMin <= 0 && iMin <= 0 && !connCents) {
-    breakdown.value = null
+  const seq = ++latestCalculation
+  breakdown.value = null
+  const request = publicChargingRequest(rates(), kwh.value, chargingMinutes.value, idleMinutes.value)
+  if (request.kwh <= 0 && request.total_plugged_minutes <= 0 && !request.connection_fee) {
+    calculating.value = false
     return
   }
 
   calculating.value = true
   try {
-    const res = await api.calculatePublicCharge({
-      kwh: k,
-      charging_minutes: cMin,
-      idle_minutes: iMin > 0 ? iMin : null,
-      connection_fee_cents: connCents,
-      cost_per_kwh_cents: kwhCents,
-      cost_per_minute_cents: minCents,
-      idle_fee_per_minute_cents: idleCents,
-      idle_grace_minutes: grace,
-    })
-    breakdown.value = res
+    const res = await api.calculatePublicCharge(request)
+    if (seq === latestCalculation) breakdown.value = res
   } catch (err) {
     console.error('Failed to calculate public charge', err)
   } finally {
-    calculating.value = false
+    if (seq === latestCalculation) calculating.value = false
   }
 }
 
@@ -118,11 +111,7 @@ async function handleSavePreset() {
     const newPreset = await api.createPublicPreset({
       name: savePresetName.value.trim(),
       currency: props.currency,
-      connection_fee_cents: connectionFee.value !== '' ? Math.round(Number(connectionFee.value) * 100) : null,
-      cost_per_kwh_cents: costPerKwh.value !== '' ? Math.round(Number(costPerKwh.value) * 100) : null,
-      cost_per_minute_cents: costPerMinute.value !== '' ? Math.round(Number(costPerMinute.value) * 100) : null,
-      idle_fee_per_minute_cents: idleFeePerMinute.value !== '' ? Math.round(Number(idleFeePerMinute.value) * 100) : null,
-      idle_grace_minutes: idleGraceMinutes.value !== '' ? Number(idleGraceMinutes.value) : null,
+      ...publicChargingRates(rates()),
     })
     presets.value.push(newPreset)
     selectedPresetId.value = newPreset.id
@@ -136,11 +125,10 @@ async function handleSavePreset() {
 }
 
 function applyToCharge() {
-  if (!breakdown.value) return
-  const totalCost = breakdown.value.total_cost_cents / 100
+  if (!breakdown.value || calculating.value || !Number.isFinite(breakdown.value.total_cost) || breakdown.value.total_cost < 0) return
+  const totalCost = breakdown.value.total_cost
   const k = Number(kwh.value) || undefined
-  const note = breakdown.value.summary
-  emit('apply', totalCost, k, note)
+  emit('apply', totalCost, k)
   open.value = false
 }
 
@@ -326,26 +314,26 @@ onMounted(() => {
           <div class="flex items-center justify-between">
             <span class="font-bold text-white text-sm">{{ t('tariffs.publicModal.estimatedTotal') }}</span>
             <span class="font-extrabold text-base text-blue-400">
-              {{ formatAmount(breakdown.total_cost_cents / 100, currency) }}
+              {{ formatAmount(breakdown.total_cost, currency) }}
             </span>
           </div>
 
           <div class="space-y-1 pt-2 border-t border-blue-500/20 text-xs text-slate-300">
-            <div v-if="breakdown.connection_fee_cents > 0" class="flex justify-between">
+            <div v-if="breakdown.connection_cost > 0" class="flex justify-between">
               <span>{{ t('tariffs.publicModal.breakdownConnection') }}</span>
-              <span>{{ formatAmount(breakdown.connection_fee_cents / 100, currency) }}</span>
+              <span>{{ formatAmount(breakdown.connection_cost, currency) }}</span>
             </div>
-            <div v-if="breakdown.energy_cost_cents > 0" class="flex justify-between">
+            <div v-if="breakdown.energy_cost > 0" class="flex justify-between">
               <span>{{ t('tariffs.publicModal.breakdownEnergy') }}</span>
-              <span>{{ formatAmount(breakdown.energy_cost_cents / 100, currency) }}</span>
+              <span>{{ formatAmount(breakdown.energy_cost, currency) }}</span>
             </div>
-            <div v-if="breakdown.duration_cost_cents > 0" class="flex justify-between">
+            <div v-if="breakdown.duration_cost > 0" class="flex justify-between">
               <span>{{ t('tariffs.publicModal.breakdownDuration') }}</span>
-              <span>{{ formatAmount(breakdown.duration_cost_cents / 100, currency) }}</span>
+              <span>{{ formatAmount(breakdown.duration_cost, currency) }}</span>
             </div>
-            <div v-if="breakdown.idle_cost_cents > 0" class="flex justify-between text-warning-300">
+            <div v-if="breakdown.idle_cost > 0" class="flex justify-between text-warning-300">
               <span>{{ t('tariffs.publicModal.breakdownIdle') }}</span>
-              <span>{{ formatAmount(breakdown.idle_cost_cents / 100, currency) }}</span>
+              <span>{{ formatAmount(breakdown.idle_cost, currency) }}</span>
             </div>
           </div>
         </div>
@@ -362,7 +350,7 @@ onMounted(() => {
         </button>
         <button
           type="button"
-          :disabled="!breakdown || breakdown.total_cost_cents <= 0"
+          :disabled="calculating || !breakdown || !Number.isFinite(breakdown.total_cost) || breakdown.total_cost < 0"
           @click="applyToCharge"
           class="btn btn-lg btn-primary"
         >
