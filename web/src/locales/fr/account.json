@@ -52,6 +52,7 @@
   "distanceUnit": "Unité de distance",
   "distanceUnitKm": "Kilomètres",
   "distanceUnitMi": "Miles",
+  "currencyPerVehicle": "La devise se règle par véhicule, à sa création (page Véhicules) ; ce n'est pas un réglage du compte.",
   "tokens": {
     "title": "Jetons d'API & Automatisations",
     "subtitle": "Pour envoyer des données depuis Home Assistant, une borne ou un script. Un jeton n'ouvre que les routes d'intégration, jamais le reste du compte.",

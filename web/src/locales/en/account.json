@@ -52,6 +52,7 @@
   "distanceUnit": "Distance unit",
   "distanceUnitKm": "Kilometers",
   "distanceUnitMi": "Miles",
+  "currencyPerVehicle": "Currency is set per vehicle when it is created (Vehicles page); it is not an account setting.",
   "tokens": {
     "title": "API Tokens & Automations",
     "subtitle": "To send data from Home Assistant, a charger or a script. A token only opens the integration endpoints, never the rest of the account.",

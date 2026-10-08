@@ -194,6 +194,7 @@ onMounted(load)
         <span class="text-sm font-medium text-white">{{ $t('account.distanceUnit') }}</span>
         <DistanceUnitSwitcher />
       </div>
+      <p class="mt-3 text-xs text-slate-400">{{ $t('account.currencyPerVehicle') }}</p>
     </section>
 
     <section v-if="hasPassword" class="rounded-2xl border border-slate-800 bg-slate-900 p-5" aria-labelledby="account-password">
