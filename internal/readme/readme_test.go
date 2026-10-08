@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"unicode"
 )
 
 var (
@@ -83,6 +84,38 @@ func TestReadmeLocalTargetsExist(t *testing.T) {
 			}
 			if _, err := os.Stat(filepath.Join("..", "..", target)); err != nil {
 				t.Errorf("%s: %s does not exist", name, target)
+			}
+		}
+	}
+}
+
+var anchorRe = regexp.MustCompile(`href="#([^"]+)"|\]\(#([^)]+)\)`)
+
+// slug follows GitHub's rule: lower case, letters, digits, hyphens and underscores kept, spaces become hyphens.
+func slug(heading string) string {
+	var b strings.Builder
+	for _, r := range strings.ToLower(heading) {
+		switch {
+		case unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-' || r == '_':
+			b.WriteRune(r)
+		case r == ' ':
+			b.WriteRune('-')
+		}
+	}
+	return b.String()
+}
+
+func TestReadmeAnchorsResolve(t *testing.T) {
+	for _, name := range []string{"README.md", "README.fr.md"} {
+		doc := read(t, name)
+		slugs := map[string]bool{}
+		for _, m := range regexp.MustCompile(`(?m)^#{1,6} (.+)$`).FindAllStringSubmatch(doc, -1) {
+			slugs[slug(m[1])] = true
+		}
+		for _, m := range anchorRe.FindAllStringSubmatch(doc, -1) {
+			a := m[1] + m[2]
+			if !slugs[a] {
+				t.Errorf("%s: #%s matches no heading", name, a)
 			}
 		}
 	}

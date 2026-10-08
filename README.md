@@ -10,6 +10,20 @@
 [![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Frem7474%2Fautoledger-blue?logo=docker)](https://github.com/Rem7474/AutoLedger/pkgs/container/autoledger)
 
 <p align="center">
+  <a href="#-what-it-does">What it does</a> ·
+  <a href="#-how-data-gets-in">Data sources</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#-highlights--features">Features</a> ·
+  <a href="#-deployment--quick-start">Install</a> ·
+  <a href="#-upgrading-from-teslacost">Upgrade</a> ·
+  <a href="#-reverse-proxy--production-hardening">Reverse proxy</a> ·
+  <a href="#-operations-automated-backups--restore">Backups</a> ·
+  <a href="#-environment-variables-reference">Configuration</a> ·
+  <a href="#-development--testing">Development</a> ·
+  <a href="docs/">Documentation</a>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/dashboard-ev.en.png" alt="Cost dashboard of an electric car" width="62%">
   <img src="docs/screenshots/mobile-quickadd.en.png" alt="Quick add of a fill-up on a phone" width="22%">
 </p>
@@ -55,13 +69,11 @@ flowchart LR
 
 ### Compatibility
 
-| Powertrain | Charges | Fill-ups | Efficiency | TeslaMate sync |
-| :--- | :---: | :---: | :---: | :---: |
-| Electric | ✅ | - | kWh/100 km | ✅ |
-| Plug-in hybrid / range-extender | ✅ | ✅ | kWh/100 km and L/100 km | - |
-| Combustion | - | ✅ | L/100 km | - |
-
-TeslaMate logs Teslas, which are all electric, so the sync is offered for electric vehicles. Every other source (manual entry, CSV, Home Assistant, ingestion API) works for every powertrain.
+| Powertrain | Charges | Fill-ups | Efficiency | TeslaMate sync | Home Assistant |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Electric | ✅ | - | kWh/100 km | ✅ | ✅ |
+| Plug-in hybrid / range-extender | ✅ | ✅ | kWh/100 km and L/100 km | - | ✅ |
+| Combustion | - | ✅ | L/100 km | - | - |
 
 ### Vehicle comparison
 
