@@ -20,6 +20,54 @@ services:
     volumes:
       - autoledger_secrets:/secrets
 
+  # One-shot helper: upgrades a database volume written by PostgreSQL 16. It starts the old server alone, takes a
+  # verified dump and a copy of the data directory into the backups volume (pg16-upgrade-*.sql.gz and
+  # pg16-datadir-*.tar.gz, never pruned), then empties the data directory so PostgreSQL 18 initializes a new
+  # cluster. db-restore loads the dump afterwards. Nothing is deleted unless both files were verified, and any
+  # failure stops the stack with the old data untouched. It does nothing on an up-to-date volume.
+  db-upgrade:
+    image: postgres:16-alpine
+    restart: "no"
+    user: root
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        set -o pipefail
+        D=/var/lib/postgresql/data
+        [ -s "$$D/PG_VERSION" ] || exit 0
+        V=$$(cat "$$D/PG_VERSION")
+        [ "$$V" != 18 ] || exit 0
+        if [ "$$V" != 16 ]; then
+          echo "db-upgrade: the database volume holds PostgreSQL $$V; only 16 is upgraded automatically. See the README." >&2
+          exit 1
+        fi
+        TS=$$(date +%Y%m%d-%H%M%S)
+        DUMP=/backups/pg16-upgrade-$$TS.sql.gz
+        TAR=/backups/pg16-datadir-$$TS.tar.gz
+        echo "db-upgrade: PostgreSQL 16 volume found, backing it up to $$DUMP and $$TAR"
+        su-exec postgres pg_ctl -D "$$D" -o "-c listen_addresses= -c unix_socket_directories=/tmp" -w start
+        trap 'su-exec postgres pg_ctl -D "$$D" -m fast -w stop >/dev/null 2>&1 || true; rm -f "$$DUMP.tmp" "$$TAR.tmp"' EXIT
+        PGHOST=/tmp pg_dump -U "$$DB_USER" -d "$$DB_NAME" | gzip > "$$DUMP.tmp"
+        gzip -t "$$DUMP.tmp"
+        gunzip -c "$$DUMP.tmp" | tail -n 5 | grep -q "PostgreSQL database dump complete"
+        su-exec postgres pg_ctl -D "$$D" -m fast -w stop
+        tar -C "$$D" -czf "$$TAR.tmp" .
+        tar -tzf "$$TAR.tmp" >/dev/null
+        mv "$$DUMP.tmp" "$$DUMP"
+        mv "$$TAR.tmp" "$$TAR"
+        chown postgres "$$DUMP" "$$TAR"
+        echo "$$DUMP" > /backups/.pg-restore-pending
+        find "$$D" -mindepth 1 -delete
+        trap - EXIT
+        echo "db-upgrade: done, the data will be restored into PostgreSQL 18"
+    environment:
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+    volumes:
+      - autoledger_db_data:/var/lib/postgresql/data
+      - autoledger_backups:/backups
+
   postgres:
     image: postgres:18-alpine
     container_name: ${DB_CONTAINER_NAME:-autoledger-db}
@@ -38,11 +86,13 @@ services:
     depends_on:
       secrets-init:
         condition: service_completed_successfully
+      db-upgrade:
+        condition: service_completed_successfully
     volumes:
       - autoledger_db_data:/var/lib/postgresql/data
       - autoledger_secrets:/secrets:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}} -d ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}} -d ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -51,6 +101,36 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  # One-shot helper: loads the dump taken by db-upgrade into the new PostgreSQL 18 cluster, in one transaction. The
+  # application starts only once it succeeded. It does nothing when no upgrade is pending.
+  db-restore:
+    image: postgres:18-alpine
+    restart: "no"
+    user: root
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        M=/backups/.pg-restore-pending
+        [ -f "$$M" ] || exit 0
+        DUMP=$$(cat "$$M")
+        [ -s "$$DUMP" ] || { echo "db-restore: $$DUMP is missing or empty" >&2; exit 1; }
+        echo "db-restore: restoring $$DUMP"
+        until pg_isready -h postgres -q; do sleep 1; done
+        export PGHOST=postgres PGUSER="$$DB_USER" PGDATABASE="$$DB_NAME" PGPASSWORD="$$(cat /secrets/db_password)"
+        gunzip -c "$$DUMP" | psql -q -v ON_ERROR_STOP=1 --single-transaction -o /dev/null
+        mv "$$M" "/backups/.pg-restore-done-$$(date +%Y%m%d-%H%M%S)"
+        echo "db-restore: done"
+    environment:
+      DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
+      DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - autoledger_backups:/backups
+      - autoledger_secrets:/secrets:ro
 
   api:
     # Pin AUTOLEDGER_VERSION (or TESLACOST_VERSION, e.g. "v1.17.0") in your .env for reproducible deployments.
@@ -66,6 +146,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      db-restore:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/api/health"]
       interval: 30s

@@ -311,24 +311,15 @@ docker run --rm \
 ```
 
 ### Upgrading PostgreSQL 16 to 18
-The Compose file runs PostgreSQL 18. A database volume written by PostgreSQL 16 is refused at startup (`database files are incompatible with server`), so existing deployments dump and restore once. Documents and secrets are not affected.
+Starting the stack on a database volume written by PostgreSQL 16 upgrades it automatically, with a backup first:
 
-```bash
-# 1. With the previous stack still running, dump the database and keep the file
-docker compose exec -T postgres pg_dump -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}" | gzip > autoledger-pre-upgrade.sql.gz
+1. `db-upgrade` starts the old server alone and writes a verified dump (`pg16-upgrade-<timestamp>.sql.gz`) and a copy of the data directory (`pg16-datadir-<timestamp>.tar.gz`) to the backups volume. These two files are never pruned.
+2. Only once both are verified, it empties the data directory, and PostgreSQL 18 initializes a new cluster.
+3. `db-restore` loads the dump in a single transaction, then the application starts.
 
-# 2. Stop everything and remove the PostgreSQL 16 data volume (DB_VOLUME_NAME, autoledger_db_data by default)
-docker compose down
-docker volume rm "${DB_VOLUME_NAME:-autoledger_db_data}"
+If any step fails, the stack stops with the old data untouched; read the logs with `docker compose logs db-upgrade db-restore`. Once the application runs correctly, delete the two `pg16-*` files to free the space. A volume written by another major than 16 is refused with an explicit message.
 
-# 3. Pull the new images and start only the database, which initializes an empty PostgreSQL 18 cluster
-docker compose pull
-docker compose up -d postgres
-
-# 4. Restore the dump, then start the rest of the stack
-gunzip -c autoledger-pre-upgrade.sql.gz | docker compose exec -T postgres psql -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}"
-docker compose up -d
-```
+To restore the pre-upgrade state, stop the stack, empty the data volume, and extract `pg16-datadir-<timestamp>.tar.gz` into it from a `postgres:16-alpine` container.
 
 ---
 
