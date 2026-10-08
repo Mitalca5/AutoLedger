@@ -172,6 +172,12 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		get(m).MaintenanceAmortized += amount
 	}
 
+	if dueMonth, due, err := s.financingDueLaterThisMonth(ctx, vehicleID); err != nil {
+		return nil, 0, 0, err
+	} else if due > 0 {
+		get(dueMonth).Financing += due
+	}
+
 	s.computeMonthlyFinancingAmortization(ownership, monthlyMap, now)
 
 	monthlyCosts := make([]MonthlyCost, 0, len(monthlyMap))

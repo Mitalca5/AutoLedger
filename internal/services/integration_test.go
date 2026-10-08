@@ -2640,3 +2640,38 @@ func TestIntegrationOpenTireSessionIsReplaced(t *testing.T) {
 		}
 	}
 }
+
+func TestIntegrationCurrentMonthCountsFinancingDueLater(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	now := time.Now().UTC()
+	tomorrow := now.AddDate(0, 0, 1)
+	if tomorrow.Month() != now.Month() || tomorrow.Day() > 28 {
+		t.Skip("needs a day later in the current month and a start day that exists in every month")
+	}
+	car := mustVehicle(t, repo, "due-later@example.com")
+	rent, months := money.Cents(45000), 36
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: car.ID, AcquisitionType: models.AcquisitionLOA, StartDate: tomorrow.AddDate(0, -2, 0),
+		LeaseMonthlyRent: &rent, LeaseDurationMonths: &months,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := NewTCOService(db.Pool, "UTC").ComputeVehicleTCO(ctx, car.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	current := now.Format("2006-01")
+	for _, m := range sum.MonthlyCosts {
+		if m.Month == current {
+			if m.Financing != rent {
+				t.Fatalf("expected the rent due tomorrow in the current month, got %s", m.Financing)
+			}
+			if sum.FinancingCost != 2*rent {
+				t.Fatalf("cumulative cash must keep only the payments already due, got %s", sum.FinancingCost)
+			}
+			return
+		}
+	}
+	t.Fatalf("current month %s missing from %+v", current, sum.MonthlyCosts)
+}
