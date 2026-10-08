@@ -14,8 +14,39 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      web: ${{ steps.filter.outputs.web }}
+      backup: ${{ steps.filter.outputs.backup }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2
+
+      - name: Select the checks the change needs
+        id: filter
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" != "pull_request" ]; then
+            files=ALL
+          else
+            files=$(git diff --name-only HEAD^1 HEAD)
+          fi
+          match() { [ "$files" = ALL ] || printf '%s\n' "$files" | grep -Eq "$1"; }
+          flag() { if match "$2"; then echo "$1=true" >> "$GITHUB_OUTPUT"; else echo "$1=false" >> "$GITHUB_OUTPUT"; fi; }
+          flag go '^(.*\.go|go\.mod|go\.sum|migrations/|web/embed\.go|\.github/workflows/(ci|codeql)\.yml)'
+          flag web '^(web/|\.github/workflows/ci\.yml)'
+          flag backup '^(backup/|\.github/workflows/ci\.yml)'
+          flag docker '^(Dockerfile|\.dockerignore|go\.mod|go\.sum|web/package(-lock)?\.json|backup/|\.github/workflows/(ci|docker-publish)\.yml)'
+
   backup:
     name: Backup regression tests
+    needs: [changes]
+    if: needs.changes.outputs.backup == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,6 +56,8 @@ jobs:
 
   backend:
     name: Backend Tests & Build
+    needs: [changes]
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -63,6 +96,8 @@ jobs:
 
   govulncheck:
     name: Go Vulnerability Scan
+    needs: [changes]
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -82,6 +117,8 @@ jobs:
 
   frontend:
     name: Frontend Build
+    needs: [changes]
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -111,7 +148,8 @@ jobs:
 
   docker-build:
     name: Docker Build (no push)
-    if: github.event_name == 'pull_request'
+    needs: [changes]
+    if: github.event_name == 'pull_request' && needs.changes.outputs.docker == 'true'
     uses: ./.github/workflows/docker-publish.yml
     permissions:
       contents: read
@@ -130,3 +168,18 @@ jobs:
       packages: write
     with:
       push: true
+
+  ci-gate:
+    name: CI gate
+    if: always()
+    needs: [backup, backend, govulncheck, frontend, docker-build, docker-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail when a required job failed or was cancelled
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: ${RESULTS}"
+          case " ${RESULTS} " in
+            *" failure "*|*" cancelled "*) exit 1 ;;
+          esac
