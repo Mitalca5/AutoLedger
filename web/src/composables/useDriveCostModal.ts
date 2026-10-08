@@ -62,7 +62,7 @@ export function useDriveCostModal({
       tripLegs.value = legs
       showCostModal.value = true
     } catch (err: any) {
-      showAlert(t('drives.drivesView.detailsLoadError', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('drives.drivesView.detailsLoadError', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 
@@ -94,7 +94,7 @@ export function useDriveCostModal({
       tripLegs.value = tgDrives
       showCostModal.value = true
     } catch (err: any) {
-      showAlert(t('drives.drivesView.detailsLoadError', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('drives.drivesView.detailsLoadError', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 

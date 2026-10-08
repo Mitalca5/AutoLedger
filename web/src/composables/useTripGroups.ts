@@ -45,7 +45,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
       await api.dismissTripSuggestion(vehicleStore.activeVehicle.id, s.drive_ids)
       tripSuggestions.value = tripSuggestions.value.filter((x) => x.drive_ids[0] !== s.drive_ids[0])
     } catch (err: any) {
-      showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     } finally {
       suggestionBusyKey.value = null
     }
@@ -63,7 +63,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
       await api.createTripGroup(vehicleStore.activeVehicle.id, { name: suggestionName(s), drive_ids: s.drive_ids })
       await loadTripGroups()
     } catch (err: any) {
-      showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     } finally {
       suggestionBusyKey.value = null
     }
@@ -80,7 +80,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
       const res = await api.getDrives(vehicleStore.activeVehicle!.id, { tripGroupId: tg.id, limit: 200 })
       tripDrives.value = [...res.drives].sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
     } catch (err: any) {
-      showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 
@@ -88,7 +88,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
     if (!vehicleStore.activeVehicle) return
     const remaining = (tg.drive_ids || []).filter((id: string) => id !== driveId)
     if (!remaining.length) {
-      showAlert(t('drives.drivesView.tripNeedsDrive'), t('drives.drivesView.actionImpossible'), 'warning')
+      void showAlert(t('drives.drivesView.tripNeedsDrive'), t('drives.drivesView.actionImpossible'), 'warning')
       return
     }
     try {
@@ -99,7 +99,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
       if (updated) await toggleTripDetails(updated)
       loadDrives()
     } catch (err: any) {
-      showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 
@@ -128,7 +128,7 @@ export function useTripGroups({ loadDrives }: { loadDrives: () => unknown }) {
       await loadTripGroups()
       loadDrives()
     } catch (err: any) {
-      showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 
