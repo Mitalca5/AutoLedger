@@ -78,5 +78,5 @@ jobs:
 
           if ! git diff --quiet; then
             git commit -am "chore(release): sync version to ${TAG} [skip ci]"
-            git push origin main
+            git push origin main || echo "::warning::main is protected, the version files were not synced; update them in a pull request"
           fi
