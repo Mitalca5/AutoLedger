@@ -10,7 +10,7 @@ import (
 
 func TestCalculateSessionCostFlat(t *testing.T) {
 	svc := NewTariffService()
-	flatRate := money.Cents(25) // 0.25 EUR / kWh
+	flatRate := money.Rate(250000) // 0.25 EUR / kWh
 	plan := &models.TariffPlan{
 		PlanType:      models.TariffTypeFlat,
 		FlatRateCents: &flatRate,
@@ -31,8 +31,8 @@ func TestCalculateSessionCostFlat(t *testing.T) {
 
 func TestCalculateSessionCostTimeOfUse(t *testing.T) {
 	svc := NewTariffService()
-	peakRate := money.Cents(30)    // 0.30 EUR / kWh
-	offpeakRate := money.Cents(15) // 0.15 EUR / kWh
+	peakRate := money.Rate(300000)    // 0.30 EUR / kWh
+	offpeakRate := money.Rate(150000) // 0.15 EUR / kWh
 
 	plan := &models.TariffPlan{
 		PlanType:         models.TariffTypeTimeOfUse,
@@ -74,12 +74,12 @@ func TestCalculatePublicCharging(t *testing.T) {
 	req := models.PublicChargingCalculationRequest{
 		Kwh:                 30.0,
 		ChargingMinutes:     45,
-		TotalPluggedMinutes: 60,               // 15 min idle
-		ConnectionFee:       money.Cents(100), // 1.00 EUR
-		PricePerKwh:         money.Cents(40),  // 0.40 EUR / kWh -> 1200 cents
-		PricePerMinute:      money.Cents(10),  // 0.10 EUR / min -> 45 * 10 = 450 cents
-		IdleFeePerMinute:    money.Cents(50),  // 0.50 EUR / min
-		IdleGraceMinutes:    5,                // 15 - 5 = 10 min billed -> 500 cents
+		TotalPluggedMinutes: 60,                 // 15 min idle
+		ConnectionFee:       money.Cents(100),   // 1.00 EUR
+		PricePerKwh:         money.Rate(400000), // 0.40 EUR / kWh -> 1200 cents
+		PricePerMinute:      money.Cents(10),    // 0.10 EUR / min -> 45 * 10 = 450 cents
+		IdleFeePerMinute:    money.Cents(50),    // 0.50 EUR / min
+		IdleGraceMinutes:    5,                  // 15 - 5 = 10 min billed -> 500 cents
 	}
 
 	bd := svc.CalculatePublicCharging(req)
@@ -109,9 +109,9 @@ func bandsPlan() *models.TariffPlan {
 		PlanType:    models.TariffTypeBands,
 		DefaultBand: "white",
 		Bands: []models.TariffBand{
-			{Name: "blue", RateCents: 10},
-			{Name: "white", RateCents: 20},
-			{Name: "red", RateCents: 50},
+			{Name: "blue", RateCents: 100000},
+			{Name: "white", RateCents: 200000},
+			{Name: "red", RateCents: 500000},
 		},
 		Rules: []models.TariffRule{
 			{Days: []int{1, 2, 3, 4, 5}, Start: "22:00", End: "06:00", Band: "blue"},
@@ -169,7 +169,7 @@ func TestBandsFollowWallClockAcrossDST(t *testing.T) {
 func TestPlanValidity(t *testing.T) {
 	svc := NewTariffServiceIn("UTC")
 	from, to := "2026-10-01", "2026-12-31"
-	rate := money.Cents(10)
+	rate := money.Rate(100000)
 	plan := &models.TariffPlan{PlanType: models.TariffTypeFlat, FlatRateCents: &rate, ValidFrom: &from, ValidTo: &to}
 	at := func(m time.Month, d int) money.Cents {
 		ts := time.Date(2026, m, d, 10, 0, 0, 0, time.UTC)
@@ -182,12 +182,29 @@ func TestPlanValidity(t *testing.T) {
 }
 
 func TestLegacyPlanReadAsGrid(t *testing.T) {
-	flat := money.Cents(25)
+	flat := money.Rate(250000)
 	bands, rules, def, ok := effectiveGrid(&models.TariffPlan{PlanType: models.TariffTypeFlat, FlatRateCents: &flat})
-	if !ok || len(rules) != 0 || bands[def] != 25 {
+	if !ok || len(rules) != 0 || bands[def] != 250000 {
 		t.Errorf("flat plan should be one band: %v %v %s", bands, rules, def)
 	}
 	if _, _, _, ok := effectiveGrid(&models.TariffPlan{PlanType: models.TariffTypeFlat}); ok {
 		t.Error("a plan without price should not be usable")
+	}
+}
+
+func TestRatesKeepSubCentPrecision(t *testing.T) {
+	svc := NewTariffServiceIn("UTC")
+	rate, _ := money.ParseRate("0.2516")
+	plan := &models.TariffPlan{PlanType: models.TariffTypeFlat, FlatRateCents: &rate}
+	start := time.Date(2026, 6, 1, 10, 0, 0, 0, time.UTC)
+	got, err := svc.CalculateSessionCost(plan, start, start.Add(time.Hour), 100)
+	if err != nil || got != 2516 {
+		t.Errorf("100 kWh at 0.2516: got %s err %v, want 25.16", got, err)
+	}
+
+	preset, _ := money.ParseRate("0.349")
+	b := svc.CalculatePublicCharging(models.PublicChargingCalculationRequest{Kwh: 40, ChargingMinutes: 30, TotalPluggedMinutes: 30, PricePerKwh: preset})
+	if b.EnergyCost != 1396 || b.TotalCost != 1396 {
+		t.Errorf("40 kWh at 0.349: got energy %s total %s, want 13.96", b.EnergyCost, b.TotalCost)
 	}
 }

@@ -43,9 +43,9 @@ type SaveTariffPlanRequest struct {
 	Name             string              `json:"name"`
 	PlanType         string              `json:"plan_type"`
 	Currency         string              `json:"currency"`
-	FlatRateCents    *money.Cents        `json:"flat_rate_cents"`
-	PeakRateCents    *money.Cents        `json:"peak_rate_cents"`
-	OffpeakRateCents *money.Cents        `json:"offpeak_rate_cents"`
+	FlatRateCents    *money.Rate         `json:"flat_rate_cents"`
+	PeakRateCents    *money.Rate         `json:"peak_rate_cents"`
+	OffpeakRateCents *money.Rate         `json:"offpeak_rate_cents"`
 	TimeWindows      []models.TimeWindow `json:"time_windows"`
 	IsDefault        bool                `json:"is_default"`
 

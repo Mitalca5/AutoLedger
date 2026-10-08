@@ -10,7 +10,7 @@ Une grille tarifaire chiffre l'énergie d'une session de recharge à domicile lo
 
 ## Modifier les grilles
 
-**Compte → Grilles tarifaires d'électricité** liste les grilles regroupées par nom de tarif, la version la plus récente en premier. Une grille se crée et se modifie dans un formulaire (prix unique ou plusieurs prix, plages horaires avec leurs jours, dates de validité, abonnement mensuel). Chaque ligne propose la modification, **Nouvelle version** (mêmes prix, à partir du lendemain de la fin de la version précédente), la duplication et la suppression. Le sélecteur de grille du formulaire véhicule renvoie vers cette section. Les mêmes opérations existent via `POST/PUT/DELETE /api/tariffs/plans` ; les prix sont stockés au centime par kWh.
+**Compte → Grilles tarifaires d'électricité** liste les grilles regroupées par nom de tarif, la version la plus récente en premier. Une grille se crée et se modifie dans un formulaire (prix unique ou plusieurs prix, plages horaires avec leurs jours, dates de validité, abonnement mensuel). Chaque ligne propose la modification, **Nouvelle version** (mêmes prix, à partir du lendemain de la fin de la version précédente), la duplication et la suppression. Le sélecteur de grille du formulaire véhicule renvoie vers cette section. Les mêmes opérations existent via `POST/PUT/DELETE /api/tariffs/plans` ; les prix par kWh gardent jusqu'à six décimales (`0.2516`) ; seul le coût d'une session est arrondi au centime.
 
 ## Tranches
 

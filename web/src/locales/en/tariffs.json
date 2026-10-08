@@ -91,7 +91,6 @@
       "ruleDays": "Invalid days.",
       "validity": "The end date is before the start date."
     },
-    "manageLink": "Manage plans",
-    "roundingHint": "Prices are rounded to the cent per kWh."
+    "manageLink": "Manage plans"
   }
 }

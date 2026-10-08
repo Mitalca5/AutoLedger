@@ -49,7 +49,13 @@ func Parse(s string) (Cents, error) {
 }
 
 func fromRat(r *big.Rat) (Cents, error) {
-	scaled := new(big.Rat).Mul(r, big.NewRat(100, 1))
+	v, err := scaleRat(r, 100)
+	return Cents(v), err
+}
+
+// scaleRat multiplies r by scale and rounds to an integer, half away from zero.
+func scaleRat(r *big.Rat, scale int64) (int64, error) {
+	scaled := new(big.Rat).Mul(r, big.NewRat(scale, 1))
 	num, den := scaled.Num(), scaled.Denom()
 	quo, rem := new(big.Int).QuoRem(num, den, new(big.Int))
 	// Round half away from zero: |2·rem| >= den
@@ -63,7 +69,7 @@ func fromRat(r *big.Rat) (Cents, error) {
 	if !quo.IsInt64() {
 		return 0, errors.New("amount out of range")
 	}
-	return Cents(quo.Int64()), nil
+	return quo.Int64(), nil
 }
 
 // MulRate multiplies an amount by a rate (e.g. a currency conversion) and rounds to the cent.

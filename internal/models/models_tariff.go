@@ -24,8 +24,8 @@ type TimeWindow struct {
 
 // TariffBand is a named price: "peak", "off-peak", "blue", "red"... A plan holds as many as its contract has.
 type TariffBand struct {
-	Name      string      `json:"name"`
-	RateCents money.Cents `json:"rate_cents"` // per kWh
+	Name      string     `json:"name"`
+	RateCents money.Rate `json:"rate_cents"` // per kWh, in currency units
 }
 
 // TariffRule assigns a band to a daily interval. Days are 0 (Sunday) to 6 (Saturday); none means every day.
@@ -45,9 +45,9 @@ type TariffPlan struct {
 	Name             string       `json:"name"`
 	PlanType         string       `json:"plan_type"` // FLAT | TIME_OF_USE
 	Currency         string       `json:"currency"`
-	FlatRateCents    *money.Cents `json:"flat_rate_cents,omitempty"`
-	PeakRateCents    *money.Cents `json:"peak_rate_cents,omitempty"`
-	OffpeakRateCents *money.Cents `json:"offpeak_rate_cents,omitempty"`
+	FlatRateCents    *money.Rate  `json:"flat_rate_cents,omitempty"`
+	PeakRateCents    *money.Rate  `json:"peak_rate_cents,omitempty"`
+	OffpeakRateCents *money.Rate  `json:"offpeak_rate_cents,omitempty"`
 	TimeWindows      []TimeWindow `json:"time_windows"`
 	// Bands, Rules and DefaultBand describe a PlanType BANDS plan; FLAT and TIME_OF_USE plans keep their rates above.
 	Bands       []TariffBand `json:"bands"`
@@ -78,7 +78,7 @@ type PublicChargingPreset struct {
 	UserID           string      `json:"user_id"`
 	Name             string      `json:"name"`
 	ConnectionFee    money.Cents `json:"connection_fee"`
-	PricePerKwh      money.Cents `json:"price_per_kwh"`
+	PricePerKwh      money.Rate  `json:"price_per_kwh"`
 	PricePerMinute   money.Cents `json:"price_per_minute"`
 	IdleFeePerMinute money.Cents `json:"idle_fee_per_minute"`
 	IdleGraceMinutes int         `json:"idle_grace_minutes"`
@@ -92,7 +92,7 @@ type PublicChargingCalculationRequest struct {
 	ChargingMinutes     int         `json:"charging_minutes"`
 	TotalPluggedMinutes int         `json:"total_plugged_minutes"`
 	ConnectionFee       money.Cents `json:"connection_fee"`
-	PricePerKwh         money.Cents `json:"price_per_kwh"`
+	PricePerKwh         money.Rate  `json:"price_per_kwh"`
 	PricePerMinute      money.Cents `json:"price_per_minute"`
 	IdleFeePerMinute    money.Cents `json:"idle_fee_per_minute"`
 	IdleGraceMinutes    int         `json:"idle_grace_minutes"`

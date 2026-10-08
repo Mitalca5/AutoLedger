@@ -12,7 +12,7 @@ A tariff plan prices the energy of a home charging session when no cost is given
 
 ## Editing plans
 
-**Account → Electricity tariff plans** lists the plans grouped by tariff name, newest version first. A plan is created and edited in a form (single price or several prices, time ranges with their days, validity dates, monthly subscription). A row offers edit, **New version** (same prices, starting the day after the previous version ends), duplicate and delete. The vehicle form's plan selector links to this section. The same operations are available through `POST/PUT/DELETE /api/tariffs/plans`; prices are stored to the cent per kWh.
+**Account → Electricity tariff plans** lists the plans grouped by tariff name, newest version first. A plan is created and edited in a form (single price or several prices, time ranges with their days, validity dates, monthly subscription). A row offers edit, **New version** (same prices, starting the day after the previous version ends), duplicate and delete. The vehicle form's plan selector links to this section. The same operations are available through `POST/PUT/DELETE /api/tariffs/plans`; prices per kWh keep up to six decimals (`0.2516`); only the cost of a session is rounded to the cent.
 
 ## Bands
 

@@ -38,13 +38,13 @@ func TestTariffBandsMigrationAndVersions(t *testing.T) {
 		plan.Rules[0].Band != "OFFPEAK" || plan.Rules[0].Start != "22:00" || plan.DefaultBand != "PEAK" {
 		t.Fatalf("legacy plan not converted: %+v", plan)
 	}
-	if plan.Bands[0].RateCents != 30 || plan.Bands[1].RateCents != 15 {
+	if plan.Bands[0].RateCents != 300000 || plan.Bands[1].RateCents != 150000 {
 		t.Errorf("rates lost: %+v", plan.Bands)
 	}
 
 	from, to := "2026-01-01", "2026-12-31"
 	oldYear := &models.TariffPlan{UserID: userID, Name: "home", PlanType: models.TariffTypeBands, Currency: "EUR", DefaultBand: "A",
-		Bands: []models.TariffBand{{Name: "A", RateCents: money.Cents(10)}}, ValidFrom: &from, ValidTo: &to}
+		Bands: []models.TariffBand{{Name: "A", RateCents: money.Rate(100000)}}, ValidFrom: &from, ValidTo: &to}
 	if err := repo.CreateTariffPlan(ctx, oldYear); err != nil {
 		t.Fatal(err)
 	}

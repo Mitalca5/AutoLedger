@@ -104,13 +104,12 @@ async function save() {
         <div v-if="form.planType === 'FLAT'" class="max-w-xs">
           <label for="tp-flat" class="field-label">{{ $t('tariffs.editor.pricePerKwh', { cur: symbol }) }}</label>
           <NumberInput id="tp-flat" v-model="form.flatRate" min="0" class="field" />
-          <p class="mt-1 text-xs text-slate-400">{{ $t('tariffs.editor.roundingHint') }}</p>
         </div>
 
         <template v-else>
           <section class="space-y-2" aria-labelledby="tp-bands">
             <h4 id="tp-bands" class="text-sm font-semibold text-slate-200">{{ $t('tariffs.editor.bands') }}</h4>
-            <p class="text-xs text-slate-400">{{ $t('tariffs.editor.bandsHint') }} {{ $t('tariffs.editor.roundingHint') }}</p>
+            <p class="text-xs text-slate-400">{{ $t('tariffs.editor.bandsHint') }}</p>
             <div v-for="(band, i) in form.bands" :key="i" class="flex items-end gap-2">
               <div class="flex-1 min-w-0">
                 <label :for="`tp-band-name-${i}`" class="field-label">{{ $t('tariffs.editor.bandName') }}</label>

@@ -56,8 +56,8 @@ func parseTimeToMinutesOfDay(timeStr string) (int, error) {
 
 // effectiveGrid reads any plan as bands, rules and a default band: a flat plan is one band, a peak / off-peak plan
 // two bands with a rule per off-peak window. ok is false when the plan carries no usable price.
-func effectiveGrid(plan *models.TariffPlan) (bands map[string]money.Cents, rules []models.TariffRule, defaultBand string, ok bool) {
-	bands = map[string]money.Cents{}
+func effectiveGrid(plan *models.TariffPlan) (bands map[string]money.Rate, rules []models.TariffRule, defaultBand string, ok bool) {
+	bands = map[string]money.Rate{}
 	if plan.PlanType == models.TariffTypeBands {
 		for _, b := range plan.Bands {
 			bands[b.Name] = b.RateCents
@@ -164,7 +164,7 @@ func (s *TariffService) CalculateSessionCost(plan *models.TariffPlan, startTime,
 		return 0, nil
 	}
 	if len(rules) == 0 {
-		return money.Cents(math.Round(float64(bands[defaultBand]) * kwh)), nil
+		return bands[defaultBand].Cost(kwh), nil
 	}
 	parsed := parseRules(rules)
 
@@ -197,14 +197,14 @@ func (s *TariffService) CalculateSessionCost(plan *models.TariffPlan, startTime,
 
 	cost := 0.0
 	for band, minutes := range minutesByBand {
-		cost += kwh * float64(minutes) / float64(evaluated) * float64(bands[band])
+		cost += kwh * float64(minutes) / float64(evaluated) * bands[band].Float()
 	}
-	return money.Cents(math.Round(cost)), nil
+	return money.FromFloat(cost), nil
 }
 
 // CalculatePublicCharging computes decomposed public charging fees (connection + energy + time + idle).
 func (s *TariffService) CalculatePublicCharging(req models.PublicChargingCalculationRequest) models.PublicChargingBreakdown {
-	energyCost := money.Cents(math.Round(req.Kwh * float64(req.PricePerKwh)))
+	energyCost := req.PricePerKwh.Cost(req.Kwh)
 	durationCost := money.Cents(int64(req.ChargingMinutes) * int64(req.PricePerMinute))
 
 	totalPlugged := req.TotalPluggedMinutes

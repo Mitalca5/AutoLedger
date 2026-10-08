@@ -91,7 +91,6 @@
       "ruleDays": "Jours invalides.",
       "validity": "La date de fin précède la date de début."
     },
-    "manageLink": "Gérer les grilles",
-    "roundingHint": "Les prix sont arrondis au centime par kWh."
+    "manageLink": "Gérer les grilles"
   }
 }

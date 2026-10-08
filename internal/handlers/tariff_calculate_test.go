@@ -10,7 +10,6 @@ import (
 
 	"github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/models"
-	"github.com/teslacost/teslacost/internal/money"
 	"github.com/teslacost/teslacost/internal/services"
 )
 
@@ -27,7 +26,7 @@ func TestCalculateSessionCostForVehicle(t *testing.T) {
 	}
 	plan := &models.TariffPlan{
 		UserID: owner.ID, Name: "Night", PlanType: "BANDS", Currency: "EUR", DefaultBand: "day",
-		Bands: []models.TariffBand{{Name: "day", RateCents: money.FromFloat(0.20)}, {Name: "night", RateCents: money.FromFloat(0.10)}},
+		Bands: []models.TariffBand{{Name: "day", RateCents: 200000}, {Name: "night", RateCents: 100000}},
 		Rules: []models.TariffRule{{Start: "22:00", End: "06:00", Band: "night"}},
 	}
 	if err := repo.CreateTariffPlan(ctx, plan); err != nil {

@@ -13,8 +13,8 @@ import (
 
 // Tariff Plans
 
-const tariffPlanColumns = `id, user_id, name, plan_type, currency, flat_rate_cents,
-	peak_rate_cents, offpeak_rate_cents, time_windows, bands, rules, default_band,
+const tariffPlanColumns = `id, user_id, name, plan_type, currency, flat_rate,
+	peak_rate, offpeak_rate, time_windows, bands, rules, default_band,
 	standing_charge_cents, to_char(valid_from, 'YYYY-MM-DD'), to_char(valid_to, 'YYYY-MM-DD'),
 	is_default, created_at, updated_at`
 
@@ -65,8 +65,8 @@ func (r *Repository) CreateTariffPlan(ctx context.Context, p *models.TariffPlan)
 
 	query := `
 		INSERT INTO tariff_plans (
-			user_id, name, plan_type, currency, flat_rate_cents,
-			peak_rate_cents, offpeak_rate_cents, time_windows, bands, rules, default_band,
+			user_id, name, plan_type, currency, flat_rate,
+			peak_rate, offpeak_rate, time_windows, bands, rules, default_band,
 			standing_charge_cents, valid_from, valid_to, is_default
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::date, $14::date, $15)
 		RETURNING id, created_at, updated_at;
@@ -166,8 +166,8 @@ func (r *Repository) UpdateTariffPlan(ctx context.Context, p *models.TariffPlan)
 
 	query := `
 		UPDATE tariff_plans
-		SET name = $1, plan_type = $2, currency = $3, flat_rate_cents = $4,
-		    peak_rate_cents = $5, offpeak_rate_cents = $6, time_windows = $7,
+		SET name = $1, plan_type = $2, currency = $3, flat_rate = $4,
+		    peak_rate = $5, offpeak_rate = $6, time_windows = $7,
 		    bands = $8, rules = $9, default_band = $10, standing_charge_cents = $11,
 		    valid_from = $12::date, valid_to = $13::date,
 		    is_default = $14, updated_at = NOW()
@@ -205,7 +205,7 @@ func (r *Repository) DeleteTariffPlan(ctx context.Context, id, userID string) er
 func (r *Repository) CreatePublicChargingPreset(ctx context.Context, p *models.PublicChargingPreset) error {
 	query := `
 		INSERT INTO public_charging_presets (
-			user_id, name, connection_fee_cents, price_per_kwh_cents,
+			user_id, name, connection_fee_cents, price_per_kwh,
 			price_per_minute_cents, idle_fee_per_minute_cents, idle_grace_minutes, currency
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id, created_at;
@@ -218,7 +218,7 @@ func (r *Repository) CreatePublicChargingPreset(ctx context.Context, p *models.P
 
 func (r *Repository) ListPublicChargingPresets(ctx context.Context, userID string) ([]models.PublicChargingPreset, error) {
 	query := `
-		SELECT id, user_id, name, connection_fee_cents, price_per_kwh_cents,
+		SELECT id, user_id, name, connection_fee_cents, price_per_kwh,
 		       price_per_minute_cents, idle_fee_per_minute_cents, idle_grace_minutes,
 		       currency, created_at
 		FROM public_charging_presets
