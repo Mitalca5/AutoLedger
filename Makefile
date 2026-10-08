@@ -13,7 +13,7 @@ help:
 	@echo "  make docker-down  - Stoppe l'environnement Docker Compose"
 
 dev:
-	go run ./cmd/server/main.go
+	go run ./cmd/server
 
 test:
 	go test -v -race ./...

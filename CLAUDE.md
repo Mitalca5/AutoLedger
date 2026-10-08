@@ -14,7 +14,7 @@ Self-hosted total-cost-of-ownership tracker for cars: energy/fuel, maintenance, 
 go build ./... && go vet ./...
 gofmt -l .                       # must print nothing (run it on files you touch; some drift)
 go test ./...                    # unit tests; integration tests are skipped without TEST_DATABASE_URL
-make dev                         # go run ./cmd/server/main.go (needs DATABASE_URL + secrets, see .env.example)
+make dev                         # go run ./cmd/server (needs DATABASE_URL + secrets, see .env.example)
 
 # Frontend (from web/)
 npm ci --ignore-scripts
@@ -41,7 +41,8 @@ The full run takes several minutes (`internal/services` ~5 min). A `go test` tha
 ## Layout
 
 ```
-cmd/server/main.go          wiring, chi routes, background workers
+cmd/server                  startup (main.go), handler wiring (handlers.go), router and middleware (routes.go),
+                            routes by domain (routes_*.go), background workers (workers.go)
 internal/config             env-var loading and validation (Config)
 internal/auth               JWT, bcrypt, OIDC client, login throttle
 internal/middleware         auth, client IP / trusted proxies, security headers, Origin check

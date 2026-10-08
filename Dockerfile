@@ -24,7 +24,7 @@ RUN apk add --no-cache git curl build-base
 COPY go.mod go.sum* ./
 RUN go mod download
 COPY . .
-CMD ["go", "run", "./cmd/server/main.go"]
+CMD ["go", "run", "./cmd/server"]
 
 # ==============================================================================
 # Stage 3: Backend Build (Go binary)
