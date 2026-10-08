@@ -124,6 +124,7 @@ A feature that needs one of these goes to an issue for discussion first.
 - Check `gh pr list --state all` before touching a branch that had a PR: PRs are merged quickly and a merged branch must not be reused. Follow-up work goes on a fresh branch from `origin/main`, one PR per topic, independent PRs rather than stacks unless the work truly depends on the previous one.
 - Commit messages and PR titles/bodies are in English. PR body: `## Summary` and `## Notes` sections. `gh pr edit` fails on the deprecated Projects-classic GraphQL field; update a body with `gh api -X PATCH repos/Rem7474/TeslaCost/pulls/<n> -F body=@file`.
 - Do not push local `feat/*` branches left over from merged PRs.
+- Review comments on external contributors' PRs are written in English and stay constructive: start with what is correct (checked against the code), phrase concerns as observations or questions with a concrete suggestion, label what is blocking and what is not, never imply fault, and say what happens next (merge, rebase, re-run). A failing check is investigated before it is reported, and a transient failure is re-run rather than put on the contributor.
 - Documentation states the current behavior; it does not narrate history ("now", "again", "re-introduced") or cite PR numbers. That belongs in commit messages.
 
 ## Browser checks
