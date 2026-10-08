@@ -15,7 +15,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['lcov', 'text-summary'],
-      include: ['src/utils/**/*.ts', 'src/composables/**/*.ts', 'src/stores/**/*.ts'],
+      include: ['src/utils/**/*.ts', 'src/composables/**/*.ts', 'src/stores/**/*.ts', 'src/services/**/*.ts'],
       exclude: ['**/*.test.ts'],
     },
   },
