@@ -102,6 +102,20 @@ Refactors
 - Splitting a file is a pure move unless stated otherwise: verify declaration hashes and the multiset of non-blank lines before and after, then `gofmt`, build, vet, tests. For Vue views, compare the rendered DOM and recorded API writes before and after with a Playwright characterization run (mock `/api/**`, fixed clock).
 - SonarCloud counts moved code as new code: duplication that already existed inside a big file fails `new_duplicated_lines_density` (3 %) once the file is split. Find the blocks with `api/duplications/show?key=Rem7474_TeslaCost:<path>&pullRequest=<n>` and extract a small helper in a separate commit.
 
+## Continuous improvement
+
+When a change touches a component, view, handler, repository or util, look around it before finishing and propose what is worth doing, instead of only patching the one spot:
+
+- a refactor of the part being edited (a function or file that has outgrown its role, a branch that repeats);
+- a shared component, helper or composable when the same markup or logic already exists, or is about to exist, in two or more places (search for the pattern first: `grep` the other views and handlers);
+- an adjacent improvement the change makes cheap (a missing test, an untranslated string, a hard-coded unit or currency, a missing empty/loading/error state, an accessibility or mobile-width gap, a stale doc).
+
+How to propose:
+- Say it in the end-of-task summary or the PR `## Notes`, one line each: what, where, why, rough size. Mention what was found, not only what was done.
+- Do the small, obviously safe ones in the same PR only when they sit in code already being changed and add no review burden; anything larger or in a different area goes to its own commit, its own PR, or an issue (link it from the roadmap issue when one exists).
+- Never widen a PR silently: a pure move stays a pure move (see Refactors), and a behaviour change is never hidden inside a refactor.
+- Do not invent work: if nothing is worth proposing, say nothing. A proposal needs a concrete duplication, defect or gap to point at.
+
 ## Out of scope
 
 AutoLedger is a self-hosted ledger: it records what the user enters or pushes and computes costs from it. Do not build:
