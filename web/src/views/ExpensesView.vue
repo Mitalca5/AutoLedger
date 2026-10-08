@@ -8,7 +8,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { useDocumentPreview } from '@/composables/useDocumentPreview'
-import { api, type ExpenseDocumentHeader, type MaintenanceReminder, type VehicleWebhook } from '@/services/api'
+import { useReminders } from '@/composables/useReminders'
+import { api, type ExpenseDocumentHeader } from '@/services/api'
 import DocumentPreviewModal from '@/components/expenses/DocumentPreviewModal.vue'
 import TollsPanel from '@/components/expenses/TollsPanel.vue'
 import MaintenancePanel from '@/components/expenses/MaintenancePanel.vue'
@@ -28,8 +29,6 @@ import WebhookModal from '@/components/expenses/WebhookModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import QualifyChargesModal from '@/components/expenses/QualifyChargesModal.vue'
 import { Receipt, Fuel, Plus, Wrench, Zap, Gauge, Calculator, Paperclip, Eye, Bell, Radio, UploadCloud, Landmark } from 'lucide-vue-next'
-import type { ReminderPreset } from '@/utils/expenses'
-import { hasReminderSchedule } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { formatNumber } from '@/utils/numbers'
 
@@ -90,6 +89,39 @@ const missingCostOnly = ref(false)
 const loading = ref(false)
 const loadError = ref<string | null>(null)
 
+// Maintenance reminders & webhook
+const {
+  reminders,
+  loadingReminders,
+  showReminderModal,
+  editingReminder,
+  reminderPreset,
+  showCompleteReminderModal,
+  completingReminder,
+  showWebhookModal,
+  vehicleWebhook,
+  overdueReminders,
+  dueSoonReminders,
+  okReminders,
+  unscheduledReminders,
+  urgentRemindersCount,
+  loadReminders,
+  openAddReminderModal,
+  openEditReminderModal,
+  handleDeleteReminder,
+  openCompleteReminder,
+  onReminderCompleted,
+  openWebhookModal,
+} = useReminders({
+  isRemindersTabActive: () => activeTab.value === 'REMINDERS',
+  onLoadError: (message) => {
+    loadError.value = message
+  },
+  onExpenseLogged: async () => {
+    if (vehicleStore.activeVehicle) maintenanceExpenses.value = await api.getMaintenance(vehicleStore.activeVehicle.id)
+  },
+})
+
 // Documents & Invoices
 const documents = ref<ExpenseDocumentHeader[]>([])
 
@@ -102,23 +134,6 @@ const showChargeModal = ref(false)
 const editingCharge = ref<any | null>(null)
 const showUploadDocModal = ref(false)
 
-// Maintenance reminders & webhook
-const reminders = ref<MaintenanceReminder[]>([])
-const loadingReminders = ref(false)
-const showReminderModal = ref(false)
-const editingReminder = ref<MaintenanceReminder | null>(null)
-const reminderPreset = ref<ReminderPreset | null>(null)
-const showCompleteReminderModal = ref(false)
-const completingReminder = ref<MaintenanceReminder | null>(null)
-const showWebhookModal = ref(false)
-const vehicleWebhook = ref<VehicleWebhook | null>(null)
-
-const overdueReminders = computed(() => reminders.value.filter((r) => r.status === 'OVERDUE'))
-const dueSoonReminders = computed(() => reminders.value.filter((r) => r.status === 'DUE_SOON'))
-const okReminders = computed(() => reminders.value.filter((r) => r.status === 'OK' && hasReminderSchedule(r)))
-const unscheduledReminders = computed(() => reminders.value.filter((r) => !hasReminderSchedule(r)))
-const urgentRemindersCount = computed(() => overdueReminders.value.length + dueSoonReminders.value.length)
-
 async function ensureDocumentsLoaded() {
   if (!vehicleStore.activeVehicle) return
   try {
@@ -130,19 +145,6 @@ async function ensureDocumentsLoaded() {
 
 function onDocumentAdded(doc: ExpenseDocumentHeader) {
   documents.value.unshift(doc)
-}
-
-async function loadReminders() {
-  if (!vehicleStore.activeVehicle) return
-  loadingReminders.value = true
-  try {
-    reminders.value = await api.getReminders(vehicleStore.activeVehicle.id)
-  } catch (err: any) {
-    console.error('Failed to load reminders', err)
-    if (activeTab.value === 'REMINDERS') loadError.value = err?.message ?? ''
-  } finally {
-    loadingReminders.value = false
-  }
 }
 
 const pendingChargesCount = ref(0)
@@ -367,60 +369,6 @@ async function handleDeleteDocument(doc: ExpenseDocumentHeader) {
   } catch (err: any) {
     showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
   }
-}
-
-// Maintenance reminders & webhook
-function openAddReminderModal(preset: ReminderPreset | null = null) {
-  editingReminder.value = null
-  reminderPreset.value = preset
-  showReminderModal.value = true
-}
-
-function openEditReminderModal(r: MaintenanceReminder) {
-  editingReminder.value = r
-  reminderPreset.value = null
-  showReminderModal.value = true
-}
-
-async function handleDeleteReminder(r: MaintenanceReminder) {
-  if (!vehicleStore.activeVehicle) return
-  const ok = await showConfirm({
-    title: t('expenses.expensesView.deleteReminderTitle'),
-    message: t('expenses.expensesView.deleteReminderMessage', { title: r.title }),
-    confirmText: t('common.delete'),
-    type: 'danger',
-  })
-  if (!ok) return
-  try {
-    await api.deleteReminder(vehicleStore.activeVehicle.id, r.id)
-    showAlert(t('expenses.expensesView.reminderDeleted'), t('common.success'), 'success')
-    await loadReminders()
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  }
-}
-
-function openCompleteReminder(r: MaintenanceReminder) {
-  completingReminder.value = r
-  showCompleteReminderModal.value = true
-}
-
-async function onReminderCompleted(expenseLogged: boolean) {
-  await loadReminders()
-  if (expenseLogged && vehicleStore.activeVehicle) {
-    maintenanceExpenses.value = await api.getMaintenance(vehicleStore.activeVehicle.id)
-  }
-}
-
-// The webhook is fetched before the modal opens, so it shows the saved configuration
-async function openWebhookModal() {
-  if (!vehicleStore.activeVehicle) return
-  try {
-    vehicleWebhook.value = await api.getVehicleWebhook(vehicleStore.activeVehicle.id)
-  } catch (err: any) {
-    console.error('Failed to load webhook', err)
-  }
-  showWebhookModal.value = true
 }
 
 const sectionKey = computed(() => (isMaintenanceSection.value ? 'maintenance' : isEnergySection.value ? 'energy' : 'expenses'))
