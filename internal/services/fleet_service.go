@@ -35,15 +35,58 @@ func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.F
 	if err != nil {
 		return nil, err
 	}
+	sums := make(map[string]*TCOSummary, len(res.Vehicles))
 	for i := range res.Vehicles {
 		sum, err := s.tco.ComputeVehicleTCO(ctx, res.Vehicles[i].VehicleID)
 		if err != nil {
 			slog.Warn("fleet comparison without TCO", "vehicle_id", res.Vehicles[i].VehicleID, "error", err)
 			continue
 		}
+		sums[res.Vehicles[i].VehicleID] = sum
 		applyTCOToFleetMetric(&res.Vehicles[i], sum, time.Now())
 	}
+	if len(sums) == len(res.Vehicles) {
+		applyTCOMonthsToFleet(res, sums, time.Now())
+	}
 	return res, nil
+}
+
+// applyTCOMonthsToFleet rebuilds the month figures of the fleet from the monthly costs of each vehicle's TCO, so the
+// household total is the sum of the per-vehicle charts: same month boundaries (APP_TIMEZONE) and the same smoothed
+// energy for months without a recorded charge.
+func applyTCOMonthsToFleet(res *models.FleetSummaryResponse, sums map[string]*TCOSummary, now time.Time) {
+	byVehicle := make(map[string]map[string]MonthlyCost, len(sums))
+	for id, sum := range sums {
+		months := make(map[string]MonthlyCost, len(sum.MonthlyCosts))
+		for _, mc := range sum.MonthlyCosts {
+			months[mc.Month] = mc
+		}
+		byVehicle[id] = months
+	}
+
+	for i := range res.MonthlyCosts {
+		fm := &res.MonthlyCosts[i]
+		fm.TotalCost, fm.EnergyCost, fm.OtherCost = 0, 0, 0
+		fm.ByVehicle = make(map[string]money.Cents, len(sums))
+		for id, months := range byVehicle {
+			mc, ok := months[fm.Month]
+			if !ok {
+				continue
+			}
+			fm.TotalCost += mc.Total
+			fm.EnergyCost += mc.Energy
+			fm.OtherCost += mc.Total - mc.Energy
+			fm.ByVehicle[id] = mc.Total
+		}
+	}
+
+	current := now.Format("2006-01")
+	res.CurrentMonthCost = 0
+	for i := range res.Vehicles {
+		cost := byVehicle[res.Vehicles[i].VehicleID][current].Total
+		res.Vehicles[i].MonthCost = cost
+		res.CurrentMonthCost += cost
+	}
 }
 
 // applyTCOToFleetMetric fills the comparison figures of a vehicle from its TCO summary.
