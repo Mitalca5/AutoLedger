@@ -310,6 +310,26 @@ docker run --rm \
   alpine sh -c "cd /data && tar -xzf /backup/autoledger-documents-<timestamp>.tar.gz --strip-components=1"
 ```
 
+### Upgrading PostgreSQL 16 to 18
+The Compose file runs PostgreSQL 18. A database volume written by PostgreSQL 16 is refused at startup (`database files are incompatible with server`), so existing deployments dump and restore once. Documents and secrets are not affected.
+
+```bash
+# 1. With the previous stack still running, dump the database and keep the file
+docker compose exec -T postgres pg_dump -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}" | gzip > autoledger-pre-upgrade.sql.gz
+
+# 2. Stop everything and remove the PostgreSQL 16 data volume (DB_VOLUME_NAME, autoledger_db_data by default)
+docker compose down
+docker volume rm "${DB_VOLUME_NAME:-autoledger_db_data}"
+
+# 3. Pull the new images and start only the database, which initializes an empty PostgreSQL 18 cluster
+docker compose pull
+docker compose up -d postgres
+
+# 4. Restore the dump, then start the rest of the stack
+gunzip -c autoledger-pre-upgrade.sql.gz | docker compose exec -T postgres psql -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}"
+docker compose up -d
+```
+
 ---
 
 ## ⚙️ Environment Variables Reference
@@ -368,7 +388,7 @@ Each primary variable wins when both are set; the legacy name is only read when 
 go test -v ./...
 
 # Run backend integration tests with PostgreSQL
-docker run -d --name autoledger-test-pg -e POSTGRES_USER=autoledger -e POSTGRES_PASSWORD=test -e POSTGRES_DB=autoledger_test -p 55432:5432 postgres:16-alpine
+docker run -d --name autoledger-test-pg -e POSTGRES_USER=autoledger -e POSTGRES_PASSWORD=test -e POSTGRES_DB=autoledger_test -p 55432:5432 postgres:18-alpine
 TEST_DATABASE_URL="postgres://autoledger:test@localhost:55432/autoledger_test?sslmode=disable" go test -v ./...
 
 # Run frontend unit tests and typecheck

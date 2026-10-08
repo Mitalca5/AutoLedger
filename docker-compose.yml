@@ -3,7 +3,7 @@ services:
   # shared by the services. A database password set through AUTOLEDGER_DB_PASSWORD (or DB_PASSWORD) is written
   # there as is; every other secret is generated once and kept. Secrets set in the api environment still win.
   secrets-init:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: "no"
     user: root
     entrypoint: ["/bin/sh", "-c"]
@@ -21,10 +21,13 @@ services:
       - autoledger_secrets:/secrets
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: ${DB_CONTAINER_NAME:-autoledger-db}
     restart: unless-stopped
     environment:
+      # PostgreSQL 18 images default to /var/lib/postgresql/18/docker. Keeping the historical path makes a server
+      # started on a volume written by an older major fail loudly instead of silently creating an empty database.
+      PGDATA: /var/lib/postgresql/data
       POSTGRES_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
       POSTGRES_PASSWORD_FILE: /secrets/db_password
       POSTGRES_DB: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}

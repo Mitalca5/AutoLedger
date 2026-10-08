@@ -27,7 +27,7 @@ Integration tests (services, handlers, database) need PostgreSQL. Use your own c
 
 ```bash
 docker run -d --rm --name tc-pg -e POSTGRES_USER=teslacost -e POSTGRES_PASSWORD=test \
-  -e POSTGRES_DB=teslacost_test -p 55433:5432 postgres:16-alpine
+  -e POSTGRES_DB=teslacost_test -p 55433:5432 postgres:18-alpine
 # wait until a TCP connection works, pg_isready alone is not enough (psql is not installed on the host):
 until docker exec -e PGPASSWORD=test tc-pg psql -h 127.0.0.1 -U teslacost -d teslacost_test -c 'select 1' >/dev/null 2>&1; do sleep 1; done
 TEST_DATABASE_URL='postgres://teslacost:test@localhost:55433/teslacost_test?sslmode=disable' go test -timeout 20m ./...

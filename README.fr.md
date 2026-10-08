@@ -310,6 +310,26 @@ docker run --rm \
   alpine sh -c "cd /data && tar -xzf /backup/autoledger-documents-<horodatage>.tar.gz --strip-components=1"
 ```
 
+### Passer de PostgreSQL 16 à 18
+Le fichier Compose utilise PostgreSQL 18. Un volume de base écrit par PostgreSQL 16 est refusé au démarrage (`database files are incompatible with server`) : les déploiements existants font un dump puis une restauration, une seule fois. Les documents et les secrets ne sont pas concernés.
+
+```bash
+# 1. L'ancienne pile étant encore démarrée, dumper la base et conserver le fichier
+docker compose exec -T postgres pg_dump -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}" | gzip > autoledger-pre-upgrade.sql.gz
+
+# 2. Tout arrêter et supprimer le volume de données PostgreSQL 16 (DB_VOLUME_NAME, autoledger_db_data par défaut)
+docker compose down
+docker volume rm "${DB_VOLUME_NAME:-autoledger_db_data}"
+
+# 3. Récupérer les nouvelles images et démarrer seulement la base, qui initialise un cluster PostgreSQL 18 vide
+docker compose pull
+docker compose up -d postgres
+
+# 4. Restaurer le dump, puis démarrer le reste de la pile
+gunzip -c autoledger-pre-upgrade.sql.gz | docker compose exec -T postgres psql -U "${AUTOLEDGER_DB_USER:-autoledger}" -d "${AUTOLEDGER_DB_NAME:-autoledger}"
+docker compose up -d
+```
+
 ---
 
 ## ⚙️ Référence des variables d'environnement
@@ -368,7 +388,7 @@ Chaque variable principale l'emporte lorsque les deux sont définies ; l'ancien 
 go test -v ./...
 
 # Lancer les tests d'intégration du backend avec PostgreSQL
-docker run -d --name autoledger-test-pg -e POSTGRES_USER=autoledger -e POSTGRES_PASSWORD=test -e POSTGRES_DB=autoledger_test -p 55432:5432 postgres:16-alpine
+docker run -d --name autoledger-test-pg -e POSTGRES_USER=autoledger -e POSTGRES_PASSWORD=test -e POSTGRES_DB=autoledger_test -p 55432:5432 postgres:18-alpine
 TEST_DATABASE_URL="postgres://autoledger:test@localhost:55432/autoledger_test?sslmode=disable" go test -v ./...
 
 # Lancer les tests unitaires du frontend et la vérification des types

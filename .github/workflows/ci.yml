@@ -54,7 +54,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Test the backup pipeline in its runtime image
-        run: docker run --rm --entrypoint sh -v "$PWD:/repo:ro" postgres:16-alpine /repo/backup/entrypoint_test.sh
+        run: docker run --rm --entrypoint sh -v "$PWD:/repo:ro" postgres:18-alpine /repo/backup/entrypoint_test.sh
 
   backend:
     name: Backend Tests & Build
@@ -169,7 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: teslacost
           POSTGRES_PASSWORD: test
