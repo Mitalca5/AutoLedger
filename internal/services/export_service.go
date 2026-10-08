@@ -48,12 +48,22 @@ type ExportOptions struct {
 	RateLabel string
 }
 
+// exportStore is the slice of *database.Repository that ExportService reads.
+type exportStore interface {
+	ListCharges(ctx context.Context, vehicleID string, missingCostOnly bool, limit, offset int) ([]models.ChargeLog, int, error)
+	ListDrives(ctx context.Context, vehicleID string, filter database.DriveFilter, limit, offset int) ([]models.Drive, int, error)
+	ListFuelLogs(ctx context.Context, vehicleID string) ([]models.FuelLog, error)
+	ListOdometerCheckpoints(ctx context.Context, vehicleID string) ([]models.OdometerCheckpoint, error)
+	ListDriveExpenses(ctx context.Context, vehicleID, lang string) ([]models.DriveExpense, error)
+	ListMaintenanceExpenses(ctx context.Context, vehicleID string) ([]models.MaintenanceExpense, error)
+}
+
 type ExportService struct {
-	repo    *database.Repository
+	repo    exportStore
 	mileage *MileageService
 }
 
-func NewExportService(repo *database.Repository) *ExportService {
+func NewExportService(repo exportStore) *ExportService {
 	return &ExportService{repo: repo}
 }
 

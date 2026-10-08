@@ -11,13 +11,20 @@ import (
 	"github.com/teslacost/teslacost/internal/money"
 )
 
+// mileageStore is the slice of *database.Repository that MileageService reads.
+type mileageStore interface {
+	ListDrives(ctx context.Context, vehicleID string, filter database.DriveFilter, limit, offset int) ([]models.Drive, int, error)
+	ListMileageRates(ctx context.Context, userID string) ([]models.MileageRate, error)
+	GetTollExpensesForDrives(ctx context.Context, vehicleID string, driveIDs []string) (map[string]money.Cents, error)
+}
+
 // MileageService totals trips per tag and applies a mileage allowance scale the user typed.
 type MileageService struct {
-	repo *database.Repository
+	repo mileageStore
 	loc  *time.Location
 }
 
-func NewMileageService(repo *database.Repository, timezone string) *MileageService {
+func NewMileageService(repo mileageStore, timezone string) *MileageService {
 	loc, err := time.LoadLocation(timezone)
 	if err != nil || timezone == "" {
 		loc = time.UTC

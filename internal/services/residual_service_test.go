@@ -1,8 +1,12 @@
 package services
 
 import (
+	"context"
 	"testing"
+	"time"
 
+	"github.com/teslacost/teslacost/internal/apierror"
+	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 )
@@ -87,5 +91,54 @@ func TestComputeResidualRejectsUnusableInputs(t *testing.T) {
 		if _, err := computeResidual(ownershipFor(1000, 500, 12), 1, 1, nil, o); err == nil {
 			t.Fatalf("options %+v must fail", o)
 		}
+	}
+}
+
+type fakeResidualStore struct {
+	ownership *models.VehicleOwnership
+	snapshots []models.BatterySnapshot
+}
+
+func (f fakeResidualStore) ListBatterySnapshots(context.Context, string) ([]models.BatterySnapshot, error) {
+	return f.snapshots, nil
+}
+
+func (f fakeResidualStore) GetVehicleOwnership(context.Context, string) (*models.VehicleOwnership, error) {
+	if f.ownership == nil {
+		return nil, database.ErrNotFound
+	}
+	return f.ownership, nil
+}
+
+func TestResidualWithoutOwnershipAsksForTheInputs(t *testing.T) {
+	svc := NewResidualService(fakeResidualStore{}, nil)
+	_, err := svc.Residual(context.Background(), &models.Vehicle{ID: "v"}, ResidualOptions{})
+	if e, ok := err.(*apierror.Error); !ok || e.Code != "residual.missing_inputs" {
+		t.Fatalf("expected residual.missing_inputs, got %v", err)
+	}
+}
+
+func TestResidualUsesAgeOdometerAndRecordedHealth(t *testing.T) {
+	price, resale, holding := money.Cents(3000000), money.Cents(1500000), 60
+	startKm := 1000.0
+	health := 90.0
+	store := fakeResidualStore{
+		ownership: &models.VehicleOwnership{
+			StartDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), StartOdometer: &startKm,
+			PurchasePrice: &price, ExpectedResaleValue: &resale, ExpectedHoldingMonths: &holding,
+		},
+		snapshots: []models.BatterySnapshot{{HealthPercent: &health}},
+	}
+	svc := NewResidualService(store, nil)
+	svc.now = func() time.Time { return time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC) }
+	out, err := svc.Residual(context.Background(), &models.Vehicle{ID: "v", CurrentOdometer: 31000}, ResidualOptions{HealthWeight: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.DistanceKm != 30000 || out.AgeMonths < 23.9 || out.AgeMonths > 24.1 {
+		t.Fatalf("unexpected age or distance: %+v", out)
+	}
+	if out.HealthPercent == nil || *out.HealthPercent != 90 || out.HealthFactor != 0.9 {
+		t.Fatalf("expected the recorded health to weigh on the value, got %+v", out)
 	}
 }

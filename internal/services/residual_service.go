@@ -20,14 +20,20 @@ const (
 	maxCapacityRatio = 1.1
 )
 
+// residualStore is the slice of *database.Repository that ResidualService reads.
+type residualStore interface {
+	ListBatterySnapshots(ctx context.Context, vehicleID string) ([]models.BatterySnapshot, error)
+	GetVehicleOwnership(ctx context.Context, vehicleID string) (*models.VehicleOwnership, error)
+}
+
 // ResidualService derives the battery state of health and the residual value of a vehicle.
 type ResidualService struct {
-	repo  *database.Repository
+	repo  residualStore
 	stats *EnergyStatsService
 	now   func() time.Time
 }
 
-func NewResidualService(repo *database.Repository, stats *EnergyStatsService) *ResidualService {
+func NewResidualService(repo residualStore, stats *EnergyStatsService) *ResidualService {
 	return &ResidualService{repo: repo, stats: stats, now: time.Now}
 }
 
