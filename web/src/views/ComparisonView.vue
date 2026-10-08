@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NumberInput from '@/components/NumberInput.vue'
 import LoadError from '@/components/LoadError.vue'
-import EmptyState from '@/components/EmptyState.vue'
+import ComparisonEmptyState from '@/components/comparison/ComparisonEmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Scale as PageIcon } from 'lucide-vue-next'
 import { intlLocale, t, te } from '@/i18n'
@@ -127,8 +127,9 @@ function applyFuelDefaults() {
   form.ice.fuel_price = d.fuel_price
 }
 
-async function startNew() {
+async function startNew(mode?: 'RETROSPECTIVE' | 'PROJECTION') {
   Object.assign(form, emptyForm())
+  if (mode) form.mode = mode
   showAdvanced.value = false
   editingId.value = null
   formError.value = ''
@@ -323,7 +324,7 @@ onMounted(async () => {
       <button
         v-if="view === 'list'"
         class="btn btn-lg btn-primary"
-        @click="startNew"
+        @click="startNew()"
       >
         <Plus class="w-4 h-4" /> {{ $t('comparison.comparisonView.newComparison') }}
       </button>
@@ -335,9 +336,7 @@ onMounted(async () => {
     <div v-if="view === 'list'">
       <div v-if="loading" class="text-sm text-slate-400">{{ $t('comparison.comparisonView.loading') }}</div>
       <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadScenarios" />
-      <EmptyState v-else-if="scenarios.length === 0">
-        {{ $t('comparison.comparisonView.noComparisonYetCreateOne') }}
-      </EmptyState>
+      <ComparisonEmptyState v-else-if="scenarios.length === 0" @start="startNew" />
       <div v-else class="space-y-3">
       <div v-if="scenarios.length >= 2" class="flex items-center justify-between gap-3 text-xs text-slate-400">
         <span>{{ $t('comparison.comparisonView.tick2Or3Comparisons') }}</span>

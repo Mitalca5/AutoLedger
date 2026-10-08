@@ -25,6 +25,7 @@ const desktopShots = [
   ['energy-fuel', '/energy', 'ICE'],
   ['maintenance', '/maintenance', 'EV'],
   ['tires', '/tires', 'EV'],
+  ['comparison', '/comparison', 'EV'],
 ]
 
 async function session(browser, options, locale) {

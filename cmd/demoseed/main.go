@@ -143,6 +143,20 @@ func (c *client) seed(ds demodata.Dataset, apiToken string) error {
 			return err
 		}
 	}
+	if cmp := ds.Comparison; cmp != nil {
+		err := c.do("POST", "/api/comparison-scenarios/", map[string]any{
+			"vehicle_id": v.ID, "name": cmp.Name, "mode": "RETROSPECTIVE", "annual_km": cmp.AnnualKm, "years": cmp.Years,
+			"ice": map[string]any{
+				"fuel_type": cmp.FuelType, "l_per_100km": cmp.LPer100Km, "fuel_price": cmp.FuelPrice,
+				"purchase_price": units(cmp.PurchaseCents), "resale_value": units(cmp.ResaleCents),
+				"maintenance_yearly": units(cmp.MaintenanceYearlyCents), "insurance_yearly": units(cmp.InsuranceYearlyCents),
+				"tax_yearly": units(cmp.TaxYearlyCents),
+			},
+		}, nil, "")
+		if err != nil {
+			return err
+		}
+	}
 	log.Printf("%s: %d events, %d tires, %d expenses, %d reminders", ds.Vehicle.Name, len(ds.Events), len(ds.Tires), len(ds.Expenses), len(ds.Reminders))
 	return nil
 }

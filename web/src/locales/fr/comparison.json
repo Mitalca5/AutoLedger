@@ -42,7 +42,6 @@
     "comparisonName": "Nom du comparatif",
     "compare": "Comparer ({length})",
     "tick2Or3Comparisons": "Cochez 2 ou 3 comparatifs pour les comparer côte à côte.",
-    "noComparisonYetCreateOne": "Comparez un véhicule électrique ou hybride rechargeable suivi à un thermique configurable, ou saisissez un véhicule électrique et un thermique pour une projection.",
     "loading": "Chargement…",
     "newComparison": "Nouveau comparatif",
     "forInformationOnlyNoneOf": "Estimation informative : aucune de vos données réelles n'est modifiée.",
@@ -212,5 +211,29 @@
     "totalHint": "Tous les coûts du scénario, entretien et autres frais compris.",
     "saved": "économisés",
     "extra": "de plus"
+  },
+  "emptyState": {
+    "intro": "Comparez le coût réel d'un véhicule électrique ou hybride rechargeable à celui d'un thermique sur plusieurs années : énergie, entretien, assurance, taxes, dépréciation et seuil de rentabilité. Deux façons de commencer :",
+    "trackedTitle": "Véhicule suivi",
+    "trackedText": "Utilise les coûts déjà enregistrés pour votre véhicule électrique ou hybride et les compare à un véhicule thermique que vous décrivez.",
+    "trackedAction": "Comparer mon véhicule",
+    "trackedUnavailable": "Sélectionnez d'abord un véhicule électrique ou hybride rechargeable.",
+    "vehiclesLink": "Véhicules",
+    "projectionTitle": "Projection",
+    "projectionText": "Saisissez vous-même les deux véhicules (prix, consommation, assurance…) pour évaluer un achat avant de le faire.",
+    "projectionAction": "Démarrer une projection",
+    "dataHint": "Une comparaison suivie demande environ trois mois d'historique avec des coûts. Ajoutez-les dans :",
+    "energyLink": "Énergie",
+    "odometerLink": "Relevés kilométriques",
+    "exampleTitle": "À quoi ressemble un résultat",
+    "exampleBadge": "Exemple",
+    "exampleText": "Chiffres illustratifs sur cinq ans, pas vos données. Rien n'est enregistré.",
+    "breakEven": "Le résultat montre aussi le coût cumulé par année et l'année où l'option la moins chère devient rentable.",
+    "rows": {
+      "energy": "Énergie",
+      "maintenance": "Entretien",
+      "insurance": "Assurance et taxes",
+      "depreciation": "Dépréciation"
+    }
   }
 }

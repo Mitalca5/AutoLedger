@@ -86,3 +86,13 @@ func TestICEFillUpsMatchTheConsumption(t *testing.T) {
 		t.Errorf("%.2f L/100 km", per100)
 	}
 }
+
+func TestOnlyTheElectricDatasetCarriesAComparison(t *testing.T) {
+	ev, _ := Build("ev", ref)
+	if c := ev.Comparison; c == nil || c.Years < 1 || c.AnnualKm <= 0 || c.LPer100Km <= 0 || c.PurchaseCents <= c.ResaleCents {
+		t.Errorf("EV comparison unusable: %+v", c)
+	}
+	if ice, _ := Build("ice", ref); ice.Comparison != nil {
+		t.Error("the combustion dataset has no comparison")
+	}
+}

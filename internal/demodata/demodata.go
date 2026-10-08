@@ -52,6 +52,20 @@ type Tire struct {
 	LifespanKm                      int
 }
 
+// Comparison is a saved EV vs combustion scenario of the vehicle (retrospective mode).
+type Comparison struct {
+	Name                   string
+	AnnualKm               float64
+	Years                  int
+	FuelType               string
+	LPer100Km, FuelPrice   float64
+	PurchaseCents          int64
+	ResaleCents            int64
+	MaintenanceYearlyCents int64
+	InsuranceYearlyCents   int64
+	TaxYearlyCents         int64
+}
+
 type Dataset struct {
 	Key       string
 	Vehicle   Vehicle
@@ -59,6 +73,8 @@ type Dataset struct {
 	Expenses  []Expense
 	Reminders []Reminder
 	Tires     []Tire
+	// Comparison is nil for a dataset that carries no scenario.
+	Comparison *Comparison
 	// FinalOdometer is the odometer after the last event.
 	FinalOdometer float64
 }
@@ -189,6 +205,10 @@ func buildEV(today time.Time) Dataset {
 		{"Michelin", "Pilot Sport 4", "235/45 R18", "SUMMER", at(200), 79200, "FR", ds.Vehicle.StartOdometer + 300, 40000},
 		{"Michelin", "Pilot Sport 4", "235/45 R18", "SUMMER", at(200), 79200, "RL", ds.Vehicle.StartOdometer + 300, 40000},
 		{"Michelin", "Pilot Sport 4", "235/45 R18", "SUMMER", at(200), 79200, "RR", ds.Vehicle.StartOdometer + 300, 40000},
+	}
+	ds.Comparison = &Comparison{
+		Name: "Model 3 vs Clio", AnnualKm: 13000, Years: 5, FuelType: "SP95_E10", LPer100Km: 5.6, FuelPrice: 1.82,
+		PurchaseCents: 1850000, ResaleCents: 700000, MaintenanceYearlyCents: 45000, InsuranceYearlyCents: 61200, TaxYearlyCents: 0,
 	}
 	return ds
 }

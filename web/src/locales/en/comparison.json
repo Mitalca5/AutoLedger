@@ -42,7 +42,6 @@
     "comparisonName": "Comparison name",
     "compare": "Compare ({length})",
     "tick2Or3Comparisons": "Tick 2 or 3 comparisons to compare them side by side.",
-    "noComparisonYetCreateOne": "Compare a tracked electric or plug-in hybrid vehicle with a configurable combustion vehicle, or enter an electric and a combustion vehicle for a projection.",
     "loading": "Loading…",
     "newComparison": "New comparison",
     "forInformationOnlyNoneOf": "For information only: none of your actual data is changed.",
@@ -212,5 +211,29 @@
     "totalHint": "All running costs and the other costs of the scenario.",
     "saved": "saved",
     "extra": "more"
+  },
+  "emptyState": {
+    "intro": "Compare the real cost of an electric or plug-in hybrid vehicle with a combustion one over several years: energy, maintenance, insurance, taxes, depreciation and the break-even point. Two ways to start:",
+    "trackedTitle": "Tracked vehicle",
+    "trackedText": "Uses the costs you have already recorded for your electric or hybrid vehicle and compares them with a combustion vehicle you describe.",
+    "trackedAction": "Compare my vehicle",
+    "trackedUnavailable": "Select an electric or plug-in hybrid vehicle first.",
+    "vehiclesLink": "Vehicles",
+    "projectionTitle": "Projection",
+    "projectionText": "Enter both vehicles yourself (price, consumption, insurance…) to evaluate a purchase before making it.",
+    "projectionAction": "Start a projection",
+    "dataHint": "A tracked comparison needs about three months of history with costs. Add them in:",
+    "energyLink": "Energy",
+    "odometerLink": "Odometer readings",
+    "exampleTitle": "What a result looks like",
+    "exampleBadge": "Example",
+    "exampleText": "Illustrative figures over five years, not your data. Nothing is saved.",
+    "breakEven": "The result also shows the cumulative cost per year and the year the cheaper option pays off.",
+    "rows": {
+      "energy": "Energy",
+      "maintenance": "Maintenance",
+      "insurance": "Insurance and taxes",
+      "depreciation": "Depreciation"
+    }
   }
 }
