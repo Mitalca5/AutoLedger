@@ -230,7 +230,7 @@ function handleLogout() {
   <!-- Mobile "Plus" sheet -->
   <div
     v-if="showMore"
-    class="md:hidden fixed inset-0 z-[60] flex items-end bg-black/70"
+    class="md:hidden fixed inset-0 z-modal flex items-end bg-black/70"
     @click.self="showMore = false"
   >
     <div

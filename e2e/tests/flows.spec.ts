@@ -128,3 +128,17 @@ test('the drive filters sit behind a button on a phone and stay visible on a wid
   await expect(toggle).toBeHidden()
   await expect(withToll).toBeVisible()
 })
+
+test('a modal covers the bottom bar of a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 700 })
+  await useVehicle(page, ice.id, '/energy?tab=FUEL')
+  await page.getByRole('button', { name: 'New fill-up' }).click()
+  await expect(page.getByRole('dialog', { name: 'New fill-up' })).toBeVisible()
+  const barIsReachable = await page.evaluate(() => {
+    const bar = document.querySelector('nav.fixed')!
+    const { left, top, width, height } = bar.getBoundingClientRect()
+    const hit = document.elementFromPoint(left + width * 0.1, top + height / 2)
+    return !!hit && bar.contains(hit)
+  })
+  expect(barIsReachable).toBe(false)
+})

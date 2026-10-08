@@ -35,7 +35,7 @@ watch(isOpen, async (open) => {
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto"
+        class="fixed inset-0 z-confirm flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto"
         @click.self="onCancel"
       >
         <Transition

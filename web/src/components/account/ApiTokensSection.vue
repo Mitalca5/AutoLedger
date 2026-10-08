@@ -188,7 +188,7 @@ onMounted(() => {
     <!-- Modal Create Token -->
     <div
       v-if="showCreateModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      class="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       @click.self="closeCreateModal"
     >
       <div v-dialog="closeCreateModal" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">

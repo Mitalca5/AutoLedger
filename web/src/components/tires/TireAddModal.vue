@@ -122,7 +122,7 @@ const handleCreateTires = () => runOnce(handleCreateTiresAction)
 <template>
   <div
     v-if="open"
-    class="fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     @click.self="open = false"
   >
     <div v-dialog data-tire-add class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">

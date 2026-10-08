@@ -138,7 +138,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="open" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="open = false">
+  <div v-if="open" class="fixed inset-0 z-modal-nested flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="open = false">
     <div v-dialog class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
       <div class="flex items-center justify-between p-4 border-b border-slate-800">
@@ -147,7 +147,7 @@ onMounted(() => {
             <Calculator class="w-4 h-4" />
           </div>
           <div>
-            <h2 class="text-sm font-bold text-white">{{ t('tariffs.publicModal.title') }}</h2>
+            <h2 class="text-base font-bold text-white">{{ t('tariffs.publicModal.title') }}</h2>
             <p class="text-xs text-slate-400">{{ t('tariffs.publicModal.subtitle') }}</p>
           </div>
         </div>

@@ -54,12 +54,12 @@ async function download() {
   <Teleport to="body">
     <div
       v-if="open"
-      class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto"
+      class="fixed inset-0 z-modal flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto"
       @click.self="emit('update:open', false)"
     >
       <div v-dialog="() => emit('update:open', false)" class="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 my-auto" role="dialog" aria-modal="true">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-white">{{ $t('import.exportTitle') }}</h2>
+          <h2 class="text-base font-bold text-white">{{ $t('import.exportTitle') }}</h2>
           <button type="button" class="text-slate-400 hover:text-white" :aria-label="$t('common.close')" @click="emit('update:open', false)">
             <X class="w-5 h-5" />
           </button>

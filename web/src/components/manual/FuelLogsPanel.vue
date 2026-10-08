@@ -255,7 +255,7 @@ onMounted(load)
     </ul>
 
     <!-- Add / edit modal -->
-    <div v-if="showForm" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+    <div v-if="showForm" class="fixed inset-0 z-modal bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
       <form v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-3.5 my-auto shadow-2xl" @submit.prevent="save">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-bold text-white">{{ editingId ? $t('manual.fuelLogsPanel.edit') : $t('manual.fuelLogsPanel.new') }}</h3>
