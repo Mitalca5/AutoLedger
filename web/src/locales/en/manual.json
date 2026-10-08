@@ -78,7 +78,7 @@
     "mileageKm": "Mileage ({unit})",
     "readingDate": "Reading date",
     "cancelTheEdit": "Cancel the edit",
-    "odometerReadingsSpreadTheUntracked": "Odometer readings spread the untracked distance month by month, and are used to estimate the mileage of fill-ups entered without one.",
+    "odometerReadingsSpreadTheUntracked": "Odometer readings, and the mileage typed on fill-ups, spread the untracked distance month by month, and are used to estimate the mileage of fill-ups entered without one.",
     "new": "New odometer reading",
     "add": "Add the reading",
     "editReading": "Edit the {km} {unit} reading",
@@ -89,6 +89,10 @@
     "deleteMessage": "Delete the {km} {unit} reading of {date}?",
     "edit": "Edit the reading",
     "update": "Update",
-    "onDate": "on {date}"
+    "onDate": "on {date}",
+    "pointS": "{length} point(s)",
+    "fromFillUp": "Fill-up",
+    "fromFillUpHint": "Mileage typed on a fill-up. It is edited from the fill-ups list.",
+    "seeFillUps": "See the fill-ups"
   }
 }

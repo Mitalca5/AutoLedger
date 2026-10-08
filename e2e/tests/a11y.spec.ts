@@ -3,10 +3,13 @@ import { expect, test } from '@playwright/test'
 import { useVehicle, vehicles, type Vehicle } from './helpers'
 
 let ev: Vehicle
+let ice: Vehicle
 
 test.beforeAll(async ({ request }) => {
-  ev = (await vehicles(request)).find((v) => v.powertrain === 'EV')!
-  expect(ev).toBeTruthy()
+  const all = await vehicles(request)
+  ev = all.find((v) => v.powertrain === 'EV')!
+  ice = all.find((v) => v.powertrain === 'ICE')!
+  expect(ev && ice).toBeTruthy()
 })
 
 const routes = ['/', '/fleet', '/drives', '/carpools', '/odometer', '/energy', '/comparison', '/tires', '/expenses', '/maintenance', '/vehicles', '/account']
@@ -53,4 +56,12 @@ test('a focused field shows a visible ring', async ({ page }) => {
   await brand.focus()
   const ring = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
   expect(ring).not.toBe('none')
+})
+
+test('the pages of a combustion vehicle have no WCAG 2.1 AA violation', async ({ page }) => {
+  for (const route of ['/', '/odometer', '/energy?tab=FUEL', '/maintenance']) {
+    await useVehicle(page, ice.id, route)
+    const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    expect(violations.map((v) => `${route} ${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([])
+  }
 })

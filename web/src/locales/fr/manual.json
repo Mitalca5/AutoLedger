@@ -78,7 +78,7 @@
     "mileageKm": "Kilométrage ({unit})",
     "readingDate": "Date du relevé",
     "cancelTheEdit": "Annuler modification",
-    "odometerReadingsSpreadTheUntracked": "Les relevés au compteur répartissent la distance non suivie mois par mois, et servent à estimer le kilométrage des pleins saisis sans compteur.",
+    "odometerReadingsSpreadTheUntracked": "Les relevés au compteur, et le kilométrage saisi sur les pleins, répartissent la distance non suivie mois par mois, et servent à estimer le kilométrage des pleins saisis sans compteur.",
     "new": "Nouveau relevé kilométrique",
     "add": "Ajouter le relevé",
     "editReading": "Modifier le relevé de {km} {unit}",
@@ -89,6 +89,10 @@
     "deleteMessage": "Supprimer le relevé de {km} {unit} du {date} ?",
     "edit": "Modifier le relevé",
     "update": "Mettre à jour",
-    "onDate": "le {date}"
+    "onDate": "le {date}",
+    "pointS": "{length} point(s)",
+    "fromFillUp": "Plein",
+    "fromFillUpHint": "Kilométrage saisi sur un plein. Il se modifie depuis la liste des pleins.",
+    "seeFillUps": "Voir les pleins"
   }
 }

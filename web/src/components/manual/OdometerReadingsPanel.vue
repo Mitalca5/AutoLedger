@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
-import { ref, watch, onMounted } from 'vue'
-import { Gauge, Edit2, Trash2 } from 'lucide-vue-next'
+import { computed, ref, watch, onMounted } from 'vue'
+import { Fuel, Gauge, Edit2, Trash2 } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { distanceUnit, formatDistance, formatDistanceValue } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
+import { canRefuel } from '@/utils/vehicles'
+import { mergeOdometerHistory } from '@/utils/odometerHistory'
 
 const props = defineProps<{
   vehicle: any
@@ -19,6 +21,9 @@ const vehicleStore = useVehicleStore()
 const { showConfirm, showAlert } = useConfirm()
 
 const readings = ref<any[]>([])
+const fuelLogs = ref<any[]>([])
+// The readings plus the fill-ups that carry a mileage: both feed the monthly smoothing and the estimates
+const history = computed(() => mergeOdometerHistory(readings.value, fuelLogs.value))
 const loading = ref(false)
 const editingId = ref<string | null>(null)
 const form = ref({
@@ -30,7 +35,13 @@ const form = ref({
 async function load() {
   loading.value = true
   try {
-    readings.value = await api.getOdometerCheckpoints(props.vehicle.id)
+    const refuels = canRefuel(props.vehicle.powertrain)
+    const [list, fuel] = await Promise.all([
+      api.getOdometerCheckpoints(props.vehicle.id),
+      refuels ? api.getFuelLogs(props.vehicle.id).catch((err: any) => { console.error('Failed to load fill-ups', err); return null }) : Promise.resolve(null),
+    ])
+    readings.value = list
+    fuelLogs.value = fuel?.logs ?? []
   } catch (err: any) {
     showAlert(t('manual.odometerReadingsPanel.loadError', { message: err.message }), t('shell.confirm.error'), 'danger')
   } finally {
@@ -169,29 +180,31 @@ onMounted(() => {
     <div class="space-y-3">
       <div class="flex items-center justify-between">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider">{{ $t('manual.odometerReadingsPanel.historyOfRecordedReadings') }}</h4>
-        <span class="text-xs text-slate-400">{{ $t('manual.odometerReadingsPanel.readingS', { length: readings.length }) }}</span>
+        <span class="text-xs text-slate-400">{{ $t('manual.odometerReadingsPanel.pointS', { length: history.length }) }}</span>
       </div>
 
       <div v-if="loading" class="py-8 text-center text-xs text-slate-400">{{ $t('manual.odometerReadingsPanel.loadingTheReadings') }}</div>
 
-      <div v-else-if="readings.length === 0" class="py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800 text-xs text-slate-400">
+      <div v-else-if="history.length === 0" class="py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800 text-xs text-slate-400">
         {{ $t('manual.odometerReadingsPanel.noManualReadingYet') }}
       </div>
 
       <div v-else class="space-y-2">
         <div
-          v-for="r in readings"
-          :key="r.id"
+          v-for="r in history"
+          :key="r.key"
           class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex items-center justify-between gap-3"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-slate-800/80 text-cyan-400 rounded-lg shrink-0">
-              <Gauge class="w-4 h-4" />
+            <div class="p-2 bg-slate-800/80 rounded-lg shrink-0" :class="r.kind === 'FUEL' ? 'text-slate-400' : 'text-cyan-400'">
+              <Fuel v-if="r.kind === 'FUEL'" class="w-4 h-4" />
+              <Gauge v-else class="w-4 h-4" />
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-bold text-white font-mono">{{ formatDistance(r.odometer) }}</span>
-                <span v-if="r.source === 'HA'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
+                <span v-if="r.kind === 'FUEL'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700" :title="$t('manual.odometerReadingsPanel.fromFillUpHint')">{{ $t('manual.odometerReadingsPanel.fromFillUp') }}</span>
+                <span v-else-if="r.source === 'HA'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
                 <span class="text-xs text-slate-400">
                   {{ $t('manual.odometerReadingsPanel.onDate', { date: new Date(r.date).toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) }) }}
                 </span>
@@ -200,7 +213,10 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-if="canEdit" class="flex items-center gap-1.5 shrink-0">
+          <router-link v-if="r.kind === 'FUEL'" to="/energy?tab=FUEL" class="tap p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors shrink-0" :aria-label="$t('manual.odometerReadingsPanel.seeFillUps')" :title="$t('manual.odometerReadingsPanel.seeFillUps')">
+            <Fuel class="w-4 h-4" />
+          </router-link>
+          <div v-else-if="canEdit" class="flex items-center gap-1.5 shrink-0">
             <button v-if="r.source !== 'HA'" type="button" class="tap p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.editReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="startEdit(r)">
               <Edit2 class="w-4 h-4" />
             </button>

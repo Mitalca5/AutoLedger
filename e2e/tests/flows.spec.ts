@@ -93,3 +93,17 @@ test('the dashboard follow-up zone is open on a wide screen', async ({ page }) =
   await useVehicle(page, ev.id, '/')
   await expect(page.getByRole('button', { name: /^Follow-up/ })).toHaveAttribute('aria-expanded', 'true')
 })
+
+test('the odometer page lists the mileage typed on fill-ups, read-only', async ({ page }) => {
+  await useVehicle(page, ice.id, '/odometer')
+  await expect(page.getByText('Fill-up', { exact: true }).first()).toBeVisible()
+  const row = page.locator('div.rounded-xl', { has: page.getByText('Fill-up', { exact: true }) }).first()
+  await expect(row.getByRole('button')).toHaveCount(0)
+  await expect(row.getByRole('link', { name: 'See the fill-ups' })).toHaveAttribute('href', /\/energy\?tab=FUEL/)
+})
+
+test('an electric vehicle lists no fill-up on the odometer page', async ({ page }) => {
+  await useVehicle(page, ev.id, '/odometer')
+  await expect(page.getByText('History of recorded readings')).toBeVisible()
+  await expect(page.getByText('Fill-up', { exact: true })).toHaveCount(0)
+})
