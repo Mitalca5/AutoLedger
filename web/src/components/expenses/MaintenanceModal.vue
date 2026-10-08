@@ -11,7 +11,7 @@ import { currencySymbol, formatAmount } from '@/currency'
 import { ChevronDown, Wrench, X, Paperclip, FileText, Eye } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import AppDropzone from '@/components/AppDropzone.vue'
-import { currencyPayload, defaultAmortizationMode, findCloseCandidate, formatDate, recentDescriptions } from '@/utils/expenses'
+import { currencyPayload, isSmoothable, findCloseCandidate, formatDate, recentDescriptions } from '@/utils/expenses'
 import { todayIso } from '@/utils/dates'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -71,7 +71,7 @@ const maintForm = ref({
   is_recurring: false,
   recurrence_interval_months: 12,
   recurrence_end_date: '',
-  amortization_mode: defaultAmortizationMode('MAINTENANCE'),
+  amortization_mode: 'NONE',
   coverage_km: 50000,
   coverage_months: 24,
   closes_maintenance_id: null as string | null,
@@ -88,19 +88,10 @@ const descriptionSuggestions = computed(() => recentDescriptions(props.maintenan
 
 // The smoothing follows the category until the user picks a mode; it stays folded unless an edited expense uses one.
 const showAdvanced = ref(false)
-let amortizationTouched = false
 
 function pickAmortization(mode: string) {
-  amortizationTouched = true
   maintForm.value.amortization_mode = mode
 }
-
-watch(
-  () => maintForm.value.category,
-  (category) => {
-    if (open.value && !props.editing && !amortizationTouched) maintForm.value.amortization_mode = defaultAmortizationMode(category)
-  }
-)
 
 const detectedOdometer = ref<number | null>(null)
 const detectingOdometer = ref(false)
@@ -138,7 +129,6 @@ watch(open, (isOpen) => {
   if (!isOpen) return
   const m = props.editing
   detectedOdometer.value = null
-  amortizationTouched = false
   showAdvanced.value = Boolean(m && m.amortization_mode && m.amortization_mode !== 'NONE')
   if (!m) {
     shouldClosePrevious.value = false
@@ -153,7 +143,7 @@ watch(open, (isOpen) => {
       is_recurring: false,
       recurrence_interval_months: 12,
       recurrence_end_date: '',
-      amortization_mode: defaultAmortizationMode('MAINTENANCE'),
+      amortization_mode: 'NONE',
       coverage_km: 50000,
       coverage_months: 24,
       closes_maintenance_id: null,
@@ -197,22 +187,23 @@ const { pending: submitting, run: runOnce } = useSubmit()
 async function handleCreateMaintAction() {
   if (!props.vehicleId) return
   try {
+    const mode = isSmoothable(maintForm.value.category) ? maintForm.value.amortization_mode : 'NONE'
     let closesId: string | null = null
-    if (shouldClosePrevious.value && closeCandidateMaintenance.value) {
+    if (mode !== 'NONE' && shouldClosePrevious.value && closeCandidateMaintenance.value) {
       closesId = closeCandidateMaintenance.value.id
     }
-
     const payload = {
       ...maintForm.value,
+      amortization_mode: mode,
       ...currencyPayload(maintForm.value, baseCurrency.value),
       amount: Number(maintForm.value.amount),
       odometer: maintForm.value.odometer ? Number(maintForm.value.odometer) : null,
       coverage_km:
-        maintForm.value.amortization_mode === 'DISTANCE' || maintForm.value.amortization_mode === 'HYBRID'
+        mode === 'DISTANCE' || mode === 'HYBRID'
           ? Number(maintForm.value.coverage_km || 50000)
           : null,
       coverage_months:
-        maintForm.value.amortization_mode === 'DURATION' || maintForm.value.amortization_mode === 'HYBRID'
+        mode === 'DURATION' || mode === 'HYBRID'
           ? Number(maintForm.value.coverage_months || 24)
           : null,
       closes_maintenance_id: closesId,
@@ -337,7 +328,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
 
         <!-- Lissage du coût pour dépenses non-récurrentes -->
         <details
-          v-if="!maintForm.is_recurring"
+          v-if="!maintForm.is_recurring && isSmoothable(maintForm.category)"
           :open="showAdvanced"
           class="group rounded-xl border border-slate-700/60 bg-slate-800/40"
           @toggle="showAdvanced = ($event.target as HTMLDetailsElement).open"

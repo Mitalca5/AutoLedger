@@ -1277,6 +1277,26 @@ func TestIntegrationMaintenanceAmortizationAndOdometer(t *testing.T) {
 		t.Fatalf("computeMonthlyMaintenanceAmortization failed: %v", err)
 	}
 
+	// Only maintenance and repairs are smoothed: an insurance or accessory row carrying a mode must not feed it.
+	insurance := &models.MaintenanceExpense{
+		VehicleID: v.ID, Category: "INSURANCE", Amount: 600, Currency: "EUR", Date: base,
+		AmortizationMode: "DISTANCE", CoverageKm: &covKm, CoverageMonths: &covMonths,
+	}
+	if err := repo.CreateMaintenanceExpense(ctx, insurance); err != nil {
+		t.Fatal(err)
+	}
+	accessory := &models.MaintenanceExpense{
+		VehicleID: v.ID, Category: "ACCESSORY", Amount: 90, Currency: "EUR", Date: base,
+		AmortizationMode: "NONE",
+	}
+	if err := repo.CreateMaintenanceExpense(ctx, accessory); err != nil {
+		t.Fatal(err)
+	}
+	maintMap, err = tcoSvc.computeMonthlyMaintenanceAmortization(ctx, v.ID, monthlyDistances, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// March 2024: 1000 km * (50000 / 50000) = 1000 cents (10.00 €)
 	if maintMap["2024-03"] != 1000 {
 		t.Fatalf("expected 1000 cents in 2024-03, got %d", maintMap["2024-03"])

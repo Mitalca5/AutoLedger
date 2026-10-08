@@ -3,7 +3,7 @@ import {
   reminderPresets,
   countUnlistedDrives,
   currencyPayload,
-  defaultAmortizationMode,
+  isSmoothable,
   recentDescriptions,
   findCloseCandidate,
   formatFileSize,
@@ -176,10 +176,11 @@ describe('maintenance list helpers', () => {
 })
 
 describe('maintenance form defaults', () => {
-  it('spreads only accessories over the distance by default', () => {
-    expect(defaultAmortizationMode('ACCESSORY')).toBe('DISTANCE')
-    expect(defaultAmortizationMode('MAINTENANCE')).toBe('NONE')
-    expect(defaultAmortizationMode('INSURANCE')).toBe('NONE')
+  it('lets only maintenance and repairs be smoothed', () => {
+    expect(isSmoothable('MAINTENANCE')).toBe(true)
+    expect(isSmoothable('REPAIR')).toBe(true)
+    expect(isSmoothable('ACCESSORY')).toBe(false)
+    expect(isSmoothable('INSURANCE')).toBe(false)
   })
 
   it('suggests the latest distinct descriptions, newest first and capped', () => {

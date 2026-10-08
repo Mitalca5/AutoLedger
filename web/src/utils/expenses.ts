@@ -269,10 +269,8 @@ export function maintenanceTotal(items: MaintenanceLike[], baseCurrency: string)
   }, 0)
 }
 
-/** How a new expense of a category weighs on the cost per km: only a lasting purchase is spread over the distance. */
-export function defaultAmortizationMode(category: string): string {
-  return category === 'ACCESSORY' ? 'DISTANCE' : 'NONE'
-}
+/** Only servicing (maintenance and repairs) can be spread over distance or time. */
+export const isSmoothable = (category: string): boolean => category === 'MAINTENANCE' || category === 'REPAIR'
 
 /** The most recent distinct descriptions, to suggest when typing a new one. */
 export function recentDescriptions(items: { description?: string | null; date: string }[], limit = 10): string[] {

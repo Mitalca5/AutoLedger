@@ -81,6 +81,9 @@ func buildMaintenanceExpense(vehicleID, baseCurrency string, req *CreateMaintena
 	if amortMode != "NONE" && amortMode != "DISTANCE" && amortMode != "DURATION" && amortMode != "HYBRID" {
 		return nil, apierror.New("expense.amortization_mode", "Invalid smoothing mode (NONE, DISTANCE, DURATION, HYBRID)")
 	}
+	if category != "MAINTENANCE" && category != "REPAIR" {
+		amortMode = "NONE"
+	}
 
 	var covKm *float64
 	var covMonths *int
