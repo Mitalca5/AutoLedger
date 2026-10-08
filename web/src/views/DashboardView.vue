@@ -11,6 +11,7 @@ import ResidualValuePanel from '@/components/dashboard/ResidualValuePanel.vue'
 import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
 import UrgentRemindersBanner from '@/components/dashboard/UrgentRemindersBanner.vue'
 import NextDueCard from '@/components/dashboard/NextDueCard.vue'
+import DashboardFollowUp from '@/components/dashboard/DashboardFollowUp.vue'
 import DataQualityCard from '@/components/dashboard/DataQualityCard.vue'
 import LeaseContractCard from '@/components/dashboard/LeaseContractCard.vue'
 import TcoMetricsGrid from '@/components/dashboard/TcoMetricsGrid.vue'
@@ -22,6 +23,8 @@ import TagBreakdown from '@/components/dashboard/TagBreakdown.vue'
 import MonthDetailModal from '@/components/dashboard/MonthDetailModal.vue'
 import MonthlyRangeSelector from '@/components/dashboard/MonthlyRangeSelector.vue'
 import { distanceUnit } from '@/units'
+import { countFollowUpItems } from '@/utils/dashboard'
+import { hasReminderSchedule } from '@/utils/expenses'
 
 // The page loads the TCO and the reminders; each card and chart of the dashboard is a component that
 // receives the data it shows. A click on a month (chart or banner) opens its detail modal.
@@ -32,6 +35,7 @@ const tco = ref<any | null>(null)
 const loading = ref(true)
 const loadError = ref<string | null>(null)
 const dashboardReminders = ref<MaintenanceReminder[]>([])
+const followUpCount = computed(() => countFollowUpItems(tco.value?.completeness, dashboardReminders.value, dashboardReminders.value.some(hasReminderSchedule)))
 const selectedMonth = ref<any | null>(null)
 
 // Monthly costs for the charts; null until the TCO is loaded
@@ -153,14 +157,15 @@ onMounted(() => {
 
       <LeaseContractCard :tco="tco" />
 
-      <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
-
-      <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
-
       <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" @open-month="openMonthDetail" />
 
-      <!-- One period for the energy, monthly cost and mileage sections below -->
-      <div class="sticky top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
+      <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount">
+        <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
+        <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
+      </DashboardFollowUp>
+
+      <!-- One period for the energy, monthly cost and mileage sections below; pinned only where there is room for it -->
+      <div class="sm:sticky sm:top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
         <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
         <MonthlyRangeSelector
           :model-value="prefs.dashboardRange"

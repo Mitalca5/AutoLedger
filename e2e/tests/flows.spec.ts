@@ -76,3 +76,20 @@ test.describe('a modal with edits does not close on a backdrop click', () => {
     await expect(modal(page)).toHaveCount(0)
   })
 })
+
+test('the dashboard follow-up zone is closed on a phone and opens on demand', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await useVehicle(page, ev.id, '/')
+  const toggle = page.getByRole('button', { name: /^Follow-up/ })
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('#dashboard-follow-up')).toBeHidden()
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.locator('#dashboard-follow-up')).toBeVisible()
+})
+
+test('the dashboard follow-up zone is open on a wide screen', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await useVehicle(page, ev.id, '/')
+  await expect(page.getByRole('button', { name: /^Follow-up/ })).toHaveAttribute('aria-expanded', 'true')
+})

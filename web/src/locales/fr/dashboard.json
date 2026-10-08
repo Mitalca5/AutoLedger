@@ -312,5 +312,8 @@
     "show": "Afficher",
     "advanced": "Réglages avancés",
     "advancedHint": "La valeur résiduelle combine l'âge, le kilométrage et la santé de la batterie. Ces poids règlent la part de chacun : laissez les valeurs par défaut si vous hésitez."
+  },
+  "followUp": {
+    "title": "À suivre"
   }
 }

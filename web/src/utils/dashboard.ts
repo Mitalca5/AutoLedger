@@ -132,6 +132,16 @@ export function nextDueReminder<T extends ScheduledReminder>(reminders: T[]): { 
   return best
 }
 
+/**
+ * How many things the follow-up zone of the dashboard asks the user to do: data left to complete in the TCO, and a
+ * maintenance coming due (or no schedule planned yet, which invites to plan one).
+ */
+export function countFollowUpItems(completeness: { is_complete?: boolean } | null | undefined, reminders: ScheduledReminder[], hasSchedule: boolean): number {
+  const dataToComplete = completeness && !completeness.is_complete ? 1 : 0
+  const maintenance = nextDueReminder(reminders) || !hasSchedule ? 1 : 0
+  return dataToComplete + maintenance
+}
+
 /** Follow-up figures of a lease (LOA / LLD) contract: elapsed time, mileage against the allowance, status. */
 export function buildLeaseSummary(tco: any, now = new Date()) {
   if (!tco || !['LOA', 'LLD'].includes(tco.acquisition_type)) {

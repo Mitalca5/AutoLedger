@@ -44,7 +44,7 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="col-span-2 lg:col-span-1 bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.totalCost') }}</span>
-        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
+        <div class="p-2 bg-slate-800 text-slate-400 rounded-xl">
           <Coins class="w-5 h-5" />
         </div>
       </div>
@@ -66,17 +66,20 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ isFuelOnly(tco?.powertrain) ? $t('dashboard.tcoMetricsGrid.fuel') : $t('dashboard.tcoMetricsGrid.energy') }}</span>
-        <div class="p-2 bg-info-500/10 text-info-400 rounded-xl">
+        <div class="p-2 bg-slate-800 text-slate-400 rounded-xl">
           <Zap class="w-5 h-5" />
         </div>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-info-400">
+      <div class="text-2xl sm:text-3xl font-extrabold text-white">
         {{ headline(tco?.energy_cost) }}
       </div>
       <div class="mt-2 space-y-0.5">
-        <p v-if="canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
-          {{ perUnit(tco?.energy_cost_per_km) }}/{{ distanceUnit() }} • {{ Math.round(tco?.total_liters || 0).toLocaleString(intlLocale()) }} L<template v-if="tco?.consumption_l_100km"> • {{ formatPerDistanceValue(tco.consumption_l_100km, 2) }} L/100 {{ distanceUnit() }}</template><template v-if="tco?.avg_cost_per_liter"> • {{ money(tco.avg_cost_per_liter, 3) }}/L</template>
-        </p>
+        <ul v-if="canRefuel(tco?.powertrain)" class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-400">
+          <li>{{ perUnit(tco?.energy_cost_per_km) }}/{{ distanceUnit() }}</li>
+          <li>{{ Math.round(tco?.total_liters || 0).toLocaleString(intlLocale()) }} L</li>
+          <li v-if="tco?.consumption_l_100km">{{ formatPerDistanceValue(tco.consumption_l_100km, 2) }} L/100 {{ distanceUnit() }}</li>
+          <li v-if="tco?.avg_cost_per_liter">{{ money(tco.avg_cost_per_liter, 3) }}/L</li>
+        </ul>
         <p v-if="canCharge(tco?.powertrain) && canRefuel(tco?.powertrain) && tco?.total_kwh_added" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.kwhOnly', { total_kwh_added: Math.round(tco.total_kwh_added).toLocaleString(intlLocale()) }) }}
         </p>
@@ -93,11 +96,11 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('dashboard.tcoMetricsGrid.tollsAndParking') }}</span>
-        <div class="p-2 bg-warning-500/10 text-warning-400 rounded-xl">
+        <div class="p-2 bg-slate-800 text-slate-400 rounded-xl">
           <Receipt class="w-5 h-5" />
         </div>
       </div>
-      <div class="text-2xl sm:text-3xl font-extrabold text-warning-400">
+      <div class="text-2xl sm:text-3xl font-extrabold text-white">
         {{ headline(tco?.tolls_cost) }}
       </div>
       <div class="mt-2">

@@ -3,6 +3,7 @@ import { formatAmount } from '@/currency'
 import {
   buildLeaseSummary,
   buildMonthBreakdown,
+  countFollowUpItems,
   computeMonthFixedVariable,
   currentMonthStats,
   filterMonthsByRange,
@@ -338,5 +339,26 @@ describe('groupRemindersByDue', () => {
     ])
     expect(groups.map((g) => g.key)).toEqual(['overdue', 'later', 'unscheduled'])
     expect(groups[1].items.map((r) => r.id)).toEqual([2, 1, 5])
+  })
+})
+
+describe('countFollowUpItems', () => {
+  const soon = { status: 'DUE_SOON', interval_km: 10000, remaining_km: 500 }
+  const overdue = { status: 'OVERDUE', interval_km: 10000, remaining_km: -100 }
+
+  it('counts data left to complete and a maintenance coming due', () => {
+    expect(countFollowUpItems({ is_complete: false }, [soon], true)).toBe(2)
+  })
+  it('counts nothing when the data is complete and the next maintenance is far or planned', () => {
+    expect(countFollowUpItems({ is_complete: true }, [], true)).toBe(0)
+  })
+  it('invites to plan a schedule when none exists', () => {
+    expect(countFollowUpItems({ is_complete: true }, [], false)).toBe(1)
+  })
+  it('leaves overdue reminders to their own banner', () => {
+    expect(countFollowUpItems({ is_complete: true }, [overdue], true)).toBe(0)
+  })
+  it('ignores a missing completeness block', () => {
+    expect(countFollowUpItems(null, [soon], true)).toBe(1)
   })
 })
