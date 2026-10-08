@@ -43,7 +43,8 @@
     "apply": "Appliquer",
     "autoTollResult": "{created} créé(s), {updated} mis à jour, {skipped} ignoré(s) (manuel: {manual}, voyage: {trip}, sans tarif: {noPrice}, sans GPS: {noGps})",
     "autoTollFailed": ", {failed} en erreur",
-    "autoTollShort": "Péage automatique"
+    "autoTollShort": "Péage automatique",
+    "filters": "Filtres"
   },
   "addToTripModal": {
     "add": "Ajouter",

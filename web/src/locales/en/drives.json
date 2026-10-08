@@ -43,7 +43,8 @@
     "apply": "Apply",
     "autoTollResult": "{created} created, {updated} updated, {skipped} skipped (manual: {manual}, trip: {trip}, no fare: {noPrice}, no GPS: {noGps})",
     "autoTollFailed": ", {failed} failed",
-    "autoTollShort": "Automatic toll"
+    "autoTollShort": "Automatic toll",
+    "filters": "Filters"
   },
   "addToTripModal": {
     "add": "Add",

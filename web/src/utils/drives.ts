@@ -260,3 +260,10 @@ export function buildTripCostDrive(tg: any, tgDrives: any[]) {
     },
   }
 }
+
+/** How many filters narrow the list. On a phone they sit behind a button, which shows this number. */
+export function countActiveDriveFilters(f: { mode: 'DRIVES' | 'TRIPS'; periodMode: string; unqualifiedOnly: boolean; hasTollOnly: boolean; selectedTag: string; tripQualifyOnly: boolean }): number {
+  const period = f.periodMode !== 'ALL' ? 1 : 0
+  if (f.mode === 'TRIPS') return period + (f.tripQualifyOnly ? 1 : 0)
+  return period + (f.unqualifiedOnly ? 1 : 0) + (f.hasTollOnly ? 1 : 0) + (f.selectedTag ? 1 : 0)
+}

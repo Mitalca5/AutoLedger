@@ -13,7 +13,7 @@ type PeriodMode = 'ALL' | 'MONTH' | 'CUSTOM'
 // Period, month and address filters shared by the drives list and the trips list, plus the metrics of what is listed
 // (the current page of drives, or the trips in trip mode).
 // Every change of a filter is reported with change so the page reloads from the first page.
-const props = withDefaults(defineProps<{ total: number; loading: boolean; drives: any[]; mode?: 'DRIVES' | 'TRIPS' }>(), { mode: 'DRIVES' })
+const props = withDefaults(defineProps<{ total: number; loading: boolean; drives: any[]; mode?: 'DRIVES' | 'TRIPS'; collapsed?: boolean }>(), { mode: 'DRIVES', collapsed: false })
 const emit = defineEmits<{ change: [] }>()
 const vehicleStore = useVehicleStore()
 const periodMode = defineModel<PeriodMode>('periodMode', { required: true })
@@ -74,8 +74,8 @@ const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.
 <template>
   <div class="space-y-3">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
-      <!-- Period Mode & Navigation (Mix A + C) -->
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- Period Mode & Navigation (Mix A + C); behind the filters button on a phone while it is closed -->
+      <div class="flex-wrap items-center gap-2" :class="collapsed ? 'hidden sm:flex' : 'flex'">
         <!-- Period mode selector -->
         <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80">
           <button

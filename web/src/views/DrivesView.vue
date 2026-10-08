@@ -31,13 +31,14 @@ import ManualDriveModal from '@/components/drives/ManualDriveModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { downloadCsv } from '@/utils/csv'
-import { Receipt, Layers, List, RotateCcw, Plus, UploadCloud } from 'lucide-vue-next'
+import { ChevronDown, Receipt, Layers, List, RotateCcw, Plus, SlidersHorizontal, UploadCloud } from 'lucide-vue-next'
 import {
   driveCsvHeaders,
   applyBatchTag,
   filterTrips,
   currentYearMonth,
   driveCsvRows,
+  countActiveDriveFilters,
   monthRange,
   selectionSummary,
   toggleTag,
@@ -249,6 +250,11 @@ async function loadDrives(silent = false) {
 // View mode: drives list or trip groups ("voyages")
 const viewMode = ref<'DRIVES' | 'TRIPS'>('DRIVES')
 const tripQualifyOnly = ref(false)
+
+// On a phone the filters sit behind one button, so the first drive is not pushed below the fold; a wide screen shows them
+const filtersOpen = ref(false)
+const activeFilterCount = computed(() => countActiveDriveFilters({ mode: viewMode.value, periodMode: periodMode.value, unqualifiedOnly: unqualifiedOnly.value, hasTollOnly: hasTollOnly.value, selectedTag: selectedTag.value, tripQualifyOnly: tripQualifyOnly.value }))
+const filterGroupClass = computed(() => (filtersOpen.value ? '' : 'hidden sm:flex'))
 const {
   tripGroups,
   tripSuggestions,
@@ -501,8 +507,21 @@ async function handleBulkApplyToll() {
           </button>
         </div>
 
+        <button
+          type="button"
+          class="btn btn-secondary sm:hidden"
+          :aria-expanded="filtersOpen"
+          aria-controls="drives-filter-groups"
+          @click="filtersOpen = !filtersOpen"
+        >
+          <SlidersHorizontal class="w-4 h-4" aria-hidden="true" />
+          <span>{{ $t('drives.drivesView.filters') }}</span>
+          <span v-if="activeFilterCount > 0" class="rounded-full bg-rose-600 px-1.5 text-xs font-bold text-white">{{ activeFilterCount }}</span>
+          <ChevronDown class="w-4 h-4 transition-transform" :class="filtersOpen ? 'rotate-180' : ''" aria-hidden="true" />
+        </button>
+
         <!-- Tag Filters -->
-        <div v-if="viewMode === 'DRIVES'" class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl flex-wrap">
+        <div v-if="viewMode === 'DRIVES'" id="drives-filter-groups" class="items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl flex-wrap" :class="[filterGroupClass, filtersOpen ? 'flex' : '']">
         <ToQualifyFilter
           :count="unqualifiedCount"
           :active="unqualifiedOnly"
@@ -561,7 +580,9 @@ async function handleBulkApplyToll() {
       <!-- Same slot for the trips: the queue of detected trips to qualify -->
       <div
         v-else-if="tripSuggestions.length > 0 || tripQualifyOnly"
-        class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl self-start sm:self-auto flex-wrap"
+        id="drives-filter-groups"
+        class="items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl self-start sm:self-auto flex-wrap"
+        :class="[filterGroupClass, filtersOpen ? 'flex' : '']"
       >
         <ToQualifyFilter
           :count="tripSuggestions.length"
@@ -583,6 +604,7 @@ async function handleBulkApplyToll() {
       v-model:custom-to="customTo"
       v-model:search-query="searchQuery"
       :mode="viewMode"
+      :collapsed="!filtersOpen"
       :total="viewMode === 'DRIVES' ? total : shownTrips.length"
       :loading="viewMode === 'DRIVES' ? loading : loadingTrips"
       :drives="viewMode === 'DRIVES' ? drives : shownTrips"

@@ -3,6 +3,7 @@ import { setDistanceUnit } from '@/units'
 import {
   applyBatchTag,
   buildSuggestionCostDrive,
+  countActiveDriveFilters,
   buildTripCostDrive,
   currentYearMonth,
   driveCsvHeaders,
@@ -297,5 +298,18 @@ describe('buildSuggestionCostDrive', () => {
     expect(trip.trip_group_name).toBe('A → C')
     expect(trip.costs.tolls_cost).toBeCloseTo(11.9, 2)
     expect(trip.distance_km).toBe(150)
+  })
+})
+
+describe('countActiveDriveFilters', () => {
+  const none = { mode: 'DRIVES' as const, periodMode: 'ALL', unqualifiedOnly: false, hasTollOnly: false, selectedTag: '', tripQualifyOnly: false }
+  it('is zero when nothing narrows the list', () => {
+    expect(countActiveDriveFilters(none)).toBe(0)
+  })
+  it('counts the period, the toll filters and the tag of the drives list', () => {
+    expect(countActiveDriveFilters({ ...none, periodMode: 'MONTH', unqualifiedOnly: true, hasTollOnly: true, selectedTag: 'Pro' })).toBe(4)
+  })
+  it('counts only the filters of the trips list in trip mode', () => {
+    expect(countActiveDriveFilters({ ...none, mode: 'TRIPS', hasTollOnly: true, selectedTag: 'Pro', tripQualifyOnly: true, periodMode: 'CUSTOM' })).toBe(2)
   })
 })
