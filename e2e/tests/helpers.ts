@@ -18,6 +18,13 @@ export async function vehicles(request: APIRequestContext): Promise<Vehicle[]> {
   return Array.isArray(body) ? body : body.vehicles
 }
 
+export async function authHeaders(request: APIRequestContext): Promise<{ Authorization: string }> {
+  const login = await request.post('/api/auth/login', { data: { email, password } })
+  expect(login.ok()).toBeTruthy()
+  const { token, access_token: accessToken } = await login.json()
+  return { Authorization: `Bearer ${token ?? accessToken}` }
+}
+
 export const authFile = '.auth/state.json'
 
 export async function login(page: Page) {

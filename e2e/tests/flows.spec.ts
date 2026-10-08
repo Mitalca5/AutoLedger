@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { expectNoHorizontalScroll, useVehicle, vehicles, type Vehicle } from './helpers'
+import { authHeaders, expectNoHorizontalScroll, useVehicle, vehicles, type Vehicle } from './helpers'
 
 let ev: Vehicle
 let ice: Vehicle
@@ -182,4 +182,34 @@ test('the expense and vehicle modals open named and close on Escape', async ({ p
   await expect(vehicle).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('a toll added from the cost modal of a drive is listed, edited and deleted', async ({ page, request }) => {
+  // A run that stopped half way must not leave its toll behind for the next one
+  const headers = await authHeaders(request)
+  const leftovers = await (await request.get(`/api/vehicles/${ev.id}/expenses`, { headers })).json()
+  for (const e of leftovers.filter((x: { notes?: string }) => x.notes === 'e2e cost modal')) {
+    await request.delete(`/api/vehicles/${ev.id}/expenses/${e.id}`, { headers })
+  }
+
+  await useVehicle(page, ev.id, '/drives')
+  await page.getByRole('button', { name: /^Open the cost breakdown of the drive of/ }).nth(4).click()
+  const dialog = page.getByRole('dialog').last()
+  await expect(dialog.getByText('0 cost(s) assigned')).toBeVisible()
+
+  await dialog.getByRole('button', { name: 'Add a toll or parking fee to this drive' }).click()
+  await dialog.locator('#drive-inline-toll-amount').fill('3.2')
+  await dialog.locator('#drive-inline-toll-notes').fill('e2e cost modal')
+  await dialog.getByRole('button', { name: 'Confirm', exact: true }).click()
+  await expect(dialog.getByText('1 cost(s) assigned')).toBeVisible()
+  await expect(dialog.getByText('€3.20').first()).toBeVisible()
+
+  await dialog.getByRole('button', { name: 'Edit this cost' }).click()
+  await dialog.locator('[id^="drive-expense-amount-"]').fill('4.5')
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(dialog.getByText('€4.50').first()).toBeVisible()
+
+  await dialog.getByRole('button', { name: 'Delete this cost' }).click()
+  await page.getByRole('dialog', { name: 'Delete the cost' }).getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(dialog.getByText('0 cost(s) assigned')).toBeVisible()
 })
