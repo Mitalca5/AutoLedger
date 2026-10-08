@@ -1,8 +1,11 @@
 package database
 
 import (
+	"bytes"
 	"context"
+	"log/slog"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -58,4 +61,42 @@ func withFastRetries(t *testing.T, fn func()) {
 	connectRetryInterval = time.Millisecond
 	t.Cleanup(func() { connectRetryInterval = original })
 	fn()
+}
+
+func TestOutdatedServerWarning(t *testing.T) {
+	if msg := OutdatedServerWarning(180000); msg != "" {
+		t.Fatalf("PostgreSQL 18 is supported, got %q", msg)
+	}
+	if msg := OutdatedServerWarning(190001); msg != "" {
+		t.Fatalf("a newer major is not outdated, got %q", msg)
+	}
+	msg := OutdatedServerWarning(160004)
+	if !strings.Contains(msg, "PostgreSQL 16") || !strings.Contains(msg, "docker-compose.yml") {
+		t.Fatalf("an older major must point to the compose file, got %q", msg)
+	}
+}
+
+func TestWarnIfServerOutdated(t *testing.T) {
+	var logs bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+
+	// A server that cannot be queried is never reported: the check must not fail startup.
+	closed := sourcesTestPool(t)
+	closed.Close()
+	(&DB{Pool: closed}).WarnIfServerOutdated(context.Background())
+	if logs.Len() != 0 {
+		t.Fatalf("an unreachable server must stay silent, got %q", logs.String())
+	}
+
+	// The test server runs the supported major or a newer one, so it stays silent too.
+	(&DB{Pool: sourcesTestPool(t)}).WarnIfServerOutdated(context.Background())
+	var num int
+	if err := sourcesTestPool(t).QueryRow(context.Background(), "SELECT current_setting('server_version_num')::int").Scan(&num); err != nil {
+		t.Fatal(err)
+	}
+	if outdated := num/10000 < SupportedServerMajor; outdated != (logs.Len() > 0) {
+		t.Fatalf("server_version_num %d: warning logged = %v, want %v", num, logs.Len() > 0, outdated)
+	}
 }

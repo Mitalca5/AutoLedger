@@ -177,9 +177,9 @@ AutoLedger/
 ├── migrations/                     # Versioned PostgreSQL schema migrations
 ├── web/                            # Vue 3 + TypeScript + Vite + Tailwind CSS SPA & PWA
 ├── backup/                         # Backup sidecar image (database dump + documents archive)
+├── db-upgrade/                     # One-shot image upgrading a PostgreSQL 16 volume to 18 (dump, verify, restore)
 ├── docs/                           # Guides (English and French) and screenshots
 ├── docker-compose.yml              # Production container stack definition
-├── docker-compose.dev.yml          # Local development hot-reload override
 ├── Dockerfile                      # Multi-stage production container build
 └── .env.example                    # Exhaustive environment variable template
 ```
@@ -316,6 +316,8 @@ Starting the stack on a database volume written by PostgreSQL 16 upgrades it aut
 1. `db-upgrade` starts the old server alone and writes a verified dump (`pg16-upgrade-<timestamp>.sql.gz`) and a copy of the data directory (`pg16-datadir-<timestamp>.tar.gz`) to the backups volume. These two files are never pruned.
 2. Only once both are verified, it empties the data directory, and PostgreSQL 18 initializes a new cluster.
 3. `db-restore` loads the dump in a single transaction, then the application starts.
+
+These steps come from the `db-upgrade` image, published with the same tag as the application, so keep `docker-compose.yml` up to date: an older file that only bumps the `postgres` image makes PostgreSQL refuse the old data directory, and the application logs a hint pointing here while it waits for the database.
 
 If any step fails, the stack stops with the old data untouched; read the logs with `docker compose logs db-upgrade db-restore`. Once the application runs correctly, delete the two `pg16-*` files to free the space. A volume written by another major than 16 is refused with an explicit message.
 

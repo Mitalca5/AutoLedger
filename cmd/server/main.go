@@ -82,10 +82,11 @@ func main() {
 	dbPool, err := database.Connect(connectCtx, cfg.DatabaseURL)
 	cancelConnect()
 	if err != nil {
-		slog.Error("giving up on PostgreSQL, exiting so the container restarts and retries", "error", err)
+		slog.Error("giving up on PostgreSQL, exiting so the container restarts and retries", "error", err, "hint", database.UnreachableHint)
 		os.Exit(1)
 	}
 	defer dbPool.Close()
+	dbPool.WarnIfServerOutdated(context.Background())
 
 	// A fresh, short-lived context for the rest of startup: it must not inherit whatever is left of the (possibly
 	// long) connection wait above.

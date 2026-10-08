@@ -17,6 +17,16 @@ type DB struct {
 	Pool *pgxpool.Pool
 }
 
+// SupportedServerMajor is the PostgreSQL major version the docker-compose.yml of this release runs.
+const SupportedServerMajor = 18
+
+// UnreachableHint tells an operator what to check when PostgreSQL stays unreachable: after a PostgreSQL major
+// upgrade, a docker-compose.yml that predates the db-upgrade and db-restore services leaves the database container
+// crashing on the old data directory.
+const UnreachableHint = "if the postgres container keeps stopping (docker compose logs postgres), your docker-compose.yml is probably " +
+	"out of date: a database volume written by an older PostgreSQL major needs the db-upgrade and db-restore services " +
+	"of the current docker-compose.yml (see the README, section \"Upgrading PostgreSQL 16 to 18\")"
+
 // connectRetryInterval is the pause between two attempts to reach PostgreSQL.
 var connectRetryInterval = 3 * time.Second
 
@@ -48,7 +58,7 @@ func Connect(ctx context.Context, databaseURL string) (*DB, error) {
 		// Logged on the first attempt and then roughly every 30s, so a long wait (crash recovery) does not flood
 		// the log with one line every connectRetryInterval.
 		if attempt == 1 || attempt%10 == 0 {
-			slog.Warn("waiting for PostgreSQL to be ready", "component", "database", "attempt", attempt, "waited", time.Since(start).Round(time.Second), "error", err)
+			slog.Warn("waiting for PostgreSQL to be ready", "component", "database", "attempt", attempt, "waited", time.Since(start).Round(time.Second), "error", err, "hint", UnreachableHint)
 		}
 
 		select {
@@ -56,6 +66,29 @@ func Connect(ctx context.Context, databaseURL string) (*DB, error) {
 			return nil, fmt.Errorf("database unreachable after %d attempt(s) over %s: %w", attempt, time.Since(start).Round(time.Second), lastErr)
 		case <-time.After(connectRetryInterval):
 		}
+	}
+}
+
+// OutdatedServerWarning returns the message to log when the server runs an older major than SupportedServerMajor,
+// or "" when it is up to date. serverVersionNum is PostgreSQL's server_version_num (e.g. 160004).
+func OutdatedServerWarning(serverVersionNum int) string {
+	major := serverVersionNum / 10000
+	if major >= SupportedServerMajor {
+		return ""
+	}
+	return fmt.Sprintf("PostgreSQL %d is running but this release targets PostgreSQL %d: update your docker-compose.yml "+
+		"(it upgrades the database volume automatically with a backup first, see the README)", major, SupportedServerMajor)
+}
+
+// WarnIfServerOutdated logs a warning when PostgreSQL is older than the supported major. It never fails startup:
+// an older server keeps working.
+func (db *DB) WarnIfServerOutdated(ctx context.Context) {
+	var num int
+	if err := db.Pool.QueryRow(ctx, "SELECT current_setting('server_version_num')::int").Scan(&num); err != nil {
+		return
+	}
+	if msg := OutdatedServerWarning(num); msg != "" {
+		slog.Warn(msg, "component", "database", "server_version_num", num)
 	}
 }
 

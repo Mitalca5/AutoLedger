@@ -20,47 +20,16 @@ services:
     volumes:
       - autoledger_secrets:/secrets
 
-  # One-shot helper: upgrades a database volume written by PostgreSQL 16. It starts the old server alone, takes a
-  # verified dump and a copy of the data directory into the backups volume (pg16-upgrade-*.sql.gz and
-  # pg16-datadir-*.tar.gz, never pruned), then empties the data directory so PostgreSQL 18 initializes a new
-  # cluster. db-restore loads the dump afterwards. Nothing is deleted unless both files were verified, and any
-  # failure stops the stack with the old data untouched. It does nothing on an up-to-date volume.
+  # One-shot helper: upgrades a database volume written by PostgreSQL 16 (verified dump and copy of the data
+  # directory into the backups volume, then an empty data directory for PostgreSQL 18). It does nothing on an
+  # up-to-date volume. See db-upgrade/ and the README. The build section is only used for local development.
   db-upgrade:
-    image: postgres:16-alpine
+    image: ghcr.io/rem7474/autoledger-db-upgrade:${AUTOLEDGER_VERSION:-${TESLACOST_VERSION:-latest}}
+    pull_policy: missing
+    build:
+      context: ./db-upgrade
+      dockerfile: Dockerfile
     restart: "no"
-    user: root
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        set -eu
-        set -o pipefail
-        D=/var/lib/postgresql/data
-        [ -s "$$D/PG_VERSION" ] || exit 0
-        V=$$(cat "$$D/PG_VERSION")
-        [ "$$V" != 18 ] || exit 0
-        if [ "$$V" != 16 ]; then
-          echo "db-upgrade: the database volume holds PostgreSQL $$V; only 16 is upgraded automatically. See the README." >&2
-          exit 1
-        fi
-        TS=$$(date +%Y%m%d-%H%M%S)
-        DUMP=/backups/pg16-upgrade-$$TS.sql.gz
-        TAR=/backups/pg16-datadir-$$TS.tar.gz
-        echo "db-upgrade: PostgreSQL 16 volume found, backing it up to $$DUMP and $$TAR"
-        su-exec postgres pg_ctl -D "$$D" -o "-c listen_addresses= -c unix_socket_directories=/tmp" -w start
-        trap 'su-exec postgres pg_ctl -D "$$D" -m fast -w stop >/dev/null 2>&1 || true; rm -f "$$DUMP.tmp" "$$TAR.tmp"' EXIT
-        PGHOST=/tmp pg_dump -U "$$DB_USER" -d "$$DB_NAME" | gzip > "$$DUMP.tmp"
-        gzip -t "$$DUMP.tmp"
-        gunzip -c "$$DUMP.tmp" | tail -n 5 | grep -q "PostgreSQL database dump complete"
-        su-exec postgres pg_ctl -D "$$D" -m fast -w stop
-        tar -C "$$D" -czf "$$TAR.tmp" .
-        tar -tzf "$$TAR.tmp" >/dev/null
-        mv "$$DUMP.tmp" "$$DUMP"
-        mv "$$TAR.tmp" "$$TAR"
-        chown postgres "$$DUMP" "$$TAR"
-        echo "$$DUMP" > /backups/.pg-restore-pending
-        find "$$D" -mindepth 1 -delete
-        trap - EXIT
-        echo "db-upgrade: done, the data will be restored into PostgreSQL 18"
     environment:
       DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
       DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
@@ -105,23 +74,13 @@ services:
   # One-shot helper: loads the dump taken by db-upgrade into the new PostgreSQL 18 cluster, in one transaction. The
   # application starts only once it succeeded. It does nothing when no upgrade is pending.
   db-restore:
-    image: postgres:18-alpine
+    image: ghcr.io/rem7474/autoledger-db-upgrade:${AUTOLEDGER_VERSION:-${TESLACOST_VERSION:-latest}}
+    pull_policy: missing
+    build:
+      context: ./db-upgrade
+      dockerfile: Dockerfile
+    entrypoint: ["/usr/local/bin/db-restore"]
     restart: "no"
-    user: root
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        set -eu
-        M=/backups/.pg-restore-pending
-        [ -f "$$M" ] || exit 0
-        DUMP=$$(cat "$$M")
-        [ -s "$$DUMP" ] || { echo "db-restore: $$DUMP is missing or empty" >&2; exit 1; }
-        echo "db-restore: restoring $$DUMP"
-        until pg_isready -h postgres -q; do sleep 1; done
-        export PGHOST=postgres PGUSER="$$DB_USER" PGDATABASE="$$DB_NAME" PGPASSWORD="$$(cat /secrets/db_password)"
-        gunzip -c "$$DUMP" | psql -q -v ON_ERROR_STOP=1 --single-transaction -o /dev/null
-        mv "$$M" "/backups/.pg-restore-done-$$(date +%Y%m%d-%H%M%S)"
-        echo "db-restore: done"
     environment:
       DB_USER: ${AUTOLEDGER_DB_USER:-${DB_USER:-autoledger}}
       DB_NAME: ${AUTOLEDGER_DB_NAME:-${DB_NAME:-autoledger}}
@@ -164,8 +123,6 @@ services:
         max-file: "3"
     environment:
       PORT: 8080
-      # This compose file is the production deployment path; docker-compose.dev.yml overrides
-      # this back to "development" for the local hot-reload workflow.
       ENVIRONMENT: ${ENVIRONMENT:-production}
       AUTOLEDGER_BASE_URL: ${AUTOLEDGER_BASE_URL:-${APP_BASE_URL:-http://localhost:8080}}
       DB_HOST: postgres

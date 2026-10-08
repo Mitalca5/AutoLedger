@@ -41,9 +41,9 @@ jobs:
           flag() { if match "$2"; then echo "$1=true" >> "$GITHUB_OUTPUT"; else echo "$1=false" >> "$GITHUB_OUTPUT"; fi; }
           flag go '^(.*\.go|README(\.fr)?\.md|go\.mod|go\.sum|migrations/|web/embed\.go|\.github/workflows/(ci|codeql)\.yml)'
           flag web '^(web/|\.github/workflows/ci\.yml)'
-          flag backup '^(backup/|\.github/workflows/ci\.yml)'
+          flag backup '^(backup/|db-upgrade/|docker-compose\.yml|\.github/workflows/ci\.yml)'
           flag e2e '^(e2e/|web/|cmd/|internal/|migrations/|go\.mod|go\.sum|\.github/workflows/ci\.yml)'
-          flag docker '^(Dockerfile|\.dockerignore|go\.mod|go\.sum|web/package(-lock)?\.json|backup/|\.github/workflows/(ci|docker-publish)\.yml)'
+          flag docker '^(Dockerfile|\.dockerignore|go\.mod|go\.sum|web/package(-lock)?\.json|backup/|db-upgrade/|\.github/workflows/(ci|docker-publish)\.yml)'
 
   backup:
     name: Backup regression tests
@@ -55,6 +55,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Test the backup pipeline in its runtime image
         run: docker run --rm --entrypoint sh -v "$PWD:/repo:ro" postgres:18-alpine /repo/backup/entrypoint_test.sh
+      - name: Test the PostgreSQL 16 to 18 upgrade on real containers
+        run: sh db-upgrade/upgrade_test.sh
 
   backend:
     name: Backend Tests & Build

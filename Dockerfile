@@ -15,19 +15,7 @@ COPY web/ ./
 RUN npm run build
 
 # ==============================================================================
-# Stage 2: Development environment for Go
-# ==============================================================================
-FROM golang:alpine AS dev
-WORKDIR /app
-ENV GOTOOLCHAIN=auto
-RUN apk add --no-cache git curl build-base
-COPY go.mod go.sum* ./
-RUN go mod download
-COPY . .
-CMD ["go", "run", "./cmd/server"]
-
-# ==============================================================================
-# Stage 3: Backend Build (Go binary)
+# Stage 2: Backend Build (Go binary)
 # ==============================================================================
 FROM --platform=$BUILDPLATFORM golang:alpine AS backend-builder
 ARG APP_VERSION=dev
@@ -51,7 +39,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
     go build -ldflags="-s -w -X main.AppVersion=${APP_VERSION}" -o /app/teslacost ./cmd/server
 
 # ==============================================================================
-# Stage 4: Production Runner (Scratch or Minimal Alpine)
+# Stage 3: Production Runner (Scratch or Minimal Alpine)
 # ==============================================================================
 FROM alpine:3.24 AS prod
 WORKDIR /app

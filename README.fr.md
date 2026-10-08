@@ -177,9 +177,9 @@ AutoLedger/
 ├── migrations/                     # Migrations versionnées du schéma PostgreSQL
 ├── web/                            # SPA et PWA Vue 3 + TypeScript + Vite + Tailwind CSS
 ├── backup/                         # Image du conteneur de sauvegarde (dump de la base et archive des documents)
+├── db-upgrade/                     # Image ponctuelle migrant un volume PostgreSQL 16 vers 18 (dump, vérification, restauration)
 ├── docs/                           # Guides (anglais et français) et captures d'écran
 ├── docker-compose.yml              # Définition de la pile de production
-├── docker-compose.dev.yml          # Surcharge de développement local avec rechargement à chaud
 ├── Dockerfile                      # Build de production multi-étapes
 └── .env.example                    # Modèle complet des variables d'environnement
 ```
@@ -316,6 +316,8 @@ Démarrer la pile sur un volume de base écrit par PostgreSQL 16 le met à nivea
 1. `db-upgrade` démarre l'ancien serveur seul et écrit dans le volume des sauvegardes un dump vérifié (`pg16-upgrade-<horodatage>.sql.gz`) et une copie du répertoire de données (`pg16-datadir-<horodatage>.tar.gz`). Ces deux fichiers ne sont jamais purgés.
 2. Une fois les deux vérifiés seulement, il vide le répertoire de données et PostgreSQL 18 initialise un nouveau cluster.
 3. `db-restore` charge le dump en une seule transaction, puis l'application démarre.
+
+Ces étapes viennent de l'image `db-upgrade`, publiée avec le même tag que l'application : garder `docker-compose.yml` à jour, car un ancien fichier qui change seulement l'image `postgres` fait refuser l'ancien répertoire de données par PostgreSQL, et l'application journalise alors une indication renvoyant ici pendant qu'elle attend la base.
 
 Si une étape échoue, la pile s'arrête avec les anciennes données intactes ; consulter les journaux avec `docker compose logs db-upgrade db-restore`. Une fois l'application validée, supprimer les deux fichiers `pg16-*` pour libérer l'espace. Un volume écrit par une autre version majeure que 16 est refusé avec un message explicite.
 
