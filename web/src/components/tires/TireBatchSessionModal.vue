@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import ModalShell from '@/components/ModalShell.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { ref, watch } from 'vue'
-import { Check, History, X } from 'lucide-vue-next'
+import { Check, History } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { todayIso } from '@/utils/dates'
-import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 
@@ -15,7 +15,6 @@ import { distanceUnit } from '@/units'
 const props = defineProps<{ vehicleId: string; storageTires: any[]; selectedTireIds: string[]; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [] }>()
 const open = defineModel<boolean>('open', { required: true })
-useEscapeToClose(open, () => (open.value = false))
 const { showAlert } = useConfirm()
 
 const batchSessionTireIds = ref<string[]>([])
@@ -134,145 +133,131 @@ async function handleSaveBatchSession() {
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    @click.self="open = false"
+  <ModalShell
+    v-model:open="open"
+    :title="$t('tires.tireBatchSessionModal.addAPastSessionOn')"
+    :icon="History"
+    icon-class="text-rose-400"
+    body-class="space-y-4 text-xs"
+    footer-class="items-center justify-end gap-2"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <div class="flex items-center gap-2">
-          <History class="w-5 h-5 text-rose-400" />
-          <h3 class="text-base font-bold text-white">
-            {{ $t('tires.tireBatchSessionModal.addAPastSessionOn') }}
-          </h3>
+    <!-- Tire selection from storage -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-semibold text-slate-300">
+          {{ $t('tires.tireBatchSessionModal.garageTiresConcerned', { length: batchSessionTireIds.length, length2: storageTires.length }) }}
+        </span>
+        <div class="flex items-center gap-2 text-xs">
+          <button type="button" @click="selectAllBatchSessionTires()" class="text-rose-400 hover:text-rose-300 font-semibold">
+            {{ $t('tires.tireBatchSessionModal.tickAll') }}
+          </button>
+          <span class="text-slate-400">|</span>
+          <button type="button" @click="deselectAllBatchSessionTires()" class="text-slate-400 hover:text-slate-200">
+            {{ $t('tires.tireBatchSessionModal.untickAll') }}
+          </button>
         </div>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
-          <X class="w-5 h-5" />
-        </button>
       </div>
 
-      <div class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4 text-xs">
-        <!-- Tire selection from storage -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-semibold text-slate-300">
-              {{ $t('tires.tireBatchSessionModal.garageTiresConcerned', { length: batchSessionTireIds.length, length2: storageTires.length }) }}
-            </span>
-            <div class="flex items-center gap-2 text-xs">
-              <button type="button" @click="selectAllBatchSessionTires()" class="text-rose-400 hover:text-rose-300 font-semibold">
-                {{ $t('tires.tireBatchSessionModal.tickAll') }}
-              </button>
-              <span class="text-slate-400">|</span>
-              <button type="button" @click="deselectAllBatchSessionTires()" class="text-slate-400 hover:text-slate-200">
-                {{ $t('tires.tireBatchSessionModal.untickAll') }}
-              </button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800/80">
-            <label
-              v-for="t in storageTires"
-              :key="t.tire.id"
-              class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer text-slate-200"
-            >
-              <input
-                type="checkbox"
-                :checked="batchSessionTireIds.includes(t.tire.id)"
-                @change="toggleBatchSessionTire(t.tire.id)"
-                class="rounded accent-rose-500 w-4 h-4"
-              />
-              <div class="min-w-0 flex-1">
-                <div class="font-bold truncate text-white">{{ t.tire.brand }} {{ t.tire.model }}</div>
-                <div class="text-xs text-slate-400 truncate">{{ t.tire.dimension }}</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Dates & Odometers -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label for="batch-session-mounted-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.fittingDate') }}</label>
-            <AppDatePicker
-              id="batch-session-mounted-date"
-              v-model="batchSessionForm.mounted_date"
-              size="sm"
-              :clearable="true"
-            />
-          </div>
-          <div>
-            <label for="batch-session-mounted-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.odometerAtFittingKm', { unit: distanceUnit() }) }}</label>
-            <DistanceInput
-              id="batch-session-mounted-odometer"
-              v-model="batchSessionForm.mounted_odometer"
-              @input="onBatchOdometerChange"
-              class="field"
-            />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label for="batch-session-dismounted-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.removalDate') }}</label>
-            <AppDatePicker
-              id="batch-session-dismounted-date"
-              v-model="batchSessionForm.dismounted_date"
-              size="sm"
-              :clearable="true"
-            />
-          </div>
-          <div>
-            <label for="batch-session-dismounted-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.odometerAtRemovalKm', { unit: distanceUnit() }) }}</label>
-            <DistanceInput
-              id="batch-session-dismounted-odometer"
-              v-model="batchSessionForm.dismounted_odometer"
-              @input="onBatchOdometerChange"
-              class="field"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label for="batch-session-distance-km" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.sessionDistanceKm', { unit: distanceUnit() }) }}</label>
-          <DistanceInput
-            id="batch-session-distance-km"
-            v-model="batchSessionForm.distance_km"
-            :placeholder="$t('tires.tireBatchSessionModal.calculatedFromTheOdometersOr')"
-            class="field"
-          />
-        </div>
-
-        <div>
-          <label for="batch-session-notes" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.commentNotes') }}</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800/80">
+        <label
+          v-for="t in storageTires"
+          :key="t.tire.id"
+          class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer text-slate-200"
+        >
           <input
-            id="batch-session-notes"
-            v-model="batchSessionForm.notes"
-            type="text"
-            :placeholder="$t('tires.tireBatchSessionModal.eGWinterSeason2023')"
-            class="field"
+            type="checkbox"
+            :checked="batchSessionTireIds.includes(t.tire.id)"
+            @change="toggleBatchSessionTire(t.tire.id)"
+            class="rounded accent-rose-500 w-4 h-4"
           />
-        </div>
-      </div>
-
-      <div class="px-5 py-3.5 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button
-          type="button"
-          @click="open = false"
-          class="btn btn-lg btn-secondary"
-        >
-          {{ $t('common.cancel') }}
-        </button>
-        <button
-          type="button"
-          @click="handleSaveBatchSession()"
-          :disabled="savingBatchSession || batchSessionTireIds.length === 0"
-          class="btn btn-lg btn-primary"
-        >
-          <Check class="w-4 h-4" />
-          <span>{{ savingBatchSession ? $t('tires.tireBatchSessionModal.saving') : $t('tires.tireBatchSessionModal.applyTo', { count: batchSessionTireIds.length }) }}</span>
-        </button>
+          <div class="min-w-0 flex-1">
+            <div class="font-bold truncate text-white">{{ t.tire.brand }} {{ t.tire.model }}</div>
+            <div class="text-xs text-slate-400 truncate">{{ t.tire.dimension }}</div>
+          </div>
+        </label>
       </div>
     </div>
-  </div>
+
+    <!-- Dates & Odometers -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label for="batch-session-mounted-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.fittingDate') }}</label>
+        <AppDatePicker
+          id="batch-session-mounted-date"
+          v-model="batchSessionForm.mounted_date"
+          size="sm"
+          :clearable="true"
+        />
+      </div>
+      <div>
+        <label for="batch-session-mounted-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.odometerAtFittingKm', { unit: distanceUnit() }) }}</label>
+        <DistanceInput
+          id="batch-session-mounted-odometer"
+          v-model="batchSessionForm.mounted_odometer"
+          @input="onBatchOdometerChange"
+          class="field"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label for="batch-session-dismounted-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.removalDate') }}</label>
+        <AppDatePicker
+          id="batch-session-dismounted-date"
+          v-model="batchSessionForm.dismounted_date"
+          size="sm"
+          :clearable="true"
+        />
+      </div>
+      <div>
+        <label for="batch-session-dismounted-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.odometerAtRemovalKm', { unit: distanceUnit() }) }}</label>
+        <DistanceInput
+          id="batch-session-dismounted-odometer"
+          v-model="batchSessionForm.dismounted_odometer"
+          @input="onBatchOdometerChange"
+          class="field"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label for="batch-session-distance-km" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.sessionDistanceKm', { unit: distanceUnit() }) }}</label>
+      <DistanceInput
+        id="batch-session-distance-km"
+        v-model="batchSessionForm.distance_km"
+        :placeholder="$t('tires.tireBatchSessionModal.calculatedFromTheOdometersOr')"
+        class="field"
+      />
+    </div>
+
+    <div>
+      <label for="batch-session-notes" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireBatchSessionModal.commentNotes') }}</label>
+      <input
+        id="batch-session-notes"
+        v-model="batchSessionForm.notes"
+        type="text"
+        :placeholder="$t('tires.tireBatchSessionModal.eGWinterSeason2023')"
+        class="field"
+      />
+    </div>
+    <template #footer>
+      <button
+        type="button"
+        @click="open = false"
+        class="btn btn-lg btn-secondary"
+      >
+        {{ $t('common.cancel') }}
+      </button>
+      <button
+        type="button"
+        @click="handleSaveBatchSession()"
+        :disabled="savingBatchSession || batchSessionTireIds.length === 0"
+        class="btn btn-lg btn-primary"
+      >
+        <Check class="w-4 h-4" />
+        <span>{{ savingBatchSession ? $t('tires.tireBatchSessionModal.saving') : $t('tires.tireBatchSessionModal.applyTo', { count: batchSessionTireIds.length }) }}</span>
+      </button>
+    </template>
+  </ModalShell>
 </template>

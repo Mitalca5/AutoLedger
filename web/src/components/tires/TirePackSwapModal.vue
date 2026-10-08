@@ -1,19 +1,18 @@
 <script setup lang="ts">
+import ModalShell from '@/components/ModalShell.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { ref, watch } from 'vue'
-import { Snowflake, X } from 'lucide-vue-next'
+import { Snowflake } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { getTireSelectLabel } from '@/utils/tires'
-import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
 
 const props = defineProps<{ vehicleId: string; storageTires: any[]; currentOdometer: number }>()
 const emit = defineEmits<{ saved: [] }>()
 const open = defineModel<boolean>('open', { required: true })
-useEscapeToClose(open, () => (open.value = false))
 const { showAlert } = useConfirm()
 
 const packSwapForm = ref({
@@ -69,102 +68,90 @@ const handlePackSwapSubmit = () => runOnce(handlePackSwapSubmitAction)
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    @click.self="open = false"
+  <ModalShell
+    v-model:open="open"
+    :title="$t('tires.tirePackSwapModal.seasonalSwapFullSetChange')"
+    :icon="Snowflake"
+    icon-class="text-info-400"
+    body-class="space-y-4 text-xs"
+    footer-class="items-center justify-end gap-2"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Snowflake class="w-4 h-4 text-info-400" />
-          {{ $t('tires.tirePackSwapModal.seasonalSwapFullSetChange') }}
-        </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
-          <X class="w-4 h-4" />
-        </button>
+    <div>
+      <label for="tire-pack-swap-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.odometerAtTheSwapKm', { unit: distanceUnit() }) }}</label>
+      <DistanceInput id="tire-pack-swap-odometer"
+        v-model="packSwapForm.odometer"
+        class="field"
+      />
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+      <div>
+        <label for="tire-pack-swap-tires-fl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontLeftFl') }}</label>
+        <select id="tire-pack-swap-tires-fl"
+          v-model="packSwapForm.tires.FL"
+          class="field"
+        >
+          <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
+          <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
+            {{ getTireSelectLabel(t) }}
+          </option>
+        </select>
       </div>
 
-      <div class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4 text-xs">
-        <div>
-          <label for="tire-pack-swap-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.odometerAtTheSwapKm', { unit: distanceUnit() }) }}</label>
-          <DistanceInput id="tire-pack-swap-odometer"
-            v-model="packSwapForm.odometer"
-            class="field"
-          />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <div>
-            <label for="tire-pack-swap-tires-fl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontLeftFl') }}</label>
-            <select id="tire-pack-swap-tires-fl"
-              v-model="packSwapForm.tires.FL"
-              class="field"
-            >
-              <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
-              <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
-                {{ getTireSelectLabel(t) }}
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label for="tire-pack-swap-tires-fr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontRightFr') }}</label>
-            <select id="tire-pack-swap-tires-fr"
-              v-model="packSwapForm.tires.FR"
-              class="field"
-            >
-              <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
-              <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
-                {{ getTireSelectLabel(t) }}
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label for="tire-pack-swap-tires-rl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearLeftRl') }}</label>
-            <select id="tire-pack-swap-tires-rl"
-              v-model="packSwapForm.tires.RL"
-              class="field"
-            >
-              <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
-              <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
-                {{ getTireSelectLabel(t) }}
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label for="tire-pack-swap-tires-rr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearRightRr') }}</label>
-            <select id="tire-pack-swap-tires-rr"
-              v-model="packSwapForm.tires.RR"
-              class="field"
-            >
-              <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
-              <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
-                {{ getTireSelectLabel(t) }}
-              </option>
-            </select>
-          </div>
-        </div>
+      <div>
+        <label for="tire-pack-swap-tires-fr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.frontRightFr') }}</label>
+        <select id="tire-pack-swap-tires-fr"
+          v-model="packSwapForm.tires.FR"
+          class="field"
+        >
+          <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
+          <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
+            {{ getTireSelectLabel(t) }}
+          </option>
+        </select>
       </div>
 
-      <div class="px-5 py-3.5 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button
-          type="button"
-          @click="open = false"
-          class="btn btn-lg btn-secondary"
+      <div>
+        <label for="tire-pack-swap-tires-rl" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearLeftRl') }}</label>
+        <select id="tire-pack-swap-tires-rl"
+          v-model="packSwapForm.tires.RL"
+          class="field"
         >
-          {{ $t('common.cancel') }}
-        </button>
-        <button :disabled="submitting"
-          type="button"
-          @click="handlePackSwapSubmit"
-          class="btn btn-lg btn-primary"
+          <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
+          <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
+            {{ getTireSelectLabel(t) }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label for="tire-pack-swap-tires-rr" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tirePackSwapModal.rearRightRr') }}</label>
+        <select id="tire-pack-swap-tires-rr"
+          v-model="packSwapForm.tires.RR"
+          class="field"
         >
-          {{ $t('tires.tirePackSwapModal.confirmTheRotation') }}
-        </button>
+          <option value="">{{ $t('tires.tirePackSwapModal.chooseATire') }}</option>
+          <option v-for="t in storageTires" :key="t.tire.id" :value="t.tire.id">
+            {{ getTireSelectLabel(t) }}
+          </option>
+        </select>
       </div>
     </div>
-  </div>
+    <template #footer>
+      <button
+        type="button"
+        @click="open = false"
+        class="btn btn-lg btn-secondary"
+      >
+        {{ $t('common.cancel') }}
+      </button>
+      <button :disabled="submitting"
+        type="button"
+        @click="handlePackSwapSubmit"
+        class="btn btn-lg btn-primary"
+      >
+        {{ $t('tires.tirePackSwapModal.confirmTheRotation') }}
+      </button>
+    </template>
+  </ModalShell>
 </template>

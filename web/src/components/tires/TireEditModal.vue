@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import ModalShell from '@/components/ModalShell.vue'
 import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
-import { Pencil, X } from 'lucide-vue-next'
+import { Pencil } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
@@ -11,7 +12,6 @@ import { isMountedPosition } from '@/utils/tires'
 import { toIsoDay } from '@/utils/dates'
 import { useVehicleStore } from '@/stores/vehicle'
 import { currencySymbol } from '@/currency'
-import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { useOdometerPrefill } from '@/composables/useOdometerPrefill'
 import { distanceUnit } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
@@ -20,7 +20,6 @@ import { useSubmit } from '@/composables/useSubmit'
 const props = defineProps<{ vehicleId: string; tires: any[]; tireIds: string[]; fallbackTire: any | null; fallbackStats: any | null }>()
 const emit = defineEmits<{ saved: [] }>()
 const open = defineModel<boolean>('open', { required: true })
-useEscapeToClose(open, () => (open.value = false))
 const { showAlert } = useConfirm()
 const vehicleStore = useVehicleStore()
 
@@ -132,124 +131,112 @@ const handleSaveTireEdit = () => runOnce(handleSaveTireEditAction)
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    @click.self="open = false"
+  <ModalShell
+    v-model:open="open"
+    :title="tireEditIds.length > 1 ? $t('tires.tireEditModal.editMany', { count: tireEditIds.length }) : $t('tires.tireEditModal.editOne')"
+    :icon="Pencil"
+    icon-class="text-rose-400"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Pencil class="w-4 h-4 text-rose-400" />
-          {{ tireEditIds.length > 1 ? $t('tires.tireEditModal.editMany', { count: tireEditIds.length }) : $t('tires.tireEditModal.editOne') }}
-        </h3>
-        <button type="button" @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
-          <X class="w-4 h-4" />
-        </button>
+    <form id="tire-edit-modal-form" @submit.prevent="handleSaveTireEdit" class="space-y-4">
+      <p v-if="tireEditIds.length > 1" class="text-xs text-slate-400">
+        {{ $t('tires.tireEditModal.emptyFieldsUnchanged', { tires: editedTires.map((t) => `${t.tire.brand} ${t.tire.current_position}`).join(' • ') }) }}
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="tire-edit-brand" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.brand') }}</label>
+          <input id="tire-edit-brand" v-model="tireEditForm.brand" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-model" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.model') }}</label>
+          <input id="tire-edit-model" v-model="tireEditForm.model" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-dimension" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.size') }}</label>
+          <input id="tire-edit-dimension" v-model="tireEditForm.dimension" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-season" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.season') }}</label>
+          <select id="tire-edit-season" v-model="tireEditForm.season" class="field">
+            <option value="">{{ tireEditIds.length > 1 ? $t('tires.tireEditModal.unchangedFeminine') : '—' }}</option>
+            <option value="SUMMER">{{ $t('tires.tireEditModal.summer') }}</option>
+            <option value="WINTER">{{ $t('tires.tireEditModal.winter') }}</option>
+            <option value="ALL_SEASON">{{ $t('tires.tireEditModal.allSeason') }}</option>
+          </select>
+        </div>
+        <div>
+          <label for="tire-edit-purchase-date" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.purchaseDate') }}</label>
+          <AppDatePicker
+            id="tire-edit-purchase-date"
+            v-model="tireEditForm.purchase_date"
+            :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : $t('tires.tireEditModal.selectDate')"
+            size="xs"
+            :clearable="true"
+          />
+        </div>
+        <div>
+          <label for="tire-edit-dot" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.dotCode') }}</label>
+          <input id="tire-edit-dot" v-model="tireEditForm.dot_code" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
       </div>
 
-      <form id="tire-edit-modal-form" @submit.prevent="handleSaveTireEdit" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
-        <p v-if="tireEditIds.length > 1" class="text-xs text-slate-400">
-          {{ $t('tires.tireEditModal.emptyFieldsUnchanged', { tires: editedTires.map((t) => `${t.tire.brand} ${t.tire.current_position}`).join(' • ') }) }}
-        </p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+        <div>
+          <label for="tire-edit-price-mode" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.priceEntry') }}</label>
+          <select id="tire-edit-price-mode" v-model="tireEditPriceMode" class="field">
+            <option value="UNIT">{{ $t('tires.tireEditModal.unitPrice') }}</option>
+            <option value="TOTAL" :disabled="tireEditIds.length < 2">{{ $t('tires.tireEditModal.totalPriceSplit') }}</option>
+          </select>
+        </div>
+        <div>
+          <label for="tire-edit-price" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.price', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
+          <NumberInput id="tire-edit-price" v-model="tireEditForm.price" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-lifespan" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.estimatedLifespanKm', { unit: distanceUnit() }) }}</label>
+          <DistanceInput whole id="tire-edit-lifespan" v-model="tireEditForm.estimated_lifespan_km" min="1" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-initial-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.newDepthMm') }}</label>
+          <NumberInput id="tire-edit-initial-depth" v-model="tireEditForm.initial_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-min-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.minimumDepthMm') }}</label>
+          <NumberInput id="tire-edit-min-depth" v-model="tireEditForm.min_legal_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+        <div>
+          <label for="tire-edit-initial-distance" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.kmBeforeTrackingUsed', { unit: distanceUnit() }) }}</label>
+          <DistanceInput id="tire-edit-initial-distance" v-model="tireEditForm.initial_distance_km" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+        </div>
+      </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div v-if="editIncludesMounted" class="space-y-2 pt-3 border-t border-slate-800">
+        <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider">{{ $t('tires.tireEditModal.currentlyFitted') }}</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label for="tire-edit-brand" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.brand') }}</label>
-            <input id="tire-edit-brand" v-model="tireEditForm.brand" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-model" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.model') }}</label>
-            <input id="tire-edit-model" v-model="tireEditForm.model" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-dimension" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.size') }}</label>
-            <input id="tire-edit-dimension" v-model="tireEditForm.dimension" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-season" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.season') }}</label>
-            <select id="tire-edit-season" v-model="tireEditForm.season" class="field">
-              <option value="">{{ tireEditIds.length > 1 ? $t('tires.tireEditModal.unchangedFeminine') : '—' }}</option>
-              <option value="SUMMER">{{ $t('tires.tireEditModal.summer') }}</option>
-              <option value="WINTER">{{ $t('tires.tireEditModal.winter') }}</option>
-              <option value="ALL_SEASON">{{ $t('tires.tireEditModal.allSeason') }}</option>
-            </select>
-          </div>
-          <div>
-            <label for="tire-edit-purchase-date" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.purchaseDate') }}</label>
+            <label for="tire-edit-mounted-date" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.fittingDate') }}</label>
             <AppDatePicker
-              id="tire-edit-purchase-date"
-              v-model="tireEditForm.purchase_date"
+              id="tire-edit-mounted-date"
+              v-model="tireEditForm.mounted_date"
               :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : $t('tires.tireEditModal.selectDate')"
               size="xs"
               :clearable="true"
             />
           </div>
           <div>
-            <label for="tire-edit-dot" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.dotCode') }}</label>
-            <input id="tire-edit-dot" v-model="tireEditForm.dot_code" type="text"  :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
+            <label for="tire-edit-mounted-odometer" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.odometerAtFittingKm', { unit: distanceUnit() }) }}</label>
+            <DistanceInput id="tire-edit-mounted-odometer" v-model="tireEditForm.mounted_odometer" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
           </div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-          <div>
-            <label for="tire-edit-price-mode" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.priceEntry') }}</label>
-            <select id="tire-edit-price-mode" v-model="tireEditPriceMode" class="field">
-              <option value="UNIT">{{ $t('tires.tireEditModal.unitPrice') }}</option>
-              <option value="TOTAL" :disabled="tireEditIds.length < 2">{{ $t('tires.tireEditModal.totalPriceSplit') }}</option>
-            </select>
-          </div>
-          <div>
-            <label for="tire-edit-price" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.price', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-            <NumberInput id="tire-edit-price" v-model="tireEditForm.price" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-lifespan" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.estimatedLifespanKm', { unit: distanceUnit() }) }}</label>
-            <DistanceInput whole id="tire-edit-lifespan" v-model="tireEditForm.estimated_lifespan_km" min="1" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-initial-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.newDepthMm') }}</label>
-            <NumberInput id="tire-edit-initial-depth" v-model="tireEditForm.initial_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-min-depth" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.minimumDepthMm') }}</label>
-            <NumberInput id="tire-edit-min-depth" v-model="tireEditForm.min_legal_depth_mm" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-          <div>
-            <label for="tire-edit-initial-distance" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.kmBeforeTrackingUsed', { unit: distanceUnit() }) }}</label>
-            <DistanceInput id="tire-edit-initial-distance" v-model="tireEditForm.initial_distance_km" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-          </div>
-        </div>
-
-        <div v-if="editIncludesMounted" class="space-y-2 pt-3 border-t border-slate-800">
-          <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider">{{ $t('tires.tireEditModal.currentlyFitted') }}</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label for="tire-edit-mounted-date" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.fittingDate') }}</label>
-              <AppDatePicker
-                id="tire-edit-mounted-date"
-                v-model="tireEditForm.mounted_date"
-                :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : $t('tires.tireEditModal.selectDate')"
-                size="xs"
-                :clearable="true"
-              />
-            </div>
-            <div>
-              <label for="tire-edit-mounted-odometer" class="block text-xs text-slate-400 mb-1 font-semibold">{{ $t('tires.tireEditModal.odometerAtFittingKm', { unit: distanceUnit() }) }}</label>
-              <DistanceInput id="tire-edit-mounted-odometer" v-model="tireEditForm.mounted_odometer" min="0" :placeholder="tireEditIds.length > 1 ? $t('tires.tireEditModal.unchanged') : ''" class="field" />
-            </div>
-          </div>
-        </div>
-      </form>
-
-      <div class="px-5 py-3.5 border-t border-slate-800/80 flex justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
-          {{ $t('common.cancel') }}
-        </button>
-        <button :disabled="submitting" type="submit" form="tire-edit-modal-form" class="btn btn-lg btn-primary">
-          {{ $t('common.save') }}
-        </button>
       </div>
-    </div>
-  </div>
+    </form>
+    <template #footer>
+      <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
+        {{ $t('common.cancel') }}
+      </button>
+      <button :disabled="submitting" type="submit" form="tire-edit-modal-form" class="btn btn-lg btn-primary">
+        {{ $t('common.save') }}
+      </button>
+    </template>
+  </ModalShell>
 </template>

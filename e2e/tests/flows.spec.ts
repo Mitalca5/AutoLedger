@@ -142,3 +142,21 @@ test('a modal covers the bottom bar of a phone', async ({ page }) => {
   })
   expect(barIsReachable).toBe(false)
 })
+
+test.describe('the tire modals share one frame', () => {
+  test('add and history open named, close on Escape and on the close button', async ({ page }) => {
+    await useVehicle(page, ev.id, '/tires')
+    await page.getByRole('button', { name: 'Add tires' }).first().click()
+    const add = page.getByRole('dialog', { name: 'Add tires' })
+    await expect(add).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(add).toHaveCount(0)
+
+    await page.getByRole('button', { name: /^Open Michelin Pilot Sport 4/ }).first().click()
+    const history = page.getByRole('dialog', { name: /Michelin Pilot Sport 4/ })
+    await expect(history).toBeVisible()
+    await expect(history.getByRole('button', { name: 'Edit the tire' })).toBeVisible()
+    await history.getByRole('button', { name: 'Close', exact: true }).first().click()
+    await expect(history).toHaveCount(0)
+  })
+})

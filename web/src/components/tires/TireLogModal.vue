@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import ModalShell from '@/components/ModalShell.vue'
 import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
-import { Ruler, X } from 'lucide-vue-next'
+import { Ruler } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { type TireLogForm, validateTreadDepth } from '@/utils/tires'
 import { todayIso } from '@/utils/dates'
-import { useEscapeToClose } from '@/composables/useEscapeToClose'
 import { distanceUnit } from '@/units'
 import { useSubmit } from '@/composables/useSubmit'
 
@@ -17,7 +17,6 @@ import { useSubmit } from '@/composables/useSubmit'
 const props = defineProps<{ vehicleId: string; selectedTire: any | null; editingLogId: string | null; initialForm: TireLogForm }>()
 const emit = defineEmits<{ saved: [] }>()
 const open = defineModel<boolean>('open', { required: true })
-useEscapeToClose(open, () => (open.value = false))
 const { showAlert } = useConfirm()
 
 const newLogForm = ref<TireLogForm>({
@@ -67,73 +66,62 @@ const handleAddLog = () => runOnce(handleAddLogAction)
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    @click.self="open = false"
+  <ModalShell
+    v-model:open="open"
+    :title="editingLogId ? $t('tires.tireLogModal.edit') : $t('tires.tireLogModal.new')"
+    :icon="Ruler"
+    icon-class="text-success-400"
+    size="sm"
+    body-class="space-y-4 text-xs"
+    footer-class="items-center justify-end gap-2"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Ruler class="w-4 h-4 text-success-400" />
-          {{ editingLogId ? $t('tires.tireLogModal.edit') : $t('tires.tireLogModal.new') }}
-        </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
-          <X class="w-4 h-4" />
-        </button>
-      </div>
-
-      <div class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4 text-xs">
-        <div>
-          <label for="tire-new-log-depth-mm" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.measuredDepthMm') }}</label>
-          <NumberInput id="tire-new-log-depth-mm"
-            v-model="newLogForm.depth_mm"
-            min="0.1"
-            max="20"
-            :aria-invalid="depthError ? 'true' : undefined"
-            aria-describedby="tire-new-log-depth-error"
-            class="field font-bold"
-          />
-          <p v-if="depthError" id="tire-new-log-depth-error" class="mt-1 text-xs text-danger-400">{{ $t(depthError) }}</p>
-        </div>
-        <div>
-          <label for="tire-new-log-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.currentOdometerKm', { unit: distanceUnit() }) }}</label>
-          <DistanceInput id="tire-new-log-odometer"
-            v-model="newLogForm.odometer"
-            class="field"
-          />
-        </div>
-        <div>
-          <label for="tire-new-log-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.readingDate') }}</label>
-          <AppDatePicker id="tire-new-log-date" v-model="newLogForm.date" size="sm" required />
-        </div>
-        <div>
-          <label for="tire-new-log-notes" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.notesOptional') }}</label>
-          <input id="tire-new-log-notes"
-            v-model="newLogForm.notes"
-            type="text"
-            :placeholder="$t('tires.tireLogModal.eGCheckBeforeThe')"
-            class="field"
-          />
-        </div>
-      </div>
-
-      <div class="px-5 py-3.5 border-t border-slate-800/80 flex items-center justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button
-          type="button"
-          @click="open = false"
-          class="btn btn-lg btn-secondary"
-        >
-          {{ $t('common.cancel') }}
-        </button>
-        <button :disabled="submitting"
-          type="button"
-          @click="handleAddLog"
-          class="bg-success-600 hover:bg-success-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-        >
-          {{ $t('tires.tireLogModal.saveTheReading') }}
-        </button>
-      </div>
+    <div>
+      <label for="tire-new-log-depth-mm" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.measuredDepthMm') }}</label>
+      <NumberInput id="tire-new-log-depth-mm"
+        v-model="newLogForm.depth_mm"
+        min="0.1"
+        max="20"
+        :aria-invalid="depthError ? 'true' : undefined"
+        aria-describedby="tire-new-log-depth-error"
+        class="field font-bold"
+      />
+      <p v-if="depthError" id="tire-new-log-depth-error" class="mt-1 text-xs text-danger-400">{{ $t(depthError) }}</p>
     </div>
-  </div>
+    <div>
+      <label for="tire-new-log-odometer" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.currentOdometerKm', { unit: distanceUnit() }) }}</label>
+      <DistanceInput id="tire-new-log-odometer"
+        v-model="newLogForm.odometer"
+        class="field"
+      />
+    </div>
+    <div>
+      <label for="tire-new-log-date" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.readingDate') }}</label>
+      <AppDatePicker id="tire-new-log-date" v-model="newLogForm.date" size="sm" required />
+    </div>
+    <div>
+      <label for="tire-new-log-notes" class="block text-slate-400 mb-1 font-semibold">{{ $t('tires.tireLogModal.notesOptional') }}</label>
+      <input id="tire-new-log-notes"
+        v-model="newLogForm.notes"
+        type="text"
+        :placeholder="$t('tires.tireLogModal.eGCheckBeforeThe')"
+        class="field"
+      />
+    </div>
+    <template #footer>
+      <button
+        type="button"
+        @click="open = false"
+        class="btn btn-lg btn-secondary"
+      >
+        {{ $t('common.cancel') }}
+      </button>
+      <button :disabled="submitting"
+        type="button"
+        @click="handleAddLog"
+        class="bg-success-600 hover:bg-success-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+      >
+        {{ $t('tires.tireLogModal.saveTheReading') }}
+      </button>
+    </template>
+  </ModalShell>
 </template>
