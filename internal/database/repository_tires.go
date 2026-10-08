@@ -162,3 +162,33 @@ func (r *Repository) DisposeTire(ctx context.Context, vehicleID, tireID string, 
 	}
 	return tx.Commit(ctx)
 }
+
+const tireColumns = `
+	id, vehicle_id, brand, model, dimension, season,
+	purchase_date, purchase_price, current_position,
+	initial_depth_mm, min_legal_depth_mm, dot_code, is_archived,
+	mounted_odometer, initial_distance_km, accumulated_distance_km, estimated_lifespan_km,
+	created_at, updated_at
+`
+
+func scanTire(row pgx.Row, t *models.Tire) error {
+	return row.Scan(
+		&t.ID, &t.VehicleID, &t.Brand, &t.Model, &t.Dimension, &t.Season,
+		&t.PurchaseDate, &t.PurchasePrice, &t.CurrentPosition,
+		&t.InitialDepthMm, &t.MinLegalDepthMm, &t.DotCode, &t.IsArchived,
+		&t.MountedOdometer, &t.InitialDistanceKm, &t.AccumulatedDistanceKm, &t.EstimatedLifespanKm,
+		&t.CreatedAt, &t.UpdatedAt,
+	)
+}
+
+func isMountedPosition(pos models.TirePosition) bool {
+	switch pos {
+	case models.TirePosFL, models.TirePosFR, models.TirePosRL, models.TirePosRR:
+		return true
+	}
+	return false
+}
+
+func isValidTirePosition(pos models.TirePosition) bool {
+	return isMountedPosition(pos) || pos == models.TirePosStorage || pos == models.TirePosDisposed
+}
