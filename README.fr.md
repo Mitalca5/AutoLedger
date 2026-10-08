@@ -196,7 +196,12 @@ AutoLedger/
    curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
    ```
 
-2. **Démarrez la pile :**
+2. **Facultatif : définir vos propres valeurs.** Téléchargez le modèle à côté du fichier compose, nommez-le `.env` et modifiez-le :
+   ```bash
+   curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
+   ```
+
+3. **Démarrez la pile :**
    ```bash
    docker compose up -d
    ```

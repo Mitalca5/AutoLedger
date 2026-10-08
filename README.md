@@ -196,7 +196,12 @@ AutoLedger/
    curl -O https://raw.githubusercontent.com/Rem7474/AutoLedger/main/docker-compose.yml
    ```
 
-2. **Start the stack:**
+2. **Optional: set your own values.** Download the template next to the compose file, rename it `.env` and edit it:
+   ```bash
+   curl -o .env https://raw.githubusercontent.com/Rem7474/AutoLedger/main/.env.example
+   ```
+
+3. **Start the stack:**
    ```bash
    docker compose up -d
    ```
