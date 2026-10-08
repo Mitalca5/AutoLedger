@@ -38,7 +38,7 @@ jobs:
           fi
           match() { [ "$files" = ALL ] || printf '%s\n' "$files" | grep -Eq "$1"; }
           flag() { if match "$2"; then echo "$1=true" >> "$GITHUB_OUTPUT"; else echo "$1=false" >> "$GITHUB_OUTPUT"; fi; }
-          flag go '^(.*\.go|go\.mod|go\.sum|migrations/|web/embed\.go|\.github/workflows/(ci|codeql)\.yml)'
+          flag go '^(.*\.go|README(\.fr)?\.md|go\.mod|go\.sum|migrations/|web/embed\.go|\.github/workflows/(ci|codeql)\.yml)'
           flag web '^(web/|\.github/workflows/ci\.yml)'
           flag backup '^(backup/|\.github/workflows/ci\.yml)'
           flag docker '^(Dockerfile|\.dockerignore|go\.mod|go\.sum|web/package(-lock)?\.json|backup/|\.github/workflows/(ci|docker-publish)\.yml)'

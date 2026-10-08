@@ -1,5 +1,7 @@
 # AutoLedger 🚗
 
+**English** · [Français](README.fr.md)
+
 > **Self-hosted ledger of what your car really costs, per kilometre.**  
 > Electric, plug-in hybrid, range-extender or combustion, any make: energy or fuel, financing (cash, loan, lease), tires, maintenance, insurance, tolls and carpooling in one place, fed by hand, by CSV, by Home Assistant or a script, or synchronised from [TeslaMate](https://github.com/teslamate-org/teslamate).
 
