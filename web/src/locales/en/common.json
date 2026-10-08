@@ -1,5 +1,6 @@
 {
   "cancel": "Cancel",
+  "unsavedChanges": "Unsaved changes: use Cancel or Close to leave this window.",
   "close": "Close",
   "save": "Save",
   "loadFailed": "Could not load this data.",

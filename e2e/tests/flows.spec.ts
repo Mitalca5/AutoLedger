@@ -51,3 +51,28 @@ for (const width of [320, 360, 375, 390, 414]) {
     }
   })
 }
+
+const modal = (page: import('@playwright/test').Page) => page.getByRole('dialog', { name: 'Add tires' })
+
+test.describe('a modal with edits does not close on a backdrop click', () => {
+  test.beforeEach(async ({ page }) => {
+    await useVehicle(page, ev.id, '/tires')
+    await page.getByRole('button', { name: 'Add tires' }).first().click()
+    await expect(modal(page)).toBeVisible()
+  })
+
+  test('typed input is kept and Escape still closes', async ({ page }) => {
+    await page.fill('#tire-add-tire-brand', 'Acme')
+    await page.mouse.click(4, 4)
+    await expect(modal(page)).toBeVisible()
+    await expect(page.locator('#tire-add-tire-brand')).toHaveValue('Acme')
+    await expect(toast(page)).toContainText('Unsaved changes')
+    await page.keyboard.press('Escape')
+    await expect(modal(page)).toHaveCount(0)
+  })
+
+  test('an untouched modal closes on a backdrop click', async ({ page }) => {
+    await page.mouse.click(4, 4)
+    await expect(modal(page)).toHaveCount(0)
+  })
+})

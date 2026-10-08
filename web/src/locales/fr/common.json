@@ -1,5 +1,6 @@
 {
   "cancel": "Annuler",
+  "unsavedChanges": "Modifications non enregistrées : utilisez Annuler ou Fermer pour quitter cette fenêtre.",
   "close": "Fermer",
   "save": "Enregistrer",
   "loadFailed": "Impossible de charger ces données.",
