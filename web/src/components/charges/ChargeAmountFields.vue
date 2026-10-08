@@ -23,10 +23,10 @@ const props = withDefaults(
 const kwh = defineModel<string>('kwh', { required: true })
 const cost = defineModel<string>('cost', { required: true })
 
-const { price, driver, onPriceInput, onCostInput, setFree } = useChargeAmounts(kwh, cost, props.suggestedPrice, computed(() => props.tariff?.cost ?? null))
+const { price, driver, onPriceInput, onCostInput, setCost, setFree } = useChargeAmounts(kwh, cost, props.suggestedPrice, computed(() => props.tariff?.cost ?? null))
 
 const kwhInput = ref<InstanceType<typeof NumberInput> | null>(null)
-defineExpose({ focus: () => kwhInput.value?.focus() })
+defineExpose({ focus: () => kwhInput.value?.focus(), setCost })
 
 const quick = computed(() => props.variant === 'quick')
 const inputClass = computed(() => (quick.value ? 'quick-input' : 'field'))

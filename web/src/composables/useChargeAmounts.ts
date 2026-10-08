@@ -14,10 +14,17 @@ export function useChargeAmounts(kwh: Ref<string>, cost: Ref<string>, suggestedP
   // The vehicle's tariff priced the session: it replaces the suggestion until the user types a price or a cost
   if (tariff) {
     watch(tariff, (total) => {
-      if (driver.value !== 'tariff' || total === null) return
+      if (driver.value !== 'tariff') return
+      if (total === null) {
+        // Only the remembered suggestion can be reused; the previous plan's effective rate cannot.
+        price.value = suggestedPrice !== undefined ? String(suggestedPrice) : ''
+        const fallback = totalFromUnitPrice(toNumber(kwh.value), toNumber(price.value))
+        cost.value = fallback === null ? '' : fallback.toFixed(2)
+        return
+      }
       cost.value = total.toFixed(2)
       price.value = unitPriceText(total, toNumber(kwh.value), 4)
-    })
+    }, { immediate: true, flush: 'sync' })
   }
 
   watch(kwh, (value) => {
@@ -42,11 +49,18 @@ export function useChargeAmounts(kwh: Ref<string>, cost: Ref<string>, suggestedP
     price.value = unitPriceText(toNumber(cost.value), toNumber(kwh.value), 4)
   }
 
+  // Costs applied by another UI (such as the public calculator) are explicit too.
+  function setCost(total: number) {
+    driver.value = 'cost'
+    cost.value = total.toFixed(2)
+    price.value = unitPriceText(total, toNumber(kwh.value), 4)
+  }
+
   function setFree() {
     driver.value = 'cost'
     cost.value = '0'
     price.value = '0'
   }
 
-  return { price, driver, onPriceInput, onCostInput, setFree }
+  return { price, driver, onPriceInput, onCostInput, setCost, setFree }
 }

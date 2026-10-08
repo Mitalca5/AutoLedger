@@ -61,10 +61,11 @@ const tariffCost = useSessionTariffCost(
 )
 
 const showPublicCalc = ref(false)
+const amounts = ref<InstanceType<typeof ChargeAmountFields> | null>(null)
 const suggestedPrice = computed(() => (editingCharge.value ? undefined : loadMemory(props.vehicleId).pricePerKwh))
 
 function handleApplyPublicCalc(cost: number, calculatedKwh?: number, summaryNote?: string) {
-  chargeForm.value.cost = cost.toFixed(2)
+  amounts.value?.setCost(cost)
   if (calculatedKwh && (!chargeForm.value.kwh_added || Number(chargeForm.value.kwh_added) <= 0)) {
     chargeForm.value.kwh_added = calculatedKwh.toFixed(3)
   }
@@ -187,6 +188,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
         </template>
 
         <ChargeAmountFields
+          ref="amounts"
           v-model:kwh="chargeForm.kwh_added"
           v-model:cost="chargeForm.cost"
           id-prefix="charge-form"

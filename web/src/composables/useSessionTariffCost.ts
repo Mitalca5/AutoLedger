@@ -19,10 +19,9 @@ export function useSessionTariffCost(query: () => SessionPriceRequest | null, en
       clearTimeout(timer)
       const request: SessionPriceRequest | null = JSON.parse(key)
       const seq = ++latest
-      if (!request) {
-        result.value = null
-        return
-      }
+      // An amount belongs to its exact query; do not keep it while another session is being priced.
+      result.value = null
+      if (!request) return
       timer = setTimeout(async () => {
         try {
           const res = await api.calculateSessionCost(request)
@@ -32,8 +31,11 @@ export function useSessionTariffCost(query: () => SessionPriceRequest | null, en
         }
       }, 300)
     },
-    { immediate: true },
+    { immediate: true, flush: 'sync' },
   )
-  onBeforeUnmount(() => clearTimeout(timer))
+  onBeforeUnmount(() => {
+    clearTimeout(timer)
+    ++latest
+  })
   return result
 }
