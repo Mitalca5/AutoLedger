@@ -187,7 +187,7 @@ function clearCardTestResult() {
         <span>{{ $t('vehicles.vehicleCard.dataSources') }}</span>
       </button>
       <router-link
-        to="/manual"
+        to="/odometer"
         @click="vehicleStore.setActiveVehicle(v.id)"
         class="btn btn-secondary tap-text"
         :title="$t('vehicles.vehicleCard.odometerReadingsAndManualEntries')"

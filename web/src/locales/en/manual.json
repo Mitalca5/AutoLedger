@@ -1,7 +1,7 @@
 {
   "manualTrackingView": {
     "addAVehicleFirst": "Add a vehicle first.",
-    "manualTracking": "Mileage",
+    "manualTracking": "Odometer readings",
     "independent": ". Each entry is independent.",
     "subtitleMileage": "Mileage entered by hand"
   },

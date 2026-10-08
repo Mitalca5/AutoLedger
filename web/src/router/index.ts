@@ -44,15 +44,19 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/manual',
-      name: 'manual',
+      path: '/odometer',
+      name: 'odometer',
       component: ManualTrackingView,
       meta: { requiresAuth: true },
-      // The energy estimate and the fill-ups live on the energy page
-      beforeEnter: (to) => {
+    },
+    {
+      // Former address of the odometer page; the energy estimate and the fill-ups moved to the energy page
+      path: '/manual',
+      redirect: (to) => {
         const tab = String(to.query.tab ?? '').toUpperCase()
-        if (tab === 'ENERGY') return { path: '/energy', query: { tab: 'ESTIMATE' }, replace: true }
-        if (tab === 'FUEL') return { path: '/energy', query: { tab: 'FUEL' }, replace: true }
+        if (tab === 'ENERGY') return { path: '/energy', query: { tab: 'ESTIMATE' } }
+        if (tab === 'FUEL') return { path: '/energy', query: { tab: 'FUEL' } }
+        return { path: '/odometer' }
       },
     },
     {

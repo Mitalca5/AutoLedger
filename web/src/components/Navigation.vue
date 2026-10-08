@@ -38,7 +38,7 @@ const allNavItems = [
   { name: 'drives', labelKey: 'shell.nav.drives', path: '/drives', icon: NavIcon },
   { name: 'carpools', labelKey: 'shell.nav.carpools', path: '/carpools', icon: Users },
   { name: 'tires', labelKey: 'shell.nav.tires', path: '/tires', icon: Disc },
-  { name: 'manual', labelKey: 'shell.nav.manual', path: '/manual', icon: ClipboardList },
+  { name: 'odometer', labelKey: 'shell.nav.odometer', path: '/odometer', icon: ClipboardList },
   { name: 'energy', labelKey: 'shell.nav.energy', path: '/energy', icon: Zap },
   { name: 'expenses', labelKey: 'shell.nav.expenses', path: '/expenses', icon: Receipt },
   { name: 'maintenance', labelKey: 'shell.nav.maintenance', path: '/maintenance', icon: Wrench },
@@ -60,7 +60,7 @@ const navItems = computed(() =>
 const currentRouteName = computed(() => route.name)
 
 // Phone bar: the everyday pages, the quick entry button in the middle, everything else behind "Plus".
-const primaryNames = computed(() => (vehicleStore.canCharge ? ['dashboard', 'drives', 'expenses'] : ['dashboard', 'energy', 'manual']))
+const primaryNames = computed(() => (vehicleStore.canCharge ? ['dashboard', 'drives', 'expenses'] : ['dashboard', 'energy', 'odometer']))
 const primaryItems = computed(() =>
   primaryNames.value.map((name) => navItems.value.find((item) => item.name === name)).filter((item) => !!item),
 )

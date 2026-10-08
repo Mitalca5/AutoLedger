@@ -21,7 +21,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   drives: 'shell.nav.drives',
   carpools: 'shell.nav.carpools',
   tires: 'shell.nav.tires',
-  manual: 'shell.nav.manual',
+  odometer: 'shell.nav.odometer',
   expenses: 'shell.nav.expenses',
   comparison: 'shell.nav.comparison',
   vehicles: 'shell.nav.vehicles',
