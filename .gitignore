@@ -35,3 +35,7 @@ Thumbs.db
 *.swo
 
 scripts/screenshots/node_modules/
+
+# Test coverage output
+coverage.out
+web/coverage/
