@@ -23,7 +23,7 @@ import (
 )
 
 // AppVersion is the application version, injected at build time via -ldflags "-X main.AppVersion=...".
-var AppVersion = "1.34.0"
+var AppVersion = "1.35.0"
 
 // dbConnectTimeout is how long the server waits for PostgreSQL to become reachable on startup before giving up.
 // It covers a slow crash recovery after an unclean shutdown, not just a normal container boot race.
