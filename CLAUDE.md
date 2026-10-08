@@ -34,6 +34,8 @@ TEST_DATABASE_URL='postgres://teslacost:test@localhost:55433/teslacost_test?sslm
 docker rm -f tc-pg
 ```
 
+End-to-end suite (`e2e/`, Playwright against the built SPA and a real server): start the server on a fresh database (`ENVIRONMENT=development DATABASE_URL=... AUTOLEDGER_PORT=8080 ./server`), seed it with `DEMO_PASSWORD=... go run ./cmd/demoseed -url http://127.0.0.1:8080`, then `cd e2e && npm ci --ignore-scripts && ./node_modules/.bin/playwright install chromium && BASE_URL=http://127.0.0.1:8080 DEMO_PASSWORD=... ./node_modules/.bin/playwright test`. It mocks nothing; the `End-to-end tests` CI job runs it and uploads traces on failure. Add a test there only for a flow unit tests cannot cover (a form, a redirect, a layout check).
+
 The full run takes several minutes (`internal/services` ~5 min). A `go test` that hangs on pgxpool acquire means the database was not really up: recreate the container. CI runs `go test -race` on postgres:14, `govulncheck`, `npm audit --audit-level=high`, and SonarCloud.
 
 ## Layout
