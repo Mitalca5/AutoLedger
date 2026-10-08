@@ -10,6 +10,10 @@ A tariff plan prices the energy of a home charging session when no cost is given
 | `TIME_OF_USE` | Peak and off-peak prices with off-peak `time_windows`. Stored as `BANDS` since migration 51 and still accepted by the API. |
 | `BANDS` | Any number of named bands, rules that assign a band to a time range, and a default band. |
 
+## Editing plans
+
+**Account → Electricity tariff plans** lists the plans grouped by tariff name, newest version first. A plan is created and edited in a form (single price or several prices, time ranges with their days, validity dates, monthly subscription). A row offers edit, **New version** (same prices, starting the day after the previous version ends), duplicate and delete. The vehicle form's plan selector links to this section. The same operations are available through `POST/PUT/DELETE /api/tariffs/plans`; prices are stored to the cent per kWh.
+
 ## Bands
 
 ```json

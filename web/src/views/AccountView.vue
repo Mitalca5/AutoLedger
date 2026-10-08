@@ -5,6 +5,7 @@ import { t } from '@/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import DistanceUnitSwitcher from '@/components/DistanceUnitSwitcher.vue'
 import ApiTokensSection from '@/components/account/ApiTokensSection.vue'
+import TariffPlansPanel from '@/components/tariffs/TariffPlansPanel.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { KeyRound, Laptop, LogOut, SlidersHorizontal, Smartphone, UserRound } from 'lucide-vue-next'
@@ -226,6 +227,8 @@ onMounted(load)
         <p class="text-xs text-slate-400">{{ $t('account.accountView.otherDevicesAreSignedOut') }}</p>
       </form>
     </section>
+
+    <TariffPlansPanel />
 
     <ApiTokensSection />
 

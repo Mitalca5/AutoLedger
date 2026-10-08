@@ -442,7 +442,10 @@ async function testModalConnection() {
                   {{ p.name }} ({{ p.plan_type }})
                 </option>
               </select>
-              <p class="text-xs text-slate-400 mt-1">{{ $t('tariffs.planSelectHint') }}</p>
+              <p class="text-xs text-slate-400 mt-1">
+                {{ $t('tariffs.planSelectHint') }}
+                <router-link to="/account" class="text-primary-300 underline" @click="open = false">{{ $t('tariffs.editor.manageLink') }}</router-link>
+              </p>
             </div>
 
             <label for="vehicle-home-charger-default" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/40 border border-slate-700/60 cursor-pointer">
