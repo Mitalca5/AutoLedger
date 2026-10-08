@@ -1,18 +1,17 @@
 <script setup lang="ts">
+import ModalShell from '@/components/ModalShell.vue'
 import { t } from '@/i18n'
 import { ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
-import { Layers, X } from 'lucide-vue-next'
+import { Layers } from 'lucide-vue-next'
 import DrivePicker from '@/components/drives/DrivePicker.vue'
 import { toDateInputString } from '@/utils/carpool'
-import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 // Edits a trip group: its name, its notes and its legs (the drives ticked in the picker, around the date of the trip).
 const props = defineProps<{ vehicleId: string; trip: any | null }>()
 const emit = defineEmits<{ saved: [] }>()
 const open = defineModel<boolean>('open', { required: true })
-useEscapeToClose(open, () => (open.value = false))
 const { showAlert } = useConfirm()
 
 const form = ref({ id: '', name: '', notes: '' })
@@ -60,55 +59,43 @@ async function handleSave() {
 </script>
 
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-modal bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    @click.self="open = false"
+  <ModalShell
+    v-model:open="open"
+    :title="$t('drives.tripEditModal.editTheTrip')"
+    :icon="Layers"
+    icon-class="text-indigo-400"
   >
-    <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
-      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <Layers class="w-5 h-5 text-indigo-400" />
-          {{ $t('drives.tripEditModal.editTheTrip') }}
-        </h3>
-        <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors" :title="$t('common.close')" :aria-label="$t('common.close')">
-          <X class="w-5 h-5" />
-        </button>
+    <form id="trip-edit-form" @submit.prevent="handleSave" class="space-y-4">
+      <div>
+        <label for="trip-edit-name" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.tripEditModal.name') }}</label>
+        <input id="trip-edit-name" v-model="form.name" required class="field" />
+      </div>
+      <div>
+        <label for="trip-edit-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('common.notes') }}</label>
+        <input id="trip-edit-notes" v-model="form.notes" class="field" />
       </div>
 
-      <form id="trip-edit-form" @submit.prevent="handleSave" class="p-5 overflow-y-auto flex-1 overscroll-contain space-y-4">
-        <div>
-          <label for="trip-edit-name" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('drives.tripEditModal.name') }}</label>
-          <input id="trip-edit-name" v-model="form.name" required class="field" />
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400">{{ $t('drives.tripEditModal.tickTheLegs') }}</span>
+          <span class="text-indigo-300 font-semibold">{{ $t('drives.tripEditModal.legsSelected', { count: selectedDriveIds.length }) }}</span>
         </div>
-        <div>
-          <label for="trip-edit-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('common.notes') }}</label>
-          <input id="trip-edit-notes" v-model="form.notes" class="field" />
-        </div>
-
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-400">{{ $t('drives.tripEditModal.tickTheLegs') }}</span>
-            <span class="text-indigo-300 font-semibold">{{ $t('drives.tripEditModal.legsSelected', { count: selectedDriveIds.length }) }}</span>
-          </div>
-          <DrivePicker
-            :key="session"
-            :vehicle-id="vehicleId"
-            :selected-ids="selectedDriveIds"
-            :anchor-date="anchorDate"
-            @toggle="toggleDrive"
-          />
-        </div>
-      </form>
-
-      <div class="px-5 py-3.5 border-t border-slate-800/80 flex justify-end gap-2 shrink-0 bg-slate-900/95">
-        <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
-          {{ $t('common.cancel') }}
-        </button>
-        <button type="submit" form="trip-edit-form" :disabled="saving" class="btn btn-lg btn-primary">
-          {{ $t('common.save') }}
-        </button>
+        <DrivePicker
+          :key="session"
+          :vehicle-id="vehicleId"
+          :selected-ids="selectedDriveIds"
+          :anchor-date="anchorDate"
+          @toggle="toggleDrive"
+        />
       </div>
-    </div>
-  </div>
+    </form>
+    <template #footer>
+      <button type="button" @click="open = false" class="btn btn-lg btn-secondary">
+        {{ $t('common.cancel') }}
+      </button>
+      <button type="submit" form="trip-edit-form" :disabled="saving" class="btn btn-lg btn-primary">
+        {{ $t('common.save') }}
+      </button>
+    </template>
+  </ModalShell>
 </template>
