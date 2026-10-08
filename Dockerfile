@@ -53,7 +53,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} \
 # ==============================================================================
 # Stage 4: Production Runner (Scratch or Minimal Alpine)
 # ==============================================================================
-FROM alpine:3.20 AS prod
+FROM alpine:3.24 AS prod
 WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -S teslacost && adduser -S -G teslacost -H teslacost \
