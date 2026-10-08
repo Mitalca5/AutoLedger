@@ -278,12 +278,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download the coverage reports
+      # One step per report, each into its own folder: a pattern download extracts a lone artifact straight into
+      # the target folder, so a run that produced a single report (a frontend-only change) hid it from SonarCloud.
+      - name: Download the Go coverage report
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         continue-on-error: true
         with:
-          pattern: coverage-*
-          path: coverage
+          name: coverage-go
+          path: coverage/coverage-go
+
+      - name: Download the web coverage report
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: coverage-web
+          path: coverage/coverage-web
 
       - name: Scan
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
