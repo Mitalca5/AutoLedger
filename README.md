@@ -55,9 +55,11 @@ flowchart LR
 
 | Powertrain | Charges | Fill-ups | Efficiency | TeslaMate sync |
 | :--- | :---: | :---: | :---: | :---: |
-| Electric | ✅ | | kWh/100 km | ✅ |
-| Plug-in hybrid / range-extender | ✅ | ✅ | electricity and fuel combined | ✅ |
-| Combustion | | ✅ | L/100 km | |
+| Electric | ✅ | - | kWh/100 km | ✅ |
+| Plug-in hybrid / range-extender | ✅ | ✅ | kWh/100 km and L/100 km | - |
+| Combustion | - | ✅ | L/100 km | - |
+
+TeslaMate logs Teslas, which are all electric, so the sync is offered for electric vehicles. Every other source (manual entry, CSV, Home Assistant, ingestion API) works for every powertrain.
 
 ### Vehicle comparison
 
@@ -95,7 +97,7 @@ French captures sit next to the English ones (`*.fr.png`); `scripts/screenshots/
   - *Classic loan*: Amortization schedule tracking with principal/interest split, origination fees, and borrower insurance.
   - *Leasing (LOA / LLD)*: Down payment, monthly payments, security deposit, contract mileage allowance, and excess mileage provisions.
 - **Advanced Indicators**: Real cost per km (energy + tolls vs full TCO), net cost factoring carpooling revenues, and an adaptive TCO completeness score.
-- **Energy Analytics** (for EVs): Real consumption in kWh/100 km, home vs AC vs DC charging efficiency, battery temperature correlation, and cold-weather impact.
+- **Energy Analytics** (vehicles that charge): Real consumption in kWh/100 km, home vs AC vs DC charging efficiency, battery temperature correlation, and cold-weather impact.
 - **Battery health and residual value**: Source-agnostic state of health (OBD2 or garage readings, TeslaMate, or estimated from complete charges) and a resale value projection built from your own purchase price and expected resale, adjusted for age, distance and battery health.
 
 ### 🛞 Tire Lifecycle Management
@@ -138,18 +140,26 @@ AutoLedger/
 │   └── server/
 │       └── main.go                 # Application entry point, chi routing & graceful shutdown
 ├── internal/
+│   ├── apierror/                   # Coded, translatable API errors and messages
 │   ├── auth/                       # bcrypt hashing, JWT token rotation & OIDC SSO client
 │   ├── config/                     # Environment configuration loader with backward fallbacks
 │   ├── crypto/                     # AES-256-GCM symmetric encryption engine
-│   ├── database/                   # pgx connection pool & repository interfaces
+│   ├── database/                   # pgx connection pool, migrations runner & repositories
+│   ├── demodata/                   # Seeded data of the read-only demo
+│   ├── geocode/                    # Optional reverse geocoding of pushed coordinates
 │   ├── handlers/                   # REST API controllers & CSV import pipeline
 │   ├── middleware/                 # Security headers, rate limiting, trusted proxies, CORS
 │   ├── models/                     # Strongly-typed data models (Vehicles, Drives, TCO, Tires)
+│   ├── money/                      # Integer-cent amounts
+│   ├── servertext/                 # English / French text for webhooks and stored notes
 │   ├── services/                   # TCO engine, tire wear projection, carpool math, webhooks
 │   ├── storage/                    # Document attachment storage on Docker volumes
-│   └── teslamate/                  # Client for the optional TeslaMate sync
+│   ├── teslamate/                  # Client for the optional TeslaMate sync
+│   └── tolldata/                   # French motorway toll reference data
 ├── migrations/                     # Versioned PostgreSQL schema migrations
 ├── web/                            # Vue 3 + TypeScript + Vite + Tailwind CSS SPA & PWA
+├── backup/                         # Backup sidecar image (database dump + documents archive)
+├── docs/                           # Guides (English and French) and screenshots
 ├── docker-compose.yml              # Production container stack definition
 ├── docker-compose.dev.yml          # Local development hot-reload override
 ├── Dockerfile                      # Multi-stage production container build
@@ -175,7 +185,7 @@ AutoLedger/
 
 No configuration is required. The database password, the session signing secret and the credential encryption key are generated on first start and kept in the `autoledger_secrets` volume (the backup service archives it next to the database dump, as `autoledger-secrets-<timestamp>.tar.gz`). Keep it with your database backups: the encryption key is needed to read stored credentials. Outside Docker Compose (plain `docker run`), the image generates the session secret and the encryption key itself into `.autoledger-secrets.json` on the documents volume. To manage a value yourself, set `AUTOLEDGER_DB_PASSWORD`, `AUTOLEDGER_JWT_SECRET` or `AUTOLEDGER_ENCRYPTION_KEY` in a `.env` file (template: `.env.example`); an explicit value always wins. Optional settings such as OIDC / SSO also go in `.env`.
 
-The application is now live at **`http://localhost:8080`**.
+The application is served at **`http://localhost:8080`**.
 
 ---
 
@@ -289,7 +299,7 @@ docker run --rm \
 | Variable (Primary) | Legacy Fallback | Description | Default |
 |---|---|---|---|
 | `AUTOLEDGER_PORT` | `PORT` | HTTP server listening port | `8080` |
-| `ENVIRONMENT` | - | Runtime environment (`production`, `development`) | `production` |
+| `ENVIRONMENT` | - | Runtime environment (`production`, `development`) | `production` in the Compose file, `development` when unset elsewhere |
 | `AUTOLEDGER_VERSION` | `TESLACOST_VERSION` | Docker image tag to deploy | `latest` |
 | `AUTOLEDGER_BASE_URL` | `APP_BASE_URL` | Canonical public URL of the application | `http://localhost:8080` |
 | `AUTOLEDGER_DATABASE_URL`| `DATABASE_URL` | Full PostgreSQL connection URL | *Derived from DB_\** |
@@ -309,6 +319,7 @@ docker run --rm \
 | `AUTOLEDGER_DEMO_EMAIL` / `AUTOLEDGER_DEMO_PASSWORD` | - | Demo account offered by the "Try the demo" button on the sign-in page (public by design) | - |
 | `INITIAL_ADMIN_EMAIL` | - | Pre-configured admin user email | *Optional* |
 | `INITIAL_ADMIN_PASSWORD` | - | Pre-configured admin user password | *Optional* |
+| `CORS_ALLOWED_ORIGINS` | - | Comma-separated origins allowed to call the API from a browser, besides the public base URL | Derived from `AUTOLEDGER_BASE_URL` |
 | `TRUSTED_PROXIES` | - | Reverse proxy CIDR whitelist for client IP resolution | Private ranges |
 | `SECURITY_HEADERS` | - | Enable built-in HTTP security headers | `true` |
 | `CONTENT_SECURITY_POLICY`| - | Override CSP policy (`off` to disable) | Built-in strict |
@@ -340,7 +351,7 @@ go test -v ./...
 
 # Run backend integration tests with PostgreSQL
 docker run -d --name autoledger-test-pg -e POSTGRES_USER=autoledger -e POSTGRES_PASSWORD=test -e POSTGRES_DB=autoledger_test -p 55432:5432 postgres:16-alpine
-TEST_DATABASE_URL="postgres://autoledger:test@localhost:55432/autoledger_test?sslmode=disable" go test -v ./internal/services/
+TEST_DATABASE_URL="postgres://autoledger:test@localhost:55432/autoledger_test?sslmode=disable" go test -v ./...
 
 # Run frontend unit tests and typecheck
 cd web && npm test && npm run typecheck
@@ -348,6 +359,8 @@ cd web && npm test && npm run typecheck
 # Build frontend production bundle
 cd web && npm run build
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report a bug, propose a feature and open a pull request.
 
 ---
 
