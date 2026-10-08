@@ -1,0 +1,45 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you got. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Enter ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: AutoLedger version
+      description: Image tag or version shown in the app.
+    validations:
+      required: true
+  - type: dropdown
+    id: powertrain
+    attributes:
+      label: Vehicle type and data source
+      options:
+        - Electric, connected to TeslaMate
+        - Electric, manual or CSV
+        - Combustion
+        - Not vehicle-specific
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or browser console output
+      description: Remove tokens, URLs and personal data first.
+      render: shell

@@ -1,0 +1,11 @@
+name: Documentation or translation
+description: Missing, unclear or wrong documentation, or a translation error (English / French)
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: where
+    attributes:
+      label: Where and what
+      description: The page, file or screen, and what should change.
+    validations:
+      required: true
