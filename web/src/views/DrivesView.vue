@@ -10,6 +10,7 @@ import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { useConfirm } from '@/composables/useConfirm'
+import { useDriveSelection } from '@/composables/useDriveSelection'
 import { api } from '@/services/api'
 import SelectAllToggle from '@/components/SelectAllToggle.vue'
 import DrivesToolbar from '@/components/drives/DrivesToolbar.vue'
@@ -166,44 +167,20 @@ function resetAllFilters() {
   loadDrives()
 }
 
-// Multi-selection for trip grouping & tolls & carpooling. Drives are kept by id so that the selection
-// survives pagination and filters.
-const selectedDrives = ref<Record<string, any>>({})
-const selectedDriveIds = computed(() => Object.keys(selectedDrives.value))
-const selectedList = computed(() =>
-  Object.values(selectedDrives.value).sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-)
-const selectedOffPage = computed(() => selectedDriveIds.value.filter((id) => !drives.value.some((d) => d.id === id)).length)
-const allPageSelected = computed(() => drives.value.length > 0 && drives.value.every((d) => selectedDrives.value[d.id]))
-const somePageSelected = computed(() => !allPageSelected.value && drives.value.some((d) => selectedDrives.value[d.id]))
+const {
+  selectedDrives,
+  selectedDriveIds,
+  selectedList,
+  selectedOffPage,
+  allPageSelected,
+  somePageSelected,
+  clearSelection,
+  toggleSelectDrive,
+  selectAll,
+} = useDriveSelection(drives)
 
 // Unified selection summary metrics (same as a Voyage)
 const selectedSummaryMetrics = computed(() => selectionSummary(selectedList.value, vehicleStore.currency))
-
-function clearSelection() {
-  selectedDrives.value = {}
-}
-
-function toggleSelectDrive(d: any) {
-  const next = { ...selectedDrives.value }
-  if (next[d.id]) {
-    delete next[d.id]
-  } else {
-    next[d.id] = d
-  }
-  selectedDrives.value = next
-}
-
-// Selects or unselects the drives of the current page, keeping selections made on other pages
-function selectAll() {
-  const next = { ...selectedDrives.value }
-  const select = !allPageSelected.value
-  for (const d of drives.value) {
-    if (select) next[d.id] = d
-    else delete next[d.id]
-  }
-  selectedDrives.value = next
-}
 
 // Batch tagging
 async function handleBatchTag(tag: 'Pro' | 'Perso' | null) {
