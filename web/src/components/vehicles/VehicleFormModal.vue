@@ -205,7 +205,7 @@ async function testModalConnection() {
 
         <!-- Motorisation (Boutons visuels au lieu d'un simple select) -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">{{ $t('vehicles.vehicleFormModal.powertrain') }}</label>
+          <span class="block text-xs font-semibold text-slate-300 mb-1.5">{{ $t('vehicles.vehicleFormModal.powertrain') }}</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button
               v-for="p in powertrainChoices"

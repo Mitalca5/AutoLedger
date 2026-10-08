@@ -234,11 +234,11 @@ onBeforeUnmount(() => {
     <div v-if="showConsumption || showCost" class="grid grid-cols-1 gap-4" :class="{ 'lg:grid-cols-2': showConsumption && showCost }">
       <div v-if="showConsumption">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.monthlyConsumption') }}</h4>
-        <div class="h-44 sm:h-56"><canvas ref="consumptionRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
+        <div class="h-44 sm:h-56"><canvas ref="consumptionRef" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
       </div>
       <div v-if="showCost">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.energyCostPer100Km', { unit: distanceUnit() }) }}</h4>
-        <div class="h-44 sm:h-56"><canvas ref="costRef" role="img" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyEnergyCostPer100', { unit: distanceUnit() })"></canvas></div>
+        <div class="h-44 sm:h-56"><canvas ref="costRef" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyEnergyCostPer100', { unit: distanceUnit() })"></canvas></div>
       </div>
     </div>
 

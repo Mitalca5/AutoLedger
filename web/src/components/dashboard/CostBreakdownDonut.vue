@@ -71,7 +71,7 @@ onUnmounted(() => {
     </div>
     <p class="text-xs text-slate-500 mb-4">{{ $t(mode === 'full' ? 'dashboard.donut.hintFull' : 'dashboard.donut.hintCash') }}</p>
     <div class="h-48 sm:h-64">
-      <canvas ref="donutChartRef" role="img" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
+      <canvas ref="donutChartRef" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
     </div>
   </div>
 </template>

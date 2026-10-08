@@ -66,5 +66,5 @@ onUnmounted(() => chart?.destroy())
 </script>
 
 <template>
-  <canvas ref="canvasRef" role="img" :aria-label="chartLabel"></canvas>
+  <canvas ref="canvasRef" :aria-label="chartLabel"></canvas>
 </template>

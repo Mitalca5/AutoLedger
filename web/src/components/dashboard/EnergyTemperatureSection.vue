@@ -91,7 +91,7 @@ onBeforeUnmount(() => chart?.destroy())
     </p>
 
     <div class="h-44 sm:h-52">
-      <canvas ref="canvas" role="img" :aria-label="$t('dashboard.energyTemperatureSection.averageConsumptionPer100Km', { unit: distanceUnit() })"></canvas>
+      <canvas ref="canvas" :aria-label="$t('dashboard.energyTemperatureSection.averageConsumptionPer100Km', { unit: distanceUnit() })"></canvas>
     </div>
     <div class="sr-only">
       <table>

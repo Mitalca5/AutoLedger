@@ -33,6 +33,7 @@ const emit = defineEmits<{ open: [stat: any]; toggle: [tireId: string] }>()
             <input
               :id="'storage-select-' + t.tire.id"
               type="checkbox"
+              :aria-label="$t('tires.tireStorageCard.selectForABulkAction')"
               :checked="selected"
               @change="emit('toggle', t.tire.id)"
               class="select-box"

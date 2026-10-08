@@ -123,19 +123,19 @@ onBeforeUnmount(destroyCharts)
   <div class="space-y-5">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <h2 class="text-sm font-semibold text-white mb-3">{{ $t('comparison.comparisonView.costBreakdownOverThePeriod') }}</h2>
-      <div class="h-64"><canvas ref="barRef" :aria-label="$t(sk('comparison.comparisonView.costByCategoryElectricAnd'))" role="img"></canvas></div>
+      <div class="h-64"><canvas ref="barRef" :aria-label="$t(sk('comparison.comparisonView.costByCategoryElectricAnd'))"></canvas></div>
     </div>
 
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <h2 class="text-sm font-semibold text-white mb-1">{{ $t('comparison.comparisonView.cumulativeCost') }}</h2>
       <p class="text-xs text-slate-400 mb-3">{{ breakEvenText }}</p>
-      <div class="h-64"><canvas ref="chartRef" :aria-label="$t(sk('comparison.comparisonView.cumulativeCostElectricAndCombustion'))" role="img"></canvas></div>
+      <div class="h-64"><canvas ref="chartRef" :aria-label="$t(sk('comparison.comparisonView.cumulativeCostElectricAndCombustion'))"></canvas></div>
     </div>
 
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <h2 class="text-sm font-semibold text-white mb-1">{{ $t('comparison.comparisonView.sensitivity') }}</h2>
       <p class="text-xs text-slate-400 mb-3">{{ $t(sk('comparison.comparisonView.effectOnTheElectricSaving')) }}</p>
-      <div class="h-48 mb-3"><canvas ref="tornadoRef" :aria-label="$t('comparison.comparisonView.sensitivityOfTheGapTo')" role="img"></canvas></div>
+      <div class="h-48 mb-3"><canvas ref="tornadoRef" :aria-label="$t('comparison.comparisonView.sensitivityOfTheGapTo')"></canvas></div>
       <ul class="text-xs text-slate-300 space-y-1">
         <li v-for="s in result.sensitivity" :key="s.label.code" class="flex justify-between">
           <span>{{ apiMessageText(s.label) }}</span>

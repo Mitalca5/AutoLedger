@@ -241,9 +241,9 @@ async function handleSubmit() {
 
         <!-- Tag (Pro / Perso) -->
         <div v-if="prefs.proPersoEnabled">
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+          <span class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
             {{ $t('drives.manualModal.tag') }}
-          </label>
+          </span>
           <div class="flex items-center gap-2">
             <button
               type="button"

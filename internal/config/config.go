@@ -14,7 +14,7 @@ import (
 // loopback and the private ranges of Docker networks and home LANs. A proxy on a public address has to be
 // listed in TRUSTED_PROXIES.
 var DefaultTrustedProxies = []string{
-	"127.0.0.0/8", "::1/128",
+	"127.0.0.0/8", "::1/128", // NOSONAR: private and loopback defaults, not a routable address
 	"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
 }
 

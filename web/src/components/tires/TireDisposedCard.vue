@@ -26,6 +26,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(intlLocale(), { da
             <input
               :id="'disposed-select-' + t.tire.id"
               type="checkbox"
+              :aria-label="$t('tires.tireDisposedCard.selectForABulkAction')"
               :checked="selected"
               @change="emit('toggle', t.tire.id)"
               class="select-box"

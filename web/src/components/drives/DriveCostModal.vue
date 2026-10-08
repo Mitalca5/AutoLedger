@@ -194,7 +194,7 @@ const canApplyTollEstimate = computed(
 const canDetectTolls = computed(() => !selectedCostDrive.value?.is_trip_group && !!selectedCostDrive.value?.teslamate_drive_id)
 // Nothing to apply when the toll already recorded is that same estimate
 const estimateMatchesExistingToll = computed(
-  () => existingTollExpense.value?.source === 'AUTO_TOLL' && Math.abs(Number(existingTollExpense.value.amount) - (tollDetectionEstimatedTotal.value ?? NaN)) < 0.005
+  () => existingTollExpense.value?.source === 'AUTO_TOLL' && Math.abs(Number(existingTollExpense.value.amount) - (tollDetectionEstimatedTotal.value ?? Number.NaN)) < 0.005
 )
 const applyingToll = ref(false)
 

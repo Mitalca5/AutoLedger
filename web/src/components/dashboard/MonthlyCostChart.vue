@@ -130,7 +130,7 @@ onUnmounted(() => {
       </h3>
     </div>
     <div class="h-52 sm:h-72">
-      <canvas ref="monthlyChartRef" role="img" :aria-label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')"></canvas>
+      <canvas ref="monthlyChartRef" :aria-label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')"></canvas>
     </div>
   </div>
 </template>

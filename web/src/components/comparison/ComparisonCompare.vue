@@ -139,7 +139,7 @@ onBeforeUnmount(() => chart?.destroy())
 
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
       <h2 class="text-sm font-semibold text-white mb-3">{{ $t('comparison.comparisonCompare.totalCostPerScenario') }}</h2>
-      <div class="h-72"><canvas ref="canvas" role="img" :aria-label="$t(sk('comparison.comparisonCompare.totalElectricAndCombustionCost'))"></canvas></div>
+      <div class="h-72"><canvas ref="canvas" :aria-label="$t(sk('comparison.comparisonCompare.totalElectricAndCombustionCost'))"></canvas></div>
     </div>
   </div>
 </template>
