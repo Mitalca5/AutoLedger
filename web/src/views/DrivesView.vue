@@ -11,6 +11,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { useConfirm } from '@/composables/useConfirm'
 import { useDriveSelection } from '@/composables/useDriveSelection'
+import { useTripGroups } from '@/composables/useTripGroups'
 import { api } from '@/services/api'
 import SelectAllToggle from '@/components/SelectAllToggle.vue'
 import DrivesToolbar from '@/components/drives/DrivesToolbar.vue'
@@ -29,7 +30,6 @@ import ManualDriveModal from '@/components/drives/ManualDriveModal.vue'
 import CSVImportModal from '@/components/CSVImportModal.vue'
 import EmptySourceHints from '@/components/EmptySourceHints.vue'
 import { downloadCsv } from '@/utils/csv'
-import { formatAmount } from '@/currency'
 import { Receipt, Layers, List, RotateCcw, Plus, UploadCloud } from 'lucide-vue-next'
 import {
   driveCsvHeaders,
@@ -38,7 +38,6 @@ import {
   buildSuggestionCostDrive,
   filterTrips,
   suggestionTripId,
-  formatTripDates,
   currentYearMonth,
   driveCsvRows,
   monthRange,
@@ -251,14 +250,23 @@ async function loadDrives(silent = false) {
 
 // View mode: drives list or trip groups ("voyages")
 const viewMode = ref<'DRIVES' | 'TRIPS'>('DRIVES')
-const tripGroups = ref<any[]>([])
-const tripSuggestions = ref<any[]>([])
-const suggestionBusyKey = ref<string | null>(null)
 const tripQualifyOnly = ref(false)
-const loadingTrips = ref(false)
-const tripsLoadError = ref<string | null>(null)
-const expandedTripId = ref<string | null>(null)
-const tripDrives = ref<any[]>([])
+const {
+  tripGroups,
+  tripSuggestions,
+  suggestionBusyKey,
+  loadingTrips,
+  tripsLoadError,
+  expandedTripId,
+  tripDrives,
+  loadTripGroups,
+  dismissTripSuggestion,
+  suggestionName,
+  createTripFromSuggestion,
+  toggleTripDetails,
+  removeDriveFromTrip,
+  handleDeleteTrip,
+} = useTripGroups({ loadDrives })
 
 // Modals
 const showTripEditModal = ref(false)
@@ -331,73 +339,9 @@ function openTollEntry(d: any) {
   openCostModal(d, true)
 }
 
-// ----- Trip groups ("voyages") -----
-async function loadTripGroups(silent = false) {
-  if (!vehicleStore.activeVehicle) return
-  if (!silent) loadingTrips.value = true
-  tripsLoadError.value = null
-  try {
-    const vehicleId = vehicleStore.activeVehicle.id
-    const [groups, suggestions] = await Promise.all([api.getTripGroups(vehicleId), api.getTripSuggestions(vehicleId).catch(() => [])])
-    tripGroups.value = groups
-    tripSuggestions.value = suggestions
-  } catch (err) {
-    console.error('Failed to load trip groups', err)
-    tripsLoadError.value = (err as Error)?.message ?? ''
-  } finally {
-    loadingTrips.value = false
-  }
-}
-
-async function dismissTripSuggestion(s: any) {
-  if (!vehicleStore.activeVehicle) return
-  suggestionBusyKey.value = s.drive_ids[0]
-  try {
-    await api.dismissTripSuggestion(vehicleStore.activeVehicle.id, s.drive_ids)
-    tripSuggestions.value = tripSuggestions.value.filter((x) => x.drive_ids[0] !== s.drive_ids[0])
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  } finally {
-    suggestionBusyKey.value = null
-  }
-}
-
-function suggestionName(s: any) {
-  const route = [s.start_address, s.end_address].filter(Boolean).join(' → ')
-  return route || formatTripDates({ start_time: s.start_time, end_time: s.end_time })
-}
-
-async function createTripFromSuggestion(s: any) {
-  if (!vehicleStore.activeVehicle) return
-  suggestionBusyKey.value = s.drive_ids[0]
-  try {
-    await api.createTripGroup(vehicleStore.activeVehicle.id, { name: suggestionName(s), drive_ids: s.drive_ids })
-    await loadTripGroups()
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  } finally {
-    suggestionBusyKey.value = null
-  }
-}
-
 function switchView(mode: 'DRIVES' | 'TRIPS') {
   viewMode.value = mode
   if (mode === 'TRIPS') loadTripGroups()
-}
-
-async function toggleTripDetails(tg: any) {
-  if (expandedTripId.value === tg.id) {
-    expandedTripId.value = null
-    return
-  }
-  expandedTripId.value = tg.id
-  tripDrives.value = []
-  try {
-    const res = await api.getDrives(vehicleStore.activeVehicle!.id, { tripGroupId: tg.id, limit: 200 })
-    tripDrives.value = [...res.drives].sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  }
 }
 
 // The edit form replaces the detail, like the edit of a carpool
@@ -418,54 +362,6 @@ async function onTripSaved() {
 function openTripEdit(tg: any) {
   tripBeingEdited.value = tg
   showTripEditModal.value = true
-}
-
-async function removeDriveFromTrip(tg: any, driveId: string) {
-  if (!vehicleStore.activeVehicle) return
-  const remaining = (tg.drive_ids || []).filter((id: string) => id !== driveId)
-  if (!remaining.length) {
-    showAlert(t('drives.drivesView.tripNeedsDrive'), t('drives.drivesView.actionImpossible'), 'warning')
-    return
-  }
-  try {
-    await api.updateTripGroup(vehicleStore.activeVehicle.id, tg.id, { name: tg.name, notes: tg.notes, drive_ids: remaining })
-    await loadTripGroups()
-    const updated = tripGroups.value.find((g) => g.id === tg.id)
-    expandedTripId.value = null
-    if (updated) await toggleTripDetails(updated)
-    loadDrives()
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  }
-}
-
-async function handleDeleteTrip(tg: any) {
-  if (!vehicleStore.activeVehicle) return
-  const ok = await showConfirm({
-    title: t('drives.drivesView.deleteTripTitle'),
-    message: t('drives.drivesView.deleteTripMessage', { name: tg.name }),
-    confirmText: t('drives.drivesView.deleteTripTitle'),
-    type: 'danger',
-  })
-  if (!ok) return
-
-  let deleteExpenses = false
-  if (tg.expense_count > 0) {
-    deleteExpenses = await showConfirm({
-      title: t('drives.drivesView.tripCostsTitle'),
-      message: t('drives.drivesView.tripCostsMessage', { count: tg.expense_count, total: formatAmount(Number(tg.expenses_total), vehicleStore.currency) }),
-      confirmText: t('drives.drivesView.deleteCostsToo'),
-      cancelText: t('drives.drivesView.keepCostsUnlinked'),
-      type: 'warning',
-    })
-  }
-  try {
-    await api.deleteTripGroup(vehicleStore.activeVehicle.id, tg.id, deleteExpenses)
-    await loadTripGroups()
-    loadDrives()
-  } catch (err: any) {
-    showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
-  }
 }
 
 async function openAddToTrip() {
