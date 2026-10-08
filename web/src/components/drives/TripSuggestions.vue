@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardOpenButton from '@/components/CardOpenButton.vue'
 import { computed, ref } from 'vue'
 import { formatDistance } from '@/units'
 import { intlLocale } from '@/i18n'
@@ -35,10 +36,9 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
     <div
       v-for="s in visible"
       :key="key(s)"
-      v-clickable
-      @click="emit('open', s)"
-      class="bg-slate-900/60 border border-dashed border-warning-500/30 hover:border-warning-500/60 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 cursor-pointer transition-colors"
+      class="relative bg-slate-900/60 border border-dashed border-warning-500/30 hover:border-warning-500/60 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition-colors"
     >
+      <CardOpenButton :label="$t('common.openItem', { item: route(s) || formatTripDates({ start_time: s.start_time, end_time: s.end_time }) })" @click="emit('open', s)" />
       <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap mb-1">
           <span class="text-xs font-semibold text-slate-400">{{ formatTripDates({ start_time: s.start_time, end_time: s.end_time }) }}</span>
@@ -60,12 +60,12 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
       </div>
       <QualifyActions
         v-if="vehicleStore.canEdit"
+        class="relative z-10"
         :busy="busyKey === key(s)"
         :primary-label="$t('drives.tripSuggestions.create')"
         :primary-title="$t('drives.tripSuggestions.createTitle')"
         :secondary-label="$t('drives.tripSuggestions.dismiss')"
         :secondary-title="$t('drives.tripSuggestions.dismissTitle')"
-        @click.stop
         @primary="emit('create', s)"
         @secondary="emit('dismiss', s)"
       />

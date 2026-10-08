@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { MapPin, Clock, Users, Coins, Pencil, Trash2 } from 'lucide-vue-next'
+import CardOpenButton from '@/components/CardOpenButton.vue'
 import QualifyActions from '@/components/drives/QualifyActions.vue'
 import { needsTollQualification } from '@/utils/drives'
 import { formatDayTime } from '@/utils/dates'
@@ -28,18 +29,16 @@ const formatDate = formatDayTime
 
 <template>
   <div
-    v-clickable
-    @click="emit('open', d)"
-    class="bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group"
+    class="relative bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 group"
     :class="{ 'border-rose-500/40 bg-slate-800/40 shadow-lg shadow-rose-950/20': selected }"
   >
+    <CardOpenButton :label="$t('drives.driveCard.openBreakdown', { date: formatDate(d.start_time) })" @click="emit('open', d)" />
     <div class="flex items-start gap-3 min-w-0 flex-1">
       <!-- Selection checkbox -->
       <label
         v-if="vehicleStore.canEdit"
         :for="'drive-select-' + d.id"
-        @click.stop
-        class="tap mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
+        class="relative z-10 tap mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
         :title="$t('drives.driveCard.selectThisDrive')"
       >
         <span class="sr-only">{{ $t('drives.driveCard.selectThisDrive') }}</span>
@@ -102,7 +101,7 @@ const formatDate = formatDayTime
     </div>
 
     <!-- Right Side: Cost Badge & Actions -->
-    <div class="flex items-center gap-2 sm:gap-2.5 self-start lg:self-auto flex-wrap justify-start lg:justify-end shrink-0" @click.stop>
+    <div class="relative z-10 flex items-center gap-2 sm:gap-2.5 self-start lg:self-auto flex-wrap justify-start lg:justify-end shrink-0">
       <!-- Toll qualification: 2 taps -->
       <QualifyActions
         v-if="vehicleStore.canEdit && needsTollQualification(d)"

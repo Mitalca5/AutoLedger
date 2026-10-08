@@ -31,5 +31,6 @@
   },
   "numberInvalid": "Enter a number.",
   "numberMin": "Enter a value of {min} or more.",
-  "numberMax": "Enter a value of {max} or less."
+  "numberMax": "Enter a value of {max} or less.",
+  "openItem": "Open {item}"
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardOpenButton from '@/components/CardOpenButton.vue'
 import { computed } from 'vue'
 import { formatDistance } from '@/units'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -74,11 +75,10 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
     <div
       v-for="trip in trips"
       :key="trip.id"
-      v-clickable
-      @click="emit('open', trip)"
-      class="bg-slate-900 border rounded-2xl p-4 transition-all shadow-sm space-y-3 cursor-pointer"
+      class="relative bg-slate-900 border rounded-2xl p-4 transition-all shadow-sm space-y-3"
       :class="selectedTripIds.includes(trip.id) ? 'border-rose-500/50 bg-rose-500/[0.02]' : 'border-slate-800 hover:border-slate-700'"
     >
+      <CardOpenButton :label="$t('common.openItem', { item: trip.title })" @click="emit('open', trip)" />
       <!-- Trip Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-start gap-3 min-w-0 flex-1">
@@ -86,8 +86,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
           <label
             v-if="vehicleStore.canEdit"
             :for="'carpool-select-' + trip.id"
-            @click.stop
-            class="mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
+            class="relative z-10 mt-0.5 -ml-1 p-1 shrink-0 flex items-center cursor-pointer"
             :title="$t('carpool.carpoolTripList.selectThisCarpool')"
           >
             <span class="sr-only">{{ $t('carpool.carpoolTripList.selectThisCarpool') }}</span>
@@ -118,7 +117,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
             </div>
           </div>
         </div>
-        <div v-if="vehicleStore.canEdit" @click.stop class="flex items-center gap-1 sm:gap-2 shrink-0 self-end sm:self-auto">
+        <div v-if="vehicleStore.canEdit" class="relative z-10 flex items-center gap-1 sm:gap-2 shrink-0 self-end sm:self-auto">
           <button
             @click="emit('recalculate', trip)"
             :disabled="recalculating"

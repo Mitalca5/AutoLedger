@@ -31,5 +31,6 @@
   },
   "numberInvalid": "Saisissez un nombre.",
   "numberMin": "Saisissez une valeur supérieure ou égale à {min}.",
-  "numberMax": "Saisissez une valeur inférieure ou égale à {max}."
+  "numberMax": "Saisissez une valeur inférieure ou égale à {max}.",
+  "openItem": "Ouvrir {item}"
 }

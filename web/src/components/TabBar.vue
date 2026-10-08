@@ -83,7 +83,7 @@ const badgeClass = (tone?: TabItem['badgeTone']) =>
         :class="
           modelValue === t.key
             ? 'border-rose-500 text-white'
-            : [t.muted ? 'text-slate-500' : 'text-slate-400', 'border-transparent hover:text-slate-200']
+            : [t.muted ? 'text-slate-400' : 'text-slate-300', 'border-transparent hover:text-slate-200']
         "
         @click="select(t.key)"
         @keydown="onKeydown"

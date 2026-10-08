@@ -93,17 +93,17 @@ onBeforeUnmount(() => chart?.destroy())
           {{ fmt(latest.health_percent, 1) }} <span class="text-xs font-medium text-slate-400">%</span>
         </dd>
         <dd v-else class="mt-1 text-sm text-slate-400">{{ $t('dashboard.energyBatterySection.noMeasurementYet') }}</dd>
-        <p class="mt-0.5 text-xs text-slate-400">
+        <dd class="mt-0.5 text-xs text-slate-400">
           <template v-if="latest">{{ $t('dashboard.energyBatterySection.kwhOutOfKwhThe', { value: fmt(latest.current_capacity_kwh, 1), value2: fmt(latest.max_capacity_kwh, 1) }) }}</template>
           <template v-else>{{ $t('dashboard.energyBatterySection.readAtEachSynchronizationIf') }} <code>battery-health</code>.</template>
-        </p>
+        </dd>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.estimatedCapacity') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(stats.summary.estimated_capacity_kwh, 1) }} <span class="text-xs font-medium text-slate-400">kWh</span></dd>
-        <p class="mt-0.5 text-xs text-slate-400">
+        <dd class="mt-0.5 text-xs text-slate-400">
           {{ $t('dashboard.energyBatterySection.medianOfTheLastCharges', { capacity_samples: stats.summary.capacity_samples ?? 0 }) }}
-        </p>
+        </dd>
       </div>
     </dl>
 

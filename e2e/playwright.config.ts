@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
-    { name: 'flows', testMatch: /flows\.spec\.ts/, dependencies: ['setup'], use: { storageState: '.auth/state.json' } },
+    { name: 'flows', testMatch: /(flows|a11y)\.spec\.ts/, dependencies: ['setup'], use: { storageState: '.auth/state.json' } },
   ],
   use: {
     baseURL: process.env.BASE_URL ?? 'http://localhost:8080',

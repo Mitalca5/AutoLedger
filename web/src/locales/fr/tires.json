@@ -349,5 +349,6 @@
   "sessionCount": "{count} session | {count} sessions",
   "wearBar": {
     "label": "Usure estimée"
-  }
+  },
+  "openTire": "Ouvrir {name}"
 }

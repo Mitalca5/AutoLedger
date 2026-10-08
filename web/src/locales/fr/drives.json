@@ -84,7 +84,8 @@
     "min": "{duration_min} min",
     "selectThisDrive": "Sélectionner ce trajet",
     "unknownStart": "Départ inconnu",
-    "unknownEnd": "Arrivée inconnue"
+    "unknownEnd": "Arrivée inconnue",
+    "openBreakdown": "Ouvrir le détail des coûts du trajet du {date}"
   },
   "drivePicker": {
     "earlierDrives": "Trajets plus anciens",

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardOpenButton from '@/components/CardOpenButton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { distanceUnit, formatDistance, perDistance } from '@/units'
@@ -35,10 +36,9 @@ const formatDate = formatDayTime
       :key="tg.id"
     >
       <div
-        v-clickable
-        @click="emit('open-cost', tg)"
-        class="bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group"
+        class="relative bg-slate-900 border border-slate-800 hover:border-slate-700/90 p-4 rounded-2xl transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 group"
       >
+        <CardOpenButton :label="$t('common.openItem', { item: tg.name })" @click="emit('open-cost', tg)" />
         <div class="flex items-start gap-3 min-w-0 flex-1">
           <!-- Icon indicator -->
           <div class="mt-1 p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
@@ -69,7 +69,7 @@ const formatDate = formatDayTime
         </div>
 
         <!-- Right Side: Cost Badge & Actions (matching Drive right-side) -->
-        <div class="flex items-center gap-2 sm:gap-2.5 self-start lg:self-auto flex-wrap justify-start lg:justify-end shrink-0" @click.stop>
+        <div class="relative z-10 flex items-center gap-2 sm:gap-2.5 self-start lg:self-auto flex-wrap justify-start lg:justify-end shrink-0">
           <!-- Real Cost Badge -->
           <div
             class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/70 rounded-xl flex items-center gap-2 text-left shadow-sm"

@@ -84,7 +84,8 @@
     "min": "{duration_min} min",
     "selectThisDrive": "Select this drive",
     "unknownStart": "Unknown start",
-    "unknownEnd": "Unknown destination"
+    "unknownEnd": "Unknown destination",
+    "openBreakdown": "Open the cost breakdown of the drive of {date}"
   },
   "drivePicker": {
     "earlierDrives": "Earlier drives",

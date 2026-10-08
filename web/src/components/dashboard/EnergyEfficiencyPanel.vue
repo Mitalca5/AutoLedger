@@ -199,26 +199,26 @@ onBeforeUnmount(() => {
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} <span class="text-xs font-medium text-slate-400">kWh/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</p>
+        <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</dd>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyCost') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(perUnit(stats?.summary.cost_per_100km) || 0, currency) }} <span class="text-xs font-medium text-slate-400">/100 {{ distanceUnit() }}</span></dd>
-        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</p>
+        <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</dd>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiency') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmtPercent(stats?.summary.charge_efficiency) }}</dd>
-        <p v-if="stats?.summary.charge_efficiency == null" class="mt-0.5 text-xs text-slate-400">
+        <dd v-if="stats?.summary.charge_efficiency == null" class="mt-0.5 text-xs text-slate-400">
           {{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyEmpty') }}
           <router-link to="/energy?tab=CHARGES" class="font-semibold text-sky-400 underline">{{ $t('dashboard.energyEfficiencyPanel.chargingEfficiencyAction') }}</router-link>
-        </p>
-        <p v-else class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</p>
+        </dd>
+        <dd v-else class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyStoredInTheBattery') }}</dd>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(stats?.summary.cost_per_full_charge || 0, currency) }} <span class="text-xs font-medium text-slate-400">(0 → 100 %)</span></dd>
-        <p class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</p>
+        <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</dd>
       </div>
     </dl>
 

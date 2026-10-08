@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardOpenButton from '@/components/CardOpenButton.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { Disc } from 'lucide-vue-next'
@@ -18,14 +19,13 @@ const vehicleStore = useVehicleStore()
 <template>
   <div
     v-if="stat"
-    v-clickable
-    @click="emit('open', stat)"
-    class="bg-slate-900 border border-slate-800 hover:border-rose-500/40 cursor-pointer rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-sm transition-all group"
+    class="relative bg-slate-900 border border-slate-800 hover:border-rose-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-sm transition-all group"
     :class="{ 'ring-2 ring-rose-500/50 border-rose-500/60': selected }"
   >
+    <CardOpenButton :label="$t('tires.openTire', { name: `${stat.tire.brand} ${stat.tire.model}` })" @click="emit('open', stat)" />
     <div class="flex items-start justify-between">
       <div>
-        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" @click.stop class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-danger-400 hover:text-danger-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
+        <label :for="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id" class="relative z-10 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-danger-400 hover:text-danger-300 cursor-pointer" :title="selected ? $t('tires.tireWheelCard.removeFromSelection') : $t('tires.tireWheelCard.selectForBulk')">
           <input
             :id="'chassis-select-' + pos.toLowerCase() + '-' + stat.tire.id"
             type="checkbox"
