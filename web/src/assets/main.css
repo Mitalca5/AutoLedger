@@ -251,7 +251,7 @@
 /* Field of the quick entry sheet: one size everywhere, large enough for a thumb. */
 @layer components {
   .quick-input {
-    @apply w-full min-h-12 rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-white placeholder:text-slate-500 focus:border-rose-500 focus:outline-none;
+    @apply w-full min-h-12 rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-white placeholder:text-slate-500 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300/40;
   }
   .quick-label {
     @apply mb-1.5 block text-xs font-semibold text-slate-300;
@@ -264,7 +264,7 @@
 /* The one text field of the app: forms, modals and settings share its size, surface and focus ring. */
 @layer components {
   .field {
-    @apply w-full min-w-0 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-rose-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full min-w-0 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300/40 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .field-label {
     @apply mb-1.5 block text-xs font-semibold text-slate-300;

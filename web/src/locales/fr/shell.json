@@ -6,7 +6,8 @@
     "quickAdd": "Saisie rapide",
     "mainNavigation": "Navigation principale",
     "version": "Version",
-    "signedIn": "Connecté"
+    "signedIn": "Connecté",
+    "tagline": "TCO et gestion de flotte"
   },
   "topBar": {
     "syncFinishedWithWarnings": "Synchronisation terminée avec remarques :",

@@ -6,7 +6,8 @@
     "quickAdd": "Quick add",
     "mainNavigation": "Main navigation",
     "version": "Version",
-    "signedIn": "Signed in"
+    "signedIn": "Signed in",
+    "tagline": "TCO & Fleet Manager"
   },
   "topBar": {
     "syncFinishedWithWarnings": "Sync finished with warnings:",

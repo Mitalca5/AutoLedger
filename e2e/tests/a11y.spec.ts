@@ -36,3 +36,21 @@ test('a drive card opens from its button and its checkbox does not open it', asy
   await card.click()
   await expect(page.getByRole('dialog')).toBeVisible()
 })
+
+test('the sidebar is a named landmark and marks the current page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await useVehicle(page, ev.id, '/tires')
+  const nav = page.getByRole('navigation', { name: 'Main navigation' })
+  await expect(nav).toBeVisible()
+  await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1)
+  await expect(nav.locator('a[aria-current="page"]')).toHaveAttribute('href', '/tires')
+})
+
+test('a focused field shows a visible ring', async ({ page }) => {
+  await useVehicle(page, ev.id, '/tires')
+  await page.getByRole('button', { name: 'Add tires' }).first().click()
+  const brand = page.locator('#tire-add-tire-brand')
+  await brand.focus()
+  const ring = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
+  expect(ring).not.toBe('none')
+})

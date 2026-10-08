@@ -103,7 +103,7 @@ function handleLogout() {
             {{ APP_NAME }}
           </p>
         </div>
-        <p class="text-xs text-slate-400">TCO & Fleet Manager</p>
+        <p class="text-xs text-slate-400">{{ $t('shell.navigation.tagline') }}</p>
       </div>
     </div>
 
@@ -117,11 +117,12 @@ function handleLogout() {
       {{ $t('shell.navigation.quickAdd') }}
     </button>
 
-    <nav class="flex-1 space-y-1">
+    <nav :aria-label="$t('shell.navigation.mainNavigation')" class="flex-1 space-y-1">
       <router-link
         v-for="item in navItems"
         :key="item.name"
         :to="item.path"
+        :aria-current="currentRouteName === item.name ? 'page' : undefined"
         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border border-transparent"
         :class="
           currentRouteName === item.name
