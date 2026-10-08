@@ -3,92 +3,148 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-chi/chi/v5"
+
+	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/models"
 )
 
-func TestVehicleRoleValidation(t *testing.T) {
-	roles := []struct {
-		role    models.VehicleRole
-		valid   bool
-		canEdit bool
-	}{
-		{models.RoleOwner, true, true},
-		{models.RoleEditor, true, true},
-		{models.RoleViewer, true, false},
-		{models.VehicleRole("ADMIN"), false, false},
-		{models.VehicleRole(""), false, false},
-	}
-
-	for _, r := range roles {
-		if r.role.IsValid() != r.valid {
-			t.Errorf("role %q valid expected %v, got %v", r.role, r.valid, r.role.IsValid())
-		}
-		if r.role.CanEdit() != r.canEdit {
-			t.Errorf("role %q canEdit expected %v, got %v", r.role, r.canEdit, r.role.CanEdit())
-		}
-	}
+type memberAPI struct {
+	t       *testing.T
+	router  chi.Router
+	repo    *database.Repository
+	vid     string
+	ownerID string
+	guestID string
+	guest   string
 }
 
-func TestRequireVehicleAccessRoles(t *testing.T) {
-	cases := []struct {
-		name       string
-		userRole   models.VehicleRole
-		minRole    models.VehicleRole
-		wantStatus int
-	}{
-		{"Owner accesses Owner endpoint", models.RoleOwner, models.RoleOwner, http.StatusOK},
-		{"Owner accesses Editor endpoint", models.RoleOwner, models.RoleEditor, http.StatusOK},
-		{"Owner accesses Viewer endpoint", models.RoleOwner, models.RoleViewer, http.StatusOK},
-		{"Editor accesses Editor endpoint", models.RoleEditor, models.RoleEditor, http.StatusOK},
-		{"Editor accesses Viewer endpoint", models.RoleEditor, models.RoleViewer, http.StatusOK},
-		{"Editor accesses Owner endpoint -> 403", models.RoleEditor, models.RoleOwner, http.StatusForbidden},
-		{"Viewer accesses Viewer endpoint", models.RoleViewer, models.RoleViewer, http.StatusOK},
-		{"Viewer accesses Editor endpoint -> 403", models.RoleViewer, models.RoleEditor, http.StatusForbidden},
-		{"Viewer accesses Owner endpoint -> 403", models.RoleViewer, models.RoleOwner, http.StatusForbidden},
+func newMemberAPI(t *testing.T, tag string) *memberAPI {
+	t.Helper()
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	owner, err := repo.CreateUser(ctx, "owner-"+tag+"@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			w := httptest.NewRecorder()
-			req := httptest.NewRequest(http.MethodGet, "/test", nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, "user-1"))
-
-			v := &models.Vehicle{
-				ID:   "veh-1",
-				Role: tc.userRole,
-			}
-
-			// Simulating the role check inside requireVehicleAccess
-			if tc.minRole == models.RoleOwner && v.Role != models.RoleOwner {
-				writeError(w, http.StatusForbidden, "Action réservée au propriétaire du véhicule")
-			} else if (tc.minRole == models.RoleEditor || tc.minRole == models.RoleOwner) && !v.Role.CanEdit() {
-				writeError(w, http.StatusForbidden, "Accès en lecture seule : modifications non autorisées")
-			} else {
-				writeJSON(w, http.StatusOK, map[string]string{"ok": "true"})
-			}
-
-			if w.Code != tc.wantStatus {
-				t.Fatalf("expected status %d, got %d", tc.wantStatus, w.Code)
-			}
-		})
+	guest, err := repo.CreateUser(ctx, "guest-"+tag+"@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
 	}
+	v := &models.Vehicle{UserID: owner.ID, Name: "Car", TeslaMateAuthType: models.AuthModeNone, CurrentOdometer: 1000}
+	if err := repo.CreateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	h := NewVehicleMemberHandler(repo)
+	r := chi.NewRouter()
+	r.Get("/{id}/members", h.ListMembers)
+	r.Post("/{id}/members", h.AddMember)
+	r.Put("/{id}/members/{memberId}", h.UpdateMemberRole)
+	r.Delete("/{id}/members/{memberId}", h.RemoveMember)
+	r.Get("/{id}/people", h.ListPeople)
+	r.Post("/{id}/people", h.CreatePerson)
+	r.Put("/{id}/people/{personId}", h.UpdatePerson)
+	r.Delete("/{id}/people/{personId}", h.DeletePerson)
+	r.Put("/{id}/people/{personId}/link", h.LinkPerson)
+	r.Put("/{id}/people/{personId}/default", h.SetDefaultPerson)
+	return &memberAPI{t: t, router: r, repo: repo, vid: v.ID, ownerID: owner.ID, guestID: guest.ID, guest: guest.Email}
 }
 
-func TestVehicleMemberHandlerValidation(t *testing.T) {
-	h := NewVehicleMemberHandler(nil)
+func (a *memberAPI) as(userID string, want int, method, path, body string) []byte {
+	a.t.Helper()
+	req := httptest.NewRequest(method, "/"+a.vid+path, bytes.NewBufferString(body))
+	req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, userID))
+	rec := httptest.NewRecorder()
+	a.router.ServeHTTP(rec, req)
+	if rec.Code != want {
+		a.t.Fatalf("%s %s %s: got %d, want %d (%s)", method, path, body, rec.Code, want, rec.Body.String())
+	}
+	return rec.Body.Bytes()
+}
 
-	t.Run("AddMember invalid json", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/api/vehicles/123/members", bytes.NewReader([]byte("{invalid")))
-		req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, "user-1"))
-		w := httptest.NewRecorder()
+func decodeObj(t *testing.T, raw []byte) map[string]any {
+	t.Helper()
+	var obj map[string]any
+	if err := json.Unmarshal(raw, &obj); err != nil {
+		t.Fatalf("decode %s: %v", raw, err)
+	}
+	return obj
+}
 
-		// Without repo, GetVehicleByID will panic if called, but since repo is nil, let's verify empty email handling if checked
-		_ = h
-		_ = w
-	})
+func TestVehicleMemberLifecycle(t *testing.T) {
+	a := newMemberAPI(t, "members")
+
+	var members []map[string]any
+	if err := json.Unmarshal(a.as(a.ownerID, http.StatusOK, "GET", "/members", ""), &members); err != nil || len(members) != 1 {
+		t.Fatalf("owner should be the only member: %v %v", members, err)
+	}
+
+	a.as(a.ownerID, http.StatusBadRequest, "POST", "/members", `{`)
+	a.as(a.ownerID, http.StatusBadRequest, "POST", "/members", `{"email":"  ","role":"VIEWER"}`)
+	a.as(a.ownerID, http.StatusBadRequest, "POST", "/members", `{"email":"`+a.guest+`","role":"BOSS"}`)
+	a.as(a.ownerID, http.StatusNotFound, "POST", "/members", `{"email":"nobody@example.com","role":"VIEWER"}`)
+	a.as(a.guestID, http.StatusNotFound, "POST", "/members", `{"email":"`+a.guest+`","role":"VIEWER"}`)
+
+	a.as(a.ownerID, http.StatusCreated, "POST", "/members", `{"email":" `+a.guest+` ","role":"VIEWER"}`)
+	a.as(a.guestID, http.StatusOK, "GET", "/members", "")
+	a.as(a.guestID, http.StatusForbidden, "POST", "/members", `{"email":"x@example.com","role":"VIEWER"}`)
+	a.as(a.guestID, http.StatusForbidden, "PUT", "/members/"+a.ownerID, `{"role":"VIEWER"}`)
+	a.as(a.guestID, http.StatusForbidden, "DELETE", "/members/"+a.ownerID, "")
+
+	a.as(a.ownerID, http.StatusBadRequest, "PUT", "/members/"+a.guestID, `{`)
+	a.as(a.ownerID, http.StatusBadRequest, "PUT", "/members/"+a.guestID, `{"role":"BOSS"}`)
+	a.as(a.ownerID, http.StatusNotFound, "PUT", "/members/00000000-0000-0000-0000-000000000000", `{"role":"EDITOR"}`)
+	a.as(a.ownerID, http.StatusOK, "PUT", "/members/"+a.guestID, `{"role":"EDITOR"}`)
+
+	a.as(a.ownerID, http.StatusNotFound, "DELETE", "/members/00000000-0000-0000-0000-000000000000", "")
+	a.as(a.guestID, http.StatusOK, "DELETE", "/members/"+a.guestID, "")
+	a.as(a.guestID, http.StatusNotFound, "GET", "/members", "")
+
+	a.as(a.ownerID, http.StatusCreated, "POST", "/members", `{"email":"`+a.guest+`","role":"EDITOR"}`)
+	a.as(a.ownerID, http.StatusOK, "DELETE", "/members/"+a.guestID, "")
+}
+
+func TestVehiclePeopleLifecycle(t *testing.T) {
+	a := newMemberAPI(t, "people")
+
+	a.as(a.ownerID, http.StatusOK, "GET", "/people", "")
+	a.as(a.ownerID, http.StatusCreated, "POST", "/members", `{"email":"`+a.guest+`","role":"EDITOR"}`)
+
+	a.as(a.ownerID, http.StatusBadRequest, "POST", "/people", `{`)
+	a.as(a.guestID, http.StatusForbidden, "POST", "/people", `{"name":"Zoe"}`)
+	person := decodeObj(t, a.as(a.ownerID, http.StatusCreated, "POST", "/people", `{"name":"Zoe"}`))
+	pid := person["id"].(string)
+	if person["name"] != "Zoe" {
+		t.Fatalf("person: %v", person)
+	}
+	a.as(a.guestID, http.StatusOK, "GET", "/people", "")
+
+	a.as(a.ownerID, http.StatusBadRequest, "PUT", "/people/"+pid, `{`)
+	renamed := decodeObj(t, a.as(a.ownerID, http.StatusOK, "PUT", "/people/"+pid, `{"name":"Zoé"}`))
+	if renamed["name"] != "Zoé" {
+		t.Fatalf("rename: %v", renamed)
+	}
+	a.as(a.ownerID, http.StatusNotFound, "PUT", "/people/00000000-0000-0000-0000-000000000000", `{"name":"Ghost"}`)
+
+	a.as(a.ownerID, http.StatusBadRequest, "PUT", "/people/"+pid+"/link", `{}`)
+	a.as(a.ownerID, http.StatusBadRequest, "PUT", "/people/"+pid+"/link", `{`)
+	linked := decodeObj(t, a.as(a.ownerID, http.StatusOK, "PUT", "/people/"+pid+"/link", `{"user_id":"`+a.guestID+`"}`))
+	if linked["user_id"] != a.guestID {
+		t.Fatalf("link: %v", linked)
+	}
+
+	a.as(a.ownerID, http.StatusOK, "PUT", "/people/"+pid+"/default", "")
+	a.as(a.ownerID, http.StatusNotFound, "PUT", "/people/00000000-0000-0000-0000-000000000000/default", "")
+
+	a.as(a.guestID, http.StatusForbidden, "DELETE", "/people/"+pid, "")
+	a.as(a.ownerID, http.StatusBadRequest, "DELETE", "/people/"+pid, "")
+	other := decodeObj(t, a.as(a.ownerID, http.StatusCreated, "POST", "/people", `{"name":"Max"}`))["id"].(string)
+	a.as(a.ownerID, http.StatusNoContent, "DELETE", "/people/"+other, "")
+	a.as(a.ownerID, http.StatusNotFound, "DELETE", "/people/"+other, "")
 }
