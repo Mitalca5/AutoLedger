@@ -207,11 +207,14 @@ services:
         max-file: "3"
 
 volumes:
-  # For existing installations upgrading from TeslaCost:
-  # You can keep your existing volumes without migrating data by setting in your .env:
-  # DB_VOLUME_NAME=postgres_data
-  # DOCUMENTS_VOLUME_NAME=teslacost_documents
-  # BACKUPS_VOLUME_NAME=teslacost_backups
+  # Installations coming from TeslaCost keep their data by naming their existing volumes in .env.
+  # Compose prefixes volume names with the project (directory) name, so list the real names first:
+  #   docker volume ls | grep -Ei "postgres_data|documents|backups"
+  # Typical TeslaCost names, for a stack started from a directory called "teslacost":
+  #   DB_VOLUME_NAME=teslacost_postgres_data
+  #   DOCUMENTS_VOLUME_NAME=teslacost_teslacost_documents
+  #   BACKUPS_VOLUME_NAME=teslacost_teslacost_backups
+  # Without these overrides a new, empty database is created and the onboarding page is shown.
   autoledger_db_data:
     name: ${DB_VOLUME_NAME:-autoledger_db_data}
     driver: local
