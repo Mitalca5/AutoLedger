@@ -84,6 +84,10 @@ A vehicle can carry a flat, peak / off-peak or multi-band [tariff plan](docs/tar
   <img src="docs/screenshots/drives.en.png" alt="Drives and trips" width="48%">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/comparison.en.png" alt="Five-year comparison of an electric and a petrol car" width="48%">
+</p>
+
 French captures sit next to the English ones (`*.fr.png`); `scripts/screenshots/capture.mjs` regenerates all of them from a seeded demo instance.
 
 ---

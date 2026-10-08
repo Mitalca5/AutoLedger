@@ -25,7 +25,11 @@ const desktopShots = [
   ['energy-fuel', '/energy', 'ICE'],
   ['maintenance', '/maintenance', 'EV'],
   ['tires', '/tires', 'EV'],
-  ['comparison', '/comparison', 'EV'],
+  ['comparison', '/comparison', 'EV', async (page) => {
+    await page.locator('button.text-left').first().click()
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
+  }],
 ]
 
 async function session(browser, options, locale) {
@@ -53,8 +57,9 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 try {
   for (const locale of locales) {
     const d = await session(browser, desktop, locale)
-    for (const [name, route, powertrain] of desktopShots) {
+    for (const [name, route, powertrain, prepare] of desktopShots) {
       await open(d.page, d.vehicles, route, powertrain)
+      if (prepare) await prepare(d.page)
       await d.page.screenshot({ path: `${out}/${name}.${locale}.png` })
     }
     await d.context.close()
