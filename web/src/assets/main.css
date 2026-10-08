@@ -31,33 +31,33 @@
 }
 
 .dp--theme-dark {
-  --dp-background-color: #1e293b;
-  --dp-text-color: #f1f5f9;
-  --dp-hover-color: #334155;
-  --dp-hover-text-color: #ffffff;
-  --dp-hover-icon-color: #94a3b8;
-  --dp-primary-color: #e11d48;
-  --dp-primary-disabled-color: #9f1239;
-  --dp-primary-text-color: #ffffff;
-  --dp-secondary-color: #64748b;
-  --dp-border-color: #334155;
-  --dp-menu-border-color: #334155;
-  --dp-border-color-hover: #475569;
-  --dp-border-color-focus: #e11d48;
-  --dp-disabled-color: #0f172a;
-  --dp-disabled-color-text: #475569;
-  --dp-scroll-bar-background: #0f172a;
-  --dp-scroll-bar-color: #334155;
+  --dp-background-color: var(--color-slate-800);
+  --dp-text-color: var(--color-slate-100);
+  --dp-hover-color: var(--color-slate-700);
+  --dp-hover-text-color: var(--color-white);
+  --dp-hover-icon-color: var(--color-slate-400);
+  --dp-primary-color: var(--color-rose-600);
+  --dp-primary-disabled-color: var(--color-rose-800);
+  --dp-primary-text-color: var(--color-white);
+  --dp-secondary-color: var(--color-slate-500);
+  --dp-border-color: var(--color-slate-700);
+  --dp-menu-border-color: var(--color-slate-700);
+  --dp-border-color-hover: var(--color-slate-600);
+  --dp-border-color-focus: var(--color-rose-600);
+  --dp-disabled-color: var(--color-slate-900);
+  --dp-disabled-color-text: var(--color-slate-600);
+  --dp-scroll-bar-background: var(--color-slate-900);
+  --dp-scroll-bar-color: var(--color-slate-700);
   --dp-border-radius: 0.75rem;
   --dp-cell-border-radius: 0.5rem;
   --dp-font-family: inherit;
 }
 
 .dp__input {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
+  background-color: var(--color-slate-800) !important;
+  border-color: var(--color-slate-700) !important;
   border-radius: 0.75rem !important;
-  color: #f1f5f9 !important;
+  color: var(--color-slate-100) !important;
   font-size: 0.875rem !important;
   line-height: 1.25rem !important;
   padding-top: 0.5rem !important;
@@ -69,38 +69,38 @@
 }
 
 .dp__input:hover {
-  border-color: #475569 !important;
+  border-color: var(--color-slate-600) !important;
 }
 
 .dp__input:focus {
-  border-color: #e11d48 !important;
+  border-color: var(--color-rose-600) !important;
   outline: none !important;
 }
 
 .dp__input:disabled,
 .dp--disabled {
-  background-color: rgba(15, 23, 42, 0.9) !important;
-  border-color: #1e293b !important;
-  color: #64748b !important;
+  background-color: color-mix(in oklab, var(--color-slate-900) 90%, transparent) !important;
+  border-color: var(--color-slate-800) !important;
+  color: var(--color-slate-500) !important;
   cursor: not-allowed !important;
   opacity: 0.6 !important;
 }
 
 .dp__input_icon {
-  color: #94a3b8 !important;
+  color: var(--color-slate-400) !important;
   padding-left: 0.75rem !important;
   cursor: pointer !important;
 }
 
 .dp__clear_icon {
-  color: #94a3b8 !important;
+  color: var(--color-slate-400) !important;
   padding-right: 0.5rem !important;
   cursor: pointer !important;
 }
 
 .dp__menu {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5) !important;
-  border: 1px solid #334155 !important;
+  border: 1px solid var(--color-slate-700) !important;
 }
 
 @layer base {
@@ -117,7 +117,7 @@
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: #334155 #0f172a;
+    scrollbar-color: var(--color-slate-700) var(--color-slate-900);
   }
   body {
     font-variant-numeric: tabular-nums;
@@ -125,7 +125,7 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   :focus-visible {
-    outline: 2px solid rgba(251, 113, 133, 0.9);
+    outline: 2px solid color-mix(in oklab, var(--color-rose-400) 90%, transparent);
     outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -169,16 +169,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--color-slate-900);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--color-slate-700);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--color-slate-600);
 }
 
 /* Bottom bars keep clear of the home indicator on notched phones (viewport-fit=cover). */
@@ -279,7 +279,7 @@
     width: 1rem;
     height: 1rem;
     border-radius: 0.3rem;
-    border: 1.5px solid #475569;
+    border: 1.5px solid var(--color-slate-600);
     background-color: transparent;
     background-position: center;
     background-repeat: no-repeat;
@@ -288,16 +288,16 @@
     transition: border-color 0.15s ease, background-color 0.15s ease;
   }
   .select-box:hover {
-    border-color: #94a3b8;
+    border-color: var(--color-slate-400);
   }
   .select-box:focus-visible {
-    outline: 2px solid rgba(225, 29, 72, 0.55);
+    outline: 2px solid color-mix(in oklab, var(--color-rose-600) 55%, transparent);
     outline-offset: 2px;
   }
   .select-box:checked,
   .select-box:indeterminate {
-    border-color: #e11d48;
-    background-color: #e11d48;
+    border-color: var(--color-rose-600);
+    background-color: var(--color-rose-600);
   }
   .select-box:checked {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
@@ -316,15 +316,15 @@
    option in the accent colour, instead of the system's light grey highlight. */
 select option,
 select optgroup {
-  background-color: #1e293b;
-  color: #f1f5f9;
+  background-color: var(--color-slate-800);
+  color: var(--color-slate-100);
 }
 select option:checked {
-  background: linear-gradient(#be123c, #be123c);
-  color: #ffffff;
+  background: linear-gradient(var(--color-rose-700), var(--color-rose-700));
+  color: var(--color-white);
 }
 select option:disabled {
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 /* Browsers that can style the picker itself (Chromium) draw the list in the app's theme, hover included,
@@ -335,8 +335,8 @@ select option:disabled {
     appearance: base-select;
   }
   select::picker(select) {
-    background-color: #1e293b;
-    border: 1px solid #334155;
+    background-color: var(--color-slate-800);
+    border: 1px solid var(--color-slate-700);
     border-radius: 0.75rem;
     padding: 0.25rem;
     margin-top: 0.25rem;
@@ -348,12 +348,12 @@ select option:disabled {
   }
   select option:hover,
   select option:focus-visible {
-    background: #334155;
-    color: #ffffff;
+    background: var(--color-slate-700);
+    color: var(--color-white);
   }
   select option:checked {
-    background: #be123c;
-    color: #ffffff;
+    background: var(--color-rose-700);
+    color: var(--color-white);
   }
   select option::checkmark {
     display: none;

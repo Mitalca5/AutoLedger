@@ -16,7 +16,7 @@ const range = defineModel<import('@/utils/dashboard').MonthlyRangeKey>({ require
       :aria-pressed="range === opt.key"
       :class="[
         'tap-text px-2.5 text-xs font-semibold rounded-md transition-colors',
-        range === opt.key ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white',
+        range === opt.key ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white',
       ]"
     >
       {{ $t(opt.labelKey) }}
