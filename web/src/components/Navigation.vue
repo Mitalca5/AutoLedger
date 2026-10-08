@@ -25,6 +25,7 @@ import {
 import { APP_NAME } from '@/brand'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { APP_VERSION } from '@/version'
+import { groupNavItems } from '@/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,6 +59,7 @@ const navItems = computed(() =>
 )
 
 const currentRouteName = computed(() => route.name)
+const navSections = computed(() => groupNavItems(navItems.value))
 
 // Phone bar: the everyday pages, the quick entry button in the middle, everything else behind "Plus".
 const primaryNames = computed(() => (vehicleStore.canCharge ? ['dashboard', 'drives', 'expenses'] : ['dashboard', 'energy', 'odometer']))
@@ -117,22 +119,33 @@ function handleLogout() {
       {{ $t('shell.navigation.quickAdd') }}
     </button>
 
-    <nav :aria-label="$t('shell.navigation.mainNavigation')" class="flex-1 space-y-1">
-      <router-link
-        v-for="item in navItems"
-        :key="item.name"
-        :to="item.path"
-        :aria-current="currentRouteName === item.name ? 'page' : undefined"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border border-transparent"
-        :class="
-          currentRouteName === item.name
-            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-sm'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-        "
+    <nav :aria-label="$t('shell.navigation.mainNavigation')" class="flex-1 overflow-y-auto space-y-0.5">
+      <div
+        v-for="(section, index) in navSections"
+        :key="section.headingKey ?? index"
+        role="group"
+        :aria-labelledby="section.headingKey ? 'nav-section-' + index : undefined"
+        class="space-y-0.5"
       >
-        <component :is="item.icon" class="w-5 h-5" />
-        {{ $t(item.labelKey) }}
-      </router-link>
+        <p v-if="section.headingKey" :id="'nav-section-' + index" class="px-3 pb-0.5 pt-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {{ $t(section.headingKey) }}
+        </p>
+        <router-link
+          v-for="item in section.items"
+          :key="item.name"
+          :to="item.path"
+          :aria-current="currentRouteName === item.name ? 'page' : undefined"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all border border-transparent"
+          :class="
+            currentRouteName === item.name
+              ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+          "
+        >
+          <component :is="item.icon" class="w-5 h-5" />
+          {{ $t(item.labelKey) }}
+        </router-link>
+      </div>
     </nav>
 
     <div class="pt-4 border-t border-slate-800 mt-auto space-y-2">

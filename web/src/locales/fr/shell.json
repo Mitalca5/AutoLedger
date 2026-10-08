@@ -121,5 +121,10 @@
   },
   "a11y": {
     "skipToContent": "Aller au contenu"
+  },
+  "navSections": {
+    "tracking": "Suivi",
+    "costs": "Coûts",
+    "management": "Gestion"
   }
 }
