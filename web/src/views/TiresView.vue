@@ -2,6 +2,8 @@
 import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useSubmit } from '@/composables/useSubmit'
+import { useTireList } from '@/composables/useTireList'
+import { useTireSelection } from '@/composables/useTireSelection'
 import LoadError from '@/components/LoadError.vue'
 import ListSkeleton from '@/components/ListSkeleton.vue'
 import { Disc as PageIcon } from 'lucide-vue-next'
@@ -29,7 +31,6 @@ import TireBatchDisposeModal from '@/components/tires/TireBatchDisposeModal.vue'
 import TireCopyHistoryModal from '@/components/tires/TireCopyHistoryModal.vue'
 import { Archive, ArrowUpDown, Copy, Disc, History, Package, Pencil, Plus, RefreshCw, Shuffle, Snowflake } from 'lucide-vue-next'
 import {
-  MOUNTED_POSITIONS,
   copiedSessionFromSession,
   emptySessionForm,
   formatDate,
@@ -45,14 +46,19 @@ import { todayIso, toIsoDay } from '@/utils/dates'
 // its API call and reports back with "saved".
 const vehicleStore = useVehicleStore()
 const { showConfirm, showAlert } = useConfirm()
-const tires = ref<any[]>([])
-const loading = ref(false)
-const loadError = ref('')
-const loadFailed = ref(false)
-const ready = computed(() => loadedVehicleId.value === vehicleId.value)
-const loadedVehicleId = ref('')
-
-const vehicleId = computed(() => vehicleStore.activeVehicle?.id ?? '')
+const {
+  tires,
+  loading,
+  loadError,
+  loadFailed,
+  ready,
+  vehicleId,
+  mountedTires,
+  hasMountedTires,
+  storageTires,
+  disposedTires,
+  loadTires,
+} = useTireList()
 const currentOdometer = computed(() => vehicleStore.activeVehicle?.current_odometer || 0)
 
 // Active tab: 'chassis' (Montés) or 'storage' (Au garage)
@@ -102,93 +108,15 @@ const logInitialForm = ref<TireLogForm>({ depth_mm: 6.5, odometer: 0, notes: '',
 const tireEditIds = ref<string[]>([])
 const copyHistorySource = ref<any | null>(null)
 
-// Selection for batch actions
-const selectedTireIds = ref<string[]>([])
-function toggleTireSelection(id: string) {
-  selectedTireIds.value = selectedTireIds.value.includes(id)
-    ? selectedTireIds.value.filter((x) => x !== id)
-    : [...selectedTireIds.value, id]
-}
-
-// Mounted tires mapped by position
-const mountedTires = computed(() => {
-  const map: Record<string, any> = { FL: null, FR: null, RL: null, RR: null }
-  tires.value.forEach((t) => {
-    const pos = t.tire.current_position
-    if (pos in map) {
-      map[pos] = t
-    }
-  })
-  return map
-})
-
-const hasMountedTires = computed(() => Object.values(mountedTires.value).some(Boolean))
-
-const storageTires = computed(() => {
-  return tires.value.filter((t) => t.tire.current_position === 'STORAGE')
-})
-
-const disposedTires = computed(() => tires.value.filter((t) => t.tire.current_position === 'DISPOSED'))
-
-const currentTabTireIds = computed<string[]>(() => {
-  if (activeTab.value === 'chassis') {
-    return MOUNTED_POSITIONS.map((pos) => mountedTires.value[pos]?.tire.id).filter(Boolean)
-  }
-  if (activeTab.value === 'storage') {
-    return storageTires.value.map((t) => t.tire.id)
-  }
-  if (activeTab.value === 'disposed') {
-    return disposedTires.value.map((t) => t.tire.id)
-  }
-  return []
-})
-
-const isCurrentTabAllSelected = computed<boolean>(() => {
-  const ids = currentTabTireIds.value
-  return ids.length > 0 && ids.every((id) => selectedTireIds.value.includes(id))
-})
-
-const isCurrentTabPartlySelected = computed<boolean>(
-  () => !isCurrentTabAllSelected.value && currentTabTireIds.value.some((id) => selectedTireIds.value.includes(id))
-)
-
-function toggleSelectAllCurrentTab() {
-  const ids = currentTabTireIds.value
-  if (!ids.length) return
-  if (isCurrentTabAllSelected.value) {
-    selectedTireIds.value = selectedTireIds.value.filter((id) => !ids.includes(id))
-  } else {
-    selectedTireIds.value = Array.from(new Set([...selectedTireIds.value, ...ids]))
-  }
-}
-
-const selectedDisposedCount = computed(() => {
-  return tires.value.filter((t) => selectedTireIds.value.includes(t.tire.id) && t.tire.current_position === 'DISPOSED').length
-})
-const canBatchDispose = computed(() => {
-  return selectedTireIds.value.length > 0 && selectedTireIds.value.length > selectedDisposedCount.value
-})
-
-async function loadTires() {
-  if (!vehicleStore.activeVehicle) return
-  const id = vehicleStore.activeVehicle.id
-  loading.value = true
-  loadError.value = ''
-  loadFailed.value = false
-  try {
-    const res = (await api.getTires(id)) ?? []
-    if (vehicleStore.activeVehicle?.id !== id) return
-    tires.value = res
-    loadedVehicleId.value = id
-  } catch (err: any) {
-    console.error('Failed to load tires', err)
-    loadError.value = err?.message || ''
-    loadFailed.value = true
-    if (loadedVehicleId.value !== id) tires.value = []
-  } finally {
-    loading.value = false
-  }
-}
+const {
+  selectedTireIds,
+  toggleTireSelection,
+  currentTabTireIds,
+  isCurrentTabAllSelected,
+  isCurrentTabPartlySelected,
+  toggleSelectAllCurrentTab,
+  canBatchDispose,
+} = useTireSelection({ tires, mountedTires, storageTires, disposedTires, activeTab })
 
 watch(
   () => [vehicleStore.activeVehicle?.id, activeTab.value],
