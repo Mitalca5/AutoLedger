@@ -7,7 +7,8 @@ import { useRouter } from 'vue-router'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, Pencil, Trash2, AlertTriangle, Paperclip } from 'lucide-vue-next'
-import { formatDate, groupChargesByMonth } from '@/utils/expenses'
+import { groupChargesByMonth } from '@/utils/expenses'
+import { formatChargeWindow } from '@/utils/dates'
 import { formatAmount } from '@/currency'
 import { formatNumber } from '@/utils/numbers'
 import { distanceUnit, formatPerDistanceValue, perDistance } from '@/units'
@@ -110,7 +111,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
               </button>
             </div>
             <p class="text-xs text-slate-400 mt-0.5 truncate" :title="c.address">
-              {{ formatDate(c.date) }} · <span class="text-slate-300">{{ c.address || $t('expenses.chargesPanel.unknownPlace') }}</span>
+              {{ formatChargeWindow(c.date, c.end_date) }} · <span class="text-slate-300">{{ c.address || $t('expenses.chargesPanel.unknownPlace') }}</span>
             </p>
           </div>
           <div class="text-right shrink-0">
