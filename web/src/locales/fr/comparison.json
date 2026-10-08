@@ -206,7 +206,11 @@
     "less": "{percent} % de moins que le véhicule thermique",
     "more": "{percent} % de plus que le véhicule thermique",
     "month": "{amount} par mois",
-    "energyLess": "énergie seule : {amount} de moins",
-    "energyMore": "énergie seule : {amount} de plus"
+    "energyTitle": "Économie d'énergie",
+    "totalTitle": "Économie totale",
+    "energyHint": "Carburant ou électricité seulement.",
+    "totalHint": "Tous les coûts du scénario, entretien et autres frais compris.",
+    "saved": "économisés",
+    "extra": "de plus"
   }
 }

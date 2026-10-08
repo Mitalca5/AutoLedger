@@ -206,7 +206,11 @@
     "less": "{percent}% less than the combustion vehicle",
     "more": "{percent}% more than the combustion vehicle",
     "month": "{amount} per month",
-    "energyLess": "energy alone: {amount} less",
-    "energyMore": "energy alone: {amount} more"
+    "energyTitle": "Energy savings",
+    "totalTitle": "Total savings",
+    "energyHint": "Fuel or electricity only.",
+    "totalHint": "All running costs and the other costs of the scenario.",
+    "saved": "saved",
+    "extra": "more"
   }
 }

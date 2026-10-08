@@ -233,19 +233,23 @@ const verdict = computed(() => {
     : t(sk('comparison.verdict.more'), { count: n, amount: abs })
 })
 
-// What the verdict does not say: the gap as a share of the combustion cost and per month, and the part due to energy alone.
-const savingsDetail = computed(() => {
+// What the verdict does not say: the saving on energy alone and on the whole cost, each as an amount, a share of the
+// combustion cost and per month.
+interface SavingsCard { key: 'energy' | 'total'; amount: number; positive: boolean; percent: string | null; perMonth: string | null }
+
+const savingsCards = computed<SavingsCard[]>(() => {
   const r = result.value
-  if (!r) return ''
-  const total = comparisonSavings(r.tracked.total, r.ice.total, r.years_count, r.annual_km)
-  const energy = comparisonSavings(r.tracked.energy, r.ice.energy, r.years_count, r.annual_km)
-  const parts: string[] = []
-  if (total.percent !== null && Math.abs(total.amount) >= 1) {
-    parts.push(t(total.amount > 0 ? 'comparison.savings.less' : 'comparison.savings.more', { percent: Math.abs(total.percent).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) }))
-  }
-  if (total.perMonth !== null && Math.abs(total.amount) >= 1) parts.push(t('comparison.savings.month', { amount: fmtMoney(Math.abs(total.perMonth)) }))
-  if (Math.abs(energy.amount) >= 1) parts.push(t(energy.amount > 0 ? 'comparison.savings.energyLess' : 'comparison.savings.energyMore', { amount: fmtMoney(Math.abs(energy.amount)) }))
-  return parts.join(' · ')
+  if (!r) return []
+  return (['energy', 'total'] as const).map(key => {
+    const s = comparisonSavings(r.tracked[key], r.ice[key], r.years_count, r.annual_km)
+    return {
+      key,
+      amount: Math.abs(s.amount),
+      positive: s.amount >= 0,
+      percent: s.percent !== null ? Math.abs(s.percent).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) : null,
+      perMonth: s.perMonth !== null ? fmtMoney(Math.abs(s.perMonth)) : null,
+    }
+  })
 })
 
 function breakEvenSentence(be: number | null | undefined, keys: { none: string; now: string; after: string }): string {
@@ -537,8 +541,23 @@ onMounted(async () => {
           <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
           <div>
             <div class="text-lg font-bold text-white">{{ verdict }}</div>
-            <div v-if="savingsDetail" class="text-sm text-slate-300 mt-0.5">{{ savingsDetail }}</div>
             <div class="text-xs text-slate-400 mt-0.5">{{ currentScenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div v-for="card in savingsCards" :key="card.key" class="bg-slate-900 border border-slate-800 rounded-2xl p-4" :data-testid="`savings-${card.key}`">
+            <h2 class="text-sm font-semibold text-slate-300">{{ $t(`comparison.savings.${card.key}Title`) }}</h2>
+            <div class="text-2xl font-bold mt-1" :class="card.positive ? 'text-success-400' : 'text-warning-400'">
+              {{ fmtMoney(card.amount) }}
+              <span class="text-sm font-medium">{{ $t(card.positive ? 'comparison.savings.saved' : 'comparison.savings.extra') }}</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1">
+              <template v-if="card.percent !== null">{{ $t(card.positive ? 'comparison.savings.less' : 'comparison.savings.more', { percent: card.percent }) }}</template>
+              <template v-if="card.percent !== null && card.perMonth !== null"> · </template>
+              <template v-if="card.perMonth !== null">{{ $t('comparison.savings.month', { amount: card.perMonth }) }}</template>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">{{ $t(`comparison.savings.${card.key}Hint`) }}</div>
           </div>
         </div>
 
