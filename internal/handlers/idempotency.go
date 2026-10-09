@@ -38,6 +38,7 @@ func (w *recordingWriter) Write(b []byte) (int, error) {
 // so that requests queued offline and resent after a lost response are applied only once.
 // It must run after authentication.
 func Idempotency(repo *database.Repository) func(http.Handler) http.Handler {
+	var locks idempotencyLocks
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			key := r.Header.Get("Idempotency-Key")
@@ -46,6 +47,13 @@ func Idempotency(repo *database.Repository) func(http.Handler) http.Handler {
 				return
 			}
 			userID := middleware.GetUserID(r.Context())
+			// Reserve this user's key through lookup, mutation and response persistence.
+			// A concurrent retry must look up the response only after its first writer finishes.
+			release, err := locks.acquire(r.Context(), idempotencyRequestKey{userID: userID, key: key})
+			if err != nil {
+				return
+			}
+			defer release()
 
 			stored, err := repo.GetIdempotentResponse(r.Context(), userID, key)
 			if err != nil {
