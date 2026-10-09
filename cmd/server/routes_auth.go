@@ -36,6 +36,8 @@ func (h *apiHandlers) registerSessionAuthRoutes(r chi.Router, activeSession func
 	r.Delete("/api/auth/sessions/{sessionId}", h.auth.RevokeSession)
 	r.Post("/api/auth/logout-all", h.auth.LogoutAll)
 	r.With(httprate.LimitByIP(10, time.Minute), activeSession).Post("/api/auth/password", h.auth.ChangePassword)
+	// Linking an SSO identity to this account is explicit: it starts from an active signed-in session (see AuthHandler.OIDCLink).
+	r.With(activeSession).Get("/api/auth/oidc/link", h.auth.OIDCLink)
 	r.Put("/api/auth/language", h.auth.UpdateLanguage)
 	r.Put("/api/auth/distance-unit", h.auth.UpdateDistanceUnit)
 

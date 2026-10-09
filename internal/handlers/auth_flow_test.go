@@ -326,7 +326,7 @@ func TestOIDCFlowUsesPKCEAndRejectsWhatIsNotBoundToTheBrowser(t *testing.T) {
 	}
 }
 
-func TestOIDCRefusesAnUnverifiedEmailAndOnlyLinksFreeAccounts(t *testing.T) {
+func TestOIDCRefusesAnUnverifiedEmailAndNeverLinksALocalAccountByAddress(t *testing.T) {
 	repo := authTestRepo(t)
 	idp := newFakeIdP(t)
 	h := oidcTestHandler(t, repo, idp, nil)
@@ -346,29 +346,56 @@ func TestOIDCRefusesAnUnverifiedEmailAndOnlyLinksFreeAccounts(t *testing.T) {
 		t.Fatal("the local account must not have been linked to an unverified identity")
 	}
 
-	// A verified identity links the local account once.
-	if rec := oidcRound(t, h, idp, "victim@example.org", &yes, nil); rec.Code != http.StatusFound {
+	// A verified identity does not take over a local account either: whoever registered it first may have chosen its
+	// password, and the address alone does not tell who owns it. The user is sent back to sign in, and nothing is issued.
+	rec := oidcRound(t, h, idp, "victim@example.org", &yes, nil)
+	if rec.Code != http.StatusFound || rec.Header().Get("Location") != "/login?error=oidc_local_account_exists" {
+		t.Fatalf("verified email on a local account: got %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	for _, c := range rec.Result().Cookies() {
+		if (c.Name == refreshTokenCookie || c.Name == accessTokenCookie) && c.Value != "" {
+			t.Fatalf("no session may be issued when the account is not linked: %s", c.Name)
+		}
+	}
+	if u, _ := repo.GetUserByEmail(ctx, "victim@example.org"); u.ID != local.ID || u.OIDCSubject != nil || u.PasswordHash == nil {
+		t.Fatalf("the local account must be left as it was: %+v", u)
+	}
+
+	// A provider that omits the claim is still accepted (not every provider sends it), for an address nobody holds.
+	if rec := oidcRound(t, h, idp, "noclaim@example.org", nil, nil); rec.Code != http.StatusFound || rec.Header().Get("Location") != "/oidc-callback" {
+		t.Errorf("email_verified absent: got %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	if rec := oidcRound(t, h, idp, "fresh@example.org", &yes, nil); rec.Code != http.StatusFound || rec.Header().Get("Location") != "/oidc-callback" {
+		t.Errorf("a new identity creates its account: got %d", rec.Code)
+	}
+}
+
+func TestOIDCOnlyInstanceLinksALocalAccountByAddressOnce(t *testing.T) {
+	repo := authTestRepo(t)
+	idp := newFakeIdP(t)
+	h := oidcTestHandler(t, repo, idp, nil)
+	h.cfg.OIDCDisableLocalAuth = true // local sign-in is off: the accounts hold no usable password
+	ctx := context.Background()
+	yes := true
+
+	local, _ := repo.CreateUser(ctx, "admin@example.org", "hash")
+	if rec := oidcRound(t, h, idp, "admin@example.org", &yes, nil); rec.Code != http.StatusFound || rec.Header().Get("Location") != "/oidc-callback" {
 		t.Fatalf("verified email: got %d", rec.Code)
 	}
-	linked, _ := repo.GetUserByEmail(ctx, "victim@example.org")
-	if linked.ID != local.ID || linked.OIDCSubject == nil || *linked.OIDCSubject != "sub-victim@example.org" {
+	linked, _ := repo.GetUserByEmail(ctx, "admin@example.org")
+	if linked.ID != local.ID || linked.OIDCSubject == nil || *linked.OIDCSubject != "sub-admin@example.org" {
 		t.Fatalf("expected the local account to be linked, got %+v", linked)
 	}
 
 	// Another identity claiming the same address cannot take the account over: it is already linked.
 	other := newFakeIdP(t)
 	h2 := oidcTestHandler(t, repo, other, nil)
-	h2.cfg.OIDCIssuerURL = other.srv.URL
-	if rec := oidcRound(t, h2, other, "victim@example.org", &yes, nil); rec.Code == http.StatusFound {
+	h2.cfg.OIDCDisableLocalAuth = true
+	if rec := oidcRound(t, h2, other, "admin@example.org", &yes, nil); rec.Header().Get("Location") == "/oidc-callback" {
 		t.Error("an account already tied to an identity must not be re-pointed to another one")
 	}
-	if again, _ := repo.GetUserByEmail(ctx, "victim@example.org"); again.OIDCSubject == nil || *again.OIDCSubject != "sub-victim@example.org" {
+	if again, _ := repo.GetUserByEmail(ctx, "admin@example.org"); again.OIDCSubject == nil || *again.OIDCSubject != "sub-admin@example.org" {
 		t.Errorf("the link changed: %+v", again.OIDCSubject)
-	}
-
-	// A provider that omits the claim is still accepted (not every provider sends it).
-	if rec := oidcRound(t, h, idp, "noclaim@example.org", nil, nil); rec.Code != http.StatusFound {
-		t.Errorf("email_verified absent: got %d", rec.Code)
 	}
 }
 

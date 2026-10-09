@@ -8,6 +8,7 @@ import { Zap, Lock, Mail, AlertCircle, Shield } from 'lucide-vue-next'
 import { APP_NAME } from '@/brand'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { APP_VERSION } from '@/version'
+import { ssoLoginErrorKey } from '@/utils/sso'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -38,10 +39,8 @@ onMounted(async () => {
   }
 
   // Show OIDC error if redirected back after a failure
-  const params = new URLSearchParams(window.location.search)
-  if (params.get('error') === 'oidc_failed') {
-    error.value = t('auth.loginView.ssoFailed')
-  }
+  const errorKey = ssoLoginErrorKey(new URLSearchParams(window.location.search).get('error'))
+  if (errorKey) error.value = t(errorKey)
 })
 
 async function handleSubmit() {

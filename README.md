@@ -352,6 +352,8 @@ Each primary variable wins when both are set; the legacy name is only read when 
 | `OIDC_ALLOWED_EMAILS` | Comma-separated whitelist of allowed user emails | `user@example.com` |
 | `OIDC_DISABLE_LOCAL_AUTH` | Disable local email/password sign-in | `false` |
 
+An SSO identity gets its own account. It is never attached to an existing local account because both share an email address, since the address of a local account does not prove who registered it: the owner links their SSO from the **Account** page while signed in. With `OIDC_DISABLE_LOCAL_AUTH=true`, local accounts have no usable password, so an existing account with the same address is linked automatically.
+
 ---
 
 ## 🧪 Development & Testing

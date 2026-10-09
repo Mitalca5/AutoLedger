@@ -83,5 +83,15 @@
     "tokenWarning": "Copiez votre jeton immédiatement. Pour des raisons de sécurité, il ne pourra plus être réaffiché !",
     "copy": "Copier dans le presse-papiers",
     "createFailed": "Échec de création du jeton"
+  },
+  "sso": {
+    "link": "Lier {provider}",
+    "linkHint": "Connectez-vous avec {provider} en plus de votre mot de passe. Vos données restent sur ce compte.",
+    "linked": "Lié à {provider} : vous pouvez vous connecter avec lui en plus de votre mot de passe.",
+    "linkedNotice": "Votre authentification unique est liée à ce compte.",
+    "alreadyLinked": "Ce compte est déjà lié à une identité d'authentification unique.",
+    "identityInUse": "Cette identité d'authentification unique appartient déjà à un autre compte.",
+    "emailMismatch": "L'identité d'authentification unique a une autre adresse e-mail que ce compte. Utilisez la même adresse des deux côtés.",
+    "failed": "La liaison de votre authentification unique a échoué. Veuillez réessayer."
   }
 }

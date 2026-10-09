@@ -352,6 +352,8 @@ Chaque variable principale l'emporte lorsque les deux sont définies ; l'ancien 
 | `OIDC_ALLOWED_EMAILS` | Liste blanche d'e-mails autorisés, séparés par des virgules | `user@example.com` |
 | `OIDC_DISABLE_LOCAL_AUTH` | Désactiver la connexion locale par e-mail et mot de passe | `false` |
 
+Une identité SSO obtient son propre compte. Elle n'est jamais rattachée à un compte local existant du seul fait que les deux ont la même adresse e-mail, puisque l'adresse d'un compte local ne prouve pas qui l'a créé : son propriétaire lie son SSO depuis la page **Compte**, une fois connecté. Avec `OIDC_DISABLE_LOCAL_AUTH=true`, les comptes locaux n'ont aucun mot de passe utilisable : un compte existant ayant la même adresse est donc lié automatiquement.
+
 ---
 
 ## 🧪 Développement et tests

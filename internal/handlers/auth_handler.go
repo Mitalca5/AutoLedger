@@ -415,7 +415,8 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, struct {
 		*models.User
 		HasPassword bool `json:"has_password"`
-	}{user, user.PasswordHash != nil})
+		OIDCLinked  bool `json:"oidc_linked"`
+	}{user, user.PasswordHash != nil, user.OIDCSubject != nil})
 }
 
 // OIDCLogin initiates the Authorization Code Flow: generates state + nonce cookies,
@@ -530,10 +531,22 @@ func (h *AuthHandler) OIDCCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// JIT provisioning: create or link the user account.
+	// A signed-in user asked to link this identity to their account: that is the only way an account that has a
+	// password gets one (see OIDCLink).
+	if h.finishOIDCLink(w, r, userInfo) {
+		return
+	}
+
+	// JIT provisioning: create the user account of the identity. A local account with the same address is linked
+	// only when local sign-in is off; otherwise the address proves nothing about who owns that account.
 	dbUser, err := h.repo.UpsertOIDCUser(r.Context(),
 		userInfo.Email, userInfo.Subject, h.cfg.OIDCIssuerURL, userInfo.DisplayName,
+		h.cfg.OIDCDisableLocalAuth,
 	)
+	if errors.Is(err, database.ErrLocalAccountExists) {
+		http.Redirect(w, r, "/login?error=oidc_local_account_exists", http.StatusFound)
+		return
+	}
 	if err != nil {
 		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", "Failed to provision user account"))
 		return

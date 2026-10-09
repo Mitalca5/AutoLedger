@@ -247,7 +247,7 @@ func TestChangePasswordSharesTheSignInThrottleAndRefusesSSOOnlyAccounts(t *testi
 		t.Errorf("a stolen session must not be able to guess the password without limit: got %d", last.Code)
 	}
 
-	sso, err := repo.UpsertOIDCUser(ctx, "sso@example.org", "sub-1", "https://idp.example", "SSO User")
+	sso, err := repo.UpsertOIDCUser(ctx, "sso@example.org", "sub-1", "https://idp.example", "SSO User", false)
 	if err != nil {
 		t.Fatal(err)
 	}

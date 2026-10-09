@@ -7,13 +7,14 @@ import DistanceUnitSwitcher from '@/components/DistanceUnitSwitcher.vue'
 import ApiTokensSection from '@/components/account/ApiTokensSection.vue'
 import TariffPlansPanel from '@/components/tariffs/TariffPlansPanel.vue'
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { KeyRound, Laptop, LogOut, SlidersHorizontal, Smartphone, UserRound } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { usePreferencesStore } from '@/stores/preferences'
 import { useConfirm } from '@/composables/useConfirm'
 import { describeRelativeTime, describeUserAgent } from '@/utils/userAgent'
+import { ssoLinkNotice } from '@/utils/sso'
 
 interface Session {
   id: string
@@ -25,6 +26,7 @@ interface Session {
 }
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const prefs = usePreferencesStore()
 const { showConfirm } = useConfirm()
@@ -38,6 +40,12 @@ const sessionError = ref('')
 
 const hasPassword = computed(() => authStore.user?.has_password === true)
 
+// Linking a single sign-on is offered to an account that signs in with a password, on an instance that has one
+const oidcEnabled = ref(false)
+const oidcProviderName = ref('SSO')
+const oidcLinked = computed(() => authStore.user?.oidc_linked === true)
+const ssoNotice = ref(ssoLinkNotice(route.query.sso))
+
 const current = ref('')
 const next = ref('')
 const confirmation = ref('')
@@ -46,6 +54,18 @@ const passwordError = ref('')
 const passwordDone = ref('')
 
 const isMobile = (ua?: string) => /Android|iPhone|iPad|iPod|Mobile/i.test(ua ?? '')
+
+async function loadSsoConfig() {
+  try {
+    const config = await api.getAuthConfig()
+    oidcEnabled.value = !!config.oidc_enabled
+    oidcProviderName.value = config.oidc_provider_name || 'SSO'
+  } catch {
+    // the link is simply not offered
+  }
+  // The server sends the user back here with the outcome, on a fresh page load that has read the profile again.
+  if (route.query.sso) router.replace({ query: {} })
+}
 
 async function load() {
   loading.value = true
@@ -142,7 +162,10 @@ async function changePassword() {
   }
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  loadSsoConfig()
+})
 </script>
 
 <template>
@@ -170,6 +193,20 @@ onMounted(load)
           <dd class="text-slate-200">{{ hasPassword ? $t('account.localPassword') : $t('account.ssoProvider') }}</dd>
         </div>
       </dl>
+      <p
+        v-if="ssoNotice"
+        role="status"
+        class="mt-3 rounded-xl border px-3 py-2 text-xs"
+        :class="ssoNotice.tone === 'success' ? 'border-success-500/30 bg-success-500/10 text-success-300' : 'border-warning-500/30 bg-warning-500/10 text-warning-300'"
+      >
+        {{ $t(ssoNotice.key) }}
+      </p>
+      <div v-if="oidcEnabled && hasPassword" class="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-3">
+        <p class="max-w-md text-xs text-slate-400">
+          {{ oidcLinked ? $t('account.sso.linked', { provider: oidcProviderName }) : $t('account.sso.linkHint', { provider: oidcProviderName }) }}
+        </p>
+        <a v-if="!oidcLinked" href="/api/auth/oidc/link" class="btn btn-secondary">{{ $t('account.sso.link', { provider: oidcProviderName }) }}</a>
+      </div>
     </section>
 
     <section class="rounded-2xl border border-slate-800 bg-slate-900 p-5" aria-labelledby="account-preferences">

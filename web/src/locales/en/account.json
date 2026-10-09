@@ -83,5 +83,15 @@
     "tokenWarning": "Make sure to copy your personal token now. You won't be able to see it again!",
     "copy": "Copy to clipboard",
     "createFailed": "Failed to create token"
+  },
+  "sso": {
+    "link": "Link {provider}",
+    "linkHint": "Sign in with {provider} as well as with your password. Your data stays on this account.",
+    "linked": "Linked to {provider}: you can sign in with it as well as with your password.",
+    "linkedNotice": "Your single sign-on is linked to this account.",
+    "alreadyLinked": "This account is already linked to a single sign-on identity.",
+    "identityInUse": "That single sign-on identity already belongs to another account.",
+    "emailMismatch": "The single sign-on identity has another email address than this account. Use the same address on both.",
+    "failed": "Linking your single sign-on failed. Please try again."
   }
 }

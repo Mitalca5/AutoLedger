@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/teslacost/teslacost/internal/models"
 )
@@ -99,11 +100,27 @@ func (r *Repository) GetUserByOIDCSubject(ctx context.Context, provider, subject
 	return &u, nil
 }
 
+// Errors of the SSO account linking.
+var (
+	// ErrLocalAccountExists: a local account already has the address of the SSO identity. It is not linked on the
+	// strength of the address alone: whoever registered it may not own the mailbox.
+	ErrLocalAccountExists = errors.New("a local account already uses this email address")
+	// ErrOIDCAlreadyLinked: the account is already tied to an SSO identity.
+	ErrOIDCAlreadyLinked = errors.New("the account is already linked to an SSO identity")
+	// ErrOIDCIdentityInUse: the SSO identity already belongs to another account.
+	ErrOIDCIdentityInUse = errors.New("the SSO identity is already linked to another account")
+	// ErrOIDCEmailMismatch: the address of the SSO identity is not the one of the account.
+	ErrOIDCEmailMismatch = errors.New("the SSO identity has another email address than the account")
+)
+
 // UpsertOIDCUser performs JIT (Just-In-Time) provisioning:
-//   - If a user with the same (oidc_provider, oidc_subject) already exists → update email/display_name.
-//   - If a local user with the same email exists → link it to this OIDC identity.
-//   - Otherwise → create a new user account with no local password.
-func (r *Repository) UpsertOIDCUser(ctx context.Context, email, subject, provider, displayName string) (*models.User, error) {
+// it creates the user of an SSO identity, or returns the one already linked to it.
+//
+// A local account that has the same address is linked only when linkLocal is set, which is for an instance that
+// has switched local authentication off: its accounts hold no usable password. Otherwise the address does not prove
+// that the SSO user owns the account (anyone could have registered it first, with a password of their choosing), and
+// ErrLocalAccountExists is returned; the owner links the identity from a signed-in session with LinkOIDCIdentity.
+func (r *Repository) UpsertOIDCUser(ctx context.Context, email, subject, provider, displayName string, linkLocal bool) (*models.User, error) {
 	query := `
 		INSERT INTO users (email, oidc_subject, oidc_provider, display_name)
 		VALUES ($1, $2, $3, $4)
@@ -119,9 +136,13 @@ func (r *Repository) UpsertOIDCUser(ctx context.Context, email, subject, provide
 		&u.ID, &u.Email, &u.PasswordHash, &u.OIDCSubject, &u.OIDCProvider, &u.DisplayName, &u.Language, &u.DistanceUnit, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if err != nil {
-		// Conflict on email (local account with same email exists but no OIDC link yet).
-		// Link the existing account to this OIDC identity, but only a local account that has no identity yet:
-		// one already tied to another identity (or provider) is never re-pointed by a matching address.
+		// Conflict on email: an account has this address. Only a local one, with no identity yet, can be linked,
+		// and only when the instance allows it; one tied to another identity is never re-pointed.
+		var hasIdentity bool
+		lookup := r.pool.QueryRow(ctx, `SELECT oidc_subject IS NOT NULL FROM users WHERE email = $1;`, email).Scan(&hasIdentity)
+		if lookup == nil && !hasIdentity && !linkLocal {
+			return nil, ErrLocalAccountExists
+		}
 		linkQuery := `
 			UPDATE users
 			SET oidc_subject  = $1,
@@ -141,6 +162,40 @@ func (r *Repository) UpsertOIDCUser(ctx context.Context, email, subject, provide
 		return &linked, nil
 	}
 	return &u, nil
+}
+
+// LinkOIDCIdentity ties an SSO identity to the account of a user who is signed in and asked for it. The address of the
+// identity must be the account's (compared without regard to case), the account must have no identity yet, and the
+// identity no other account.
+func (r *Repository) LinkOIDCIdentity(ctx context.Context, userID, email, subject, provider string) (*models.User, error) {
+	var u models.User
+	err := r.pool.QueryRow(ctx, `
+		UPDATE users
+		SET oidc_subject = $3, oidc_provider = $4, updated_at = NOW()
+		WHERE id::text = $1 AND oidc_subject IS NULL AND LOWER(email) = LOWER($2)
+		RETURNING id, email, password_hash, oidc_subject, oidc_provider, display_name, language, distance_unit, created_at, updated_at;
+	`, userID, email, subject, provider).Scan(
+		&u.ID, &u.Email, &u.PasswordHash, &u.OIDCSubject, &u.OIDCProvider, &u.DisplayName, &u.Language, &u.DistanceUnit, &u.CreatedAt, &u.UpdatedAt,
+	)
+	if err == nil {
+		return &u, nil
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return nil, ErrOIDCIdentityInUse
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("failed to link the SSO identity: %w", err)
+	}
+	var identity *string
+	var accountEmail string
+	if lookup := r.pool.QueryRow(ctx, `SELECT oidc_subject, email FROM users WHERE id::text = $1;`, userID).Scan(&identity, &accountEmail); lookup != nil {
+		return nil, ErrNotFound
+	}
+	if identity != nil {
+		return nil, ErrOIDCAlreadyLinked
+	}
+	return nil, ErrOIDCEmailMismatch
 }
 
 // ============================================================================
