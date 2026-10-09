@@ -241,6 +241,7 @@
     "electric_only": "Les sessions de recharge ne concernent que les véhicules électriques"
   },
   "tariff": {
+    "currency_mismatch": "La devise du tarif ({p0}) doit correspondre à celle du véhicule ({p1})",
     "band_invalid": "Tranche invalide",
     "bands_required": "Au moins une tranche est requise",
     "name_required": "Le nom de la grille tarifaire est requis",
