@@ -19,6 +19,9 @@ var (
 type Claims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	// SessionID is the refresh token family the access token was issued for. A session that was revoked
+	// no longer vouches for it: the routes that mint credentials check that the session is still active.
+	SessionID string `json:"sid,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -32,14 +35,21 @@ func GenerateToken(userID, email, secret string, expirationHours int) (string, e
 
 // GenerateAccessToken creates a signed short-lived JWT token with expiration in minutes.
 func GenerateAccessToken(userID, email, secret string, expirationMinutes int) (string, error) {
+	return GenerateSessionAccessToken(userID, email, "", secret, expirationMinutes)
+}
+
+// GenerateSessionAccessToken is GenerateAccessToken for a token bound to the session (refresh token family) it was
+// issued for.
+func GenerateSessionAccessToken(userID, email, sessionID, secret string, expirationMinutes int) (string, error) {
 	if expirationMinutes <= 0 {
 		expirationMinutes = 15
 	}
 
 	now := time.Now()
 	claims := &Claims{
-		UserID: userID,
-		Email:  email,
+		UserID:    userID,
+		Email:     email,
+		SessionID: sessionID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(expirationMinutes) * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(now),

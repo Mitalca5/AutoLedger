@@ -36,7 +36,7 @@ func newRouteTable(t *testing.T) chi.Router {
 	r := chi.NewRouter()
 	passThrough := func(next http.Handler) http.Handler { return next }
 	registerSystemRoutes(r, nil)
-	registerAPIRoutes(r, testJWTSecret, fakeTokenValidator{}, passThrough, &apiHandlers{})
+	registerAPIRoutes(r, testJWTSecret, fakeTokenValidator{}, fakeSessionChecker{}, passThrough, &apiHandlers{})
 	return r
 }
 
@@ -133,4 +133,11 @@ func assertSameRoutes(t *testing.T, tier string, got, want []string) {
 	if strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("%s routes differ\n got: %v\nwant: %v", tier, got, want)
 	}
+}
+
+// fakeSessionChecker lets every session through: these tests are about which routes need which credential.
+type fakeSessionChecker struct{}
+
+func (fakeSessionChecker) IsSessionActive(context.Context, string, string) (bool, error) {
+	return true, nil
 }

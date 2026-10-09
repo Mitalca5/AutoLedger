@@ -105,7 +105,7 @@ func registerSystemRoutes(r chi.Router, ping func(context.Context) error) {
 
 // registerAPIRoutes mounts the API in three tiers: public authentication, the integration routes an API token
 // opens, and the routes that need a signed-in session.
-func registerAPIRoutes(r chi.Router, jwtSecret string, tokens appMiddleware.APITokenValidator, idempotency func(http.Handler) http.Handler, h *apiHandlers) {
+func registerAPIRoutes(r chi.Router, jwtSecret string, tokens appMiddleware.APITokenValidator, sessions appMiddleware.SessionChecker, idempotency func(http.Handler) http.Handler, h *apiHandlers) {
 	h.registerPublicAuthRoutes(r)
 
 	// Integration routes: the only ones an API token opens (Home Assistant, scripts); a session works too.
@@ -121,7 +121,7 @@ func registerAPIRoutes(r chi.Router, jwtSecret string, tokens appMiddleware.APIT
 		r.Use(appMiddleware.AuthenticateJWT(jwtSecret))
 		r.Use(idempotency)
 
-		h.registerSessionAuthRoutes(r)
+		h.registerSessionAuthRoutes(r, appMiddleware.RequireActiveSession(sessions))
 		h.registerAccountRoutes(r)
 
 		r.Route("/api/vehicles", func(r chi.Router) {

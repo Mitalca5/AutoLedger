@@ -124,7 +124,7 @@ func main() {
 		slog.Error("failed to initialize the API handlers", "error", err)
 		os.Exit(1)
 	}
-	registerAPIRoutes(r, cfg.JWTSecret, repo, handlers.Idempotency(repo), api)
+	registerAPIRoutes(r, cfg.JWTSecret, repo, repo, handlers.Idempotency(repo), api)
 	registerSPA(r)
 
 	server := &http.Server{

@@ -280,6 +280,22 @@ func (r *Repository) RevokeAllUserRefreshTokens(ctx context.Context, userID stri
 	return nil
 }
 
+// IsSessionActive reports whether the session (refresh token family) of a user still holds a usable refresh token,
+// that is whether it can still renew its access. A revoked or expired session, and one of another user, is not.
+func (r *Repository) IsSessionActive(ctx context.Context, userID, familyID string) (bool, error) {
+	var active bool
+	err := r.pool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM refresh_tokens
+			WHERE user_id::text = $1 AND family_id::text = $2 AND NOT is_revoked AND expires_at > NOW()
+		);
+	`, userID, familyID).Scan(&active)
+	if err != nil {
+		return false, fmt.Errorf("failed to check the session: %w", err)
+	}
+	return active, nil
+}
+
 // ListSessions returns the signed-in devices of a user: the refresh token families that still hold a usable token,
 // most recently used first. Each rotation adds a token to its family, so the family's own bounds are the session's.
 func (r *Repository) ListSessions(ctx context.Context, userID string) ([]models.Session, error) {

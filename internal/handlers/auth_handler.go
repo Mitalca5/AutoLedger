@@ -147,7 +147,15 @@ func clientAddress(r *http.Request) string {
 }
 
 func (h *AuthHandler) issueSession(w http.ResponseWriter, r *http.Request, userID, email, familyID string) (string, string, error) {
-	accessToken, err := auth.GenerateAccessToken(userID, email, h.cfg.JWTSecret, h.cfg.JWTAccessExpirationMinutes)
+	if familyID == "" {
+		newFamID, famErr := auth.NewUUID()
+		if famErr != nil {
+			return "", "", fmt.Errorf("failed to generate family ID: %w", famErr)
+		}
+		familyID = newFamID
+	}
+
+	accessToken, err := auth.GenerateSessionAccessToken(userID, email, familyID, h.cfg.JWTSecret, h.cfg.JWTAccessExpirationMinutes)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate access token: %w", err)
 	}
@@ -155,14 +163,6 @@ func (h *AuthHandler) issueSession(w http.ResponseWriter, r *http.Request, userI
 	plainRefreshToken, tokenHash, err := auth.GenerateRefreshToken()
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate refresh token: %w", err)
-	}
-
-	if familyID == "" {
-		newFamID, famErr := auth.NewUUID()
-		if famErr != nil {
-			return "", "", fmt.Errorf("failed to generate family ID: %w", famErr)
-		}
-		familyID = newFamID
 	}
 
 	expiresAt := time.Now().Add(time.Duration(h.cfg.JWTRefreshExpirationDays) * 24 * time.Hour)
@@ -366,7 +366,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := auth.GenerateAccessToken(user.ID, user.Email, h.cfg.JWTSecret, h.cfg.JWTAccessExpirationMinutes)
+	accessToken, err := auth.GenerateSessionAccessToken(user.ID, user.Email, rotatedToken.FamilyID, h.cfg.JWTSecret, h.cfg.JWTAccessExpirationMinutes)
 	if err != nil {
 		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", "Failed to generate access token"))
 		return

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httprate"
-	"time"
 )
 
 // registerPublicAuthRoutes registers the credential endpoints that need no session.
@@ -27,19 +29,20 @@ func (h *apiHandlers) registerPublicAuthRoutes(r chi.Router) {
 }
 
 // registerSessionAuthRoutes registers the account endpoints of a signed-in session, including API token management.
-func (h *apiHandlers) registerSessionAuthRoutes(r chi.Router) {
+// Creating a credential (a password, an API token) also needs the session to be active, see activeSession.
+func (h *apiHandlers) registerSessionAuthRoutes(r chi.Router, activeSession func(http.Handler) http.Handler) {
 	r.Get("/api/auth/me", h.auth.Me)
 	r.Get("/api/auth/sessions", h.auth.ListSessions)
 	r.Delete("/api/auth/sessions/{sessionId}", h.auth.RevokeSession)
 	r.Post("/api/auth/logout-all", h.auth.LogoutAll)
-	r.With(httprate.LimitByIP(10, time.Minute)).Post("/api/auth/password", h.auth.ChangePassword)
+	r.With(httprate.LimitByIP(10, time.Minute), activeSession).Post("/api/auth/password", h.auth.ChangePassword)
 	r.Put("/api/auth/language", h.auth.UpdateLanguage)
 	r.Put("/api/auth/distance-unit", h.auth.UpdateDistanceUnit)
 
 	// API Tokens (External Integrations / Home Assistant)
 	r.Route("/api/auth/tokens", func(r chi.Router) {
 		r.Get("/", h.token.ListTokens)
-		r.Post("/", h.token.CreateToken)
+		r.With(activeSession).Post("/", h.token.CreateToken)
 		r.Delete("/{tokenId}", h.token.RevokeToken)
 	})
 }

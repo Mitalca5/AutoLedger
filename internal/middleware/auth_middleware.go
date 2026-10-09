@@ -15,6 +15,8 @@ type contextKey string
 const (
 	UserIDKey    contextKey = "userID"
 	UserEmailKey contextKey = "userEmail"
+	// SessionIDKey holds the session an access token was issued for; absent for an API token or an older token.
+	SessionIDKey contextKey = "sessionID"
 )
 
 // accessTokenCookieName mirrors the constant of the same name in the handlers package
@@ -37,6 +39,39 @@ func extractBearerToken(r *http.Request) (string, error) {
 	}
 
 	return "", fmt.Errorf("missing Authorization header or %s cookie", accessTokenCookieName)
+}
+
+// SessionChecker tells whether a session (refresh token family) of a user can still renew its access.
+type SessionChecker interface {
+	IsSessionActive(ctx context.Context, userID, sessionID string) (bool, error)
+}
+
+// RequireActiveSession refuses a request whose access token comes from a session that was revoked or has expired,
+// and a token that names no session. An access token stays valid until it expires, which is fine to read data; the
+// routes that create credentials (an API token, a new password) must not honour one whose session was ended, or
+// revoking a session would not contain a stolen token. Run it after AuthenticateJWT. The 401 makes the web app
+// renew its session, and the retry carries a token bound to it.
+func RequireActiveSession(checker SessionChecker) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sessionID, _ := r.Context().Value(SessionIDKey).(string)
+			userID := GetUserID(r.Context())
+			if sessionID == "" || userID == "" {
+				sendJSONError(w, http.StatusUnauthorized, "Session must be renewed")
+				return
+			}
+			active, err := checker.IsSessionActive(r.Context(), userID, sessionID)
+			if err != nil {
+				sendJSONError(w, http.StatusInternalServerError, "Session check failed")
+				return
+			}
+			if !active {
+				sendJSONError(w, http.StatusUnauthorized, "Session is no longer active")
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 type APITokenValidator interface {
@@ -91,6 +126,7 @@ func authenticate(jwtSecret string, tokenValidator APITokenValidator) func(http.
 
 			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 			ctx = context.WithValue(ctx, UserEmailKey, claims.Email)
+			ctx = context.WithValue(ctx, SessionIDKey, claims.SessionID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
