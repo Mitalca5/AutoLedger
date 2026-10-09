@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { t } from '@/i18n'
 import { enqueueMutation, listQueuedMutations, removeQueuedMutation, type QueuedMutation } from '@/services/offlineQueue'
 import { useVehicleStore } from '@/stores/vehicle'
+import { fetchWithSessionRefresh } from '@/services/sessionFetch'
 
 const RETRY_INTERVAL_MS = 30_000
 
@@ -41,7 +42,7 @@ export const useOfflineStore = defineStore('offline', () => {
       for (const m of await listQueuedMutations()) {
         let res: Response
         try {
-          res = await fetch(`/api${m.endpoint}`, {
+          res = await fetchWithSessionRefresh(`/api${m.endpoint}`, {
             method: m.method,
             credentials: 'include',
             headers: {

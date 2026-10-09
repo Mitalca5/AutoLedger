@@ -4,13 +4,13 @@ import { formatAmount } from '@/currency'
 import { newIdempotencyKey } from '@/services/offlineQueue'
 import { apiErrorMessage } from '@/services/apiError'
 import { csvImportForm, type CSVExecuteResult, type CSVImportBatch, type CSVImportOptions, type CSVImportProfile, type CSVPreviewResult } from '@/services/csvImport'
+import { fetchWithSessionRefresh, isPublicAuthRequest } from '@/services/sessionFetch'
 
 const BASE_URL = '/api'
 
 // The access and refresh tokens live exclusively in HttpOnly cookies set by the API
 // (see internal/handlers/auth_handler.go) — JS never reads or stores them, which removes
 // them as an XSS exfiltration target compared to localStorage.
-let refreshPromise: Promise<boolean> | null = null
 
 function getHeaders(body?: any): HeadersInit {
   const headers: Record<string, string> = {}
@@ -18,29 +18,6 @@ function getHeaders(body?: any): HeadersInit {
     headers['Content-Type'] = 'application/json'
   }
   return headers
-}
-
-async function refreshAccessToken(): Promise<boolean> {
-  if (refreshPromise) {
-    return refreshPromise
-  }
-
-  refreshPromise = (async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      })
-      return res.ok
-    } catch {
-      return false
-    } finally {
-      refreshPromise = null
-    }
-  })()
-
-  return refreshPromise
 }
 
 export interface QueuedResult {
@@ -90,7 +67,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, offlineLa
 
   let res: Response
   try {
-    res = await fetch(`${BASE_URL}${endpoint}`, {
+    res = await fetchWithSessionRefresh(`${BASE_URL}${endpoint}`, {
       ...options,
       credentials: options.credentials || 'include',
       headers: {
@@ -107,29 +84,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}, offlineLa
     throw err
   }
 
-  // Intercept 401 Unauthorized for token refresh
-  if (res.status === 401) {
-    const isAuthEndpoint =
-      endpoint.startsWith('/auth/login') ||
-      endpoint.startsWith('/auth/register') ||
-      endpoint.startsWith('/auth/refresh') ||
-      endpoint.startsWith('/auth/config')
-
-    if (!isAuthEndpoint) {
-      const refreshed = await refreshAccessToken()
-      if (refreshed) {
-        // The new access token cookie is already set by the browser; just retry.
-        return request<T>(endpoint, options, offlineLabel)
-      }
-
-      // Refresh failed -> session is over, redirect to login
-      if (
-        window.location.pathname !== '/login' &&
-        window.location.pathname !== '/register' &&
-        window.location.pathname !== '/onboarding'
-      ) {
-        window.location.href = '/login'
-      }
+  // A failed refresh keeps the existing redirect for ordinary API requests.
+  if (res.status === 401 && !isPublicAuthRequest(`${BASE_URL}${endpoint}`)) {
+    if (!['/login', '/register', '/onboarding'].includes(window.location.pathname)) {
+      window.location.href = '/login'
     }
   }
 
@@ -154,7 +112,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, offlineLa
 
 // Fetches a generated file, taking its name from Content-Disposition; the server's error message is kept when it sends one.
 async function fetchDownload(path: string, fallbackName: string): Promise<{ blob: Blob; filename: string }> {
-  const res = await fetch(`${BASE_URL}${path}`, { credentials: 'include' })
+  const res = await fetchWithSessionRefresh(`${BASE_URL}${path}`, { credentials: 'include' })
   if (!res.ok) {
     let errorMsg = t('import.exportFailed')
     try {
@@ -476,7 +434,7 @@ export const api = {
     request<{ message: string }>(`/vehicles/${vehicleId}/documents/${docId}`, { method: 'DELETE' }),
 
   downloadDocumentBlob: async (vehicleId: string, docId: string): Promise<{ blob: Blob; filename: string }> => {
-    const res = await fetch(`${BASE_URL}/vehicles/${vehicleId}/documents/${docId}`, {
+    const res = await fetchWithSessionRefresh(`${BASE_URL}/vehicles/${vehicleId}/documents/${docId}`, {
       credentials: 'include',
     })
     if (!res.ok) {
