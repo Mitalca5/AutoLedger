@@ -427,7 +427,7 @@ async function testModalConnection() {
             <label for="vehicle-tariff-plan" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('tariffs.planSelectLabel') }}</label>
             <select id="vehicle-tariff-plan" v-model="form.tariff_plan_id" class="field">
               <option :value="null">{{ $t('tariffs.noPlanManual') }}</option>
-              <option v-for="p in tariffPlans" :key="p.id" :value="p.id">
+              <option v-for="p in tariffPlans.filter((plan) => plan.currency === form.currency)" :key="p.id" :value="p.id">
                 {{ p.name }} ({{ p.plan_type }})
               </option>
             </select>
