@@ -132,6 +132,23 @@ func (h *VehicleHandler) List(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, list)
 }
 
+// checkTariffCurrency refuses to relabel a tariff amount as the vehicle's currency.
+func (h *VehicleHandler) checkTariffCurrency(w http.ResponseWriter, r *http.Request, planID *string, currency string) bool {
+	if planID == nil || *planID == "" {
+		return true
+	}
+	plan, err := h.repo.GetTariffPlanByID(r.Context(), *planID, middleware.GetUserID(r.Context()))
+	if err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("tariff.not_found", "Tariff plan not found"))
+		return false
+	}
+	if plan.Currency != currency {
+		writeAPIError(w, http.StatusBadRequest, apierror.Newf("tariff.currency_mismatch", "The tariff currency (%s) must match the vehicle currency (%s)", plan.Currency, currency))
+		return false
+	}
+	return true
+}
+
 func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 
@@ -156,6 +173,9 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	currency, err := normalizeVehicleCurrency(req.Currency)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	if !h.checkTariffCurrency(w, r, req.TariffPlanID, currency) {
 		return
 	}
 	grafanaURL, err := normalizeGrafanaURL(req.TeslaMateGrafanaURL)
@@ -341,6 +361,9 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		existing.DefaultDriverID = req.DefaultDriverID
 	}
 	existing.TariffPlanID = req.TariffPlanID
+	if !h.checkTariffCurrency(w, r, req.TariffPlanID, existing.Currency) {
+		return
+	}
 	existing.IsHomeChargerDefault = req.IsHomeChargerDefault
 
 	if err := h.repo.UpdateVehicle(r.Context(), existing); err != nil {
