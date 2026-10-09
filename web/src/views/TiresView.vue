@@ -477,7 +477,7 @@ async function handleDeleteLog(l: any) {
             :title="$t('tires.tiresView.rotateTooltip', { pairs: 'FL ⇄ RR, FR ⇄ RL' })"
             class="tap btn btn-secondary"
           >
-            <Shuffle class="w-3.5 h-3.5 text-indigo-400" />
+            <Shuffle class="w-3.5 h-3.5 text-sky-400" />
             {{ $t('tires.tiresView.crossRotation') }}
           </button>
         </div>
@@ -549,7 +549,7 @@ async function handleDeleteLog(l: any) {
               class="btn btn-secondary"
               :title="$t('tires.tiresView.copyATireSWhole')"
             >
-              <Copy class="w-3.5 h-3.5 text-indigo-400" />
+              <Copy class="w-3.5 h-3.5 text-sky-400" />
               <span>{{ $t('tires.tiresView.copyATireSHistory') }}</span>
             </button>
             <button

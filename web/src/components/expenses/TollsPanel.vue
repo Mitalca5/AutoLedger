@@ -47,13 +47,13 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
             <span v-if="e.drive_title" class="text-xs px-2.5 py-0.5 rounded-lg bg-success-500/10 text-success-400 border border-success-500/20 flex items-center gap-1 truncate max-w-xs">
               <Navigation class="w-3 h-3 shrink-0" /> <span class="truncate">{{ e.drive_title }}</span>
             </span>
-            <span v-else-if="e.trip_group_name" class="text-xs px-2.5 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 truncate max-w-xs">
+            <span v-else-if="e.trip_group_name" class="text-xs px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center gap-1 truncate max-w-xs">
               <Layers class="w-3 h-3 shrink-0" /> <span class="truncate">{{ e.trip_group_name }}</span>
             </span>
             <button
               v-if="e.document_id"
               @click="emit('view-document', e.document_id, e.document_filename, false)"
-              class="text-xs px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
+              class="text-xs px-2 py-0.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
               :title="$t('expenses.tollsPanel.viewTheReceipt')"
             >
               <Paperclip class="w-3 h-3 shrink-0" />
@@ -73,7 +73,7 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
               class="btn btn-secondary"
               :title="$t('expenses.tollsPanel.createACarpoolForThis')"
             >
-              <Users class="w-3.5 h-3.5 text-cyan-400" />
+              <Users class="w-3.5 h-3.5 text-sky-400" />
               <span>{{ $t('expenses.tollsPanel.carpool') }}</span>
             </button>
             <button

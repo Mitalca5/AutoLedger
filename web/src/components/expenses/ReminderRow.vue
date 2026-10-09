@@ -53,7 +53,7 @@ const tile = computed(() => reminderDueTile(r.value))
             </span>
             <span
               v-if="r.webhook_enabled"
-              class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 flex items-center gap-1"
+              class="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center gap-1"
               :title="$t('expenses.remindersPanel.webhookNotificationEnabledForThis')"
             >
               <Radio class="w-2.5 h-2.5" />
@@ -137,7 +137,7 @@ const tile = computed(() => reminderDueTile(r.value))
               {{ $t('common.atKm', { unit: distanceUnit(), km: formatDistanceValue(r.last_service_odometer) }) }}
             </span>
           </span>
-          <span v-if="r.maintenance" class="mt-1 block text-xs text-violet-300">
+          <span v-if="r.maintenance" class="mt-1 block text-xs text-sky-300">
             {{ $t('expenses.remindersPanel.basedOnMaintenance', { date: formatDate(r.maintenance.date) }) }}
           </span>
         </div>
@@ -157,7 +157,7 @@ const tile = computed(() => reminderDueTile(r.value))
         <div v-if="vehicleStore.canEdit" class="flex items-center gap-1.5">
           <button
             @click="emit('edit', r)"
-            class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-violet-400 rounded-xl transition-colors border border-slate-700/60"
+            class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-sky-400 rounded-xl transition-colors border border-slate-700/60"
             :title="$t('expenses.remindersPanel.editThisReminder')" :aria-label="$t('expenses.remindersPanel.editThisReminder')"
           >
             <Pencil class="w-3.5 h-3.5" />

@@ -73,7 +73,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
           </div>
           <div class="flex items-center gap-3 text-xs text-slate-300 flex-wrap">
             <span class="font-bold text-rose-400">{{ formatDistance(trip.distance_km, 1) }}</span>
-            <span class="text-indigo-400 font-semibold">{{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}</span>
+            <span class="text-sky-400 font-semibold">{{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}</span>
             <span class="text-blue-400 font-semibold">{{ $t('carpool.carpoolTripList.passengers', { length: trip.passengers?.length || 0 }) }}</span>
           </div>
           <p v-if="trip.notes" class="text-xs text-slate-400 pt-2 border-t border-slate-700/60">{{ trip.notes }}</p>
@@ -82,7 +82,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
         <!-- Legs, as rows -->
         <div class="space-y-1.5">
           <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-            <Navigation class="w-3.5 h-3.5 text-indigo-400" />
+            <Navigation class="w-3.5 h-3.5 text-sky-400" />
             {{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}
           </h4>
           <component

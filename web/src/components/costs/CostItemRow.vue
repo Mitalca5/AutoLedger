@@ -14,7 +14,7 @@ const TONES: Record<Tone, { box: string; text: string }> = {
   sky: { box: 'bg-info-500/10 text-info-400', text: 'text-info-400' },
   emerald: { box: 'bg-success-500/10 text-success-400', text: 'text-success-400' },
   pink: { box: 'bg-pink-500/10 text-pink-400', text: 'text-pink-400' },
-  purple: { box: 'bg-purple-500/10 text-purple-400', text: 'text-purple-400' },
+  purple: { box: 'bg-sky-500/10 text-sky-400', text: 'text-sky-400' },
   amber: { box: 'bg-warning-500/10 text-warning-400', text: 'text-warning-400' },
   slate: { box: 'bg-slate-500/10 text-slate-300', text: 'text-slate-300' },
 }

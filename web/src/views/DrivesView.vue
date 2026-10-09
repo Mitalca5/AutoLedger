@@ -481,7 +481,7 @@ async function handleBulkApplyToll() {
           <button
             @click="switchView('TRIPS')"
             class="tap flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-transparent"
-            :class="viewMode === 'TRIPS' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
+            :class="viewMode === 'TRIPS' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
           >
             <Layers class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.trips') }}
           </button>
@@ -531,7 +531,7 @@ async function handleBulkApplyToll() {
         <button
           @click="hasTollOnly = !hasTollOnly"
           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
-          :class="hasTollOnly ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-cyan-400/80 hover:text-cyan-300 border border-transparent'"
+          :class="hasTollOnly ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-sky-400/80 hover:text-sky-300 border border-transparent'"
           :title="$t('drives.drivesView.drivesWithATollExpense')"
         >
           <Receipt class="w-3.5 h-3.5" />

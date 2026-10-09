@@ -238,7 +238,7 @@ async function handleExecute() {
       <!-- Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <UploadCloud class="w-5 h-5 text-indigo-400" />
+          <UploadCloud class="w-5 h-5 text-sky-400" />
           {{ $t('import.modalTitle') }}
         </h3>
         <button @click="close" class="tap p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" :aria-label="$t('common.close')">
@@ -373,7 +373,7 @@ async function handleExecute() {
                   v-model="skipDuplicates"
                   @change="onOptionsChange"
                   type="checkbox"
-                  class="rounded text-indigo-500 focus:ring-indigo-500/20 bg-slate-900 border-slate-700 w-4 h-4"
+                  class="rounded text-sky-500 focus:ring-sky-500/20 bg-slate-900 border-slate-700 w-4 h-4"
                 />
                 <span>{{ $t('import.skipDuplicates') }}</span>
               </label>
@@ -383,7 +383,7 @@ async function handleExecute() {
           <!-- Preview Table -->
           <div v-if="previewResult" class="space-y-3 pt-2">
             <div class="flex items-center justify-between text-xs text-slate-300 border-b border-slate-800 pb-2">
-              <span class="font-semibold text-indigo-400">
+              <span class="font-semibold text-sky-400">
                 {{ typeLabel(previewResult.type) }}
                 — {{ previewResult.total_rows }} {{ $t('import.linesFound') }}
               </span>

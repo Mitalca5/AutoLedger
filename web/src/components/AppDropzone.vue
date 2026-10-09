@@ -184,8 +184,8 @@ function removeFile() {
       :class="[
         'relative border-2 border-dashed rounded-xl p-5 text-center transition-all cursor-pointer select-none flex flex-col items-center justify-center gap-2 group',
         isDragging
-          ? 'border-indigo-400 bg-indigo-500/10 scale-[1.01]'
-          : 'border-slate-700 hover:border-indigo-500/60 bg-slate-800/50 hover:bg-slate-800/80',
+          ? 'border-sky-400 bg-sky-500/10 scale-[1.01]'
+          : 'border-slate-700 hover:border-sky-500/60 bg-slate-800/50 hover:bg-slate-800/80',
         disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : '',
       ]"
     >
@@ -193,8 +193,8 @@ function removeFile() {
         :class="[
           'w-11 h-11 rounded-xl flex items-center justify-center transition-colors',
           isDragging
-            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30'
-            : 'bg-slate-800 text-slate-400 group-hover:text-indigo-400 group-hover:bg-slate-700/80',
+            ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30'
+            : 'bg-slate-800 text-slate-400 group-hover:text-sky-400 group-hover:bg-slate-700/80',
         ]"
       >
         <UploadCloud class="w-6 h-6 animate-pulse transition-transform group-hover:-translate-y-0.5" />

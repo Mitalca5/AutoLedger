@@ -41,7 +41,7 @@ const formatDate = formatDayTime
         <CardOpenButton :label="$t('common.openItem', { item: tg.name })" @click="emit('open-cost', tg)" />
         <div class="flex items-start gap-3 min-w-0 flex-1">
           <!-- Icon indicator -->
-          <div class="mt-1 p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+          <div class="mt-1 p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
             <Layers class="w-4 h-4" />
           </div>
 
@@ -52,7 +52,7 @@ const formatDate = formatDayTime
               <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-800 text-slate-200 border border-slate-700/60 shrink-0">
                 {{ formatDistance(tg.distance_km) }}
               </span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 shrink-0">
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/30 shrink-0">
                 {{ $t('drives.tripGroupsPanel.legS', { length: tg.drive_ids?.length || 0 }) }}
               </span>
               <span v-if="tg.carpool_count" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/30 shrink-0">
@@ -111,7 +111,7 @@ const formatDate = formatDayTime
           <template v-if="vehicleStore.canEdit">
             <button
               @click="emit('edit', tg)"
-              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-indigo-400 rounded-lg border border-slate-700/60 transition-colors"
+              class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-sky-400 rounded-lg border border-slate-700/60 transition-colors"
               :title="$t('drives.tripGroupsPanel.renameTheTrip')" :aria-label="$t('drives.tripGroupsPanel.renameTheTrip')"
             >
               <Pencil class="w-3.5 h-3.5" />

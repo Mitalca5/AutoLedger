@@ -47,9 +47,9 @@ function clear() {
 
 <template>
   <div>
-    <div v-if="documentId" class="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-indigo-500/30 bg-slate-800 px-3">
+    <div v-if="documentId" class="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-slate-800 px-3">
       <span class="flex min-w-0 items-center gap-2 text-sm text-white">
-        <FileText class="h-4 w-4 shrink-0 text-indigo-400" aria-hidden="true" />
+        <FileText class="h-4 w-4 shrink-0 text-sky-400" aria-hidden="true" />
         <span class="truncate">{{ filename || $t('quickadd.quickPhotoField.attached') }}</span>
       </span>
       <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:text-danger-400" :aria-label="$t('quickadd.quickPhotoField.removeTheReceipt')" @click="clear">
@@ -59,8 +59,8 @@ function clear() {
 
     <template v-else>
       <label
-        class="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-600/20 px-3 text-sm font-semibold text-indigo-200"
-        :class="offlineStore.isOnline && !uploading ? 'cursor-pointer hover:bg-indigo-600/30' : 'opacity-60'"
+        class="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-600/20 px-3 text-sm font-semibold text-sky-200"
+        :class="offlineStore.isOnline && !uploading ? 'cursor-pointer hover:bg-sky-600/30' : 'opacity-60'"
       >
         <Camera class="h-4 w-4" aria-hidden="true" />
         {{ uploading ? $t('quickadd.quickPhotoField.uploading') : $t('quickadd.quickPhotoField.photo') }}

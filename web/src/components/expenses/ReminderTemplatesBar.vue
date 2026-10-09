@@ -70,7 +70,7 @@ onMounted(load)
           <option value="">{{ $t('expenses.remindersPanel.templates.pick') }}</option>
           <option v-for="tpl in templates" :key="tpl.id" :value="tpl.id">{{ tpl.name }} ({{ tpl.items.length }})</option>
         </select>
-        <button type="button" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!selected" :title="!selected ? $t('expenses.remindersPanel.templates.pickFirst') : undefined" @click="apply">
+        <button type="button" class="px-3 py-1.5 rounded-xl bg-sky-500/20 text-sky-200 border border-sky-500/30 font-semibold disabled:opacity-50" :disabled="!selected" :title="!selected ? $t('expenses.remindersPanel.templates.pickFirst') : undefined" @click="apply">
           {{ $t('expenses.remindersPanel.templates.apply') }}
         </button>
         <button type="button" class="text-slate-400 hover:text-danger-400 disabled:opacity-40" :disabled="!selected" :title="!selected ? $t('expenses.remindersPanel.templates.pickFirst') : undefined" :aria-label="$t('expenses.remindersPanel.templates.delete')" @click="remove">

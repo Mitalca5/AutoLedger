@@ -126,9 +126,9 @@ const handleSaveSession = () => runOnce(handleSaveSessionAction)
       v-if="copiedSession && !editingSessionId"
       type="button"
       @click="applyCopiedSessionToForm()"
-      class="w-full px-3 py-2 bg-indigo-950/40 border border-indigo-800/60 rounded-xl text-indigo-300 hover:text-white text-xs flex items-center justify-center gap-2 transition-colors font-semibold"
+      class="w-full px-3 py-2 bg-sky-950/40 border border-sky-800/60 rounded-xl text-sky-300 hover:text-white text-xs flex items-center justify-center gap-2 transition-colors font-semibold"
     >
-      <ClipboardPaste class="w-4 h-4 text-indigo-400" />
+      <ClipboardPaste class="w-4 h-4 text-sky-400" />
       <span>{{ $t('tires.tireSessionModal.pasteTheDataOfThe', { mounted_date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' }) }}</span>
     </button>
 

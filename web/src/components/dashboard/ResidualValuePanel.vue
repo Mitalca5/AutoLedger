@@ -131,7 +131,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
           <input v-model="readingDate" type="date" :aria-label="$t('dashboard.residualPanel.date')" class="w-auto field" />
           <NumberInput text v-model="readingPercent" min="1" max="100" :placeholder="$t('dashboard.residualPanel.percent')" :aria-label="$t('dashboard.residualPanel.percent')" class="w-28 field" />
           <NumberInput text v-model="readingMax" min="1" :placeholder="$t('dashboard.residualPanel.newCapacity')" :aria-label="$t('dashboard.residualPanel.newCapacity')" class="w-36 field" />
-          <button type="submit" class="px-3 py-2 rounded-xl bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 font-semibold disabled:opacity-50" :disabled="!readingPercent && !readingMax" :title="!readingPercent && !readingMax ? $t('dashboard.residualPanel.readingRequired') : undefined">{{ $t('dashboard.residualPanel.addReading') }}</button>
+          <button type="submit" class="px-3 py-2 rounded-xl bg-sky-500/20 text-sky-200 border border-sky-500/30 font-semibold disabled:opacity-50" :disabled="!readingPercent && !readingMax" :title="!readingPercent && !readingMax ? $t('dashboard.residualPanel.readingRequired') : undefined">{{ $t('dashboard.residualPanel.addReading') }}</button>
         </form>
         <p v-if="error" class="text-danger-400" role="alert">{{ error }}</p>
         <ul v-if="health?.readings.length" class="space-y-1">

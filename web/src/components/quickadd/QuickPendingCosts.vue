@@ -100,7 +100,7 @@ async function complete(c: PendingCharge) {
           <button
             v-if="suggestion(c)"
             type="button"
-            class="mt-2 min-h-11 rounded-lg px-1 text-xs font-semibold text-indigo-300 hover:text-indigo-200"
+            class="mt-2 min-h-11 rounded-lg px-1 text-xs font-semibold text-sky-300 hover:text-sky-200"
             @click="costs[c.id] = suggestion(c)!"
           >
             {{ $t('quickadd.quickPendingCosts.applyTheLastRate', { c: formatAmount(Number(suggestion(c)), vehicleStore.currency) }) }}

@@ -507,7 +507,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, Math.max(0, member.percentage)))" :aria-label="member.display_name">
               <div
-                class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                class="h-full bg-gradient-to-r from-blue-500 to-sky-500 rounded-full transition-all duration-500"
                 :style="{ width: `${Math.min(100, Math.max(0, member.percentage))}%` }"
               ></div>
             </div>

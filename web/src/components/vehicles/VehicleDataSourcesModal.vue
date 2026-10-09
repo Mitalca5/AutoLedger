@@ -62,7 +62,7 @@ function formatLast(iso?: string) {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div class="flex min-w-0 items-center gap-3">
-          <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-xl"><Database class="w-5 h-5" /></div>
+          <div class="p-2 bg-sky-500/10 text-sky-400 rounded-xl"><Database class="w-5 h-5" /></div>
           <div class="min-w-0">
             <h3 class="text-base font-bold text-white">{{ $t('vehicles.vehicleDataSourcesModal.title') }}</h3>
             <p class="text-xs text-slate-400 truncate">{{ vehicle?.name }}</p>

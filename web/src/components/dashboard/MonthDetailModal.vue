@@ -84,7 +84,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <!-- Header with Month Title, Prev/Next Navigation, and Close Button -->
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between gap-2 shrink-0 bg-slate-900/95">
         <div class="flex items-center gap-2 sm:gap-3 min-w-0 pr-2">
-          <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
+          <div class="p-2 bg-sky-500/10 text-sky-400 rounded-xl shrink-0">
             <PieChart class="w-5 h-5" />
           </div>
           <div class="min-w-0 truncate">
@@ -174,12 +174,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <div v-if="selectedMonthBreakdown.fixedVar && selectedMonthBreakdown.fixedVar.totalAmount > 0" class="p-3.5 bg-slate-800/40 border border-slate-700/50 rounded-xl space-y-2">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
           <span class="font-semibold text-white flex items-center gap-1.5">
-            <SlidersHorizontal class="w-3.5 h-3.5 text-indigo-400" />
+            <SlidersHorizontal class="w-3.5 h-3.5 text-sky-400" />
             <span>{{ $t('dashboard.monthDetailModal.fixedVsVariable') }}</span>
           </span>
           <div class="flex items-center gap-3 text-xs flex-wrap">
-            <span class="flex items-center gap-1.5 text-purple-300">
-              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span class="flex items-center gap-1.5 text-sky-300">
+              <span class="w-2 h-2 rounded-full bg-sky-500"></span>
               <span>{{ $t('dashboard.monthDetailModal.fixedCosts') }} : <strong class="text-white">{{ formatPercent(selectedMonthBreakdown.fixedVar.fixedPct, 0) }}</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.fixedAmount, currency) }})</span>
             </span>
             <span class="text-slate-400">•</span>
@@ -193,12 +193,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <!-- Bicolor bar -->
         <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden flex" role="progressbar" :aria-label="$t('dashboard.monthDetailModal.fixedVsVariable')">
           <div
-            class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full transition-all duration-300"
+            class="bg-gradient-to-r from-sky-500 to-sky-500 h-full transition-all duration-300"
             :style="{ width: `${selectedMonthBreakdown.fixedVar.fixedPct}%` }"
             :title="`${$t('dashboard.monthDetailModal.fixedCosts')}: ${selectedMonthBreakdown.fixedVar.fixedPct}%`"
           ></div>
           <div
-            class="bg-gradient-to-r from-info-500 to-teal-400 h-full transition-all duration-300"
+            class="bg-gradient-to-r from-info-500 to-sky-400 h-full transition-all duration-300"
             :style="{ width: `${selectedMonthBreakdown.fixedVar.variablePct}%` }"
             :title="`${$t('dashboard.monthDetailModal.variableCosts')}: ${selectedMonthBreakdown.fixedVar.variablePct}%`"
           ></div>
@@ -213,7 +213,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <!-- Toggle View Mode: Economic Cost vs Cash-Flow -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-slate-800/40 border border-slate-700/50 rounded-xl text-xs">
         <span class="text-slate-300 font-medium flex items-center gap-1.5">
-          <Info class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <Info class="w-3.5 h-3.5 text-sky-400 shrink-0" />
           <span>{{ $t('dashboard.monthDetailModal.breakdownCalculationMode') }}</span>
         </span>
         <div class="flex items-center gap-1 bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/70">
@@ -223,7 +223,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             :aria-pressed="monthDetailViewMode === 'economic'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
-              monthDetailViewMode === 'economic' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              monthDetailViewMode === 'economic' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
             ]"
           >
             {{ $t('dashboard.monthDetailModal.costPriceKm', { unit: distanceUnit(), cur: currencySymbol(currency) }) }}
@@ -234,7 +234,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             :aria-pressed="monthDetailViewMode === 'cash'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
-              monthDetailViewMode === 'cash' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+              monthDetailViewMode === 'cash' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
             ]"
           >
             {{ $t('dashboard.monthDetailModal.cashExpenses', { cur: currencySymbol(currency) }) }}
@@ -247,7 +247,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <!-- Left (2 cols): Donut Chart -->
         <div class="md:col-span-2 bg-slate-800/30 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center">
           <h4 class="text-xs font-bold text-white mb-2 self-start flex items-center gap-1.5">
-            <PieChart class="w-3.5 h-3.5 text-indigo-400" />
+            <PieChart class="w-3.5 h-3.5 text-sky-400" />
             <span>{{ $t('dashboard.monthDetailModal.breakdownOfTheMonth') }}</span>
           </h4>
           <div class="w-full h-56 sm:h-64 relative">
@@ -311,7 +311,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           </div>
 
           <!-- Total Row -->
-          <div class="p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex items-center justify-between text-xs mt-2">
+          <div class="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl flex items-center justify-between text-xs mt-2">
             <div class="font-bold text-white flex items-center gap-2">
               <span>{{ $t('dashboard.monthDetailModal.monthTotal') }}</span>
               <span class="text-xs text-slate-400 font-normal">({{ formatDistance(selectedMonthBreakdown.distanceKm) }})</span>
@@ -336,7 +336,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             to="/drives"
             class="btn btn-secondary"
           >
-            <Activity class="w-3.5 h-3.5 text-indigo-400" />
+            <Activity class="w-3.5 h-3.5 text-sky-400" />
             <span>{{ $t('dashboard.monthDetailModal.vehicleDrives') }}</span>
           </router-link>
           <router-link

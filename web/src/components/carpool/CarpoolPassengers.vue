@@ -110,7 +110,7 @@ function applyFairPrice(index: number) {
           <button
             type="button"
             @click="togglePassengerMath(index)"
-            class="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
+            class="text-sky-400 hover:text-sky-300 font-medium flex items-center gap-1 transition-colors"
             :title="expandedPassengerIndex === index ? $t('carpool.carpoolTripModal.hideCalcDetail') : $t('carpool.carpoolTripModal.explainShare')"
           >
             <Calculator class="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ function applyFairPrice(index: number) {
             <ChevronUp v-if="expandedPassengerIndex === index" class="w-3.5 h-3.5" />
             <ChevronDown v-else class="w-3.5 h-3.5" />
           </button>
-          <button type="button" @click="applyFairPrice(index)" class="text-indigo-400 hover:text-indigo-300 font-semibold">{{ $t('carpool.carpoolTripModal.applyTheFairShare') }}</button>
+          <button type="button" @click="applyFairPrice(index)" class="text-sky-400 hover:text-sky-300 font-semibold">{{ $t('carpool.carpoolTripModal.applyTheFairShare') }}</button>
           <button v-if="passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-400 hover:text-danger-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
             <Trash2 class="w-3.5 h-3.5" />
           </button>
@@ -132,7 +132,7 @@ function applyFairPrice(index: number) {
       >
         <div class="flex items-center justify-between text-xs">
           <span class="font-bold text-slate-200 flex items-center gap-1.5">
-            <Calculator class="w-3.5 h-3.5 text-indigo-400" />
+            <Calculator class="w-3.5 h-3.5 text-sky-400" />
             {{ $t('carpool.carpoolTripModal.formulaPerSection', { name: p.passenger_name || $t('carpool.passenger', { n: index + 1 }) }) }}
           </span>
           <span class="text-xs text-slate-400 font-medium">
@@ -146,7 +146,7 @@ function applyFairPrice(index: number) {
             :key="legIdx"
             class="text-xs p-2.5 rounded-lg border transition-colors"
             :class="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index
-              ? 'bg-slate-900/90 border-indigo-500/30 text-slate-200'
+              ? 'bg-slate-900/90 border-sky-500/30 text-slate-200'
               : 'bg-slate-900/30 border-slate-800/50 text-slate-400 opacity-60'"
           >
             <div class="flex items-center justify-between font-semibold">
@@ -157,7 +157,7 @@ function applyFairPrice(index: number) {
                 <span>{{ stops[legIdx] }} → {{ stops[legIdx + 1] }}</span>
                 <span v-if="Number(leg.distance_km)" class="text-slate-400 font-normal">({{ formatDistance(Number(leg.distance_km), 1) }})</span>
               </span>
-              <span v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="text-indigo-300 font-bold">
+              <span v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="text-sky-300 font-bold">
                 {{ fmt(euros((live.legDetails[legIdx]?.perPerson || 0) * (Number(p.seats) || 1))) }}
               </span>
               <span v-else class="text-slate-400 italic text-xs">
@@ -170,7 +170,7 @@ function applyFairPrice(index: number) {
               <span>•</span>
               <span>{{ $t('carpool.carpoolTripModal.occupants') }} <strong class="text-slate-200">{{ $t('carpool.carpoolTripModal.oneDriverPlusPassengers', { legDetails: live.legDetails[legIdx]?.seats || 0, legDetails2: 1 + (live.legDetails[legIdx]?.seats || 0) }) }}</strong></span>
               <span>•</span>
-              <span class="text-indigo-300/90">
+              <span class="text-sky-300/90">
                 {{ $t('carpool.carpoolTripModal.calcFormula', { total: fmt(euros(live.legDetails[legIdx]?.total || 0)), people: 1 + (live.legDetails[legIdx]?.seats || 0) }) }}{{ p.seats > 1 ? $t('carpool.carpoolTripModal.calcSeats', { seats: p.seats }) : '' }}
               </span>
             </div>

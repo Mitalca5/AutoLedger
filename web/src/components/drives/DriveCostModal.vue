@@ -150,7 +150,7 @@ async function handleDriverChange(event: Event) {
           >
             <ArrowLeft class="w-4 h-4" />
           </button>
-          <div class="p-2 rounded-xl shrink-0" :class="selectedCostDrive.is_trip_group ? 'bg-indigo-500/10 text-indigo-400' : 'bg-success-500/10 text-success-400'">
+          <div class="p-2 rounded-xl shrink-0" :class="selectedCostDrive.is_trip_group ? 'bg-sky-500/10 text-sky-400' : 'bg-success-500/10 text-success-400'">
             <component :is="selectedCostDrive.is_trip_group ? Layers : Coins" class="w-5 h-5" />
           </div>
           <div class="min-w-0 truncate">
@@ -190,7 +190,7 @@ async function handleDriverChange(event: Event) {
         <div class="flex items-center gap-3 text-xs text-slate-300 flex-wrap">
           <span class="font-bold text-rose-400">{{ formatDistance(selectedCostDrive.distance_km, 1) }}</span>
           <span v-if="selectedCostDrive.duration_min" class="text-slate-400">{{ $t('drives.driveCostModal.min', { duration_min: selectedCostDrive.duration_min }) }}</span>
-          <span v-if="selectedCostDrive.drives_count" class="text-indigo-400 font-semibold">{{ $t('drives.driveCostModal.legs', { drives_count: selectedCostDrive.drives_count }) }}</span>
+          <span v-if="selectedCostDrive.drives_count" class="text-sky-400 font-semibold">{{ $t('drives.driveCostModal.legs', { drives_count: selectedCostDrive.drives_count }) }}</span>
           <span v-if="selectedCostDrive.speed_avg" class="text-slate-400">{{ $t('drives.driveCostModal.kmHAvg', { speed: speedUnit(), speed_avg: Math.round(kmToDisplayDistance(selectedCostDrive.speed_avg)) }) }}</span>
           <span v-if="selectedCostDrive.costs?.electricity_kwh" class="text-info-400 font-mono">{{ $t('drives.driveCostModal.kwh', { electricity_kwh: selectedCostDrive.costs.electricity_kwh }) }}</span>
         </div>
@@ -229,14 +229,14 @@ async function handleDriverChange(event: Event) {
         <!-- Driver attribution (only for individual drives) -->
         <div v-if="!selectedCostDrive.is_trip_group && vehicleStore.canEdit" class="pt-2 border-t border-slate-700/60 flex items-center justify-between gap-2">
           <label for="drive-driver-select" class="text-xs text-slate-400 flex items-center gap-1.5 cursor-pointer">
-            <User class="w-3.5 h-3.5 text-purple-400" />
+            <User class="w-3.5 h-3.5 text-sky-400" />
             {{ $t('drives.driverLabel') }}
           </label>
           <select
             id="drive-driver-select"
             :value="selectedCostDrive.driver_id || ''"
             @change="handleDriverChange($event)"
-            class="field focus:border-purple-500"
+            class="field focus:border-sky-500"
           >
             <option value="">{{ defaultDriverOption }}</option>
             <option v-for="p in vehiclePeople" :key="p.id" :value="p.id">
@@ -246,7 +246,7 @@ async function handleDriverChange(event: Event) {
         </div>
       </div>
 
-      <p v-if="selectedCostDrive.is_suggestion" class="text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2">
+      <p v-if="selectedCostDrive.is_suggestion" class="text-xs text-sky-300 bg-sky-500/10 border border-sky-500/20 rounded-xl px-3 py-2">
         {{ $t('drives.driveCostModal.suggestionNotice') }}
       </p>
 

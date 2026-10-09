@@ -16,14 +16,14 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
 </script>
 
 <template>
-  <div v-if="currentMonthStats" class="bg-slate-900/80 border border-indigo-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div v-if="currentMonthStats" class="bg-slate-900/80 border border-sky-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div class="flex items-center gap-3 min-w-0 flex-1">
-      <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl shrink-0">
+      <div class="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl shrink-0">
         <Calendar class="w-5 h-5" />
       </div>
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">{{ $t('dashboard.currentMonthBanner.activityThisMonth', { month: currentMonthStats.month }) }}</span>
+          <span class="text-xs font-semibold text-sky-400 uppercase tracking-wider">{{ $t('dashboard.currentMonthBanner.activityThisMonth', { month: currentMonthStats.month }) }}</span>
         </div>
         <div class="text-base sm:text-lg font-bold text-white flex items-center gap-x-3 gap-y-0.5 mt-0.5 flex-wrap">
           <span>{{ $t('dashboard.currentMonthBanner.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(currentMonthStats.distance_km) }) }}</span>
@@ -44,7 +44,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
       <button
         type="button"
         @click="emit('open-month', currentMonthStats.raw)"
-        class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+        class="px-3 py-1.5 bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
       >
         <PieChart class="w-3.5 h-3.5" />
         <span>{{ $t('dashboard.currentMonthBanner.viewTheBreakdown') }}</span>

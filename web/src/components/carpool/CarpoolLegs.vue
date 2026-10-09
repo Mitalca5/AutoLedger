@@ -26,7 +26,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), props.currency)
   <div class="space-y-2">
     <div class="flex items-center justify-between gap-2 flex-wrap">
       <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-        <Navigation class="w-4 h-4 text-indigo-400" />
+        <Navigation class="w-4 h-4 text-sky-400" />
         {{ $t('carpool.carpoolTripModal.legsAndActualCostsKm', { unit: distanceUnit(), liveDistance: formatDistanceValue(liveDistance, 1), total: fmt(euros(live.total)) }) }}
       </h4>
       <div class="flex items-center gap-2">
@@ -45,7 +45,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), props.currency)
           v-if="sourceMode === 'MANUAL'"
           type="button"
           @click="emit('add-leg')"
-          class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+          class="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1"
         >
           <Plus class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.addALeg') }}
         </button>
@@ -55,7 +55,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), props.currency)
 
     <div v-for="(leg, i) in legs" :key="i" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
       <div class="flex flex-wrap items-center gap-2 text-xs">
-        <span class="font-bold text-indigo-300">{{ $t('carpool.carpoolTripModal.leg', { i: i + 1 }) }}</span>
+        <span class="font-bold text-sky-300">{{ $t('carpool.carpoolTripModal.leg', { i: i + 1 }) }}</span>
         <label :for="`leg-start-${i}`" class="sr-only">{{ $t('carpool.carpoolTripModal.startOfLeg', { i: i + 1 }) }}</label>
         <input
           :id="`leg-start-${i}`"
@@ -84,7 +84,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), props.currency)
           v-if="!leg.drive_id"
           type="button"
           @click="emit('estimate', i)"
-          class="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300"
+          class="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300"
           :title="$t('carpool.carpoolTripModal.estimateElectricityTiresMaintenanceAnd')"
         >
           <Calculator class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.estimate') }}

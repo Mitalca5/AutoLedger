@@ -449,7 +449,7 @@ const tabs = computed<TabItem[]>(() => {
           class="btn btn-lg btn-secondary"
           :title="$t('expenses.expensesView.setUpTheWebhookTo')"
         >
-          <Radio class="w-3.5 h-3.5 text-violet-400" />
+          <Radio class="w-3.5 h-3.5" />
           <span class="hidden sm:inline">{{ $t('expenses.expensesView.homelabWebhook') }}</span>
           <span class="sm:hidden">{{ $t('expenses.expensesView.webhook') }}</span>
         </button>
@@ -466,7 +466,7 @@ const tabs = computed<TabItem[]>(() => {
           @click="openCSVImportModal"
           class="btn btn-lg btn-secondary"
         >
-          <UploadCloud class="w-3.5 h-3.5 text-info-400" />
+          <UploadCloud class="w-3.5 h-3.5" />
           <span>{{ $t('expenses.expensesView.importCsv') }}</span>
         </button>
         <template v-if="activeTab === 'CHARGES' && vehicleStore.canCharge">
@@ -474,7 +474,7 @@ const tabs = computed<TabItem[]>(() => {
             @click="openCSVImportModal"
             class="btn btn-lg btn-secondary"
           >
-            <UploadCloud class="w-3.5 h-3.5 text-info-400" />
+            <UploadCloud class="w-3.5 h-3.5" />
             <span>{{ $t('expenses.expensesView.importCsv') }}</span>
           </button>
           <button

@@ -99,7 +99,7 @@ async function handleDeleteWebhook() {
     v-model:open="open"
     :title="$t('expenses.webhookModal.homelabWebhookNotifications')"
     :icon="Radio"
-    icon-class="text-violet-400"
+    icon-class="text-sky-400"
     footer-class="items-center justify-between"
   >
     <form id="webhook-modal-form" @submit.prevent="handleSaveWebhook" class="space-y-4">
@@ -141,7 +141,7 @@ async function handleDeleteWebhook() {
           id="webhook-form-enabled"
           v-model="webhookForm.enabled"
           type="checkbox"
-          class="rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+          class="rounded border-slate-700 bg-slate-800 text-sky-600 focus:ring-sky-500"
         />
         <label for="webhook-form-enabled" class="text-xs text-slate-300 cursor-pointer">
           {{ $t('expenses.webhookModal.enableAutomaticBackgroundNotifications') }}
@@ -167,8 +167,8 @@ async function handleDeleteWebhook() {
           :disabled="isTestingWebhook || !webhookForm.url"
           class="btn btn-lg btn-secondary w-full"
         >
-          <Loader2 v-if="isTestingWebhook" class="w-4 h-4 animate-spin text-violet-400" />
-          <Radio v-else class="w-4 h-4 text-violet-400" />
+          <Loader2 v-if="isTestingWebhook" class="w-4 h-4 animate-spin text-sky-400" />
+          <Radio v-else class="w-4 h-4 text-sky-400" />
           <span>{{ isTestingWebhook ? $t('expenses.webhookModal.sendingTest') : $t('expenses.webhookModal.sendTest') }}</span>
         </button>
       </div>

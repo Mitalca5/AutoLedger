@@ -58,7 +58,7 @@ watch(isOpen, async (open) => {
               :class="{
                 'bg-danger-500': options.type === 'danger',
                 'bg-warning-500': options.type === 'warning',
-                'bg-indigo-500': options.type === 'info',
+                'bg-sky-500': options.type === 'info',
                 'bg-success-500': options.type === 'success',
               }"
             />
@@ -71,7 +71,7 @@ watch(isOpen, async (open) => {
                   :class="{
                     'bg-danger-500/10 text-danger-400 border-danger-500/20': options.type === 'danger',
                     'bg-warning-500/10 text-warning-400 border-warning-500/20': options.type === 'warning',
-                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/20': options.type === 'info',
+                    'bg-sky-500/10 text-sky-400 border-sky-500/20': options.type === 'info',
                     'bg-success-500/10 text-success-400 border-success-500/20': options.type === 'success',
                   }"
                 >

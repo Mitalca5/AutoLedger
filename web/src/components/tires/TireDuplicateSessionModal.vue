@@ -75,7 +75,7 @@ async function handleDuplicateSessionSubmit() {
     v-model:open="open"
     :title="$t('tires.tireDuplicateSessionModal.duplicateTheSessionToOther')"
     :icon="Copy"
-    icon-class="text-indigo-400"
+    icon-class="text-sky-400"
     size="sm"
     nested
     body-class="space-y-4 text-xs"
@@ -96,7 +96,7 @@ async function handleDuplicateSessionSubmit() {
           <button
             type="button"
             @click="duplicateTargetTireIds = tires.filter(x => x.tire.id !== selectedTire?.id).map(x => x.tire.id)"
-            class="text-indigo-400 hover:text-indigo-300 font-semibold"
+            class="text-sky-400 hover:text-sky-300 font-semibold"
           >
             {{ $t('tires.tireDuplicateSessionModal.tickAll') }}
           </button>
@@ -120,7 +120,7 @@ async function handleDuplicateSessionSubmit() {
             type="checkbox"
             :checked="duplicateTargetTireIds.includes(t.tire.id)"
             @change="toggleDuplicateTargetTire(t.tire.id)"
-            class="rounded accent-indigo-500 w-4 h-4"
+            class="rounded accent-rose-500 w-4 h-4"
           />
           <div class="min-w-0 flex-1">
             <div class="font-bold truncate text-white">{{ t.tire.brand }} {{ t.tire.model }}</div>

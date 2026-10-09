@@ -27,13 +27,13 @@ const money = (n: number) => `${n.toLocaleString()} ${cur.value}`
 
     <div class="grid gap-3 md:grid-cols-2">
       <section class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-2" aria-labelledby="cmp-empty-tracked">
-        <h3 id="cmp-empty-tracked" class="flex items-center gap-2 text-sm font-bold text-white"><Gauge class="w-4 h-4 text-cyan-400" /> {{ $t('comparison.emptyState.trackedTitle') }}</h3>
+        <h3 id="cmp-empty-tracked" class="flex items-center gap-2 text-sm font-bold text-white"><Gauge class="w-4 h-4 text-sky-400" /> {{ $t('comparison.emptyState.trackedTitle') }}</h3>
         <p class="text-sm text-slate-400">{{ $t('comparison.emptyState.trackedText') }}</p>
         <p v-if="!canTrack" class="text-xs text-warning-400">{{ $t('comparison.emptyState.trackedUnavailable') }} <router-link to="/vehicles" class="underline">{{ $t('comparison.emptyState.vehiclesLink') }}</router-link></p>
         <button type="button" class="btn btn-primary" :disabled="!canTrack" @click="$emit('start', 'RETROSPECTIVE')">{{ $t('comparison.emptyState.trackedAction') }}</button>
       </section>
       <section class="rounded-2xl border border-slate-800 bg-slate-900 p-4 space-y-2" aria-labelledby="cmp-empty-projection">
-        <h3 id="cmp-empty-projection" class="flex items-center gap-2 text-sm font-bold text-white"><Calculator class="w-4 h-4 text-cyan-400" /> {{ $t('comparison.emptyState.projectionTitle') }}</h3>
+        <h3 id="cmp-empty-projection" class="flex items-center gap-2 text-sm font-bold text-white"><Calculator class="w-4 h-4 text-sky-400" /> {{ $t('comparison.emptyState.projectionTitle') }}</h3>
         <p class="text-sm text-slate-400">{{ $t('comparison.emptyState.projectionText') }}</p>
         <button type="button" class="btn btn-secondary" @click="$emit('start', 'PROJECTION')">{{ $t('comparison.emptyState.projectionAction') }}</button>
       </section>

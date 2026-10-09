@@ -269,7 +269,7 @@ watch(
           type="button"
           @click="handleDetectTolls"
           :disabled="tollDetectionLoading"
-          class="tap p-1 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 rounded-lg text-xs disabled:opacity-50"
+          class="tap p-1 bg-sky-600/20 hover:bg-sky-600/40 text-sky-300 rounded-lg text-xs disabled:opacity-50"
           :title="tollDetectionLoading ? $t('drives.driveCostModal.detecting') : tollDetection ? $t('drives.driveCostModal.redetect') : $t('drives.driveCostModal.detectTolls')"
           :aria-label="$t('drives.driveCostModal.detectTolls')"
         >
@@ -292,9 +292,9 @@ watch(
         <div v-if="editingExpenseId !== exp.id" class="flex items-center justify-between gap-2">
           <span>
             {{ exp.type === 'TOLL' ? $t('drives.driveCostModal.toll') : exp.type }}
-            <span v-if="exp.source === 'AUTO_TOLL'" class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-medium" :title="$t('drives.driveCostModal.calculatedAutomaticallyFromTheGps')">{{ $t('drives.driveCostModal.auto') }}</span>
+            <span v-if="exp.source === 'AUTO_TOLL'" class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 font-medium" :title="$t('drives.driveCostModal.calculatedAutomaticallyFromTheGps')">{{ $t('drives.driveCostModal.auto') }}</span>
             <span v-if="exp.notes" class="text-slate-400">({{ exp.notes }})</span>
-            <span v-if="exp.trip_group_id && !selectedCostDrive.is_trip_group" class="text-indigo-400"> {{ $t('drives.driveCostModal.shareOfATripCosting', { amount: formatAmount(exp.amount, exp.currency || vehicleCurrency) }) }}</span>
+            <span v-if="exp.trip_group_id && !selectedCostDrive.is_trip_group" class="text-sky-400"> {{ $t('drives.driveCostModal.shareOfATripCosting', { amount: formatAmount(exp.amount, exp.currency || vehicleCurrency) }) }}</span>
           </span>
           <span class="flex items-center gap-1.5">
             <span class="font-mono text-warning-400">{{ formatAmount(exp.allocated_amount ?? exp.amount, vehicleCurrency) }}</span>
@@ -324,7 +324,7 @@ watch(
           <button @click="editingExpenseId = null" class="col-span-1 p-1 text-slate-400 hover:text-white" :title="$t('common.cancel')" :aria-label="$t('common.cancel')">
             <X class="w-3.5 h-3.5" />
           </button>
-          <p v-if="exp.trip_group_id" class="col-span-12 text-xs text-indigo-300/80">{{ $t('drives.driveCostModal.totalAmountOfTheTrip') }}</p>
+          <p v-if="exp.trip_group_id" class="col-span-12 text-xs text-sky-300/80">{{ $t('drives.driveCostModal.totalAmountOfTheTrip') }}</p>
         </div>
       </div>
     </div>
@@ -342,7 +342,7 @@ watch(
             type="button"
             @click="showTollSegments = !showTollSegments"
             :aria-expanded="showTollSegments"
-            class="flex items-center gap-1 text-cyan-400 hover:text-cyan-300"
+            class="flex items-center gap-1 text-sky-400 hover:text-sky-300"
           >
             <Radar class="w-3 h-3" />
             {{ $t('drives.driveCostModal.detectedGates', tollDetection.segments.length) }}

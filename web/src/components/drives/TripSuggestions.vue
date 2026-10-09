@@ -45,7 +45,7 @@ const route = (s: any) => [s.start_address, s.end_address].filter(Boolean).join(
           <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-800 text-slate-200 border border-slate-700/60">
             {{ formatDistance(s.distance_km) }}
           </span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
+          <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/30">
             {{ $t('drives.tripGroupsPanel.legS', { length: s.drive_ids.length }) }}
           </span>
           <span

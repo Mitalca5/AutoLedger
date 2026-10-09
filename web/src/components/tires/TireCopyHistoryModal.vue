@@ -82,14 +82,14 @@ async function handleCopyHistorySubmit() {
     v-model:open="open"
     :title="$t('tires.tireCopyHistoryModal.copyTheFullHistory')"
     :icon="Copy"
-    icon-class="text-indigo-400"
+    icon-class="text-sky-400"
     nested
     body-class="space-y-4 text-xs"
     footer-class="items-center justify-end gap-2"
   >
     <!-- Source selection -->
     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-2">
-      <label for="copy-history-source-select" class="text-xs text-indigo-400 font-semibold uppercase tracking-wider block">{{ $t('tires.tireCopyHistoryModal.sourceTireToClone') }}</label>
+      <label for="copy-history-source-select" class="text-xs text-sky-400 font-semibold uppercase tracking-wider block">{{ $t('tires.tireCopyHistoryModal.sourceTireToClone') }}</label>
       <select
         id="copy-history-source-select"
         :value="copyHistorySourceTire.id"
@@ -109,7 +109,7 @@ async function handleCopyHistorySubmit() {
         <input
           type="checkbox"
           v-model="copyHistoryOptions.copy_sessions"
-          class="rounded accent-indigo-500 w-4 h-4 mt-0.5"
+          class="rounded accent-rose-500 w-4 h-4 mt-0.5"
         />
         <div>
           <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.fittingAndRemovalSessions') }}</span>
@@ -122,7 +122,7 @@ async function handleCopyHistorySubmit() {
           type="checkbox"
           v-model="copyHistoryOptions.adapt_position"
           :disabled="!copyHistoryOptions.copy_sessions"
-          class="rounded accent-indigo-500 w-4 h-4 mt-0.5"
+          class="rounded accent-rose-500 w-4 h-4 mt-0.5"
         />
         <div>
           <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.adaptTheFittingPositionTo') }}</span>
@@ -134,7 +134,7 @@ async function handleCopyHistorySubmit() {
         <input
           type="checkbox"
           v-model="copyHistoryOptions.copy_logs"
-          class="rounded accent-indigo-500 w-4 h-4 mt-0.5"
+          class="rounded accent-rose-500 w-4 h-4 mt-0.5"
         />
         <div>
           <span class="font-medium text-white">{{ $t('tires.tireCopyHistoryModal.wearAndTreadMeasurementsLogs') }}</span>
@@ -151,7 +151,7 @@ async function handleCopyHistorySubmit() {
           <button
             type="button"
             @click="copyHistoryTargetTireIds = tires.filter(x => x.tire.id !== copyHistorySourceTire?.id).map(x => x.tire.id)"
-            class="text-indigo-400 hover:text-indigo-300 font-semibold"
+            class="text-sky-400 hover:text-sky-300 font-semibold"
           >
             {{ $t('tires.tireCopyHistoryModal.tickAll') }}
           </button>
@@ -176,12 +176,12 @@ async function handleCopyHistorySubmit() {
             type="checkbox"
             :checked="copyHistoryTargetTireIds.includes(t.tire.id)"
             @change="toggleCopyHistoryTargetTire(t.tire.id)"
-            class="rounded accent-indigo-500 w-4 h-4"
+            class="rounded accent-rose-500 w-4 h-4"
           />
           <div class="min-w-0 flex-1">
             <div class="font-bold truncate text-white flex items-center justify-between gap-2">
               <span class="truncate">{{ t.tire.brand }} {{ t.tire.model }}</span>
-              <span class="text-xs font-normal text-indigo-300 shrink-0">
+              <span class="text-xs font-normal text-sky-300 shrink-0">
                 {{ formatDistance(t.total_distance_km ?? t.tire.accumulated_distance_km ?? 0) }} • {{ (t.sessions?.length || 0) }} {{ (t.sessions?.length || 0) > 1 ? 'sessions' : 'session' }}
               </span>
             </div>

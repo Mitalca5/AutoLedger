@@ -18,9 +18,9 @@ const vehicleStore = useVehicleStore()
 <template>
   <div class="space-y-4">
     <!-- Info banner -->
-    <div class="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-indigo-300">
+    <div class="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-sky-300">
       <div class="flex items-center gap-2.5">
-        <Paperclip class="w-4 h-4 text-indigo-400 shrink-0" />
+        <Paperclip class="w-4 h-4 text-sky-400 shrink-0" />
         <span>
           {{ $t('expenses.documentsPanel.receiptsInvoicesTicketsWorkshopReports') }}
         </span>
@@ -54,7 +54,7 @@ const vehicleStore = useVehicleStore()
         <div class="space-y-2">
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
-              <div class="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
+              <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 shrink-0">
                 <FileText class="w-5 h-5" />
               </div>
               <div class="min-w-0">
@@ -87,8 +87,8 @@ const vehicleStore = useVehicleStore()
               class="btn btn-secondary"
               :title="$t('expenses.documentsPanel.viewTheFile')"
             >
-              <Loader2 v-if="loadingDocId === d.id" class="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-              <Eye v-else class="w-3.5 h-3.5 text-indigo-400" />
+              <Loader2 v-if="loadingDocId === d.id" class="w-3.5 h-3.5 text-sky-400 animate-spin" />
+              <Eye v-else class="w-3.5 h-3.5 text-sky-400" />
               <span>{{ $t('expenses.documentsPanel.open') }}</span>
             </button>
             <button
@@ -96,7 +96,7 @@ const vehicleStore = useVehicleStore()
               class="btn btn-secondary"
               :title="$t('expenses.documentsPanel.downloadTheFile')"
             >
-              <Download class="w-3.5 h-3.5 text-indigo-400" />
+              <Download class="w-3.5 h-3.5 text-sky-400" />
               <span>{{ $t('expenses.documentsPanel.download') }}</span>
             </button>
           </div>

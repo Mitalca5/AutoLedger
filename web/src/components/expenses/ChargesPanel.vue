@@ -103,7 +103,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
               <button
                 v-if="c.document_id"
                 @click="emit('view-document', c.document_id, c.document_filename, false)"
-                class="text-xs px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
+                class="text-xs px-2 py-0.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
                 :title="$t('expenses.chargesPanel.viewTheReceipt')"
               >
                 <Paperclip class="w-3 h-3 shrink-0" />

@@ -111,10 +111,10 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
             <span v-else-if="m.amortization_mode === 'DISTANCE'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-success-500/10 text-success-400 border border-success-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.smoothedOverKm', { unit: distanceUnit(), coverage_km: m.coverage_km ? formatDistanceValue(m.coverage_km) : formatDistanceValue(50000) }) }}
             </span>
-            <span v-else-if="m.amortization_mode === 'DURATION'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+            <span v-else-if="m.amortization_mode === 'DURATION'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.smoothedOverMonths', { coverage_months: m.coverage_months || 24 }) }}
             </span>
-            <span v-else-if="m.amortization_mode === 'HYBRID'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
+            <span v-else-if="m.amortization_mode === 'HYBRID'" class="text-xs px-2 py-0.5 rounded-full font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
               {{ $t('expenses.maintenancePanel.mixedSmoothingKmMonths', { unit: distanceUnit(), coverage_km: m.coverage_km ? formatDistanceValue(m.coverage_km) : formatDistanceValue(50000), coverage_months: m.coverage_months || 24 }) }}
             </span>
             <span v-if="m.closes_maintenance_id" class="text-xs px-2 py-0.5 rounded-full font-medium bg-warning-500/10 text-warning-400 border border-warning-500/20 shrink-0">
@@ -123,7 +123,7 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
             <button
               v-if="m.document_id"
               @click="emit('view-document', m.document_id, m.document_filename, false)"
-              class="text-xs px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
+              class="text-xs px-2 py-0.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center gap-1 transition-colors max-w-[200px] truncate"
               :title="$t('expenses.maintenancePanel.viewTheReceipt')"
             >
               <Paperclip class="w-3 h-3 shrink-0" />

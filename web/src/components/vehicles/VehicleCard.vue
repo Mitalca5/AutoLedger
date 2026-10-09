@@ -101,15 +101,15 @@ function clearCardTestResult() {
           class="group text-left inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all border"
           :class="
             ownership
-              ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+              ? 'bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border-sky-500/30'
               : 'bg-warning-500/10 hover:bg-warning-500/20 text-warning-300 border-warning-500/30'
           "
           :title="ownership ? $t('vehicles.vehicleCard.editContract') : $t('vehicles.vehicleCard.setUpContract')"
         >
-          <FileText v-if="ownership" class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <FileText v-if="ownership" class="w-3.5 h-3.5 text-sky-400 shrink-0" />
           <Plus v-else class="w-3.5 h-3.5 text-warning-400 shrink-0" />
           <span>{{ ownership ? ownershipSummary(ownership, v.currency || 'EUR') : $t('vehicles.vehicleCard.enterContract') }}</span>
-          <Pencil v-if="ownership" class="w-3 h-3 text-indigo-400 opacity-60 group-hover:opacity-100 shrink-0 ml-0.5" />
+          <Pencil v-if="ownership" class="w-3 h-3 text-sky-400 opacity-60 group-hover:opacity-100 shrink-0 ml-0.5" />
         </button>
       </div>
       <div v-else>
@@ -168,7 +168,7 @@ function clearCardTestResult() {
         class="btn btn-secondary"
         :title="$t('vehicles.vehicleCard.manageAccessAndCoDrivers')"
       >
-        <Users class="w-3.5 h-3.5 text-violet-400" />
+        <Users class="w-3.5 h-3.5" />
         <span>{{ $t('vehicles.vehicleCard.sharingAndAccess') }}</span>
       </button>
       <button
@@ -176,14 +176,14 @@ function clearCardTestResult() {
         @click="emit('ownership', v)"
         class="btn btn-secondary"
       >
-        <FileText class="w-3.5 h-3.5 text-indigo-400" />
+        <FileText class="w-3.5 h-3.5" />
         <span>{{ $t('vehicles.vehicleCard.acquisitionAndFinancing') }}</span>
       </button>
       <button
         @click="emit('dataSources', v)"
         class="btn btn-secondary"
       >
-        <Database class="w-3.5 h-3.5 text-cyan-400" />
+        <Database class="w-3.5 h-3.5" />
         <span>{{ $t('vehicles.vehicleCard.dataSources') }}</span>
       </button>
       <router-link
@@ -192,7 +192,7 @@ function clearCardTestResult() {
         class="btn btn-secondary tap-text"
         :title="$t('vehicles.vehicleCard.odometerReadingsAndManualEntries')"
       >
-        <Gauge class="w-3.5 h-3.5 text-cyan-400" />
+        <Gauge class="w-3.5 h-3.5" />
         <span>{{ $t('vehicles.vehicleCard.manualTracking') }}</span>
       </router-link>
       <button

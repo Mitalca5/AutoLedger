@@ -249,7 +249,7 @@ async function handleSubmit() {
               type="button"
               @click="selectedTag = selectedTag === 'Pro' ? '' : 'Pro'"
               class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
-              :class="selectedTag === 'Pro' ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
+              :class="selectedTag === 'Pro' ? 'bg-sky-500/20 text-sky-300 border-sky-500' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'"
             >
               Pro
             </button>

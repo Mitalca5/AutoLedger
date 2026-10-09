@@ -13,7 +13,7 @@ const formatDate = formatDayTime
 <template>
   <div class="space-y-1.5">
     <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-      <Layers class="w-3.5 h-3.5 text-indigo-400" />
+      <Layers class="w-3.5 h-3.5 text-sky-400" />
       {{ $t('drives.driveCostModal.tripLegs', { count: tripLegs.length }) }}
     </h4>
     <button

@@ -47,7 +47,7 @@ async function handleUploadStandaloneDocument() {
     v-model:open="open"
     :title="$t('expenses.uploadDocumentModal.addAReceiptOrAn')"
     :icon="UploadCloud"
-    icon-class="text-indigo-400"
+    icon-class="text-sky-400"
     size="sm"
   >
     <form id="standalone-doc-form" @submit.prevent="handleUploadStandaloneDocument" class="space-y-4">

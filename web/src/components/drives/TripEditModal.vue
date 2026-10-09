@@ -63,7 +63,7 @@ async function handleSave() {
     v-model:open="open"
     :title="$t('drives.tripEditModal.editTheTrip')"
     :icon="Layers"
-    icon-class="text-indigo-400"
+    icon-class="text-sky-400"
   >
     <form id="trip-edit-form" @submit.prevent="handleSave" class="space-y-4">
       <div>
@@ -78,7 +78,7 @@ async function handleSave() {
       <div class="space-y-1.5">
         <div class="flex items-center justify-between text-xs">
           <span class="text-slate-400">{{ $t('drives.tripEditModal.tickTheLegs') }}</span>
-          <span class="text-indigo-300 font-semibold">{{ $t('drives.tripEditModal.legsSelected', { count: selectedDriveIds.length }) }}</span>
+          <span class="text-sky-300 font-semibold">{{ $t('drives.tripEditModal.legsSelected', { count: selectedDriveIds.length }) }}</span>
         </div>
         <DrivePicker
           :key="session"

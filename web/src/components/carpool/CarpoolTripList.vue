@@ -138,7 +138,7 @@ const isAllSelected = computed(() => props.trips.length > 0 && props.selectedTri
       <!-- One line: what it covers and what it cost; the rest is in the detail -->
       <div class="flex items-center justify-between gap-3 text-xs text-slate-400 flex-wrap">
         <div class="flex items-center gap-x-3 gap-y-1 flex-wrap">
-          <span class="flex items-center gap-1.5"><Navigation class="w-3.5 h-3.5 text-indigo-400" />{{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}</span>
+          <span class="flex items-center gap-1.5"><Navigation class="w-3.5 h-3.5 text-sky-400" />{{ $t('carpool.carpoolTripList.legs', { length: trip.legs.length }) }}</span>
           <span class="flex items-center gap-1.5"><Users class="w-3.5 h-3.5 text-blue-400" />{{ $t('carpool.carpoolTripList.passengers', { length: trip.passengers?.length || 0 }) }}</span>
           <span>{{ $t('carpool.carpoolTripList.actualCost') }} <strong class="text-slate-200">{{ fmt(trip.total_cost) }}</strong></span>
           <span class="text-success-400 font-semibold">+{{ fmt(trip.total_revenue) }}</span>

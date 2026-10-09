@@ -222,22 +222,22 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
         <div class="space-y-2 bg-slate-800/40 p-3 rounded-xl border border-slate-700/60">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
+              <Paperclip class="w-3.5 h-3.5 text-sky-400" />
               {{ $t('expenses.chargeModal.receiptInvoice') }}
             </span>
             <span v-if="chargeForm.document_id" class="text-xs text-success-400 font-medium">{{ $t('expenses.chargeModal.linked') }}</span>
           </div>
 
-          <div v-if="chargeForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">
+          <div v-if="chargeForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-sky-500/30 rounded-xl">
             <div class="flex items-center gap-2 min-w-0">
-              <FileText class="w-4 h-4 text-indigo-400 shrink-0" />
+              <FileText class="w-4 h-4 text-sky-400 shrink-0" />
               <span class="text-xs text-white truncate font-medium">{{ chargeForm.document_filename || $t('expenses.linkedInvoice') }}</span>
             </div>
             <div class="flex items-center gap-1 shrink-0">
               <button
                 type="button"
                 @click="emit('view-document', chargeForm.document_id, chargeForm.document_filename, false)"
-                class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
+                class="tap p-1 text-slate-400 hover:text-sky-400 rounded-lg hover:bg-slate-800"
                 :title="$t('expenses.chargeModal.viewTheDocument')" :aria-label="$t('expenses.chargeModal.viewTheDocument')"
               >
                 <Eye class="w-3.5 h-3.5" />
@@ -268,7 +268,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
                   </option>
                 </select>
               </div>
-              <label class="cursor-pointer px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors">
+              <label class="cursor-pointer px-3 py-1.5 bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors">
                 <UploadCloud class="w-3.5 h-3.5" />
                 <span>{{ isUploadingDocument ? $t('expenses.uploading') : $t('expenses.newFile') }}</span>
                 <input

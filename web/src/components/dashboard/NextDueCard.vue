@@ -22,7 +22,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
     <div class="flex items-center gap-3 min-w-0 flex-1">
       <div
         class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-        :class="soon ? 'bg-warning-500/20 text-warning-400' : 'bg-violet-500/10 text-violet-400'"
+        :class="soon ? 'bg-warning-500/20 text-warning-400' : 'bg-sky-500/10 text-sky-400'"
       >
         <CalendarClock class="w-5 h-5" />
       </div>
@@ -42,7 +42,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
           </span>
         </div>
         <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(next.progress * 100)" aria-valuemin="0" aria-valuemax="100">
-          <div class="h-full rounded-full transition-all" :class="soon ? 'bg-warning-400' : 'bg-violet-500'" :style="{ width: `${Math.round(next.progress * 100)}%` }"></div>
+          <div class="h-full rounded-full transition-all" :class="soon ? 'bg-warning-400' : 'bg-sky-500'" :style="{ width: `${Math.round(next.progress * 100)}%` }"></div>
         </div>
       </div>
       <p v-else class="text-sm text-slate-300">{{ $t('dashboard.nextDueCard.empty') }}</p>

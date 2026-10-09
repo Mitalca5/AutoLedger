@@ -158,24 +158,21 @@ const actionRowConfig = computed(() => ({
   pointer-events: none;
 }
 
-.is-disabled :deep(.dp__input),
 .is-disabled :deep(.dp--input),
 :deep(.dp--disabled) {
-  background-color: rgba(15, 23, 42, 0.9) !important;
-  border-color: #1e293b !important;
-  color: #64748b !important;
+  background-color: color-mix(in oklab, var(--color-slate-900) 90%, transparent) !important;
+  border-color: var(--color-slate-800) !important;
+  color: var(--color-slate-500) !important;
   cursor: not-allowed !important;
   opacity: 0.6 !important;
   box-shadow: none !important;
 }
 
-.is-disabled :deep(.dp__input_icon),
 .is-disabled :deep(.dp--input-icon),
-:deep(.dp--disabled .dp__input_icon) {
-  color: #475569 !important;
+:deep(.dp--disabled .dp--input-icon) {
+  color: var(--color-slate-600) !important;
 }
 
-.size-xs :deep(.dp__input),
 .size-xs :deep(.dp--input) {
   font-size: 0.75rem !important;
   line-height: 1rem !important;
@@ -185,12 +182,10 @@ const actionRowConfig = computed(() => ({
   padding-right: 0.375rem !important;
 }
 
-.size-xs :deep(.dp__input_icon),
 .size-xs :deep(.dp--input-icon) {
   padding-left: 0.5rem !important;
 }
 
-.size-sm :deep(.dp__input),
 .size-sm :deep(.dp--input) {
   font-size: 0.875rem !important;
   line-height: 1.25rem !important;
@@ -198,7 +193,6 @@ const actionRowConfig = computed(() => ({
   padding-bottom: 0.5rem !important;
 }
 
-.size-md :deep(.dp__input),
 .size-md :deep(.dp--input) {
   font-size: 1rem !important;
   line-height: 1.5rem !important;

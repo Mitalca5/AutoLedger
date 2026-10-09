@@ -141,7 +141,7 @@ const open = defineModel<boolean>('open', { required: true })
         </div>
         <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400 uppercase">{{ $t('tires.tireHistoryModal.adjustedLongevity') }}</div>
-          <div class="font-bold text-indigo-300 text-sm mt-0.5">~{{ formatDistance(selectedTireStats.dynamic_lifespan_km || selectedTire.estimated_lifespan_km) }}</div>
+          <div class="font-bold text-sky-300 text-sm mt-0.5">~{{ formatDistance(selectedTireStats.dynamic_lifespan_km || selectedTire.estimated_lifespan_km) }}</div>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ const open = defineModel<boolean>('open', { required: true })
           <button
             v-if="copiedSession"
             @click="emit('paste-session')"
-            class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors bg-indigo-950/40 border border-indigo-800/60 px-2 py-1 rounded-lg"
+            class="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 transition-colors bg-sky-950/40 border border-sky-800/60 px-2 py-1 rounded-lg"
             :title="$t('tires.tireHistoryModal.pasteCopied', { date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' })" :aria-label="$t('tires.tireHistoryModal.pasteCopied', { date: copiedSession.mounted_date ? formatDate(copiedSession.mounted_date) : '' })"
           >
             <ClipboardPaste class="w-3.5 h-3.5" />
@@ -202,7 +202,7 @@ const open = defineModel<boolean>('open', { required: true })
               <button
                 @click="emit('copy-session', s)"
                 class="tap p-1 rounded transition-colors"
-                :class="copiedSession?.mounted_date === (s.mounted_date ? new Date(s.mounted_date).toISOString().substring(0, 10) : '') && copiedSession?.mounted_odometer === s.mounted_odometer ? 'text-indigo-400 bg-indigo-950/60' : 'text-slate-400 hover:text-indigo-400'"
+                :class="copiedSession?.mounted_date === (s.mounted_date ? new Date(s.mounted_date).toISOString().substring(0, 10) : '') && copiedSession?.mounted_odometer === s.mounted_odometer ? 'text-sky-400 bg-sky-950/60' : 'text-slate-400 hover:text-sky-400'"
                 :title="$t('tires.tireHistoryModal.copyThisSessionSData')" :aria-label="$t('tires.tireHistoryModal.copyThisSessionSData')"
               >
                 <Copy class="w-3.5 h-3.5" />

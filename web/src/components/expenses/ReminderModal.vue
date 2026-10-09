@@ -178,7 +178,7 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
     v-model:open="open"
     :title="editingReminderId ? $t('expenses.reminderModal.edit') : $t('expenses.reminderModal.new')"
     :icon="Bell"
-    icon-class="text-violet-400"
+    icon-class="text-sky-400"
   >
     <form id="reminder-modal-form" data-reminder-form novalidate @submit.prevent="handleSaveReminder" class="space-y-4">
       <!-- Preset chips (only when adding new) -->
@@ -192,7 +192,7 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
             @click="applyReminderPreset(preset)"
             class="btn btn-secondary"
           >
-            <Sparkles class="w-3 h-3 text-violet-400" />
+            <Sparkles class="w-3 h-3 text-sky-400" />
             {{ preset.title }}
           </button>
         </div>
@@ -281,7 +281,7 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
             id="reminder-form-repeat-yearly"
             v-model="reminderForm.repeat_yearly"
             type="checkbox"
-            class="rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+            class="rounded border-slate-700 bg-slate-800 text-sky-600 focus:ring-sky-500"
           />
           <label for="reminder-form-repeat-yearly" class="text-xs text-slate-300 cursor-pointer">{{ $t('expenses.reminderModal.repeatYearly') }}</label>
         </div>
@@ -358,7 +358,7 @@ const handleSaveReminder = () => runOnce(handleSaveReminderAction)
           id="reminder-form-webhook-toggle"
           v-model="reminderForm.webhook_enabled"
           type="checkbox"
-          class="rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-500"
+          class="rounded border-slate-700 bg-slate-800 text-sky-600 focus:ring-sky-500"
         />
         <label for="reminder-form-webhook-toggle" class="text-xs text-slate-300 cursor-pointer">
           {{ $t('expenses.reminderModal.sendAnAutomaticWebhookNotification') }}

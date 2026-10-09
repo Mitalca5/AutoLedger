@@ -42,7 +42,7 @@ async function handleAddToTrip() {
     <div v-dialog class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto">
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-900/95">
         <h3 class="text-base font-bold text-white flex items-center gap-2 truncate pr-2">
-          <Plus class="w-5 h-5 text-indigo-400 shrink-0" />
+          <Plus class="w-5 h-5 text-sky-400 shrink-0" />
           <span class="truncate">{{ $t('drives.addToTripModal.addDriveSToA', { length: selectedDriveIds.length }) }}</span>
         </h3>
         <button @click="open = false" class="tap text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors shrink-0" :aria-label="$t('common.close')">

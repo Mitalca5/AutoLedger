@@ -53,7 +53,7 @@
   --dp-font-family: inherit;
 }
 
-.dp__input {
+.dp--input {
   background-color: var(--color-slate-800) !important;
   border-color: var(--color-slate-700) !important;
   border-radius: 0.75rem !important;
@@ -68,16 +68,16 @@
   cursor: pointer !important;
 }
 
-.dp__input:hover {
+.dp--input:hover {
   border-color: var(--color-slate-600) !important;
 }
 
-.dp__input:focus {
+.dp--input:focus {
   border-color: var(--color-rose-600) !important;
   outline: none !important;
 }
 
-.dp__input:disabled,
+.dp--input:disabled,
 .dp--disabled {
   background-color: color-mix(in oklab, var(--color-slate-900) 90%, transparent) !important;
   border-color: var(--color-slate-800) !important;
@@ -86,19 +86,19 @@
   opacity: 0.6 !important;
 }
 
-.dp__input_icon {
+.dp--input-icon {
   color: var(--color-slate-400) !important;
   padding-left: 0.75rem !important;
   cursor: pointer !important;
 }
 
-.dp__clear_icon {
+.dp--clear-btn {
   color: var(--color-slate-400) !important;
   padding-right: 0.5rem !important;
   cursor: pointer !important;
 }
 
-.dp__menu {
+.dp--menu {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5) !important;
   border: 1px solid var(--color-slate-700) !important;
 }
@@ -203,7 +203,7 @@
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
   select,
   textarea,
-  .dp__input {
+  .dp--input {
     font-size: var(--touch-font-size, 16px) !important;
   }
 }
@@ -225,14 +225,14 @@
 
 /* Every control meets the minimum hit area without a per-component class: 36px with a mouse,
    44px on touch screens. :where() keeps the specificity at zero, .no-tap opts out. */
-:where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp__action_button, .dp__inner_nav, .dp__calendar_item *, .dp__month_year_select, .dp__time_display) {
+:where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp--action-button, .dp--inner-nav, .dp--calendar-item *, .dp--month-year-select, .dp--time-display) {
   min-height: 2.25rem;
 }
 :where(button:has(> svg:only-child)):not(.no-tap) {
   min-width: 2.25rem;
 }
 @media (pointer: coarse) {
-  :where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp__action_button, .dp__inner_nav, .dp__calendar_item *, .dp__month_year_select, .dp__time_display) {
+  :where(button, [role="button"], [role="tab"], summary, select, input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), textarea):not(.no-tap, .sr-only, .dp--action-button, .dp--inner-nav, .dp--calendar-item *, .dp--month-year-select, .dp--time-display) {
     min-height: 2.75rem;
   }
   :where(button:has(> svg:only-child)):not(.no-tap) {

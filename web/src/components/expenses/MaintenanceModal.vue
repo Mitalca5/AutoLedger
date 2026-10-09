@@ -249,10 +249,10 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
         </select>
       </div>
       <!-- Insurance: annual premium paid monthly -->
-      <div v-if="maintForm.category === 'INSURANCE'" class="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 space-y-2">
+      <div v-if="maintForm.category === 'INSURANCE'" class="bg-sky-500/10 border border-sky-500/20 rounded-xl p-3 space-y-2">
         <div class="flex items-end gap-2">
           <div class="flex-1">
-            <label for="expense-insurance-annual" class="block text-xs font-semibold text-indigo-200 mb-1">{{ $t('expenses.maintenanceModal.annualPremium', { cur: currencySymbol(baseCurrency) }) }}</label>
+            <label for="expense-insurance-annual" class="block text-xs font-semibold text-sky-200 mb-1">{{ $t('expenses.maintenanceModal.annualPremium', { cur: currencySymbol(baseCurrency) }) }}</label>
             <NumberInput text
               id="expense-insurance-annual"
               v-model="insuranceAnnualPremium"
@@ -265,7 +265,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
             {{ $t('expenses.maintenanceModal.spreadMonthly') }}
           </button>
         </div>
-        <p class="text-xs text-indigo-200/80">
+        <p class="text-xs text-sky-200/80">
           {{ $t('expenses.maintenanceModal.createsAMonthlyRecurringExpense') }}
         </p>
       </div>
@@ -355,7 +355,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
             type="button"
             @click="pickAmortization('DURATION')"
             class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
-            :class="maintForm.amortization_mode === 'DURATION' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+            :class="maintForm.amortization_mode === 'DURATION' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
           >
             {{ $t('expenses.maintenanceModal.byDuration') }}
           </button>
@@ -363,7 +363,7 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
             type="button"
             @click="pickAmortization('HYBRID')"
             class="py-1.5 px-1 text-xs font-medium rounded-lg transition-colors text-center border"
-            :class="maintForm.amortization_mode === 'HYBRID' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+            :class="maintForm.amortization_mode === 'HYBRID' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
           >
             {{ $t('expenses.maintenanceModal.mixed') }}
           </button>
@@ -437,22 +437,22 @@ const handleCreateMaint = () => runOnce(handleCreateMaintAction)
       <div class="space-y-2 bg-slate-800/40 p-3 rounded-xl border border-slate-700/60">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <Paperclip class="w-3.5 h-3.5 text-indigo-400" />
+            <Paperclip class="w-3.5 h-3.5 text-sky-400" />
             {{ $t('expenses.maintenanceModal.receiptInvoice') }}
           </span>
           <span v-if="maintForm.document_id" class="text-xs text-success-400 font-medium">{{ $t('expenses.maintenanceModal.linked') }}</span>
         </div>
 
-        <div v-if="maintForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-indigo-500/30 rounded-xl">
+        <div v-if="maintForm.document_id" class="flex items-center justify-between p-2.5 bg-slate-900 border border-sky-500/30 rounded-xl">
           <div class="flex items-center gap-2 min-w-0">
-            <FileText class="w-4 h-4 text-indigo-400 shrink-0" />
+            <FileText class="w-4 h-4 text-sky-400 shrink-0" />
             <span class="text-xs text-white truncate font-medium">{{ maintForm.document_filename || $t('expenses.linkedInvoice') }}</span>
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button
               type="button"
               @click="emit('view-document', maintForm.document_id, maintForm.document_filename, false)"
-              class="tap p-1 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-slate-800"
+              class="tap p-1 text-slate-400 hover:text-sky-400 rounded-lg hover:bg-slate-800"
               :title="$t('expenses.maintenanceModal.viewTheDocument')" :aria-label="$t('expenses.maintenanceModal.viewTheDocument')"
             >
               <Eye class="w-3.5 h-3.5" />

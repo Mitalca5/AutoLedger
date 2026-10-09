@@ -132,7 +132,7 @@ onMounted(() => {
 
     <form v-if="canEdit" class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-4" @submit.prevent="save">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">
+        <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">
           {{ editingId ? $t('manual.odometerReadingsPanel.edit') : $t('manual.odometerReadingsPanel.new') }}
         </span>
         <button v-if="editingId" type="button" class="text-xs text-slate-400 hover:text-white" @click="resetForm">
@@ -196,7 +196,7 @@ onMounted(() => {
           class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex items-center justify-between gap-3"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <div class="p-2 bg-slate-800/80 rounded-lg shrink-0" :class="r.kind === 'FUEL' ? 'text-slate-400' : 'text-cyan-400'">
+            <div class="p-2 bg-slate-800/80 rounded-lg shrink-0" :class="r.kind === 'FUEL' ? 'text-slate-400' : 'text-sky-400'">
               <Fuel v-if="r.kind === 'FUEL'" class="w-4 h-4" />
               <Gauge v-else class="w-4 h-4" />
             </div>
@@ -204,7 +204,7 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <span class="text-sm font-bold text-white font-mono">{{ formatDistance(r.odometer) }}</span>
                 <span v-if="r.kind === 'FUEL'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700" :title="$t('manual.odometerReadingsPanel.fromFillUpHint')">{{ $t('manual.odometerReadingsPanel.fromFillUp') }}</span>
-                <span v-else-if="r.source === 'HA'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
+                <span v-else-if="r.source === 'HA'" class="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/30" :title="$t('manual.odometerReadingsPanel.fromHomeAssistantHint')">{{ $t('manual.odometerReadingsPanel.fromHomeAssistant') }}</span>
                 <span class="text-xs text-slate-400">
                   {{ $t('manual.odometerReadingsPanel.onDate', { date: new Date(r.date).toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) }) }}
                 </span>
@@ -217,7 +217,7 @@ onMounted(() => {
             <Fuel class="w-4 h-4" />
           </router-link>
           <div v-else-if="canEdit" class="flex items-center gap-1.5 shrink-0">
-            <button v-if="r.source !== 'HA'" type="button" class="tap p-1.5 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.editReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="startEdit(r)">
+            <button v-if="r.source !== 'HA'" type="button" class="tap p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.editReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="startEdit(r)">
               <Edit2 class="w-4 h-4" />
             </button>
             <button type="button" class="tap p-1.5 text-slate-400 hover:text-danger-400 hover:bg-slate-800 rounded-lg transition-colors" :aria-label="$t('manual.odometerReadingsPanel.deleteReading', { unit: distanceUnit(), km: formatDistanceValue(r.odometer) })" @click="remove(r)">

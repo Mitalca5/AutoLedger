@@ -143,7 +143,7 @@ onUnmounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
       <div>
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <Activity class="w-4 h-4 text-indigo-400" />
+          <Activity class="w-4 h-4 text-sky-400" />
           <span>{{ $t('dashboard.mileageCostChart.monthlyMileageAndCostPer2', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) }) }}</span>
         </h3>
         <p class="text-xs text-slate-400 mt-0.5">{{ $t('dashboard.mileageCostChart.clickABarOfThe') }}</p>
@@ -153,14 +153,14 @@ onUnmounted(() => {
           v-if="filteredMileageCosts.length"
           type="button"
           @click="emit('open-month', filteredMileageCosts[filteredMileageCosts.length - 1])"
-          class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          class="px-2.5 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
         >
           <PieChart class="w-3.5 h-3.5" />
           <span>{{ $t('dashboard.mileageCostChart.lastMonthSDetail') }}</span>
         </button>
         <div class="flex items-center gap-3 text-xs">
-          <span class="flex items-center gap-1.5 text-indigo-300">
-            <span class="w-3 h-3 rounded bg-indigo-500/80 inline-block"></span>
+          <span class="flex items-center gap-1.5 text-sky-300">
+            <span class="w-3 h-3 rounded bg-sky-500/80 inline-block"></span>
             {{ $t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() }) }}
           </span>
           <span class="flex items-center gap-1.5 text-success-400">

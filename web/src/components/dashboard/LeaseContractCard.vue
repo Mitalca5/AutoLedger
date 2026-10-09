@@ -18,12 +18,12 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
 <template>
   <div
     v-if="leaseContract"
-    class="bg-gradient-to-br from-slate-900/90 to-indigo-950/20 border border-indigo-500/20 p-4 sm:p-5 rounded-2xl shadow-sm space-y-4"
+    class="bg-gradient-to-br from-slate-900/90 to-sky-950/20 border border-sky-500/20 p-4 sm:p-5 rounded-2xl shadow-sm space-y-4"
   >
     <!-- Card Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
       <div class="flex items-center gap-2.5 flex-wrap">
-        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
           <FileText class="w-3.5 h-3.5" />
           {{ $t('dashboard.leaseContractCard.contract', { acquisitionType: leaseContract.acquisitionType }) }}
         </span>
@@ -56,10 +56,10 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
       <div class="bg-slate-950/50 border border-slate-800/80 rounded-xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between text-xs">
           <span class="font-semibold text-slate-300 flex items-center gap-1.5">
-            <Calendar class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <Calendar class="w-3.5 h-3.5 text-sky-400 shrink-0" />
             {{ $t('dashboard.leaseContractCard.contractDuration') }}
           </span>
-          <span class="font-bold text-indigo-300">
+          <span class="font-bold text-sky-300">
             {{ $t('dashboard.leaseContractCard.months', { elapsedMonths: leaseContract.elapsedMonths, totalMonths: leaseContract.totalMonths }) }}
             <span class="text-slate-400 font-normal">({{ formatPercent(leaseContract.durationProgressPct, 0) }})</span>
           </span>
@@ -68,7 +68,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         <!-- Progress Bar Track -->
         <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(Math.min(100, leaseContract.durationProgressPct))" :aria-label="$t('dashboard.leaseContractCard.durationProgress')">
           <div
-            class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+            class="h-full bg-gradient-to-r from-sky-500 to-sky-500 rounded-full transition-all duration-500"
             :style="{ width: `${leaseContract.durationProgressPct}%` }"
           ></div>
         </div>
