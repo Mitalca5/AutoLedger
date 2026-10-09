@@ -31,6 +31,12 @@ type parsedRow struct {
 
 type rowParser func(rc *rowContext, row []string, line int) (*parsedRow, *apierror.Error)
 
+// validImportAmount checks the source value before converting it to integer cents.
+// Non-finite or overflowing floats must not wrap into a negative amount during conversion.
+func validImportAmount(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0 && value <= money.Max.Float()
+}
+
 var rowParsers = map[ImportType]rowParser{
 	ImportTypeCharges:  parseChargeRow,
 	ImportTypeDrives:   parseDriveRow,
@@ -141,7 +147,7 @@ func parseChargeRow(rc *rowContext, row []string, line int) (*parsedRow, *apierr
 		return nil, apierror.Newf("import.row.cost_required", "Line %d: the cost of a charge is required", line)
 	}
 	costValue, err := rc.float(costRaw)
-	if err != nil || costValue < 0 || money.FromFloat(costValue) > money.Max {
+	if err != nil || !validImportAmount(costValue) {
 		return nil, apierror.Newf("import.row.invalid_cost", "Line %d: invalid cost %q", line, costRaw)
 	}
 	cost := money.FromFloat(costValue)
@@ -292,7 +298,7 @@ func parseFuelRow(rc *rowContext, row []string, line int) (*parsedRow, *apierror
 	var amount money.Cents
 	if raw := rc.col(row, "amount", "cost", "total", "total_cost"); raw != "" {
 		v, err := rc.float(raw)
-		if err != nil || v < 0 || money.FromFloat(v) > money.Max {
+		if err != nil || !validImportAmount(v) {
 			return nil, apierror.Newf("import.row.invalid_amount", "Line %d: invalid amount %q", line, raw)
 		}
 		amount = money.FromFloat(v)
