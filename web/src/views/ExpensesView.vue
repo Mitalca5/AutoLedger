@@ -433,7 +433,8 @@ const tabs = computed<TabItem[]>(() => {
           class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
-          {{ $t('expenses.expensesView.tollParking') }}
+          {{ $t('expenses.expensesView.add') }}
+          <span class="hidden font-normal opacity-75 sm:inline">{{ $t('expenses.expensesView.tollParking') }}</span>
         </button>
         <button
           v-if="activeTab === 'MAINTENANCE' || activeTab === 'FIXED'"
@@ -441,7 +442,8 @@ const tabs = computed<TabItem[]>(() => {
           class="btn btn-lg btn-primary"
         >
           <Plus class="w-3.5 h-3.5" />
-          {{ $t('expenses.expensesView.maintenanceFixed') }}
+          {{ $t('expenses.expensesView.add') }}
+          <span class="hidden font-normal opacity-75 sm:inline">{{ activeTab === 'FIXED' ? $t('expenses.expensesView.fixedCosts') : $t('expenses.expensesView.maintenance') }}</span>
         </button>
         <button
           v-if="activeTab === 'REMINDERS'"
@@ -516,6 +518,7 @@ const tabs = computed<TabItem[]>(() => {
       v-if="activeTab === 'TOLLS'"
       :drive-expenses="driveExpenses"
       :loading="loading"
+      @add="openAddTollModal"
       @edit="openEditTollModal"
       @delete="handleDeleteToll"
       @view-document="viewOrDownloadDocument"
@@ -527,6 +530,7 @@ const tabs = computed<TabItem[]>(() => {
       :vehicle-id="vehicleId"
       :maintenance-expenses="maintenanceExpenses"
       :loading="loading"
+      @add="openAddMaintModal"
       @edit="openEditMaintModal"
       @delete="handleDeleteMaint"
       @view-document="viewOrDownloadDocument"

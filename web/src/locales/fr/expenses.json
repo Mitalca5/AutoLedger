@@ -13,8 +13,8 @@
     "webhook": "Webhook",
     "homelabWebhook": "Webhook Homelab",
     "setUpTheWebhookTo": "Configurer le webhook pour recevoir des notifications en temps réel",
-    "maintenanceFixed": "Ajouter une dépense",
-    "tollParking": "Péage / Parking",
+    "add": "Ajouter",
+    "tollParking": "Péage / parking",
     "addCharge": "Ajouter une recharge",
     "importCsv": "Importer CSV",
     "deleteExpenseTitle": "Supprimer la dépense",
@@ -353,7 +353,9 @@
     "carpool": "Covoiturer",
     "createACarpoolForThis": "Créer un covoiturage pour ce trajet",
     "viewTheReceipt": "Voir le justificatif",
-    "noTollOrParkingRecorded": "Aucun péage ou parking enregistré."
+    "noTollOrParkingRecorded": "Aucun péage ou parking enregistré.",
+    "emptyHint": "Les péages et parkings apparaissent ici, ceux saisis sur un trajet y sont listés. Ajoutez-en un à la main pour un déplacement non enregistré.",
+    "addFirst": "Ajouter un péage ou un parking"
   },
   "uploadDocumentModal": {
     "eGServiceInvoiceAugust": "ex: Facture révision, péages août 2026...",

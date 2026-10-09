@@ -13,8 +13,8 @@
     "webhook": "Webhook",
     "homelabWebhook": "Homelab webhook",
     "setUpTheWebhookTo": "Set up the webhook to receive real-time notifications",
-    "maintenanceFixed": "Add an expense",
-    "tollParking": "Toll / Parking",
+    "add": "Add",
+    "tollParking": "Toll / parking",
     "addCharge": "Add a charge",
     "importCsv": "Import CSV",
     "deleteExpenseTitle": "Delete the expense",
@@ -353,7 +353,9 @@
     "carpool": "Carpool",
     "createACarpoolForThis": "Create a carpool for this drive",
     "viewTheReceipt": "View the receipt",
-    "noTollOrParkingRecorded": "No toll or parking recorded."
+    "noTollOrParkingRecorded": "No toll or parking recorded.",
+    "emptyHint": "Tolls and parking fees show up here, and the ones recorded on a drive are listed with it. Add one by hand for a trip you did not record.",
+    "addFirst": "Add a toll or parking fee"
   },
   "uploadDocumentModal": {
     "eGServiceInvoiceAugust": "e.g. Service invoice, August 2026 tolls...",

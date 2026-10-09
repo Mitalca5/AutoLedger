@@ -3,13 +3,14 @@ import ListSkeleton from '@/components/ListSkeleton.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useRouter } from 'vue-router'
 import { useVehicleStore } from '@/stores/vehicle'
-import { Navigation, Layers, Users, Pencil, Trash2, Paperclip } from 'lucide-vue-next'
+import { Navigation, Layers, Users, Pencil, Trash2, Paperclip, Plus } from 'lucide-vue-next'
 import { formatDate } from '@/utils/expenses'
 import { formatAmount } from '@/currency'
 import { t } from '@/i18n'
 
 defineProps<{ driveExpenses: any[]; loading: boolean }>()
 const emit = defineEmits<{
+  add: []
   edit: [expense: any]
   delete: [expense: any]
   'view-document': [docId: string | null | undefined, filename?: string | null, download?: boolean]
@@ -30,7 +31,13 @@ const expenseTypeLabel = (type: string) => (TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL
   <div>
     <ListSkeleton v-if="loading" />
     <EmptyState v-else-if="!driveExpenses.length">
-      {{ $t('expenses.tollsPanel.noTollOrParkingRecorded') }}
+      <p class="font-medium text-slate-300">{{ $t('expenses.tollsPanel.noTollOrParkingRecorded') }}</p>
+      <p class="mt-1">{{ $t('expenses.tollsPanel.emptyHint') }}</p>
+      <template v-if="vehicleStore.canEdit" #actions>
+        <button class="btn btn-primary" @click="emit('add')">
+          <Plus class="h-3.5 w-3.5" /> {{ $t('expenses.tollsPanel.addFirst') }}
+        </button>
+      </template>
     </EmptyState>
     <div v-else class="space-y-3">
       <div
