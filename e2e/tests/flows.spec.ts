@@ -213,3 +213,43 @@ test('a toll added from the cost modal of a drive is listed, edited and deleted'
   await page.getByRole('dialog', { name: 'Delete the cost' }).getByRole('button', { name: 'Delete', exact: true }).click()
   await expect(dialog.getByText('0 cost(s) assigned')).toBeVisible()
 })
+
+test('a carpool is entered with its legs and passengers, priced and saved, then deleted', async ({ page, request }) => {
+  // The demo carpool of an interrupted run is removed first
+  const headers = await authHeaders(request)
+  const existing = await (await request.get(`/api/vehicles/${ev.id}/carpools`, { headers })).json()
+  for (const trip of (existing.trips ?? []).filter((c: { title: string }) => c.title === 'E2E carpool')) {
+    await request.delete(`/api/vehicles/${ev.id}/carpools/${trip.id}`, { headers })
+  }
+
+  await useVehicle(page, ev.id, '/carpools')
+  await page.getByRole('button', { name: 'New carpool' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'New carpool' })
+  await dialog.locator('#carpool-title').fill('E2E carpool')
+  await dialog.locator('#leg-start-0').fill('Lyon')
+  await dialog.locator('#leg-end-0').fill('Annecy')
+  await dialog.locator('#leg-distance-0').fill('100')
+  await dialog.locator('#leg-electricity_cost-0').fill('20')
+  await dialog.locator('#leg-tolls_cost-0').fill('10')
+
+  // 30 of actual cost shared between the driver and one passenger: the fair share is 15
+  await dialog.getByRole('button', { name: 'Apply the fair share' }).click()
+  await expect(dialog.locator('#passenger-paid-0')).toHaveValue('15')
+  await dialog.getByRole('button', { name: 'Calculation detail' }).click()
+  await expect(dialog.getByText('Hide the calculation')).toBeVisible()
+  await expect(dialog.getByText('€30.00').first()).toBeVisible()
+  await expect(dialog.getByText('€15.00').first()).toBeVisible()
+
+  await dialog.getByRole('button', { name: 'Add a passenger' }).click()
+  await expect(dialog.locator('#passenger-name-1')).toBeVisible()
+  await dialog.getByRole('button', { name: 'Remove this passenger' }).last().click()
+  await expect(dialog.locator('#passenger-name-1')).toHaveCount(0)
+
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByText('E2E carpool').first()).toBeVisible()
+
+  await page.locator('div.rounded-2xl', { hasText: 'E2E carpool' }).getByRole('button', { name: 'Delete', exact: true }).first().click()
+  await page.getByRole('dialog').last().getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(page.getByText('E2E carpool')).toHaveCount(0)
+})

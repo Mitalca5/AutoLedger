@@ -1,36 +1,19 @@
 <script setup lang="ts">
-import NumberInput from '@/components/NumberInput.vue'
 import { t } from '@/i18n'
-import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
-import { Users, Plus, Trash2, X, Navigation, Calculator, Lock, RotateCw, ChevronDown, ChevronUp } from 'lucide-vue-next'
+import { Users, X, Lock } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import DrivePicker from '@/components/drives/DrivePicker.vue'
-import {
-  COST_FIELDS,
-  allocate,
-  cents,
-  clampPassengerStops as clampStops,
-  earliestSelectedDriveDate,
-  emptyLeg,
-  estimateTitle,
-  euros,
-  legsFromEstimate,
-  legsFromTrip,
-  newPassenger,
-  passengersFromTrip,
-  remapPassengerStops,
-  stopNames,
-  toDateInputString,
-  type LegForm,
-  type PassengerForm,
-} from '@/utils/carpool'
+import { COST_FIELDS, allocate, cents, clampPassengerStops as clampStops, earliestSelectedDriveDate, emptyLeg, estimateTitle, legsFromEstimate, legsFromTrip, newPassenger, passengersFromTrip, remapPassengerStops, stopNames, toDateInputString, type LegForm, type PassengerForm } from '@/utils/carpool'
 import { useEscapeToClose } from '@/composables/useEscapeToClose'
-import { currencySymbol, formatAmount } from '@/currency'
-import { distanceUnit, formatDistance, formatDistanceValue } from '@/units'
+import { formatAmount } from '@/currency'
+
+import CarpoolLegs from '@/components/carpool/CarpoolLegs.vue'
+import CarpoolPassengers from '@/components/carpool/CarpoolPassengers.vue'
+import CarpoolSimulation from '@/components/carpool/CarpoolSimulation.vue'
 
 // Creates a carpool trip, or edits `editing`. A new trip can start from drives or a trip group (createOptions).
 // openToken changes every time the page asks to open the modal, so the form is initialised again even if it is already open.
@@ -62,10 +45,6 @@ const selectedDriveIds = ref<string[]>([])
 const titleTouched = ref(false)
 const currentRates = ref<any>(null)
 const expandedPassengerIndex = ref<number | null>(null)
-
-function togglePassengerMath(index: number) {
-  expandedPassengerIndex.value = expandedPassengerIndex.value === index ? null : index
-}
 
 const isDateDisabled = computed(() => sourceMode.value === 'DRIVES')
 
@@ -260,7 +239,7 @@ function initEdit(trip: any) {
     legs,
     passengers: passengersFromTrip(trip, legs.length),
   }
-  if (!form.value.passengers.length) addPassenger()
+  if (!form.value.passengers.length) form.value.passengers.push(newPassenger(0, legs.length))
   pickerAnchor.value = form.value.date
 }
 
@@ -270,22 +249,6 @@ watch([open, () => props.openToken], ([isOpen]) => {
   if (props.editing) initEdit(props.editing)
   else initCreate(props.createOptions)
 })
-
-function addPassenger() {
-  form.value.passengers.push(newPassenger(form.value.passengers.length, form.value.legs.length))
-}
-
-function removePassenger(index: number) {
-  form.value.passengers.splice(index, 1)
-}
-
-function onBoardChange(p: PassengerForm) {
-  if (p.alight_stop_index <= p.board_stop_index) p.alight_stop_index = p.board_stop_index + 1
-}
-
-function applyFairPrice(index: number) {
-  form.value.passengers[index].amount_paid = euros(live.value.shares[index])
-}
 
 const submitted = ref(false)
 const titleError = computed(() => (!form.value.title.trim() ? t('carpool.carpoolTripModal.titleRequired') : ''))
@@ -434,272 +397,33 @@ async function handleModalRecalculate() {
       </div>
 
       <!-- Legs -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-            <Navigation class="w-4 h-4 text-indigo-400" />
-            {{ $t('carpool.carpoolTripModal.legsAndActualCostsKm', { unit: distanceUnit(), liveDistance: formatDistanceValue(liveDistance, 1), total: fmt(euros(live.total)) }) }}
-          </h4>
-          <div class="flex items-center gap-2">
-            <button
-              v-if="editingTripId && form.legs.length > 0"
-              type="button"
-              @click="handleModalRecalculate"
-              :disabled="estimating"
-              class="text-xs text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1.5 px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg transition-colors disabled:opacity-50"
-              :title="$t('carpool.carpoolTripModal.updateTheActualCostsWith')"
-            >
-              <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': estimating }" />
-              <span>{{ $t('carpool.carpoolTripModal.recalculateTheCosts') }}</span>
-            </button>
-            <button
-              v-if="sourceMode === 'MANUAL'"
-              type="button"
-              @click="addManualLeg"
-              class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
-            >
-              <Plus class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.addALeg') }}
-            </button>
-          </div>
-        </div>
-        <p v-if="!form.legs.length" role="status" :class="['text-xs', submitted ? 'text-danger-400' : 'text-slate-400']">{{ $t('carpool.carpoolTripModal.selectAtLeastOneDrive') }}</p>
-
-        <div v-for="(leg, i) in form.legs" :key="i" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <span class="font-bold text-indigo-300">{{ $t('carpool.carpoolTripModal.leg', { i: i + 1 }) }}</span>
-            <label :for="`leg-start-${i}`" class="sr-only">{{ $t('carpool.carpoolTripModal.startOfLeg', { i: i + 1 }) }}</label>
-            <input
-              :id="`leg-start-${i}`"
-              v-model="leg.start_label"
-              :placeholder="$t('carpool.carpoolTripModal.start')"
-              class="field w-36!"
-            />
-            <span class="text-slate-400">→</span>
-            <label :for="`leg-end-${i}`" class="sr-only">{{ $t('carpool.carpoolTripModal.endOfLeg', { i: i + 1 }) }}</label>
-            <input
-              :id="`leg-end-${i}`"
-              v-model="leg.end_label"
-              :placeholder="$t('carpool.carpoolTripModal.destination')"
-              class="field w-36!"
-            />
-            <label :for="`leg-distance-${i}`" class="text-slate-400">{{ distanceUnit() }}</label>
-            <DistanceInput
-              :id="`leg-distance-${i}`"
-              v-model="leg.distance_km"
-              step="0.1"
-              min="0"
-              :readonly="!!leg.drive_id"
-              class="field w-20!"
-            />
-            <button
-              v-if="!leg.drive_id"
-              type="button"
-              @click="estimateManualLeg(i)"
-              class="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300"
-              :title="$t('carpool.carpoolTripModal.estimateElectricityTiresMaintenanceAnd')"
-            >
-              <Calculator class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.estimate') }}
-            </button>
-            <span class="ml-auto text-slate-300">
-              {{ $t('carpool.carpoolTripModal.onBoard', { legDetails: fmt(euros(live.legDetails[i]?.total || 0)), legDetails2: 1 + (live.legDetails[i]?.seats || 0) }) }}
-              <strong>{{ $t('carpool.carpoolTripModal.person', { legDetails: fmt(euros(live.legDetails[i]?.perPerson || 0)) }) }}</strong>
-            </span>
-            <button v-if="sourceMode === 'MANUAL' && form.legs.length > 1" type="button" @click="removeLeg(i)" class="text-slate-400 hover:text-danger-400" :title="$t('carpool.carpoolTripModal.deleteTheLeg')">
-              <Trash2 class="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            <div v-for="f in COST_FIELDS" :key="f.key">
-              <label :for="`leg-${f.key}-${i}`" class="block text-xs text-slate-400 mb-0.5">{{ $t(`carpool.costFields.${f.label}`) }} ({{ currencySymbol(vehicleStore.currency) }})</label>
-              <NumberInput
-                :id="`leg-${f.key}-${i}`"
-                v-model="(leg as any)[f.key]"
-                min="0"
-                class="field"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <CarpoolLegs
+        :legs="form.legs"
+        :source-mode="sourceMode"
+        :is-editing="!!editingTripId"
+        :submitted="submitted"
+        :estimating="estimating"
+        :live="live"
+        :live-distance="liveDistance"
+        :currency="vehicleStore.currency"
+        @recalculate="handleModalRecalculate"
+        @add-leg="addManualLeg"
+        @estimate="estimateManualLeg"
+        @remove="removeLeg"
+      />
 
       <!-- Passengers -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-            <Users class="w-4 h-4 text-blue-400" />
-            {{ $t('carpool.carpoolTripModal.passengersBoardingAndAlighting') }}
-          </h4>
-          <button type="button" @click="addPassenger" class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1">
-            <Plus class="w-3.5 h-3.5" /> {{ $t('carpool.carpoolTripModal.addAPassenger') }}
-          </button>
-        </div>
-
-        <div v-for="(p, index) in form.passengers" :key="index" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 space-y-2">
-          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end text-xs">
-            <div class="col-span-2 sm:col-span-3">
-              <label :for="`passenger-name-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.name') }}</label>
-              <input
-                :id="`passenger-name-${index}`"
-                v-model="p.passenger_name"
-                class="field"
-              />
-            </div>
-            <div class="sm:col-span-3">
-              <label :for="`passenger-board-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOnAt') }}</label>
-              <select
-                :id="`passenger-board-${index}`"
-                v-model.number="p.board_stop_index"
-                @change="onBoardChange(p)"
-                class="field"
-              >
-                <option v-for="(name, s) in stops.slice(0, -1)" :key="s" :value="s">{{ name }}</option>
-              </select>
-            </div>
-            <div class="sm:col-span-3">
-              <label :for="`passenger-alight-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.getsOffAt') }}</label>
-              <select
-                :id="`passenger-alight-${index}`"
-                v-model.number="p.alight_stop_index"
-                class="field"
-              >
-                <option v-for="(name, s) in stops" v-show="s > p.board_stop_index" :key="s" :value="s" :disabled="s <= p.board_stop_index">{{ name }}</option>
-              </select>
-            </div>
-            <div>
-              <label :for="`passenger-seats-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.seats') }}</label>
-              <input
-                :id="`passenger-seats-${index}`"
-                v-model.number="p.seats"
-                type="number"
-                min="1"
-                max="7"
-                class="field"
-              />
-            </div>
-            <div class="sm:col-span-2">
-              <label :for="`passenger-paid-${index}`" class="block text-xs text-slate-400 mb-0.5">{{ $t('carpool.carpoolTripModal.paid', { cur: currencySymbol(vehicleStore.currency) }) }}</label>
-              <NumberInput
-                :id="`passenger-paid-${index}`"
-                v-model="p.amount_paid"
-                min="0"
-                class="field font-bold text-success-400"
-              />
-            </div>
-          </div>
-          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span class="text-slate-400">
-              {{ $t('carpool.carpoolTripModal.fairShare') }} <strong class="text-slate-200">{{ fmt(euros(live.shares[index] || 0)) }}</strong>
-              <span :class="cents(p.amount_paid) >= (live.shares[index] || 0) ? 'text-success-400' : 'text-warning-400'" class="ml-2">
-                {{ cents(p.amount_paid) >= (live.shares[index] || 0)
-                  ? $t('carpool.above', { amount: fmt(euros(cents(p.amount_paid) - (live.shares[index] || 0))) })
-                  : $t('carpool.below', { amount: fmt(euros((live.shares[index] || 0) - cents(p.amount_paid))) }) }}
-              </span>
-            </span>
-            <span class="flex items-center gap-3">
-              <button
-                type="button"
-                @click="togglePassengerMath(index)"
-                class="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
-                :title="expandedPassengerIndex === index ? $t('carpool.carpoolTripModal.hideCalcDetail') : $t('carpool.carpoolTripModal.explainShare')"
-              >
-                <Calculator class="w-3.5 h-3.5" />
-                <span>{{ expandedPassengerIndex === index ? $t('carpool.carpoolTripModal.hideCalc') : $t('carpool.carpoolTripModal.calcDetail') }}</span>
-                <ChevronUp v-if="expandedPassengerIndex === index" class="w-3.5 h-3.5" />
-                <ChevronDown v-else class="w-3.5 h-3.5" />
-              </button>
-              <button type="button" @click="applyFairPrice(index)" class="text-indigo-400 hover:text-indigo-300 font-semibold">{{ $t('carpool.carpoolTripModal.applyTheFairShare') }}</button>
-              <button v-if="form.passengers.length > 1" type="button" @click="removePassenger(index)" class="text-slate-400 hover:text-danger-400" :title="$t('carpool.carpoolTripModal.removeThisPassenger')">
-                <Trash2 class="w-3.5 h-3.5" />
-              </button>
-            </span>
-          </div>
-
-          <!-- Mathematical Breakdown Card -->
-          <div
-            v-if="expandedPassengerIndex === index"
-            class="mt-3 pt-3 border-t border-slate-800 space-y-2.5 bg-slate-950/70 p-3 rounded-xl"
-          >
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                <Calculator class="w-3.5 h-3.5 text-indigo-400" />
-                {{ $t('carpool.carpoolTripModal.formulaPerSection', { name: p.passenger_name || $t('carpool.passenger', { n: index + 1 }) }) }}
-              </span>
-              <span class="text-xs text-slate-400 font-medium">
-                {{ $t('carpool.carpoolTripModal.seatsBooked', p.seats) }}
-              </span>
-            </div>
-
-            <div class="space-y-2">
-              <div
-                v-for="(leg, legIdx) in form.legs"
-                :key="legIdx"
-                class="text-xs p-2.5 rounded-lg border transition-colors"
-                :class="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index
-                  ? 'bg-slate-900/90 border-indigo-500/30 text-slate-200'
-                  : 'bg-slate-900/30 border-slate-800/50 text-slate-400 opacity-60'"
-              >
-                <div class="flex items-center justify-between font-semibold">
-                  <span class="flex items-center gap-1.5">
-                    <span class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-xs font-mono text-slate-300">
-                      {{ legIdx + 1 }}
-                    </span>
-                    <span>{{ stops[legIdx] }} → {{ stops[legIdx + 1] }}</span>
-                    <span v-if="Number(leg.distance_km)" class="text-slate-400 font-normal">({{ formatDistance(Number(leg.distance_km), 1) }})</span>
-                  </span>
-                  <span v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="text-indigo-300 font-bold">
-                    {{ fmt(euros((live.legDetails[legIdx]?.perPerson || 0) * (Number(p.seats) || 1))) }}
-                  </span>
-                  <span v-else class="text-slate-400 italic text-xs">
-                    {{ $t('carpool.carpoolTripModal.notTravelled') }}
-                  </span>
-                </div>
-
-                <div v-if="p.board_stop_index <= legIdx && legIdx < p.alight_stop_index" class="mt-1.5 pl-5.5 text-xs text-slate-400 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                  <span>{{ $t('carpool.carpoolTripModal.actualCostOfTheSection') }} <strong class="text-slate-200">{{ fmt(euros(live.legDetails[legIdx]?.total || 0)) }}</strong></span>
-                  <span>•</span>
-                  <span>{{ $t('carpool.carpoolTripModal.occupants') }} <strong class="text-slate-200">{{ $t('carpool.carpoolTripModal.oneDriverPlusPassengers', { legDetails: live.legDetails[legIdx]?.seats || 0, legDetails2: 1 + (live.legDetails[legIdx]?.seats || 0) }) }}</strong></span>
-                  <span>•</span>
-                  <span class="text-indigo-300/90">
-                    {{ $t('carpool.carpoolTripModal.calcFormula', { total: fmt(euros(live.legDetails[legIdx]?.total || 0)), people: 1 + (live.legDetails[legIdx]?.seats || 0) }) }}{{ p.seats > 1 ? $t('carpool.carpoolTripModal.calcSeats', { seats: p.seats }) : '' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span class="text-slate-400">{{ $t('carpool.carpoolTripModal.totalFairShareDue') }}</span>
-              <div class="text-right">
-                <span class="font-bold text-success-400 text-sm">{{ fmt(euros(live.shares[index] || 0)) }}</span>
-                <span class="text-xs text-slate-400 block">{{ $t('carpool.carpoolTripModal.exactSumOfTheSections') }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <CarpoolPassengers
+        v-model:passengers="form.passengers"
+        v-model:expanded="expandedPassengerIndex"
+        :legs="form.legs"
+        :stops="stops"
+        :live="live"
+        :currency="vehicleStore.currency"
+      />
 
       <!-- Simulation -->
-      <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-        <div>
-          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.actualCost') }}</div>
-          <div class="text-sm font-bold text-white">{{ fmt(euros(live.total)) }}</div>
-        </div>
-        <div>
-          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.passengersShares') }}</div>
-          <div class="text-sm font-bold text-blue-400">{{ fmt(euros(live.passengersShare)) }}</div>
-        </div>
-        <div>
-          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.driverSShare') }}</div>
-          <div class="text-sm font-bold text-warning-400">{{ fmt(euros(live.driverShare)) }}</div>
-        </div>
-        <div>
-          <div class="text-slate-400">{{ $t('carpool.carpoolTripModal.received') }}</div>
-          <div class="text-sm font-bold text-success-400">{{ fmt(euros(liveRevenue)) }} ({{ liveCoverage }} %)</div>
-        </div>
-        <div>
-          <div class="text-slate-400">{{ liveNet > 0 ? $t('carpool.carpoolTripModal.leftToDriver') : $t('carpool.carpoolTripModal.surplus') }}</div>
-          <div class="text-sm font-bold" :class="liveNet > 0 ? 'text-white' : 'text-success-400'">{{ fmt(euros(Math.abs(liveNet))) }}</div>
-        </div>
-      </div>
+      <CarpoolSimulation :live="live" :live-revenue="liveRevenue" :live-coverage="liveCoverage" :live-net="liveNet" :currency="vehicleStore.currency" />
 
       <div>
         <label for="carpool-notes" class="block text-xs font-semibold text-slate-400 mb-1">{{ $t('carpool.carpoolTripModal.notesOptional') }}</label>
