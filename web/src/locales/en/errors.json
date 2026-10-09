@@ -241,6 +241,7 @@
     "electric_only": "Charging sessions only apply to electric vehicles"
   },
   "tariff": {
+    "currency_mismatch": "The tariff currency ({p0}) must match the vehicle currency ({p1})",
     "band_invalid": "Invalid band",
     "bands_required": "At least one band is required",
     "name_required": "Tariff plan name is required",
