@@ -354,6 +354,7 @@ describe('endpoint contract', () => {
     ['createComparisonScenario', () => api.createComparisonScenario({ s: 1 }), 'POST', '/comparison-scenarios', { s: 1 }],
     ['updateComparisonScenario', () => api.updateComparisonScenario('s1', { s: 2 }), 'PUT', '/comparison-scenarios/s1', { s: 2 }],
     ['deleteComparisonScenario', () => api.deleteComparisonScenario('s1'), 'DELETE', '/comparison-scenarios/s1'],
+    ['previewComparison', () => api.previewComparison({ s: 1 }), 'POST', '/comparison-scenarios/preview', { s: 1 }],
     ['getComparisonResult', () => api.getComparisonResult('s1'), 'GET', '/comparison-scenarios/s1/result'],
     ['getCarpools', () => api.getCarpools('v1'), 'GET', '/vehicles/v1/carpools'],
     ['getCarpool', () => api.getCarpool('v1', 'c1'), 'GET', '/vehicles/v1/carpools/c1'],

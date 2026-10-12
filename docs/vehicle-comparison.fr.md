@@ -19,6 +19,12 @@ Les résultats montrent les coûts d'énergie, l'entretien, l'assurance, la dép
 - Les financements, prêts et locations sont exclus. La dépréciation suit le calcul achat/revente existant ; le seuil de rentabilité compare l'achat et les dépenses courantes sans déduire la revente.
 - La **projection** reste un scénario électrique contre thermique saisi à la main. Un comparatif d'hybride suivi demande des données d'hybride enregistrées.
 
+## Et si
+
+Le résultat d'une **projection** comporte une section **Et si… ?**. Déplacez les curseurs, ou saisissez une valeur, pour la distance annuelle, le prix du carburant au litre et le prix de l'électricité au kWh ; les curseurs couvrent de la moitié au double de la valeur enregistrée. Les chiffres explorés s'affichent à côté des chiffres enregistrés : l'économie d'énergie (carburant et électricité seulement), l'économie totale (tous les coûts du scénario) et le seuil de rentabilité sur le coût complet sont trois chiffres distincts. **Réinitialiser** revient aux valeurs enregistrées et **Enregistrer comme nouvelle comparaison** ouvre le formulaire avec les valeurs explorées, sans modifier la comparaison d'origine.
+
+Les valeurs explorées passent par le même calcul qu'un scénario enregistré et ne sont pas stockées. Un prix hypothétique ne recalcule jamais une recharge ou un plein enregistré. Les distances, volumes et la devise suivent les réglages du compte. La section n'existe que pour les projections.
+
 ## Coûts de recharge gratuits et inconnus
 
 Saisissez un coût explicite de **0** pour une recharge gratuite, quelle qu'en soit la raison. Zéro est un coût connu ; un coût absent reste inconnu. Les recharges gratuites enregistrées comptent comme des recharges dans les comparatifs d'hybrides suivis et ne déclenchent pas l'avertissement de source d'énergie manquante. Les recharges dont le coût est inconnu reçoivent un rappel distinct pour saisir leur coût réel, ou zéro si elles étaient gratuites.

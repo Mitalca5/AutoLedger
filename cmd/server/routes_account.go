@@ -53,6 +53,7 @@ func (h *apiHandlers) registerAccountRoutes(r chi.Router) {
 		r.Get("/", h.comparison.List)
 		r.Post("/", h.comparison.Create)
 		r.Get("/defaults", h.comparison.Defaults)
+		r.Post("/preview", h.comparison.Preview)
 		r.Put("/{scenarioId}", h.comparison.Update)
 		r.Delete("/{scenarioId}", h.comparison.Delete)
 		r.Get("/{scenarioId}/result", h.comparison.Result)

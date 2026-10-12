@@ -235,5 +235,28 @@
       "insurance": "Assurance et taxes",
       "depreciation": "Dépréciation"
     }
+  },
+  "whatIf": {
+    "title": "Et si… ?",
+    "intro": "Testez une autre distance ou d'autres prix sur cette projection. Votre comparaison enregistrée ne change pas et les coûts enregistrés ne sont jamais recalculés.",
+    "reset": "Réinitialiser",
+    "annualKm": "Distance par an ({unit})",
+    "fuelPrice": "Prix du carburant (par litre)",
+    "electricityPrice": "Prix de l'électricité (par kWh)",
+    "original": "Enregistré : {value}",
+    "tableCaption": "Économies de la comparaison enregistrée et des valeurs explorées",
+    "originalColumn": "Enregistré",
+    "exploredColumn": "Exploré",
+    "gapColumn": "Écart",
+    "energySavings": "Économie d'énergie",
+    "totalSavings": "Économie totale (tous coûts)",
+    "breakEven": "Point mort (coût complet)",
+    "notReached": "non atteint",
+    "years": "{years} an(s)",
+    "distinct": "L'économie d'énergie ne compte que le carburant et l'électricité ; l'économie totale inclut tous les coûts du scénario ; le point mort est le moment où les dépenses cumulées du véhicule électrique passent sous celles du thermique.",
+    "invalid": "Une des valeurs explorées est hors de la plage acceptée.",
+    "failed": "Les chiffres explorés n'ont pas pu être calculés.",
+    "saveAsNew": "Enregistrer comme nouvelle comparaison",
+    "copyName": "{name} (et si)"
   }
 }

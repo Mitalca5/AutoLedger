@@ -19,6 +19,12 @@ Results show energy costs, maintenance, insurance, depreciation, total cost, cos
 - Financing, loans and leases are excluded. Depreciation follows the existing purchase/resale calculation; break-even compares purchase plus running outlays without deducting resale.
 - **Projection** remains a manually entered electric-versus-combustion scenario. A tracked hybrid comparison needs recorded hybrid data.
 
+## What if
+
+The result of a **projection** has a **What if…?** section. Move the sliders, or type a value, for the annual distance, the fuel price per litre and the electricity price per kWh; the sliders span half to twice the saved value. The explored figures appear next to the saved ones: energy savings (fuel and electricity only), total savings (every cost of the scenario) and the break-even on the full cost are three separate figures. **Reset** returns to the saved values and **Save as a new comparison** opens the form with the explored values, leaving the original comparison unchanged.
+
+The explored inputs are sent to the same calculation as a saved scenario and are not stored. A hypothetical price never reprices a recorded charge or fill-up. Distances, volumes and currency follow the account settings. The section is available for projections only.
+
 ## Free and unknown charging costs
 
 Enter an explicit cost of **0** for a free charge, regardless of why it is free. Zero is a known cost; an absent cost remains unknown. Recorded free charges count as charging records in tracked hybrid comparisons and do not trigger the missing-energy-source warning. Charges with an unknown cost receive a separate reminder to enter their actual cost, or zero if they were free.

@@ -386,6 +386,8 @@ export const api = {
     request<any>(`/comparison-scenarios/${scenarioId}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteComparisonScenario: (scenarioId: string) =>
     request<any>(`/comparison-scenarios/${scenarioId}`, { method: 'DELETE' }),
+  previewComparison: (data: any) =>
+    request<any>('/comparison-scenarios/preview', { method: 'POST', body: JSON.stringify(data) }),
   getComparisonResult: (scenarioId: string) => request<any>(`/comparison-scenarios/${scenarioId}/result`),
   getComparisonDefaults: (vehicleId?: string, currency?: string) => {
     const params = new URLSearchParams()

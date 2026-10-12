@@ -24,6 +24,7 @@ import {
   comparisonReferenceVehicle,
   comparisonStepErrorKey,
   emptyComparisonForm,
+  type ComparisonForm,
   hasAdvancedOptions,
   scenarioToForm,
   MAX_COMPARE,
@@ -145,6 +146,17 @@ function editScenario(sc: any) {
   Object.assign(form, scenarioToForm(sc, canCompareTrackedVehicle.value))
   showAdvanced.value = hasAdvancedOptions(form)
   editingId.value = sc.id
+  formError.value = ''
+  step.value = 1
+  view.value = 'edit'
+  loadDefaults()
+}
+
+// A what-if saved as a new comparison opens the form with the explored values; the original stays as it is.
+function startFromExplored(explored: ComparisonForm) {
+  Object.assign(form, explored)
+  showAdvanced.value = hasAdvancedOptions(form)
+  editingId.value = null
   formError.value = ''
   step.value = 1
   view.value = 'edit'
@@ -445,6 +457,7 @@ onMounted(async () => {
       :currency="currency"
       @back="view = 'list'"
       @edit="editScenario(currentScenario)"
+      @save-as-new="startFromExplored"
     />
   </div>
 </template>

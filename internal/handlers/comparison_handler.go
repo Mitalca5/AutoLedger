@@ -217,6 +217,33 @@ func (h *ComparisonHandler) Result(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
+// Preview evaluates a projection from the inputs of the request, without saving a scenario. It backs the
+// what-if section of a result: the explored values are never stored and never touch recorded costs.
+func (h *ComparisonHandler) Preview(w http.ResponseWriter, r *http.Request) {
+	var req SaveComparisonRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+	if req.Mode != models.ComparisonModeProjection {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("comparison.preview_projection_only", "The what-if exploration is only available for projections"))
+		return
+	}
+	if strings.TrimSpace(req.Name) == "" {
+		req.Name = "preview"
+	}
+	if err := validateComparisonRequest(&req); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	res, err := h.service.Compare(r.Context(), req.toScenario(middleware.GetUserID(r.Context())))
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to compute comparison")
+		return
+	}
+	writeJSON(w, http.StatusOK, res)
+}
+
 // Defaults returns the form prefill, using the vehicle's real data when vehicle_id is given.
 func (h *ComparisonHandler) Defaults(w http.ResponseWriter, r *http.Request) {
 	vehicleID := r.URL.Query().Get("vehicle_id")

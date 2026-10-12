@@ -235,5 +235,28 @@
       "insurance": "Insurance and taxes",
       "depreciation": "Depreciation"
     }
+  },
+  "whatIf": {
+    "title": "What if…?",
+    "intro": "Try another distance or other prices on this projection. Your saved comparison does not change and recorded costs are never repriced.",
+    "reset": "Reset",
+    "annualKm": "Distance per year ({unit})",
+    "fuelPrice": "Fuel price (per litre)",
+    "electricityPrice": "Electricity price (per kWh)",
+    "original": "Saved: {value}",
+    "tableCaption": "Savings of the saved comparison and of the explored values",
+    "originalColumn": "Saved",
+    "exploredColumn": "Explored",
+    "gapColumn": "Gap",
+    "energySavings": "Energy savings",
+    "totalSavings": "Total savings (all costs)",
+    "breakEven": "Break-even (full cost)",
+    "notReached": "not reached",
+    "years": "{years} year(s)",
+    "distinct": "Energy savings count fuel and electricity only; total savings include every cost of the scenario; the break-even is when the cumulated outlay of the electric vehicle drops below the combustion one.",
+    "invalid": "One of the explored values is outside the accepted range.",
+    "failed": "The explored figures could not be computed.",
+    "saveAsNew": "Save as a new comparison",
+    "copyName": "{name} (what if)"
   }
 }

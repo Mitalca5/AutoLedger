@@ -8,11 +8,13 @@ import { comparisonSavings } from '@/utils/comparisonSavings'
 import { sideKey, type TrackedSide } from '@/utils/comparisonSide'
 import { costRowValues } from '@/utils/comparisonForm'
 import ComparisonCharts from '@/components/comparison/ComparisonCharts.vue'
+import ComparisonWhatIf from '@/components/comparison/ComparisonWhatIf.vue'
+import type { ComparisonForm } from '@/utils/comparisonForm'
 import { ArrowLeft, Download, Info, Pencil, Printer, TrendingDown, TrendingUp } from 'lucide-vue-next'
 
 // The outcome of one scenario: verdict, savings, cost breakdown, charts and the CSV / print exports.
 const props = defineProps<{ result: any | null; scenario: any | null; side: TrackedSide; currency: string }>()
-const emit = defineEmits<{ back: []; edit: [] }>()
+const emit = defineEmits<{ back: []; edit: []; 'save-as-new': [form: ComparisonForm] }>()
 
 const sk = (key: string) => sideKey(key, props.side)
 
@@ -189,6 +191,14 @@ function printResult() {
           </tbody>
         </table>
       </div>
+
+      <ComparisonWhatIf
+        v-if="scenario?.mode === 'PROJECTION'"
+        :scenario="scenario"
+        :result="result"
+        :currency="currency"
+        @save-as-new="emit('save-as-new', $event)"
+      />
 
       <ComparisonCharts :result="result" :side="side" :currency="currency" :cost-rows="costRows" :break-even-text="breakEvenText" />
 
