@@ -78,7 +78,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 	if err := validateRange(ice.LPer100Km, 0.1, 50, apierror.Newf("comparison.ice_consumption", "Invalid combustion consumption (%.1f to %.0f L/100 km)", apierror.PerKm(0.1), apierror.PerKm(50))); err != nil {
 		return err
 	}
-	if err := validateRange(ice.FuelPrice, 0, 10, apierror.New("comparison.fuel_price", "Invalid fuel price (0 to 10 per litre)")); err != nil {
+	if err := validateRange(ice.FuelPrice, 0, models.MaxFuelPricePerLiter, apierror.New("comparison.fuel_price", "Invalid fuel price: outside the supported range")); err != nil {
 		return err
 	}
 	if err := validateAmounts(ice.PurchasePrice, ice.ResaleValue, ice.MaintenanceYearly, ice.InsuranceYearly, ice.TaxYearly); err != nil {
@@ -116,7 +116,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 		if err := validateRange(req.Tracked.KwhPer100Km, 0.1, 100, apierror.Newf("comparison.ev_consumption", "Invalid electric consumption (%.1f to %.0f kWh/100 km)", apierror.PerKm(0.1), apierror.PerKm(100))); err != nil {
 			return err
 		}
-		if err := validateRange(req.Tracked.EurPerKwh, 0, 5, apierror.New("comparison.electricity_price", "Invalid electricity price (0 to 5 per kWh)")); err != nil {
+		if err := validateRange(req.Tracked.EurPerKwh, 0, money.MaxRate.Float(), apierror.New("comparison.electricity_price", "Invalid electricity price: outside the supported range")); err != nil {
 			return err
 		}
 		if err := validateAmounts(req.Tracked.PurchasePrice, req.Tracked.ResaleValue, req.Tracked.MaintenanceYearly, req.Tracked.InsuranceYearly, req.Tracked.TaxYearly); err != nil {

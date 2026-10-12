@@ -25,8 +25,8 @@ const STEPS: Record<WhatIfKey, number> = { annual_km: 500, fuel_price: 0.01, eur
 // Hard limits of the API (validateComparisonRequest)
 const LIMITS: Record<WhatIfKey, { min: number; max: number }> = {
   annual_km: { min: 1, max: 200_000 },
-  fuel_price: { min: 0, max: 10 },
-  eur_per_kwh: { min: 0, max: 5 },
+  fuel_price: { min: 0, max: 999_999_999.999 },
+  eur_per_kwh: { min: 0, max: 999_999.999999 },
 }
 
 export function whatIfBounds(base: WhatIfInputs): Record<WhatIfKey, WhatIfBound> {
@@ -35,9 +35,10 @@ export function whatIfBounds(base: WhatIfInputs): Record<WhatIfKey, WhatIfBound>
     const step = STEPS[key]
     const { min: floor, max: ceiling } = LIMITS[key]
     const value = Number(base[key]) || 0
+    const ceilingOnStep = Math.floor(ceiling / step) * step
     // Round outwards to the step so that the saved value always sits on the track
     const min = Math.max(floor, Math.floor((value * SPAN.low) / step) * step)
-    const max = Math.min(ceiling, Math.max(Math.ceil((value * SPAN.high) / step) * step, min + step))
+    const max = Math.min(ceilingOnStep, Math.max(Math.ceil((value * SPAN.high) / step) * step, min + step))
     out[key] = { min: round(min, step), max: round(max, step), step }
   }
   return out

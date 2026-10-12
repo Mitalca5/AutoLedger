@@ -106,7 +106,9 @@ func applyTCOToFleetMetric(m *models.VehicleFleetMetric, sum *TCOSummary, now ti
 	m.RunningCostPerKm = sum.TotalCostPerKm
 	m.FullCostPerKm = sum.FullCostPerKm
 	m.CompletenessPct = sum.Completeness.ScorePct
-	m.Comparable = sum.DistanceBasisKm > 0 && sum.FullCost > 0 && sum.Completeness.ScorePct >= fleetComparableMinCompleteness
+	m.DepreciationKnown = sum.DepreciationKnown
+	// A bought vehicle without depreciation leaves out its largest cost item: ranking it first would reward the gap.
+	m.Comparable = sum.DistanceBasisKm > 0 && sum.FullCost > 0 && sum.DepreciationKnown && sum.Completeness.ScorePct >= fleetComparableMinCompleteness
 
 	if sum.DistanceBasisKm > 0 {
 		if sum.TotalKwhAdded > 0 {

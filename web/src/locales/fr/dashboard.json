@@ -10,6 +10,7 @@
     "chartsPeriod": "Période des graphiques"
   },
   "costBreakdownDonut": {
+    "depreciationMissing": "Dépréciation non renseignée : la part est manquante, pas nulle.",
     "fullCostBreakdownByCategory": "Répartition du coût complet par poste",
     "fullCostBreakdown": "Répartition du coût complet"
   },
@@ -222,6 +223,8 @@
     "untagged": "Non tagué"
   },
   "tcoMetricsGrid": {
+    "depreciationMissing": "Dépréciation non renseignée : le coût complet omet son plus gros poste.",
+    "depreciationMissingAction": "La renseigner",
     "tollsAndParking": "Péages & Parkings",
     "chargeSWithoutACost": "{charges_without_cost} recharge(s) sans coût",
     "depreciationKm": "• décote {value}/{unit}",

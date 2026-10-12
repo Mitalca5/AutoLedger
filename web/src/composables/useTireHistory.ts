@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import { t } from '@/i18n'
 import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -46,17 +46,35 @@ export function useTireHistory(options: {
   const editingLogId = ref<string | null>(null)
   const logInitialForm = ref<TireLogForm>({ depth_mm: 6.5, odometer: 0, notes: '', date: todayIso() })
 
+  let historyRequest = 0
+  watch(showHistoryModal, (open) => { if (!open) historyRequest++ }, { flush: 'sync' })
+  watch(() => vehicleStore.activeVehicle?.id, () => {
+    historyRequest++
+    showHistoryModal.value = false
+  }, { flush: 'sync' })
+
   async function openHistoryModal(tire: any) {
+    const vehicleId = vehicleStore.activeVehicle?.id
+    if (!vehicleId) return
+    const request = ++historyRequest
+    const isCurrent = () => request === historyRequest && vehicleStore.activeVehicle?.id === vehicleId
+
+    if (selectedTire.value?.id !== tire.tire.id) {
+      tireSessions.value = []
+      tireLogs.value = []
+    }
     selectedTire.value = tire.tire
     selectedTireStats.value = tire
     try {
-      const res = await api.getTireHistory(vehicleStore.activeVehicle!.id, tire.tire.id)
+      const res = await api.getTireHistory(vehicleId, tire.tire.id)
+      if (!isCurrent()) return
       selectedTire.value = res.tire
       selectedTireStats.value = res.stats
       tireSessions.value = res.sessions || []
       tireLogs.value = res.logs || []
       showHistoryModal.value = true
     } catch (err: any) {
+      if (!isCurrent()) return
       void showAlert(t('tires.tiresView.loadError', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }

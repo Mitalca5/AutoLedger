@@ -56,6 +56,9 @@ export interface PlaceStats {
 export const PLACE_PERIODS = [6, 12, 24, 0] as const
 
 export const UNCLASSIFIED_COLOR = '#64748b'
+export const OUTSIDE_COLOR = '#38bdf8'
+/** Category of the charges reporting a location linked to no place once a home place exists. */
+export const OUTSIDE_CATEGORY = 'OUTSIDE'
 const CATEGORY_COLORS: Record<PlaceCategory, string[]> = {
   HOME: ['#34d399', '#10b981', '#6ee7b7'],
   WORK: ['#60a5fa', '#3b82f6', '#93c5fd'],
@@ -69,6 +72,10 @@ export function groupColors(groups: PlaceStatsGroup[]): Record<string, string> {
   const out: Record<string, string> = {}
   for (const g of groups) {
     const category = g.category as PlaceCategory
+    if (g.category === OUTSIDE_CATEGORY) {
+      out[g.key] = OUTSIDE_COLOR
+      continue
+    }
     if (!g.key || !CATEGORY_COLORS[category]) {
       out[g.key] = UNCLASSIFIED_COLOR
       continue
@@ -81,27 +88,28 @@ export function groupColors(groups: PlaceStatsGroup[]): Record<string, string> {
   return out
 }
 
-/** Label of a group: the place name, or the translated "unclassified". */
-export function groupLabel(g: PlaceStatsGroup, unclassified: string): string {
+/** Label of a group: the place name, the translated "outside", or the translated "unclassified". */
+export function groupLabel(g: PlaceStatsGroup, unclassified: string, outside = ''): string {
+  if (g.category === OUTSIDE_CATEGORY) return outside || unclassified
   return g.key ? g.name || unclassified : unclassified
 }
 
 export type BreakdownMode = 'energy' | 'cost'
 
 /** Donut items of the groups by energy (kWh) or by recorded cost. */
-export function donutItems(groups: PlaceStatsGroup[], mode: BreakdownMode, colors: Record<string, string>, unclassified: string) {
+export function donutItems(groups: PlaceStatsGroup[], mode: BreakdownMode, colors: Record<string, string>, unclassified: string, outside = '') {
   return groups.map((g) => ({
-    label: groupLabel(g, unclassified),
+    label: groupLabel(g, unclassified, outside),
     color: colors[g.key],
     amount: mode === 'energy' ? g.kwh_added : g.cost,
   }))
 }
 
 /** One stacked-bar dataset per group, one value per month, in kWh or in recorded cost. */
-export function monthlyDatasets(stats: PlaceStats, colors: Record<string, string>, unclassified: string, mode: BreakdownMode) {
+export function monthlyDatasets(stats: PlaceStats, colors: Record<string, string>, unclassified: string, mode: BreakdownMode, outside = '') {
   return stats.groups.map((g) => ({
     key: g.key,
-    label: groupLabel(g, unclassified),
+    label: groupLabel(g, unclassified, outside),
     color: colors[g.key],
     data: stats.series.map((m) => {
       const x = m.groups.find((y) => y.key === g.key)

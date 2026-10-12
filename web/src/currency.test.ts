@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { currencySymbol, formatAmount, formatAxisAmount, formatMoney } from './currency'
+import { currencySymbol, formatAmount, formatAmountOrUnknown, formatAxisAmount, formatMoney } from './currency'
 
 describe('formatMoney', () => {
   it('divides cents into the main unit before formatting', () => {
@@ -35,5 +35,18 @@ describe('formatAxisAmount', () => {
     expect(got).toContain('400')
     expect(got).not.toMatch(/000/)
     expect(got).not.toMatch(/,00/)
+  })
+})
+
+describe('formatAmountOrUnknown', () => {
+  it('reads a missing figure as a dash, never as zero', () => {
+    expect(formatAmountOrUnknown(null, 'EUR')).toBe('—')
+    expect(formatAmountOrUnknown(undefined, 'EUR')).toBe('—')
+    expect(formatAmountOrUnknown(Number.NaN, 'EUR')).toBe('—')
+  })
+
+  it('keeps a known zero as an amount and formats the others', () => {
+    expect(formatAmountOrUnknown(0, 'EUR')).toMatch(/^0,00\s€$/)
+    expect(formatAmountOrUnknown(0.2345, 'EUR', 3)).toMatch(/0,235/)
   })
 })

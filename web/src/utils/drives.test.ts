@@ -14,6 +14,7 @@ import {
   monthRange,
   needsTollQualification,
   paginationPages,
+  sumDriveCosts,
   selectionSummary,
   shiftMonth,
   suggestionTripId,
@@ -225,19 +226,19 @@ describe('buildTripCostDrive', () => {
   })
 
   it('keeps the rate sources so the modal does not report the insurance as not entered', () => {
-    const withSources = (insurance: string, tires: string) => ({ ...drives[0], costs: { ...drives[0].costs, insurance_source: insurance, tires_rate_source: tires, electricity_rate_source: 'HISTORY', maintenance_rate_source: 'DEFAULT' } })
+    const withSources = (insurance: string, tires: string) => ({ ...drives[0], costs: { ...drives[0].costs, insurance_source: insurance, tires_rate_source: tires, electricity_rate_source: 'HISTORY', maintenance_rate_source: 'UNKNOWN' } })
     const t = buildTripCostDrive({ id: 'tg1', name: 'Alpes' }, [withSources('RECORDED_EXPENSES', 'MOUNTED_TIRES'), withSources('RECORDED_EXPENSES', 'MOUNTED_TIRES')])
     expect(t.costs.insurance_source).toBe('RECORDED_EXPENSES')
     expect(t.costs.tires_rate_source).toBe('MOUNTED_TIRES')
     expect(t.costs.electricity_rate_source).toBe('HISTORY')
-    expect(t.costs.maintenance_rate_source).toBe('DEFAULT')
+    expect(t.costs.maintenance_rate_source).toBe('UNKNOWN')
   })
 
   it('shows the most cautious source when the drives of a trip differ', () => {
     const one = (insurance: string, tires: string) => ({ ...drives[0], costs: { ...drives[0].costs, insurance_source: insurance, tires_rate_source: tires } })
-    const t = buildTripCostDrive({ id: 'tg1', name: 'Alpes' }, [one('RECORDED_EXPENSES', 'MOUNTED_TIRES'), one('INSUFFICIENT_DISTANCE', 'DEFAULT')])
+    const t = buildTripCostDrive({ id: 'tg1', name: 'Alpes' }, [one('RECORDED_EXPENSES', 'MOUNTED_TIRES'), one('INSUFFICIENT_DISTANCE', 'UNKNOWN')])
     expect(t.costs.insurance_source).toBe('INSUFFICIENT_DISTANCE')
-    expect(t.costs.tires_rate_source).toBe('DEFAULT')
+    expect(t.costs.tires_rate_source).toBe('UNKNOWN')
   })
 
   it('counts the tolls entered on a drive of the trip, not only those attached to the trip itself', () => {
@@ -246,14 +247,14 @@ describe('buildTripCostDrive', () => {
     expect(t.costs.total_cost).toBeCloseTo(18 + 5 + 3 + 2 + 10.3)
   })
 
-  it('falls back to default rates and placeholders for an empty trip', () => {
+  it('has no built-in rate for an empty trip, only placeholders', () => {
     const t = buildTripCostDrive({ id: 'tg2', name: 'Vide', created_at: '2026-05-06' }, [])
     expect(t.start_time).toBe('2026-05-06')
     expect(t.start_address).toBe('Départ')
     expect(t.end_address).toBe('Arrivée')
-    expect(t.costs.electricity_rate).toBe(0.22)
-    expect(t.costs.tires_rate).toBe(0.02)
-    expect(t.costs.maintenance_rate).toBe(0.015)
+    expect(t.costs.electricity_rate).toBe(0)
+    expect(t.costs.tires_rate).toBe(0)
+    expect(t.costs.maintenance_rate).toBe(0)
     expect(t.costs.cost_per_km).toBe(0)
   })
 })
@@ -311,5 +312,16 @@ describe('countActiveDriveFilters', () => {
   })
   it('counts only the filters of the trips list in trip mode', () => {
     expect(countActiveDriveFilters({ ...none, mode: 'TRIPS', hasTollOnly: true, selectedTag: 'Pro', tripQualifyOnly: true, periodMode: 'CUSTOM' })).toBe(2)
+  })
+})
+
+describe('sumDriveCosts', () => {
+  it('adds the costs as sent by the API, in currency units', () => {
+    const list = [{ costs: { total_cost: 4.37 } }, { costs: { total_cost: 4.51 } }, { costs: { total_cost: 79.37 } }]
+    expect(sumDriveCosts(list)).toBeCloseTo(88.25, 2)
+  })
+  it('counts a drive without a cost as zero and an empty list as zero', () => {
+    expect(sumDriveCosts([{ costs: { total_cost: 12.5 } }, { costs: null }, {}])).toBe(12.5)
+    expect(sumDriveCosts([])).toBe(0)
   })
 })

@@ -53,7 +53,8 @@ const (
 )
 
 // HomeSavings compares what charging away from home cost with the same energy at the home price.
-// Only charges classified in a non-home place count as away: an unclassified charge is not assumed to be away.
+// A charge counts as away when it is classified in a non-home place or, once the account has a home place, when
+// it reports a location linked to none; a charge that reports no location is not assumed to be away.
 // Savings is negative when charging away was cheaper than at home.
 type HomeSavings struct {
 	Reason           string      `json:"reason,omitempty"`
@@ -202,7 +203,7 @@ func homeSavings(groups map[string]*PlaceGroup) HomeSavings {
 		case models.PlaceHome:
 			homeCost += g.Cost
 			h.HomePricedKwh += g.PricedKwh
-		case models.PlaceWork, models.PlacePublic, models.PlaceOther:
+		case models.PlaceWork, models.PlacePublic, models.PlaceOther, models.PlaceOutside:
 			h.AwaySessions += g.Sessions
 			h.AwayPricedKwh += g.PricedKwh
 			h.AwayCost += g.Cost
@@ -263,28 +264,38 @@ func (s *EnergyStatsService) PlaceStats(ctx context.Context, vehicleID, ownerID 
 	}
 
 	rows, err := s.pool.Query(ctx, `
-		SELECT TO_CHAR(c.date AT TIME ZONE $3, 'YYYY-MM') AS m,
-		       COALESCE(COALESCE(c.place_id, a.place_id)::text, ''),
-		       COALESCE(p.name, ''), COALESCE(p.category, ''),
-		       COUNT(*) FILTER (WHERE c.kwh_added > 0),
-		       COALESCE(SUM(c.kwh_added) FILTER (WHERE c.kwh_added > 0), 0)::float8,
-		       COALESCE(SUM(l.amount_eur) FILTER (WHERE c.kwh_added > 0), 0),
-		       COALESCE(SUM(c.kwh_added) FILTER (WHERE c.kwh_added > 0 AND l.source_id IS NOT NULL), 0)::float8,
-		       COUNT(*) FILTER (WHERE c.kwh_added > 0 AND l.source_id IS NOT NULL AND l.amount_eur = 0),
-		       COUNT(*) FILTER (WHERE c.kwh_added > 0 AND l.source_id IS NULL),
-		       COALESCE(SUM(c.kwh_added) FILTER (WHERE c.kwh_added > 0 AND l.source_id IS NULL), 0)::float8,
-		       COUNT(*) FILTER (WHERE c.kwh_added <= 0)
-		FROM charge_logs c
-		LEFT JOIN charging_place_aliases a
-		       ON a.user_id = $2 AND a.alias = lower(regexp_replace(btrim(COALESCE(c.address, '')), '\s+', ' ', 'g'))
-		LEFT JOIN charging_places p ON p.id = COALESCE(c.place_id, a.place_id) AND p.user_id = $2
-		LEFT JOIN cost_ledger l ON l.source_table = 'charge_logs' AND l.source_id = c.id
-		WHERE c.vehicle_id = $1 AND c.deleted_upstream_at IS NULL
-		  AND ($4::timestamptz IS NULL OR c.date >= $4)
-		  AND ($5::timestamptz IS NULL OR c.date < $5)
-		GROUP BY m, COALESCE(c.place_id, a.place_id), p.name, p.category
+		WITH has_home AS (
+			SELECT EXISTS (SELECT 1 FROM charging_places WHERE user_id = $2 AND category = 'HOME') AS yes
+		), resolved AS (
+			SELECT c.id, c.date, c.kwh_added, p.name AS place_name, p.category AS place_category,
+			       COALESCE(c.place_id, a.place_id)::text AS place_id,
+			       (COALESCE(c.place_id, a.place_id) IS NULL AND btrim(COALESCE(c.address, '')) <> '' AND h.yes) AS outside
+			FROM charge_logs c
+			CROSS JOIN has_home h
+			LEFT JOIN charging_place_aliases a
+			       ON a.user_id = $2 AND a.alias = lower(regexp_replace(btrim(COALESCE(c.address, '')), '\s+', ' ', 'g'))
+			LEFT JOIN charging_places p ON p.id = COALESCE(c.place_id, a.place_id) AND p.user_id = $2
+			WHERE c.vehicle_id = $1 AND c.deleted_upstream_at IS NULL
+			  AND ($4::timestamptz IS NULL OR c.date >= $4)
+			  AND ($5::timestamptz IS NULL OR c.date < $5)
+		)
+		SELECT TO_CHAR(r.date AT TIME ZONE $3, 'YYYY-MM') AS m,
+		       CASE WHEN r.outside THEN $6::text ELSE COALESCE(r.place_id, '') END AS k,
+		       COALESCE(r.place_name, ''),
+		       CASE WHEN r.outside THEN $7::text ELSE COALESCE(r.place_category, '') END AS cat,
+		       COUNT(*) FILTER (WHERE r.kwh_added > 0),
+		       COALESCE(SUM(r.kwh_added) FILTER (WHERE r.kwh_added > 0), 0)::float8,
+		       COALESCE(SUM(l.amount_eur) FILTER (WHERE r.kwh_added > 0), 0),
+		       COALESCE(SUM(r.kwh_added) FILTER (WHERE r.kwh_added > 0 AND l.source_id IS NOT NULL), 0)::float8,
+		       COUNT(*) FILTER (WHERE r.kwh_added > 0 AND l.source_id IS NOT NULL AND l.amount_eur = 0),
+		       COUNT(*) FILTER (WHERE r.kwh_added > 0 AND l.source_id IS NULL),
+		       COALESCE(SUM(r.kwh_added) FILTER (WHERE r.kwh_added > 0 AND l.source_id IS NULL), 0)::float8,
+		       COUNT(*) FILTER (WHERE r.kwh_added <= 0)
+		FROM resolved r
+		LEFT JOIN cost_ledger l ON l.source_table = 'charge_logs' AND l.source_id = r.id
+		GROUP BY m, k, r.place_name, cat
 		ORDER BY m;
-	`, vehicleID, ownerID, s.timezone, since, until)
+	`, vehicleID, ownerID, s.timezone, since, until, models.PlaceOutsideKey, models.PlaceOutside)
 	if err != nil {
 		return nil, err
 	}

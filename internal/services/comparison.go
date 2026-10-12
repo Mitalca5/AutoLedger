@@ -70,7 +70,10 @@ type ComparisonResult struct {
 	Tracked        CostSide    `json:"tracked"`
 	ICE            CostSide    `json:"ice"`
 	TrackedSavings money.Cents `json:"tracked_savings"`
-	BreakEvenYear  *float64    `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
+	// TrackedDepreciationKnown is false when the tracked vehicle was bought but has no depreciation entered: its side
+	// has a depreciation of zero, so the total saving would count depreciation on the other side only.
+	TrackedDepreciationKnown bool     `json:"tracked_depreciation_known"`
+	BreakEvenYear            *float64 `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
 	// BreakEvenNetYear is the same break-even once each vehicle is credited with its value at that point (resale)
 	BreakEvenNetYear *float64            `json:"break_even_net_year,omitempty"`
 	Cumulative       []CumulativePoint   `json:"cumulative"`
@@ -262,15 +265,17 @@ func computeCore(sc *models.ComparisonScenario, ev TrackedBaseline, km, fuelFact
 	iceSide, iceCash := ice.run(km, years)
 
 	res := ComparisonResult{
-		Mode:             sc.Mode,
-		AnnualKm:         km,
-		YearsCount:       years,
-		Tracked:          evSide,
-		ICE:              iceSide,
-		TrackedSavings:   iceSide.Total - evSide.Total,
-		BreakEvenYear:    breakEven(evCash, iceCash),
-		BreakEvenNetYear: breakEvenNet(tracked.netOfResale(evCash), ice.netOfResale(iceCash)),
-		Assumptions:      comparisonAssumptions(sc),
+		Mode:           sc.Mode,
+		AnnualKm:       km,
+		YearsCount:     years,
+		Tracked:        evSide,
+		ICE:            iceSide,
+		TrackedSavings: iceSide.Total - evSide.Total,
+		// Overwritten by the caller when the tracked side comes from recorded costs
+		TrackedDepreciationKnown: true,
+		BreakEvenYear:            breakEven(evCash, iceCash),
+		BreakEvenNetYear:         breakEvenNet(tracked.netOfResale(evCash), ice.netOfResale(iceCash)),
+		Assumptions:              comparisonAssumptions(sc),
 	}
 	for i := range evCash {
 		res.Cumulative = append(res.Cumulative, CumulativePoint{Year: i, Tracked: money.FromFloat(evCash[i]), ICE: money.FromFloat(iceCash[i])})

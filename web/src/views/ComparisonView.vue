@@ -14,6 +14,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
 import { currencySymbol } from '@/currency'
+import { CURRENCIES } from '@/utils/expenses'
 import { comparisonCurrency, canCompareCurrencies } from '@/utils/comparisonCurrency'
 import { canCharge } from '@/utils/vehicles'
 import { scenarioSide } from '@/utils/comparisonSide'
@@ -88,6 +89,7 @@ const currency = computed(() => {
   const referenceId = view.value === 'edit' ? form.vehicle_id : undefined
   return comparisonReferenceVehicle(referenceId, vehicleStore.activeVehicle, vehicleStore.vehicles)?.currency || vehicleStore.currency
 })
+const currencyOptions = computed(() => [...new Set([...CURRENCIES, ...vehicleStore.vehicles.map(v => v.currency), form.currency])].filter(code => /^[A-Z]{3}$/.test(code)))
 const currencySign = computed(() => currencySymbol(currency.value))
 
 function fmtKm(v: number): string {
@@ -353,7 +355,10 @@ onMounted(async () => {
         </div>
         <div v-if="!isRetro">
           <label for="cmp-currency" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.currency.label') }}</label>
-          <input id="cmp-currency" v-model="form.currency" maxlength="3" pattern="[A-Za-z]{3}" required class="field" @change="loadDefaults" />
+          <select id="cmp-currency" v-model="form.currency" required class="field" @change="loadDefaults">
+            <option disabled value="">{{ $t('comparison.errors.currency') }}</option>
+            <option v-for="code in currencyOptions" :key="code" :value="code">{{ code }}</option>
+          </select>
           <p class="text-xs text-slate-400 mt-1">{{ $t('comparison.currency.hint') }}</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -401,12 +406,7 @@ onMounted(async () => {
 
         <div v-if="!isRetro" class="space-y-3 pt-2 border-t border-slate-800">
           <h2 class="text-sm font-semibold text-info-300">{{ $t('comparison.comparisonView.electricVehicle') }}</h2>
-          <div v-if="!isRetro">
-          <label for="cmp-currency" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.currency.label') }}</label>
-          <input id="cmp-currency" v-model="form.currency" maxlength="3" pattern="[A-Za-z]{3}" required class="field" @change="loadDefaults" />
-          <p class="text-xs text-slate-400 mt-1">{{ $t('comparison.currency.hint') }}</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="cmp-ev-kwh" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.comparisonView.consumptionKwh100Km', { unit: distanceUnit() }) }}</label>
               <DistanceInput kind="per-distance" id="cmp-ev-kwh" v-model="form.tracked.kwh_per_100km" min="0.1" step="any" class="field" />

@@ -575,6 +575,60 @@ func TestIntegrationLedgerAcquisitionAndDepreciation(t *testing.T) {
 	}
 }
 
+func TestIntegrationBoughtVehicleWithoutResaleHasUnknownDepreciation(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "no_resale@example.com")
+	tco := NewTCOService(db.Pool, "Europe/Paris")
+
+	purchase := time.Now().AddDate(-1, 0, 0)
+	price, odo := money.Cents(4328000), 0.0
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: v.ID, AcquisitionType: models.AcquisitionCash, StartDate: purchase, StartOdometer: &odo, PurchasePrice: &price,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mustDrive(t, repo, v.ID, 1, time.Now().AddDate(0, 0, -5), 100, 500)
+
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.DepreciationKnown || sum.DepreciationCost != 0 {
+		t.Fatalf("a purchase without resale value: known=%v depreciation=%s", sum.DepreciationKnown, sum.DepreciationCost)
+	}
+
+	// A retrospective comparison says so and leaves the flag to the client.
+	cmp := NewComparisonService(tco)
+	sc := &models.ComparisonScenario{
+		UserID: v.UserID, VehicleID: &v.ID, Name: "Vs thermique", Mode: models.ComparisonModeRetrospective, AnnualKm: 15000, Years: 5,
+		ICE: models.ICEInputs{FuelType: "SP95_E10", LPer100Km: 7, FuelPrice: 1.8, PurchasePrice: money.FromFloat(30000), ResaleValue: money.FromFloat(12000)},
+	}
+	res, err := cmp.Compare(ctx, sc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.TrackedDepreciationKnown {
+		t.Error("the comparison must flag the missing depreciation of the tracked vehicle")
+	}
+
+	// Entering the resale value and the holding period makes it known.
+	resale, months := money.Cents(2000000), 60
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: v.ID, AcquisitionType: models.AcquisitionCash, StartDate: purchase, StartOdometer: &odo, PurchasePrice: &price,
+		ExpectedResaleValue: &resale, ExpectedHoldingMonths: &months,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err = tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sum.DepreciationKnown || sum.DepreciationCost <= 0 {
+		t.Fatalf("complete purchase: known=%v depreciation=%s", sum.DepreciationKnown, sum.DepreciationCost)
+	}
+}
+
 func TestIntegrationOdometerContinuity(t *testing.T) {
 	db, repo := setupIntegrationDB(t, false)
 	ctx := context.Background()
@@ -1033,6 +1087,66 @@ func TestCarpoolElectricityRecentCharges5Days(t *testing.T) {
 	// Only Charge 1 should be used: 10 EUR / 50 kWh = 0.20 €/kWh
 	if rates2.ElectricityPerKwh != 0.20 {
 		t.Fatalf("expected 0.20 €/kWh (only latest charge), got %f", rates2.ElectricityPerKwh)
+	}
+}
+
+func TestIntegrationFreeChargesAreAKnownElectricityRate(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "free_charges@example.com")
+	svc := NewCarpoolService(db.Pool, repo)
+
+	now := time.Date(2026, 6, 15, 12, 0, 0, 0, time.UTC)
+	free := money.Cents(0)
+	for i, daysAgo := range []int{1, 2} {
+		c := &models.ChargeLog{VehicleID: v.ID, Date: now.Add(-time.Duration(daysAgo) * 24 * time.Hour), KwhAdded: 30 + float64(i), Cost: &free, Currency: "EUR"}
+		if err := repo.CreateManualCharge(ctx, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	rates, err := svc.GetVehicleUnitRatesAt(ctx, v.ID, &now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rates.ElectricitySource != RateSourceRecentCharges || rates.ElectricityPerKwh != 0 {
+		t.Fatalf("free recent charges must give a known rate of zero, got %s %v", rates.ElectricitySource, rates.ElectricityPerKwh)
+	}
+
+	// Too old to be "recent": the history of priced charges still answers, with a zero price.
+	later := now.Add(120 * 24 * time.Hour)
+	rates, err = svc.GetVehicleUnitRatesAt(ctx, v.ID, &later)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rates.ElectricitySource != RateSourceHistory || rates.ElectricityPerKwh != 0 {
+		t.Fatalf("free history must give a known rate of zero, got %s %v", rates.ElectricitySource, rates.ElectricityPerKwh)
+	}
+}
+
+func TestIntegrationVehicleWithoutHistoryHasUnknownRatesNotDefaultAmounts(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "no_history@example.com")
+	svc := NewCarpoolService(db.Pool, repo)
+
+	rates, err := svc.GetVehicleUnitRates(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, src := range map[string]string{"electricity": rates.ElectricitySource, "tires": rates.TiresSource, "maintenance": rates.MaintenanceSource} {
+		if src != RateSourceUnknown {
+			t.Errorf("%s rate source: got %s, want %s", name, src, RateSourceUnknown)
+		}
+	}
+	if rates.ElectricityPerKwh != 0 || rates.TiresPerKm != 0 || rates.MaintenancePerKm != 0 {
+		t.Errorf("no built-in amount may be applied: %+v", rates)
+	}
+	if !rates.HasUnknownRate() {
+		t.Error("unknown rates must be reported")
+	}
+	if got := ComputeCostComponents(rates, 100, 16); got.ElectricityCost != 0 || got.TiresCost != 0 || got.MaintenanceCost != 0 {
+		t.Errorf("unknown rates must not price a drive: %+v", got)
 	}
 }
 
@@ -1839,7 +1953,7 @@ func TestIntegrationICEVehicleFuelLogs(t *testing.T) {
 	if sum.EstimatedEnergyDistanceKm != 0 {
 		t.Errorf("a combustion vehicle has no estimated energy distance, got %v", sum.EstimatedEnergyDistanceKm)
 	}
-	if sum.EnergyCostPerKm <= 0 {
+	if sum.EnergyCostPerKm == nil || *sum.EnergyCostPerKm <= 0 {
 		t.Errorf("energy cost per km = %v, want > 0 without any drive", sum.EnergyCostPerKm)
 	}
 	var monthlyKm, monthlyEnergy float64
@@ -2410,7 +2524,7 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 	if sum.FuelFillUps != 2 || sum.TotalLiters != 70 || sum.TotalKwhAdded != 50 {
 		t.Errorf("volumes: fills=%d liters=%v kwh=%v", sum.FuelFillUps, sum.TotalLiters, sum.TotalKwhAdded)
 	}
-	if sum.EstimatedEnergyDistanceKm != 0 || sum.EnergyCostPerKm <= 0 {
+	if sum.EstimatedEnergyDistanceKm != 0 || sum.EnergyCostPerKm == nil || *sum.EnergyCostPerKm <= 0 {
 		t.Errorf("estimated distance=%v cost per km=%v", sum.EstimatedEnergyDistanceKm, sum.EnergyCostPerKm)
 	}
 	for _, w := range sum.Completeness.Warnings {

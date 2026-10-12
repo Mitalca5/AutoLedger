@@ -115,3 +115,43 @@ func TestOwnershipLeaseEndDateComputed(t *testing.T) {
 		t.Fatalf("expected contract end date %v, got %v", expectedEnd, *c.ContractEndDate)
 	}
 }
+
+func TestOwnershipDepreciationUnknownOnlyForBoughtVehiclesWithoutIt(t *testing.T) {
+	start := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	now := start.AddDate(1, 0, 0)
+
+	// Bought, but neither resale value nor holding period: depreciation is 0 and unknown.
+	bought := &models.VehicleOwnership{AcquisitionType: models.AcquisitionCash, StartDate: start, PurchasePrice: cents(4300000)}
+	if c := ComputeOwnershipCosts(bought, now, 0); !c.DepreciationUnknown || c.Depreciation != 0 {
+		t.Errorf("cash purchase without resale value: unknown=%v depreciation=%s", c.DepreciationUnknown, c.Depreciation)
+	}
+
+	// Bought without a price: unknown as well.
+	noPrice := &models.VehicleOwnership{AcquisitionType: models.AcquisitionLoan, StartDate: start}
+	if c := ComputeOwnershipCosts(noPrice, now, 0); !c.DepreciationUnknown {
+		t.Error("loan without a purchase price must have an unknown depreciation")
+	}
+
+	// With the resale value and the holding period it is known, even when it is nothing yet.
+	bought.ExpectedResaleValue, bought.ExpectedHoldingMonths = cents(2000000), intPtr(48)
+	if c := ComputeOwnershipCosts(bought, now, 0); c.DepreciationUnknown || c.Depreciation <= 0 {
+		t.Errorf("complete purchase: unknown=%v depreciation=%s", c.DepreciationUnknown, c.Depreciation)
+	}
+
+	// A sale fixes the depreciation without a resale estimate.
+	end, sale := start.AddDate(1, 6, 0), cents(3000000)
+	sold := &models.VehicleOwnership{AcquisitionType: models.AcquisitionCash, StartDate: start, PurchasePrice: cents(4300000), EndDate: &end, SalePrice: sale}
+	if c := ComputeOwnershipCosts(sold, start.AddDate(2, 0, 0), 0); c.DepreciationUnknown {
+		t.Error("a sold vehicle has a known depreciation")
+	}
+
+	// A lease has no depreciation to enter.
+	allowance, price := 15000.0, 0.10
+	lease := &models.VehicleOwnership{
+		AcquisitionType: models.AcquisitionLLD, StartDate: start, LeaseMonthlyRent: cents(45000), LeaseDurationMonths: intPtr(36),
+		LeaseKmAllowancePerYear: &allowance, LeaseExcessKmPrice: &price,
+	}
+	if c := ComputeOwnershipCosts(lease, now, 10000); c.DepreciationUnknown {
+		t.Error("a lease is not affected")
+	}
+}

@@ -2,7 +2,7 @@
 import { intlLocale } from '@/i18n'
 import { canCharge, canRefuel, isFuelOnly } from '@/utils/vehicles'
 import { useVehicleStore } from '@/stores/vehicle'
-import { formatAmount } from '@/currency'
+import { formatAmount, formatAmountOrUnknown } from '@/currency'
 import { Coins, Zap, Receipt, TrendingUp } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit, litresToDisplayVolume, perDistance, perVolume, volumeUnitLabel } from '@/units'
 
@@ -13,7 +13,8 @@ const money = (v: number, digits = 2) => formatAmount(v || 0, vehicleStore.curre
 // A cost per km from the API, per the account's distance unit
 // A headline amount drops its cents from 1 000 on: they are noise next to the digits that matter
 const headline = (v: number) => money(v, Math.abs(v || 0) >= 1000 ? 0 : 2)
-const perUnit = (v: number) => money(perDistance(v || 0), 3)
+// Unknown (no distance yet) reads as a dash, not as 0,00
+const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == null ? null : perDistance(v), vehicleStore.currency, 3)
 </script>
 
 <template>
@@ -30,6 +31,10 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         {{ perUnit(tco?.full_cost_per_km) }}<span class="text-base font-normal text-slate-400">/{{ distanceUnit() }}</span>
       </div>
       <div class="mt-2 space-y-0.5">
+        <p v-if="tco && tco.depreciation_known === false" class="text-xs font-medium text-warning-400">
+          {{ $t('dashboard.tcoMetricsGrid.depreciationMissing') }}
+          <router-link to="/vehicles" class="underline">{{ $t('dashboard.tcoMetricsGrid.depreciationMissingAction') }}</router-link>
+        </p>
         <p class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.directRunningCostKm', { unit: distanceUnit(), usage_cost_per_km: perUnit(tco?.usage_cost_per_km) }) }}
         </p>

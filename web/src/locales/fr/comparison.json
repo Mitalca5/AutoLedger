@@ -110,7 +110,11 @@
     "calcFailed": "Calcul impossible.",
     "deleteFailed": "Suppression impossible.",
     "compareFailed": "Comparaison impossible.",
-    "currency": "Saisissez un code de devise de trois lettres."
+    "currency": "Choisissez une devise."
+  },
+  "depreciationMissing": {
+    "verdict": "L'économie sur l'ensemble de la période n'est pas affichée : la dépréciation du véhicule suivi n'est pas renseignée.",
+    "card": "Renseignez la valeur de revente et la durée de détention du véhicule suivi pour comparer le coût total. L'économie sur l'énergie seule reste valable."
   },
   "verdict": {
     "same": "Sur {count} an, les deux véhicules coûtent autant. | Sur {count} ans, les deux véhicules coûtent autant.",

@@ -10,6 +10,7 @@
     "chartsPeriod": "Charts period"
   },
   "costBreakdownDonut": {
+    "depreciationMissing": "Depreciation is not entered: the slice is missing, not zero.",
     "fullCostBreakdownByCategory": "Full cost breakdown by category",
     "fullCostBreakdown": "Full cost breakdown"
   },
@@ -222,6 +223,8 @@
     "untagged": "Untagged"
   },
   "tcoMetricsGrid": {
+    "depreciationMissing": "Depreciation not entered: the full cost leaves out the largest item.",
+    "depreciationMissingAction": "Enter it",
     "tollsAndParking": "Tolls and parking",
     "chargeSWithoutACost": "{charges_without_cost} charge(s) without a cost",
     "depreciationKm": "• depreciation {value}/{unit}",

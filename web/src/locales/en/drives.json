@@ -155,6 +155,7 @@
     "insuranceShareFixedCost": "Insurance share (fixed cost)",
     "includedInTheLease2": "included in the lease",
     "estimate": "estimate",
+    "rateUnknown": "no rate yet",
     "maintenanceProvision": "Maintenance provision",
     "tireWear": "Tire wear",
     "kwhKwh": "{electricity_kwh} kWh × {electricity_rate}/kWh",

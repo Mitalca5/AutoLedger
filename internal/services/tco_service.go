@@ -33,11 +33,28 @@ func round3(v float64) float64 { return math.Round(v*1000) / 1000 }
 
 func round1(v float64) float64 { return math.Round(v*10) / 10 }
 
-func perKm(amount money.Cents, km float64) float64 {
+// perKm is the cost of one kilometre, nil when there is no distance to divide by: a figure without a distance is
+// unknown, not zero.
+func perKm(amount money.Cents, km float64) *float64 {
 	if km <= 0 {
-		return 0
+		return nil
 	}
-	return round3(amount.Float() / km)
+	v := round3(amount.Float() / km)
+	return &v
+}
+
+// vehicleBasics are the columns of the vehicle row the TCO and its monthly timeline start from.
+type vehicleBasics struct {
+	currentOdometer             float64
+	estKwh100km, estPricePerKwh *float64
+	powertrain, telemetryMode   string
+}
+
+func (s *TCOService) loadVehicleBasics(ctx context.Context, vehicleID string) (vehicleBasics, error) {
+	var b vehicleBasics
+	err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain, telemetry_mode FROM vehicles WHERE id = $1;`, vehicleID).
+		Scan(&b.currentOdometer, &b.estKwh100km, &b.estPricePerKwh, &b.powertrain, &b.telemetryMode)
+	return b, err
 }
 
 // ComputeVehicleTCO calculates complete TCO for a given vehicle.
@@ -51,12 +68,12 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	if err != nil && !errors.Is(err, database.ErrNotFound) {
 		return nil, fmt.Errorf("ownership: %w", err)
 	}
-	var currentOdometer float64
-	var estKwh100km, estPricePerKwh *float64
-	var powertrain, telemetryMode string
-	if err := s.pool.QueryRow(ctx, `SELECT current_odometer, estimated_kwh_100km, estimated_price_per_kwh, powertrain, telemetry_mode FROM vehicles WHERE id = $1;`, vehicleID).Scan(&currentOdometer, &estKwh100km, &estPricePerKwh, &powertrain, &telemetryMode); err != nil {
+	basics, err := s.loadVehicleBasics(ctx, vehicleID)
+	if err != nil {
 		return nil, fmt.Errorf("vehicle: %w", err)
 	}
+	currentOdometer, estKwh100km, estPricePerKwh := basics.currentOdometer, basics.estKwh100km, basics.estPricePerKwh
+	powertrain, telemetryMode := basics.powertrain, basics.telemetryMode
 	refuels := models.PowertrainCanRefuel(powertrain)
 	fuelOnly := models.PowertrainIsFuelOnly(powertrain)
 	isManual := telemetryMode == models.TelemetryManual || telemetryMode == models.TelemetrySemiAuto
@@ -82,10 +99,12 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	basisKm := math.Max(trackedKm, odometerSpan)
 	var fuelStats FuelStats
 	var fuelSpanKm float64
-	readings, err := s.repo.ListOdometerCheckpoints(ctx, vehicleID)
+	// The readings and fill-ups are read once: the mileage smoothing of the monthly costs uses the same records.
+	smoothing, err := s.loadSmoothingInputs(ctx, vehicleID, powertrain)
 	if err != nil {
 		return nil, fmt.Errorf("odometer readings: %w", err)
 	}
+	readings, fuelLogs := smoothing.checkpoints, smoothing.fuelLogs
 
 	// Mileage covered by odometer readings (manual or integration), the start of the ownership and, for a
 	// combustion vehicle, fill-ups that carry a mileage
@@ -106,10 +125,6 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		note(*ownership.StartOdometer)
 	}
 	if refuels {
-		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
-		if err != nil {
-			return nil, fmt.Errorf("fuel logs: %w", err)
-		}
 		fuelStats = ComputeFuelStats(fuelLogs, BuildOdometerRefs(readings, ownership))
 		for _, f := range fuelLogs {
 			if f.Odometer != nil {
@@ -268,6 +283,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	}
 	sum.AcquisitionCost = byCategory[LedgerAcquisition]
 	sum.DepreciationCost = owned.Depreciation
+	sum.DepreciationKnown = !owned.DepreciationUnknown
 	sum.LeaseExcessKmCost = owned.LeaseExcessKm
 	sum.LeaseExcessKmProjected = owned.LeaseExcessKmProjected
 	sum.LeaseKmDriven = round1(owned.LeaseKmDriven)
@@ -417,7 +433,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		return nil, fmt.Errorf("tag breakdown: %w", err)
 	}
 	var totalSmoothedKm, totalEstimatedEnergyKm float64
-	if sum.MonthlyCosts, totalSmoothedKm, totalEstimatedEnergyKm, err = s.monthlyCosts(ctx, vehicleID, ownership, currentOdometer, estKwh100km, estPricePerKwh, now); err != nil {
+	if sum.MonthlyCosts, totalSmoothedKm, totalEstimatedEnergyKm, err = s.monthlyCosts(ctx, vehicleID, ownership, currentOdometer, estKwh100km, estPricePerKwh, now, smoothing); err != nil {
 		return nil, fmt.Errorf("monthly costs: %w", err)
 	}
 	sum.SmoothedDistanceKm = totalSmoothedKm

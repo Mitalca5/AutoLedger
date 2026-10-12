@@ -57,6 +57,7 @@
     "l100": "{value} {unit}",
     "cheapest": "Le moins cher",
     "indicative": "Indicatif",
+    "depreciationMissing": "Dépréciation non renseignée",
     "footnote": "Le coût d'usage couvre l'énergie, l'entretien, l'assurance et le financement ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). Un véhicule sous 60 % de complétude est affiché mais pas classé."
   }
 }

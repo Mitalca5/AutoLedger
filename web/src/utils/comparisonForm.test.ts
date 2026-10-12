@@ -114,6 +114,7 @@ describe('comparisonStepErrorKey', () => {
     const form = emptyComparisonForm(false)
     expect(comparisonStepErrorKey(1, form, false)).toBe('comparison.errors.name')
     form.name = 'x'
+    form.currency = 'USD'
     form.annual_km = 0
     expect(comparisonStepErrorKey(1, form, false)).toBe('comparison.errors.annualKm')
     form.annual_km = 1000

@@ -66,11 +66,13 @@ func monthlyOdometerDistance(points []odometerPoint, loc *time.Location) map[str
 }
 
 // odometerPoints lists the dated mileage readings of a vehicle: manual and integration readings and the
-// odometer at the start of the ownership.
+// odometer at the start of the ownership, and fill-ups carrying an odometer.
 func (s *EnergyStatsService) odometerPoints(ctx context.Context, vehicleID string) ([]odometerPoint, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT date::timestamptz, odometer::float8 FROM odometer_checkpoints WHERE vehicle_id = $1
 		UNION ALL
+        SELECT date, odometer::float8 FROM fuel_logs WHERE vehicle_id = $1 AND odometer IS NOT NULL
+        UNION ALL
 		SELECT start_date::timestamptz, start_odometer::float8 FROM vehicle_ownership
 		WHERE vehicle_id = $1 AND start_odometer IS NOT NULL;
 	`, vehicleID)

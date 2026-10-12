@@ -8,7 +8,7 @@ export function emptyComparisonForm(canCompareTracked: boolean) {
   return {
     mode: (canCompareTracked ? 'RETROSPECTIVE' : 'PROJECTION') as ComparisonMode,
     name: '',
-    currency: 'EUR',
+    currency: '',
     vehicle_id: undefined as string | undefined,
     annual_km: 12000,
     years: 5,

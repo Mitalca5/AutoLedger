@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { MapPin, Trash2 } from 'lucide-vue-next'
 import ModalShell from '@/components/ModalShell.vue'
 import { api } from '@/services/api'
@@ -61,8 +61,19 @@ const addPlace = () =>
     })
   })
 
-function assign(location: ChargingLocation, placeId: string) {
-  return mutate(() => api.setChargingPlaceAlias(props.vehicleId, location.text, placeId || null))
+const HOME_OPTION = '__home__'
+const hasHome = computed(() => places.value.some((p) => p.category === 'HOME'))
+
+// Picking "Home" with no home place yet creates it, so one click marks a reported location as home.
+function assign(location: ChargingLocation, value: string) {
+  return mutate(async () => {
+    let placeId = value
+    if (value === HOME_OPTION) {
+      const created = await api.createChargingPlace(props.vehicleId, { name: t('expenses.chargingPlaces.homeName'), category: 'HOME' })
+      placeId = created.id
+    }
+    await api.setChargingPlaceAlias(props.vehicleId, location.text, placeId || null)
+  })
 }
 
 async function removePlace(place: ChargingPlace) {
@@ -75,6 +86,7 @@ async function removePlace(place: ChargingPlace) {
   <ModalShell v-model:open="open" size="lg" :title="$t('expenses.chargingPlaces.title')" :icon="MapPin">
     <p class="text-xs text-slate-400">{{ $t('expenses.chargingPlaces.intro') }}</p>
     <p v-if="error" class="text-xs text-danger-400" role="alert">{{ error }}</p>
+    <p v-if="!loading && locations.length && !hasHome" class="text-xs text-amber-300" role="status">{{ $t('expenses.chargingPlaces.noHome') }}</p>
 
     <section class="space-y-2">
       <h4 class="text-xs font-bold text-white">{{ $t('expenses.chargingPlaces.locations') }}</h4>
@@ -92,7 +104,8 @@ async function removePlace(place: ChargingPlace) {
             :aria-label="$t('expenses.chargingPlaces.assign', { text: l.text })"
             @change="assign(l, ($event.target as HTMLSelectElement).value)"
           >
-            <option value="">{{ $t('expenses.chargingPlaces.unclassified') }}</option>
+            <option value="">{{ $t(hasHome ? 'expenses.chargingPlaces.outside' : 'expenses.chargingPlaces.unclassified') }}</option>
+            <option v-if="!hasHome" :value="HOME_OPTION">{{ $t('expenses.chargingPlaces.markHome') }}</option>
             <option v-for="p in places" :key="p.id" :value="p.id">{{ p.name }}</option>
           </select>
         </li>

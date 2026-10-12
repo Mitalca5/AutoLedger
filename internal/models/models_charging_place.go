@@ -8,6 +8,13 @@ const (
 	PlaceOther  = "OTHER"
 )
 
+// PlaceOutside is the category of the charges that report a location linked to no place once the account has a
+// home place: whatever is not home is away. It is derived by the statistics and never stored on a place.
+const PlaceOutside = "OUTSIDE"
+
+// PlaceOutsideKey is the group key of those charges.
+const PlaceOutsideKey = "outside"
+
 // ValidPlaceCategory reports whether c is one of the place categories.
 func ValidPlaceCategory(c string) bool {
 	switch c {

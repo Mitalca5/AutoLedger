@@ -10,6 +10,8 @@ Le côté suivi utilise les coûts enregistrés divisés par le kilométrage con
 
 Les résultats montrent les coûts d'énergie, l'entretien, l'assurance, la dépréciation, le coût total, le coût par distance et le seuil de rentabilité d'achat projeté. Comparez les deux lignes **Énergie** pour l'économie d'énergie ; l'économie totale inclut les autres catégories de coûts. Les coûts enregistrés ne sont jamais modifiés.
 
+Les prix du carburant et de l’électricité respectent les limites de stockage, quelle que soit la devise, y compris dans les champs de simulation.
+
 ## Données et hypothèses
 
 - Enregistrez chaque plein et chaque recharge, y compris les recharges gratuites, et saisissez les relevés kilométriques. Des coûts ou un kilométrage manquants rendent l'estimation peu fiable. Un hybride qui n'a que des pleins ou que des recharges peut être comparé ; le résultat porte alors un avertissement, car le calcul ne peut pas deviner les achats non enregistrés.

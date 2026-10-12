@@ -23,8 +23,8 @@ const commonCurrency = computed(() => canCompareCurrencies(props.items.map(i => 
   ? comparisonCurrency(props.items[0]?.scenario, vehicleStore.vehicles) : undefined)
 
 // Never label or plot different currencies as if their amounts were interchangeable.
-function fmtMoney(v: number | null | undefined, digits = 0): string {
-  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency: commonCurrency.value!, minimumFractionDigits: digits, maximumFractionDigits: digits })
+function fmtMoney(v: number | null | undefined, currency: string, digits = 0): string {
+  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency, minimumFractionDigits: digits, maximumFractionDigits: digits })
 }
 
 function breakEven(r: any): string {
@@ -54,7 +54,8 @@ let chart: Chart | null = null
 
 function render() {
   chart?.destroy()
-  if (!canvas.value) return
+  const currency = commonCurrency.value
+  if (!canvas.value || !currency) return
   chart = new Chart(canvas.value, {
     type: 'bar',
     data: {
@@ -69,11 +70,11 @@ function render() {
       maintainAspectRatio: false,
       plugins: {
         legend: { labels: { color: '#94a3b8', boxWidth: 12 } },
-        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label} : ${fmtMoney(Number(ctx.raw))}` } },
+        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label} : ${fmtMoney(Number(ctx.raw), currency)}` } },
       },
       scales: {
         x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
-        y: { ticks: { color: '#94a3b8', callback: (v) => fmtMoney(Number(v)) }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94a3b8', callback: (v) => fmtMoney(Number(v), currency) }, grid: { color: '#1e293b' } },
       },
     },
   })
@@ -130,10 +131,10 @@ onBeforeUnmount(() => chart?.destroy())
               <div class="font-semibold text-white">{{ r.name }}</div>
               <div class="text-xs text-slate-400">{{ r.mode }} · {{ $t('comparison.comparisonCompare.usage', { unit: distanceUnit(), km: formatDistanceValue(r.km), years: r.years }) }}</div>
             </th>
-            <td>{{ fmtMoney(r.tracked) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
-            <td>{{ fmtMoney(r.ice) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
+            <td>{{ fmtMoney(r.tracked, commonCurrency) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth, commonCurrency) }) }}</div></td>
+            <td>{{ fmtMoney(r.ice, commonCurrency) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth, commonCurrency) }) }}</div></td>
             <td :class="r.savings >= 0 ? 'text-success-400' : 'text-warning-400'">
-              {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings)) }}
+              {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings), commonCurrency) }}
               <div class="text-xs text-slate-400">{{ r.savings >= 0 ? $t(sk('comparison.compare.saves')) : $t(sk('comparison.compare.costsMore')) }}</div>
             </td>
             <td>{{ r.breakEven }}</td>

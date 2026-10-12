@@ -33,6 +33,7 @@
       "insurance_estimated": "Insurance payments without a coverage period: the last 12 months of payments are used as the annual estimate",
       "insurance_expired": "Historical insurance payments have no current coverage: reference insurance is not projected; record the current premium",
       "ev_price_unknown": "Tracked vehicle purchase price unknown (lease or missing entry): depreciation not included",
+      "ev_depreciation_missing": "Tracked vehicle depreciation not entered (resale value or holding period): its total cost is incomplete, so the total saving is not shown",
       "ev_no_distance": "No tracked mileage: recorded costs cannot provide a reliable comparison",
       "hybrid_actual": "Hybrid side: fuel, electricity, maintenance and depreciation from recorded costs per {unit}; insurance and taxes from annual amounts",
       "hybrid_missing_energy_source": "This hybrid has no records for one or both energy sources. This may reflect your usage; check that all fill-ups and charging sessions are recorded",

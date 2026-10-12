@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  OUTSIDE_COLOR,
   UNCLASSIFIED_COLOR,
   donutItems,
   groupColors,
@@ -35,12 +36,23 @@ describe('groupColors', () => {
     expect(colors.home).not.toBe(colors.home2)
     expect(colors['']).toBe(UNCLASSIFIED_COLOR)
   })
+
+  it('gives the outside group its own colour, apart from the classified categories', () => {
+    const colors = groupColors([group({}), group({ key: 'outside', name: undefined, category: 'OUTSIDE' })])
+    expect(colors.outside).toBe(OUTSIDE_COLOR)
+  })
 })
 
 describe('groupLabel', () => {
   it('names a place, and falls back on the unclassified wording', () => {
     expect(groupLabel(group({}), 'Unclassified')).toBe('Home')
     expect(groupLabel(group({ key: '' }), 'Unclassified')).toBe('Unclassified')
+  })
+
+  it('labels the derived outside group, even though it has no place name', () => {
+    const outside = group({ key: 'outside', name: undefined, category: 'OUTSIDE' })
+    expect(groupLabel(outside, 'Unclassified', 'Outside')).toBe('Outside')
+    expect(groupLabel(outside, 'Unclassified')).toBe('Unclassified')
   })
 })
 

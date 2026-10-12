@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.energyCost') }}</dt>
-        <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(perUnit(stats?.summary.cost_per_100km) || 0, currency) }} <span class="text-xs font-medium text-slate-400">/100 {{ distanceUnit() }}</span></dd>
+        <dd class="mt-1 text-xl font-bold text-white">{{ fmtMoney(perUnit(stats?.summary.cost_per_100km), currency) }} <span class="text-xs font-medium text-slate-400">/100 {{ distanceUnit() }}</span></dd>
         <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.thatIsKwhOnAverage', { price_per_kwh: fmtMoney(stats?.summary.price_per_kwh, currency, 3) }) }}</dd>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
@@ -218,7 +218,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
         <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.fullCharge') }}</dt>
-        <dd class="mt-1 text-xl font-bold text-white">{{ formatAmount(stats?.summary.cost_per_full_charge || 0, currency) }} <span class="text-xs font-medium text-slate-400">(0 → 100 %)</span></dd>
+        <dd class="mt-1 text-xl font-bold text-white">{{ fmtMoney(stats?.summary.cost_per_full_charge ?? undefined, currency) }} <span class="text-xs font-medium text-slate-400">(0 → 100 %)</span></dd>
         <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.extrapolatedFromTheChargesWhose') }}</dd>
       </div>
     </dl>

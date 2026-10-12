@@ -111,7 +111,7 @@ func averageMonthlyKm(anchors []OdometerAnchor, now time.Time) float64 {
 	}
 	first := now
 	for _, a := range anchors {
-		if a.Km > 0 && a.Date.Before(first) {
+		if (a.Km > 0 || a.Origin) && a.Date.Before(first) {
 			first = a.Date
 		}
 	}
@@ -136,7 +136,7 @@ func averageMonthlyKm(anchors []OdometerAnchor, now time.Time) float64 {
 func monthlyKmProfile(anchors []OdometerAnchor, now time.Time) (km [12]float64, observed [12]bool) {
 	first := now
 	for _, a := range anchors {
-		if a.Km > 0 && a.Date.Before(first) {
+		if (a.Km > 0 || a.Origin) && a.Date.Before(first) {
 			first = a.Date
 		}
 	}

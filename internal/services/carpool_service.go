@@ -45,18 +45,17 @@ const (
 	RateSourceRecentCharges = "RECENT_CHARGES"
 	RateSourceHistory       = "HISTORY"
 	RateSourceMountedTires  = "MOUNTED_TIRES"
-	RateSourceDefault       = "DEFAULT"
+	// RateSourceUnknown marks a rate with no history behind it: the component is not priced, never replaced by a
+	// built-in amount (which would be in one currency whatever the vehicle's).
+	RateSourceUnknown       = "UNKNOWN"
 	RateSourceIncluded      = "INCLUDED_IN_LEASE"
 	EnergySourceMeasured    = "MEASURED"
 	EnergySourceConsumption = "CONSUMPTION"
 	EnergySourceDefault     = "DEFAULT"
 )
 
-// Fallback assumptions used only when the vehicle has no usable history.
+// Fallback consumption used only when a drive has neither measured energy nor a vehicle consumption.
 const (
-	defaultElectricityPerKwh = 0.22
-	defaultTiresPerKm        = 0.020
-	defaultMaintenancePerKm  = 0.015
 	defaultConsumptionKwh100 = 16.5
 	// Minimum distance over the insurance window for a meaningful per-km share.
 	minInsuranceWindowKm = 500.0
@@ -71,25 +70,28 @@ type UnitRates struct {
 	MaintenanceSource string
 	// InsurancePerKm shares the insurance premiums paid over the last 12 months (or since the first premium)
 	// across the kilometers actually driven over the same window.
-	InsurancePerKm      float64
-	InsuranceSource     string // RECORDED_EXPENSES | INCLUDED_IN_LEASE | INSUFFICIENT_DISTANCE | NONE
-	InsuranceWindowCost *money.Cents
-	InsuranceWindowKm   *float64
+	InsurancePerKm       float64
+	InsuranceSource      string // RECORDED_EXPENSES | INCLUDED_IN_LEASE | INSUFFICIENT_DISTANCE | NONE
+	InsuranceWindowCost  *money.Cents
+	InsuranceWindowKm    *float64
 	DailyInsuranceCost   money.Cents
 	MonthlyInsuranceCost money.Cents
 }
 
-// DefaultUnitRates returns the fallback assumptions, all flagged as defaults.
+// DefaultUnitRates returns the rates of a vehicle without history: every component is unknown, not priced.
 func DefaultUnitRates() *UnitRates {
 	return &UnitRates{
-		ElectricityPerKwh: defaultElectricityPerKwh,
-		ElectricitySource: RateSourceDefault,
-		TiresPerKm:        defaultTiresPerKm,
-		TiresSource:       RateSourceDefault,
-		MaintenancePerKm:  defaultMaintenancePerKm,
-		MaintenanceSource: RateSourceDefault,
+		ElectricitySource: RateSourceUnknown,
+		TiresSource:       RateSourceUnknown,
+		MaintenanceSource: RateSourceUnknown,
 		InsuranceSource:   InsuranceSourceNone,
 	}
+}
+
+// HasUnknownRate reports whether a priced component of a drive has no rate behind it, so its cost is missing from the
+// total rather than estimated.
+func (r *UnitRates) HasUnknownRate() bool {
+	return r.ElectricitySource == RateSourceUnknown || r.TiresSource == RateSourceUnknown || r.MaintenanceSource == RateSourceUnknown
 }
 
 // CostComponents holds the per-km/per-kWh cost components of a drive, excluding insurance and
@@ -151,7 +153,8 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		ref = *refTime
 	}
 
-	// 1. Electricity rate (vehicle currency/kWh): try the last 2 priced charges prior to or at ref
+	// 1. Electricity rate (vehicle currency/kWh): try the last 2 priced charges prior to or at ref. A free charge is a
+	// known price of zero, so only a missing cost is skipped.
 	rows, err := s.pool.Query(ctx, `
 		SELECT date, kwh_added,
 		       COALESCE(CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN cost ELSE cost * fx_rate END, 0)
@@ -159,7 +162,6 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		WHERE vehicle_id = $1
 		  AND deleted_upstream_at IS NULL
 		  AND cost IS NOT NULL
-		  AND cost > 0
 		  AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL)
 		  AND date <= $2
 		ORDER BY date DESC
@@ -174,7 +176,7 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		var recent []chargeSample
 		for rows.Next() {
 			var cs chargeSample
-			if err := rows.Scan(&cs.date, &cs.kwh, &cs.cost); err == nil && cs.kwh > 0 && cs.cost > 0 {
+			if err := rows.Scan(&cs.date, &cs.kwh, &cs.cost); err == nil && cs.kwh > 0 {
 				recent = append(recent, cs)
 			}
 		}
@@ -199,18 +201,19 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 	}
 
 	// 2. Fallback to all priced charges history if no recent charge was found
-	if rates.ElectricitySource == RateSourceDefault {
+	if rates.ElectricitySource == RateSourceUnknown {
 		var pricedCost money.Cents
 		var pricedKwh float64
 		if err := s.pool.QueryRow(ctx, `
 			SELECT COALESCE(SUM(CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN cost ELSE cost * fx_rate END), 0),
 			       COALESCE(SUM(kwh_added), 0)
 			FROM charge_logs
-			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND cost IS NOT NULL AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL);
-		`, vehicleID).Scan(&pricedCost, &pricedKwh); err != nil {
+			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND cost IS NOT NULL
+              AND date <= $2 AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL);
+		`, vehicleID, ref).Scan(&pricedCost, &pricedKwh); err != nil {
 			return nil, err
 		}
-		if pricedKwh > 0 && pricedCost > 0 {
+		if pricedKwh > 0 {
 			rates.ElectricityPerKwh = pricedCost.Float() / pricedKwh
 			rates.ElectricitySource = RateSourceHistory
 		}
@@ -276,8 +279,8 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		SELECT COALESCE(SUM(
 			CASE
 				WHEN is_recurring AND COALESCE(recurrence_interval_months, 0) > 0
-				THEN ROUND(amount * 12.0 / recurrence_interval_months)
-				ELSE amount
+				THEN ROUND((CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN amount ELSE amount * fx_rate END) * 12.0 / recurrence_interval_months, 2)
+				ELSE CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN amount ELSE amount * fx_rate END
 			END
 		), 0)
 		FROM maintenance_expenses

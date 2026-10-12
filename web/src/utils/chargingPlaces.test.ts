@@ -9,6 +9,7 @@ const locations: ChargingLocation[] = [
 describe('placeCategoryKey', () => {
   it('maps a category to its catalog key and falls back on other', () => {
     expect(placeCategoryKey('HOME')).toBe('expenses.chargingPlaces.category.HOME')
+    expect(placeCategoryKey('OUTSIDE')).toBe('expenses.chargingPlaces.category.OUTSIDE')
     expect(placeCategoryKey('SPA')).toBe('expenses.chargingPlaces.category.OTHER')
   })
 })

@@ -167,7 +167,7 @@ func (r *MaintenanceReminder) ComputeStatus(currentOdometer float64, now time.Ti
 		if r.LastServiceDate != nil {
 			baseDate = *r.LastServiceDate
 		}
-		dueDate := addReminderMonths(baseDate, *r.IntervalMonths)
+		dueDate := AddCalendarMonths(baseDate, *r.IntervalMonths)
 		r.DueDate = &dueDate
 
 		remDays := int(dueDate.Sub(now).Hours() / 24)
@@ -227,15 +227,4 @@ type VehicleWebhook struct {
 	Enabled   bool      `json:"enabled"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-}
-
-// addReminderMonths keeps a monthly interval in its target month, clamping an unavailable day.
-func addReminderMonths(base time.Time, months int) time.Time {
-	target := time.Date(base.Year(), base.Month()+time.Month(months), 1, 0, 0, 0, 0, base.Location())
-	lastDay := time.Date(target.Year(), target.Month()+1, 0, 0, 0, 0, 0, base.Location()).Day()
-	day := base.Day()
-	if day > lastDay {
-		day = lastDay
-	}
-	return time.Date(target.Year(), target.Month(), day, base.Hour(), base.Minute(), base.Second(), base.Nanosecond(), base.Location())
 }

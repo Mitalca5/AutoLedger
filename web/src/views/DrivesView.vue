@@ -2,6 +2,7 @@
 import LoadError from '@/components/LoadError.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import TabBar, { type TabItem } from '@/components/TabBar.vue'
 import { Navigation as PageIcon } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import { distanceUnit } from '@/units'
@@ -335,6 +336,11 @@ function openTollEntry(d: any) {
   openCostModal(d, true)
 }
 
+const viewTabs = computed<TabItem[]>(() => [
+  { key: 'DRIVES', label: t('drives.drivesView.drives'), icon: List },
+  { key: 'TRIPS', label: t('drives.drivesView.trips'), icon: Layers },
+])
+
 function switchView(mode: 'DRIVES' | 'TRIPS') {
   viewMode.value = mode
   if (mode === 'TRIPS') loadTripGroups()
@@ -414,24 +420,6 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
     <!-- Header & Filter Tabs -->
     <PageHeader :title="$t('drives.drivesView.drivesAndTrips')" :icon="PageIcon">
       {{ $t('drives.drivesView.drivesActualEnergyAndTolls', { unit: distanceUnit(), total }) }}
-      <template #below>
-      <div class="flex items-center gap-1 mt-3 bg-slate-900 border border-slate-800 p-1 rounded-xl w-full sm:w-fit">
-          <button
-            @click="switchView('DRIVES')"
-            class="tap flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-transparent"
-            :class="viewMode === 'DRIVES' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
-          >
-            <List class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.drives') }}
-          </button>
-          <button
-            @click="switchView('TRIPS')"
-            class="tap flex-1 sm:flex-none justify-center px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors border border-transparent"
-            :class="viewMode === 'TRIPS' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
-          >
-            <Layers class="w-3.5 h-3.5" /> {{ $t('drives.drivesView.trips') }}
-          </button>
-        </div>
-      </template>
       <template #actions>
       <!-- Actions & Tag Filters container -->
       <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
@@ -495,6 +483,8 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
     
       </template>
     </PageHeader>
+
+    <TabBar :model-value="viewMode" :tabs="viewTabs" :label="$t('drives.drivesView.drivesAndTrips')" id-prefix="drives-tab" @update:model-value="switchView($event as 'DRIVES' | 'TRIPS')" />
 
     <!-- Filters & Navigation Toolbar (Drives Mode) -->
     <DrivesToolbar
