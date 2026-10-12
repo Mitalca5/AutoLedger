@@ -17,7 +17,6 @@ defineProps<{
         <h2 class="text-2xl font-bold tracking-tight text-white">{{ title }}</h2>
       </div>
       <p v-if="$slots.default" class="mt-1 text-sm text-slate-400"><slot /></p>
-      <slot name="below" />
     </div>
     <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 self-start sm:self-center">
       <slot name="actions" />
