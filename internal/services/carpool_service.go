@@ -208,8 +208,9 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 			SELECT COALESCE(SUM(CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN cost ELSE cost * fx_rate END), 0),
 			       COALESCE(SUM(kwh_added), 0)
 			FROM charge_logs
-			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND cost IS NOT NULL AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL);
-		`, vehicleID).Scan(&pricedCost, &pricedKwh); err != nil {
+			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND cost IS NOT NULL
+              AND date <= $2 AND (currency = (SELECT currency FROM vehicles WHERE id = $1) OR fx_rate IS NOT NULL);
+		`, vehicleID, ref).Scan(&pricedCost, &pricedKwh); err != nil {
 			return nil, err
 		}
 		if pricedKwh > 0 {
