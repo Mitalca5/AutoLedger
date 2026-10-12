@@ -10,7 +10,8 @@
     "monthDistance": "Distance · {month}",
     "fleetTravelled": "Total distance traveled",
     "monthEnergy": "Energy · {month}",
-    "energyDelivered": "Delivered charging energy"
+    "energyDelivered": "Delivered charging energy",
+    "perCurrency": "One total per currency"
   },
   "vehicles": {
     "comparisonTitle": "Vehicles & Energy Efficiency",
@@ -25,7 +26,8 @@
     "monthlyCostHistory": "Fleet Monthly Cost History",
     "stackedBreakdown": "Energy vs. other expenses",
     "energyCost": "Energy",
-    "otherCost": "Other Expenses"
+    "otherCost": "Other Expenses",
+    "fleetCurrencyOnly": "{currency} vehicles only"
   },
   "drivers": {
     "title": "Driver Distance Distribution",
@@ -42,7 +44,8 @@
     "none": "No budget set: add one to follow the household spending this month.",
     "spent": "{spent} of {budget} ({percent}%)",
     "remaining": "{amount} left",
-    "over": "{amount} over"
+    "over": "{amount} over",
+    "otherCurrency": "{count} vehicle in another currency is not counted in this {currency} budget | {count} vehicles in other currencies are not counted in this {currency} budget"
   },
   "compare": {
     "title": "Cost per distance, side by side",

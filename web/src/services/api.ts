@@ -781,9 +781,18 @@ export interface MemberKmShare {
   percentage: number
 }
 
+export interface FleetCurrencyTotal {
+  currency: string
+  vehicle_count: number
+  current_month_cost: number
+}
+
 export interface FleetSummaryResponse {
   total_vehicles: number
+  /** Currency of the budget and of the figures below: vehicles in another currency are only in `totals`. */
   currency: string
+  /** Cost of the month in progress, one line per currency. */
+  totals: FleetCurrencyTotal[]
   /** Month in progress (YYYY-MM) in the reporting timezone. */
   current_month: string
   current_month_cost: number

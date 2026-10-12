@@ -11,6 +11,7 @@ import { Chart, registerables } from 'chart.js'
 import { api, type FleetSummaryResponse } from '@/services/api'
 import { formatAmount, formatAmountOrUnknown } from '@/currency'
 import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
+import { cheapestPerKmIds, mostEconomicalIds, rankFleetVehicles } from '@/utils/fleetRanking'
 import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit } from '@/units'
 import { t } from '@/i18n'
@@ -77,27 +78,16 @@ async function loadFleetSummary() {
   }
 }
 
-// Find the most economical vehicle by energy cost / 100km
-const mostEconomicalVehicleId = computed(() => {
-  if (!summary.value?.vehicles.length) return null
-  const withCost = summary.value.vehicles.filter((v) => v.energy_cost_per_100km > 0)
-  if (!withCost.length) return null
-  return withCost.reduce((prev, curr) => (curr.energy_cost_per_100km < prev.energy_cost_per_100km ? curr : prev)).vehicle_id
-})
+// Vehicles in a currency other than the fleet one are not part of its totals, budget or chart
+const otherCurrencyCount = computed(() => (summary.value?.totals ?? []).filter((x) => x.currency !== summary.value?.currency).reduce((n, x) => n + x.vehicle_count, 0))
+const otherTotals = computed(() => (summary.value?.totals ?? []).filter((x) => x.currency !== summary.value?.currency))
 
-// Ranking by full cost per km, only among vehicles whose figures are complete enough to be compared
-const rankedVehicles = computed(() =>
-  [...(summary.value?.vehicles ?? [])].sort((a, b) => {
-    if (a.comparable !== b.comparable) return a.comparable ? -1 : 1
-    // A vehicle without a cost per km yet goes last, never first as if it cost nothing
-    if (a.full_cost_per_km == null || b.full_cost_per_km == null) return (a.full_cost_per_km == null ? 1 : 0) - (b.full_cost_per_km == null ? 1 : 0)
-    return a.full_cost_per_km - b.full_cost_per_km
-  }),
-)
-const cheapestPerKmId = computed(() => {
-  const first = rankedVehicles.value[0]
-  return first?.comparable && rankedVehicles.value.filter((v) => v.comparable).length > 1 ? first.vehicle_id : null
-})
+// Most economical by energy cost / 100 km, within each currency
+const mostEconomicalIdSet = computed(() => mostEconomicalIds(summary.value?.vehicles ?? []))
+
+// Ranking by full cost per km inside each currency, only among vehicles whose figures are complete enough to be compared
+const rankedVehicles = computed(() => rankFleetVehicles(summary.value?.vehicles ?? [], summary.value?.currency ?? ''))
+const cheapestPerKmIdSet = computed(() => cheapestPerKmIds(rankedVehicles.value))
 
 function completenessClass(pct: number): string {
   if (pct >= 80) return 'text-success-400'
@@ -120,6 +110,7 @@ function renderChart() {
     chartInstance = null
   }
 
+  const currency = summary.value.currency
   const months = summary.value.monthly_costs.map((m) => m.month)
   const energyCosts = summary.value.monthly_costs.map((m) => m.energy_cost)
   const otherCosts = summary.value.monthly_costs.map((m) => m.other_cost)
@@ -162,8 +153,7 @@ function renderChart() {
           callbacks: {
             label(context) {
               const val = context.raw as number
-              const curr = summary.value?.currency || 'EUR'
-              return `${context.dataset.label}: ${formatAmount(val, curr)}`
+              return `${context.dataset.label}: ${formatAmount(val, currency)}`
             },
           },
         },
@@ -180,7 +170,7 @@ function renderChart() {
           ticks: {
             color: '#94a3b8',
             callback(value) {
-              return formatAmount(Number(value), summary.value?.currency || 'EUR', 0)
+              return formatAmount(Number(value), currency, 0)
             },
           },
         },
@@ -263,6 +253,9 @@ onBeforeUnmount(() => {
         </p>
       </template>
       <p v-else-if="!editingBudget" class="text-xs text-slate-400">{{ t('fleet.budget.none') }}</p>
+      <p v-if="otherCurrencyCount > 0" class="text-xs text-slate-400" data-testid="fleet-budget-other-currency">
+        {{ t('fleet.budget.otherCurrency', { currency: summary.currency, count: otherCurrencyCount }, otherCurrencyCount) }}
+      </p>
     </div>
 
     <!-- KPI Grid -->
@@ -288,7 +281,10 @@ onBeforeUnmount(() => {
         <p class="text-2xl font-bold text-white mt-2">
           {{ formatAmount(summary.current_month_cost, summary.currency) }}
         </p>
-        <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.currentMonthTotal') }}</p>
+        <p v-for="tot in otherTotals" :key="tot.currency" class="text-lg font-bold text-white tabular-nums" data-testid="fleet-currency-total">
+          {{ formatAmount(tot.current_month_cost, tot.currency) }}
+        </p>
+        <p class="text-xs text-slate-400 mt-1">{{ otherTotals.length ? t('fleet.kpi.perCurrency') : t('fleet.kpi.currentMonthTotal') }}</p>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
@@ -334,14 +330,14 @@ onBeforeUnmount(() => {
           :key="v.vehicle_id"
           class="relative p-4 rounded-xl bg-slate-950/60 border transition-all"
           :class="[
-            v.vehicle_id === mostEconomicalVehicleId
+            mostEconomicalIdSet.has(v.vehicle_id)
               ? 'border-success-500/40 bg-success-950/10 shadow-sm shadow-success-500/10'
               : 'border-slate-800/80 hover:border-slate-700'
           ]"
         >
           <!-- Economical Badge -->
           <div
-            v-if="v.vehicle_id === mostEconomicalVehicleId && v.energy_cost_per_100km > 0"
+            v-if="mostEconomicalIdSet.has(v.vehicle_id) && v.energy_cost_per_100km > 0"
             class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-500/20 text-success-400 border border-success-500/30 text-xs font-semibold tracking-wide uppercase"
           >
             <Award class="w-3 h-3" />
@@ -410,7 +406,7 @@ onBeforeUnmount(() => {
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="truncate font-semibold text-white">{{ v.name }}</p>
-              <p v-if="v.vehicle_id === cheapestPerKmId" class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
+              <p v-if="cheapestPerKmIdSet.has(v.vehicle_id)" class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
                 <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
               </p>
               <p v-else-if="!v.comparable" class="mt-0.5 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</p>
@@ -456,7 +452,7 @@ onBeforeUnmount(() => {
             <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60" :class="{ 'opacity-70': !v.comparable }">
               <td class="py-2 pr-4">
                 <span class="font-semibold text-white">{{ v.name }}</span>
-                <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
+                <span v-if="cheapestPerKmIdSet.has(v.vehicle_id)" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
                   <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
                 </span>
                 <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</span>
@@ -481,7 +477,7 @@ onBeforeUnmount(() => {
           <h2 class="text-base font-semibold text-white">
             {{ t('fleet.chart.monthlyCostHistory') }}
           </h2>
-          <span class="text-xs text-slate-400">{{ t('fleet.chart.stackedBreakdown') }}</span>
+          <span class="text-xs text-slate-400">{{ otherCurrencyCount > 0 ? t('fleet.chart.fleetCurrencyOnly', { currency: summary.currency }) : t('fleet.chart.stackedBreakdown') }}</span>
         </div>
         <div class="h-64 relative">
           <canvas ref="chartCanvas"></canvas>

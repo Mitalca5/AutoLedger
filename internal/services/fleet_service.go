@@ -106,11 +106,20 @@ func applyTCOMonthsToFleet(res *models.FleetSummaryResponse, sums map[string]*TC
 		byVehicle[id] = months
 	}
 
+	// Only the vehicles in the currency of the fleet figures are added together
+	inFleetCurrency := make(map[string]bool, len(res.Vehicles))
+	for _, v := range res.Vehicles {
+		inFleetCurrency[v.VehicleID] = v.Currency == res.Currency
+	}
+
 	for i := range res.MonthlyCosts {
 		fm := &res.MonthlyCosts[i]
 		fm.TotalCost, fm.EnergyCost, fm.OtherCost = 0, 0, 0
 		fm.ByVehicle = make(map[string]money.Cents, len(sums))
 		for id, months := range byVehicle {
+			if !inFleetCurrency[id] {
+				continue
+			}
 			mc, ok := months[fm.Month]
 			if !ok {
 				continue
@@ -127,8 +136,11 @@ func applyTCOMonthsToFleet(res *models.FleetSummaryResponse, sums map[string]*TC
 	for i := range res.Vehicles {
 		cost := byVehicle[res.Vehicles[i].VehicleID][current].Total
 		res.Vehicles[i].MonthCost = cost
-		res.CurrentMonthCost += cost
+		if inFleetCurrency[res.Vehicles[i].VehicleID] {
+			res.CurrentMonthCost += cost
+		}
 	}
+	res.Totals = models.FleetCurrencyTotals(res.Vehicles)
 }
 
 // applyTCOToFleetMetric fills the comparison figures of a vehicle from its TCO summary.

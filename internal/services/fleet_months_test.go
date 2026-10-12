@@ -47,3 +47,35 @@ func TestApplyTCOMonthsToFleetSumsVehicleMonths(t *testing.T) {
 		t.Fatalf("vehicle month costs = %d/%d", res.Vehicles[0].MonthCost, res.Vehicles[1].MonthCost)
 	}
 }
+
+func TestApplyTCOMonthsToFleetKeepsCurrenciesApart(t *testing.T) {
+	res := &models.FleetSummaryResponse{
+		Currency:     "EUR",
+		MonthlyCosts: []models.FleetMonthlyCost{{Month: "2026-10"}},
+		Vehicles: []models.VehicleFleetMetric{
+			{VehicleID: "eur-1", Currency: "EUR"},
+			{VehicleID: "eur-2", Currency: "EUR"},
+			{VehicleID: "chf", Currency: "CHF"},
+		},
+	}
+	month := func(total money.Cents) *TCOSummary {
+		return &TCOSummary{MonthlyCosts: []MonthlyCost{{Month: "2026-10", Energy: 0, Total: total}}}
+	}
+	sums := map[string]*TCOSummary{"eur-1": month(1924), "eur-2": month(8768), "chf": month(90000)}
+
+	applyTCOMonthsToFleet(res, sums, time.Date(2026, 10, 8, 12, 0, 0, 0, time.UTC))
+
+	if res.CurrentMonthCost != 1924+8768 {
+		t.Fatalf("fleet month = %d, want the euro vehicles only", res.CurrentMonthCost)
+	}
+	if got := res.MonthlyCosts[0]; got.TotalCost != 1924+8768 || len(got.ByVehicle) != 2 {
+		t.Fatalf("monthly chart mixes currencies: %+v", got)
+	}
+	want := []models.FleetCurrencyTotal{
+		{Currency: "EUR", VehicleCount: 2, CurrentMonthCost: 1924 + 8768},
+		{Currency: "CHF", VehicleCount: 1, CurrentMonthCost: 90000},
+	}
+	if len(res.Totals) != 2 || res.Totals[0] != want[0] || res.Totals[1] != want[1] {
+		t.Fatalf("totals = %+v, want %+v", res.Totals, want)
+	}
+}

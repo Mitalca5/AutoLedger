@@ -55,3 +55,5 @@ Months are calendar months of the reporting timezone (`APP_TIMEZONE`) everywhere
 ## Energy cost per 100 km
 
 The cost per 100 km of energy has one definition: `EnergyStats.Summary.CostPer100km` (priced charges over the distance of the months where distance is tracked, at least 50 km). The fleet summary (`energy_cost_per_100km`) and the Home Assistant vehicle metrics read it from `EnergyStatsService`; the TCO card shows the amount, names the estimated part and links to the energy panel instead of a second per-distance figure. A vehicle without a figure reports 0 in the fleet.
+
+The fleet summary never adds two currencies. `currency` is the one of the first vehicle and is the currency of `current_month_cost`, the monthly chart and the household budget, which count only the vehicles in it. `totals` has one line per currency (`FleetCurrencyTotals`) with the month cost and the number of vehicles. The comparison table and the cheapest/most economical badges rank within one currency (`web/src/utils/fleetRanking.ts`). Amounts are never converted: there is no exchange-rate source.

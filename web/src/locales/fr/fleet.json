@@ -10,7 +10,8 @@
     "monthDistance": "Distance · {month}",
     "fleetTravelled": "Distance totale parcourue",
     "monthEnergy": "Énergie · {month}",
-    "energyDelivered": "Énergie de recharge délivrée"
+    "energyDelivered": "Énergie de recharge délivrée",
+    "perCurrency": "Un total par devise"
   },
   "vehicles": {
     "comparisonTitle": "Véhicules et efficacité énergétique",
@@ -25,7 +26,8 @@
     "monthlyCostHistory": "Historique des coûts de la flotte",
     "stackedBreakdown": "Énergie vs autres dépenses",
     "energyCost": "Énergie",
-    "otherCost": "Autres dépenses"
+    "otherCost": "Autres dépenses",
+    "fleetCurrencyOnly": "Véhicules en {currency} uniquement"
   },
   "drivers": {
     "title": "Répartition des kilomètres par conducteur",
@@ -42,7 +44,8 @@
     "none": "Aucun budget défini : ajoutez-en un pour suivre les dépenses du foyer ce mois-ci.",
     "spent": "{spent} sur {budget} ({percent} %)",
     "remaining": "{amount} restants",
-    "over": "{amount} de dépassement"
+    "over": "{amount} de dépassement",
+    "otherCurrency": "{count} véhicule dans une autre devise n'est pas compté dans ce budget en {currency} | {count} véhicules dans d'autres devises ne sont pas comptés dans ce budget en {currency}"
   },
   "compare": {
     "title": "Coût au kilomètre, côte à côte",
