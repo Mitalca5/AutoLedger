@@ -1,54 +1,24 @@
 <script setup lang="ts">
-import { t } from '@/i18n'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { Chart, registerables } from 'chart.js'
+import { computed, ref } from 'vue'
+import CostDonut from '@/components/costs/CostDonut.vue'
+import { formatAmount } from '@/currency'
+import { useVehicleStore } from '@/stores/vehicle'
+import { formatPercent } from '@/utils/numbers'
+import { donutRows, type DonutMode } from '@/utils/donutBreakdown'
 
-import { DONUT_KEYS, donutAmounts, type DonutMode } from '@/utils/donutBreakdown'
-
-Chart.register(...registerables)
-
-// Share of each cost item: in the full cost of ownership, or in what was actually paid
+// Share of each cost item: in the full cost of ownership, or in what was actually paid. The amounts are listed under
+// the ring, largest first, so no figure is hidden behind a tooltip.
 const props = defineProps<{ tco: any | null }>()
+const vehicleStore = useVehicleStore()
 
-const donutChartRef = ref<HTMLCanvasElement | null>(null)
-let donutChartInstance: Chart | null = null
 const mode = ref<DonutMode>('full')
 const modes: DonutMode[] = ['full', 'cash']
-const keys = computed(() => DONUT_KEYS.filter((k) => mode.value === 'full' || k !== 'depreciation'))
-
-function renderChart() {
-  if (!donutChartRef.value || !props.tco) return
-  if (donutChartInstance) donutChartInstance.destroy()
-  const tco = props.tco
-
-  donutChartInstance = new Chart(donutChartRef.value, {
-    type: 'doughnut',
-    data: {
-      labels: keys.value.map((k) => t(`dashboard.donut.${k === 'tires' && mode.value === 'cash' ? 'tiresCash' : k}`)),
-      datasets: [
-        {
-          data: donutAmounts(tco, mode.value).filter((_, i) => mode.value === 'full' || DONUT_KEYS[i] !== 'depreciation'),
-          backgroundColor: ['#38bdf8', '#f59e0b', '#10b981', '#ec4899', '#a855f7', '#f97316', '#e11d48', '#64748b'].filter((_, i) => mode.value === 'full' || DONUT_KEYS[i] !== 'depreciation'),
-          borderWidth: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } },
-      },
-      cutout: '72%',
-    },
-  })
-}
-
-onMounted(renderChart)
-watch([() => props.tco, mode], renderChart, { flush: 'post' })
-onUnmounted(() => {
-  if (donutChartInstance) donutChartInstance.destroy()
-})
+const rows = computed(() =>
+  donutRows(props.tco, mode.value).map((r) => ({
+    ...r,
+    label: r.key === 'tires' && mode.value === 'cash' ? 'dashboard.donut.tiresCash' : `dashboard.donut.${r.key}`,
+  })),
+)
 </script>
 
 <template>
@@ -69,10 +39,28 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
-    <p class="text-xs text-slate-500 mb-4">{{ $t(mode === 'full' ? 'dashboard.donut.hintFull' : 'dashboard.donut.hintCash') }}</p>
+    <p class="text-xs text-slate-400 mb-4">{{ $t(mode === 'full' ? 'dashboard.donut.hintFull' : 'dashboard.donut.hintCash') }}</p>
     <p v-if="mode === 'full' && tco && tco.depreciation_known === false" class="text-xs font-medium text-warning-400 -mt-2 mb-3">{{ $t('dashboard.costBreakdownDonut.depreciationMissing') }}</p>
-    <div class="h-48 sm:h-64">
-      <canvas ref="donutChartRef" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
+    <div v-if="tco" class="mx-auto h-36 w-36 sm:h-44 sm:w-44">
+      <CostDonut
+        :items="rows.map((r) => ({ label: $t(r.label), color: r.color, amount: r.amount }))"
+        :currency="vehicleStore.currency"
+        :show-legend="false"
+        :empty-label="$t('dashboard.costBreakdownDonut.noCost')"
+        :chart-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"
+      />
     </div>
+    <ul class="mt-4 space-y-1.5 text-xs">
+      <li v-for="r in rows" :key="r.key" class="flex items-center justify-between gap-3">
+        <span class="flex min-w-0 items-center gap-2 text-slate-300">
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: r.color }" aria-hidden="true"></span>
+          <span class="truncate">{{ $t(r.label) }}</span>
+        </span>
+        <span class="shrink-0 tabular-nums text-slate-400">
+          <span class="font-semibold text-white">{{ formatAmount(r.amount, vehicleStore.currency, 0) }}</span>
+          · {{ formatPercent(r.sharePct, 0) }}
+        </span>
+      </li>
+    </ul>
   </div>
 </template>

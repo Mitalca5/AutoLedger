@@ -12,7 +12,8 @@
   "costBreakdownDonut": {
     "depreciationMissing": "Depreciation is not entered: the slice is missing, not zero.",
     "fullCostBreakdownByCategory": "Full cost breakdown by category",
-    "fullCostBreakdown": "Full cost breakdown"
+    "fullCostBreakdown": "Full cost breakdown",
+    "noCost": "No cost recorded yet"
   },
   "dataQualityCard": {
     "enterTheStartOdometer": "Enter the odometer at purchase",

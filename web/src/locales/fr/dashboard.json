@@ -12,7 +12,8 @@
   "costBreakdownDonut": {
     "depreciationMissing": "Dépréciation non renseignée : la part est manquante, pas nulle.",
     "fullCostBreakdownByCategory": "Répartition du coût complet par poste",
-    "fullCostBreakdown": "Répartition du coût complet"
+    "fullCostBreakdown": "Répartition du coût complet",
+    "noCost": "Aucun coût enregistré"
   },
   "dataQualityCard": {
     "enterTheStartOdometer": "Saisir le compteur à l'achat",
