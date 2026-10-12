@@ -51,3 +51,7 @@ Each vehicle has its own `Currency` (ISO 4217, `vehicles.currency`, migration `0
 ## Reporting months
 
 Months are calendar months of the reporting timezone (`APP_TIMEZONE`) everywhere: the TCO monthly costs, the fleet summary, the instalments due later in the month and the current-month figures. The TCO and the fleet summary carry `current_month` (`YYYY-MM`), which the client uses instead of its own clock. `monthly_costs` is continuous: every month from the first record to the current one is present, a month without a record as an empty row with an unknown cost per kilometre, so a range of N months is N calendar months. `GetFleetSummary` takes the timezone name.
+
+## Energy cost per 100 km
+
+The cost per 100 km of energy has one definition: `EnergyStats.Summary.CostPer100km` (priced charges over the distance of the months where distance is tracked, at least 50 km). The fleet summary (`energy_cost_per_100km`) and the Home Assistant vehicle metrics read it from `EnergyStatsService`; the TCO card shows the amount, names the estimated part and links to the energy panel instead of a second per-distance figure. A vehicle without a figure reports 0 in the fleet.

@@ -15,6 +15,8 @@ const money = (v: number, digits = 2) => formatAmount(v || 0, vehicleStore.curre
 // A cost per km from the API, per the account's distance unit
 // A headline amount drops its cents from 1 000 on: they are noise next to the digits that matter
 const headline = (v: number) => money(v, Math.abs(v || 0) >= 1000 ? 0 : 2)
+// The cost per 100 distance units lives in the energy panel: one definition, not a second figure on this card
+const showEnergyPanel = () => document.getElementById('energy-efficiency')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 // Unknown (no distance yet) reads as a dash, not as 0,00
 const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == null ? null : perDistance(v), vehicleStore.currency, 3)
 </script>
@@ -98,9 +100,18 @@ const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == nul
         <p v-if="canCharge(tco?.powertrain) && canRefuel(tco?.powertrain) && tco?.total_kwh_added" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.kwhOnly', { total_kwh_added: Math.round(tco.total_kwh_added).toLocaleString(intlLocale()) }) }}
         </p>
-        <p v-else-if="!canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
-          {{ $t('dashboard.tcoMetricsGrid.kmKwh', { unit: distanceUnit(), energy_cost_per_km: perUnit(tco?.energy_cost_per_km), total_kwh_added: Math.round(tco?.total_kwh_added || 0).toLocaleString(intlLocale()) }) }}
-        </p>
+        <template v-else-if="!canRefuel(tco?.powertrain)">
+          <p class="text-xs text-slate-400">
+            {{ $t('dashboard.tcoMetricsGrid.kwhOnly', { total_kwh_added: Math.round(tco?.total_kwh_added || 0).toLocaleString(intlLocale()) }) }}
+          </p>
+          <p v-if="tco?.estimated_energy_cost" class="text-xs text-slate-400">
+            {{ $t('dashboard.tcoMetricsGrid.ofWhichEstimatedEnergy', { amount: money(tco.estimated_energy_cost, 0) }) }}
+            <GlossaryTip term="estimatedEnergy" />
+          </p>
+          <button type="button" class="text-xs text-sky-400 underline" @click="showEnergyPanel">
+            {{ $t('dashboard.tcoMetricsGrid.energyPanelLink', { unit: distanceUnit() }) }}
+          </button>
+        </template>
         <p v-if="tco?.completeness?.charges_without_cost" class="text-xs text-warning-400">
           {{ $t('dashboard.tcoMetricsGrid.chargeSWithoutACost', { charges_without_cost: tco.completeness.charges_without_cost }) }}
         </p>

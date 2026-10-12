@@ -42,8 +42,12 @@ func TestFleetSummaryComputesEnergyCostPer100Km(t *testing.T) {
 		t.Fatalf("expected 1 vehicle, got %d", len(summary.Vehicles))
 	}
 	m := summary.Vehicles[0]
-	if m.EnergyCostPer100Km != 500 {
-		t.Errorf("energy cost per 100 km: got %v, want 500 (1000.00 spent over 200 km)", m.EnergyCostPer100Km)
+	fleet, err := services.NewFleetService(repo, services.NewTCOService(pool, "UTC")).GetSummary(ctx, u.ID)
+	if err != nil {
+		t.Fatalf("GetSummary failed: %v", err)
+	}
+	if got := fleet.Vehicles[0].EnergyCostPer100Km; got != 500 {
+		t.Errorf("energy cost per 100 km: got %v, want 500 (1000.00 spent over 200 km)", got)
 	}
 	if summary.CurrentMonthCost != 100000 || m.MonthCost != 100000 {
 		t.Errorf("month cost in cents: fleet %d, vehicle %d, want 100000", summary.CurrentMonthCost, m.MonthCost)

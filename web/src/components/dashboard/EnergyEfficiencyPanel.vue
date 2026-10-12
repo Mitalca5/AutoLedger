@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
   <section v-if="!hasData && showEmpty" class="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
     {{ $t('dashboard.energyEfficiencyPanel.noData') }}
   </section>
-  <section v-else-if="hasData" class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
+  <section v-else-if="hasData" id="energy-efficiency" class="scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
     <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">

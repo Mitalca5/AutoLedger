@@ -230,7 +230,6 @@
     "depreciationKm": "• décote {value}/{unit}",
     "fullCostPerKm": "Coût complet / {unit}",
     "totalCost": "Décaissé depuis l'achat",
-    "kmKwh": "{energy_cost_per_km}/{unit} • {total_kwh_added} kWh",
     "overKm": "Sur {distance_basis_km} {unit}",
     "directRunningCostKm": "Énergie + péages : {usage_cost_per_km}/{unit}",
     "netOfCarpooling": "Net covoiturage : {full_cost_net}",
@@ -240,7 +239,8 @@
     "energy": "Énergie (Charges)",
     "kwhOnly": "{total_kwh_added} kWh rechargés",
     "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée",
-    "periodSince": "Depuis {month}"
+    "periodSince": "Depuis {month}",
+    "energyPanelLink": "Coût aux 100 {unit} : efficacité énergétique"
   },
   "nextDueCard": {
     "title": "Prochain entretien",

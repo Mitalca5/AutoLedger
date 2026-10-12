@@ -100,40 +100,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 		rows.Close()
 	}
 
-	// 3. Per-vehicle all-time energy cost & distance to compute energy cost per 100km
-	energyCostPer100KmByVeh := make(map[string]float64)
-	statsQuery := `
-		SELECT c.vehicle_id,
-		       c.amount_eur,
-		       COALESCE(d.total_km, 0)
-		FROM (
-			SELECT vehicle_id, SUM(amount_eur) as amount_eur
-			FROM cost_ledger
-			WHERE vehicle_id::text = ANY($1) AND category = 'ENERGY'
-			GROUP BY vehicle_id
-		) c
-		LEFT JOIN (
-			SELECT vehicle_id, SUM(distance_km) as total_km
-			FROM drives
-			WHERE vehicle_id::text = ANY($1) AND deleted_upstream_at IS NULL
-			GROUP BY vehicle_id
-		) d ON d.vehicle_id = c.vehicle_id;
-	`
-	rows, err = r.pool.Query(ctx, statsQuery, vehicleIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch energy cost per distance: %w", err)
-	}
-	for rows.Next() {
-		var vid string
-		var totalEnergyEur float64
-		var totalKm float64
-		if err := rows.Scan(&vid, &totalEnergyEur, &totalKm); err == nil && totalKm > 0 {
-			energyCostPer100KmByVeh[vid] = math.Round((totalEnergyEur/(totalKm/100.0))*100) / 100
-		}
-	}
-	rows.Close()
-
-	// 4. Current month costs from cost_ledger
+	// 3. Current month costs from cost_ledger
 	monthCostByVeh := make(map[string]money.Cents)
 	ledgerMonthQuery := `
 		SELECT vehicle_id, COALESCE(SUM(amount_eur), 0)
@@ -157,26 +124,24 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 		mDist := monthDistByVeh[v.ID]
 		mCost := monthCostByVeh[v.ID]
 		mKwh := monthEnergyByVeh[v.ID]
-		eff := energyCostPer100KmByVeh[v.ID]
 
 		res.CurrentMonthCost += mCost
 		res.CurrentMonthDistanceKm += mDist
 		res.CurrentMonthEnergyKwh += mKwh
 
 		res.Vehicles = append(res.Vehicles, models.VehicleFleetMetric{
-			VehicleID:          v.ID,
-			Name:               v.Name,
-			Make:               v.Make,
-			Model:              v.Model,
-			Currency:           v.Currency,
-			CurrentOdometer:    v.CurrentOdometer,
-			MonthDistanceKm:    mDist,
-			MonthCost:          mCost,
-			EnergyCostPer100Km: eff,
+			VehicleID:       v.ID,
+			Name:            v.Name,
+			Make:            v.Make,
+			Model:           v.Model,
+			Currency:        v.Currency,
+			CurrentOdometer: v.CurrentOdometer,
+			MonthDistanceKm: mDist,
+			MonthCost:       mCost,
 		})
 	}
 
-	// 5. Monthly fleet history (last 12 months)
+	// 4. Monthly fleet history (last 12 months)
 	historyQuery := `
 		SELECT TO_CHAR(entry_date AT TIME ZONE $3, 'YYYY-MM') as month_str,
 		       vehicle_id,
@@ -258,7 +223,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 		})
 	}
 
-	// 6. Member Km Shares
+	// 5. Member Km Shares
 	// A drive counts for its driver, else for the default driver of its vehicle. The same person
 	// is one line across vehicles: by account when linked, else by name.
 	driverSharesQuery := `

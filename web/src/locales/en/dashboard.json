@@ -230,7 +230,6 @@
     "depreciationKm": "• depreciation {value}/{unit}",
     "fullCostPerKm": "Full cost / {unit}",
     "totalCost": "Cash paid since purchase",
-    "kmKwh": "{energy_cost_per_km}/{unit} • {total_kwh_added} kWh",
     "overKm": "Over {distance_basis_km} {unit}",
     "directRunningCostKm": "Energy + tolls: {usage_cost_per_km}/{unit}",
     "netOfCarpooling": "Net of carpooling: {full_cost_net}",
@@ -240,7 +239,8 @@
     "energy": "Energy (charges)",
     "kwhOnly": "{total_kwh_added} kWh charged",
     "ofWhichEstimatedEnergy": "of which {amount} estimated energy",
-    "periodSince": "Since {month}"
+    "periodSince": "Since {month}",
+    "energyPanelLink": "Cost per 100 {unit}: energy efficiency"
   },
   "nextDueCard": {
     "title": "Next maintenance",

@@ -29,16 +29,23 @@ type vehicleTCO interface {
 	ComputeVehicleTCO(ctx context.Context, vehicleID string) (*TCOSummary, error)
 }
 
+// energyStatsReader is the slice of *EnergyStatsService that FleetService uses.
+type energyStatsReader interface {
+	Compute(ctx context.Context, vehicleID string) (*EnergyStats, error)
+}
+
 // FleetService coordinates aggregated multi-vehicle analytics for households.
 type FleetService struct {
 	repo fleetStore
 	tco  vehicleTCO
+	// energy gives the energy cost per 100 km, the one definition shared with the dashboard.
+	energy energyStatsReader
 	// timezone is the reporting timezone: its calendar months bound the monthly figures.
 	timezone string
 }
 
 func NewFleetService(repo *database.Repository, tco *TCOService) *FleetService {
-	return &FleetService{repo: repo, tco: tco, timezone: tco.timezone}
+	return &FleetService{repo: repo, tco: tco, energy: NewEnergyStatsService(tco.pool, tco.timezone), timezone: tco.timezone}
 }
 
 // GetSummary returns consolidated KPIs, monthly breakdown and driver shares for all vehicles of a household, with
@@ -53,6 +60,9 @@ func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.F
 		loc = time.UTC
 	}
 	now := time.Now().In(loc)
+	for i := range res.Vehicles {
+		res.Vehicles[i].EnergyCostPer100Km = s.energyCostPer100Km(ctx, res.Vehicles[i].VehicleID)
+	}
 	sums := make(map[string]*TCOSummary, len(res.Vehicles))
 	for i := range res.Vehicles {
 		sum, err := s.tco.ComputeVehicleTCO(ctx, res.Vehicles[i].VehicleID)
@@ -67,6 +77,20 @@ func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.F
 		applyTCOMonthsToFleet(res, sums, now)
 	}
 	return res, nil
+}
+
+// energyCostPer100Km is the cost per 100 km of the energy statistics, 0 when there is no tracked distance or no priced
+// charge to derive it from.
+func (s *FleetService) energyCostPer100Km(ctx context.Context, vehicleID string) float64 {
+	stats, err := s.energy.Compute(ctx, vehicleID)
+	if err != nil {
+		slog.Warn("fleet energy cost without energy statistics", "vehicle_id", vehicleID, "error", err)
+		return 0
+	}
+	if stats.Summary.CostPer100km == nil {
+		return 0
+	}
+	return *stats.Summary.CostPer100km
 }
 
 // applyTCOMonthsToFleet rebuilds the month figures of the fleet from the monthly costs of each vehicle's TCO, so the
