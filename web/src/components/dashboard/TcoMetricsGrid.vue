@@ -92,7 +92,11 @@ const costPerKm = computed(() => (rolling.value ? rolling.value.economicPerKm : 
           <Calendar class="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
         </div>
         <template v-if="month">
-          <div class="text-2xl font-extrabold text-white">{{ headline(month.total) }}</div>
+          <div class="text-2xl font-extrabold text-white">{{ headline(month.total - month.scheduled) }}</div>
+          <p class="mt-1 text-xs text-slate-300">{{ $t('dashboard.tcoMetricsGrid.spentSoFar') }}</p>
+          <p v-if="month.scheduled > 0" class="mt-0.5 text-xs text-slate-300">
+            {{ $t('dashboard.tcoMetricsGrid.alreadyScheduled', { amount: money(month.scheduled) }) }}
+          </p>
           <p class="mt-2 text-xs text-slate-400">
             {{ $t('dashboard.tcoMetricsGrid.monthDistance', { unit: distanceUnit(), distance_km: formatDistanceValue(month.distance_km) }) }}
             · {{ formatCostPerDistance(month.cost_per_km, vehicleStore.currency, 3, true) }}

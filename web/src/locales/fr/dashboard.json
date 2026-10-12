@@ -285,7 +285,9 @@
     "netOfCarpoolingLabel": "Net covoiturage",
     "avgPrice": "Prix moyen",
     "kwhLabel": "Énergie rechargée",
-    "hybridSplitLabel": "Répartition"
+    "hybridSplitLabel": "Répartition",
+    "spentSoFar": "dépensé à ce jour",
+    "alreadyScheduled": "+ {amount} déjà programmé"
   },
   "nextDueCard": {
     "title": "Prochain entretien",

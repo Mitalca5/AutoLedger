@@ -61,6 +61,13 @@ describe('currentMonthStats', () => {
     expect(s.raw).toBe(list[1])
   })
 
+  it('separates the instalments still due from what was spent so far', () => {
+    const s = currentMonthStats([{ month: '2026-05', distance_km: 100, total: 700, scheduled: 450 }], new Date('2026-05-15T10:00:00Z'))!
+    expect(s.scheduled).toBe(450)
+    expect(s.total - s.scheduled).toBe(250)
+    expect(currentMonthStats(list, new Date('2026-05-15T10:00:00Z'))!.scheduled).toBe(0)
+  })
+
   it('falls back to the latest month when the current one has no row', () => {
     expect(currentMonthStats(list, new Date('2026-09-01T10:00:00Z'))!.month).toBe('2026-05')
   })

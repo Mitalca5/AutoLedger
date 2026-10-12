@@ -60,6 +60,8 @@ export function currentMonthStats(monthlyCosts: any[] | undefined, now = new Dat
     distance_km: current.distance_km || 0,
     cost_per_km: current.cost_per_km ?? null,
     total: current.total || 0,
+    // The part of the total due later in the month; the rest was spent so far
+    scheduled: current.scheduled || 0,
     prevDistance: prev ? prev.distance_km : null,
     fixedVar,
   }

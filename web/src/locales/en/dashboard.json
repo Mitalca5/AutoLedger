@@ -285,7 +285,9 @@
     "netOfCarpoolingLabel": "Net of carpooling",
     "avgPrice": "Average price",
     "kwhLabel": "Energy charged",
-    "hybridSplitLabel": "Split"
+    "hybridSplitLabel": "Split",
+    "spentSoFar": "spent so far",
+    "alreadyScheduled": "+ {amount} already scheduled"
   },
   "nextDueCard": {
     "title": "Next maintenance",

@@ -2786,6 +2786,9 @@ func TestIntegrationCurrentMonthCountsFinancingDueLater(t *testing.T) {
 			if m.Financing != rent {
 				t.Fatalf("expected the rent due tomorrow in the current month, got %s", m.Financing)
 			}
+			if m.Scheduled != rent || m.Total < m.Scheduled {
+				t.Fatalf("the rent due later is scheduled, not spent: scheduled %s of total %s", m.Scheduled, m.Total)
+			}
 			if sum.FinancingCost != 2*rent {
 				t.Fatalf("cumulative cash must keep only the payments already due, got %s", sum.FinancingCost)
 			}

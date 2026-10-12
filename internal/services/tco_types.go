@@ -50,7 +50,10 @@ type MonthlyCost struct {
 	Tires                money.Cents `json:"tires"`           // Cash basis: full price in the purchase month
 	TiresAmortized       money.Cents `json:"tires_amortized"` // Prorated by km driven while mounted, used for cost_per_km
 	Total                money.Cents `json:"total"`
-	CostPerKm            *float64    `json:"cost_per_km"`
+	// Scheduled is the part of Total (and of Financing) that falls due later in the month in progress: the
+	// instalments dated after today. Total minus Scheduled is what was spent so far.
+	Scheduled money.Cents `json:"scheduled,omitempty"`
+	CostPerKm *float64    `json:"cost_per_km"`
 }
 
 // TagCostBreakdown represents costs split by tag (e.g. Pro vs Perso).
