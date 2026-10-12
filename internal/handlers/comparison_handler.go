@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"math"
 	"net/http"
@@ -141,6 +142,29 @@ func (r *SaveComparisonRequest) toScenario(userID string) *models.ComparisonScen
 	}
 }
 
+// fillProjectionCurrency gives a projection sent without a currency (a client that predates the field, a queued
+// offline write) the currency shared by all the vehicles of its owner. When they differ, or the owner has none, the
+// request stays empty and validation asks for the currency.
+func (h *ComparisonHandler) fillProjectionCurrency(ctx context.Context, userID string, req *SaveComparisonRequest) {
+	if h.repo == nil || req.Mode != models.ComparisonModeProjection || strings.TrimSpace(req.Currency) != "" {
+		return
+	}
+	vehicles, err := h.repo.ListVehiclesByUserID(ctx, userID)
+	if err != nil {
+		return
+	}
+	currency := ""
+	for _, v := range vehicles {
+		switch {
+		case currency == "":
+			currency = v.Currency
+		case currency != v.Currency:
+			return
+		}
+	}
+	req.Currency = currency
+}
+
 // decodeAndCheck reads the request, validates it and checks the access to the reference vehicle.
 func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Request) (*SaveComparisonRequest, bool) {
 	var req SaveComparisonRequest
@@ -148,6 +172,7 @@ func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Reques
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
 		return nil, false
 	}
+	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
 	if err := validateComparisonRequest(&req); err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return nil, false
@@ -243,6 +268,7 @@ func (h *ComparisonHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	if strings.TrimSpace(req.Name) == "" {
 		req.Name = "preview"
 	}
+	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
 	if err := validateComparisonRequest(&req); err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return
