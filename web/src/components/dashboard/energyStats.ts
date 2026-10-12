@@ -24,6 +24,11 @@ export interface ChargeClass {
   price_per_kwh?: number
   charge_efficiency?: number
   cost_per_full_charge?: number
+  /** Energy of the sessions that have a cost: the denominator of `price_per_kwh`. */
+  priced_kwh: number
+  sessions_without_cost: number
+  /** State-of-charge points behind `cost_per_full_charge`. */
+  soc_swing_priced?: number
 }
 
 export interface TemperatureBin {
@@ -97,19 +102,27 @@ function mergeTwo(a: ChargeClass | undefined, b: ChargeClass | undefined, cls: '
   const sessions = (a?.sessions ?? 0) + (b?.sessions ?? 0)
   const kwh_added = round1((a?.kwh_added ?? 0) + (b?.kwh_added ?? 0))
   const energy_cost = (a?.energy_cost ?? 0) + (b?.energy_cost ?? 0)
+  // The price is over the kWh that have a cost, like the server does for each class: sessions without a cost must not
+  // lower it.
+  const priced_kwh = (a?.priced_kwh ?? 0) + (b?.priced_kwh ?? 0)
+  const socSwing = (a?.soc_swing_priced ?? 0) + (b?.soc_swing_priced ?? 0)
   return {
     class: cls,
     sessions,
     kwh_added,
     energy_cost,
-    price_per_kwh: kwh_added > 0 ? energy_cost / kwh_added : undefined,
+    priced_kwh,
+    sessions_without_cost: (a?.sessions_without_cost ?? 0) + (b?.sessions_without_cost ?? 0),
+    soc_swing_priced: socSwing > 0 ? socSwing : undefined,
+    price_per_kwh: priced_kwh > 0 ? energy_cost / priced_kwh : undefined,
     charge_efficiency: weightedAvg([
       [a?.charge_efficiency, a?.kwh_added ?? 0],
       [b?.charge_efficiency, b?.kwh_added ?? 0],
     ]),
+    // A full charge costs the same weighted average the server computes: priced cost over state-of-charge points.
     cost_per_full_charge: weightedAvg([
-      [a?.cost_per_full_charge, a?.sessions ?? 0],
-      [b?.cost_per_full_charge, b?.sessions ?? 0],
+      [a?.cost_per_full_charge, a?.soc_swing_priced ?? 0],
+      [b?.cost_per_full_charge, b?.soc_swing_priced ?? 0],
     ]),
   }
 }

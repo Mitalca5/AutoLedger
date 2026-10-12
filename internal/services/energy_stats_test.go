@@ -164,6 +164,9 @@ func TestComputeEnergyStats(t *testing.T) {
 		t.Errorf("AC: got %d sessions / %v kWh", ac.Sessions, ac.KwhAdded)
 	}
 	eq(t, "AC price/kWh", ac.PricePerKwh, 0.25) // 15 EUR over the 60 priced kWh
+	if ac.PricedKwh != 60 || ac.SessionsWithoutCost != 1 {
+		t.Errorf("AC priced kWh / sessions without cost: got %v / %d, want 60 / 1", ac.PricedKwh, ac.SessionsWithoutCost)
+	}
 	eq(t, "DC price/kWh", dc.PricePerKwh, 0.5)
 	isNil(t, "DC efficiency", dc.ChargeEfficiency)
 	eq(t, "socket efficiency", slow.ChargeEfficiency, 0.833)

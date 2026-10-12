@@ -81,6 +81,13 @@ type ChargeClassStat struct {
 	ChargeEfficiency *float64    `json:"charge_efficiency,omitempty"`
 	// CostPerFullCharge is what going from 0 to 100 % costs with this kind of charging.
 	CostPerFullCharge *float64 `json:"cost_per_full_charge,omitempty"`
+	// PricedKwh is the energy of the sessions that have a cost: the denominator of PricePerKwh, so two classes can be
+	// merged without letting unpriced kWh lower the price.
+	PricedKwh float64 `json:"priced_kwh"`
+	// SessionsWithoutCost are left out of the price.
+	SessionsWithoutCost int `json:"sessions_without_cost"`
+	// SocSwingPriced is the state-of-charge points behind CostPerFullCharge, the weight to merge two classes with.
+	SocSwingPriced float64 `json:"soc_swing_priced,omitempty"`
 }
 
 // EnergySummary holds the figures over the whole history.
@@ -315,6 +322,7 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge, odome
 	type classAcc struct {
 		energyAcc
 		sessions int
+		unpriced int
 	}
 	classes := map[string]*classAcc{}
 	sessionsWithoutCost := 0
@@ -329,6 +337,9 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge, odome
 			classes[class] = &classAcc{}
 		}
 		classes[class].sessions++
+		if c.Cost == nil {
+			classes[class].unpriced++
+		}
 		classes[class].addCharge(c)
 	}
 
@@ -417,13 +428,16 @@ func computeEnergyStats(drives []energyDriveMonth, charges []energyCharge, odome
 			continue
 		}
 		out.ChargeClasses = append(out.ChargeClasses, ChargeClassStat{
-			Class:             class,
-			Sessions:          c.sessions,
-			KwhAdded:          round1(c.kwhAdded),
-			EnergyCost:        c.cost,
-			PricePerKwh:       costRatioPtr(c.cost.Float(), c.kwhPriced, 3),
-			ChargeEfficiency:  ratioPtr(c.effAdded, c.effUsed, 3),
-			CostPerFullCharge: fullChargeCost(c.costSwingPriced, c.socSwingPriced),
+			Class:               class,
+			Sessions:            c.sessions,
+			KwhAdded:            round1(c.kwhAdded),
+			EnergyCost:          c.cost,
+			PricePerKwh:         costRatioPtr(c.cost.Float(), c.kwhPriced, 3),
+			ChargeEfficiency:    ratioPtr(c.effAdded, c.effUsed, 3),
+			CostPerFullCharge:   fullChargeCost(c.costSwingPriced, c.socSwingPriced),
+			PricedKwh:           round1(c.kwhPriced),
+			SessionsWithoutCost: c.unpriced,
+			SocSwingPriced:      c.socSwingPriced,
 		})
 	}
 
