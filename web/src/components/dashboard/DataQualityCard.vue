@@ -6,6 +6,8 @@ import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
 import { AlertTriangle, CheckCircle2, ChevronDown } from 'lucide-vue-next'
+import { formatAmount } from '@/currency'
+import { orderActionsByGap, type CompletenessGap } from '@/utils/completenessGaps'
 
 // TCO completeness score with the reasons it is not 100 %, and the odometer inconsistencies on demand
 const props = defineProps<{ tco: any | null; vehicleId: string }>()
@@ -71,6 +73,17 @@ interface Action {
   to: string
   label: string
   hint?: string
+  /** What the gap this action removes is worth, empty when unknown. */
+  note?: string
+}
+
+// What a gap is worth, an order of magnitude from the vehicle's own prices; the depreciation is the largest item
+// and is not estimated
+function gapNote(gap: CompletenessGap | null): string {
+  if (!gap) return ''
+  if (gap.key === 'depreciation') return t('dashboard.dataQualityCard.gapLargest')
+  if (gap.amount != null) return t('dashboard.dataQualityCard.gapAmount', { amount: formatAmount(gap.amount, vehicleStore.currency, 0) })
+  return ''
 }
 
 const actions = computed<Action[]>(() => {
@@ -88,6 +101,12 @@ const actions = computed<Action[]>(() => {
       hint: t('dashboard.dataQualityCard.enterTheStartOdometerHint'),
       show: !!c.start_odometer_missing,
     },
+    {
+      key: 'unconverted',
+      to: c.unconverted_target === 'expenses' ? '/expenses' : '/energy?tab=CHARGES',
+      label: t('dashboard.dataQualityCard.enterTheExchangeRate'),
+      show: c.unconverted_expenses > 0,
+    },
     { key: 'fillUp', to: '/energy?tab=FUEL', label: t('dashboard.dataQualityCard.enterAFillUp'), show: canRefuel(props.tco.powertrain) && !props.tco.fuel_fill_ups },
     {
       key: 'consumption',
@@ -97,7 +116,7 @@ const actions = computed<Action[]>(() => {
       show: isElectricOnly(props.tco.powertrain) && c.untracked_distance_km > 0 && !props.tco.estimated_energy_cost,
     },
   ]
-  return list.filter((a) => a.show)
+  return orderActionsByGap(list.filter((a) => a.show), c.gaps).map((a) => ({ ...a, note: gapNote(a.gap) }))
 })
 const hasOdometerIssues = computed(() => (props.tco?.completeness?.odometer_gaps ?? 0) > 0 || (props.tco?.completeness?.odometer_anomalies ?? 0) > 0)
 const todoCount = computed(() => actions.value.length + (hasOdometerIssues.value ? 1 : 0))
@@ -151,6 +170,7 @@ const showTodo = ref(false)
         </li>
       </ul>
     </div>
+    <p v-if="showTodo && actions.some((a) => a.note)" class="text-xs text-slate-400">{{ $t('dashboard.dataQualityCard.gapsHint') }}</p>
     <div v-if="showTodo" class="flex flex-wrap gap-2 pt-1">
       <router-link
         v-for="action in actions"
@@ -159,7 +179,7 @@ const showTodo = ref(false)
         :title="action.hint"
         class="btn btn-secondary tap-text"
       >
-        {{ action.label }}
+        {{ action.label }}<span v-if="action.note" class="text-slate-400 font-normal"> · {{ action.note }}</span>
       </router-link>
       <button
         v-if="hasOdometerIssues"

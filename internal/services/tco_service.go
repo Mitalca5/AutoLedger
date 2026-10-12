@@ -228,6 +228,10 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		return nil, fmt.Errorf("completeness: %w", err)
 	}
 	comp.UnconvertedExpenses = unconvertedCharges + unconvertedOther
+	comp.UnconvertedTarget = "charges"
+	if unconvertedOther > 0 {
+		comp.UnconvertedTarget = "expenses"
+	}
 	if comp.UnconvertedExpenses > 0 {
 		comp.Warnings = append(comp.Warnings, fmt.Sprintf(
 			"%d expense(s) in a foreign currency without a conversion rate: excluded from the totals", comp.UnconvertedExpenses))
@@ -503,6 +507,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		sum.FinancingCostPerKm = perKm(sum.FinancingFullCost, basisKm)
 		sum.OtherCostPerKm = perKm(otherTotal, basisKm)
 	}
+	sum.Completeness.Gaps = completenessGaps(sum, unconvertedCharges, unconvertedOther)
 	return sum, nil
 }
 

@@ -2807,7 +2807,7 @@ func TestIntegrationCompletenessWithoutDataHasNoScore(t *testing.T) {
 	if sum.Completeness.ScoreAvailable || sum.Completeness.ScorePct != 0 {
 		t.Fatalf("an empty vehicle has no score, got available=%v score=%d", sum.Completeness.ScoreAvailable, sum.Completeness.ScorePct)
 	}
-	if sum.Completeness.Dimensions == nil || sum.Completeness.AcquisitionMissingFields == nil {
+	if sum.Completeness.Dimensions == nil || sum.Completeness.AcquisitionMissingFields == nil || sum.Completeness.Gaps == nil {
 		t.Error("lists must serialise as [] rather than null")
 	}
 }

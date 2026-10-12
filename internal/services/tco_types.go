@@ -68,6 +68,8 @@ type TCOCompleteness struct {
 	ChargesWithoutCost  int     `json:"charges_without_cost"`
 	KwhWithoutCost      float64 `json:"kwh_without_cost"`
 	UnconvertedExpenses int     `json:"unconverted_expenses"`
+	// UnconvertedTarget is where the unconverted amounts are fixed: "charges" or "expenses".
+	UnconvertedTarget   string  `json:"unconverted_target"`
 	UnqualifiedDrives   int     `json:"unqualified_drives"`
 	UntrackedDistanceKm float64 `json:"untracked_distance_km"`
 	OdometerGaps        int     `json:"odometer_gaps"`
@@ -82,6 +84,8 @@ type TCOCompleteness struct {
 	Warnings             []string `json:"warnings"`
 	// ScoreAvailable is false while the vehicle has no distance and no expense: there is nothing to score yet.
 	ScoreAvailable bool `json:"score_available"`
+	// Gaps lists what is missing with its estimated worth, the largest first.
+	Gaps []CompletenessGap `json:"gaps"`
 	// ScorePct is a weighted completeness score (0-100) over the dimensions below; 0 when ScoreAvailable is false.
 	ScorePct   int                     `json:"score_pct"`
 	Dimensions []CompletenessDimension `json:"dimensions"`

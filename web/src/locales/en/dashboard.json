@@ -63,7 +63,11 @@
       "acquisition": "Acquisition and depreciation entered",
       "odometer": "Odometer continuity",
       "currency": "Expenses converted to the vehicle currency"
-    }
+    },
+    "gapLargest": "largest item",
+    "gapAmount": "≈ {amount}",
+    "gapsHint": "Largest gap first. Amounts are orders of magnitude from your own prices, not entered values.",
+    "enterTheExchangeRate": "Enter the exchange rate"
   },
   "energyBatterySection": {
     "teslamateGrafana": "TeslaMate Grafana",

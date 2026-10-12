@@ -63,7 +63,11 @@
       "acquisition": "Acquisition et dépréciation saisies",
       "odometer": "Continuité de l'odomètre",
       "currency": "Dépenses converties dans la devise du véhicule"
-    }
+    },
+    "gapLargest": "plus gros poste",
+    "gapAmount": "≈ {amount}",
+    "gapsHint": "Le plus gros écart en premier. Les montants sont des ordres de grandeur issus de vos propres prix, pas des valeurs saisies.",
+    "enterTheExchangeRate": "Saisir le taux de change"
   },
   "energyBatterySection": {
     "teslamateGrafana": "Grafana TeslaMate",
