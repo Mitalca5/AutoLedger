@@ -239,10 +239,12 @@
     "energy": "Energy (charges)",
     "kwhOnly": "{total_kwh_added} kWh charged",
     "ofWhichEstimatedEnergy": "of which {amount} estimated energy",
-    "periodSince": "Since {month}",
     "energyPanelLink": "Cost per 100 {unit}: energy efficiency",
     "energyHybrid": "Energy (charges + fill-ups)",
-    "hybridSplit": "Electricity {electricity} · fuel {fuel}"
+    "hybridSplit": "Electricity {electricity} · fuel {fuel}",
+    "cashPaidWindow": "Cash paid · last month | Cash paid · last {months} months",
+    "economicWindow": "Economic cost: {amount} · {cost_per_km}/{unit}",
+    "sincePurchase": "Since {month}: {amount}"
   },
   "nextDueCard": {
     "title": "Next maintenance",

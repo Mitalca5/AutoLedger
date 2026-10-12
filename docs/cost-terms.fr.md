@@ -11,3 +11,7 @@ Le tableau de bord, la comparaison de flotte et le détail du mois emploient les
 | Consommation à la roue | Énergie utilisée en roulant, telle que mesurée par le véhicule (panneau énergie). |
 | Consommation à la prise | Énergie prélevée en charge, pertes comprises, rapportée à la distance parcourue (comparaison de flotte). |
 | Énergie estimée | Énergie valorisée pour la distance parcourue sans trajet enregistré, d'après la consommation et le prix moyens du véhicule. |
+
+## Période des chiffres du tableau de bord
+
+La carte du décaissé affiche en premier les 12 derniers mois civils, mois en cours compris, avec le coût économique et son coût par distance sur les mêmes mois ; la valeur depuis le premier enregistrement est en texte secondaire. Avec moins d'historique, la carte nomme les mois qu'elle couvre. Ces chiffres sont les sommes des barres des graphiques mensuels sur cette fenêtre.

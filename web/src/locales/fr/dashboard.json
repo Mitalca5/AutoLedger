@@ -239,10 +239,12 @@
     "energy": "Énergie (Charges)",
     "kwhOnly": "{total_kwh_added} kWh rechargés",
     "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée",
-    "periodSince": "Depuis {month}",
     "energyPanelLink": "Coût aux 100 {unit} : efficacité énergétique",
     "energyHybrid": "Énergie (charges + pleins)",
-    "hybridSplit": "Électricité {electricity} · carburant {fuel}"
+    "hybridSplit": "Électricité {electricity} · carburant {fuel}",
+    "cashPaidWindow": "Décaissé · dernier mois | Décaissé · {months} derniers mois",
+    "economicWindow": "Coût économique : {amount} · {cost_per_km}/{unit}",
+    "sincePurchase": "Depuis {month} : {amount}"
   },
   "nextDueCard": {
     "title": "Prochain entretien",

@@ -329,6 +329,41 @@ export function computeMonthFixedVariable(m: any, mode: MonthDetailMode = 'econo
   }
 }
 
+/** Number of calendar months of the rolling window the headline figures cover. */
+export const ROLLING_MONTHS = 12
+
+/**
+ * Cash paid, economic cost and distance over the last calendar months of the monthly costs (the current month
+ * included), so a recent change in usage, tariff or insurance shows. With less history the window is what exists.
+ * The sums are those of the bars of the monthly charts over the same months.
+ */
+export function rollingWindowStats(monthlyCosts: any[] | undefined, months = ROLLING_MONTHS) {
+  if (!monthlyCosts?.length) return null
+  const window = monthlyCosts.slice(-months)
+  let cash = 0
+  let economic = 0
+  let distanceKm = 0
+  let estimatedEnergy = 0
+  for (const m of window) {
+    const b = buildMonthBreakdown(m, 'economic')
+    cash += b.cashTotal
+    economic += b.economicTotal
+    distanceKm += m.distance_km || 0
+    estimatedEnergy += m.smoothed_energy || 0
+  }
+  return {
+    months: window.length,
+    fromMonth: window[0].month as string,
+    toMonth: window[window.length - 1].month as string,
+    cash,
+    economic,
+    distanceKm,
+    estimatedEnergy,
+    // Unknown, not zero, without a distance or without any cost over the window
+    economicPerKm: distanceKm > 0 && economic > 0 ? economic / distanceKm : null,
+  }
+}
+
 /** Cost items of one month, in the economic view (smoothed) or the cash view (what was paid), with their share and cost per km. */
 export function buildMonthBreakdown(m: any, mode: MonthDetailMode, currency = 'EUR') {
   const money = (v: number) => formatAmount(v, currency)
