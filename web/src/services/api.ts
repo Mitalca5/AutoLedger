@@ -751,7 +751,8 @@ export interface VehicleFleetMetric {
   current_odometer: number
   month_distance_km: number
   month_cost: number
-  energy_cost_per_100km: number
+  /** `null` when unknown; 0 is a known cost (free charging). */
+  energy_cost_per_100km: number | null
   powertrain: string
   /** `null` while the vehicle has no distance to divide by. */
   running_cost_per_km: number | null

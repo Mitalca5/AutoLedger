@@ -47,7 +47,7 @@ func TestFleetSummaryComputesEnergyCostPer100Km(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetSummary failed: %v", err)
 	}
-	if got := fleet.Vehicles[0].EnergyCostPer100Km; got != 500 {
+	if got := fleet.Vehicles[0].EnergyCostPer100Km; got == nil || *got != 500 {
 		t.Errorf("energy cost per 100 km: got %v, want 500 (1000.00 spent over 200 km)", got)
 	}
 	if summary.CurrentMonthCost != 100000 || m.MonthCost != 100000 {

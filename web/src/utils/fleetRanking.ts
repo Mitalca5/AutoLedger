@@ -3,7 +3,6 @@ interface RankableVehicle {
   currency: string
   comparable: boolean
   full_cost_per_km: number | null
-  energy_cost_per_100km: number
 }
 
 // Amounts in two currencies are never put in one order: vehicles are grouped by currency (the fleet currency first,
@@ -32,15 +31,4 @@ export function cheapestPerKmIds(ranked: RankableVehicle[]): Set<string> {
   }
   for (const v of ranked) if ((seen.get(v.currency) ?? 0) < 2) ids.delete(v.vehicle_id)
   return ids
-}
-
-// The vehicle with the lowest energy cost per 100 km inside each currency.
-export function mostEconomicalIds(vehicles: RankableVehicle[]): Set<string> {
-  const best = new Map<string, RankableVehicle>()
-  for (const v of vehicles) {
-    if (!(v.energy_cost_per_100km > 0)) continue
-    const cur = best.get(v.currency)
-    if (!cur || v.energy_cost_per_100km < cur.energy_cost_per_100km) best.set(v.currency, v)
-  }
-  return new Set([...best.values()].map((v) => v.vehicle_id))
 }

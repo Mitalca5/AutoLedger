@@ -79,3 +79,28 @@ func samePtr(a, b *float64) bool {
 	}
 	return *a == *b
 }
+
+func TestApplyTCOToFleetMetricEnergyCostFallsBackToTheTCO(t *testing.T) {
+	perKm := 0.0825
+	sum := &TCOSummary{Powertrain: "ICE", DistanceBasisKm: 1100, EnergyCost: 9075, EnergyCostPerKm: &perKm}
+
+	m := models.VehicleFleetMetric{}
+	applyTCOToFleetMetric(&m, sum, time.Date(2026, 10, 20, 0, 0, 0, 0, time.UTC))
+	if m.EnergyCostPer100Km == nil || *m.EnergyCostPer100Km != 8.25 {
+		t.Fatalf("combustion energy cost per 100 km = %v, want 8.25 from the TCO", m.EnergyCostPer100Km)
+	}
+
+	noEnergy := &TCOSummary{Powertrain: "ICE", DistanceBasisKm: 1100, EnergyCostPerKm: &perKm}
+	unknown := models.VehicleFleetMetric{}
+	applyTCOToFleetMetric(&unknown, noEnergy, time.Date(2026, 10, 20, 0, 0, 0, 0, time.UTC))
+	if unknown.EnergyCostPer100Km != nil {
+		t.Fatalf("a vehicle with no energy cost recorded has no figure, got %v", *unknown.EnergyCostPer100Km)
+	}
+
+	stat := 5.5
+	withStats := models.VehicleFleetMetric{EnergyCostPer100Km: &stat}
+	applyTCOToFleetMetric(&withStats, sum, time.Date(2026, 10, 20, 0, 0, 0, 0, time.UTC))
+	if *withStats.EnergyCostPer100Km != 5.5 {
+		t.Fatalf("the energy statistics figure must stay, got %v", *withStats.EnergyCostPer100Km)
+	}
+}

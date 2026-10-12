@@ -13,15 +13,6 @@
     "energyDelivered": "Énergie de recharge délivrée",
     "perCurrency": "Un total par devise"
   },
-  "vehicles": {
-    "comparisonTitle": "Véhicules et efficacité énergétique",
-    "efficiencyMetricHint": "Coût réel de recharge aux 100 unités de distance",
-    "mostEconomical": "Plus économique",
-    "energyCostPer100": "Coût Énergie / 100",
-    "currentMonthCost": "Coût du mois",
-    "currentMonthDistance": "Distance du mois",
-    "odometer": "Odomètre"
-  },
   "chart": {
     "monthlyCostHistory": "Historique des coûts de la flotte",
     "stackedBreakdown": "Énergie vs autres dépenses",
@@ -31,7 +22,7 @@
   },
   "drivers": {
     "title": "Répartition des kilomètres par conducteur",
-    "subtitle": "Kilomètres enregistrés par membre du foyer ce mois-ci",
+    "subtitle": "Distance enregistrée par conducteur du foyer sur les 12 derniers mois",
     "noData": "Aucun trajet avec conducteur assigné pour le moment."
   },
   "budget": {
@@ -48,8 +39,8 @@
     "otherCurrency": "{count} véhicule dans une autre devise n'est pas compté dans ce budget en {currency} | {count} véhicules dans d'autres devises ne sont pas comptés dans ce budget en {currency}"
   },
   "compare": {
-    "title": "Coût au kilomètre, côte à côte",
-    "hint": "Toutes motorisations, d'après le TCO de chaque véhicule",
+    "title": "Véhicules côte à côte",
+    "hint": "Mêmes définitions pour chaque véhicule ; le mois et l'énergie suivent le fuseau de référence et le TCO propre du véhicule",
     "vehicle": "Véhicule",
     "runningPerDistance": "Décaissé / {unit}",
     "fullPerDistance": "Coût complet / {unit}",
@@ -61,6 +52,9 @@
     "cheapest": "Le moins cher",
     "indicative": "Indicatif",
     "depreciationMissing": "Dépréciation non renseignée",
-    "footnote": "Le décaissé couvre l'énergie, l'entretien, l'assurance et le financement, énergie estimée comprise ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). L'énergie est l'énergie chargée à la prise. Un véhicule sous 60 % de complétude est affiché mais pas classé."
+    "footnote": "Le décaissé couvre l'énergie, l'entretien, l'assurance et le financement, énergie estimée comprise ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). L'énergie est l'énergie chargée à la prise. Un véhicule sous 60 % de complétude est affiché mais pas classé.",
+    "energyCost": "Coût énergie / 100 {unit}",
+    "monthDistance": "Distance ce mois",
+    "monthCost": "Coût du mois"
   }
 }

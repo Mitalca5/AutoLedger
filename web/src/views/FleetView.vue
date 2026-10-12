@@ -6,12 +6,12 @@ import { formatNumber, formatPercent } from '@/utils/numbers'
 import PageHeader from '@/components/PageHeader.vue'
 import { Gauge as PageIcon } from 'lucide-vue-next'
 import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
-import { Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown, ArrowUpRight } from 'lucide-vue-next'
+import { Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown } from 'lucide-vue-next'
 import { Chart, registerables } from 'chart.js'
 import { api, type FleetSummaryResponse } from '@/services/api'
 import { formatAmount, formatAmountOrUnknown } from '@/currency'
 import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
-import { cheapestPerKmIds, mostEconomicalIds, rankFleetVehicles } from '@/utils/fleetRanking'
+import { cheapestPerKmIds, rankFleetVehicles } from '@/utils/fleetRanking'
 import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit } from '@/units'
 import { t } from '@/i18n'
@@ -82,9 +82,6 @@ async function loadFleetSummary() {
 const otherCurrencyCount = computed(() => (summary.value?.totals ?? []).filter((x) => x.currency !== summary.value?.currency).reduce((n, x) => n + x.vehicle_count, 0))
 const otherTotals = computed(() => (summary.value?.totals ?? []).filter((x) => x.currency !== summary.value?.currency))
 
-// Most economical by energy cost / 100 km, within each currency
-const mostEconomicalIdSet = computed(() => mostEconomicalIds(summary.value?.vehicles ?? []))
-
 // Ranking by full cost per km inside each currency, only among vehicles whose figures are complete enough to be compared
 const rankedVehicles = computed(() => rankFleetVehicles(summary.value?.vehicles ?? [], summary.value?.currency ?? ''))
 const cheapestPerKmIdSet = computed(() => cheapestPerKmIds(rankedVehicles.value))
@@ -93,6 +90,11 @@ function completenessClass(pct: number): string {
   if (pct >= 80) return 'text-success-400'
   if (pct >= 60) return 'text-warning-400'
   return 'text-rose-400'
+}
+
+// The energy cost of 100 distance units: a known zero (free charging) is shown, an unknown figure is a dash
+function energyCost100(v: { energy_cost_per_100km: number | null; currency: string }): string {
+  return v.energy_cost_per_100km == null ? '—' : formatAmount(perDistance(v.energy_cost_per_100km), v.currency)
 }
 
 function energyPer100(v: { kwh_per_100km: number | null; liters_per_100km: number | null }): string {
@@ -314,81 +316,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- Vehicle Comparison Grid -->
-    <div v-if="summary" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-        <h2 class="text-base font-semibold text-white flex items-center gap-2">
-          <Car class="w-4 h-4 text-rose-400" />
-          {{ t('fleet.vehicles.comparisonTitle') }}
-        </h2>
-        <span class="text-xs text-slate-400">{{ t('fleet.vehicles.efficiencyMetricHint') }}</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="v in summary.vehicles"
-          :key="v.vehicle_id"
-          class="relative p-4 rounded-xl bg-slate-950/60 border transition-all"
-          :class="[
-            mostEconomicalIdSet.has(v.vehicle_id)
-              ? 'border-success-500/40 bg-success-950/10 shadow-sm shadow-success-500/10'
-              : 'border-slate-800/80 hover:border-slate-700'
-          ]"
-        >
-          <!-- Economical Badge -->
-          <div
-            v-if="mostEconomicalIdSet.has(v.vehicle_id) && v.energy_cost_per_100km > 0"
-            class="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-500/20 text-success-400 border border-success-500/30 text-xs font-semibold tracking-wide uppercase"
-          >
-            <Award class="w-3 h-3" />
-            {{ t('fleet.vehicles.mostEconomical') }}
-          </div>
-
-          <div class="pr-20">
-            <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ v.name }}</h3>
-            <p class="text-xs text-slate-400 mt-0.5 truncate">{{ v.make }} {{ v.model }}</p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800/60">
-            <div>
-              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.energyCostPer100') }}</span>
-              <span class="text-sm font-bold block mt-0.5" :class="v.energy_cost_per_100km > 0 ? 'text-success-400' : 'text-slate-400'">
-                <template v-if="v.energy_cost_per_100km > 0">
-                  {{ formatAmount(perDistance(v.energy_cost_per_100km), v.currency) }} / 100 {{ distanceUnitLabel }}
-                </template>
-                <template v-else>
-                  —
-                </template>
-              </span>
-            </div>
-
-            <div>
-              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.currentMonthCost') }}</span>
-              <span class="text-sm font-semibold text-white block mt-0.5">
-                {{ formatAmount(v.month_cost, v.currency) }}
-              </span>
-            </div>
-
-            <div>
-              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.currentMonthDistance') }}</span>
-              <span class="text-xs font-medium text-slate-300 block mt-0.5">
-                {{ formatDistance(v.month_distance_km) }}
-              </span>
-            </div>
-
-            <div>
-              <span class="text-xs text-slate-400 block">{{ t('fleet.vehicles.odometer') }}</span>
-              <span class="text-xs font-medium text-slate-300 block mt-0.5">
-                {{ formatDistance(v.current_odometer) }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Cost per distance comparison -->
-    <div v-if="summary && summary.vehicles.length > 1" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+    <div v-if="summary && summary.vehicles.length > 0" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
       <div class="flex flex-col gap-1 border-b border-slate-800/80 pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <h2 class="text-base font-semibold text-white flex items-center gap-2">
           <TrendingDown class="w-4 h-4 text-rose-400" />
@@ -421,8 +350,20 @@ onBeforeUnmount(() => {
               <dd class="tabular-nums text-slate-200">{{ formatAmountOrUnknown(v.running_cost_per_km == null ? null : perDistance(v.running_cost_per_km), v.currency) }}</dd>
             </div>
             <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.energyCost', { unit: distanceUnitLabel }) }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ energyCost100(v) }}</dd>
+            </div>
+            <div>
               <dt class="text-slate-400">{{ t('fleet.compare.energy') }} <GlossaryTip term="atThePlug" /></dt>
               <dd class="tabular-nums text-slate-200">{{ energyPer100(v) }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.monthDistance') }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ formatDistance(v.month_distance_km) }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">{{ t('fleet.compare.monthCost') }}</dt>
+              <dd class="tabular-nums text-slate-200">{{ formatAmount(v.month_cost, v.currency) }}</dd>
             </div>
             <div>
               <dt class="text-slate-400">{{ t('fleet.compare.annual') }}</dt>
@@ -442,7 +383,10 @@ onBeforeUnmount(() => {
               <th class="py-2 pr-4 font-medium">{{ t('fleet.compare.vehicle') }}</th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }} <GlossaryTip term="cashPaid" /></th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.energyCost', { unit: distanceUnitLabel }) }}</th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.energy') }} <GlossaryTip term="atThePlug" /></th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.monthDistance') }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.monthCost') }}</th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.annual') }}</th>
               <th class="py-2 font-medium text-right">{{ t('fleet.compare.completeness') }}</th>
             </tr>
@@ -458,7 +402,10 @@ onBeforeUnmount(() => {
               </td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ formatAmountOrUnknown(v.running_cost_per_km == null ? null : perDistance(v.running_cost_per_km), v.currency) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ formatAmountOrUnknown(v.full_cost_per_km == null ? null : perDistance(v.full_cost_per_km), v.currency) }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ energyCost100(v) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ energyPer100(v) }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ formatDistance(v.month_distance_km) }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ formatAmount(v.month_cost, v.currency) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</td>
               <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</td>
             </tr>

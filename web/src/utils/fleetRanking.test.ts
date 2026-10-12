@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { cheapestPerKmIds, mostEconomicalIds, rankFleetVehicles } from './fleetRanking'
+import { cheapestPerKmIds, rankFleetVehicles } from './fleetRanking'
 
-const v = (id: string, currency: string, perKm: number | null, comparable = true, per100 = 0) => ({
+const v = (id: string, currency: string, perKm: number | null, comparable = true) => ({
   vehicle_id: id,
   currency,
   comparable,
   full_cost_per_km: perKm,
-  energy_cost_per_100km: per100,
 })
 
 describe('rankFleetVehicles', () => {
@@ -24,12 +23,5 @@ describe('cheapestPerKmIds', () => {
   it('flags one vehicle per currency, only when two can be told apart', () => {
     const ranked = rankFleetVehicles([v('a', 'EUR', 0.2), v('b', 'EUR', 0.4), v('chf', 'CHF', 0.1)], 'EUR')
     expect([...cheapestPerKmIds(ranked)]).toEqual(['a'])
-  })
-})
-
-describe('mostEconomicalIds', () => {
-  it('picks the lowest energy cost per currency and ignores unknown ones', () => {
-    const ids = mostEconomicalIds([v('a', 'EUR', null, true, 8), v('b', 'EUR', null, true, 5), v('c', 'CHF', null, true, 30), v('d', 'CHF', null, true, 0)])
-    expect([...ids].sort()).toEqual(['b', 'c'])
   })
 })

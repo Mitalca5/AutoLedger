@@ -79,3 +79,33 @@ func TestApplyTCOMonthsToFleetKeepsCurrenciesApart(t *testing.T) {
 		t.Fatalf("totals = %+v, want %+v", res.Totals, want)
 	}
 }
+
+func TestApplyTCOMonthsToFleetTakesDistanceFromTheTCOMonths(t *testing.T) {
+	res := &models.FleetSummaryResponse{
+		Currency:     "EUR",
+		MonthlyCosts: []models.FleetMonthlyCost{{Month: "2026-10", DistanceKm: 10}},
+		Vehicles: []models.VehicleFleetMetric{
+			{VehicleID: "ev", Currency: "EUR", MonthDistanceKm: 10},
+			{VehicleID: "ice", Currency: "EUR"},
+			{VehicleID: "chf", Currency: "CHF"},
+		},
+		CurrentMonthDistanceKm: 10,
+	}
+	month := func(km float64) *TCOSummary {
+		return &TCOSummary{MonthlyCosts: []MonthlyCost{{Month: "2026-10", DistanceKm: km}}}
+	}
+	// The combustion vehicle has no drive: its distance comes from fill-up readings.
+	sums := map[string]*TCOSummary{"ev": month(120.4), "ice": month(231), "chf": month(40)}
+
+	applyTCOMonthsToFleet(res, sums, time.Date(2026, 10, 20, 12, 0, 0, 0, time.UTC))
+
+	if res.Vehicles[1].MonthDistanceKm != 231 {
+		t.Fatalf("combustion month distance = %v, want 231 from its readings", res.Vehicles[1].MonthDistanceKm)
+	}
+	if res.CurrentMonthDistanceKm != 120.4+231+40 {
+		t.Fatalf("fleet month distance = %v, want every vehicle counted whatever its currency", res.CurrentMonthDistanceKm)
+	}
+	if res.MonthlyCosts[0].DistanceKm != 120.4+231+40 {
+		t.Fatalf("history distance = %v", res.MonthlyCosts[0].DistanceKm)
+	}
+}

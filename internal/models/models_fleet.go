@@ -66,9 +66,10 @@ type VehicleFleetMetric struct {
 	CurrentOdometer float64     `json:"current_odometer"`
 	MonthDistanceKm float64     `json:"month_distance_km"`
 	MonthCost       money.Cents `json:"month_cost"`
-	// EnergyCostPer100Km is the energy-statistics figure (priced charges over the distance of the months driven), 0
-	// when it is not known.
-	EnergyCostPer100Km float64 `json:"energy_cost_per_100km"`
+	// EnergyCostPer100Km is the energy-statistics figure (priced charges over the distance of the months driven), or
+	// the energy cost of the TCO over its distance basis for a vehicle the statistics do not cover. nil when it is
+	// not known; 0 is a known cost (free charging).
+	EnergyCostPer100Km *float64 `json:"energy_cost_per_100km"`
 
 	Powertrain string `json:"powertrain"`
 	// RunningCostPerKm is what the vehicle costs to run (energy, upkeep, insurance, financing); FullCostPerKm adds
