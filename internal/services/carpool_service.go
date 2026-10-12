@@ -279,8 +279,8 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		SELECT COALESCE(SUM(
 			CASE
 				WHEN is_recurring AND COALESCE(recurrence_interval_months, 0) > 0
-				THEN ROUND(amount * 12.0 / recurrence_interval_months)
-				ELSE amount
+				THEN ROUND((CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN amount ELSE amount * fx_rate END) * 12.0 / recurrence_interval_months, 2)
+				ELSE CASE WHEN currency = (SELECT currency FROM vehicles WHERE id = $1) THEN amount ELSE amount * fx_rate END
 			END
 		), 0)
 		FROM maintenance_expenses
