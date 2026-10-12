@@ -148,15 +148,15 @@ describe('selectionSummary and CSV rows', () => {
     expect(selectionSummary(list, 'USD')).toContain(new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(7.75))
   })
 
-  it('escapes quotes and joins tags in the CSV rows', () => {
+  it('returns raw text for the shared CSV encoder', () => {
     const rows = driveCsvRows(list)
     expect(rows[0][1]).toBe('2026-05-01T08:00')
-    expect(rows[0][2]).toBe('"Rue ""A"", Paris"')
+    expect(rows[0][2]).toBe('Rue "A", Paris')
     expect(rows[0][8]).toBe('5.50')
     expect(rows[0][9]).toBe('0.050')
-    expect(rows[0][10]).toBe('"Pro, X"')
+    expect(rows[0][10]).toBe('Pro, X')
     expect(rows[1][1]).toBe('')
-    expect(rows[1][10]).toBe('""')
+    expect(rows[1][10]).toBe('')
   })
   it('names the vehicle currency in the cost columns of the CSV header', () => {
     const headers = driveCsvHeaders('USD')

@@ -259,7 +259,7 @@ export function carpoolCsvRows(trips: any[]) {
   return trips.map((t) => [
     t.id,
     toDateInputString(t.date),
-    `"${(t.title || '').replace(/"/g, '""')}"`,
+    t.title || '',
     Math.round(kmToDisplayDistance(t.distance_km || 0) * 100) / 100,
     t.passenger_count || (t.passengers || []).length || 0,
     (t.total_cost || 0).toFixed(2),
