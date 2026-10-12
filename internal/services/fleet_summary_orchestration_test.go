@@ -121,11 +121,11 @@ func TestFleetEnergyCostPer100KmComesFromTheEnergyStatistics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Vehicles[0].EnergyCostPer100Km != 3.73 {
+	if v := got.Vehicles[0].EnergyCostPer100Km; v == nil || *v != 3.73 {
 		t.Fatalf("vehicle a: got %v, want the energy-statistics 3.73", got.Vehicles[0].EnergyCostPer100Km)
 	}
-	if got.Vehicles[1].EnergyCostPer100Km != 0 {
-		t.Fatalf("vehicle b has no tracked figure: got %v, want 0 (unknown)", got.Vehicles[1].EnergyCostPer100Km)
+	if got.Vehicles[1].EnergyCostPer100Km != nil {
+		t.Fatalf("vehicle b has no tracked figure: got %v, want nil (unknown)", *got.Vehicles[1].EnergyCostPer100Km)
 	}
 }
 
@@ -139,7 +139,7 @@ func TestFleetEnergyCostPer100KmIsUnknownWhenTheStatisticsFail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Vehicles[0].EnergyCostPer100Km != 0 {
-		t.Fatalf("got %v, want 0", got.Vehicles[0].EnergyCostPer100Km)
+	if got.Vehicles[0].EnergyCostPer100Km != nil {
+		t.Fatalf("got %v, want nil", *got.Vehicles[0].EnergyCostPer100Km)
 	}
 }

@@ -18,6 +18,7 @@ import (
 type TCOService struct {
 	pool     *pgxpool.Pool
 	repo     *database.Repository
+	carpool  *CarpoolService
 	timezone string
 }
 
@@ -26,7 +27,8 @@ func NewTCOService(pool *pgxpool.Pool, timezone string) *TCOService {
 	if timezone == "" {
 		timezone = "UTC"
 	}
-	return &TCOService{pool: pool, repo: database.NewRepository(pool), timezone: timezone}
+	repo := database.NewRepository(pool)
+	return &TCOService{pool: pool, repo: repo, carpool: NewCarpoolService(pool, repo), timezone: timezone}
 }
 
 func round3(v float64) float64 { return math.Round(v*1000) / 1000 }
@@ -228,6 +230,10 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		return nil, fmt.Errorf("completeness: %w", err)
 	}
 	comp.UnconvertedExpenses = unconvertedCharges + unconvertedOther
+	comp.UnconvertedTarget = "charges"
+	if unconvertedOther > 0 {
+		comp.UnconvertedTarget = "expenses"
+	}
 	if comp.UnconvertedExpenses > 0 {
 		comp.Warnings = append(comp.Warnings, fmt.Sprintf(
 			"%d expense(s) in a foreign currency without a conversion rate: excluded from the totals", comp.UnconvertedExpenses))
@@ -300,6 +306,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	sum.LeaseKmAllowanceToDate = round1(owned.LeaseKmAllowanceToDate)
 	if len(owned.Missing) > 0 {
 		comp.AcquisitionMissing = true
+		comp.AcquisitionMissingFields = owned.MissingFields
 		comp.Warnings = append(comp.Warnings, owned.Missing...)
 	}
 	comp.Warnings = append(comp.Warnings, owned.LeaseWarnings(now)...)
@@ -356,10 +363,13 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	}
 
 	comp.IsComplete = len(comp.Warnings) == 0
+	if comp.AcquisitionMissingFields == nil {
+		comp.AcquisitionMissingFields = []string{}
+	}
 	if comp.Warnings == nil {
 		comp.Warnings = []string{}
 	}
-	comp.ScorePct, comp.Dimensions = completenessScore(completenessInputs{
+	scoreInputs := completenessInputs{
 		kwhAdded:            kwhAdded,
 		kwhPriced:           kwhPriced,
 		highwayDrives:       highwayDrives,
@@ -378,7 +388,14 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		telemetryMode:       telemetryMode,
 		daysSinceOdometer:   daysSinceCheckpoint,
 		hasCheckpoints:      checkpointCount > 0,
-	})
+		depreciationUnknown: owned.DepreciationUnknown,
+	}
+	comp.ScoreAvailable = completenessHasData(scoreInputs)
+	if comp.ScoreAvailable {
+		comp.ScorePct, comp.Dimensions = completenessScore(scoreInputs)
+	} else {
+		comp.Dimensions = []CompletenessDimension{}
+	}
 
 	// 10. Aggregates
 	energy := byCategory[LedgerEnergy]
@@ -492,46 +509,6 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		sum.FinancingCostPerKm = perKm(sum.FinancingFullCost, basisKm)
 		sum.OtherCostPerKm = perKm(otherTotal, basisKm)
 	}
+	sum.Completeness.Gaps = completenessGaps(sum, unconvertedCharges, unconvertedOther)
 	return sum, nil
-}
-
-func (s *TCOService) tagBreakdown(ctx context.Context, vehicleID string, totalDistance float64) ([]TagCostBreakdown, error) {
-	rows, err := s.pool.Query(ctx, database.DriveTollAllocationCTE+`,
-		per_drive AS (
-			SELECT drive_id, SUM(allocated) AS amount FROM allocations GROUP BY drive_id
-		)
-		SELECT sub.tag,
-		       COALESCE(SUM(sub.distance_km), 0),
-		       COALESCE(SUM(sub.energy_consumed_kwh), 0),
-		       COALESCE(SUM(pd.amount), 0)
-		FROM (
-			SELECT d.id,
-			       unnest(CASE WHEN d.tags = '{}' OR d.tags IS NULL THEN ARRAY[''] ELSE d.tags END) AS tag,
-			       d.distance_km, d.energy_consumed_kwh
-			FROM drives d
-			WHERE d.vehicle_id = $1 AND d.deleted_upstream_at IS NULL
-		) sub
-		LEFT JOIN per_drive pd ON pd.drive_id = sub.id
-		GROUP BY sub.tag
-		ORDER BY 2 DESC;
-	`, vehicleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	list := []TagCostBreakdown{}
-	for rows.Next() {
-		var tb TagCostBreakdown
-		if err := rows.Scan(&tb.Tag, &tb.DistanceKm, &tb.EnergyKwh, &tb.TollsAmount); err != nil {
-			return nil, err
-		}
-		if totalDistance > 0 {
-			tb.Percentage = round1(tb.DistanceKm / totalDistance * 100)
-		}
-		tb.DistanceKm = round1(tb.DistanceKm)
-		tb.EnergyKwh = round1(tb.EnergyKwh)
-		list = append(list, tb)
-	}
-	return list, rows.Err()
 }

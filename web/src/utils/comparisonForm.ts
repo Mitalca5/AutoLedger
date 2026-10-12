@@ -30,7 +30,7 @@ export function emptyComparisonForm(canCompareTracked: boolean) {
     },
     tracked: {
       kwh_per_100km: 16,
-      eur_per_kwh: 0.2,
+      eur_per_kwh: 0.2 as number | string,
       purchase_price: 0,
       resale_value: 0,
       maintenance_yearly: 300,
@@ -61,9 +61,9 @@ export function applyComparisonDefaults(form: ComparisonForm, d: ComparisonDefau
   form.ice.maintenance_yearly = d.maintenance_yearly
   form.ice.insurance_yearly = d.insurance_yearly
   // Prices written for another currency are not shown as the vehicle's own: the user types them
-  if (d.indicative_prices === false) form.tracked.eur_per_kwh = 0
+  if (d.indicative_prices === false) form.tracked.eur_per_kwh = ''
   if (d.tracked_kwh_per_100km) form.tracked.kwh_per_100km = d.tracked_kwh_per_100km
-  if (d.tracked_eur_per_kwh) form.tracked.eur_per_kwh = d.tracked_eur_per_kwh
+  if (d.tracked_eur_per_kwh !== undefined && d.tracked_eur_per_kwh !== null) form.tracked.eur_per_kwh = d.tracked_eur_per_kwh
   const fuel = d.ice?.find((f) => f.fuel_type === form.ice.fuel_type)
   if (fuel) {
     form.ice.l_per_100km = fuel.l_per_100km
@@ -130,6 +130,10 @@ export function buildComparisonPayload(form: ComparisonForm, vehicleId: string |
   return payload
 }
 
+function validElectricityPrice(value: unknown): boolean {
+  return value !== null && value !== undefined && String(value).trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0
+}
+
 // Catalog key of the first problem on a wizard step, or '' when the step is valid.
 export function comparisonStepErrorKey(step: number, form: ComparisonForm, canCompareTracked: boolean): string {
   const retro = form.mode === 'RETROSPECTIVE'
@@ -144,7 +148,7 @@ export function comparisonStepErrorKey(step: number, form: ComparisonForm, canCo
     if (!(Number(form.ice.l_per_100km) > 0)) return 'comparison.errors.iceConsumption'
     if (!(Number(form.ice.fuel_price) > 0)) return 'comparison.errors.fuelPrice'
     if (!(Number(form.ice.purchase_price) > 0)) return 'comparison.errors.icePrice'
-    if (!retro && !(Number(form.tracked.eur_per_kwh) > 0)) return 'comparison.errors.electricityPrice'
+    if (!retro && !validElectricityPrice(form.tracked.eur_per_kwh)) return 'comparison.errors.electricityPrice'
     if (!retro && !(Number(form.tracked.purchase_price) > 0)) return 'comparison.errors.evPrice'
   }
   return ''

@@ -113,6 +113,39 @@ func ComputeCostComponents(rates *UnitRates, distanceKm, kwh float64) CostCompon
 	}
 }
 
+// DriveCost is the cost of one drive as the drive list shows it: the vehicle's unit rates applied to the drive, its
+// share of the insurance and the tolls allocated to it.
+type DriveCost struct {
+	ElectricityCost money.Cents
+	ElectricityKwh  float64
+	EnergySource    string
+	TiresCost       money.Cents
+	MaintenanceCost money.Cents
+	InsuranceCost   money.Cents
+	TollsCost       money.Cents
+	TotalCost       money.Cents
+	// HasEstimates is true when the energy or one of the rates relies on a default assumption.
+	HasEstimates bool
+}
+
+// ComputeDriveCost is the single definition of a drive's cost, shared by the drive list and the per-tag totals of
+// the TCO so a total by tag always adds up the drives the list shows for that tag.
+func ComputeDriveCost(rates *UnitRates, d models.Drive, insurance, tolls money.Cents) DriveCost {
+	kwh, source := DriveEnergyKwh(d.DistanceKm, d.EnergyConsumedKwh, d.ConsumptionKwh100km)
+	components := ComputeCostComponents(rates, d.DistanceKm, kwh)
+	return DriveCost{
+		ElectricityCost: components.ElectricityCost,
+		ElectricityKwh:  kwh,
+		EnergySource:    source,
+		TiresCost:       components.TiresCost,
+		MaintenanceCost: components.MaintenanceCost,
+		InsuranceCost:   insurance,
+		TollsCost:       tolls,
+		TotalCost:       components.ElectricityCost + components.TiresCost + components.MaintenanceCost + insurance + tolls,
+		HasEstimates:    source == EnergySourceDefault || rates.HasUnknownRate(),
+	}
+}
+
 // DriveEnergyKwh returns the energy of a drive and how it was obtained.
 func DriveEnergyKwh(distanceKm float64, energyKwh, consumptionKwh100km *float64) (float64, string) {
 	switch {

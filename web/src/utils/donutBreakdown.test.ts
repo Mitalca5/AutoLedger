@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { donutAmounts } from './donutBreakdown'
+import { donutAmounts, donutRows } from './donutBreakdown'
 
 const tco = {
   energy_cost: 100, tolls_cost: 10, tires_cost: 400, tires_amortized_cost: 150, maintenance_cost: 50, repair_cost: 20,
@@ -18,5 +18,23 @@ describe('donutAmounts', () => {
 
   it('tolerates missing fields', () => {
     expect(donutAmounts({}, 'cash')).toEqual([0, 0, 0, 0, 0, 0, 0, 0])
+  })
+})
+
+describe('donutRows', () => {
+  it('lists the slices with an amount, largest first, with their share', () => {
+    const rows = donutRows(tco, 'full')
+    expect(rows.map((r) => r.key)).toEqual(['financing', 'depreciation', 'insurance', 'tires', 'energy', 'maintenance', 'other', 'tolls'])
+    expect(rows[0].sharePct).toBeCloseTo((1000 / 2148) * 100, 5)
+    expect(rows.reduce((sum, r) => sum + r.sharePct, 0)).toBeCloseTo(100, 5)
+  })
+
+  it('leaves the depreciation out of the cash view', () => {
+    expect(donutRows(tco, 'cash').some((r) => r.key === 'depreciation')).toBe(false)
+  })
+
+  it('is empty without any cost', () => {
+    expect(donutRows({}, 'cash')).toEqual([])
+    expect(donutRows(null, 'full')).toEqual([])
   })
 })

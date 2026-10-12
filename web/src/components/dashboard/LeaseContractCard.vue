@@ -2,7 +2,7 @@
 import { formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { computed } from 'vue'
-import { Coins, Gauge, Calendar, FileText, CheckCircle2 } from 'lucide-vue-next'
+import { Coins, Gauge, Calendar, FileText, CheckCircle2, ChevronDown } from 'lucide-vue-next'
 import { buildLeaseSummary } from '@/utils/dashboard'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -16,12 +16,12 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
 </script>
 
 <template>
-  <div
+  <details
     v-if="leaseContract"
-    class="bg-gradient-to-br from-slate-900/90 to-sky-950/20 border border-sky-500/20 p-4 sm:p-5 rounded-2xl shadow-sm space-y-4"
+    class="group bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm space-y-4"
   >
-    <!-- Card Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+    <!-- Card Header: the contract state stays visible when the details are closed -->
+    <summary class="tap flex cursor-pointer list-none flex-col sm:flex-row sm:items-center justify-between gap-3 group-open:pb-3 group-open:border-b border-slate-800/80">
       <div class="flex items-center gap-2.5 flex-wrap">
         <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
           <FileText class="w-3.5 h-3.5" />
@@ -45,7 +45,8 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
           {{ $t('dashboard.leaseContractCard.downPayment', { downPayment: formatAmount(Number(leaseContract.downPayment), currency, 0) }) }}
         </span>
       </div>
-    </div>
+      <ChevronDown class="hidden sm:block h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
+    </summary>
 
     <!-- Progress Bars Section: 1 col on mobile, 2 cols on desktop if mileage allowance configured -->
     <div
@@ -173,5 +174,5 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         </span>
       </div>
     </div>
-  </div>
+  </details>
 </template>

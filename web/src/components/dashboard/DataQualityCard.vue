@@ -6,6 +6,8 @@ import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { useVehicleStore } from '@/stores/vehicle'
 import { AlertTriangle, CheckCircle2, ChevronDown } from 'lucide-vue-next'
+import { formatAmount } from '@/currency'
+import { orderActionsByGap, type CompletenessGap } from '@/utils/completenessGaps'
 
 // TCO completeness score with the reasons it is not 100 %, and the odometer inconsistencies on demand
 const props = defineProps<{ tco: any | null; vehicleId: string }>()
@@ -35,14 +37,53 @@ const RING_LENGTH = 2 * Math.PI * 15.5
 
 // Below half the card turns amber: that is when the figures above are really unreliable. Above, it is a to-do, not an alert.
 const score = computed(() => props.tco?.completeness?.score_pct ?? 0)
-const low = computed(() => score.value < 50)
+const scored = computed(() => props.tco?.completeness?.score_available !== false)
+const low = computed(() => scored.value && score.value < 50)
 const ringColor = computed(() => (low.value ? 'stroke-amber-400' : score.value >= 90 ? 'stroke-emerald-400' : 'stroke-sky-400'))
+
+// The action names what the depreciation lacks instead of asking to enter the whole acquisition again
+function acquisitionLabel(fields: string[]): string {
+  const resale = fields.includes('resale_value')
+  const holding = fields.includes('holding_period')
+  if (fields.includes('purchase_price')) return t('dashboard.dataQualityCard.enterThePrice')
+  if (resale && holding) return t('dashboard.dataQualityCard.enterTheResaleAndHolding')
+  if (resale) return t('dashboard.dataQualityCard.enterTheResale')
+  if (holding) return t('dashboard.dataQualityCard.enterTheHolding')
+  return t('dashboard.dataQualityCard.enterTheAcquisition')
+}
+
+interface Dimension {
+  key: string
+  label: string
+  value: string
+}
+
+const dimensions = computed<Dimension[]>(() =>
+  ((props.tco?.completeness?.dimensions ?? []) as any[]).map((d) => ({
+    key: d.key,
+    label: t(`dashboard.dataQualityCard.dimensions.${d.label_key || d.key}`),
+    value: d.applicable ? `${d.score_pct} %` : t('dashboard.dataQualityCard.notApplicable'),
+  })),
+)
+const showDimensions = ref(false)
+const cappedByDepreciation = computed(() => props.tco?.completeness?.acquisition_missing && props.tco?.depreciation_known === false && score.value < 60)
 
 interface Action {
   key: string
   to: string
   label: string
   hint?: string
+  /** What the gap this action removes is worth, empty when unknown. */
+  note?: string
+}
+
+// What a gap is worth, an order of magnitude from the vehicle's own prices; the depreciation is the largest item
+// and is not estimated
+function gapNote(gap: CompletenessGap | null): string {
+  if (!gap) return ''
+  if (gap.key === 'depreciation') return t('dashboard.dataQualityCard.gapLargest')
+  if (gap.amount != null) return t('dashboard.dataQualityCard.gapAmount', { amount: formatAmount(gap.amount, vehicleStore.currency, 0) })
+  return ''
 }
 
 const actions = computed<Action[]>(() => {
@@ -52,13 +93,19 @@ const actions = computed<Action[]>(() => {
     { key: 'charges', to: '/energy?tab=CHARGES', label: t('dashboard.dataQualityCard.completeTheCharges'), show: c.charges_without_cost > 0 },
     { key: 'drives', to: '/drives', label: t('dashboard.dataQualityCard.qualifyTheDrives'), show: c.unqualified_drives > 0 },
     { key: 'insurance', to: '/maintenance', label: t('dashboard.dataQualityCard.enterTheInsurance'), show: !!c.insurance_missing },
-    { key: 'acquisition', to: '/vehicles', label: t('dashboard.dataQualityCard.enterTheAcquisition'), show: !!c.acquisition_missing },
+    { key: 'acquisition', to: '/vehicles', label: acquisitionLabel(c.acquisition_missing_fields ?? []), show: !!c.acquisition_missing },
     {
       key: 'startOdometer',
       to: '/vehicles',
       label: t('dashboard.dataQualityCard.enterTheStartOdometer'),
       hint: t('dashboard.dataQualityCard.enterTheStartOdometerHint'),
       show: !!c.start_odometer_missing,
+    },
+    {
+      key: 'unconverted',
+      to: c.unconverted_target === 'expenses' ? '/expenses' : '/energy?tab=CHARGES',
+      label: t('dashboard.dataQualityCard.enterTheExchangeRate'),
+      show: c.unconverted_expenses > 0,
     },
     { key: 'fillUp', to: '/energy?tab=FUEL', label: t('dashboard.dataQualityCard.enterAFillUp'), show: canRefuel(props.tco.powertrain) && !props.tco.fuel_fill_ups },
     {
@@ -69,7 +116,7 @@ const actions = computed<Action[]>(() => {
       show: isElectricOnly(props.tco.powertrain) && c.untracked_distance_km > 0 && !props.tco.estimated_energy_cost,
     },
   ]
-  return list.filter((a) => a.show)
+  return orderActionsByGap(list.filter((a) => a.show), c.gaps).map((a) => ({ ...a, note: gapNote(a.gap) }))
 })
 const hasOdometerIssues = computed(() => (props.tco?.completeness?.odometer_gaps ?? 0) > 0 || (props.tco?.completeness?.odometer_anomalies ?? 0) > 0)
 const todoCount = computed(() => actions.value.length + (hasOdometerIssues.value ? 1 : 0))
@@ -80,17 +127,18 @@ const showTodo = ref(false)
   <div
     v-if="tco?.completeness"
     class="p-4 rounded-2xl space-y-2 border"
-    :class="tco.completeness.is_complete ? 'bg-emerald-500/5 border-emerald-500/20' : low ? 'bg-amber-500/10 border-amber-500/30' : 'bg-slate-900 border-slate-800'"
+    :class="tco.completeness.is_complete && scored ? 'bg-emerald-500/5 border-emerald-500/20' : low ? 'bg-amber-500/10 border-amber-500/30' : 'bg-slate-900 border-slate-800'"
   >
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-      <div class="flex items-center gap-2.5 text-sm font-bold min-w-0" :class="tco.completeness.is_complete ? 'text-emerald-400' : low ? 'text-amber-400' : 'text-slate-200'">
-        <CheckCircle2 v-if="tco.completeness.is_complete" class="w-5 h-5 shrink-0 text-emerald-400" />
-        <svg v-else class="w-7 h-7 shrink-0 -rotate-90" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <div class="flex items-center gap-2.5 text-sm font-bold min-w-0" :class="tco.completeness.is_complete && scored ? 'text-emerald-400' : low ? 'text-amber-400' : 'text-slate-200'">
+        <CheckCircle2 v-if="tco.completeness.is_complete && scored" class="w-5 h-5 shrink-0 text-emerald-400" />
+        <svg v-else-if="scored" class="w-7 h-7 shrink-0 -rotate-90" viewBox="0 0 36 36" fill="none" aria-hidden="true">
           <circle cx="18" cy="18" r="15.5" stroke-width="3.5" class="stroke-slate-800" />
           <circle cx="18" cy="18" r="15.5" stroke-width="3.5" stroke-linecap="round" :stroke-dasharray="RING_LENGTH" :stroke-dashoffset="RING_LENGTH * (1 - score / 100)" :class="ringColor" />
         </svg>
         <AlertTriangle v-if="low && !tco.completeness.is_complete" class="w-4 h-4 shrink-0" />
-        <span>{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
+        <span v-if="scored">{{ $t('dashboard.dataQualityCard.tcoComplete', { score_pct: tco.completeness.score_pct }) }}</span>
+        <span v-else data-testid="completeness-no-score">{{ $t('dashboard.dataQualityCard.noScore') }}</span>
         <span
           v-if="['MANUAL', 'SEMI_AUTO'].includes(vehicleStore.activeVehicle?.telemetry_mode)"
           class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700"
@@ -109,6 +157,20 @@ const showTodo = ref(false)
         <ChevronDown class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': showTodo }" aria-hidden="true" />
       </button>
     </div>
+    <p v-if="!scored" class="text-xs text-slate-400">{{ $t('dashboard.dataQualityCard.noScoreHint') }}</p>
+    <p v-else-if="cappedByDepreciation" class="text-xs text-slate-400" data-testid="completeness-capped">{{ $t('dashboard.dataQualityCard.capped') }}</p>
+    <div v-if="scored && dimensions.length" class="pt-1">
+      <button type="button" class="text-xs font-semibold text-sky-400 tap-text" :aria-expanded="showDimensions" @click="showDimensions = !showDimensions">
+        {{ showDimensions ? $t('dashboard.dataQualityCard.hideDimensions') : $t('dashboard.dataQualityCard.showDimensions') }}
+      </button>
+      <ul v-if="showDimensions" class="mt-2 space-y-1 text-xs text-slate-300" data-testid="completeness-dimensions">
+        <li v-for="d in dimensions" :key="d.key" class="flex items-center justify-between gap-3">
+          <span>{{ d.label }}</span>
+          <span class="tabular-nums text-slate-400">{{ d.value }}</span>
+        </li>
+      </ul>
+    </div>
+    <p v-if="showTodo && actions.some((a) => a.note)" class="text-xs text-slate-400">{{ $t('dashboard.dataQualityCard.gapsHint') }}</p>
     <div v-if="showTodo" class="flex flex-wrap gap-2 pt-1">
       <router-link
         v-for="action in actions"
@@ -117,7 +179,7 @@ const showTodo = ref(false)
         :title="action.hint"
         class="btn btn-secondary tap-text"
       >
-        {{ action.label }}
+        {{ action.label }}<span v-if="action.note" class="text-slate-400 font-normal"> · {{ action.note }}</span>
       </router-link>
       <button
         v-if="hasOdometerIssues"

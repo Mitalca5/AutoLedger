@@ -37,6 +37,8 @@ type OwnershipCosts struct {
 
 	// Missing lists the settings needed for a complete cost of ownership.
 	Missing []string
+	// MissingFields names the depreciation inputs not entered: "purchase_price", "resale_value", "holding_period".
+	MissingFields []string
 }
 
 // monthsBetween returns the number of months (fractional) between two dates.
@@ -68,6 +70,7 @@ func ComputeOwnershipCosts(o *models.VehicleOwnership, now time.Time, kmSinceSta
 	case models.AcquisitionCash, models.AcquisitionLoan:
 		if o.PurchasePrice == nil || *o.PurchasePrice <= 0 {
 			c.Missing = append(c.Missing, "Purchase price not entered")
+			c.MissingFields = append(c.MissingFields, "purchase_price")
 			c.DepreciationUnknown = true
 		} else {
 			base := *o.PurchasePrice + centsOrZero(o.PurchaseFees) - centsOrZero(o.Incentives)
@@ -75,6 +78,12 @@ func ComputeOwnershipCosts(o *models.VehicleOwnership, now time.Time, kmSinceSta
 			c.Depreciation = dep
 			if !ok {
 				c.DepreciationUnknown = true
+				if o.ExpectedResaleValue == nil {
+					c.MissingFields = append(c.MissingFields, "resale_value")
+				}
+				if o.ExpectedHoldingMonths == nil || *o.ExpectedHoldingMonths <= 0 {
+					c.MissingFields = append(c.MissingFields, "holding_period")
+				}
 				c.Missing = append(c.Missing, "Estimated resale value or holding period not entered: depreciation excluded from the full cost")
 			}
 		}

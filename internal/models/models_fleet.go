@@ -4,8 +4,12 @@ import "github.com/teslacost/teslacost/internal/money"
 
 // FleetSummaryResponse aggregates multi-vehicle household metrics.
 type FleetSummaryResponse struct {
-	TotalVehicles int    `json:"total_vehicles"`
-	Currency      string `json:"currency"`
+	TotalVehicles int `json:"total_vehicles"`
+	// Currency is the currency of the budget and of the monthly figures below: the one of the first vehicle. Vehicles
+	// in another currency are not added to them, they appear in Totals.
+	Currency string `json:"currency"`
+	// Totals is the cost of the month in progress, one line per currency in order of first appearance.
+	Totals []FleetCurrencyTotal `json:"totals"`
 	// CurrentMonth is the month in progress (YYYY-MM) in the reporting timezone.
 	CurrentMonth     string      `json:"current_month"`
 	CurrentMonthCost money.Cents `json:"current_month_cost"`
@@ -16,6 +20,30 @@ type FleetSummaryResponse struct {
 	MonthlyCosts           []FleetMonthlyCost   `json:"monthly_costs"`
 	Vehicles               []VehicleFleetMetric `json:"vehicles"`
 	MemberKmShares         []MemberKmShare      `json:"member_km_shares"`
+}
+
+// FleetCurrencyTotal is the cost of the month in progress of the vehicles that share one currency.
+type FleetCurrencyTotal struct {
+	Currency         string      `json:"currency"`
+	VehicleCount     int         `json:"vehicle_count"`
+	CurrentMonthCost money.Cents `json:"current_month_cost"`
+}
+
+// FleetCurrencyTotals groups the month cost of the vehicles by currency, never adding two currencies together.
+func FleetCurrencyTotals(vehicles []VehicleFleetMetric) []FleetCurrencyTotal {
+	totals := []FleetCurrencyTotal{}
+	index := make(map[string]int)
+	for _, v := range vehicles {
+		i, ok := index[v.Currency]
+		if !ok {
+			i = len(totals)
+			index[v.Currency] = i
+			totals = append(totals, FleetCurrencyTotal{Currency: v.Currency})
+		}
+		totals[i].VehicleCount++
+		totals[i].CurrentMonthCost += v.MonthCost
+	}
+	return totals
 }
 
 // FleetMonthlyCost represents costs for the entire fleet for a single month.
@@ -38,9 +66,10 @@ type VehicleFleetMetric struct {
 	CurrentOdometer float64     `json:"current_odometer"`
 	MonthDistanceKm float64     `json:"month_distance_km"`
 	MonthCost       money.Cents `json:"month_cost"`
-	// EnergyCostPer100Km is the energy-statistics figure (priced charges over the distance of the months driven), 0
-	// when it is not known.
-	EnergyCostPer100Km float64 `json:"energy_cost_per_100km"`
+	// EnergyCostPer100Km is the energy-statistics figure (priced charges over the distance of the months driven), or
+	// the energy cost of the TCO over its distance basis for a vehicle the statistics do not cover. nil when it is
+	// not known; 0 is a known cost (free charging).
+	EnergyCostPer100Km *float64 `json:"energy_cost_per_100km"`
 
 	Powertrain string `json:"powertrain"`
 	// RunningCostPerKm is what the vehicle costs to run (energy, upkeep, insurance, financing); FullCostPerKm adds

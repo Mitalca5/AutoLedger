@@ -751,7 +751,8 @@ export interface VehicleFleetMetric {
   current_odometer: number
   month_distance_km: number
   month_cost: number
-  energy_cost_per_100km: number
+  /** `null` when unknown; 0 is a known cost (free charging). */
+  energy_cost_per_100km: number | null
   powertrain: string
   /** `null` while the vehicle has no distance to divide by. */
   running_cost_per_km: number | null
@@ -781,9 +782,18 @@ export interface MemberKmShare {
   percentage: number
 }
 
+export interface FleetCurrencyTotal {
+  currency: string
+  vehicle_count: number
+  current_month_cost: number
+}
+
 export interface FleetSummaryResponse {
   total_vehicles: number
+  /** Currency of the budget and of the figures below: vehicles in another currency are only in `totals`. */
   currency: string
+  /** Cost of the month in progress, one line per currency. */
+  totals: FleetCurrencyTotal[]
   /** Month in progress (YYYY-MM) in the reporting timezone. */
   current_month: string
   current_month_cost: number

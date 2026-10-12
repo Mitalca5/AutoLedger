@@ -220,7 +220,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             :aria-pressed="monthDetailViewMode === 'economic'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
-              monthDetailViewMode === 'economic' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
+              monthDetailViewMode === 'economic' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'
             ]"
           >
             {{ $t('dashboard.monthDetailModal.costPriceKm', { unit: distanceUnit(), cur: currencySymbol(currency) }) }}
@@ -231,7 +231,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             :aria-pressed="monthDetailViewMode === 'cash'"
             :class="[
               'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
-              monthDetailViewMode === 'cash' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'
+              monthDetailViewMode === 'cash' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'
             ]"
           >
             {{ $t('dashboard.monthDetailModal.cashExpenses', { cur: currencySymbol(currency) }) }}

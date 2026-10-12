@@ -22,6 +22,27 @@ type completenessInputs struct {
 	telemetryMode       string // CONNECTED, SEMI_AUTO, MANUAL
 	daysSinceOdometer   int    // Days since last odometer checkpoint
 	hasCheckpoints      bool   // Vehicle has odometer checkpoints recorded
+	// depreciationUnknown is true when a bought vehicle has no depreciation (price, resale value or holding period
+	// missing): its full cost leaves out the largest item, so the score is capped.
+	depreciationUnknown bool
+}
+
+// depreciationMissingCap is the highest score of a vehicle whose depreciation is unknown: it stays under the
+// threshold from which a vehicle is ranked, whatever the other dimensions say.
+const depreciationMissingCap = fleetComparableMinCompleteness - 1
+
+// completenessHasData reports whether the vehicle has any distance or expense to judge: before that a score would
+// only describe an empty account.
+func completenessHasData(in completenessInputs) bool {
+	return in.basisKm > 0 || in.kwhAdded > 0 || in.fillUps > 0 || in.pricedEntries+in.unconvertedEntries > 0
+}
+
+// energyScore is the share of the charged energy that has a cost; a vehicle with no charge has nothing priced.
+func energyScore(in completenessInputs) float64 {
+	if in.kwhAdded <= 0 {
+		return 0
+	}
+	return ratio(in.kwhPriced, in.kwhAdded)
 }
 
 func ratio(part, total float64) float64 {
@@ -68,34 +89,36 @@ func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 			distance = ratio(in.trackedKm, in.basisKm)
 		}
 	}
-	energyLabel, energyScore := "Charges with a cost (kWh)", ratio(in.kwhPriced, in.kwhAdded)
-	distanceLabel := "Kilometres covered by drives"
+	energyLabel, energyValue, energyKey := "Charges with a cost (kWh)", energyScore(in), "energy"
+	distanceLabel, distanceKey := "Kilometres covered by drives", "distance"
 	switch {
 	case in.fuelOnly:
-		energyLabel, energyScore = "Fuel fill-ups recorded", boolScore(in.fillUps > 0)
-		distanceLabel = "Kilometres covered by readings and fill-ups"
+		energyLabel, energyValue, energyKey = "Fuel fill-ups recorded", boolScore(in.fillUps > 0), "energy_fuel"
+		distanceLabel, distanceKey = "Kilometres covered by readings and fill-ups", "distance_fuel"
 	case in.hybrid:
-		energyLabel, energyScore = "Charges with a cost and fill-ups recorded", hybridEnergyScore(in)
-		distanceLabel = "Kilometres covered by readings, drives and fill-ups"
+		energyLabel, energyValue, energyKey = "Charges with a cost and fill-ups recorded", hybridEnergyScore(in), "energy_hybrid"
+		distanceLabel, distanceKey = "Kilometres covered by readings, drives and fill-ups", "distance_hybrid"
 	case isManual:
-		distanceLabel = "Kilometres covered by readings and drives"
+		distanceLabel, distanceKey = "Kilometres covered by readings and drives", "distance_manual"
 	}
+	// A dimension with nothing to evaluate (no motorway drive to qualify, no odometer reading to compare, no priced
+	// expense to convert) is not applicable: it is shown as such, never as complete.
 	dims := []struct {
-		key, label string
-		weight     float64
-		score      float64
-		neutral    bool
+		key, labelKey, label string
+		weight               float64
+		score                float64
+		neutral              bool
 	}{
-		{"energy", energyLabel, 0.30, energyScore, false},
-		{"distance", distanceLabel, 0.20, distance, false},
-		{"tolls", "Motorway drives qualified", 0.15, completion(float64(in.unqualifiedDrives), float64(in.highwayDrives)), in.highwayDrives == 0},
-		{"insurance", "Insurance entered", 0.10, boolScore(in.insurancePresent), false},
-		{"acquisition", "Acquisition and depreciation entered", 0.10, boolScore(in.acquisitionComplete), false},
-		{"odometer", "Odometer continuity", 0.10, completion(float64(in.odometerAnomalies), float64(in.drivesWithOdometer)), false},
-		{"currency", "Expenses converted to euros", 0.05, completion(float64(in.unconvertedEntries), float64(in.pricedEntries+in.unconvertedEntries)), false},
+		{"energy", energyKey, energyLabel, 0.30, energyValue, false},
+		{"distance", distanceKey, distanceLabel, 0.20, distance, false},
+		{"tolls", "tolls", "Motorway drives qualified", 0.15, completion(float64(in.unqualifiedDrives), float64(in.highwayDrives)), in.highwayDrives == 0},
+		{"insurance", "insurance", "Insurance entered", 0.10, boolScore(in.insurancePresent), false},
+		{"acquisition", "acquisition", "Acquisition and depreciation entered", 0.10, boolScore(in.acquisitionComplete), false},
+		{"odometer", "odometer", "Odometer continuity", 0.10, completion(float64(in.odometerAnomalies), float64(in.drivesWithOdometer)), in.drivesWithOdometer == 0},
+		{"currency", "currency", "Expenses converted to the vehicle currency", 0.05, completion(float64(in.unconvertedEntries), float64(in.pricedEntries+in.unconvertedEntries)), in.pricedEntries+in.unconvertedEntries == 0},
 	}
-	// A dimension with nothing to evaluate (no motorway drive to qualify) is left out and the others share its
-	// weight, so it neither inflates nor deflates the score.
+	// A dimension that is not applicable is left out and the others share its weight, so it neither inflates nor
+	// deflates the score.
 	var applicable float64
 	for _, d := range dims {
 		if !d.neutral {
@@ -110,9 +133,13 @@ func completenessScore(in completenessInputs) (int, []CompletenessDimension) {
 			weight = d.weight / applicable
 			total += weight * d.score
 		}
-		out = append(out, CompletenessDimension{Key: d.key, Label: d.label, ScorePct: int(math.Round(d.score * 100)), Weight: weight, Applicable: !d.neutral})
+		out = append(out, CompletenessDimension{Key: d.key, LabelKey: d.labelKey, Label: d.label, ScorePct: int(math.Round(d.score * 100)), Weight: weight, Applicable: !d.neutral})
 	}
-	return int(math.Round(total * 100)), out
+	score := int(math.Round(total * 100))
+	if in.depreciationUnknown && score > depreciationMissingCap {
+		score = depreciationMissingCap
+	}
+	return score, out
 }
 
 // hybridEnergyScore averages the energies the vehicle actually recorded: the priced share of its charges and

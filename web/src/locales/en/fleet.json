@@ -10,26 +10,20 @@
     "monthDistance": "Distance · {month}",
     "fleetTravelled": "Total distance traveled",
     "monthEnergy": "Energy · {month}",
-    "energyDelivered": "Delivered charging energy"
-  },
-  "vehicles": {
-    "comparisonTitle": "Vehicles & Energy Efficiency",
-    "efficiencyMetricHint": "Real charging cost per 100 distance units",
-    "mostEconomical": "Most Economical",
-    "energyCostPer100": "Energy Cost / 100",
-    "currentMonthCost": "Month Cost",
-    "currentMonthDistance": "Month Distance",
-    "odometer": "Odometer"
+    "energyDelivered": "Delivered charging energy",
+    "perCurrency": "One total per currency"
   },
   "chart": {
     "monthlyCostHistory": "Fleet Monthly Cost History",
     "stackedBreakdown": "Energy vs. other expenses",
     "energyCost": "Energy",
-    "otherCost": "Other Expenses"
+    "otherCost": "Other Expenses",
+    "fleetCurrencyOnly": "{currency} vehicles only",
+    "month": "Month"
   },
   "drivers": {
     "title": "Driver Distance Distribution",
-    "subtitle": "Kilometers logged per household driver this month",
+    "subtitle": "Distance logged per household driver over the last 12 months",
     "noData": "No drives logged with driver assignment yet."
   },
   "budget": {
@@ -42,11 +36,12 @@
     "none": "No budget set: add one to follow the household spending this month.",
     "spent": "{spent} of {budget} ({percent}%)",
     "remaining": "{amount} left",
-    "over": "{amount} over"
+    "over": "{amount} over",
+    "otherCurrency": "{count} vehicle in another currency is not counted in this {currency} budget | {count} vehicles in other currencies are not counted in this {currency} budget"
   },
   "compare": {
-    "title": "Cost per distance, side by side",
-    "hint": "All powertrains, from each vehicle's TCO",
+    "title": "Vehicles side by side",
+    "hint": "Same definitions for every vehicle; the month and the energy figures follow the reporting timezone and the vehicle's own TCO",
     "vehicle": "Vehicle",
     "runningPerDistance": "Cash paid / {unit}",
     "fullPerDistance": "Full cost / {unit}",
@@ -58,6 +53,9 @@
     "cheapest": "Cheapest",
     "indicative": "Indicative",
     "depreciationMissing": "Depreciation not entered",
-    "footnote": "Cash paid covers energy, upkeep, insurance and financing, estimated energy included; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). Energy is charged energy at the plug. A vehicle under 60% completeness is shown but not ranked."
+    "footnote": "Cash paid covers energy, upkeep, insurance and financing, estimated energy included; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). Energy is charged energy at the plug. A vehicle under 60% completeness is shown but not ranked.",
+    "energyCost": "Energy cost / 100 {unit}",
+    "monthDistance": "Distance this month",
+    "monthCost": "Cost this month"
   }
 }

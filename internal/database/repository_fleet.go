@@ -26,6 +26,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 	res := &models.FleetSummaryResponse{
 		TotalVehicles:  len(vehicles),
 		Currency:       baseCurrency,
+		Totals:         []models.FleetCurrencyTotal{},
 		MonthlyCosts:   []models.FleetMonthlyCost{},
 		Vehicles:       []models.VehicleFleetMetric{},
 		MemberKmShares: []models.MemberKmShare{},
@@ -125,7 +126,9 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 		mCost := monthCostByVeh[v.ID]
 		mKwh := monthEnergyByVeh[v.ID]
 
-		res.CurrentMonthCost += mCost
+		if v.Currency == baseCurrency {
+			res.CurrentMonthCost += mCost
+		}
 		res.CurrentMonthDistanceKm += mDist
 		res.CurrentMonthEnergyKwh += mKwh
 
@@ -140,6 +143,8 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 			MonthCost:       mCost,
 		})
 	}
+
+	res.Totals = models.FleetCurrencyTotals(res.Vehicles)
 
 	// 4. Monthly fleet history (last 12 months)
 	historyQuery := `
@@ -166,6 +171,9 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone strin
 			var mStr, vid, cat string
 			var eur float64
 			if err := rows.Scan(&mStr, &vid, &cat, &eur); err == nil {
+				if vehicleMap[vid].Currency != baseCurrency {
+					continue
+				}
 				b, ok := buckets[mStr]
 				if !ok {
 					b = &monthBucket{byVeh: make(map[string]money.Cents)}

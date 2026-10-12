@@ -115,7 +115,7 @@ func averageMonthlyKm(anchors []OdometerAnchor, now time.Time) float64 {
 			first = a.Date
 		}
 	}
-	from := now.AddDate(0, -tireForecastWindowMonths, 0)
+	from := models.AddCalendarMonths(now, -tireForecastWindowMonths)
 	if from.Before(first) {
 		from = first
 	}

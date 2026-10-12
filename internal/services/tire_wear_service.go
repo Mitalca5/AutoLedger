@@ -249,7 +249,18 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 		wearConfidence = measuredWear / (measuredWear + wearPriorMm)
 		wearRatePer10k = wearConfidence*measuredRate + (1-wearConfidence)*defaultWearRatePer10k
 	}
-	estimatedRemainingKm := (remainingDepth / wearRatePer10k) * 10000.0
+	// Measurements remain unchanged; only the forecast consumes the distance driven since the latest reading.
+	sinceReadingKm := totalDistance
+	readingOdometer := 0.0
+	if len(logs) > 0 {
+		readingOdometer = logs[0].Odometer
+		distanceAtReading := tire.InitialDistanceKm + TireDistanceAtOdometer(sessions, readingOdometer)
+		if len(sessions) == 0 && tire.MountedOdometer != nil {
+			distanceAtReading = tire.AccumulatedDistanceKm + math.Max(0, readingOdometer-*tire.MountedOdometer)
+		}
+		sinceReadingKm = math.Max(0, totalDistance-distanceAtReading)
+	}
+	estimatedRemainingKm := math.Max(0, remainingDepth/wearRatePer10k*10000-sinceReadingKm)
 
 	// TeslaMate dynamic telemetry & power stress calculation.
 	// Only drives performed while the tire was physically mounted are considered.
@@ -334,7 +345,9 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 				(1-wearConfidence)*neutralRate
 		}
 		if neutralRate > 0 {
-			dynamicRemainingKm = projectRemainingKm(remainingDepth, neutralRate, tire.CurrentPosition, math.Max(0, tireRotationIntervalKm-currentRunKm))
+			projectedDepth := math.Max(0, remainingDepth-sinceReadingKm*neutralRate*
+				pastAxleWeight(sessions, readingOdometer, vehicleCurrentOdometer, tire.CurrentPosition)/10000)
+			dynamicRemainingKm = projectRemainingKm(projectedDepth, neutralRate, tire.CurrentPosition, math.Max(0, tireRotationIntervalKm-currentRunKm))
 		}
 
 		style := "kw:balanced"
@@ -355,9 +368,9 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 	}
 
 	condition := "GOOD"
-	if currentDepth <= 2.5 {
+	if currentDepth <= math.Max(minLegal, 2.5) {
 		condition = "CRITICAL"
-	} else if currentDepth <= 4.0 {
+	} else if currentDepth <= math.Max(4.0, minLegal+1.5) {
 		condition = "WARNING"
 	}
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/teslacost/teslacost/internal/middleware"
 	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/money"
 	"github.com/teslacost/teslacost/internal/services"
 )
 
@@ -46,7 +47,7 @@ func TestFleetSummaryComputesEnergyCostPer100Km(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetSummary failed: %v", err)
 	}
-	if got := fleet.Vehicles[0].EnergyCostPer100Km; got != 500 {
+	if got := fleet.Vehicles[0].EnergyCostPer100Km; got == nil || *got != 500 {
 		t.Errorf("energy cost per 100 km: got %v, want 500 (1000.00 spent over 200 km)", got)
 	}
 	if summary.CurrentMonthCost != 100000 || m.MonthCost != 100000 {
@@ -190,5 +191,45 @@ func TestFleetSummaryMonthsFollowTheReportingTimezone(t *testing.T) {
 	}
 	if last(inUTC).DistanceKm != 0 {
 		t.Fatalf("in UTC the same drive belongs to the previous month: %+v", last(inUTC))
+	}
+}
+
+func TestFleetSummaryTotalsPerCurrency(t *testing.T) {
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	u, err := repo.CreateUser(ctx, "fleet-currency@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	eur := &models.Vehicle{UserID: u.ID, Name: "EUR car", Currency: "EUR", TeslaMateAuthType: models.AuthModeNone}
+	chf := &models.Vehicle{UserID: u.ID, Name: "CHF car", Currency: "CHF", TeslaMateAuthType: models.AuthModeNone}
+	for _, v := range []*models.Vehicle{eur, chf} {
+		if err := repo.CreateVehicle(ctx, v); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for id, cost := range map[string]float64{eur.ID: 20, chf.ID: 900} {
+		if _, err := repo.Pool().Exec(ctx, `INSERT INTO charge_logs (vehicle_id, date, kwh_added, cost, cost_source, currency, is_manual)
+			VALUES ($1, now(), 40, $2, 'MANUAL', (SELECT currency FROM vehicles WHERE id = $1), TRUE)`, id, cost); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	summary, err := services.NewFleetService(repo, services.NewTCOService(repo.Pool(), "UTC")).GetSummary(ctx, u.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(summary.Totals) != 2 {
+		t.Fatalf("totals = %+v, want one per currency", summary.Totals)
+	}
+	byCurrency := map[string]money.Cents{}
+	for _, tot := range summary.Totals {
+		byCurrency[tot.Currency] = tot.CurrentMonthCost
+	}
+	if byCurrency["EUR"] != 2000 || byCurrency["CHF"] != 90000 {
+		t.Fatalf("totals by currency = %v", byCurrency)
+	}
+	if summary.CurrentMonthCost != byCurrency[summary.Currency] {
+		t.Fatalf("fleet month %d adds currencies: %s total is %d", summary.CurrentMonthCost, summary.Currency, byCurrency[summary.Currency])
 	}
 }

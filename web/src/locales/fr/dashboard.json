@@ -12,15 +12,8 @@
   "costBreakdownDonut": {
     "depreciationMissing": "Dépréciation non renseignée : la part est manquante, pas nulle.",
     "fullCostBreakdownByCategory": "Répartition du coût complet par poste",
-    "fullCostBreakdown": "Répartition du coût complet"
-  },
-  "currentMonthBanner": {
-    "drives": "Trajets",
-    "viewTheBreakdown": "Voir la répartition",
-    "spent": "{value} dépensés",
-    "activityThisMonth": "Activité du mois ({month})",
-    "kmDriven": "{distance_km} {unit} roulés",
-    "fixedVariableRatio": "{fixedPct} % fixes • {variablePct} % variables"
+    "fullCostBreakdown": "Répartition du coût complet",
+    "noCost": "Aucun coût enregistré"
   },
   "dataQualityCard": {
     "enterTheStartOdometer": "Saisir le compteur à l'achat",
@@ -39,7 +32,35 @@
     "odometerGap": "Trou d'odomètre avant ce trajet",
     "odometerRegression": "Odomètre en recul par rapport au trajet précédent",
     "distanceMismatch": "Distance différente du relevé d'odomètre",
-    "complete": "Compléter ({count})"
+    "complete": "Compléter ({count})",
+    "noScore": "Pas assez de données pour noter le TCO",
+    "noScoreHint": "Saisissez un trajet, une recharge ou une dépense : la note apparaît.",
+    "enterTheResale": "Saisir la valeur de revente estimée",
+    "enterTheHolding": "Saisir la durée de détention",
+    "enterTheResaleAndHolding": "Saisir la valeur de revente et la durée de détention",
+    "enterThePrice": "Saisir le prix d'achat",
+    "capped": "Plafonné sous le seuil de classement : la dépréciation manque.",
+    "showDimensions": "Ce que couvre la note",
+    "hideDimensions": "Masquer le détail de la note",
+    "notApplicable": "rien à évaluer",
+    "dimensions": {
+      "energy": "Recharges avec un coût (kWh)",
+      "energy_fuel": "Pleins de carburant saisis",
+      "energy_hybrid": "Recharges avec un coût et pleins saisis",
+      "distance": "Distance couverte par les trajets",
+      "distance_manual": "Distance couverte par les relevés et les trajets",
+      "distance_fuel": "Distance couverte par les relevés et les pleins",
+      "distance_hybrid": "Distance couverte par les relevés, les trajets et les pleins",
+      "tolls": "Trajets autoroutiers qualifiés",
+      "insurance": "Assurance saisie",
+      "acquisition": "Acquisition et dépréciation saisies",
+      "odometer": "Continuité de l'odomètre",
+      "currency": "Dépenses converties dans la devise du véhicule"
+    },
+    "gapLargest": "plus gros poste",
+    "gapAmount": "≈ {amount}",
+    "gapsHint": "Le plus gros écart en premier. Les montants sont des ordres de grandeur issus de vos propres prix, pas des valeurs saisies.",
+    "enterTheExchangeRate": "Saisir le taux de change"
   },
   "energyBatterySection": {
     "teslamateGrafana": "Grafana TeslaMate",
@@ -65,7 +86,7 @@
     "theEnergyEfficiencyStatisticsCould": "Les statistiques d'efficacité énergétique n'ont pas pu être chargées.",
     "kwhKwhEfficiency": "{value} kWh · {value2}/kWh · rendement {value3}",
     "ofTheEnergyChargeS": "{value} % de l'énergie · {sessions} recharge(s)",
-    "howTheCarIsCharged": "Comment la voiture est rechargée",
+    "howTheCarIsCharged": "Vitesse de recharge",
     "3MonthAverage100Km": "Moyenne 3 mois {cur}/100 {unit}",
     "month": "Mois",
     "consumptionAndEnergyCostPer": "Consommation et coût de l'énergie par mois",
@@ -103,7 +124,11 @@
     "chargingEfficiencyEmpty": "Le rendement compare l'énergie stockée dans la batterie à l'énergie tirée du réseau (compteur ou borne). Les recharges synchronisées par TeslaMate ou une intégration la portent ; sans elle, il reste inconnu.",
     "chargingEfficiencyAction": "Voir les recharges",
     "noData": "Pas encore de données d'efficacité : elles apparaissent dès que des relevés de compteur et des recharges couvrent une même période.",
-    "seeEnergy": "Voir l'énergie"
+    "seeEnergy": "Voir l'énergie",
+    "byPlace": "Où la voiture est rechargée",
+    "placeShare": "{share} % des kWh ({kwh} kWh)",
+    "placeUnknown": "{count} recharge(s) sans coût, hors du prix",
+    "placeLink": "Tous les lieux et les prix"
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Trajets d'au moins {min}, groupés par température extérieure moyenne ; tranches de moins de {band} masquées.",
@@ -154,13 +179,11 @@
     "distanceKm": "Distance ({unit})",
     "lastMonthSDetail": "Détail dernier mois",
     "clickABarOfThe": "Cliquer sur une barre du graphique pour ouvrir le détail chiffré du mois.",
-    "monthlyMileageAndCostPer2": "Kilométrage mensuel et coût de revient au {unit} ({cur}/{unit})",
     "kmDriven": "Distance parcourue ({unit})",
     "averageCostPerKm": "Coût moyen au {unit} ({cur}/{unit})",
     "tooltipDistance": "Distance : {distance} {unit}",
     "tooltipCostPerKm": "Coût de revient : {cost}/{unit}",
-    "axisDistance": "Distance ({unit})",
-    "axisCostPerKm": "Coût/{unit} ({cur})"
+    "minDistanceNote": "Les mois de moins de {distance} {unit} ne sont pas tracés."
   },
   "monthDetailModal": {
     "expensesAndInvoices": "Dépenses & Factures",
@@ -214,37 +237,57 @@
     "maintenance": "Entretien",
     "financing": "Financement",
     "monthTotal": "Total mois : {total}",
-    "fixedVariableTooltip": "{fixedPct} % fixes • {variablePct} % variables"
+    "fixedVariableTooltip": "{fixedPct} % fixes • {variablePct} % variables",
+    "view": "Vue",
+    "economic": "Économique",
+    "cash": "Décaissé",
+    "economicHint": "Chaque coût réparti sur la période qu'il couvre.",
+    "cashHint": "Ce qui a été payé chaque mois.",
+    "month": "Mois",
+    "total": "Total"
   },
   "tagBreakdown": {
     "ofTollsAndParking": "{value} de péages & parkings",
     "breakdownByDriveCategoryWork": "Ventilation par Catégorie de Trajets (Pro / Perso)",
     "kmKwh": "{distance_km} {unit} ({energy_kwh} kWh)",
-    "untagged": "Non tagué"
+    "untagged": "Non tagué",
+    "costBasis": "Coût des trajets de chaque étiquette : énergie, usure, part d'assurance et péages, comme dans la liste des trajets.",
+    "sharedNote": "Un trajet portant plusieurs étiquettes compte dans chacune : leur somme peut dépasser le total du véhicule."
   },
   "tcoMetricsGrid": {
     "depreciationMissing": "Dépréciation non renseignée : le coût complet omet son plus gros poste.",
     "depreciationMissingAction": "La renseigner",
     "tollsAndParking": "Péages & Parkings",
     "chargeSWithoutACost": "{charges_without_cost} recharge(s) sans coût",
-    "depreciationKm": "• décote {value}/{unit}",
     "fullCostPerKm": "Coût complet / {unit}",
     "totalCost": "Décaissé depuis l'achat",
-    "overKm": "Sur {distance_basis_km} {unit}",
-    "directRunningCostKm": "Énergie + péages : {usage_cost_per_km}/{unit}",
-    "netOfCarpooling": "Net covoiturage : {full_cost_net}",
-    "includingDepreciation": "(dont décote {depreciation_cost})",
-    "fullCost": "Coût complet : {full_cost}",
     "fuel": "Carburant (pleins)",
     "energy": "Énergie (Charges)",
-    "kwhOnly": "{total_kwh_added} kWh rechargés",
     "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée",
     "energyPanelLink": "Coût aux 100 {unit} : efficacité énergétique",
     "energyHybrid": "Énergie (charges + pleins)",
     "hybridSplit": "Électricité {electricity} · carburant {fuel}",
     "cashPaidWindow": "Décaissé · dernier mois | Décaissé · {months} derniers mois",
     "economicWindow": "Coût économique : {amount} · {cost_per_km}/{unit}",
-    "sincePurchase": "Depuis {month} : {amount}"
+    "sincePurchase": "Depuis {month} : {amount}",
+    "economicPerKmWindow": "Coût économique / {unit} · dernier mois | Coût économique / {unit} · {months} derniers mois",
+    "sincePurchasePerKm": "Depuis l'achat : {amount}/{unit}",
+    "currentMonth": "{month}",
+    "currentMonthShort": "Mois en cours",
+    "monthDistance": "{distance_km} {unit}",
+    "viewTheBreakdown": "Voir le détail",
+    "details": "Détail des coûts",
+    "fullCostLabel": "Coût complet depuis l'achat",
+    "depreciationLabel": "dont décote",
+    "economicWindowLabel": "Coût économique · dernier mois | Coût économique · {months} derniers mois",
+    "runningCostLabel": "Énergie + péages au {unit}",
+    "distanceBasis": "Distance retenue",
+    "netOfCarpoolingLabel": "Net covoiturage",
+    "avgPrice": "Prix moyen",
+    "kwhLabel": "Énergie rechargée",
+    "hybridSplitLabel": "Répartition",
+    "spentSoFar": "dépensé à ce jour",
+    "alreadyScheduled": "+ {amount} déjà programmé"
   },
   "nextDueCard": {
     "title": "Prochain entretien",
@@ -318,7 +361,7 @@
     "readingRequired": "Saisissez d'abord un pourcentage de santé ou une capacité de batterie neuve.",
     "deleteReading": "Supprimer la mesure du {date}",
     "residual": "Valeur de revente projetée",
-    "expectedKm": "Distance prévue (km)",
+    "expectedKm": "Distance prévue",
     "kmShare": "Poids de la distance (%)",
     "healthWeight": "Poids de la santé",
     "summary": "{depreciation} perdus à ce jour · {progress} % de la dépréciation prévue",

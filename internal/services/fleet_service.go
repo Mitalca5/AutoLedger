@@ -79,18 +79,15 @@ func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.F
 	return res, nil
 }
 
-// energyCostPer100Km is the cost per 100 km of the energy statistics, 0 when there is no tracked distance or no priced
-// charge to derive it from.
-func (s *FleetService) energyCostPer100Km(ctx context.Context, vehicleID string) float64 {
+// energyCostPer100Km is the cost per 100 km of the energy statistics, nil when there is no tracked distance or no
+// priced charge to derive it from.
+func (s *FleetService) energyCostPer100Km(ctx context.Context, vehicleID string) *float64 {
 	stats, err := s.energy.Compute(ctx, vehicleID)
 	if err != nil {
 		slog.Warn("fleet energy cost without energy statistics", "vehicle_id", vehicleID, "error", err)
-		return 0
+		return nil
 	}
-	if stats.Summary.CostPer100km == nil {
-		return 0
-	}
-	return *stats.Summary.CostPer100km
+	return stats.Summary.CostPer100km
 }
 
 // applyTCOMonthsToFleet rebuilds the month figures of the fleet from the monthly costs of each vehicle's TCO, so the
@@ -106,13 +103,24 @@ func applyTCOMonthsToFleet(res *models.FleetSummaryResponse, sums map[string]*TC
 		byVehicle[id] = months
 	}
 
+	// Only the vehicles in the currency of the fleet figures are added together
+	inFleetCurrency := make(map[string]bool, len(res.Vehicles))
+	for _, v := range res.Vehicles {
+		inFleetCurrency[v.VehicleID] = v.Currency == res.Currency
+	}
+
 	for i := range res.MonthlyCosts {
 		fm := &res.MonthlyCosts[i]
-		fm.TotalCost, fm.EnergyCost, fm.OtherCost = 0, 0, 0
+		fm.TotalCost, fm.EnergyCost, fm.OtherCost, fm.DistanceKm = 0, 0, 0, 0
 		fm.ByVehicle = make(map[string]money.Cents, len(sums))
 		for id, months := range byVehicle {
 			mc, ok := months[fm.Month]
 			if !ok {
+				continue
+			}
+			// Distance does not depend on the currency: every vehicle counts, drives and readings alike
+			fm.DistanceKm += mc.DistanceKm
+			if !inFleetCurrency[id] {
 				continue
 			}
 			fm.TotalCost += mc.Total
@@ -123,12 +131,18 @@ func applyTCOMonthsToFleet(res *models.FleetSummaryResponse, sums map[string]*TC
 	}
 
 	current := now.Format("2006-01")
-	res.CurrentMonthCost = 0
+	res.CurrentMonthCost, res.CurrentMonthDistanceKm = 0, 0
 	for i := range res.Vehicles {
-		cost := byVehicle[res.Vehicles[i].VehicleID][current].Total
+		month := byVehicle[res.Vehicles[i].VehicleID][current]
+		cost := month.Total
 		res.Vehicles[i].MonthCost = cost
-		res.CurrentMonthCost += cost
+		res.Vehicles[i].MonthDistanceKm = month.DistanceKm
+		res.CurrentMonthDistanceKm += month.DistanceKm
+		if inFleetCurrency[res.Vehicles[i].VehicleID] {
+			res.CurrentMonthCost += cost
+		}
 	}
+	res.Totals = models.FleetCurrencyTotals(res.Vehicles)
 }
 
 // applyTCOToFleetMetric fills the comparison figures of a vehicle from its TCO summary.
@@ -138,6 +152,12 @@ func applyTCOToFleetMetric(m *models.VehicleFleetMetric, sum *TCOSummary, now ti
 	m.FullCostPerKm = sum.FullCostPerKm
 	m.CompletenessPct = sum.Completeness.ScorePct
 	m.DepreciationKnown = sum.DepreciationKnown
+	// The energy statistics only cover charges: a vehicle without a figure there (combustion, fuel only) takes the
+	// energy cost of its TCO over the same distance basis.
+	if m.EnergyCostPer100Km == nil && sum.EnergyCostPerKm != nil && sum.EnergyCost > 0 {
+		v := math.Round(*sum.EnergyCostPerKm*100*100) / 100
+		m.EnergyCostPer100Km = &v
+	}
 	// A bought vehicle without depreciation leaves out its largest cost item: ranking it first would reward the gap.
 	m.Comparable = sum.DistanceBasisKm > 0 && sum.FullCost > 0 && sum.DepreciationKnown && sum.Completeness.ScorePct >= fleetComparableMinCompleteness
 

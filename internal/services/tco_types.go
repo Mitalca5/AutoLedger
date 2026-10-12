@@ -50,7 +50,10 @@ type MonthlyCost struct {
 	Tires                money.Cents `json:"tires"`           // Cash basis: full price in the purchase month
 	TiresAmortized       money.Cents `json:"tires_amortized"` // Prorated by km driven while mounted, used for cost_per_km
 	Total                money.Cents `json:"total"`
-	CostPerKm            *float64    `json:"cost_per_km"`
+	// Scheduled is the part of Total (and of Financing) that falls due later in the month in progress: the
+	// instalments dated after today. Total minus Scheduled is what was spent so far.
+	Scheduled money.Cents `json:"scheduled,omitempty"`
+	CostPerKm *float64    `json:"cost_per_km"`
 }
 
 // TagCostBreakdown represents costs split by tag (e.g. Pro vs Perso).
@@ -60,6 +63,12 @@ type TagCostBreakdown struct {
 	EnergyKwh   float64     `json:"energy_kwh"`
 	TollsAmount money.Cents `json:"tolls_amount"`
 	Percentage  float64     `json:"percentage"`
+	// Cost is the sum of the cost of the tag's drives as the drive list shows it (energy, wear, insurance share and
+	// tolls at the vehicle's unit rates), and CostPerKm that cost over the distance: an allocation of the running
+	// cost, not the cash paid. A drive with several tags counts in each; SharedDrives says how many do.
+	Cost         money.Cents `json:"cost"`
+	CostPerKm    float64     `json:"cost_per_km"`
+	SharedDrives int         `json:"shared_drives"`
 }
 
 // TCOCompleteness lists the known gaps of the TCO figures.
@@ -68,23 +77,35 @@ type TCOCompleteness struct {
 	ChargesWithoutCost  int     `json:"charges_without_cost"`
 	KwhWithoutCost      float64 `json:"kwh_without_cost"`
 	UnconvertedExpenses int     `json:"unconverted_expenses"`
+	// UnconvertedTarget is where the unconverted amounts are fixed: "charges" or "expenses".
+	UnconvertedTarget   string  `json:"unconverted_target"`
 	UnqualifiedDrives   int     `json:"unqualified_drives"`
 	UntrackedDistanceKm float64 `json:"untracked_distance_km"`
 	OdometerGaps        int     `json:"odometer_gaps"`
 	OdometerAnomalies   int     `json:"odometer_anomalies"`
 	InsuranceMissing    bool    `json:"insurance_missing"`
 	AcquisitionMissing  bool    `json:"acquisition_missing"`
+	// AcquisitionMissingFields names what the acquisition still lacks for the depreciation: "purchase_price",
+	// "resale_value" and/or "holding_period". Empty when the acquisition mode itself is missing or not applicable.
+	AcquisitionMissingFields []string `json:"acquisition_missing_fields"`
 	// StartOdometerMissing is true when the odometer at the start of ownership is not entered.
 	StartOdometerMissing bool     `json:"start_odometer_missing"`
 	Warnings             []string `json:"warnings"`
-	// ScorePct is a weighted completeness score (0-100) over the dimensions below.
+	// ScoreAvailable is false while the vehicle has no distance and no expense: there is nothing to score yet.
+	ScoreAvailable bool `json:"score_available"`
+	// Gaps lists what is missing with its estimated worth, the largest first.
+	Gaps []CompletenessGap `json:"gaps"`
+	// ScorePct is a weighted completeness score (0-100) over the dimensions below; 0 when ScoreAvailable is false.
 	ScorePct   int                     `json:"score_pct"`
 	Dimensions []CompletenessDimension `json:"dimensions"`
 }
 
 // CompletenessDimension is one weighted component of the completeness score.
 type CompletenessDimension struct {
-	Key      string  `json:"key"`
+	Key string `json:"key"`
+	// LabelKey selects the translated label on the client (it differs by powertrain and tracking mode); Label is the
+	// English fallback.
+	LabelKey string  `json:"label_key"`
 	Label    string  `json:"label"`
 	ScorePct int     `json:"score_pct"`
 	Weight   float64 `json:"weight"`

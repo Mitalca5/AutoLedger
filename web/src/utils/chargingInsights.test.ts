@@ -7,6 +7,7 @@ import {
   groupLabel,
   monthlyDatasets,
   monthlyPrices,
+  placeCategoryRows,
   savingsView,
   unclassifiedShare,
   type HomeSavings,
@@ -103,5 +104,43 @@ describe('unclassifiedShare', () => {
   })
   it('is zero without energy or without an unclassified group', () => {
     expect(unclassifiedShare(stats([group({})]))).toBe(0)
+  })
+})
+
+describe('placeCategoryRows', () => {
+  const group = (key: string, category: string | undefined, kwh: number, cost: number, priced: number, unknown = 0) => ({
+    key, category, sessions: 1, kwh_added: kwh, cost, priced_kwh: priced, price_per_kwh: priced ? cost / priced : null, free_sessions: 0, unknown_sessions: unknown, unknown_kwh: 0,
+  })
+  const stats = {
+    months: 12,
+    summary: { sessions: 5, kwh_added: 100, cost: 0, priced_kwh: 0, price_per_kwh: null, free_sessions: 0, unknown_sessions: 0, unknown_kwh: 0, zero_kwh_sessions: 0 },
+    groups: [
+      group('h1', 'HOME', 40, 8, 40),
+      group('h2', 'HOME', 20, 6, 20),
+      group('p1', 'PUBLIC', 30, 15, 20, 1),
+      group('', undefined, 10, 0, 0, 2),
+    ],
+    series: [],
+    home_savings: { home_price_per_kwh: null, home_priced_kwh: 0, away_sessions: 0, away_priced_kwh: 0, away_cost: 0, hypothetical_cost: 0, savings: 0, unclassified_kwh: 0 },
+  } as any
+
+  it('folds the places of a category, the busiest first', () => {
+    const rows = placeCategoryRows(stats)
+    expect(rows.map((r) => r.category)).toEqual(['HOME', 'PUBLIC', ''])
+    expect(rows[0].kwh).toBe(60)
+    expect(rows[0].sharePct).toBe(60)
+    expect(rows[0].pricePerKwh).toBeCloseTo(14 / 60, 6)
+  })
+
+  it('prices over the priced energy only and leaves unclassified charges unclassified', () => {
+    const rows = placeCategoryRows(stats)
+    expect(rows[1].pricePerKwh).toBeCloseTo(15 / 20, 6)
+    expect(rows[1].unknownSessions).toBe(1)
+    expect(rows[2].category).toBe('')
+    expect(rows[2].pricePerKwh).toBeNull()
+  })
+
+  it('is empty without energy', () => {
+    expect(placeCategoryRows({ ...stats, groups: [] })).toEqual([])
   })
 })

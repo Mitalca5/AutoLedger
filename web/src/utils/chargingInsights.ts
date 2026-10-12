@@ -154,3 +154,41 @@ export function unclassifiedShare(stats: PlaceStats): number {
   const un = stats.groups.find((g) => !g.key)
   return un ? un.kwh_added / total : 0
 }
+
+export interface PlaceCategoryRow {
+  /** HOME, WORK, PUBLIC, OTHER, OUTSIDE, or '' for the charges no place could be assigned to. */
+  category: string
+  sessions: number
+  kwh: number
+  sharePct: number
+  /** Cost over the priced energy only, as in the place view; null when no charge of the category has a cost. */
+  pricePerKwh: number | null
+  unknownSessions: number
+}
+
+/** The place groups folded by category, the busiest first; unclassified charges stay on their own row. */
+export function placeCategoryRows(stats: PlaceStats): PlaceCategoryRow[] {
+  const total = stats.summary.kwh_added
+  const byCategory = new Map<string, { sessions: number; kwh: number; cost: number; pricedKwh: number; unknown: number }>()
+  for (const g of stats.groups) {
+    const category = g.category === OUTSIDE_CATEGORY ? OUTSIDE_CATEGORY : g.key ? g.category || 'OTHER' : ''
+    const row = byCategory.get(category) ?? { sessions: 0, kwh: 0, cost: 0, pricedKwh: 0, unknown: 0 }
+    row.sessions += g.sessions
+    row.kwh += g.kwh_added
+    row.cost += g.cost
+    row.pricedKwh += g.priced_kwh
+    row.unknown += g.unknown_sessions
+    byCategory.set(category, row)
+  }
+  return [...byCategory.entries()]
+    .map(([category, r]) => ({
+      category,
+      sessions: r.sessions,
+      kwh: r.kwh,
+      sharePct: total > 0 ? (r.kwh / total) * 100 : 0,
+      pricePerKwh: r.pricedKwh > 0 ? r.cost / r.pricedKwh : null,
+      unknownSessions: r.unknown,
+    }))
+    .filter((r) => r.kwh > 0)
+    .sort((a, b) => b.kwh - a.kwh)
+}

@@ -199,13 +199,13 @@ describe('estimate helpers', () => {
 })
 
 describe('carpoolCsvRows', () => {
-  it('escapes the title and computes the coverage, capped at 100 %', () => {
+  it('returns the raw title and computes the coverage, capped at 100 %', () => {
     const rows = carpoolCsvRows([
       { id: 't1', date: '2026-05-02T10:00:00', title: 'Paris "Est" → Lyon', distance_km: 230, passengers: [{}, {}], total_cost: 60.5, total_revenue: 40, net_cost: 20.5 },
       { id: 't2', title: '', distance_km: 110, passenger_count: 1, total_cost: 10, total_revenue: 25, net_cost: -15 },
       { id: 't3', total_cost: 0, total_revenue: 12 },
     ])
-    expect(rows[0][2]).toBe('"Paris ""Est"" → Lyon"')
+    expect(rows[0][2]).toBe('Paris "Est" → Lyon')
     expect(rows[0][4]).toBe(2)
     expect(rows[0][5]).toBe('60.50')
     expect(rows[0][8]).toBe(66)

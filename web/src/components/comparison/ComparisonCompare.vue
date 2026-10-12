@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { intlLocale, t } from '@/i18n'
-import { distanceUnit, formatDistanceValue, kmToDisplayDistance } from '@/units'
+import { distanceUnit, formatDistanceValue } from '@/units'
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { downloadCsv } from '@/utils/csv'
+import { comparisonCsvRows } from '@/utils/comparisonCsv'
 import { useVehicleStore } from '@/stores/vehicle'
 import { scenarioSide, sideKey } from '@/utils/comparisonSide'
 import { comparisonCurrency, canCompareCurrencies } from '@/utils/comparisonCurrency'
@@ -84,16 +85,7 @@ function exportCsv() {
   downloadCsv(
     t('comparison.csv.scenariosFile'),
     t(sk('comparison.csv.scenariosHeader'), { unit: distanceUnit(), cur: commonCurrency.value }).split(','),
-    rows.value.map((r) => [
-      `"${r.name.replace(/"/g, '""')}"`,
-      r.mode,
-      r.years,
-      Math.round(kmToDisplayDistance(r.km)),
-      Number(r.tracked).toFixed(2),
-      Number(r.ice).toFixed(2),
-      Number(r.savings).toFixed(2),
-      r.breakEven,
-    ])
+    comparisonCsvRows(rows.value)
   )
 }
 

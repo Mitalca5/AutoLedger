@@ -139,15 +139,15 @@ export function driveCsvRows(list: any[]) {
   return list.map((d) => [
     d.id,
     d.start_time ? new Date(d.start_time).toISOString().slice(0, 16) : '',
-    `"${(d.start_address || '').replace(/"/g, '""')}"`,
-    `"${(d.end_address || '').replace(/"/g, '""')}"`,
+    d.start_address || '',
+    d.end_address || '',
     Math.round(kmToDisplayDistance(d.distance_km || 0) * 100) / 100,
     d.duration_min || 0,
     Math.round(perDistance(d.consumption_kwh_100km || 0) * 10) / 10,
     d.costs?.electricity_kwh || 0,
     (d.costs?.total_cost || 0).toFixed(2),
     perDistance(d.costs?.cost_per_km || 0).toFixed(3),
-    `"${(d.tags || []).join(', ')}"`,
+    (d.tags || []).join(', '),
   ])
 }
 

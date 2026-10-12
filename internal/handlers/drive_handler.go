@@ -129,16 +129,10 @@ func (h *DriveHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	enriched := make([]EnrichedDrive, len(drives))
 	for i, d := range drives {
-		kwh, energySource := services.DriveEnergyKwh(d.DistanceKm, d.EnergyConsumedKwh, d.ConsumptionKwh100km)
-		hasEstimates := energySource == services.EnergySourceDefault || rates.HasUnknownRate()
-
-		components := services.ComputeCostComponents(rates, d.DistanceKm, kwh)
-		elecCost := components.ElectricityCost
-		tiresCost := components.TiresCost
-		maintCost := components.MaintenanceCost
-		insCost := insuranceCosts[d.ID]
-		tollsCost := tollsMap[d.ID]
-		totalCost := elecCost + tiresCost + maintCost + insCost + tollsCost
+		cost := services.ComputeDriveCost(rates, d, insuranceCosts[d.ID], tollsMap[d.ID])
+		kwh, energySource, hasEstimates := cost.ElectricityKwh, cost.EnergySource, cost.HasEstimates
+		elecCost, tiresCost, maintCost := cost.ElectricityCost, cost.TiresCost, cost.MaintenanceCost
+		insCost, tollsCost, totalCost := cost.InsuranceCost, cost.TollsCost, cost.TotalCost
 
 		costPerKm := 0.0
 		// The insurance rate actually applied to this drive, which may differ from the vehicle's

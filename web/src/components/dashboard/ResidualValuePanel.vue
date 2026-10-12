@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DistanceInput from '@/components/DistanceInput.vue'
 import NumberInput from '@/components/NumberInput.vue'
 import { computed, ref, watch } from 'vue'
 import { t } from '@/i18n'
@@ -146,7 +147,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
         <h4 class="font-bold text-slate-200">{{ $t('dashboard.residualPanel.residual') }}</h4>
         <div class="flex flex-wrap gap-2 items-end">
           <label class="text-slate-400">{{ $t('dashboard.residualPanel.expectedKm') }}
-            <input v-model="expectedKm" type="number" min="0" step="1000" class="block w-32 field" @change="loadResidual" />
+            <DistanceInput whole text v-model="expectedKm" min="0" step="1000" class="block w-32 field" @change="loadResidual" />
           </label>
         </div>
         <details class="rounded-xl border border-slate-800 bg-slate-950/40 px-3 py-2">
