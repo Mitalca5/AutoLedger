@@ -22,7 +22,7 @@
     "saveEstimate": "Save the estimate",
     "invalidConsumption": "Invalid average consumption (must be between {min} and {max} kWh/100 {unit})",
     "invalidField": "Invalid field",
-    "invalidRate": "Invalid electricity rate (must be between 0.01 and 10 {cur}/kWh)",
+    "invalidRate": "Invalid electricity rate (must be between 0 and 10 {cur}/kWh)",
     "saved": "Energy estimate saved!"
   },
   "fuelLogsPanel": {

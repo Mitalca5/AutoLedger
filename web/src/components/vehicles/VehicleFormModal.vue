@@ -453,7 +453,7 @@ async function testModalConnection() {
             </div>
             <div>
               <label for="vehicle-pre-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.rateKwh', { currency: form.currency }) }}</label>
-              <NumberInput id="vehicle-pre-rate" v-model="form.estimated_price_per_kwh" min="0.01" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="field" />
+              <NumberInput id="vehicle-pre-rate" v-model="form.estimated_price_per_kwh" min="0" max="5" :placeholder="$t('common.example', { value: $n(0.22) })" class="field" />
             </div>
           </div>
         </div>

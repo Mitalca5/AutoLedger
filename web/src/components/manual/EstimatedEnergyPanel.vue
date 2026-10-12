@@ -10,6 +10,7 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { currencySymbol, formatAmount } from '@/currency'
 import { distanceUnit, formatDistance, formatPerDistanceValue, perDistance } from '@/units'
+import { hasEnergyEstimate } from '@/utils/vehicles'
 
 const props = defineProps<{
   vehicle: any
@@ -26,8 +27,9 @@ const tco = ref<any | null>(null)
 
 const preview = computed(() => {
   const kwh100 = Number(form.value.kwh_100km)
+  if (!kwh100 || kwh100 <= 0 || form.value.price_per_kwh == null) return null
   const rate = Number(form.value.price_per_kwh)
-  if (!kwh100 || !rate || kwh100 <= 0 || rate <= 0) return null
+  if (!(rate >= 0)) return null
   const distance = tco.value?.estimated_energy_distance_km ?? (tco.value?.completeness?.untracked_distance_km || 0)
   if (distance <= 0) return null
   const kwh = (distance * kwh100) / 100
@@ -54,7 +56,7 @@ async function save() {
     void showAlert(t('manual.estimatedEnergyPanel.invalidConsumption', { unit: distanceUnit(), min, max }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
     return
   }
-  if (rate !== null && (rate <= 0 || rate > 10)) {
+  if (rate !== null && (rate < 0 || rate > 10)) {
     void showAlert(t('manual.estimatedEnergyPanel.invalidRate', { cur: currencySymbol(vehicleStore.currency) }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
     return
   }
@@ -104,7 +106,7 @@ onMounted(() => {
           </div>
         </div>
         <span
-          v-if="vehicle?.estimated_kwh_100km && vehicle?.estimated_price_per_kwh"
+          v-if="hasEnergyEstimate(vehicle)"
           class="text-xs px-2.5 py-0.5 rounded-full bg-success-500/10 text-success-400 border border-success-500/20 font-semibold flex items-center gap-1"
         >
           <CheckCircle2 class="w-3 h-3" /> {{ $t('manual.estimatedEnergyPanel.active') }}
@@ -157,7 +159,7 @@ onMounted(() => {
 
         <div v-if="canEdit" class="flex items-center justify-between pt-1">
           <button
-            v-if="vehicle?.estimated_kwh_100km || vehicle?.estimated_price_per_kwh"
+            v-if="vehicle?.estimated_kwh_100km || vehicle?.estimated_price_per_kwh != null"
             type="button"
             class="tap-text text-xs text-slate-400 hover:text-rose-400 transition-colors"
             @click="clear"

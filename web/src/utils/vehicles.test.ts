@@ -8,6 +8,7 @@ import {
   isFuelOnly,
   emptyOwnership,
   emptyVehicleForm,
+  hasEnergyEstimate,
   hasTeslaMate,
   isLeaseType,
   isOwnedPhase,
@@ -260,5 +261,18 @@ describe('default driver', () => {
   it('has no default driver without people', () => {
     expect(defaultDriver([guest], null)).toBeUndefined()
     expect(defaultDriver([], 'o')).toBeUndefined()
+  })
+})
+
+describe('hasEnergyEstimate', () => {
+  it('accepts a free supply: a price of 0 is set, not missing', () => {
+    expect(hasEnergyEstimate({ estimated_kwh_100km: 16, estimated_price_per_kwh: 0 })).toBe(true)
+    expect(hasEnergyEstimate({ estimated_kwh_100km: 16, estimated_price_per_kwh: 0.22 })).toBe(true)
+  })
+  it('needs a consumption and a price', () => {
+    expect(hasEnergyEstimate({ estimated_kwh_100km: 16, estimated_price_per_kwh: null })).toBe(false)
+    expect(hasEnergyEstimate({ estimated_kwh_100km: null, estimated_price_per_kwh: 0.2 })).toBe(false)
+    expect(hasEnergyEstimate({ estimated_kwh_100km: 0, estimated_price_per_kwh: 0.2 })).toBe(false)
+    expect(hasEnergyEstimate(null)).toBe(false)
   })
 })

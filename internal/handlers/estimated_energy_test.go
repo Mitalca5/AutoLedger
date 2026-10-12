@@ -41,6 +41,14 @@ func TestUpdateEstimatedEnergyValidation(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name: "free supply",
+			body: func() SaveEstimatedEnergyRequest {
+				p := 0.0
+				return SaveEstimatedEnergyRequest{EstimatedPricePerKwh: &p}
+			}(),
+			wantStatus: http.StatusOK,
+		},
+		{
 			name: "excessive tariff",
 			body: func() SaveEstimatedEnergyRequest {
 				p := 15.0

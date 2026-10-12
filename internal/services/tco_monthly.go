@@ -159,7 +159,7 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		mc.DistanceKm = round1(mc.TrackedDistanceKm + mc.SmoothedKm)
 		totalSmoothed += mc.SmoothedKm
 		totalEstimated += mc.EstimatedEnergyKm
-		if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh > 0 && mc.EstimatedEnergyKm > 0 {
+		if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh >= 0 && mc.EstimatedEnergyKm > 0 {
 			mc.SmoothedKwh = round1(mc.EstimatedEnergyKm * (*estKwh100km / 100.0))
 			mc.SmoothedEnergy = money.FromFloat(mc.SmoothedKwh * *estPricePerKwh)
 			mc.Energy += mc.SmoothedEnergy
@@ -180,7 +180,7 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		if math.Abs(diff) > 0.001 && math.Abs(diff) < 1.0 {
 			lastEstimatedMc.EstimatedEnergyKm = round1(lastEstimatedMc.EstimatedEnergyKm + diff)
 			totalEstimated = targetPreTm
-			if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh > 0 && lastEstimatedMc.EstimatedEnergyKm > 0 {
+			if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh >= 0 && lastEstimatedMc.EstimatedEnergyKm > 0 {
 				oldEnergy := lastEstimatedMc.SmoothedEnergy
 				lastEstimatedMc.SmoothedKwh = round1(lastEstimatedMc.EstimatedEnergyKm * (*estKwh100km / 100.0))
 				lastEstimatedMc.SmoothedEnergy = money.FromFloat(lastEstimatedMc.SmoothedKwh * *estPricePerKwh)

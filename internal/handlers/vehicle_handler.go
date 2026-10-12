@@ -367,7 +367,7 @@ func (h *VehicleHandler) UpdateEstimatedEnergy(w http.ResponseWriter, r *http.Re
 		writeAPIError(w, http.StatusBadRequest, apierror.Newf("vehicle.estimate_consumption_range", "The average consumption must be between 0 and %.0f kWh/100km", apierror.PerKm(100)))
 		return
 	}
-	if req.EstimatedPricePerKwh != nil && (*req.EstimatedPricePerKwh <= 0 || *req.EstimatedPricePerKwh > 10) {
+	if req.EstimatedPricePerKwh != nil && (*req.EstimatedPricePerKwh < 0 || *req.EstimatedPricePerKwh > 10) {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.estimate_rate_range", "The electricity rate must be between 0 and 10 per kWh"))
 		return
 	}

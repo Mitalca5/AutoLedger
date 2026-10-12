@@ -6,7 +6,7 @@ import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { api } from '@/services/api'
 import { Car, Plus, Trash2, Edit2, RefreshCw, CheckCircle2, AlertCircle, X, Gauge, Link2, FileText, Zap, Users, Pencil, Database } from 'lucide-vue-next'
-import { canCharge, canRefuel, isElectricOnly, ownershipSummary, roleLabel } from '@/utils/vehicles'
+import { canCharge, canRefuel, hasEnergyEstimate, isElectricOnly, ownershipSummary, roleLabel } from '@/utils/vehicles'
 
 // One vehicle of the list, with its contract summary and a TeslaMate connection test of its own
 const props = defineProps<{ v: any; ownership: any | null }>()
@@ -153,7 +153,7 @@ function clearCardTestResult() {
 
       <div v-if="isElectricOnly(v.powertrain)">
         <span class="text-slate-400">{{ $t('vehicles.vehicleCard.estimatedEnergy') }}</span>
-        <p v-if="v.estimated_kwh_100km && v.estimated_price_per_kwh" class="text-xs font-semibold text-info-400 flex items-center gap-1 mt-1">
+        <p v-if="hasEnergyEstimate(v)" class="text-xs font-semibold text-info-400 flex items-center gap-1 mt-1">
           <Zap class="w-3.5 h-3.5 text-info-400" />
           {{ $t('vehicles.vehicleCard.kwh100kmKwh', { unit: distanceUnit(), estimated_kwh_100km: formatPerDistanceValue(Number(v.estimated_kwh_100km)), price: `${formatAmount(v.estimated_price_per_kwh, v.currency || 'EUR', 3)}/kWh` }) }}
         </p>

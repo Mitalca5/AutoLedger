@@ -2814,3 +2814,46 @@ func TestIntegrationCompletenessWithoutDataHasNoScore(t *testing.T) {
 		t.Error("lists must serialise as [] rather than null")
 	}
 }
+
+func TestIntegrationEstimatedEnergyAtAFreePrice(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	tco := NewTCOService(db.Pool, "Europe/Paris")
+
+	day := time.Now().UTC().Truncate(24 * time.Hour)
+	kwh100, price := 15.0, 0.0
+	u, err := repo.CreateUser(ctx, "est-free@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := &models.Vehicle{UserID: u.ID, Name: "EV", TeslaMateAuthType: models.AuthModeNone, CurrentOdometer: 11000,
+		EstimatedKwh100km: &kwh100, EstimatedPricePerKwh: &price}
+	if err := repo.CreateVehicle(ctx, v); err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range []models.OdometerCheckpoint{
+		{VehicleID: v.ID, Date: day.AddDate(0, 0, -100), Odometer: 10000},
+		{VehicleID: v.ID, Date: day.AddDate(0, 0, -20), Odometer: 11000},
+	} {
+		if err := repo.CreateOdometerCheckpoint(ctx, &r); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A price of 0 is a free supply: the energy is estimated (150 kWh over 1000 km) and costs nothing.
+	if sum.EstimatedEnergyKwh < 149 || sum.EstimatedEnergyKwh > 151 {
+		t.Errorf("free supply: estimated energy %v kWh, want 150", sum.EstimatedEnergyKwh)
+	}
+	if sum.EstimatedEnergyCost != 0 {
+		t.Errorf("free supply: estimated energy cost %v, want 0", sum.EstimatedEnergyCost)
+	}
+	for _, w := range sum.Completeness.Warnings {
+		if strings.Contains(w, "appear in no drive") {
+			t.Errorf("a free supply must not be reported as missing drives: %q", w)
+		}
+	}
+}

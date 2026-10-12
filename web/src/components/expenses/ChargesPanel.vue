@@ -13,6 +13,7 @@ import { formatAmount } from '@/currency'
 import { formatNumber } from '@/utils/numbers'
 import { chargeDeletable, chargeOrigin, chargeOriginKey } from '@/utils/chargeProvenance'
 import { distanceUnit, formatPerDistanceValue, perDistance } from '@/units'
+import { hasEnergyEstimate } from '@/utils/vehicles'
 
 const props = defineProps<{
   charges: any[]
@@ -42,7 +43,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
   <div class="space-y-3">
     <!-- Energy estimate banner if configured -->
     <div
-      v-if="vehicleStore.activeVehicle?.estimated_kwh_100km && vehicleStore.activeVehicle?.estimated_price_per_kwh"
+      v-if="hasEnergyEstimate(vehicleStore.activeVehicle)"
       class="p-3 bg-info-500/10 border border-info-500/20 rounded-2xl flex items-center justify-between text-xs text-info-300"
     >
       <div class="flex items-center gap-2">

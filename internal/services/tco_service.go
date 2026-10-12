@@ -467,7 +467,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	sum.SmoothedDistanceKm = totalSmoothedKm
 	sum.EstimatedEnergyDistanceKm = totalEstimatedEnergyKm
 
-	if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh > 0 && totalEstimatedEnergyKm > 0 {
+	if estKwh100km != nil && *estKwh100km > 0 && estPricePerKwh != nil && *estPricePerKwh >= 0 && totalEstimatedEnergyKm > 0 {
 		sum.EstimatedEnergyKwh = round1(totalEstimatedEnergyKm * (*estKwh100km / 100.0))
 		sum.EstimatedEnergyCost = money.FromFloat(sum.EstimatedEnergyKwh * *estPricePerKwh)
 		sum.TotalKwhAdded = round1(sum.TotalKwhAdded + sum.EstimatedEnergyKwh)
@@ -481,7 +481,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		}
 	}
 	if comp.UntrackedDistanceKm > 0 {
-		if sum.EstimatedEnergyCost > 0 {
+		if sum.EstimatedEnergyKwh > 0 {
 			comp.Warnings = append(comp.Warnings, fmt.Sprintf(
 				"%.0f km driven before tracking started: charges estimated and completed (%.1f kWh/100km at %.3f/kWh)", sum.EstimatedEnergyDistanceKm, *estKwh100km, *estPricePerKwh))
 		} else {

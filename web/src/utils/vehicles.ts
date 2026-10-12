@@ -146,6 +146,11 @@ export function vehicleFormFrom(v: any): VehicleForm {
 }
 
 // Empty numeric inputs are sent as null, never as ""
+/** A vehicle has an energy estimate when both figures are set; a price of 0 is a valid (free) supply. */
+export function hasEnergyEstimate(v: { estimated_kwh_100km?: number | null; estimated_price_per_kwh?: number | null } | null | undefined): boolean {
+  return !!v && (v.estimated_kwh_100km ?? 0) > 0 && v.estimated_price_per_kwh != null
+}
+
 export function nullIfEmpty(v: any) {
   return v === '' || v === undefined ? null : v
 }
