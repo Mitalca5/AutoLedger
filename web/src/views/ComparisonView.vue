@@ -14,6 +14,8 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
 import { api } from '@/services/api'
 import { currencySymbol } from '@/currency'
+import { CURRENCIES } from '@/utils/expenses'
+import { comparisonCurrency, canCompareCurrencies } from '@/utils/comparisonCurrency'
 import { canCharge } from '@/utils/vehicles'
 import { scenarioSide } from '@/utils/comparisonSide'
 import ComparisonCompare from '@/components/comparison/ComparisonCompare.vue'
@@ -57,7 +59,7 @@ const fuelLabel = (f: { fuel_type: string; label: string }) => (te(`comparison.f
 // Electric and plug-in hybrid vehicles use their recorded energy costs.
 const canCompareTrackedVehicle = computed(() => !!vehicleStore.activeVehicle && vehicleStore.canCharge)
 
-const emptyForm = () => emptyComparisonForm(canCompareTrackedVehicle.value)
+const emptyForm = () => ({ ...emptyComparisonForm(canCompareTrackedVehicle.value), currency: vehicleStore.currency })
 const form = reactive(emptyForm())
 const showAdvanced = ref(false)
 const formVehicle = computed(() => comparisonReferenceVehicle(form.vehicle_id, vehicleStore.activeVehicle, vehicleStore.vehicles))
@@ -82,9 +84,12 @@ const evFields = [
 
 // A tracked scenario's amounts, defaults and labels follow its saved reference vehicle.
 const currency = computed(() => {
-  const referenceId = view.value === 'edit' ? form.vehicle_id : view.value === 'result' && currentScenario.value?.mode === 'RETROSPECTIVE' ? currentScenario.value?.vehicle_id : undefined
+  if (view.value === 'edit' && form.mode === 'PROJECTION') return /^[A-Z]{3}$/.test(form.currency.trim().toUpperCase()) ? form.currency.trim().toUpperCase() : vehicleStore.currency
+  if (view.value === 'result') return comparisonCurrency(currentScenario.value, vehicleStore.vehicles) || vehicleStore.currency
+  const referenceId = view.value === 'edit' ? form.vehicle_id : undefined
   return comparisonReferenceVehicle(referenceId, vehicleStore.activeVehicle, vehicleStore.vehicles)?.currency || vehicleStore.currency
 })
+const currencyOptions = computed(() => [...new Set([...CURRENCIES, ...vehicleStore.vehicles.map(v => v.currency), form.currency])].filter(code => /^[A-Z]{3}$/.test(code)))
 const currencySign = computed(() => currencySymbol(currency.value))
 
 function fmtKm(v: number): string {
@@ -197,6 +202,11 @@ async function saveAndCompute() {
 }
 
 async function openResult(sc: any) {
+  if (!comparisonCurrency(sc, vehicleStore.vehicles)) {
+    editScenario(sc)
+    formError.value = t('comparison.currency.legacy')
+    return
+  }
   currentScenario.value = sc
   result.value = null
   view.value = 'result'
@@ -235,6 +245,10 @@ function toggleSelected(id: string) {
 
 async function openCompare() {
   const chosen = scenarios.value.filter((s) => selectedIds.value.includes(s.id))
+  if (!canCompareCurrencies(chosen, vehicleStore.vehicles)) {
+    await showAlert(t('comparison.currency.same'), t('comparison.comparisonView.title'), 'warning')
+    return
+  }
   try {
     const results = await Promise.all(chosen.map((s) => api.getComparisonResult(s.id)))
     compareItems.value = chosen.map((scenario, i) => ({ scenario, result: results[i] }))
@@ -338,6 +352,14 @@ onMounted(async () => {
             <option value="PROJECTION">{{ $t('comparison.comparisonView.projectionICompareTwoVehicles') }}</option>
           </select>
           <p v-if="isRetro" class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.theElectricVehicleSCosts') }}</p>
+        </div>
+        <div v-if="!isRetro">
+          <label for="cmp-currency" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('comparison.currency.label') }}</label>
+          <select id="cmp-currency" v-model="form.currency" required class="field" @change="loadDefaults">
+            <option disabled value="">{{ $t('comparison.errors.currency') }}</option>
+            <option v-for="code in currencyOptions" :key="code" :value="code">{{ code }}</option>
+          </select>
+          <p class="text-xs text-slate-400 mt-1">{{ $t('comparison.currency.hint') }}</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>

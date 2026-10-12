@@ -20,6 +20,7 @@ func validComparisonRequest() SaveComparisonRequest {
 	return SaveComparisonRequest{
 		VehicleID: &vid,
 		Name:      "  Vs SUV essence ",
+		Currency:  "EUR",
 		Mode:      models.ComparisonModeRetrospective,
 		AnnualKm:  12000,
 		Years:     5,
@@ -228,5 +229,50 @@ func TestPreviewComparisonRefusesOtherModesAndInvalidInputs(t *testing.T) {
 		if rec := previewRequest(t, h, req); rec.Code != http.StatusBadRequest {
 			t.Errorf("%s: status %d, want 400", name, rec.Code)
 		}
+	}
+}
+
+func TestIntegrationProjectionWithoutCurrencyTakesTheOwnersSharedCurrency(t *testing.T) {
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	single, err := repo.CreateUser(ctx, "cmp-single@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mixed, err := repo.CreateUser(ctx, "cmp-mixed@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, v := range []*models.Vehicle{
+		{UserID: single.ID, Name: "A", Currency: "CHF", TeslaMateAuthType: models.AuthModeNone},
+		{UserID: single.ID, Name: "B", Currency: "CHF", TeslaMateAuthType: models.AuthModeNone},
+		{UserID: mixed.ID, Name: "C", Currency: "EUR", TeslaMateAuthType: models.AuthModeNone},
+		{UserID: mixed.ID, Name: "D", Currency: "CHF", TeslaMateAuthType: models.AuthModeNone},
+	} {
+		if err := repo.CreateVehicle(ctx, v); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	h := NewComparisonHandler(repo, services.NewComparisonService(nil))
+	create := func(userID string) *httptest.ResponseRecorder {
+		body := projectionPreviewRequest()
+		body.Name = "No currency"
+		body.Currency = ""
+		raw, _ := json.Marshal(body)
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(raw))
+		req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, userID))
+		rec := httptest.NewRecorder()
+		h.Create(rec, req)
+		return rec
+	}
+
+	rec := create(single.ID)
+	var saved models.ComparisonScenario
+	if rec.Code != http.StatusCreated || json.Unmarshal(rec.Body.Bytes(), &saved) != nil || saved.Currency != "CHF" {
+		t.Fatalf("single currency: status %d currency %q body %s", rec.Code, saved.Currency, rec.Body)
+	}
+	if rec := create(mixed.ID); rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "comparison.currency_required") {
+		t.Fatalf("mixed currencies must ask for the currency, got %d %s", rec.Code, rec.Body)
 	}
 }

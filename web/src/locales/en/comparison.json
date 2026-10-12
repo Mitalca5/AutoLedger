@@ -109,7 +109,8 @@
     "saveFailed": "Could not save the comparison.",
     "calcFailed": "Calculation failed.",
     "deleteFailed": "Could not delete.",
-    "compareFailed": "Comparison failed."
+    "compareFailed": "Comparison failed.",
+    "currency": "Choose a currency."
   },
   "depreciationMissing": {
     "verdict": "The saving over the whole period is not shown: the depreciation of the tracked vehicle is not entered.",
@@ -265,5 +266,11 @@
   },
   "exclusions": {
     "note": "Not compared: tolls, parking, financing, subscriptions and other costs have no combustion-side input."
+  },
+  "currency": {
+    "label": "Currency (ISO code)",
+    "hint": "Amounts keep this currency. Changing it does not convert them.",
+    "legacy": "This older projection has no recorded currency. Confirm the original currency before saving or viewing it.",
+    "same": "Select comparisons in the same known currency. Edit older projections to confirm their original currency."
   }
 }

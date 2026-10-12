@@ -7,6 +7,7 @@ import { downloadCsv } from '@/utils/csv'
 import { comparisonCsvRows } from '@/utils/comparisonCsv'
 import { useVehicleStore } from '@/stores/vehicle'
 import { scenarioSide, sideKey } from '@/utils/comparisonSide'
+import { comparisonCurrency, canCompareCurrencies } from '@/utils/comparisonCurrency'
 
 Chart.register(...registerables)
 
@@ -19,9 +20,12 @@ const vehicleStore = useVehicleStore()
 // Hybrid wording only when every compared scenario tracks a hybrid.
 const sk = (key: string) => sideKey(key, props.items.length > 0 && props.items.every((i) => scenarioSide(i.scenario, vehicleStore.vehicles) === 'hybrid') ? 'hybrid' : 'electric')
 
-// Same currency as the comparison page these scenarios were built on
-function fmtMoney(v: number | null | undefined, digits = 0): string {
-  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency: vehicleStore.currency, minimumFractionDigits: digits, maximumFractionDigits: digits })
+const commonCurrency = computed(() => canCompareCurrencies(props.items.map(i => i.scenario), vehicleStore.vehicles)
+  ? comparisonCurrency(props.items[0]?.scenario, vehicleStore.vehicles) : undefined)
+
+// Never label or plot different currencies as if their amounts were interchangeable.
+function fmtMoney(v: number | null | undefined, currency: string, digits = 0): string {
+  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency, minimumFractionDigits: digits, maximumFractionDigits: digits })
 }
 
 function breakEven(r: any): string {
@@ -51,7 +55,8 @@ let chart: Chart | null = null
 
 function render() {
   chart?.destroy()
-  if (!canvas.value) return
+  const currency = commonCurrency.value
+  if (!canvas.value || !currency) return
   chart = new Chart(canvas.value, {
     type: 'bar',
     data: {
@@ -66,11 +71,11 @@ function render() {
       maintainAspectRatio: false,
       plugins: {
         legend: { labels: { color: '#94a3b8', boxWidth: 12 } },
-        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label} : ${fmtMoney(Number(ctx.raw))}` } },
+        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label} : ${fmtMoney(Number(ctx.raw), currency)}` } },
       },
       scales: {
         x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
-        y: { ticks: { color: '#94a3b8', callback: (v) => fmtMoney(Number(v)) }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94a3b8', callback: (v) => fmtMoney(Number(v), currency) }, grid: { color: '#1e293b' } },
       },
     },
   })
@@ -79,7 +84,7 @@ function render() {
 function exportCsv() {
   downloadCsv(
     t('comparison.csv.scenariosFile'),
-    t(sk('comparison.csv.scenariosHeader'), { unit: distanceUnit(), cur: vehicleStore.currency }).split(','),
+    t(sk('comparison.csv.scenariosHeader'), { unit: distanceUnit(), cur: commonCurrency.value }).split(','),
     comparisonCsvRows(rows.value)
   )
 }
@@ -92,7 +97,8 @@ onBeforeUnmount(() => chart?.destroy())
 </script>
 
 <template>
-  <div class="space-y-5 print-area">
+  <p v-if="!commonCurrency" class="text-warning-300">{{ $t('comparison.currency.same') }}</p>
+  <div v-else class="space-y-5 print-area">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
       <div class="flex items-center justify-between mb-3 gap-3">
         <h2 class="text-sm font-semibold text-white">{{ $t('comparison.comparisonCompare.comparisonOfScenarios', { length: rows.length }) }}</h2>
@@ -117,10 +123,10 @@ onBeforeUnmount(() => chart?.destroy())
               <div class="font-semibold text-white">{{ r.name }}</div>
               <div class="text-xs text-slate-400">{{ r.mode }} · {{ $t('comparison.comparisonCompare.usage', { unit: distanceUnit(), km: formatDistanceValue(r.km), years: r.years }) }}</div>
             </th>
-            <td>{{ fmtMoney(r.tracked) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth) }) }}</div></td>
-            <td>{{ fmtMoney(r.ice) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth) }) }}</div></td>
+            <td>{{ fmtMoney(r.tracked, commonCurrency) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month2', { evMonth: fmtMoney(r.evMonth, commonCurrency) }) }}</div></td>
+            <td>{{ fmtMoney(r.ice, commonCurrency) }}<div class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.month', { iceMonth: fmtMoney(r.iceMonth, commonCurrency) }) }}</div></td>
             <td :class="r.savings >= 0 ? 'text-success-400' : 'text-warning-400'">
-              {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings)) }}
+              {{ r.savings >= 0 ? '−' : '+' }}{{ fmtMoney(Math.abs(r.savings), commonCurrency) }}
               <div class="text-xs text-slate-400">{{ r.savings >= 0 ? $t(sk('comparison.compare.saves')) : $t(sk('comparison.compare.costsMore')) }}</div>
             </td>
             <td>{{ r.breakEven }}</td>

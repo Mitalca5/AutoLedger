@@ -109,7 +109,8 @@
     "saveFailed": "Impossible d'enregistrer le comparatif.",
     "calcFailed": "Calcul impossible.",
     "deleteFailed": "Suppression impossible.",
-    "compareFailed": "Comparaison impossible."
+    "compareFailed": "Comparaison impossible.",
+    "currency": "Choisissez une devise."
   },
   "depreciationMissing": {
     "verdict": "L'économie sur l'ensemble de la période n'est pas affichée : la dépréciation du véhicule suivi n'est pas renseignée.",
@@ -265,5 +266,11 @@
   },
   "exclusions": {
     "note": "Non comparés : péages, stationnement, financement, abonnements et autres coûts n'ont pas de saisie côté thermique."
+  },
+  "currency": {
+    "label": "Devise (code ISO)",
+    "hint": "Les montants conservent cette devise. La modifier ne les convertit pas.",
+    "legacy": "Cette ancienne projection ne contient pas de devise. Confirmez la devise d'origine avant de l'enregistrer ou de la consulter.",
+    "same": "Sélectionnez des comparaisons dans une même devise connue. Modifiez les anciennes projections pour confirmer leur devise d'origine."
   }
 }

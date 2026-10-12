@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"math"
 	"net/http"
@@ -30,6 +31,7 @@ func NewComparisonHandler(repo *database.Repository, service *services.Compariso
 type SaveComparisonRequest struct {
 	VehicleID *string                `json:"vehicle_id"`
 	Name      string                 `json:"name"`
+	Currency  string                 `json:"currency"`
 	Mode      string                 `json:"mode"`
 	AnnualKm  float64                `json:"annual_km"`
 	Years     int                    `json:"years"`
@@ -100,6 +102,14 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 		}
 		req.Tracked = nil
 	case models.ComparisonModeProjection:
+		if strings.TrimSpace(req.Currency) == "" {
+			return apierror.New("comparison.currency_required", "Choose the currency of the projection")
+		}
+		currency, err := normalizeVehicleCurrency(req.Currency)
+		if err != nil {
+			return err
+		}
+		req.Currency = currency
 		req.VehicleID = nil
 		if req.Tracked == nil {
 			return apierror.New("comparison.ev_required", "The electric vehicle data is required in projection mode")
@@ -122,6 +132,7 @@ func (r *SaveComparisonRequest) toScenario(userID string) *models.ComparisonScen
 		UserID:    userID,
 		VehicleID: r.VehicleID,
 		Name:      r.Name,
+		Currency:  r.Currency,
 		Mode:      r.Mode,
 		AnnualKm:  r.AnnualKm,
 		Years:     r.Years,
@@ -131,6 +142,29 @@ func (r *SaveComparisonRequest) toScenario(userID string) *models.ComparisonScen
 	}
 }
 
+// fillProjectionCurrency gives a projection sent without a currency (a client that predates the field, a queued
+// offline write) the currency shared by all the vehicles of its owner. When they differ, or the owner has none, the
+// request stays empty and validation asks for the currency.
+func (h *ComparisonHandler) fillProjectionCurrency(ctx context.Context, userID string, req *SaveComparisonRequest) {
+	if h.repo == nil || req.Mode != models.ComparisonModeProjection || strings.TrimSpace(req.Currency) != "" {
+		return
+	}
+	vehicles, err := h.repo.ListVehiclesByUserID(ctx, userID)
+	if err != nil {
+		return
+	}
+	currency := ""
+	for _, v := range vehicles {
+		switch {
+		case currency == "":
+			currency = v.Currency
+		case currency != v.Currency:
+			return
+		}
+	}
+	req.Currency = currency
+}
+
 // decodeAndCheck reads the request, validates it and checks the access to the reference vehicle.
 func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Request) (*SaveComparisonRequest, bool) {
 	var req SaveComparisonRequest
@@ -138,6 +172,7 @@ func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Reques
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
 		return nil, false
 	}
+	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
 	if err := validateComparisonRequest(&req); err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return nil, false
@@ -147,6 +182,7 @@ func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Reques
 		if v == nil {
 			return nil, false
 		}
+		req.Currency = v.Currency
 		if !v.CanCharge() {
 			writeAPIError(w, http.StatusBadRequest, apierror.New("comparison.needs_ev", "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle"))
 			return nil, false
@@ -232,6 +268,7 @@ func (h *ComparisonHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	if strings.TrimSpace(req.Name) == "" {
 		req.Name = "preview"
 	}
+	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
 	if err := validateComparisonRequest(&req); err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return

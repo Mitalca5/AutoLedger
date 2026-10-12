@@ -58,6 +58,7 @@ type ComparisonScenario struct {
 	UserID    string          `json:"user_id"`
 	VehicleID *string         `json:"vehicle_id,omitempty"` // Reference tracked vehicle (required in RETROSPECTIVE mode)
 	Name      string          `json:"name"`
+	Currency  string          `json:"currency"`
 	Mode      string          `json:"mode"`
 	AnnualKm  float64         `json:"annual_km"`
 	Years     int             `json:"years"`
