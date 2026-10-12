@@ -268,6 +268,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	}
 	sum.AcquisitionCost = byCategory[LedgerAcquisition]
 	sum.DepreciationCost = owned.Depreciation
+	sum.DepreciationKnown = !owned.DepreciationUnknown
 	sum.LeaseExcessKmCost = owned.LeaseExcessKm
 	sum.LeaseExcessKmProjected = owned.LeaseExcessKmProjected
 	sum.LeaseKmDriven = round1(owned.LeaseKmDriven)

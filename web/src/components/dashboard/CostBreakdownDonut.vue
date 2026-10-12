@@ -70,6 +70,7 @@ onUnmounted(() => {
       </div>
     </div>
     <p class="text-xs text-slate-500 mb-4">{{ $t(mode === 'full' ? 'dashboard.donut.hintFull' : 'dashboard.donut.hintCash') }}</p>
+    <p v-if="mode === 'full' && tco && tco.depreciation_known === false" class="text-xs font-medium text-warning-400 -mt-2 mb-3">{{ $t('dashboard.costBreakdownDonut.depreciationMissing') }}</p>
     <div class="h-48 sm:h-64">
       <canvas ref="donutChartRef" :aria-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"></canvas>
     </div>

@@ -575,6 +575,60 @@ func TestIntegrationLedgerAcquisitionAndDepreciation(t *testing.T) {
 	}
 }
 
+func TestIntegrationBoughtVehicleWithoutResaleHasUnknownDepreciation(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "no_resale@example.com")
+	tco := NewTCOService(db.Pool, "Europe/Paris")
+
+	purchase := time.Now().AddDate(-1, 0, 0)
+	price, odo := money.Cents(4328000), 0.0
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: v.ID, AcquisitionType: models.AcquisitionCash, StartDate: purchase, StartOdometer: &odo, PurchasePrice: &price,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mustDrive(t, repo, v.ID, 1, time.Now().AddDate(0, 0, -5), 100, 500)
+
+	sum, err := tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.DepreciationKnown || sum.DepreciationCost != 0 {
+		t.Fatalf("a purchase without resale value: known=%v depreciation=%s", sum.DepreciationKnown, sum.DepreciationCost)
+	}
+
+	// A retrospective comparison says so and leaves the flag to the client.
+	cmp := NewComparisonService(tco)
+	sc := &models.ComparisonScenario{
+		UserID: v.UserID, VehicleID: &v.ID, Name: "Vs thermique", Mode: models.ComparisonModeRetrospective, AnnualKm: 15000, Years: 5,
+		ICE: models.ICEInputs{FuelType: "SP95_E10", LPer100Km: 7, FuelPrice: 1.8, PurchasePrice: money.FromFloat(30000), ResaleValue: money.FromFloat(12000)},
+	}
+	res, err := cmp.Compare(ctx, sc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.TrackedDepreciationKnown {
+		t.Error("the comparison must flag the missing depreciation of the tracked vehicle")
+	}
+
+	// Entering the resale value and the holding period makes it known.
+	resale, months := money.Cents(2000000), 60
+	if err := repo.SaveVehicleOwnership(ctx, &models.VehicleOwnership{
+		VehicleID: v.ID, AcquisitionType: models.AcquisitionCash, StartDate: purchase, StartOdometer: &odo, PurchasePrice: &price,
+		ExpectedResaleValue: &resale, ExpectedHoldingMonths: &months,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	sum, err = tco.ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sum.DepreciationKnown || sum.DepreciationCost <= 0 {
+		t.Fatalf("complete purchase: known=%v depreciation=%s", sum.DepreciationKnown, sum.DepreciationCost)
+	}
+}
+
 func TestIntegrationOdometerContinuity(t *testing.T) {
 	db, repo := setupIntegrationDB(t, false)
 	ctx := context.Background()

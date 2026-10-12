@@ -15,6 +15,9 @@ import (
 type OwnershipCosts struct {
 	// Depreciation of an owned vehicle (purchase, or LOA after the purchase option is exercised).
 	Depreciation money.Cents
+	// DepreciationUnknown is set when a bought vehicle has no depreciation because the price, the resale value or the
+	// holding period is missing: its full cost leaves out the largest item, which is not the same as a zero.
+	DepreciationUnknown bool
 	// LeasePrepaidAdjustment spreads the down payment and application fees over the contract duration:
 	// negative while the contract runs (part of the cash paid upfront is not consumed yet).
 	LeasePrepaidAdjustment money.Cents
@@ -65,11 +68,13 @@ func ComputeOwnershipCosts(o *models.VehicleOwnership, now time.Time, kmSinceSta
 	case models.AcquisitionCash, models.AcquisitionLoan:
 		if o.PurchasePrice == nil || *o.PurchasePrice <= 0 {
 			c.Missing = append(c.Missing, "Purchase price not entered")
+			c.DepreciationUnknown = true
 		} else {
 			base := *o.PurchasePrice + centsOrZero(o.PurchaseFees) - centsOrZero(o.Incentives)
 			dep, ok := depreciation(base, o.StartDate, o, now)
 			c.Depreciation = dep
 			if !ok {
+				c.DepreciationUnknown = true
 				c.Missing = append(c.Missing, "Estimated resale value or holding period not entered: depreciation excluded from the full cost")
 			}
 		}
@@ -177,6 +182,7 @@ func computeLease(c *OwnershipCosts, o *models.VehicleOwnership, now time.Time, 
 			dep, ok := depreciation(*o.LeasePurchaseOptionPrice, *o.OptionExercisedDate, o, now)
 			c.Depreciation = dep
 			if !ok {
+				c.DepreciationUnknown = true
 				c.Missing = append(c.Missing, "Purchase option exercised: estimated resale value or holding period not entered, depreciation excluded")
 			}
 		}

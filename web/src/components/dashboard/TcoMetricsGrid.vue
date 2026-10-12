@@ -30,6 +30,10 @@ const perUnit = (v: number) => money(perDistance(v || 0), 3)
         {{ perUnit(tco?.full_cost_per_km) }}<span class="text-base font-normal text-slate-400">/{{ distanceUnit() }}</span>
       </div>
       <div class="mt-2 space-y-0.5">
+        <p v-if="tco && tco.depreciation_known === false" class="text-xs font-medium text-warning-400">
+          {{ $t('dashboard.tcoMetricsGrid.depreciationMissing') }}
+          <router-link to="/vehicles" class="underline">{{ $t('dashboard.tcoMetricsGrid.depreciationMissingAction') }}</router-link>
+        </p>
         <p class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.directRunningCostKm', { unit: distanceUnit(), usage_cost_per_km: perUnit(tco?.usage_cost_per_km) }) }}
         </p>

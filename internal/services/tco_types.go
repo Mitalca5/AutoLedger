@@ -110,14 +110,17 @@ type TCOSummary struct {
 	FullCost           money.Cents `json:"full_cost"`
 	FullCostPerKm      float64     `json:"full_cost_per_km"`
 
-	AcquisitionType        string      `json:"acquisition_type"` // CASH | LOAN | LOA | LLD
-	AcquisitionCost        money.Cents `json:"acquisition_cost"` // Purchase price and fees net of incentives, exercised LOA option
-	DepreciationCost       money.Cents `json:"depreciation_cost"`
-	DepreciationCostPerKm  float64     `json:"depreciation_cost_per_km"`
-	ContractStartDate      *time.Time  `json:"contract_start_date,omitempty"` // Lease / loan start
-	ContractEndDate        *time.Time  `json:"contract_end_date,omitempty"`   // Lease term
-	ContractDurationMonths *int        `json:"contract_duration_months,omitempty"`
-	OwnershipEndDate       *time.Time  `json:"ownership_end_date,omitempty"` // Sale or return
+	AcquisitionType  string      `json:"acquisition_type"` // CASH | LOAN | LOA | LLD
+	AcquisitionCost  money.Cents `json:"acquisition_cost"` // Purchase price and fees net of incentives, exercised LOA option
+	DepreciationCost money.Cents `json:"depreciation_cost"`
+	// DepreciationKnown is false when a bought vehicle has no depreciation because its resale value, holding period or
+	// price is missing: DepreciationCost is then 0 and the full cost is not comparable to a complete one.
+	DepreciationKnown      bool       `json:"depreciation_known"`
+	DepreciationCostPerKm  float64    `json:"depreciation_cost_per_km"`
+	ContractStartDate      *time.Time `json:"contract_start_date,omitempty"` // Lease / loan start
+	ContractEndDate        *time.Time `json:"contract_end_date,omitempty"`   // Lease term
+	ContractDurationMonths *int       `json:"contract_duration_months,omitempty"`
+	OwnershipEndDate       *time.Time `json:"ownership_end_date,omitempty"` // Sale or return
 
 	LeaseExcessKmCost        money.Cents  `json:"lease_excess_km_cost"`      // Accrued against the pro-rata allowance
 	LeaseExcessKmProjected   money.Cents  `json:"lease_excess_km_projected"` // Expected at contract end at the current pace

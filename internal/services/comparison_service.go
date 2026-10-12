@@ -167,6 +167,7 @@ func trackedBaselineFromInputs(in *models.TrackedInputs, incentives money.Cents)
 func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonScenario) (*ComparisonResult, error) {
 	var ev TrackedBaseline
 	var notes []*apierror.Message
+	depreciationKnown := true
 
 	if sc.Mode == models.ComparisonModeRetrospective {
 		if sc.VehicleID == nil {
@@ -181,6 +182,10 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 		}
 		now := time.Now()
 		ev, notes = trackedBaselineFromTCO(sum, sc.AnnualKm, sc.Years, now)
+		depreciationKnown = sum.DepreciationKnown
+		if !depreciationKnown {
+			notes = append(notes, apierror.NewMessage("comparison.assumption.ev_depreciation_missing", "Tracked vehicle depreciation not entered (resale value or holding period): its total cost is incomplete, so the total saving is not shown"))
+		}
 		annualInsurance, estimated, err := s.annualInsurance(ctx, *sc.VehicleID, now)
 		if err != nil {
 			return nil, err
@@ -200,6 +205,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 	}
 
 	res := ComputeComparison(sc, ev)
+	res.TrackedDepreciationKnown = depreciationKnown
 	res.Assumptions = append(notes, res.Assumptions...)
 	return &res, nil
 }

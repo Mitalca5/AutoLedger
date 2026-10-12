@@ -111,6 +111,10 @@
     "deleteFailed": "Could not delete.",
     "compareFailed": "Comparison failed."
   },
+  "depreciationMissing": {
+    "verdict": "The saving over the whole period is not shown: the depreciation of the tracked vehicle is not entered.",
+    "card": "Enter the resale value and the holding period of the tracked vehicle to compare the total cost. The saving on energy alone stays valid."
+  },
   "verdict": {
     "same": "Over {count} year, the two vehicles cost the same. | Over {count} years, the two vehicles cost the same.",
     "less": "Over {count} year, the electric vehicle costs you {amount} less. | Over {count} years, the electric vehicle costs you {amount} less.",

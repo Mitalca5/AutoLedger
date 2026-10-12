@@ -57,6 +57,7 @@
     "l100": "{value} {unit}",
     "cheapest": "Cheapest",
     "indicative": "Indicative",
+    "depreciationMissing": "Depreciation not entered",
     "footnote": "Running cost covers energy, upkeep, insurance and financing; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). A vehicle under 60% completeness is shown but not ranked."
   }
 }

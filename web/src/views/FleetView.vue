@@ -408,7 +408,7 @@ onBeforeUnmount(() => {
               <p v-if="v.vehicle_id === cheapestPerKmId" class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
                 <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
               </p>
-              <p v-else-if="!v.comparable" class="mt-0.5 text-xs uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</p>
+              <p v-else-if="!v.comparable" class="mt-0.5 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</p>
             </div>
             <div class="shrink-0 text-right">
               <p class="text-lg font-bold tabular-nums text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</p>
@@ -454,7 +454,7 @@ onBeforeUnmount(() => {
                 <span v-if="v.vehicle_id === cheapestPerKmId" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
                   <Award class="w-3 h-3" />{{ t('fleet.compare.cheapest') }}
                 </span>
-                <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-400">{{ t('fleet.compare.indicative') }}</span>
+                <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</span>
               </td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</td>
               <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>

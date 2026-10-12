@@ -32,9 +32,13 @@ function fmtKm(v: number): string {
 }
 
 const savings = computed<number>(() => Number(props.result?.tracked_savings || 0))
+// A tracked vehicle bought without a depreciation would have it at zero while the other side has one: the total saving would
+// count depreciation on one side only
+const depreciationMissing = computed(() => props.result?.tracked_depreciation_known === false)
 
 const verdict = computed(() => {
   if (!props.result) return ''
+  if (depreciationMissing.value) return t('comparison.depreciationMissing.verdict')
   const n = props.result.years_count
   const abs = fmtMoney(Math.abs(savings.value))
   if (Math.abs(savings.value) < 1) return t('comparison.verdict.same', n)
@@ -50,7 +54,7 @@ interface SavingsCard { key: 'energy' | 'total'; amount: number; positive: boole
 const savingsCards = computed<SavingsCard[]>(() => {
   const r = props.result
   if (!r) return []
-  return (['energy', 'total'] as const).map(key => {
+  return (depreciationMissing.value ? (['energy'] as const) : (['energy', 'total'] as const)).map(key => {
     const s = comparisonSavings(r.tracked[key], r.ice[key], r.years_count, r.annual_km)
     return {
       key,
@@ -88,7 +92,7 @@ function exportResultCsv() {
   rows.push([t('comparison.csv.total'), Number(r.tracked.total).toFixed(2), Number(r.ice.total).toFixed(2)])
   rows.push([t('comparison.csv.perMonth'), Number(r.tracked.per_month).toFixed(2), Number(r.ice.per_month).toFixed(2)])
   rows.push([t('comparison.csv.costPerKm', { unit: distanceUnit() }), perDistance(r.tracked.cost_per_km).toFixed(3), perDistance(r.ice.cost_per_km).toFixed(3)])
-  rows.push([t(sk('comparison.csv.gap')), Number(r.tracked_savings).toFixed(2), ''])
+  if (!depreciationMissing.value) rows.push([t(sk('comparison.csv.gap')), Number(r.tracked_savings).toFixed(2), ''])
   rows.push(['', '', ''])
   rows.push(t(sk('comparison.csv.cumulativeHeader')).split(','))
   for (const p of r.cumulative) rows.push([p.year, Number(p.tracked).toFixed(2), Number(p.ice).toFixed(2)])
@@ -121,9 +125,9 @@ function printResult() {
     <template v-else>
       <div
         class="rounded-2xl border p-5 flex items-center gap-4"
-        :class="savings >= 0 ? 'bg-success-500/10 border-success-500/30' : 'bg-warning-500/10 border-warning-500/30'"
+        :class="depreciationMissing ? 'bg-slate-900 border-slate-700' : savings >= 0 ? 'bg-success-500/10 border-success-500/30' : 'bg-warning-500/10 border-warning-500/30'"
       >
-        <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
+        <component :is="savings >= 0 ? TrendingDown : TrendingUp" class="w-8 h-8 shrink-0" :class="depreciationMissing ? 'text-slate-400' : savings >= 0 ? 'text-success-400' : 'text-warning-400'" />
         <div>
           <div class="text-lg font-bold text-white">{{ verdict }}</div>
           <div class="text-xs text-slate-400 mt-0.5">{{ scenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
@@ -131,6 +135,10 @@ function printResult() {
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">
+        <div v-if="depreciationMissing" class="order-last rounded-2xl border border-slate-700 bg-slate-900 p-4 text-sm text-slate-300" data-testid="savings-total-missing">
+          {{ $t('comparison.depreciationMissing.card') }}
+          <router-link to="/vehicles" class="font-semibold text-sky-400 underline">{{ $t('dashboard.tcoMetricsGrid.depreciationMissingAction') }}</router-link>
+        </div>
         <div v-for="card in savingsCards" :key="card.key" class="bg-slate-900 border border-slate-800 rounded-2xl p-4" :data-testid="`savings-${card.key}`">
           <h2 class="text-sm font-semibold text-slate-300">{{ $t(`comparison.savings.${card.key}Title`) }}</h2>
           <div class="text-2xl font-bold mt-1" :class="card.positive ? 'text-success-400' : 'text-warning-400'">

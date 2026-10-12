@@ -760,6 +760,8 @@ export interface VehicleFleetMetric {
   annual_cost: number | null
   completeness_pct: number
   comparable: boolean
+  /** False when the vehicle was bought but its depreciation is not entered: shown, not ranked. */
+  depreciation_known: boolean
 }
 
 export interface VehiclePerson {

@@ -51,6 +51,8 @@ type VehicleFleetMetric struct {
 	// CompletenessPct is the TCO completeness score; a vehicle under the comparison threshold is shown but not ranked.
 	CompletenessPct int  `json:"completeness_pct"`
 	Comparable      bool `json:"comparable"`
+	// DepreciationKnown is false when the vehicle was bought but its depreciation is not entered: it is not ranked.
+	DepreciationKnown bool `json:"depreciation_known"`
 }
 
 // MemberKmShare provides distance distribution among the people who drive the fleet.
