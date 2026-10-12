@@ -119,11 +119,16 @@ export function applyBatchTag(tags: string[] | undefined, tag: 'Pro' | 'Perso' |
   return current
 }
 
+/** Sum of the drive costs, in currency units like each `costs.total_cost` the API sends (not cents). */
+export function sumDriveCosts(list: any[]): number {
+  return list.reduce((s, d) => s + (Number(d.costs?.total_cost) || 0), 0)
+}
+
 export function selectionSummary(list: any[], currency: string): string {
   if (!list.length) return ''
   const totalKm = list.reduce((s, d) => s + (Number(d.distance_km) || 0), 0)
   const totalKwh = list.reduce((s, d) => s + (Number(d.costs?.electricity_kwh) || 0), 0)
-  const totalCost = list.reduce((s, d) => s + (Number(d.costs?.total_cost) || 0), 0)
+  const totalCost = sumDriveCosts(list)
   return `${formatDistance(totalKm)} • ${Math.round(totalKwh)} kWh • ${formatAmount(totalCost, currency)}`
 }
 

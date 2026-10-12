@@ -14,6 +14,7 @@ import {
   monthRange,
   needsTollQualification,
   paginationPages,
+  sumDriveCosts,
   selectionSummary,
   shiftMonth,
   suggestionTripId,
@@ -311,5 +312,16 @@ describe('countActiveDriveFilters', () => {
   })
   it('counts only the filters of the trips list in trip mode', () => {
     expect(countActiveDriveFilters({ ...none, mode: 'TRIPS', hasTollOnly: true, selectedTag: 'Pro', tripQualifyOnly: true, periodMode: 'CUSTOM' })).toBe(2)
+  })
+})
+
+describe('sumDriveCosts', () => {
+  it('adds the costs as sent by the API, in currency units', () => {
+    const list = [{ costs: { total_cost: 4.37 } }, { costs: { total_cost: 4.51 } }, { costs: { total_cost: 79.37 } }]
+    expect(sumDriveCosts(list)).toBeCloseTo(88.25, 2)
+  })
+  it('counts a drive without a cost as zero and an empty list as zero', () => {
+    expect(sumDriveCosts([{ costs: { total_cost: 12.5 } }, { costs: null }, {}])).toBe(12.5)
+    expect(sumDriveCosts([])).toBe(0)
   })
 })

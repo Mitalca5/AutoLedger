@@ -4,7 +4,7 @@ import { formatDistance } from '@/units'
 import { computed } from 'vue'
 import { ChevronLeft, ChevronRight, X, Search, Calendar } from 'lucide-vue-next'
 import AppDatePicker from '@/components/AppDatePicker.vue'
-import { currentYearMonth, formatMonthLabel, shiftMonth } from '@/utils/drives'
+import { currentYearMonth, formatMonthLabel, shiftMonth, sumDriveCosts } from '@/utils/drives'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 
@@ -68,7 +68,7 @@ function onCustomDateChange() {
 // Summary metrics of current page drives
 const pageDistance = computed(() => props.drives.reduce((acc, d) => acc + (d.distance_km || 0), 0))
 const pageEnergy = computed(() => props.drives.reduce((acc, d) => acc + (d.energy_consumed_kwh || 0), 0))
-const pageCost = computed(() => props.drives.reduce((acc, d) => acc + (d.costs?.total_cost || 0), 0) / 100)
+const pageCost = computed(() => sumDriveCosts(props.drives))
 </script>
 
 <template>
