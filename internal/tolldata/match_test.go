@@ -414,3 +414,153 @@ func TestDetectCrossings_SpeedsOfAnotherLengthAreIgnored(t *testing.T) {
 		t.Fatalf("expected one match with an unknown speed, got %+v", matches)
 	}
 }
+
+// gatePass is one GPS point of a recorded trace with its speed.
+type gatePass struct {
+	lat, lon, kmh float64
+}
+
+func traceAndSpeeds(points []gatePass) ([]LatLon, []float64) {
+	trace := make([]LatLon, len(points))
+	speeds := make([]float64, len(points))
+	for i, p := range points {
+		trace[i] = LatLon{Lat: p.lat, Lon: p.lon}
+		speeds[i] = p.kmh
+	}
+	return trace, speeds
+}
+
+func TestDetectCrossings_ClosedGateSlightlyOffTheStationPosition(t *testing.T) {
+	// A slow pass 80m east of the station: outside the open-barrier threshold, but a closed
+	// gate is read wider when the trace has speeds.
+	station := Station{Name: "G", Type: "close", Lat: 0, Lon: 0.010}
+	slow := []gatePass{{-0.0010, 0.01072, 60}, {-0.0005, 0.01072, 35}, {0, 0.01072, 30}, {0.0005, 0.01072, 35}, {0.0010, 0.01072, 60}}
+	trace, speeds := traceAndSpeeds(slow)
+
+	if got := DetectCrossings(trace, speeds, []Station{station}, DefaultThresholdMeters); len(got) != 1 {
+		t.Fatalf("expected the slow pass 80m from a closed gate to be a crossing, got %d", len(got))
+	}
+	if got := DetectCrossings(trace, nil, []Station{station}, DefaultThresholdMeters); len(got) != 0 {
+		t.Fatalf("without speeds the threshold stays %.0fm, got %d crossings", DefaultThresholdMeters, len(got))
+	}
+
+	fast := make([]gatePass, len(slow))
+	for i, p := range slow {
+		fast[i] = gatePass{p.lat, p.lon, 110}
+	}
+	trace, speeds = traceAndSpeeds(fast)
+	segments := (&Dataset{}).BuildSegments(DetectCrossings(trace, speeds, []Station{station}, DefaultThresholdMeters))
+	if len(segments) != 0 {
+		t.Fatalf("a closed gate passed at motorway speed is a drive-by, got %+v", segments)
+	}
+
+	open := station
+	open.Type = "open"
+	trace, speeds = traceAndSpeeds(slow)
+	if got := DetectCrossings(trace, speeds, []Station{open}, DefaultThresholdMeters); len(got) != 0 {
+		t.Fatalf("open barriers keep the %.0fm threshold, got %d crossings", DefaultThresholdMeters, len(got))
+	}
+}
+
+// Recorded trip Valence -> Annecy leaving the A49 at Voreppe (gate passed 53m away at 26 km/h)
+// and joining the A41 again through the free-flow Chambéry Nord gantry (crossed at 96 km/h,
+// a gate the dataset lacks): two tickets, not one Chatuzange -> Annecy Centre ticket.
+func TestBuildSegments_RecordedTripLeavingAndRejoiningTheMotorway(t *testing.T) {
+	ds, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pos := func(name string) (float64, float64) {
+		for _, s := range ds.Stations {
+			if s.Name == name {
+				return s.Lat, s.Lon
+			}
+		}
+		t.Fatalf("station %q missing from the dataset", name)
+		return 0, 0
+	}
+	// slowAt returns a straight north-bound pass through a station: fast, slow at the gate, fast.
+	slowAt := func(name string) []gatePass {
+		lat, lon := pos(name)
+		return []gatePass{{lat - 0.004, lon, 100}, {lat - 0.0005, lon, 40}, {lat, lon, 30}, {lat + 0.0005, lon, 40}, {lat + 0.004, lon, 100}}
+	}
+
+	var points []gatePass
+	points = append(points, slowAt("CHATUZANGE BARRIERE")...)
+	// Voreppe barrier on the recorded trace (11:55:21 - 11:55:42).
+	points = append(points,
+		gatePass{45.28406, 5.62082, 59}, gatePass{45.28370, 5.62088, 51}, gatePass{45.28344, 5.62095, 41},
+		gatePass{45.28324, 5.62100, 29}, gatePass{45.28305, 5.62106, 26}, gatePass{45.28278, 5.62116, 33},
+		gatePass{45.28243, 5.62133, 45}, gatePass{45.28202, 5.62154, 55})
+	// Chambéry Nord free-flow gantry on the recorded trace (12:57:13 - 12:57:34).
+	points = append(points,
+		gatePass{45.60772, 5.89050, 82}, gatePass{45.60829, 5.89136, 106}, gatePass{45.60941, 5.89297, 103},
+		gatePass{45.61059, 5.89417, 96}, gatePass{45.61122, 5.89467, 95}, gatePass{45.61191, 5.89511, 99},
+		gatePass{45.61271, 5.89561, 111})
+	points = append(points, slowAt("ANNECY CENTRE")...)
+
+	trace, speeds := traceAndSpeeds(points)
+	segments := ds.BuildSegments(DetectCrossings(trace, speeds, ds.Stations, DefaultThresholdMeters))
+
+	want := [][2]string{{"CHATUZANGE BARRIERE", "VOREPPE BARRIERE"}, {"CHAMBERY NORD", "ANNECY CENTRE"}}
+	if len(segments) != len(want) {
+		t.Fatalf("expected %d tickets, got %+v", len(want), segments)
+	}
+	for i, w := range want {
+		if segments[i].Entry != w[0] || segments[i].Exit == nil || *segments[i].Exit != w[1] {
+			t.Errorf("ticket %d: expected %s -> %s, got %+v", i, w[0], w[1], segments[i])
+		}
+		if segments[i].EstimatedPrice == nil {
+			t.Errorf("ticket %d: expected a price", i)
+		}
+	}
+}
+
+func TestBuildSegments_FreeFlowClosedStationIsNotADriveBy(t *testing.T) {
+	station := Station{Name: "FF", Type: "close", Operator: "OP1", FreeFlow: true}
+	fast := []MatchedStation{{Station: station, MinSpeedKmh: ptr(100.0)}}
+	got := (&Dataset{}).BuildSegments(fast)
+	if len(got) != 1 || got[0].Entry != "FF" {
+		t.Fatalf("a free-flow closed station crossed at speed is a crossing, got %+v", got)
+	}
+}
+
+func ptr(v float64) *float64 { return &v }
+
+func TestLoad_ChamberyNordHasAnEntryGateBesideItsBarrier(t *testing.T) {
+	ds, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var barrier, entry *Station
+	for i, s := range ds.Stations {
+		switch {
+		case s.Name == "CHAMBERY NORD" && s.FreeFlow:
+			entry = &ds.Stations[i]
+		case s.Name == "CHAMBERY NORD":
+			barrier = &ds.Stations[i]
+		}
+	}
+	if barrier == nil || entry == nil {
+		t.Fatalf("expected both the barrier and the free-flow entry, got barrier=%v entry=%v", barrier, entry)
+	}
+	if d := haversineMeters(LatLon{barrier.Lat, barrier.Lon}, LatLon{entry.Lat, entry.Lon}); d < 500 {
+		t.Errorf("the entry gate must stay apart from the dataset barrier, got %.0fm", d)
+	}
+	if ds.NetworkByStation["CHAMBERY NORD"] == "" {
+		t.Error("the entry gate shares the network of the station it belongs to")
+	}
+}
+
+func TestLoadExtraGates_InheritTheirStationAndRejectUnknownOnes(t *testing.T) {
+	gates, err := loadExtraGates([]Station{{Name: "CHAMBERY NORD", Operator: "AREA", Type: "close"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gates) != 1 || gates[0].Operator != "AREA" || gates[0].Type != "close" || !gates[0].FreeFlow {
+		t.Fatalf("expected the gate to inherit its station's operator and type, got %+v", gates)
+	}
+	if _, err := loadExtraGates(nil); err == nil {
+		t.Fatal("expected an error for a gate whose station is not in the dataset")
+	}
+}

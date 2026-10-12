@@ -11,6 +11,12 @@ import (
 // station for that station to be considered crossed.
 const DefaultThresholdMeters = 50.0
 
+// ClosedGateThresholdMeters is the distance under which a closed-network station is considered
+// crossed when the trace has speeds. A closed-network gate spans several lanes and its dataset
+// position is approximate, so it is read wider than DefaultThresholdMeters; the cars driving past
+// it on the motorway instead of through it are then dropped by their speed (see MaxGateSpeedKmh).
+const ClosedGateThresholdMeters = 100.0
+
 // MinRevisitGapMeters is the minimum trace distance required between two visits of the same
 // station for them to be treated as two distinct passes (e.g. exiting and re-entering through
 // the same gate) rather than GPS/threshold jitter around a single pass. Two different stations
@@ -47,7 +53,12 @@ func DetectCrossings(trace []LatLon, speedsKmh []float64, stations []Station, th
 		speedsKmh = nil
 	}
 
-	minLat, maxLat, minLon, maxLon := boundingBox(trace, thresholdMeters)
+	closedThreshold := thresholdMeters
+	if speedsKmh != nil && closedThreshold < ClosedGateThresholdMeters {
+		closedThreshold = ClosedGateThresholdMeters
+	}
+
+	minLat, maxLat, minLon, maxLon := boundingBox(trace, math.Max(thresholdMeters, closedThreshold))
 	cumulative := cumulativeMeters(trace)
 
 	var matches []MatchedStation
@@ -56,7 +67,11 @@ func DetectCrossings(trace []LatLon, speedsKmh []float64, stations []Station, th
 			continue // coarse pre-filter: station is nowhere near the trace's bounding box
 		}
 
-		visits := detectVisits(trace, st, thresholdMeters)
+		radius := thresholdMeters
+		if st.Type == "close" {
+			radius = closedThreshold
+		}
+		visits := detectVisits(trace, st, radius)
 		for _, v := range mergeCloseVisits(visits, trace, MinRevisitGapMeters) {
 			v.TraceMeters = cumulative[v.SegmentIndex]
 			v.MinSpeedKmh = minSpeedNear(trace, speedsKmh, st, v.SegmentIndex)
@@ -222,11 +237,12 @@ func (d *Dataset) BuildSegments(matches []MatchedStation) []Segment {
 	return segments
 }
 
-// withoutDriveBys drops the closed-network stations the car drove past at motorway speed.
+// withoutDriveBys drops the closed-network stations the car drove past at motorway speed,
+// except the free-flow ones, which are crossed at that speed.
 func withoutDriveBys(matches []MatchedStation) []MatchedStation {
 	kept := make([]MatchedStation, 0, len(matches))
 	for _, m := range matches {
-		if m.Station.Type == "close" && m.MinSpeedKmh != nil && *m.MinSpeedKmh > MaxGateSpeedKmh {
+		if m.Station.Type == "close" && !m.Station.FreeFlow && m.MinSpeedKmh != nil && *m.MinSpeedKmh > MaxGateSpeedKmh {
 			continue
 		}
 		kept = append(kept, m)

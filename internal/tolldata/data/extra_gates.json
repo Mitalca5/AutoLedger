@@ -1,0 +1,12 @@
+{
+  "comment": "Gates missing from opentolldata_network.json. A gate belongs to a station of that dataset and inherits its operator, type, network and prices; free_flow marks a closed-network gantry crossed at full speed, with no barrier to slow down for.",
+  "gates": [
+    {
+      "station": "CHAMBERY NORD",
+      "lat": 45.61067578,
+      "lon": 5.89419719,
+      "free_flow": true,
+      "note": "Entry onto the A41 towards Aix-les-Bains; the dataset position is the exit barrier, about 1 km away."
+    }
+  ]
+}
