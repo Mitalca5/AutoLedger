@@ -170,20 +170,23 @@ func (s *CarpoolService) GetVehicleUnitRates(ctx context.Context, vehicleID stri
 // falling back to the vehicle's historical average if no recent charges exist.
 func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID string, refTime *time.Time) (*UnitRates, error) {
 	rates := DefaultUnitRates()
+	ref := time.Now()
+	historical := refTime != nil && !refTime.IsZero()
+	if historical {
+		ref = *refTime
+	}
+	// Columns of type date (purchases, ledger entries) are bounded by the calendar day of the reference, in its own
+	// location, so that every date clause agrees; instants (drive starts, fittings) keep the time of day.
+	refDay := ref.Format("2006-01-02")
 
 	var totalDistance, lastYearDistance float64
 	if err := s.pool.QueryRow(ctx, `
 		SELECT COALESCE(SUM(distance_km), 0),
-		       COALESCE(SUM(distance_km) FILTER (WHERE start_time >= NOW() - INTERVAL '365 days'), 0)
+		       COALESCE(SUM(distance_km) FILTER (WHERE start_time >= $2::timestamptz - INTERVAL '365 days'), 0)
 		FROM drives
-		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL;
-	`, vehicleID).Scan(&totalDistance, &lastYearDistance); err != nil {
+		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL AND start_time <= $2::timestamptz;
+	`, vehicleID, ref).Scan(&totalDistance, &lastYearDistance); err != nil {
 		return nil, err
-	}
-
-	ref := time.Now()
-	if refTime != nil && !refTime.IsZero() {
-		ref = *refTime
 	}
 
 	// 1. Electricity rate (vehicle currency/kWh): try the last 2 priced charges prior to or at ref. A free charge is a
@@ -252,16 +255,23 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 		}
 	}
 
-	// Tires rate (vehicle currency/km): mounted tires purchase price over their remaining expected life
+	// Tires rate: use the fittings at the trip date for a historical estimate, not the wheels fitted today.
 	var mountedTireRate float64
 	var totalTiresCost money.Cents
 	if err := s.pool.QueryRow(ctx, `
 		SELECT COALESCE(SUM(purchase_price / GREATEST(estimated_lifespan_km - initial_distance_km, 1))
-		                FILTER (WHERE current_position IN ('FL', 'FR', 'RL', 'RR')), 0),
+		                FILTER (WHERE
+                  (NOT $3::boolean AND current_position IN ('FL', 'FR', 'RL', 'RR'))
+                  OR ($3::boolean AND EXISTS (
+                    SELECT 1 FROM tire_mount_sessions ms WHERE ms.tire_id = tires.id
+                      AND ms.vehicle_id = $1 AND ms.position IN ('FL', 'FR', 'RL', 'RR')
+                      AND ms.mounted_date <= $2::timestamptz
+                      AND (ms.dismounted_date IS NULL OR ms.dismounted_date > $2::timestamptz)
+                  ))), 0),
 		       COALESCE(SUM(purchase_price), 0)
 		FROM tires
-		WHERE vehicle_id = $1;
-	`, vehicleID).Scan(&mountedTireRate, &totalTiresCost); err != nil {
+		WHERE vehicle_id = $1 AND purchase_date <= $4::date;
+	`, vehicleID, ref, historical, refDay).Scan(&mountedTireRate, &totalTiresCost); err != nil {
 		return nil, err
 	}
 	if mountedTireRate > 0 {
@@ -276,8 +286,8 @@ func (s *CarpoolService) GetVehicleUnitRatesAt(ctx context.Context, vehicleID st
 	var totalMaintCost money.Cents
 	if err := s.pool.QueryRow(ctx, `
 		SELECT COALESCE(SUM(amount_eur), 0) FROM cost_ledger
-		WHERE vehicle_id = $1 AND category IN ('MAINTENANCE', 'REPAIR');
-	`, vehicleID).Scan(&totalMaintCost); err != nil {
+		WHERE vehicle_id = $1 AND category IN ('MAINTENANCE', 'REPAIR') AND entry_date <= $2::date;
+	`, vehicleID, refDay).Scan(&totalMaintCost); err != nil {
 		return nil, err
 	}
 	if totalDistance > 500 && totalMaintCost > 0 {
