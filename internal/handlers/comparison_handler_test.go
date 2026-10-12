@@ -58,7 +58,7 @@ func TestValidateComparisonRequest(t *testing.T) {
 		}, "comparison.ev_consumption"},
 		{"projection bad electricity price", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
-			r.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 9}
+			r.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: money.MaxRate.Float() + 1}
 		}, "comparison.electricity_price"},
 		{"projection negative EV amount", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
@@ -220,7 +220,7 @@ func TestPreviewComparisonRefusesOtherModesAndInvalidInputs(t *testing.T) {
 
 	for name, mutate := range map[string]func(r *SaveComparisonRequest){
 		"fuel price":     func(r *SaveComparisonRequest) { r.ICE.FuelPrice = -1 },
-		"electricity":    func(r *SaveComparisonRequest) { r.Tracked.EurPerKwh = 9 },
+		"electricity":    func(r *SaveComparisonRequest) { r.Tracked.EurPerKwh = money.MaxRate.Float() + 1 },
 		"annual mileage": func(r *SaveComparisonRequest) { r.AnnualKm = 0 },
 	} {
 		req := projectionPreviewRequest()

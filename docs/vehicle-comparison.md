@@ -4,7 +4,7 @@ Français : [vehicle-comparison.fr.md](vehicle-comparison.fr.md).
 
 Choose an electric, plug-in hybrid (PHEV) or range-extender (REEV) vehicle, open **Comparison**, and create a **tracked vehicle** comparison. All makes and models use the same calculation.
 
-Set the conventional reference vehicle's fuel consumption in L/100 km, price per litre, purchase and resale prices, annual maintenance, insurance and taxes. Fuel-type presets are starting points, not a model catalogue; replace them with assumptions appropriate to your vehicle, market and currency.
+Set the conventional reference vehicle's fuel consumption in L/100 km, price per litre, purchase and resale prices, annual maintenance, insurance and taxes. Fuel and electricity prices use currency-neutral storage bounds, including in the What if inputs. Fuel-type presets are starting points, not a model catalogue; replace them with assumptions appropriate to your vehicle, market and currency.
 
 The tracked side uses recorded costs divided by known mileage, then applies the annual distance and duration you enter. Hybrids include fill-ups and charging sessions. A fuel-price change applies to the fuel component of both vehicles; an electricity-price change applies only to charging. The fuel sensitivity chart changes both fuel components as well.
 
