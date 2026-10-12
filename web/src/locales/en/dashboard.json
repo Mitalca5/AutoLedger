@@ -250,7 +250,9 @@
     "ofTollsAndParking": "{value} of tolls and parking",
     "breakdownByDriveCategoryWork": "Breakdown by drive category (work / personal)",
     "kmKwh": "{distance_km} {unit} ({energy_kwh} kWh)",
-    "untagged": "Untagged"
+    "untagged": "Untagged",
+    "costBasis": "Cost of the drives of each tag: energy, wear, insurance share and tolls, as in the drive list.",
+    "sharedNote": "A drive with several tags counts in each of them: the tags can add up to more than the vehicle total."
   },
   "tcoMetricsGrid": {
     "depreciationMissing": "Depreciation not entered: the full cost leaves out the largest item.",

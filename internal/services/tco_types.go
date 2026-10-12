@@ -60,6 +60,12 @@ type TagCostBreakdown struct {
 	EnergyKwh   float64     `json:"energy_kwh"`
 	TollsAmount money.Cents `json:"tolls_amount"`
 	Percentage  float64     `json:"percentage"`
+	// Cost is the sum of the cost of the tag's drives as the drive list shows it (energy, wear, insurance share and
+	// tolls at the vehicle's unit rates), and CostPerKm that cost over the distance: an allocation of the running
+	// cost, not the cash paid. A drive with several tags counts in each; SharedDrives says how many do.
+	Cost         money.Cents `json:"cost"`
+	CostPerKm    float64     `json:"cost_per_km"`
+	SharedDrives int         `json:"shared_drives"`
 }
 
 // TCOCompleteness lists the known gaps of the TCO figures.

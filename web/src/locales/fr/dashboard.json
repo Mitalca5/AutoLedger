@@ -250,7 +250,9 @@
     "ofTollsAndParking": "{value} de péages & parkings",
     "breakdownByDriveCategoryWork": "Ventilation par Catégorie de Trajets (Pro / Perso)",
     "kmKwh": "{distance_km} {unit} ({energy_kwh} kWh)",
-    "untagged": "Non tagué"
+    "untagged": "Non tagué",
+    "costBasis": "Coût des trajets de chaque étiquette : énergie, usure, part d'assurance et péages, comme dans la liste des trajets.",
+    "sharedNote": "Un trajet portant plusieurs étiquettes compte dans chacune : leur somme peut dépasser le total du véhicule."
   },
   "tcoMetricsGrid": {
     "depreciationMissing": "Dépréciation non renseignée : le coût complet omet son plus gros poste.",
