@@ -15,9 +15,9 @@ export interface ChargingLocation {
   place_id: string | null
 }
 
-/** Catalog key of a place category. */
+/** Catalog key of a place category; OUTSIDE is the derived category of the locations linked to no place. */
 export function placeCategoryKey(category: string): string {
-  return `expenses.chargingPlaces.category.${PLACE_CATEGORIES.includes(category as PlaceCategory) ? category : 'OTHER'}`
+  return `expenses.chargingPlaces.category.${PLACE_CATEGORIES.includes(category as PlaceCategory) || category === 'OUTSIDE' ? category : 'OTHER'}`
 }
 
 /** Locations still to classify, the busiest first (the server already sorts by sessions). */

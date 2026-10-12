@@ -8,6 +8,8 @@ Every charge reports a location as text: a TeslaMate geofence name (`Home`), an 
 
 **Energy → Charges → Places** lists the distinct texts the charges of the vehicle report, with their number of sessions and energy. Each text is linked to a place with one choice; every charge reporting that text, past and future, is classified at once. Two spellings that differ only by case or spacing are the same text.
 
+Only the home needs to be declared. Choosing **Home** for a text creates the home place if there is none yet, and any number of texts can be linked to it. Once the account has a home place, every charge that reports a location linked to no place counts as **Outside**; a charge that reports no location stays unclassified. Without a home place, nothing is assumed to be away.
+
 A place has a name and a category: **Home**, **Work**, **Public** or **Other**. Places belong to the vehicle's owner and are shared by everyone with access to the vehicle. Deleting a place leaves its charges unclassified.
 
 A single charge can be given a place of its own in the charge form, which then wins over its reported text.
@@ -19,13 +21,13 @@ A single charge can be given a place of its own in the charge form, which then w
 - the energy, the amount spent and the average price per kWh;
 - the energy of each month by place, and the average price of each month;
 - a split by place, by energy or by cost, with each place's energy, cost, average price, free sessions and sessions without a cost;
-- **If everything were charged at home**: what the energy charged in places classified outside **Home** cost, against the same energy at the average price of the **Home** places.
+- **If everything were charged at home**: what the energy charged in places classified outside **Home**, including the outside ones, cost, against the same energy at the average price of the **Home** places.
 
 How the figures are counted:
 
 - The average price is the recorded cost over the energy of the sessions whose cost is known. A free session (cost 0) counts as zero; a session without a recorded cost is left out of the price and its energy and count are shown beside it.
 - Sessions that recorded no energy are not counted and are reported apart.
-- Energy at unclassified places is shown as such and is never assumed to be away from home, so it is left out of the home figure.
+- Energy of charges reporting no location is shown as unclassified and is never assumed to be away from home, so it is left out of the home figure. Outside charges are counted as away.
 - The home figure is negative ("more") when charging away cost less than the home price, for example free charging at work.
 - Costs are the cost ledger amounts, so they match the monthly energy totals of the dashboard.
 

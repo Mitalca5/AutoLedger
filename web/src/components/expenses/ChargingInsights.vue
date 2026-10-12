@@ -15,6 +15,7 @@ import {
   monthlyPrices,
   savingsView,
   unclassifiedShare,
+  OUTSIDE_CATEGORY,
   type BreakdownMode,
   type PlaceStats,
 } from '@/utils/chargingInsights'
@@ -66,14 +67,15 @@ async function load() {
 watch(() => [props.vehicleId, JSON.stringify(period.value), props.syncKey], load, { immediate: true })
 
 const unclassifiedLabel = computed(() => t('expenses.chargingInsights.unclassified'))
+const outsideLabel = computed(() => t(placeCategoryKey('OUTSIDE')))
 const colors = computed(() => groupColors(stats.value?.groups ?? []))
 const savings = computed(() => (stats.value ? savingsView(stats.value.home_savings) : null))
 const visible = computed(() => props.hasCharges && !!stats.value)
 const empty = computed(() => !!stats.value && stats.value.summary.sessions === 0)
 // A place named like its category would read twice ("Home · Home")
-const showCategory = (g: { name?: string; category?: string }) => !!g.category && (g.name ?? '').trim().toLowerCase() !== t(placeCategoryKey(g.category)).toLowerCase()
+const showCategory = (g: { name?: string; category?: string }) => !!g.category && g.category !== OUTSIDE_CATEGORY && (g.name ?? '').trim().toLowerCase() !== t(placeCategoryKey(g.category)).toLowerCase()
 const share = computed(() => (stats.value ? unclassifiedShare(stats.value) : 0))
-const donut = computed(() => (stats.value ? donutItems(stats.value.groups, mode.value, colors.value, unclassifiedLabel.value) : []))
+const donut = computed(() => (stats.value ? donutItems(stats.value.groups, mode.value, colors.value, unclassifiedLabel.value, outsideLabel.value) : []))
 const monthLabel = (m: string) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString(intlLocale(), { month: 'short', year: '2-digit', timeZone: 'UTC' })
 
 const energyRef = ref<HTMLCanvasElement | null>(null)
@@ -93,7 +95,7 @@ function draw() {
       type: 'bar',
       data: {
         labels,
-        datasets: monthlyDatasets(s, colors.value, unclassifiedLabel.value, mode.value).map((d) => ({ label: d.label, data: d.data, backgroundColor: d.color, stack: 'stack' })),
+        datasets: monthlyDatasets(s, colors.value, unclassifiedLabel.value, mode.value, outsideLabel.value).map((d) => ({ label: d.label, data: d.data, backgroundColor: d.color, stack: 'stack' })),
       },
       options: {
         responsive: true,
@@ -267,7 +269,7 @@ onBeforeUnmount(() => {
               <tr v-for="g in stats.groups" :key="g.key || 'none'" class="border-t border-slate-800 align-top">
                 <td class="py-1.5 pr-2">
                   <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" :style="{ backgroundColor: colors[g.key] }"></span>
-                  <span class="font-semibold text-white">{{ groupLabel(g, unclassifiedLabel) }}</span>
+                  <span class="font-semibold text-white">{{ groupLabel(g, unclassifiedLabel, outsideLabel) }}</span>
                   <span v-if="showCategory(g)" class="text-slate-500"> · {{ $t(placeCategoryKey(g.category!)) }}</span>
                   <p class="text-slate-400">
                     {{ $t('expenses.chargingInsights.sessionsCount', { count: g.sessions }, g.sessions) }}

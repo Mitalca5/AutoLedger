@@ -422,7 +422,7 @@
   "chargingPlaces": {
     "title": "Charging places",
     "button": "Places",
-    "intro": "Link the place each charge reports (a TeslaMate geofence, an address, a Home Assistant tag) to a place and a category. All the charges reporting that text are classified at once.",
+    "intro": "Mark which locations the charges report (a TeslaMate geofence, an address, a Home Assistant tag) are your home. Once a home exists, every other charge with a location counts as outside. All the charges reporting the same text are classified at once.",
     "locations": "Reported places",
     "noLocations": "No charge reports a place yet.",
     "sessions": "{count} session | {count} sessions",
@@ -444,8 +444,13 @@
       "HOME": "Home",
       "WORK": "Work",
       "PUBLIC": "Public",
-      "OTHER": "Other"
-    }
+      "OTHER": "Other",
+      "OUTSIDE": "Outside"
+    },
+    "outside": "Outside",
+    "markHome": "Home",
+    "homeName": "Home",
+    "noHome": "No home defined: mark at least one location as Home so the others are counted as outside."
   },
   "chargingInsights": {
     "title": "Charging by place",

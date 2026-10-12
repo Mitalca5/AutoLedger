@@ -422,7 +422,7 @@
   "chargingPlaces": {
     "title": "Lieux de recharge",
     "button": "Lieux",
-    "intro": "Associez chaque lieu rapporté par les recharges (une géofence TeslaMate, une adresse, un tag Home Assistant) à un lieu et une catégorie. Toutes les recharges qui rapportent ce texte sont classées d'un coup.",
+    "intro": "Indiquez quels lieux rapportés par les recharges (une géofence TeslaMate, une adresse, un tag Home Assistant) sont votre domicile. Dès qu'un domicile existe, toute autre recharge avec un lieu est comptée en extérieur. Toutes les recharges qui rapportent un même texte sont classées d'un coup.",
     "locations": "Lieux rapportés",
     "noLocations": "Aucune recharge ne rapporte encore de lieu.",
     "sessions": "{count} session | {count} sessions",
@@ -444,8 +444,13 @@
       "HOME": "Domicile",
       "WORK": "Travail",
       "PUBLIC": "Public",
-      "OTHER": "Autre"
-    }
+      "OTHER": "Autre",
+      "OUTSIDE": "Extérieur"
+    },
+    "outside": "Extérieur",
+    "markHome": "Domicile",
+    "homeName": "Domicile",
+    "noHome": "Aucun domicile défini : marquez au moins un lieu comme Domicile pour que les autres soient comptés en extérieur."
   },
   "chargingInsights": {
     "title": "Recharges par lieu",

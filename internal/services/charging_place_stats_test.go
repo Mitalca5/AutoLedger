@@ -81,6 +81,14 @@ func TestHomeSavings(t *testing.T) {
 		t.Errorf("savings: %+v", h)
 	}
 
+	away := buildPlaceStats([]placeRow{
+		{Month: "2026-03", Key: "home", Category: models.PlaceHome, Sessions: 1, KwhAdded: 100, Cost: eur(20), PricedKwh: 100},
+		{Month: "2026-03", Key: models.PlaceOutsideKey, Category: models.PlaceOutside, Sessions: 1, KwhAdded: 50, Cost: eur(30), PricedKwh: 50},
+	}, PlacePeriod{}).HomeSavings
+	if away.AwaySessions != 1 || away.Savings != eur(20) {
+		t.Errorf("outside charges are away: %+v", away)
+	}
+
 	free := buildPlaceStats([]placeRow{
 		{Month: "2026-03", Key: "home", Category: models.PlaceHome, Sessions: 1, KwhAdded: 100, Cost: eur(20), PricedKwh: 100},
 		{Month: "2026-03", Key: "work", Category: models.PlaceWork, Sessions: 5, KwhAdded: 50, Cost: 0, PricedKwh: 50, FreeSessions: 5},
@@ -142,6 +150,7 @@ func TestIntegrationPlaceStatsReconcileWithTheLedger(t *testing.T) {
 	add(v.ID, 4, addr("Valence Supercharger, Valence"), 10, nil)
 	add(v.ID, 5, addr("Somewhere else"), 15, &paid)
 	add(v.ID, 6, addr("Maison"), 0, &free)
+	add(v.ID, 8, nil, 12, &paid)                // reports no location at all
 	add(other.ID, 7, addr("Maison"), 99, &paid) // another vehicle, another account
 
 	svc := NewEnergyStatsService(db.Pool, "UTC")
@@ -158,10 +167,17 @@ func TestIntegrationPlaceStatsReconcileWithTheLedger(t *testing.T) {
 	if p.Sessions != 2 || p.KwhAdded != 40 || p.PricedKwh != 30 || p.UnknownSessions != 1 || p.UnknownKwh != 10 {
 		t.Errorf("public: %+v", p)
 	}
-	if u := group(t, s, ""); u.KwhAdded != 15 {
+	// With a home place, a reported location linked to none is away; a charge reporting nothing stays unclassified
+	if o := group(t, s, models.PlaceOutsideKey); o.KwhAdded != 15 || o.Category != models.PlaceOutside || o.Name != "" {
+		t.Errorf("outside: %+v", o)
+	}
+	if u := group(t, s, ""); u.KwhAdded != 12 {
 		t.Errorf("unclassified: %+v", u)
 	}
-	if s.Summary.ZeroKwhSessions != 1 || s.Summary.Sessions != 5 {
+	if s.HomeSavings.AwaySessions != 3 || s.HomeSavings.UnclassifiedKwh != 12 {
+		t.Errorf("outside counts as away, the unlocated charge does not: %+v", s.HomeSavings)
+	}
+	if s.Summary.ZeroKwhSessions != 1 || s.Summary.Sessions != 6 {
 		t.Errorf("summary: %+v", s.Summary)
 	}
 
@@ -198,7 +214,7 @@ func TestIntegrationPlaceStatsReconcileWithTheLedger(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(foreign.Groups) != 1 || foreign.Groups[0].Key != "" {
-		t.Errorf("without its owner's places everything is unclassified: %+v", foreign.Groups)
+		t.Errorf("without a home place of its own everything is unclassified, not away: %+v", foreign.Groups)
 	}
 }
 
