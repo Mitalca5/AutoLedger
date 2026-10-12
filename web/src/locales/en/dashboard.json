@@ -238,7 +238,9 @@
     "economic": "Economic",
     "cash": "Cash paid",
     "economicHint": "Each cost spread over the period it covers.",
-    "cashHint": "What was paid in each month."
+    "cashHint": "What was paid in each month.",
+    "month": "Month",
+    "total": "Total"
   },
   "tagBreakdown": {
     "ofTollsAndParking": "{value} of tolls and parking",
@@ -351,7 +353,7 @@
     "readingRequired": "Enter a health percentage or a new-battery capacity first.",
     "deleteReading": "Delete the reading of {date}",
     "residual": "Projected resale value",
-    "expectedKm": "Planned distance (km)",
+    "expectedKm": "Planned distance",
     "kmShare": "Weight of the distance (%)",
     "healthWeight": "Health weight",
     "summary": "{depreciation} lost so far · {progress}% of the planned depreciation",

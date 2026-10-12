@@ -16,6 +16,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit } from '@/units'
 import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
+import ChartTable from '@/components/charts/ChartTable.vue'
 import { formatMonthName } from '@/utils/dashboard'
 
 Chart.register(...registerables)
@@ -426,8 +427,13 @@ onBeforeUnmount(() => {
           <span class="text-xs text-slate-400">{{ otherCurrencyCount > 0 ? t('fleet.chart.fleetCurrencyOnly', { currency: summary.currency }) : t('fleet.chart.stackedBreakdown') }}</span>
         </div>
         <div class="h-64 relative">
-          <canvas ref="chartCanvas"></canvas>
+          <canvas ref="chartCanvas" role="img" :aria-label="t('fleet.chart.monthlyCostHistory')"></canvas>
         </div>
+        <ChartTable
+          :caption="t('fleet.chart.monthlyCostHistory')"
+          :headers="[t('fleet.chart.month'), t('fleet.chart.energyCost'), t('fleet.chart.otherCost')]"
+          :rows="summary.monthly_costs.map((m) => [formatMonthLabel(m.month), formatAmount(m.energy_cost, summary!.currency), formatAmount(m.other_cost, summary!.currency)])"
+        />
       </div>
 
       <!-- Driver Distance Distribution -->

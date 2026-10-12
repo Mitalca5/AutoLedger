@@ -32,7 +32,7 @@ const rows = computed(() =>
           type="button"
           :aria-pressed="mode === m"
           class="px-2.5 py-1 rounded-md font-medium transition-colors"
-          :class="mode === m ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'"
+          :class="mode === m ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'"
           @click="mode = m"
         >
           {{ $t(m === 'full' ? 'dashboard.donut.modeFull' : 'dashboard.donut.modeCash') }}
@@ -47,7 +47,7 @@ const rows = computed(() =>
         :currency="vehicleStore.currency"
         :show-legend="false"
         :empty-label="$t('dashboard.costBreakdownDonut.noCost')"
-        :chart-label="$t('dashboard.costBreakdownDonut.fullCostBreakdownByCategory')"
+        :chart-label="$t(mode === 'full' ? 'dashboard.costBreakdownDonut.fullCostBreakdownByCategory' : 'dashboard.donut.cashTitle')"
       />
     </div>
     <ul class="mt-4 space-y-1.5 text-xs">

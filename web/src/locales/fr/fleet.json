@@ -18,7 +18,8 @@
     "stackedBreakdown": "Énergie vs autres dépenses",
     "energyCost": "Énergie",
     "otherCost": "Autres dépenses",
-    "fleetCurrencyOnly": "Véhicules en {currency} uniquement"
+    "fleetCurrencyOnly": "Véhicules en {currency} uniquement",
+    "month": "Mois"
   },
   "drivers": {
     "title": "Répartition des kilomètres par conducteur",

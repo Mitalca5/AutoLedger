@@ -7,6 +7,7 @@ import { computeMonthFixedVariable, filterMonthsByRange, monthlyCostSeries, type
 import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount, formatAxisAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
+import ChartTable from '@/components/charts/ChartTable.vue'
 
 Chart.register(...registerables)
 
@@ -35,6 +36,18 @@ const seriesLabel = (key: string) =>
     financing: t('dashboard.monthlyCostChart.financing'),
     other: t('dashboard.donut.other'),
   })[key] ?? key
+// The same figures as a table for screen readers: one column per cost item, the month total last
+const tableData = computed(() => {
+  const { series, totals } = monthlyCostSeries(filteredMonthlyCosts.value, mode.value)
+  return {
+    headers: [t('dashboard.monthlyCostChart.month'), ...series.map((s) => seriesLabel(s.key)), t('dashboard.monthlyCostChart.total')],
+    rows: filteredMonthlyCosts.value.map((m: any, i: number) => [
+      formatMonthLabel(m.month),
+      ...series.map((s) => formatAmount(s.data[i], currency.value)),
+      formatAmount(totals[i], currency.value),
+    ]),
+  }
+})
 
 function renderChart() {
   if (!monthlyChartRef.value || !props.monthlyCosts) return
@@ -148,7 +161,8 @@ onUnmounted(() => {
     </div>
     <p class="-mt-2 mb-3 text-xs text-slate-400">{{ mode === 'economic' ? $t('dashboard.monthlyCostChart.economicHint') : $t('dashboard.monthlyCostChart.cashHint') }}</p>
     <div class="h-52 sm:h-72">
-      <canvas ref="monthlyChartRef" :aria-label="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')"></canvas>
+      <canvas ref="monthlyChartRef" role="img" :aria-label="`${$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')} · ${mode === 'economic' ? $t('dashboard.monthlyCostChart.economic') : $t('dashboard.monthlyCostChart.cash')}`"></canvas>
     </div>
+    <ChartTable :caption="$t('dashboard.monthlyCostChart.monthlyCostTrendByCategory')" :headers="tableData.headers" :rows="tableData.rows" />
   </div>
 </template>

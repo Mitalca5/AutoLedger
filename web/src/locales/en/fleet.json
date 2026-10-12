@@ -18,7 +18,8 @@
     "stackedBreakdown": "Energy vs. other expenses",
     "energyCost": "Energy",
     "otherCost": "Other Expenses",
-    "fleetCurrencyOnly": "{currency} vehicles only"
+    "fleetCurrencyOnly": "{currency} vehicles only",
+    "month": "Month"
   },
   "drivers": {
     "title": "Driver Distance Distribution",

@@ -8,6 +8,7 @@ import { filterMonthsByRange, MIN_PLOTTED_DISTANCE_KM, plottedCostPerKm } from '
 import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
+import ChartTable from '@/components/charts/ChartTable.vue'
 import { distanceUnit, formatDistanceValue, kmToDisplayDistance, perDistance } from '@/units'
 
 Chart.register(...registerables)
@@ -24,6 +25,18 @@ const range = computed(() => prefs.dashboardRange)
 const months = computed(() => filterMonthsByRange(props.monthlyCosts || [], range.value))
 let distanceChart: Chart | null = null
 let costChart: Chart | null = null
+
+// The same figures as a table for screen readers
+const tableRows = computed(() =>
+  months.value.map((m: any) => {
+    const cost = plottedCostPerKm(m)
+    return [
+      formatMonthLabel(m.month),
+      formatDistanceValue(m.distance_km || 0),
+      cost == null ? '—' : formatAmount(perDistance(cost), vehicleStore.currency, 3),
+    ]
+  }),
+)
 
 const AXIS = '#64748b'
 const GRID = '#1e293b'
@@ -154,16 +167,21 @@ onUnmounted(() => {
       <div>
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() }) }}</h4>
         <div class="h-40 sm:h-52">
-          <canvas ref="distanceRef" :aria-label="$t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() })"></canvas>
+          <canvas ref="distanceRef" role="img" :aria-label="$t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() })"></canvas>
         </div>
       </div>
       <div>
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.mileageCostChart.costKm', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) }) }}</h4>
         <div class="h-40 sm:h-52">
-          <canvas ref="costRef" :aria-label="$t('dashboard.mileageCostChart.costKm', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) })"></canvas>
+          <canvas ref="costRef" role="img" :aria-label="$t('dashboard.mileageCostChart.costKm', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) })"></canvas>
         </div>
         <p class="mt-1 text-xs text-slate-400">{{ $t('dashboard.mileageCostChart.minDistanceNote', { distance: formatDistanceValue(MIN_PLOTTED_DISTANCE_KM), unit: distanceUnit() }) }}</p>
       </div>
     </div>
+    <ChartTable
+      :caption="$t('dashboard.mileageCostChart.monthlyMileageAndCostPer', { unit: distanceUnit() })"
+      :headers="[$t('dashboard.monthlyCostChart.month'), $t('dashboard.mileageCostChart.distanceKm', { unit: distanceUnit() }), $t('dashboard.mileageCostChart.costKm', { unit: distanceUnit(), cur: currencySymbol(vehicleStore.currency) })]"
+      :rows="tableRows"
+    />
   </div>
 </template>
