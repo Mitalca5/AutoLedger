@@ -86,7 +86,7 @@
     "theEnergyEfficiencyStatisticsCould": "The energy efficiency statistics could not be loaded.",
     "kwhKwhEfficiency": "{value} kWh · {value2}/kWh · efficiency {value3}",
     "ofTheEnergyChargeS": "{value}% of the energy · {sessions} charge(s)",
-    "howTheCarIsCharged": "How the car is charged",
+    "howTheCarIsCharged": "Charging speed",
     "3MonthAverage100Km": "3-month average {cur}/100 {unit}",
     "month": "Month",
     "consumptionAndEnergyCostPer": "Consumption and energy cost per month",
@@ -124,7 +124,11 @@
     "chargingEfficiencyEmpty": "Efficiency compares the energy stored in the battery with the energy drawn from the grid (meter or charger). Charges synced by TeslaMate or an integration carry it; without it, the figure stays unknown.",
     "chargingEfficiencyAction": "See the charges",
     "noData": "No efficiency data yet: it appears once odometer readings and charges cover the same period.",
-    "seeEnergy": "See energy"
+    "seeEnergy": "See energy",
+    "byPlace": "Where it is charged",
+    "placeShare": "{share} % of kWh ({kwh} kWh)",
+    "placeUnknown": "{count} session(s) without a cost, not in the price",
+    "placeLink": "All places and prices"
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Drives of at least {min}, grouped by average outside temperature; bands under {band} are hidden.",
