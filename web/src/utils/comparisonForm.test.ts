@@ -51,7 +51,7 @@ describe('applyComparisonDefaults', () => {
   it('leaves prices empty when the defaults carry none for the currency', () => {
     const form = emptyComparisonForm(false)
     applyComparisonDefaults(form, { ...defaults, indicative_prices: false, ice: [{ fuel_type: 'SP95_E10', l_per_100km: 7, fuel_price: 0 }] })
-    expect(form.tracked.eur_per_kwh).toBe(0)
+    expect(form.tracked.eur_per_kwh).toBe('')
     expect(form.ice.l_per_100km).toBe(7)
     expect(form.ice.fuel_price).toBe(0)
   })
@@ -136,7 +136,7 @@ describe('comparisonStepErrorKey', () => {
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.fuelPrice')
     form.ice.fuel_price = 1.7
     form.ice.purchase_price = 20000
-    form.tracked.eur_per_kwh = 0
+    form.tracked.eur_per_kwh = '' as any
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.electricityPrice')
     form.tracked.eur_per_kwh = 0.2
     expect(comparisonStepErrorKey(2, form, false)).toBe('comparison.errors.evPrice')

@@ -30,4 +30,6 @@ Les valeurs explorées passent par le même calcul qu'un scénario enregistré e
 
 ## Coûts de recharge gratuits et inconnus
 
+Dans une projection manuelle, saisissez un prix de l’électricité de 0 pour une énergie gratuite ; un champ vide ne signifie pas zéro.
+
 Saisissez un coût explicite de **0** pour une recharge gratuite, quelle qu'en soit la raison. Zéro est un coût connu ; un coût absent reste inconnu. Les recharges gratuites enregistrées comptent comme des recharges dans les comparatifs d'hybrides suivis et ne déclenchent pas l'avertissement de source d'énergie manquante. Les recharges dont le coût est inconnu reçoivent un rappel distinct pour saisir leur coût réel, ou zéro si elles étaient gratuites.
