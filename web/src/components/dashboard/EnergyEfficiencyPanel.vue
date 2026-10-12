@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GlossaryTip from '@/components/GlossaryTip.vue'
 import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
@@ -198,7 +199,7 @@ onBeforeUnmount(() => {
 
     <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }} <GlossaryTip term="atTheWheel" /></dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} <span class="text-xs font-medium text-slate-400">kWh/100 {{ distanceUnit() }}</span></dd>
         <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</dd>
       </div>

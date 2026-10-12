@@ -48,9 +48,9 @@
     "title": "Coût au kilomètre, côte à côte",
     "hint": "Toutes motorisations, d'après le TCO de chaque véhicule",
     "vehicle": "Véhicule",
-    "runningPerDistance": "Coût d'usage / {unit}",
+    "runningPerDistance": "Décaissé / {unit}",
     "fullPerDistance": "Coût complet / {unit}",
-    "energy": "Énergie / 100",
+    "energy": "À la prise / 100",
     "annual": "Coût annuel",
     "completeness": "Complétude",
     "kwh100": "{value} kWh/100 {unit}",
@@ -58,6 +58,6 @@
     "cheapest": "Le moins cher",
     "indicative": "Indicatif",
     "depreciationMissing": "Dépréciation non renseignée",
-    "footnote": "Le coût d'usage couvre l'énergie, l'entretien, l'assurance et le financement ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). Un véhicule sous 60 % de complétude est affiché mais pas classé."
+    "footnote": "Le décaissé couvre l'énergie, l'entretien, l'assurance et le financement, énergie estimée comprise ; le coût complet ajoute la dépréciation et les pneus amortis. Le coût annuel extrapole le coût complet sur l'historique observé (trois mois minimum). L'énergie est l'énergie chargée à la prise. Un véhicule sous 60 % de complétude est affiché mais pas classé."
   }
 }

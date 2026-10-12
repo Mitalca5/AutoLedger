@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GlossaryTip from '@/components/GlossaryTip.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import { intlLocale, t } from '@/i18n'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
@@ -150,7 +151,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         </div>
 
         <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
-          <span class="text-xs font-medium text-slate-400 block">{{ $t('dashboard.monthDetailModal.calculatedRunningCost') }}</span>
+          <span class="text-xs font-medium text-slate-400 block">{{ $t('dashboard.monthDetailModal.calculatedRunningCost') }} <GlossaryTip term="economicCost" /></span>
           <div class="text-base sm:text-lg font-extrabold text-white mt-0.5">
             {{ formatAmount(selectedMonthBreakdown.economicTotal, currency) }}
           </div>
@@ -158,7 +159,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         </div>
 
         <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
-          <span class="text-xs font-medium text-slate-400 block">{{ $t('dashboard.monthDetailModal.totalPaidOutCash') }}</span>
+          <span class="text-xs font-medium text-slate-400 block">{{ $t('dashboard.monthDetailModal.totalPaidOutCash') }} <GlossaryTip term="cashPaid" /></span>
           <div class="text-base sm:text-lg font-extrabold text-white mt-0.5">
             {{ formatAmount(selectedMonthBreakdown.cashTotal, currency) }}
           </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GlossaryTip from '@/components/GlossaryTip.vue'
 import LoadError from '@/components/LoadError.vue'
 import ListSkeleton from '@/components/ListSkeleton.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
@@ -419,11 +420,11 @@ onBeforeUnmount(() => {
           </div>
           <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-slate-800/60 pt-2 text-xs">
             <div>
-              <dt class="text-slate-400">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</dt>
+              <dt class="text-slate-400">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }} <GlossaryTip term="cashPaid" /></dt>
               <dd class="tabular-nums text-slate-200">{{ formatAmountOrUnknown(v.running_cost_per_km == null ? null : perDistance(v.running_cost_per_km), v.currency) }}</dd>
             </div>
             <div>
-              <dt class="text-slate-400">{{ t('fleet.compare.energy') }}</dt>
+              <dt class="text-slate-400">{{ t('fleet.compare.energy') }} <GlossaryTip term="atThePlug" /></dt>
               <dd class="tabular-nums text-slate-200">{{ energyPer100(v) }}</dd>
             </div>
             <div>
@@ -442,9 +443,9 @@ onBeforeUnmount(() => {
           <thead>
             <tr class="text-left text-xs uppercase tracking-wider text-slate-400">
               <th class="py-2 pr-4 font-medium">{{ t('fleet.compare.vehicle') }}</th>
-              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }} <GlossaryTip term="cashPaid" /></th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</th>
-              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.energy') }}</th>
+              <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.energy') }} <GlossaryTip term="atThePlug" /></th>
               <th class="py-2 pr-4 font-medium text-right">{{ t('fleet.compare.annual') }}</th>
               <th class="py-2 font-medium text-right">{{ t('fleet.compare.completeness') }}</th>
             </tr>
