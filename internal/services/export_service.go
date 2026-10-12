@@ -130,7 +130,7 @@ func (s *ExportService) Export(ctx context.Context, vehicle *models.Vehicle, opt
 	if opts.Format == ExportJSON {
 		return renderExportJSON(table)
 	}
-	return renderExportCSV(table)
+	return renderExportCSV(table, opts.Lang)
 }
 
 func inPeriod(t time.Time, opts ExportOptions) bool {
@@ -319,12 +319,17 @@ func csvSafe(s string) string {
 	return s
 }
 
-func csvCell(v any) string {
+// csvCell formats one cell; decimalComma writes a float with "," for spreadsheets of a locale that reads it so.
+func csvCell(v any, decimalComma bool) string {
 	switch x := v.(type) {
 	case string:
 		return csvSafe(x)
 	case float64:
-		return strconv.FormatFloat(x, 'f', -1, 64)
+		text := strconv.FormatFloat(x, 'f', -1, 64)
+		if decimalComma {
+			text = strings.Replace(text, ".", ",", 1)
+		}
+		return text
 	case int:
 		return strconv.Itoa(x)
 	case bool:
@@ -333,17 +338,23 @@ func csvCell(v any) string {
 	return ""
 }
 
-func renderExportCSV(t *exportTable) (*ExportResult, error) {
+// renderExportCSV writes the table with a UTF-8 byte order mark. A French interface gets the dialect French Excel
+// opens in one column per field: ";" as separator and "," as decimal mark (the CSV importer reads both).
+func renderExportCSV(t *exportTable, lang string) (*ExportResult, error) {
 	var buf bytes.Buffer
 	buf.WriteString("\xEF\xBB\xBF")
 	w := csv.NewWriter(&buf)
+	french := strings.HasPrefix(strings.ToLower(lang), "fr")
+	if french {
+		w.Comma = ';'
+	}
 	if err := w.Write(t.headers); err != nil {
 		return nil, err
 	}
 	for _, row := range t.rows {
 		cells := make([]string, len(row))
 		for i, v := range row {
-			cells[i] = csvCell(v)
+			cells[i] = csvCell(v, french)
 		}
 		if err := w.Write(cells); err != nil {
 			return nil, err

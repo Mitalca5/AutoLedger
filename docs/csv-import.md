@@ -10,6 +10,7 @@ The same columns are used by **Export** (manual tracking page, or `GET /api/vehi
 - First line: headers. Case, accents and surrounding spaces are ignored, and the aliases below are accepted.
 - Dates: `2026-01-15`, `2026-01-15 18:30`, `2026-01-15T18:30:00Z` (a date without an offset is read in the instance timezone, `APP_TIMEZONE`). Dates with `/` or `.` are read day first by default (`15/01/2026`); the import dialog lets you choose month first or year first.
 - Numbers: `.` or `,` as decimal separator, detected. When a file mixes thousands separators, choose the separator in the import dialog.
+- Files written by the app (exports and templates): UTF-8 with a BOM. With the French interface the separator is `;` and numbers use `,`, so that French Excel opens one column per field; otherwise `,` and `.`. The import reads both.
 - Distances: columns suffixed `_km` or `_mi` are explicit. Without a suffix, the column is read in the distance unit of the account.
 - A single invalid row cancels the whole file: nothing is written until every row is valid. Rows already present are skipped when "skip duplicates" is on.
 - The type (charges, drives, fuel, odometer) is detected from the headers and can be chosen manually.

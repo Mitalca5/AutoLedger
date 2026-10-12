@@ -10,6 +10,7 @@ Les mêmes colonnes sont utilisées par l'**export** (page de suivi manuel, ou `
 - Première ligne : les en-têtes. La casse, les accents et les espaces autour sont ignorés, et les alias ci-dessous sont acceptés.
 - Dates : `2026-01-15`, `2026-01-15 18:30`, `2026-01-15T18:30:00Z` (une date sans décalage est lue dans le fuseau de l'instance, `APP_TIMEZONE`). Les dates avec `/` ou `.` sont lues jour en premier par défaut (`15/01/2026`) ; la fenêtre d'import permet de choisir mois en premier ou année en premier.
 - Nombres : `.` ou `,` comme séparateur décimal, détecté. Si un fichier contient des séparateurs de milliers, choisissez le séparateur dans la fenêtre d'import.
+- Fichiers écrits par l'application (exports et modèles) : UTF-8 avec BOM. Avec l'interface en français, le séparateur est `;` et les nombres utilisent `,`, pour qu'Excel en français ouvre une colonne par champ ; sinon `,` et `.`. L'import relit les deux.
 - Distances : les colonnes suffixées `_km` ou `_mi` sont explicites. Sans suffixe, la colonne est lue dans l'unité de distance du compte.
 - Une seule ligne invalide annule tout le fichier : rien n'est écrit tant que toutes les lignes ne sont pas valides. Les lignes déjà présentes sont ignorées si « ignorer les doublons » est activé.
 - Le type (recharges, trajets, pleins, relevés) est détecté d'après les en-têtes et peut être choisi à la main.

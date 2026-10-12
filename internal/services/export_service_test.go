@@ -133,3 +133,24 @@ func TestExportExpensesNameTheTripAndPassTheFiltersToDrives(t *testing.T) {
 		t.Fatalf("the tag and period must reach the repository, got %+v", store.drivesCalls)
 	}
 }
+
+func TestRenderExportCSVDialectFollowsTheLanguage(t *testing.T) {
+	table := &exportTable{
+		headers: []string{"name", "amount"},
+		rows:    [][]any{{"Family; weekend", 12.5}, {"Plain, text", 3.0}},
+	}
+	fr, err := renderExportCSV(table, "fr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(fr.Body), "\xEF\xBB\xBFname;amount\n\"Family; weekend\";12,5\nPlain, text;3\n"; got != want {
+		t.Errorf("french dialect:\n got %q\nwant %q", got, want)
+	}
+	en, err := renderExportCSV(table, "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(en.Body), "\xEF\xBB\xBFname,amount\nFamily; weekend,12.5\n\"Plain, text\",3\n"; got != want {
+		t.Errorf("default dialect:\n got %q\nwant %q", got, want)
+	}
+}
