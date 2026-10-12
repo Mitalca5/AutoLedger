@@ -26,7 +26,9 @@
     "invalid_reference": "Invalid reference: the drive, group or tire does not exist for this vehicle",
     "invalid_date_value": "Invalid date: {p0}",
     "invalid_value": "Invalid value",
-    "origin_denied": "Request origin not allowed"
+    "origin_denied": "Request origin not allowed",
+    "invalid_months": "months must be between 0 and 240",
+    "invalid_date_range": "from and to must be two days (YYYY-MM-DD), from not after to"
   },
   "member": {
     "invalid_role": "Invalid role: {p0}",

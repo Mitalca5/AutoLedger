@@ -83,7 +83,7 @@ async function removePlace(place: ChargingPlace) {
         <li v-for="l in locations" :key="l.text" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-slate-800/50 border border-slate-700/40 rounded-xl text-xs">
           <div class="min-w-0">
             <p class="font-semibold text-white truncate" :title="l.text">{{ l.text }}</p>
-            <p class="text-slate-400">{{ $t('expenses.chargingPlaces.sessions', { count: l.sessions }) }} · {{ formatNumber(l.kwh_added, 1) }} kWh</p>
+            <p class="text-slate-400">{{ $t('expenses.chargingPlaces.sessions', { count: l.sessions }, l.sessions) }} · {{ formatNumber(l.kwh_added, 1) }} kWh</p>
           </div>
           <select
             class="field sm:w-52"

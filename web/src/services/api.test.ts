@@ -344,6 +344,8 @@ describe('endpoint contract', () => {
     ['deleteMaintenance', () => api.deleteMaintenance('v1', 'm1'), 'DELETE', '/vehicles/v1/maintenance/m1'],
     ['createCharge', () => api.createCharge('v1', { kwh_added: 5 }), 'POST', '/vehicles/v1/charges', { kwh_added: 5 }],
     ['deleteCharge', () => api.deleteCharge('v1', 'c1'), 'DELETE', '/vehicles/v1/charges/c1'],
+    ['getChargingPlaceStats', () => api.getChargingPlaceStats('v1', { months: 12 }), 'GET', '/vehicles/v1/charging-place-stats?months=12'],
+    ['getChargingPlaceStatsRange', () => api.getChargingPlaceStats('v1', { from: '2026-09-01', to: '2026-09-30' }), 'GET', '/vehicles/v1/charging-place-stats?from=2026-09-01&to=2026-09-30'],
     ['getChargingPlaces', () => api.getChargingPlaces('v1'), 'GET', '/vehicles/v1/charging-places'],
     ['createChargingPlace', () => api.createChargingPlace('v1', { name: 'Home', category: 'HOME' }), 'POST', '/vehicles/v1/charging-places', { name: 'Home', category: 'HOME' }],
     ['updateChargingPlace', () => api.updateChargingPlace('v1', 'p1', { name: 'Work', category: 'WORK' }), 'PUT', '/vehicles/v1/charging-places/p1', { name: 'Work', category: 'WORK' }],

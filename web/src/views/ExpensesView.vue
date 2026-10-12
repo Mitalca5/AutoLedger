@@ -26,6 +26,7 @@ import TollModal from '@/components/expenses/TollModal.vue'
 import MaintenanceModal from '@/components/expenses/MaintenanceModal.vue'
 import ChargeModal from '@/components/expenses/ChargeModal.vue'
 import ChargingPlacesModal from '@/components/expenses/ChargingPlacesModal.vue'
+import ChargingInsights from '@/components/expenses/ChargingInsights.vue'
 import UploadDocumentModal from '@/components/expenses/UploadDocumentModal.vue'
 import ReminderModal from '@/components/expenses/ReminderModal.vue'
 import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.vue'
@@ -106,6 +107,9 @@ const showAddMaintModal = ref(false)
 const editingMaint = ref<any | null>(null)
 const showChargeModal = ref(false)
 const showPlacesModal = ref(false)
+const placesVersion = ref(0)
+// What makes the charging figures stale: a synchronisation, a charge added or removed, a place changed
+const insightsKey = computed(() => `${vehicleStore.lastSyncTimestamp}|${chargesTotal.value}|${placesVersion.value}`)
 const editingCharge = ref<any | null>(null)
 const showUploadDocModal = ref(false)
 
@@ -392,6 +396,15 @@ function openUploadDocumentModal() {
       :can-edit="vehicleStore.canEdit"
     />
 
+    <ChargingInsights
+      v-if="activeTab === 'CHARGES' && vehicleStore.canCharge && vehicleStore.activeVehicle"
+      :vehicle-id="vehicleStore.activeVehicle.id"
+      :currency="vehicleStore.currency"
+      :has-charges="chargesTotal > 0"
+      :sync-key="insightsKey"
+      @manage-places="showPlacesModal = true"
+    />
+
     <ChargesPanel
       v-if="activeTab === 'CHARGES' && vehicleStore.canCharge"
       :charges="charges"
@@ -402,7 +415,6 @@ function openUploadDocumentModal() {
       :missing-cost-only="missingCostOnly"
       @toggle-missing-cost="toggleMissingCostFilter"
       @import-csv="openCSVImportModal"
-      @manage-places="showPlacesModal = true"
       @load-more="loadMoreCharges"
       @edit="openEditChargeModal"
       @delete="handleDeleteCharge"
@@ -442,7 +454,7 @@ function openUploadDocumentModal() {
       @view-document="viewOrDownloadDocument"
     />
 
-    <ChargingPlacesModal v-model:open="showPlacesModal" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @changed="loadData" />
+    <ChargingPlacesModal v-model:open="showPlacesModal" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @changed="() => { placesVersion++; loadData() }" />
 
     <ChargeModal
       v-model:open="showChargeModal"

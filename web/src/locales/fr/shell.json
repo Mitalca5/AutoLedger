@@ -81,7 +81,8 @@
     "dayPlaceholder": "JJ/MM/AAAA",
     "dateTimePlaceholder": "JJ/MM/AAAA HH:mm",
     "today": "Aujourd'hui",
-    "confirm": "Valider"
+    "confirm": "Valider",
+    "rangePlaceholder": "Choisir une période"
   },
   "language": {
     "label": "Langue"
@@ -94,7 +95,6 @@
     "signInRequired": "Connectez-vous avant de sauvegarder une saisie hors ligne.",
     "legacyLabel": "Anciennes saisies hors ligne",
     "legacyRetained": "Les saisies sauvegardées par une ancienne version ne précisent pas le compte. Elles sont conservées localement et ne seront pas envoyées automatiquement ; saisissez-les à nouveau avec le bon compte.",
-
     "httpError": "Erreur {status}"
   },
   "documents": {

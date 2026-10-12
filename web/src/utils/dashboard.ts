@@ -19,6 +19,11 @@ const monthlyRangeMonths: Record<MonthlyRangeKey, number | null> = {
   '1M': 1,
 }
 
+/** Number of calendar months of a range, the current one included; 0 for the whole history. */
+export function rangeToMonths(range: MonthlyRangeKey): number {
+  return monthlyRangeMonths[range] ?? 0
+}
+
 /** The last N months of the monthly costs for a chart range. */
 export function filterMonthsByRange<T>(list: T[], range: MonthlyRangeKey): T[] {
   const months = monthlyRangeMonths[range]

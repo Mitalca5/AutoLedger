@@ -12,6 +12,23 @@ Un lieu a un nom et une catégorie : **Domicile**, **Travail**, **Public** ou **
 
 Une recharge peut recevoir son propre lieu dans le formulaire de recharge, qui l'emporte alors sur son texte rapporté.
 
+## Recharges par lieu
+
+**Énergie → Recharges** s'ouvre sur une synthèse des recharges du mois en cours. La période se choisit avec les préréglages (1 mois, 3 mois, 6 mois, 1 an, tout) ou avec deux jours pris sur un calendrier. **Énergie / Coût** bascule les barres mensuelles et la répartition par lieu entre kWh et coût enregistré :
+
+- l'énergie, le montant dépensé et le prix moyen au kWh ;
+- l'énergie de chaque mois par lieu, et le prix moyen de chaque mois ;
+- une répartition par lieu, en énergie ou en coût, avec l'énergie, le coût, le prix moyen, les sessions gratuites et les sessions sans coût de chaque lieu ;
+- **Si tout était rechargé à domicile** : ce qu'a coûté l'énergie rechargée dans les lieux classés hors **Domicile**, comparé à la même énergie au prix moyen des lieux **Domicile**.
+
+Comment les chiffres sont comptés :
+
+- Le prix moyen est le coût enregistré rapporté à l'énergie des sessions dont le coût est connu. Une session gratuite (coût 0) compte pour zéro ; une session sans coût enregistré est laissée hors du prix, et son énergie et son nombre sont affichés à côté.
+- Les sessions qui n'ont enregistré aucune énergie ne sont pas comptées et sont signalées à part.
+- L'énergie des lieux non classés est affichée comme telle et n'est jamais supposée hors domicile : elle est laissée hors du chiffre domicile.
+- Le chiffre domicile est négatif (« de plus ») quand recharger ailleurs a coûté moins que le prix domicile, par exemple une recharge gratuite au travail.
+- Les coûts sont les montants du registre des coûts : ils correspondent aux totaux d'énergie mensuels du tableau de bord.
+
 ## Home Assistant
 
 L'intégration envoie le lieu d'une session depuis une **entité de lieu** optionnelle (par exemple le suivi de position du véhicule, dont l'état est le nom de la zone) ou depuis un **tag de lieu par défaut**. Sans l'un ni l'autre, la session est placée au nom donné à sa borne.

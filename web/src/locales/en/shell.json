@@ -81,7 +81,8 @@
     "dayPlaceholder": "DD/MM/YYYY",
     "dateTimePlaceholder": "DD/MM/YYYY HH:mm",
     "today": "Today",
-    "confirm": "Apply"
+    "confirm": "Apply",
+    "rangePlaceholder": "Pick a date range"
   },
   "language": {
     "label": "Language"
@@ -94,7 +95,6 @@
     "signInRequired": "Sign in before saving an offline entry.",
     "legacyLabel": "Older offline entries",
     "legacyRetained": "Entries saved by an older version have no recorded account. They are kept locally and will not be sent automatically; re-enter them under the correct account.",
-
     "httpError": "Error {status}"
   },
   "documents": {

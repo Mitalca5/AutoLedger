@@ -6,7 +6,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
-import { Zap, Pencil, Trash2, AlertTriangle, Paperclip, MapPin } from 'lucide-vue-next'
+import { Zap, Pencil, Trash2, AlertTriangle, Paperclip } from 'lucide-vue-next'
 import { groupChargesByMonth } from '@/utils/expenses'
 import { formatChargeWindow } from '@/utils/dates'
 import { formatAmount } from '@/currency'
@@ -25,7 +25,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   'toggle-missing-cost': []
   'import-csv': []
-  'manage-places': []
   'load-more': []
   edit: [charge: any]
   delete: [charge: any]
@@ -60,13 +59,6 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
         class="shrink-0 font-medium underline hover:text-info-200 transition-colors ml-2"
       >
         {{ $t('common.edit') }}
-      </button>
-    </div>
-
-    <div v-if="charges.length" class="flex justify-end">
-      <button type="button" class="btn btn-secondary" @click="emit('manage-places')">
-        <MapPin class="w-3.5 h-3.5 text-sky-400" />
-        <span>{{ $t('expenses.chargingPlaces.button') }}</span>
       </button>
     </div>
 

@@ -116,6 +116,7 @@ French captures sit next to the English ones (`*.fr.png`); `scripts/screenshots/
   - *Leasing (LOA / LLD)*: Down payment, monthly payments, security deposit, contract mileage allowance, and excess mileage provisions.
 - **Advanced Indicators**: Real cost per km (energy + tolls vs full TCO), net cost factoring carpooling revenues, and an adaptive TCO completeness score.
 - **Monthly Cost Drill-Down**: The energy and insurance amounts of a month list the recorded charges, fill-ups and payments they add up to, with the estimate for distance driven before tracking shown separately.
+- **Charging by Place**: Energy → Charges breaks the charging down by month and by place (home, work, public) with weighted prices, free and unknown costs kept apart, and what charging everything at home would have cost.
 - **Energy Analytics** (vehicles that charge): Real consumption in kWh/100 km, home vs AC vs DC charging efficiency, battery temperature correlation, and cold-weather impact.
 - **Battery health and residual value**: Source-agnostic state of health (OBD2 or garage readings, TeslaMate, or estimated from complete charges) and a resale value projection built from your own purchase price and expected resale, adjusted for age, distance and battery health.
 

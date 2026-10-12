@@ -26,7 +26,9 @@
     "invalid_reference": "Référence invalide : trajet, groupe ou pneu inexistant pour ce véhicule",
     "invalid_date_value": "Date invalide : {p0}",
     "invalid_value": "Valeur invalide",
-    "origin_denied": "Origine de la requête non autorisée"
+    "origin_denied": "Origine de la requête non autorisée",
+    "invalid_months": "months doit être compris entre 0 et 240",
+    "invalid_date_range": "from et to doivent être deux jours (AAAA-MM-JJ), from pas après to"
   },
   "member": {
     "invalid_role": "Rôle invalide : {p0}",
