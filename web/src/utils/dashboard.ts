@@ -470,3 +470,26 @@ export function buildMonthBreakdown(m: any, mode: MonthDetailMode, currency = 'E
     fixedVar: computeMonthFixedVariable(m, mode),
   }
 }
+
+/** Below this distance a month's cost per distance is mostly the fixed costs of a few kilometres: it is not plotted. */
+export const MIN_PLOTTED_DISTANCE_KM = 50
+
+/** A month's cost per km for the trend chart, or null when the month is too short to mean anything. */
+export function plottedCostPerKm(m: { distance_km?: number | null; cost_per_km?: number | null }): number | null {
+  if ((m.distance_km || 0) < MIN_PLOTTED_DISTANCE_KM) return null
+  return m.cost_per_km == null ? null : m.cost_per_km
+}
+
+/** The stacked monthly bars: one series per cost item, in the economic view (spread) or the cash view (what was paid). */
+export function monthlyCostSeries(months: any[], mode: MonthDetailMode) {
+  const rows = months.map((m) => buildMonthBreakdown(m, mode))
+  const keys = rows[0]?.items.map((it) => it.key) ?? []
+  return {
+    series: keys.map((key, i) => ({
+      key,
+      color: rows[0].items[i].color,
+      data: rows.map((r) => r.items[i].displayAmount),
+    })),
+    totals: rows.map((r) => r.activeTotal),
+  }
+}

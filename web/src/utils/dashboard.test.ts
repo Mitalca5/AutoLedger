@@ -7,6 +7,8 @@ import {
   computeMonthFixedVariable,
   currentMonthStats,
   rollingWindowStats,
+  monthlyCostSeries,
+  plottedCostPerKm,
   filterMonthsByRange,
   formatMonthName,
   nextDueReminder,
@@ -441,5 +443,40 @@ describe('rollingWindowStats', () => {
     expect(rollingWindowStats([{ month: '2026-09', distance_km: 100, total: 0 }])!.economicPerKm).toBeNull()
     expect(rollingWindowStats([])).toBeNull()
     expect(rollingWindowStats(undefined)).toBeNull()
+  })
+})
+
+describe('plottedCostPerKm', () => {
+  it('does not plot a month under 50 km', () => {
+    expect(plottedCostPerKm({ distance_km: 25, cost_per_km: 0.81 })).toBeNull()
+    expect(plottedCostPerKm({ distance_km: 50, cost_per_km: 0.2 })).toBe(0.2)
+  })
+
+  it('leaves an unknown cost as a gap', () => {
+    expect(plottedCostPerKm({ distance_km: 400, cost_per_km: null })).toBeNull()
+    expect(plottedCostPerKm({ distance_km: undefined, cost_per_km: 0.3 })).toBeNull()
+  })
+})
+
+describe('monthlyCostSeries', () => {
+  const months = [
+    { month: '2026-08', distance_km: 500, total: 1200, tires: 800, tires_amortized: 100, energy: 400 },
+    { month: '2026-09', distance_km: 300, total: 90, energy: 90 },
+  ]
+
+  it('stacks the spread cost in the economic view', () => {
+    const { series, totals } = monthlyCostSeries(months, 'economic')
+    expect(series.find((s) => s.key === 'tires')!.data).toEqual([100, 0])
+    expect(totals).toEqual([500, 90])
+  })
+
+  it('stacks what was paid in the cash view', () => {
+    const { series, totals } = monthlyCostSeries(months, 'cash')
+    expect(series.find((s) => s.key === 'tires')!.data).toEqual([800, 0])
+    expect(totals).toEqual([1200, 90])
+  })
+
+  it('is empty without months', () => {
+    expect(monthlyCostSeries([], 'cash')).toEqual({ series: [], totals: [] })
   })
 })

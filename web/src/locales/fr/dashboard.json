@@ -174,13 +174,11 @@
     "distanceKm": "Distance ({unit})",
     "lastMonthSDetail": "Détail dernier mois",
     "clickABarOfThe": "Cliquer sur une barre du graphique pour ouvrir le détail chiffré du mois.",
-    "monthlyMileageAndCostPer2": "Kilométrage mensuel et coût de revient au {unit} ({cur}/{unit})",
     "kmDriven": "Distance parcourue ({unit})",
     "averageCostPerKm": "Coût moyen au {unit} ({cur}/{unit})",
     "tooltipDistance": "Distance : {distance} {unit}",
     "tooltipCostPerKm": "Coût de revient : {cost}/{unit}",
-    "axisDistance": "Distance ({unit})",
-    "axisCostPerKm": "Coût/{unit} ({cur})"
+    "minDistanceNote": "Les mois de moins de {distance} {unit} ne sont pas tracés."
   },
   "monthDetailModal": {
     "expensesAndInvoices": "Dépenses & Factures",
@@ -234,7 +232,12 @@
     "maintenance": "Entretien",
     "financing": "Financement",
     "monthTotal": "Total mois : {total}",
-    "fixedVariableTooltip": "{fixedPct} % fixes • {variablePct} % variables"
+    "fixedVariableTooltip": "{fixedPct} % fixes • {variablePct} % variables",
+    "view": "Vue",
+    "economic": "Économique",
+    "cash": "Décaissé",
+    "economicHint": "Chaque coût réparti sur la période qu'il couvre.",
+    "cashHint": "Ce qui a été payé chaque mois."
   },
   "tagBreakdown": {
     "ofTollsAndParking": "{value} de péages & parkings",

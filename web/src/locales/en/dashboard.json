@@ -174,13 +174,11 @@
     "distanceKm": "Distance ({unit})",
     "lastMonthSDetail": "Last month's detail",
     "clickABarOfThe": "Click a bar of the chart to open the month's detailed figures.",
-    "monthlyMileageAndCostPer2": "Monthly mileage and cost per {unit} ({cur}/{unit})",
     "kmDriven": "Distance driven ({unit})",
     "averageCostPerKm": "Average cost per {unit} ({cur}/{unit})",
     "tooltipDistance": "Distance: {distance} {unit}",
     "tooltipCostPerKm": "Cost price: {cost}/{unit}",
-    "axisDistance": "Distance ({unit})",
-    "axisCostPerKm": "Cost/{unit} ({cur})"
+    "minDistanceNote": "Months under {distance} {unit} are not plotted."
   },
   "monthDetailModal": {
     "expensesAndInvoices": "Expenses and invoices",
@@ -234,7 +232,12 @@
     "maintenance": "Maintenance",
     "financing": "Financing",
     "monthTotal": "Month total: {total}",
-    "fixedVariableTooltip": "{fixedPct}% fixed • {variablePct}% variable"
+    "fixedVariableTooltip": "{fixedPct}% fixed • {variablePct}% variable",
+    "view": "View",
+    "economic": "Economic",
+    "cash": "Cash paid",
+    "economicHint": "Each cost spread over the period it covers.",
+    "cashHint": "What was paid in each month."
   },
   "tagBreakdown": {
     "ofTollsAndParking": "{value} of tolls and parking",
