@@ -360,5 +360,9 @@
   "geocoding": {
     "disabled": "Reverse geocoding is not enabled on this server.",
     "already_running": "An address resolution is already running for this vehicle."
+  },
+  "tco": {
+    "contributions_invalid_month": "Month must be formatted as YYYY-MM",
+    "contributions_unsupported_category": "This cost category has no breakdown"
   }
 }

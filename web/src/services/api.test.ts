@@ -346,6 +346,7 @@ describe('endpoint contract', () => {
     ['deleteCharge', () => api.deleteCharge('v1', 'c1'), 'DELETE', '/vehicles/v1/charges/c1'],
     ['getDriveExpensesForDrive', () => api.getDriveExpensesForDrive('v1', 'd1'), 'GET', '/vehicles/v1/drives/d1/expenses'],
     ['getTCO', () => api.getTCO('v1'), 'GET', '/vehicles/v1/tco'],
+    ['getMonthlyContributions', () => api.getMonthlyContributions('v1', '2026-03', 'ENERGY'), 'GET', '/vehicles/v1/tco/months/2026-03/contributions?category=ENERGY'],
     ['getBatteryHealth', () => api.getBatteryHealth('v1'), 'GET', '/vehicles/v1/battery-health'],
     ['saveBatteryReading', () => api.saveBatteryReading('v1', { date: 'd' }), 'POST', '/vehicles/v1/battery-health', { date: 'd' }],
     ['deleteBatteryReading', () => api.deleteBatteryReading('v1', '2026-01-01'), 'DELETE', '/vehicles/v1/battery-health/2026-01-01'],

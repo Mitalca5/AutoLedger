@@ -367,6 +367,8 @@ export const api = {
 
   // TCO Analytics
   getTCO: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/tco`),
+  getMonthlyContributions: (vehicleId: string, month: string, category: string) =>
+    request<any>(`/vehicles/${vehicleId}/tco/months/${month}/contributions?category=${encodeURIComponent(category)}`),
   getBatteryHealth: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/battery-health`),
   saveBatteryReading: (vehicleId: string, data: { date: string; health_percent?: number; current_capacity_kwh?: number; max_capacity_kwh?: number }) =>
     request<any>(`/vehicles/${vehicleId}/battery-health`, { method: 'POST', body: JSON.stringify(data) }),

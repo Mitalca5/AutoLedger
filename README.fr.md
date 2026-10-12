@@ -115,6 +115,7 @@ Les captures anglaises se trouvent à côté des françaises (`*.en.png`) ; `scr
   - *Crédit classique* : suivi du tableau d'amortissement avec la part de capital et d'intérêts, les frais de dossier et l'assurance emprunteur.
   - *Location (LOA / LLD)* : apport, mensualités, dépôt de garantie, kilométrage contractuel et provision pour les kilomètres excédentaires.
 - **Indicateurs avancés** : coût réel au km (énergie + péages ou coût total de possession complet), coût net tenant compte des revenus de covoiturage et score adaptatif de complétude du coût total.
+- **Détail des coûts mensuels** : les montants d'énergie et d'assurance d'un mois listent les recharges, pleins et paiements enregistrés qui les composent, l'estimation des kilomètres parcourus avant le suivi étant affichée à part.
 - **Analyse énergétique** (véhicules qui se rechargent) : consommation réelle en kWh/100 km, efficacité des recharges à domicile, AC et DC, corrélation avec la température de la batterie et impact du froid.
 - **Santé de la batterie et valeur résiduelle** : état de santé indépendant de la source (relevés OBD2 ou garage, TeslaMate, ou estimé à partir de recharges complètes) et projection de la valeur de revente construite sur votre prix d'achat et votre revente prévue, ajustée selon l'âge, la distance et la santé de la batterie.
 

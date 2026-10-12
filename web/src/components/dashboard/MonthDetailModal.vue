@@ -9,6 +9,8 @@ import { currencySymbol, formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import ModalShell from '@/components/ModalShell.vue'
 import { distanceUnit, formatDistance, formatDistanceValue, perDistance } from '@/units'
+import { contributionCategory } from '@/utils/monthContributions'
+import MonthContributions from './MonthContributions.vue'
 
 // Cost detail of one month with a donut chart and the itemized list; ← / → move between months, Esc closes.
 // The modal is open while a month is selected.
@@ -18,6 +20,11 @@ const vehicleStore = useVehicleStore()
 const currency = computed(() => vehicleStore.currency)
 
 const monthDetailViewMode = ref<MonthDetailMode>('economic')
+const expandedKey = ref<string | null>(null)
+
+function toggleContributions(key: string) {
+  expandedKey.value = expandedKey.value === key ? null : key
+}
 
 const ITEM_ICONS: Record<string, any> = {
   energy: Zap,
@@ -51,6 +58,7 @@ function selectNextMonth() {
 
 function closeMonthDetail() {
   selectedMonth.value = null
+  expandedKey.value = null
 }
 
 const selectedMonthBreakdown = computed(() => {
@@ -258,9 +266,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           </h4>
 
           <div class="space-y-1.5 max-h-72 sm:max-h-80 overflow-y-auto pr-1">
+            <div v-for="item in selectedMonthBreakdown.items" :key="item.key">
             <div
-              v-for="item in selectedMonthBreakdown.items"
-              :key="item.key"
               class="p-2.5 bg-slate-800/50 border border-slate-700/40 rounded-xl flex items-center justify-between gap-3 text-xs hover:border-slate-600 transition-colors"
             >
               <div class="flex items-center gap-2.5 min-w-0">
@@ -294,7 +301,26 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                 <div class="text-xs text-success-400 font-medium">
                   {{ formatAmount(perDistance(item.costPerKm), currency, 3) }}/{{ distanceUnit() }}
                 </div>
+                <button
+                  v-if="contributionCategory(item.key) && item.displayAmount !== 0"
+                  type="button"
+                  class="text-xs text-sky-300 hover:text-sky-200 underline-offset-2 hover:underline"
+                  :aria-expanded="expandedKey === item.key"
+                  :aria-controls="`month-contrib-${item.key}`"
+                  @click="toggleContributions(item.key)"
+                >
+                  {{ expandedKey === item.key ? $t('dashboard.monthDetailModal.contributions.hide') : $t('dashboard.monthDetailModal.contributions.show') }}
+                </button>
               </div>
+            </div>
+            <div v-if="expandedKey === item.key && contributionCategory(item.key) && vehicleStore.activeVehicle" :id="`month-contrib-${item.key}`">
+              <MonthContributions
+                :vehicle-id="vehicleStore.activeVehicle.id"
+                :month="selectedMonthBreakdown.month"
+                :category="contributionCategory(item.key)!"
+                :currency="currency"
+              />
+            </div>
             </div>
           </div>
 

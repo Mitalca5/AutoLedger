@@ -360,5 +360,9 @@
   "geocoding": {
     "disabled": "Le géocodage inverse n'est pas activé sur ce serveur.",
     "already_running": "Une résolution d'adresses est déjà en cours pour ce véhicule."
+  },
+  "tco": {
+    "contributions_invalid_month": "Le mois doit être au format AAAA-MM",
+    "contributions_unsupported_category": "Cette catégorie de coût n'a pas de détail"
   }
 }

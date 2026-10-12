@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -39,6 +40,34 @@ func (h *TCOHandler) GetTCO(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, summary)
+}
+
+// GetMonthlyContributions lists the recorded entries behind one category of a monthly total.
+func (h *TCOHandler) GetMonthlyContributions(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	vehicleID := chi.URLParam(r, "vehicleId")
+	month := chi.URLParam(r, "month")
+	category := r.URL.Query().Get("category")
+
+	if _, err := h.repo.GetVehicleByID(r.Context(), vehicleID, userID); err != nil {
+		writeAPIError(w, http.StatusNotFound, apierror.New("vehicle.not_found", "Vehicle not found"))
+		return
+	}
+
+	out, err := h.tcoService.MonthlyCostContributions(r.Context(), vehicleID, month, category)
+	switch {
+	case errors.Is(err, services.ErrInvalidContributionMonth):
+		writeAPIError(w, http.StatusBadRequest, apierror.New("tco.contributions_invalid_month", "Month must be formatted as YYYY-MM"))
+		return
+	case errors.Is(err, services.ErrUnsupportedContributionCategory):
+		writeAPIError(w, http.StatusBadRequest, apierror.New("tco.contributions_unsupported_category", "Unsupported cost category"))
+		return
+	case err != nil:
+		writeRepoError(w, r, err, "Failed to list monthly contributions")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, out)
 }
 
 // GetDataQuality lists odometer continuity issues of the vehicle drives.

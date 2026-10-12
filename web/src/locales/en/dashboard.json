@@ -192,7 +192,19 @@
     "fixedCosts": "Fixed costs",
     "variableCosts": "Variable costs",
     "fixedCostsSub": "Insurance, financing, taxes & subscriptions",
-    "variableCostsSub": "Energy, tolls, tires & maintenance"
+    "variableCostsSub": "Energy, tolls, tires & maintenance",
+    "contributions": {
+      "show": "Show the entries behind this amount",
+      "hide": "Hide the entries",
+      "loading": "Loading entries…",
+      "failed": "The entries could not be loaded.",
+      "empty": "No recorded entry for this month.",
+      "estimate": "Estimated energy for {km} {unit} driven before tracking started ({kwh} kWh)",
+      "recurring": "Recurring, every {n} months",
+      "recurringMonthly": "Recurring, monthly",
+      "recurringYearly": "Recurring, yearly",
+      "insuranceNote": "Each payment is counted in the month it is paid; it is not spread over its coverage period."
+    }
   },
   "monthlyCostChart": {
     "monthlyCostTrendByCategory": "Monthly cost trend by category",

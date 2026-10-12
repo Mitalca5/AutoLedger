@@ -192,7 +192,19 @@
     "fixedCosts": "Coûts fixes",
     "variableCosts": "Coûts variables",
     "fixedCostsSub": "Assurance, financement, taxes & abonnements",
-    "variableCostsSub": "Énergie, péages, pneumatiques & entretien"
+    "variableCostsSub": "Énergie, péages, pneumatiques & entretien",
+    "contributions": {
+      "show": "Afficher les écritures derrière ce montant",
+      "hide": "Masquer les écritures",
+      "loading": "Chargement des écritures…",
+      "failed": "Les écritures n'ont pas pu être chargées.",
+      "empty": "Aucune écriture enregistrée pour ce mois.",
+      "estimate": "Énergie estimée pour {km} {unit} parcourus avant le début du suivi ({kwh} kWh)",
+      "recurring": "Récurrent, tous les {n} mois",
+      "recurringMonthly": "Récurrent, mensuel",
+      "recurringYearly": "Récurrent, annuel",
+      "insuranceNote": "Chaque paiement est compté dans le mois où il est payé ; il n'est pas réparti sur sa période de couverture."
+    }
   },
   "monthlyCostChart": {
     "monthlyCostTrendByCategory": "Évolution mensuelle du coût par poste",

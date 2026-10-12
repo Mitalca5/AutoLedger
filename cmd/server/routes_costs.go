@@ -69,5 +69,6 @@ func (h *apiHandlers) registerCostRoutes(r chi.Router) {
 
 	// TCO Analytics
 	r.Get("/{vehicleId}/tco", h.tco.GetTCO)
+	r.Get("/{vehicleId}/tco/months/{month}/contributions", h.tco.GetMonthlyContributions)
 	r.Get("/{vehicleId}/energy-stats", h.energy.GetStats)
 }
