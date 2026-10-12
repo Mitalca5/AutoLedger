@@ -297,7 +297,8 @@
     "electricity_price": "Invalid electricity price (0 to 5 per kWh)",
     "needs_ev": "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle",
     "preview_projection_only": "The what-if exploration is only available for projections",
-    "mode_invalid": "Invalid mode (RETROSPECTIVE or PROJECTION)"
+    "mode_invalid": "Invalid mode (RETROSPECTIVE or PROJECTION)",
+    "currency_required": "Choose the currency of the projection."
   },
   "webhook": {
     "test_failed": "Webhook test failed: {p0}"

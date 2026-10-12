@@ -6,6 +6,7 @@ import { Chart, registerables } from 'chart.js'
 import { downloadCsv } from '@/utils/csv'
 import { useVehicleStore } from '@/stores/vehicle'
 import { scenarioSide, sideKey } from '@/utils/comparisonSide'
+import { comparisonCurrency, canCompareCurrencies } from '@/utils/comparisonCurrency'
 
 Chart.register(...registerables)
 
@@ -18,9 +19,12 @@ const vehicleStore = useVehicleStore()
 // Hybrid wording only when every compared scenario tracks a hybrid.
 const sk = (key: string) => sideKey(key, props.items.length > 0 && props.items.every((i) => scenarioSide(i.scenario, vehicleStore.vehicles) === 'hybrid') ? 'hybrid' : 'electric')
 
-// Same currency as the comparison page these scenarios were built on
+const commonCurrency = computed(() => canCompareCurrencies(props.items.map(i => i.scenario), vehicleStore.vehicles)
+  ? comparisonCurrency(props.items[0]?.scenario, vehicleStore.vehicles) : undefined)
+
+// Never label or plot different currencies as if their amounts were interchangeable.
 function fmtMoney(v: number | null | undefined, digits = 0): string {
-  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency: vehicleStore.currency, minimumFractionDigits: digits, maximumFractionDigits: digits })
+  return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency: commonCurrency.value!, minimumFractionDigits: digits, maximumFractionDigits: digits })
 }
 
 function breakEven(r: any): string {
@@ -78,7 +82,7 @@ function render() {
 function exportCsv() {
   downloadCsv(
     t('comparison.csv.scenariosFile'),
-    t(sk('comparison.csv.scenariosHeader'), { unit: distanceUnit(), cur: vehicleStore.currency }).split(','),
+    t(sk('comparison.csv.scenariosHeader'), { unit: distanceUnit(), cur: commonCurrency.value }).split(','),
     rows.value.map((r) => [
       `"${r.name.replace(/"/g, '""')}"`,
       r.mode,
@@ -100,7 +104,8 @@ onBeforeUnmount(() => chart?.destroy())
 </script>
 
 <template>
-  <div class="space-y-5 print-area">
+  <p v-if="!commonCurrency" class="text-warning-300">{{ $t('comparison.currency.same') }}</p>
+  <div v-else class="space-y-5 print-area">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
       <div class="flex items-center justify-between mb-3 gap-3">
         <h2 class="text-sm font-semibold text-white">{{ $t('comparison.comparisonCompare.comparisonOfScenarios', { length: rows.length }) }}</h2>

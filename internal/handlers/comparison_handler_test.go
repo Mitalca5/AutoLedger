@@ -20,6 +20,7 @@ func validComparisonRequest() SaveComparisonRequest {
 	return SaveComparisonRequest{
 		VehicleID: &vid,
 		Name:      "  Vs SUV essence ",
+		Currency:  "EUR",
 		Mode:      models.ComparisonModeRetrospective,
 		AnnualKm:  12000,
 		Years:     5,

@@ -109,7 +109,8 @@
     "saveFailed": "Impossible d'enregistrer le comparatif.",
     "calcFailed": "Calcul impossible.",
     "deleteFailed": "Suppression impossible.",
-    "compareFailed": "Comparaison impossible."
+    "compareFailed": "Comparaison impossible.",
+    "currency": "Saisissez un code de devise de trois lettres."
   },
   "verdict": {
     "same": "Sur {count} an, les deux véhicules coûtent autant. | Sur {count} ans, les deux véhicules coûtent autant.",
@@ -258,5 +259,11 @@
     "failed": "Les chiffres explorés n'ont pas pu être calculés.",
     "saveAsNew": "Enregistrer comme nouvelle comparaison",
     "copyName": "{name} (et si)"
+  },
+  "currency": {
+    "label": "Devise (code ISO)",
+    "hint": "Les montants conservent cette devise. La modifier ne les convertit pas.",
+    "legacy": "Cette ancienne projection ne contient pas de devise. Confirmez la devise d'origine avant de l'enregistrer ou de la consulter.",
+    "same": "Sélectionnez des comparaisons dans une même devise connue. Modifiez les anciennes projections pour confirmer leur devise d'origine."
   }
 }

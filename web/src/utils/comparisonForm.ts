@@ -8,6 +8,7 @@ export function emptyComparisonForm(canCompareTracked: boolean) {
   return {
     mode: (canCompareTracked ? 'RETROSPECTIVE' : 'PROJECTION') as ComparisonMode,
     name: '',
+    currency: 'EUR',
     vehicle_id: undefined as string | undefined,
     annual_km: 12000,
     years: 5,
@@ -79,6 +80,7 @@ export function scenarioToForm(sc: any, canCompareTracked: boolean): ComparisonF
     mode: sc.mode,
     vehicle_id: sc.vehicle_id || undefined,
     name: sc.name,
+    currency: sc.currency || '',
     annual_km: sc.annual_km,
     years: sc.years,
     ice: { ...sc.ice },
@@ -95,6 +97,7 @@ export function buildComparisonPayload(form: ComparisonForm, vehicleId: string |
   const retro = form.mode === 'RETROSPECTIVE'
   const payload: any = {
     name: form.name,
+    currency: form.currency.trim().toUpperCase(),
     mode: form.mode,
     annual_km: Number(form.annual_km),
     years: Number(form.years),
@@ -132,6 +135,7 @@ export function comparisonStepErrorKey(step: number, form: ComparisonForm, canCo
   const retro = form.mode === 'RETROSPECTIVE'
   if (step === 1) {
     if (!form.name.trim()) return 'comparison.errors.name'
+    if (!retro && !/^[A-Z]{3}$/.test(form.currency.trim().toUpperCase())) return 'comparison.errors.currency'
     if (!(Number(form.annual_km) > 0)) return 'comparison.errors.annualKm'
     if (!(Number(form.years) >= 1 && Number(form.years) <= 15)) return 'comparison.errors.years'
     if (retro && !canCompareTracked) return 'comparison.errors.trackedNeeded'

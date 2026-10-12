@@ -28,3 +28,5 @@ Les valeurs explorées passent par le même calcul qu'un scénario enregistré e
 ## Coûts de recharge gratuits et inconnus
 
 Saisissez un coût explicite de **0** pour une recharge gratuite, quelle qu'en soit la raison. Zéro est un coût connu ; un coût absent reste inconnu. Les recharges gratuites enregistrées comptent comme des recharges dans les comparatifs d'hybrides suivis et ne déclenchent pas l'avertissement de source d'énergie manquante. Les recharges dont le coût est inconnu reçoivent un rappel distinct pour saisir leur coût réel, ou zéro si elles étaient gratuites.
+
+La devise d’une comparaison suivie est celle du véhicule de référence ; une projection conserve la devise choisie. La modifier ne convertit pas les montants. Une ancienne projection nécessite de confirmer sa devise d’origine avant consultation. Les comparaisons de devises différentes ne partagent pas un graphique ou un CSV.

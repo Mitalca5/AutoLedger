@@ -30,6 +30,7 @@ func NewComparisonHandler(repo *database.Repository, service *services.Compariso
 type SaveComparisonRequest struct {
 	VehicleID *string                `json:"vehicle_id"`
 	Name      string                 `json:"name"`
+	Currency  string                 `json:"currency"`
 	Mode      string                 `json:"mode"`
 	AnnualKm  float64                `json:"annual_km"`
 	Years     int                    `json:"years"`
@@ -100,6 +101,14 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 		}
 		req.Tracked = nil
 	case models.ComparisonModeProjection:
+		if strings.TrimSpace(req.Currency) == "" {
+			return apierror.New("comparison.currency_required", "Choose the currency of the projection")
+		}
+		currency, err := normalizeVehicleCurrency(req.Currency)
+		if err != nil {
+			return err
+		}
+		req.Currency = currency
 		req.VehicleID = nil
 		if req.Tracked == nil {
 			return apierror.New("comparison.ev_required", "The electric vehicle data is required in projection mode")
@@ -122,6 +131,7 @@ func (r *SaveComparisonRequest) toScenario(userID string) *models.ComparisonScen
 		UserID:    userID,
 		VehicleID: r.VehicleID,
 		Name:      r.Name,
+		Currency:  r.Currency,
 		Mode:      r.Mode,
 		AnnualKm:  r.AnnualKm,
 		Years:     r.Years,
@@ -147,6 +157,7 @@ func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Reques
 		if v == nil {
 			return nil, false
 		}
+		req.Currency = v.Currency
 		if !v.CanCharge() {
 			writeAPIError(w, http.StatusBadRequest, apierror.New("comparison.needs_ev", "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle"))
 			return nil, false
