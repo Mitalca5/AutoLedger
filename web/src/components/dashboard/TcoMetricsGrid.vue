@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { intlLocale } from '@/i18n'
+import { intlLocale, t } from '@/i18n'
+import { computed } from 'vue'
 import { canCharge, canRefuel, isFuelOnly } from '@/utils/vehicles'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount, formatAmountOrUnknown } from '@/currency'
@@ -8,7 +9,7 @@ import { formatMonthName } from '@/utils/dashboard'
 import { Coins, Zap, Receipt, TrendingUp } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit, litresToDisplayVolume, perDistance, perVolume, volumeUnitLabel } from '@/units'
 
-defineProps<{ tco: any | null }>()
+const props = defineProps<{ tco: any | null }>()
 const vehicleStore = useVehicleStore()
 // Every TCO figure is in the vehicle's own currency
 const money = (v: number, digits = 2) => formatAmount(v || 0, vehicleStore.currency, digits)
@@ -17,6 +18,12 @@ const money = (v: number, digits = 2) => formatAmount(v || 0, vehicleStore.curre
 const headline = (v: number) => money(v, Math.abs(v || 0) >= 1000 ? 0 : 2)
 // The cost per 100 distance units lives in the energy panel: one definition, not a second figure on this card
 const showEnergyPanel = () => document.getElementById('energy-efficiency')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+// A hybrid's energy is its charges and its fill-ups: the label names both
+const energyLabel = computed(() => {
+  const powertrain = props.tco?.powertrain
+  if (isFuelOnly(powertrain)) return t('dashboard.tcoMetricsGrid.fuel')
+  return canRefuel(powertrain) ? t('dashboard.tcoMetricsGrid.energyHybrid') : t('dashboard.tcoMetricsGrid.energy')
+})
 // Unknown (no distance yet) reads as a dash, not as 0,00
 const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == null ? null : perDistance(v), vehicleStore.currency, 3)
 </script>
@@ -82,7 +89,7 @@ const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == nul
     <!-- Energy Cost -->
     <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ isFuelOnly(tco?.powertrain) ? $t('dashboard.tcoMetricsGrid.fuel') : $t('dashboard.tcoMetricsGrid.energy') }}</span>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ energyLabel }}</span>
         <div class="p-2 bg-slate-800 text-slate-400 rounded-xl">
           <Zap class="w-5 h-5" />
         </div>
@@ -97,6 +104,9 @@ const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == nul
           <li v-if="tco?.consumption_l_100km">{{ formatFuelConsumptionValue(tco.consumption_l_100km, 2) }} {{ fuelConsumptionUnit() }}</li>
           <li v-if="tco?.avg_cost_per_liter">{{ money(perVolume(tco.avg_cost_per_liter), 3) }}/{{ volumeUnitLabel() }}</li>
         </ul>
+        <p v-if="canCharge(tco?.powertrain) && canRefuel(tco?.powertrain)" class="text-xs text-slate-400">
+          {{ $t('dashboard.tcoMetricsGrid.hybridSplit', { electricity: money((tco?.energy_cost || 0) - (tco?.fuel_energy_cost || 0), 0), fuel: money(tco?.fuel_energy_cost || 0, 0) }) }}
+        </p>
         <p v-if="canCharge(tco?.powertrain) && canRefuel(tco?.powertrain) && tco?.total_kwh_added" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.kwhOnly', { total_kwh_added: Math.round(tco.total_kwh_added).toLocaleString(intlLocale()) }) }}
         </p>

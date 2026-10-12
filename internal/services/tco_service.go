@@ -418,8 +418,9 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	sum.EnergyCost = energy
 	sum.EnergyCostPerKm = perKm(energy, basisKm)
 	sum.TotalKwhAdded = round1(kwhAdded)
+	// The price of a kWh is the electricity over the kWh that were priced: a hybrid's fuel is not part of it.
 	if kwhPriced > 0 {
-		sum.AvgCostPerKwh = round3(energy.Float() / kwhPriced)
+		sum.AvgCostPerKwh = round3((energy - sum.FuelEnergyCost).Float() / kwhPriced)
 	}
 	sum.TollsCost = travel
 	sum.TollsCostPerKm = perKm(travel, basisKm)
@@ -459,7 +460,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		sum.FullCost += sum.EstimatedEnergyCost
 		sum.FullCostNet += sum.EstimatedEnergyCost
 		if sum.TotalKwhAdded > 0 {
-			sum.AvgCostPerKwh = round3(sum.EnergyCost.Float() / sum.TotalKwhAdded)
+			sum.AvgCostPerKwh = round3((sum.EnergyCost - sum.FuelEnergyCost).Float() / sum.TotalKwhAdded)
 		}
 	}
 	if comp.UntrackedDistanceKm > 0 {

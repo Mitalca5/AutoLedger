@@ -255,8 +255,9 @@ func (s *ComparisonService) Defaults(ctx context.Context, vehicleID string) (*Co
 			v := sum.AvgCostPerLiter
 			d.ICEFuelPrice = &v
 		}
-		if electricity := sum.EnergyCost - sum.FuelEnergyCost; electricity > 0 && sum.TotalKwhAdded > 0 {
-			v := round3(electricity.Float() / sum.TotalKwhAdded)
+		// Electricity over the kWh that were priced: a charge without a cost does not dilute the price.
+		if sum.AvgCostPerKwh > 0 {
+			v := round3(sum.AvgCostPerKwh)
 			d.TrackedEurPerKwh = &v
 		}
 		return d, nil

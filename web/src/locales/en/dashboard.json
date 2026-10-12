@@ -100,7 +100,7 @@
     },
     "consumption": "Consumption",
     "threeMonthAverage": "3-month average",
-    "chargingEfficiencyEmpty": "Add charges with the battery level to work out the efficiency.",
+    "chargingEfficiencyEmpty": "Efficiency compares the energy stored in the battery with the energy drawn from the grid (meter or charger). Charges synced by TeslaMate or an integration carry it; without it, the figure stays unknown.",
     "chargingEfficiencyAction": "See the charges",
     "noData": "No efficiency data yet: it appears once odometer readings and charges cover the same period.",
     "seeEnergy": "See energy"
@@ -240,7 +240,9 @@
     "kwhOnly": "{total_kwh_added} kWh charged",
     "ofWhichEstimatedEnergy": "of which {amount} estimated energy",
     "periodSince": "Since {month}",
-    "energyPanelLink": "Cost per 100 {unit}: energy efficiency"
+    "energyPanelLink": "Cost per 100 {unit}: energy efficiency",
+    "energyHybrid": "Energy (charges + fill-ups)",
+    "hybridSplit": "Electricity {electricity} · fuel {fuel}"
   },
   "nextDueCard": {
     "title": "Next maintenance",
