@@ -111,7 +111,7 @@ func depreciation(base money.Cents, from time.Time, o *models.VehicleOwnership, 
 
 func computeLease(c *OwnershipCosts, o *models.VehicleOwnership, now time.Time, kmSinceStart float64) {
 	if o.LeaseDurationMonths != nil && *o.LeaseDurationMonths > 0 {
-		contractEnd := o.StartDate.AddDate(0, *o.LeaseDurationMonths, 0)
+		contractEnd := models.AddCalendarMonths(o.StartDate, *o.LeaseDurationMonths)
 		c.ContractEndDate = &contractEnd
 	}
 	if o.LeaseMonthlyRent == nil || *o.LeaseMonthlyRent <= 0 || o.LeaseDurationMonths == nil || *o.LeaseDurationMonths <= 0 {

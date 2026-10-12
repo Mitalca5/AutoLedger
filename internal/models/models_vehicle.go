@@ -223,7 +223,7 @@ func (o *VehicleOwnership) InLeasePhase(at time.Time) bool {
 	if o.EndDate != nil && !at.Before(*o.EndDate) {
 		return false
 	}
-	return at.Before(o.StartDate.AddDate(0, *o.LeaseDurationMonths, 0))
+	return at.Before(AddCalendarMonths(o.StartDate, *o.LeaseDurationMonths))
 }
 
 // VehiclePerson is someone who drives a vehicle. UserID is set when the person has an account.
