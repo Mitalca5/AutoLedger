@@ -361,6 +361,15 @@ export const api = {
     request<any>(`/vehicles/${vehicleId}/charges/${chargeId}`, { method: 'PUT', body: JSON.stringify(data) }, t('shell.api.chargeCost')),
   deleteCharge: (vehicleId: string, chargeId: string) =>
     request<any>(`/vehicles/${vehicleId}/charges/${chargeId}`, { method: 'DELETE' }),
+  getChargingPlaces: (vehicleId: string) => request<any>(`/vehicles/${vehicleId}/charging-places`),
+  createChargingPlace: (vehicleId: string, data: { name: string; category: string }) =>
+    request<any>(`/vehicles/${vehicleId}/charging-places`, { method: 'POST', body: JSON.stringify(data) }),
+  updateChargingPlace: (vehicleId: string, placeId: string, data: { name: string; category: string }) =>
+    request<any>(`/vehicles/${vehicleId}/charging-places/${placeId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteChargingPlace: (vehicleId: string, placeId: string) =>
+    request<any>(`/vehicles/${vehicleId}/charging-places/${placeId}`, { method: 'DELETE' }),
+  setChargingPlaceAlias: (vehicleId: string, text: string, placeId: string | null) =>
+    request<any>(`/vehicles/${vehicleId}/charging-places/aliases`, { method: 'PUT', body: JSON.stringify({ text, place_id: placeId }) }),
 
   getDriveExpensesForDrive: (vehicleId: string, driveId: string) =>
     request<any[]>(`/vehicles/${vehicleId}/drives/${driveId}/expenses`),

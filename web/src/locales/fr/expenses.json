@@ -418,5 +418,33 @@
     "WEBHOOK": "Home Assistant / script",
     "CSV": "Import CSV",
     "MANUAL": "Manuelle"
+  },
+  "chargingPlaces": {
+    "title": "Lieux de recharge",
+    "button": "Lieux",
+    "intro": "Associez chaque lieu rapporté par les recharges (une géofence TeslaMate, une adresse, un tag Home Assistant) à un lieu et une catégorie. Toutes les recharges qui rapportent ce texte sont classées d'un coup.",
+    "locations": "Lieux rapportés",
+    "noLocations": "Aucune recharge ne rapporte encore de lieu.",
+    "sessions": "{count} sessions",
+    "unclassified": "Non classé",
+    "assign": "Lieu de {text}",
+    "yourPlaces": "Vos lieux",
+    "newPlace": "Nouveau lieu",
+    "name": "Nom",
+    "add": "Ajouter",
+    "delete": "Supprimer le lieu",
+    "deleteConfirm": "Supprimer le lieu {name} ? Ses recharges redeviennent non classées.",
+    "failed": "Les lieux n'ont pas pu être chargés.",
+    "save": "La modification n'a pas pu être enregistrée.",
+    "chargeField": "Catégorie de lieu",
+    "noPlace": "Selon le lieu rapporté",
+    "namePlaceholder": "Maison, Travail, Ionity…",
+    "categoryLabel": "Catégorie",
+    "category": {
+      "HOME": "Domicile",
+      "WORK": "Travail",
+      "PUBLIC": "Public",
+      "OTHER": "Autre"
+    }
   }
 }

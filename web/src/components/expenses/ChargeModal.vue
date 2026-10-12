@@ -51,7 +51,9 @@ const chargeForm = ref({
   notes: '',
   document_id: null as string | null,
   document_filename: null as string | null,
+  place_id: '',
 })
+const places = ref<{ id: string; name: string }[]>([])
 
 // The vehicle's tariff prices a session that has no cost yet from its hours, whether it was typed here or synchronised
 const pricesFromTariff = computed(() => open.value && !(editingCharge.value && editingCharge.value.cost !== null && editingCharge.value.cost !== undefined))
@@ -94,6 +96,7 @@ watch(open, (isOpen) => {
       notes: '',
       document_id: null,
       document_filename: null,
+      place_id: '',
     }
   } else {
     chargeForm.value = {
@@ -108,8 +111,11 @@ watch(open, (isOpen) => {
       notes: c.notes || '',
       document_id: c.document_id || null,
       document_filename: c.document_filename || null,
+      place_id: c.place_id || '',
     }
   }
+  // The places only fill the optional category field: a failure just leaves it empty
+  api.getChargingPlaces(props.vehicleId).then((res: any) => (places.value = res.places || [])).catch(() => (places.value = []))
 })
 
 const { pending: submitting, run: runOnce } = useSubmit()
@@ -126,6 +132,7 @@ async function handleSaveChargeAction() {
     odometer: chargeForm.value.odometer ? Number(chargeForm.value.odometer) : null,
     notes: chargeForm.value.notes || null,
     document_id: chargeForm.value.document_id || null,
+    place_id: chargeForm.value.place_id || null,
   }
   try {
     if (editingCharge.value) {
@@ -203,6 +210,13 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
         <div v-if="chargeForm.currency !== baseCurrency">
           <label for="charge-form-fx-rate" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.conversionRate1', { currency: chargeForm.currency, base: baseCurrency }) }}</label>
           <NumberInput text id="charge-form-fx-rate" v-model="chargeForm.fx_rate" min="0.000001" required class="field" />
+        </div>
+        <div v-if="places.length">
+          <label for="charge-form-place" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargingPlaces.chargeField') }}</label>
+          <select id="charge-form-place" v-model="chargeForm.place_id" class="field">
+            <option value="">{{ $t('expenses.chargingPlaces.noPlace') }}</option>
+            <option v-for="p in places" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
         </div>
         <div>
           <label for="charge-form-notes" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.notesOptional') }}</label>

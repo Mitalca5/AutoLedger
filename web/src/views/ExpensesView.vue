@@ -25,6 +25,7 @@ import DocumentsPanel from '@/components/expenses/DocumentsPanel.vue'
 import TollModal from '@/components/expenses/TollModal.vue'
 import MaintenanceModal from '@/components/expenses/MaintenanceModal.vue'
 import ChargeModal from '@/components/expenses/ChargeModal.vue'
+import ChargingPlacesModal from '@/components/expenses/ChargingPlacesModal.vue'
 import UploadDocumentModal from '@/components/expenses/UploadDocumentModal.vue'
 import ReminderModal from '@/components/expenses/ReminderModal.vue'
 import CompleteReminderModal from '@/components/expenses/CompleteReminderModal.vue'
@@ -104,6 +105,7 @@ const editingToll = ref<any | null>(null)
 const showAddMaintModal = ref(false)
 const editingMaint = ref<any | null>(null)
 const showChargeModal = ref(false)
+const showPlacesModal = ref(false)
 const editingCharge = ref<any | null>(null)
 const showUploadDocModal = ref(false)
 
@@ -400,6 +402,7 @@ function openUploadDocumentModal() {
       :missing-cost-only="missingCostOnly"
       @toggle-missing-cost="toggleMissingCostFilter"
       @import-csv="openCSVImportModal"
+      @manage-places="showPlacesModal = true"
       @load-more="loadMoreCharges"
       @edit="openEditChargeModal"
       @delete="handleDeleteCharge"
@@ -438,6 +441,8 @@ function openUploadDocumentModal() {
       @document-added="onDocumentAdded"
       @view-document="viewOrDownloadDocument"
     />
+
+    <ChargingPlacesModal v-model:open="showPlacesModal" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @changed="loadData" />
 
     <ChargeModal
       v-model:open="showChargeModal"

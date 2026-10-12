@@ -240,7 +240,8 @@
     "pending_not_found": "Pending charge not found",
     "invalid_period": "The session ends before it starts",
     "invalid_energy": "The session energy must be above 0 and at most {p0} kWh",
-    "electric_only": "Charging sessions only apply to electric vehicles"
+    "electric_only": "Charging sessions only apply to electric vehicles",
+    "place_invalid": "The charging place does not exist"
   },
   "tariff": {
     "band_invalid": "Invalid band",
@@ -364,5 +365,11 @@
   "tco": {
     "contributions_invalid_month": "Month must be formatted as YYYY-MM",
     "contributions_unsupported_category": "This cost category has no breakdown"
+  },
+  "charging_place": {
+    "name_invalid": "Invalid place name (1 to 100 characters)",
+    "category_invalid": "Unknown place category",
+    "name_taken": "A place of that name already exists",
+    "text_invalid": "The location text is empty"
   }
 }

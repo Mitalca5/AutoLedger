@@ -418,5 +418,33 @@
     "WEBHOOK": "Home Assistant / script",
     "CSV": "CSV import",
     "MANUAL": "Manual"
+  },
+  "chargingPlaces": {
+    "title": "Charging places",
+    "button": "Places",
+    "intro": "Link the place each charge reports (a TeslaMate geofence, an address, a Home Assistant tag) to a place and a category. All the charges reporting that text are classified at once.",
+    "locations": "Reported places",
+    "noLocations": "No charge reports a place yet.",
+    "sessions": "{count} sessions",
+    "unclassified": "Unclassified",
+    "assign": "Place of {text}",
+    "yourPlaces": "Your places",
+    "newPlace": "New place",
+    "name": "Name",
+    "add": "Add",
+    "delete": "Delete the place",
+    "deleteConfirm": "Delete the place {name}? Its charges become unclassified.",
+    "failed": "The places could not be loaded.",
+    "save": "The change could not be saved.",
+    "chargeField": "Place category",
+    "noPlace": "By reported place",
+    "namePlaceholder": "Home, Work, Ionity…",
+    "categoryLabel": "Category",
+    "category": {
+      "HOME": "Home",
+      "WORK": "Work",
+      "PUBLIC": "Public",
+      "OTHER": "Other"
+    }
   }
 }

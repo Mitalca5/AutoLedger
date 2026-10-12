@@ -34,6 +34,7 @@ type apiHandlers struct {
 	drive          *handlers.DriveHandler
 	tire           *handlers.TireHandler
 	expense        *handlers.ExpenseHandler
+	chargingPlace  *handlers.ChargingPlaceHandler
 	tco            *handlers.TCOHandler
 	energy         *handlers.EnergyHandler
 	comparison     *handlers.ComparisonHandler
@@ -95,6 +96,7 @@ func newAPIHandlers(cfg *config.Config, repo *database.Repository, encryptor *cr
 		drive:          handlers.NewDriveHandler(repo, svc.carpool, tollDetectionService),
 		tire:           handlers.NewTireHandler(repo, svc.tireWear),
 		expense:        handlers.NewExpenseHandler(repo, storageService),
+		chargingPlace:  handlers.NewChargingPlaceHandler(repo),
 		tco:            handlers.NewTCOHandler(repo, svc.tco),
 		energy:         handlers.NewEnergyHandler(repo, svc.energyStats),
 		comparison:     handlers.NewComparisonHandler(repo, svc.comparison),

@@ -48,6 +48,11 @@ func (h *apiHandlers) registerCostRoutes(r chi.Router) {
 	r.Post("/{vehicleId}/charges", h.expense.CreateManualCharge)
 	r.Put("/{vehicleId}/charges/{chargeId}", h.expense.UpdateCharge)
 	r.Delete("/{vehicleId}/charges/{chargeId}", h.expense.DeleteManualCharge)
+	r.Get("/{vehicleId}/charging-places", h.chargingPlace.List)
+	r.Post("/{vehicleId}/charging-places", h.chargingPlace.Create)
+	r.Put("/{vehicleId}/charging-places/aliases", h.chargingPlace.SetAlias)
+	r.Put("/{vehicleId}/charging-places/{placeId}", h.chargingPlace.Update)
+	r.Delete("/{vehicleId}/charging-places/{placeId}", h.chargingPlace.Delete)
 
 	// Documents & Invoices
 	r.Get("/{vehicleId}/documents", h.expense.ListDocuments)

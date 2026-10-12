@@ -32,19 +32,21 @@ type MaintenanceExpense struct {
 
 // ChargeLog records an EV charging event with costs and kWh.
 type ChargeLog struct {
-	ID                string       `json:"id"`
-	VehicleID         string       `json:"vehicle_id"`
-	TeslaMateChargeID *int         `json:"teslamate_charge_id,omitempty"`
-	Date              time.Time    `json:"date"`
-	EndDate           *time.Time   `json:"end_date,omitempty"`
-	Address           *string      `json:"address,omitempty"`
-	KwhAdded          float64      `json:"kwh_added"`
-	KwhUsed           *float64     `json:"kwh_used,omitempty"`
-	Cost              *money.Cents `json:"cost"`        // nil = unknown cost (to be completed)
-	CostSource        string       `json:"cost_source"` // TESLAMATE | MANUAL
-	Currency          string       `json:"currency"`
-	FxRate            *float64     `json:"fx_rate,omitempty"`
-	Odometer          *float64     `json:"odometer,omitempty"`
+	ID                string     `json:"id"`
+	VehicleID         string     `json:"vehicle_id"`
+	TeslaMateChargeID *int       `json:"teslamate_charge_id,omitempty"`
+	Date              time.Time  `json:"date"`
+	EndDate           *time.Time `json:"end_date,omitempty"`
+	Address           *string    `json:"address,omitempty"`
+	// PlaceID is a place chosen for this session; otherwise its address text decides (charging_place_aliases).
+	PlaceID    *string      `json:"place_id"`
+	KwhAdded   float64      `json:"kwh_added"`
+	KwhUsed    *float64     `json:"kwh_used,omitempty"`
+	Cost       *money.Cents `json:"cost"`        // nil = unknown cost (to be completed)
+	CostSource string       `json:"cost_source"` // TESLAMATE | MANUAL
+	Currency   string       `json:"currency"`
+	FxRate     *float64     `json:"fx_rate,omitempty"`
+	Odometer   *float64     `json:"odometer,omitempty"`
 	// Stored by the synchronization and read by the energy statistics, not exposed with the charge.
 	StartBatteryLevel *int     `json:"-"`
 	EndBatteryLevel   *int     `json:"-"`

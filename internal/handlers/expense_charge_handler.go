@@ -57,6 +57,7 @@ type SaveChargeRequest struct {
 	Date       string       `json:"date"`
 	EndDate    *string      `json:"end_date"`
 	Address    *string      `json:"address"`
+	PlaceID    *string      `json:"place_id"`
 	KwhAdded   float64      `json:"kwh_added"`
 	Cost       *money.Cents `json:"cost"`
 	Currency   string       `json:"currency"`
@@ -99,6 +100,7 @@ func buildCharge(vehicleID, baseCurrency string, req *SaveChargeRequest) (*model
 		Date:       date,
 		EndDate:    endDate,
 		Address:    req.Address,
+		PlaceID:    optionalText(req.PlaceID),
 		KwhAdded:   req.KwhAdded,
 		Cost:       req.Cost,
 		Currency:   curr,
@@ -129,6 +131,24 @@ func decodeCharge(w http.ResponseWriter, r *http.Request, vehicleID, baseCurrenc
 	return c, true
 }
 
+// chargePlaceAllowed checks that the place a charge points at belongs to the vehicle's owner; it writes the
+// error response and returns false otherwise.
+func (h *ExpenseHandler) chargePlaceAllowed(w http.ResponseWriter, r *http.Request, v *models.Vehicle, c *models.ChargeLog) bool {
+	if c.PlaceID == nil {
+		return true
+	}
+	owned, err := h.repo.ChargingPlaceOwned(r.Context(), v.UserID, *c.PlaceID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to check the charging place")
+		return false
+	}
+	if !owned {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("charge.place_invalid", "The charging place does not exist"))
+		return false
+	}
+	return true
+}
+
 func (h *ExpenseHandler) CreateManualCharge(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")
 	v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
@@ -142,6 +162,9 @@ func (h *ExpenseHandler) CreateManualCharge(w http.ResponseWriter, r *http.Reque
 	}
 	if c.KwhAdded <= 0 {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("charge.energy_positive", "The energy added must be positive"))
+		return
+	}
+	if !h.chargePlaceAllowed(w, r, v, c) {
 		return
 	}
 
@@ -165,6 +188,9 @@ func (h *ExpenseHandler) UpdateCharge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c.ID = chargeID
+	if !h.chargePlaceAllowed(w, r, v, c) {
+		return
+	}
 
 	if err := h.repo.UpdateCharge(r.Context(), c); err != nil {
 		writeRepoError(w, r, err, "Failed to update charge")
