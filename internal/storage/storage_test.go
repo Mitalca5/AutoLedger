@@ -59,3 +59,41 @@ func TestFileStorageService(t *testing.T) {
 		t.Fatalf("Delete missing file should be idempotent: %v", err)
 	}
 }
+func TestFileStorageServiceRefusesPathsOutsideTheRoot(t *testing.T) {
+	parent := t.TempDir()
+	root := filepath.Join(parent, "documents")
+	sibling := filepath.Join(parent, "documents-other") // shares the root's name as a prefix
+	for _, d := range []string{root, sibling} {
+		if err := os.MkdirAll(d, 0o750); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(sibling, "secret"), []byte("secret"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	svc, err := storage.NewFileStorageService(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, p := range []string{"../documents-other/secret", "a/../../documents-other/secret", filepath.Join(sibling, "secret"), "", ".", "/etc/passwd"} {
+		if _, err := svc.Read(p); err == nil {
+			t.Errorf("Read(%q) must be refused", p)
+		}
+		if err := svc.Delete(p); err == nil {
+			t.Errorf("Delete(%q) must be refused", p)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(sibling, "secret")); err != nil {
+		t.Fatalf("the sibling file must be untouched: %v", err)
+	}
+	if _, err := os.Stat(root); err != nil {
+		t.Fatalf("the root must still exist: %v", err)
+	}
+
+	for _, id := range [][2]string{{"..", "doc"}, {"veh", ".."}, {"a/b", "doc"}, {"veh", "a/b"}, {"", "doc"}, {"veh", ""}, {"veh", "a\\b"}} {
+		if _, err := svc.Save(id[0], id[1], []byte("x")); err == nil {
+			t.Errorf("Save(%q, %q) must be refused", id[0], id[1])
+		}
+	}
+}
