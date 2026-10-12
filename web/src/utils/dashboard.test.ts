@@ -153,6 +153,13 @@ describe('buildLeaseSummary', () => {
   })
 })
 
+describe('currentMonthStats without a known cost per km', () => {
+  it('passes the unknown figure through instead of turning it into zero', () => {
+    const s = currentMonthStats([{ month: '2026-05', distance_km: 800, cost_per_km: null, total: 0 }], new Date('2026-05-15T10:00:00Z'))!
+    expect(s.cost_per_km).toBeNull()
+  })
+})
+
 describe('buildMonthBreakdown', () => {
   const month = {
     month: '2026-03', distance_km: 1000, tracked_distance_km: 900, smoothed_km: 100, cost_per_km: 0.5,
@@ -169,6 +176,17 @@ describe('buildMonthBreakdown', () => {
     expect(cash.activeTotal).toBe(825)
     expect(cash.items.find((i) => i.key === 'tires')!.displayAmount).toBe(400)
     expect(eco.items.find((i) => i.key === 'tires')!.displayAmount).toBe(20)
+  })
+
+  it('derives the cost per km from the month total when the API sent none but there is spending and distance', () => {
+    const noRate = { ...month, cost_per_km: null }
+    const b = buildMonthBreakdown(noRate, 'economic')
+    expect(b.costPerKm).toBeCloseTo(b.economicTotal / 1000, 6)
+  })
+
+  it('keeps the cost per km unknown for a month with distance but no cost', () => {
+    const noCost = { ...month, cost_per_km: null, energy: 0, smoothed_energy: 0, tolls: 0, tires: 0, tires_amortized: 0, maintenance_amortized: 0, insurance: 0, financing: 0, financing_amortized: 0, other: 0, total: 0 }
+    expect(buildMonthBreakdown(noCost, 'economic').costPerKm).toBeNull()
   })
 
   it('gives each item its share and cost per km', () => {
@@ -193,10 +211,10 @@ describe('buildMonthBreakdown', () => {
     expect(usd.items.find((i) => i.key === 'energy')!.note).not.toContain('€')
   })
 
-  it('has zero cost per km and shares without distance or spending', () => {
+  it('has an unknown cost per km and zero shares without distance or spending', () => {
     const empty = buildMonthBreakdown({ month: '2026-01' }, 'economic')
     expect(empty.economicTotal).toBe(0)
-    expect(empty.costPerKm).toBe(0)
+    expect(empty.costPerKm).toBeNull()
     expect(empty.items.every((i) => i.sharePct === 0 && i.costPerKm === 0)).toBe(true)
     expect(empty.fixedVar.totalAmount).toBe(0)
     expect(empty.fixedVar.fixedPct).toBe(0)

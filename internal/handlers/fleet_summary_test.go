@@ -128,7 +128,7 @@ func TestFleetSummaryCarriesComparisonFigures(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := summary.Vehicles[0]
-	if m.RunningCostPerKm <= 0 || m.FullCostPerKm <= 0 {
+	if m.RunningCostPerKm == nil || *m.RunningCostPerKm <= 0 || m.FullCostPerKm == nil || *m.FullCostPerKm <= 0 {
 		t.Errorf("per-km costs missing: running %v full %v", m.RunningCostPerKm, m.FullCostPerKm)
 	}
 	if m.KwhPer100Km == nil || *m.KwhPer100Km != 20 {

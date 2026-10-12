@@ -184,7 +184,10 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 	for _, mc := range monthlyMap {
 		mc.Total = mc.Energy + mc.Tolls + mc.Maintenance + mc.Insurance + mc.Financing + mc.Other + mc.Tires
 		costForPerKm := mc.Energy + mc.Tolls + mc.MaintenanceAmortized + mc.Insurance + mc.FinancingAmortized + mc.Other + mc.TiresAmortized
-		mc.CostPerKm = perKm(costForPerKm, mc.DistanceKm)
+		// A month with distance but no cost recorded has an unknown cost per km, not a free one.
+		if costForPerKm != 0 {
+			mc.CostPerKm = perKm(costForPerKm, mc.DistanceKm)
+		}
 		monthlyCosts = append(monthlyCosts, *mc)
 	}
 

@@ -41,8 +41,8 @@ type VehicleFleetMetric struct {
 	Powertrain string `json:"powertrain"`
 	// RunningCostPerKm is what the vehicle costs to run (energy, upkeep, insurance, financing); FullCostPerKm adds
 	// depreciation and amortized tires. Both rely on the distance basis of the TCO.
-	RunningCostPerKm float64 `json:"running_cost_per_km"`
-	FullCostPerKm    float64 `json:"full_cost_per_km"`
+	RunningCostPerKm *float64 `json:"running_cost_per_km"`
+	FullCostPerKm    *float64 `json:"full_cost_per_km"`
 	// KwhPer100Km and LitersPer100Km are set when the vehicle consumed that energy; a plug-in hybrid has both.
 	KwhPer100Km    *float64 `json:"kwh_per_100km"`
 	LitersPer100Km *float64 `json:"liters_per_100km"`

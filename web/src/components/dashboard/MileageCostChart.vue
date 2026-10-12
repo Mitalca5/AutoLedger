@@ -30,7 +30,8 @@ function renderChart() {
   const filteredMileageList = filteredMileageCosts.value
   const mileageLabels = filteredMileageList.map((m: any) => formatMonthLabel(m.month))
   const distanceData = filteredMileageList.map((m: any) => Math.round(kmToDisplayDistance(m.distance_km || 0)))
-  const costPerKmData = filteredMileageList.map((m: any) => perDistance(m.cost_per_km || 0))
+  // A month without a known cost is a gap in the line, not a point at zero
+  const costPerKmData = filteredMileageList.map((m: any) => (m.cost_per_km == null ? null : perDistance(m.cost_per_km)))
 
   mileageChartInstance = new Chart(mileageChartRef.value, {
     type: 'bar',

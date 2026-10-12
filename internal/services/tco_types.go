@@ -50,7 +50,7 @@ type MonthlyCost struct {
 	Tires                money.Cents `json:"tires"`           // Cash basis: full price in the purchase month
 	TiresAmortized       money.Cents `json:"tires_amortized"` // Prorated by km driven while mounted, used for cost_per_km
 	Total                money.Cents `json:"total"`
-	CostPerKm            float64     `json:"cost_per_km"`
+	CostPerKm            *float64    `json:"cost_per_km"`
 }
 
 // TagCostBreakdown represents costs split by tag (e.g. Pro vs Perso).
@@ -105,10 +105,10 @@ type TCOSummary struct {
 	SmoothedDistanceKm float64     `json:"smoothed_distance_km"`
 	DistanceBasisKm    float64     `json:"distance_basis_km"`
 	TotalCost          money.Cents `json:"total_cost"`
-	TotalCostPerKm     float64     `json:"total_cost_per_km"`
-	UsageCostPerKm     float64     `json:"usage_cost_per_km"`
+	TotalCostPerKm     *float64    `json:"total_cost_per_km"`
+	UsageCostPerKm     *float64    `json:"usage_cost_per_km"`
 	FullCost           money.Cents `json:"full_cost"`
-	FullCostPerKm      float64     `json:"full_cost_per_km"`
+	FullCostPerKm      *float64    `json:"full_cost_per_km"`
 
 	AcquisitionType  string      `json:"acquisition_type"` // CASH | LOAN | LOA | LLD
 	AcquisitionCost  money.Cents `json:"acquisition_cost"` // Purchase price and fees net of incentives, exercised LOA option
@@ -116,7 +116,7 @@ type TCOSummary struct {
 	// DepreciationKnown is false when a bought vehicle has no depreciation because its resale value, holding period or
 	// price is missing: DepreciationCost is then 0 and the full cost is not comparable to a complete one.
 	DepreciationKnown      bool       `json:"depreciation_known"`
-	DepreciationCostPerKm  float64    `json:"depreciation_cost_per_km"`
+	DepreciationCostPerKm  *float64   `json:"depreciation_cost_per_km"`
 	ContractStartDate      *time.Time `json:"contract_start_date,omitempty"` // Lease / loan start
 	ContractEndDate        *time.Time `json:"contract_end_date,omitempty"`   // Lease term
 	ContractDurationMonths *int       `json:"contract_duration_months,omitempty"`
@@ -139,11 +139,11 @@ type TCOSummary struct {
 
 	CarpoolRevenue   money.Cents `json:"carpool_revenue"`
 	FullCostNet      money.Cents `json:"full_cost_net"` // Full cost minus carpool revenue
-	FullCostNetPerKm float64     `json:"full_cost_net_per_km"`
+	FullCostNetPerKm *float64    `json:"full_cost_net_per_km"`
 
 	EnergyCost          money.Cents `json:"energy_cost"`
 	FuelEnergyCost      money.Cents `json:"fuel_energy_cost"` // Fuel portion of EnergyCost, in the vehicle currency.
-	EnergyCostPerKm     float64     `json:"energy_cost_per_km"`
+	EnergyCostPerKm     *float64    `json:"energy_cost_per_km"`
 	TotalKwhAdded       float64     `json:"total_kwh_added"`
 	RecordedChargeCount int         `json:"recorded_charge_count"` // Recorded sessions, including explicitly free and unpriced charges.
 	AvgCostPerKwh       float64     `json:"avg_cost_per_kwh"`
@@ -161,30 +161,30 @@ type TCOSummary struct {
 	EstimatedPricePerKwh      *float64    `json:"estimated_price_per_kwh,omitempty"`
 
 	TollsCost      money.Cents `json:"tolls_cost"` // Tolls, parking, ferries
-	TollsCostPerKm float64     `json:"tolls_cost_per_km"`
+	TollsCostPerKm *float64    `json:"tolls_cost_per_km"`
 
 	TiresCost               money.Cents `json:"tires_cost"`
-	TiresCostPerKm          float64     `json:"tires_cost_per_km"`
+	TiresCostPerKm          *float64    `json:"tires_cost_per_km"`
 	TiresAmortizedCost      money.Cents `json:"tires_amortized_cost"`
-	TiresAmortizedCostPerKm float64     `json:"tires_amortized_cost_per_km"`
+	TiresAmortizedCostPerKm *float64    `json:"tires_amortized_cost_per_km"`
 
 	MaintenanceCost      money.Cents `json:"maintenance_cost"`
-	MaintenanceCostPerKm float64     `json:"maintenance_cost_per_km"`
+	MaintenanceCostPerKm *float64    `json:"maintenance_cost_per_km"`
 	RepairCost           money.Cents `json:"repair_cost"` // Unplanned repairs, insurance deductibles
-	RepairCostPerKm      float64     `json:"repair_cost_per_km"`
+	RepairCostPerKm      *float64    `json:"repair_cost_per_km"`
 
 	InsuranceCost      money.Cents `json:"insurance_cost"`
-	InsuranceCostPerKm float64     `json:"insurance_cost_per_km"`
+	InsuranceCostPerKm *float64    `json:"insurance_cost_per_km"`
 	InsuranceSource    string      `json:"insurance_source"`
 
 	FinancingCost      money.Cents `json:"financing_cost"`      // Cash: rents, down payment, fees, loan interest
 	FinancingFullCost  money.Cents `json:"financing_full_cost"` // Prepaid amounts spread, return fees and excess mileage accrued
-	FinancingCostPerKm float64     `json:"financing_cost_per_km"`
+	FinancingCostPerKm *float64    `json:"financing_cost_per_km"`
 
 	SubscriptionCost money.Cents `json:"subscription_cost"`
 	TaxCost          money.Cents `json:"tax_cost"`
 	OtherCost        money.Cents `json:"other_cost"`
-	OtherCostPerKm   float64     `json:"other_cost_per_km"` // Subscriptions + taxes + other
+	OtherCostPerKm   *float64    `json:"other_cost_per_km"` // Subscriptions + taxes + other
 
 	TagBreakdown []TagCostBreakdown `json:"tag_breakdown"`
 	MonthlyCosts []MonthlyCost      `json:"monthly_costs"`

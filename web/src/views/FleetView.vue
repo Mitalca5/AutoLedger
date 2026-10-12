@@ -8,7 +8,7 @@ import { ref, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import { Car, Zap, Gauge, Users, RefreshCw, Award, TrendingDown, ArrowUpRight } from 'lucide-vue-next'
 import { Chart, registerables } from 'chart.js'
 import { api, type FleetSummaryResponse } from '@/services/api'
-import { formatAmount } from '@/currency'
+import { formatAmount, formatAmountOrUnknown } from '@/currency'
 import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
 import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit } from '@/units'
@@ -86,6 +86,8 @@ const mostEconomicalVehicleId = computed(() => {
 const rankedVehicles = computed(() =>
   [...(summary.value?.vehicles ?? [])].sort((a, b) => {
     if (a.comparable !== b.comparable) return a.comparable ? -1 : 1
+    // A vehicle without a cost per km yet goes last, never first as if it cost nothing
+    if (a.full_cost_per_km == null || b.full_cost_per_km == null) return (a.full_cost_per_km == null ? 1 : 0) - (b.full_cost_per_km == null ? 1 : 0)
     return a.full_cost_per_km - b.full_cost_per_km
   }),
 )
@@ -411,14 +413,14 @@ onBeforeUnmount(() => {
               <p v-else-if="!v.comparable" class="mt-0.5 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</p>
             </div>
             <div class="shrink-0 text-right">
-              <p class="text-lg font-bold tabular-nums text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</p>
+              <p class="text-lg font-bold tabular-nums text-white">{{ formatAmountOrUnknown(v.full_cost_per_km == null ? null : perDistance(v.full_cost_per_km), v.currency) }}</p>
               <p class="text-xs text-slate-400">{{ t('fleet.compare.fullPerDistance', { unit: distanceUnitLabel }) }}</p>
             </div>
           </div>
           <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-slate-800/60 pt-2 text-xs">
             <div>
               <dt class="text-slate-400">{{ t('fleet.compare.runningPerDistance', { unit: distanceUnitLabel }) }}</dt>
-              <dd class="tabular-nums text-slate-200">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</dd>
+              <dd class="tabular-nums text-slate-200">{{ formatAmountOrUnknown(v.running_cost_per_km == null ? null : perDistance(v.running_cost_per_km), v.currency) }}</dd>
             </div>
             <div>
               <dt class="text-slate-400">{{ t('fleet.compare.energy') }}</dt>
@@ -456,8 +458,8 @@ onBeforeUnmount(() => {
                 </span>
                 <span v-else-if="!v.comparable" class="ml-2 text-xs uppercase text-slate-300">{{ v.depreciation_known === false ? t('fleet.compare.depreciationMissing') : t('fleet.compare.indicative') }}</span>
               </td>
-              <td class="py-2 pr-4 text-right tabular-nums">{{ v.running_cost_per_km > 0 ? formatAmount(perDistance(v.running_cost_per_km), v.currency) : '—' }}</td>
-              <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ v.full_cost_per_km > 0 ? formatAmount(perDistance(v.full_cost_per_km), v.currency) : '—' }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums">{{ formatAmountOrUnknown(v.running_cost_per_km == null ? null : perDistance(v.running_cost_per_km), v.currency) }}</td>
+              <td class="py-2 pr-4 text-right tabular-nums font-semibold text-white">{{ formatAmountOrUnknown(v.full_cost_per_km == null ? null : perDistance(v.full_cost_per_km), v.currency) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ energyPer100(v) }}</td>
               <td class="py-2 pr-4 text-right tabular-nums">{{ v.annual_cost != null ? formatAmount(v.annual_cost, v.currency) : '—' }}</td>
               <td class="py-2 text-right tabular-nums font-semibold" :class="completenessClass(v.completeness_pct)">{{ formatPercent(v.completeness_pct, 0) }}</td>

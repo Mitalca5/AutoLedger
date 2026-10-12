@@ -753,8 +753,9 @@ export interface VehicleFleetMetric {
   month_cost: number
   energy_cost_per_100km: number
   powertrain: string
-  running_cost_per_km: number
-  full_cost_per_km: number
+  /** `null` while the vehicle has no distance to divide by. */
+  running_cost_per_km: number | null
+  full_cost_per_km: number | null
   kwh_per_100km: number | null
   liters_per_100km: number | null
   annual_cost: number | null

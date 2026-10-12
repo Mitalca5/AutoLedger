@@ -33,11 +33,14 @@ func round3(v float64) float64 { return math.Round(v*1000) / 1000 }
 
 func round1(v float64) float64 { return math.Round(v*10) / 10 }
 
-func perKm(amount money.Cents, km float64) float64 {
+// perKm is the cost of one kilometre, nil when there is no distance to divide by: a figure without a distance is
+// unknown, not zero.
+func perKm(amount money.Cents, km float64) *float64 {
 	if km <= 0 {
-		return 0
+		return nil
 	}
-	return round3(amount.Float() / km)
+	v := round3(amount.Float() / km)
+	return &v
 }
 
 // ComputeVehicleTCO calculates complete TCO for a given vehicle.

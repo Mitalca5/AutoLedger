@@ -14,6 +14,15 @@ export function formatAmount(amount: number, currency: string, maximumFractionDi
   return new Intl.NumberFormat(intlLocale(), { style: 'currency', currency, maximumFractionDigits }).format(amount)
 }
 
+/** A figure shown when its value is not known: a missing amount reads as a dash, never as a zero. */
+export const UNKNOWN_AMOUNT = '—'
+
+/** Like `formatAmount`, but `null`, `undefined` and NaN are an unknown figure and read as a dash. */
+export function formatAmountOrUnknown(amount: number | null | undefined, currency: string, maximumFractionDigits = 2): string {
+  if (amount === null || amount === undefined || !Number.isFinite(amount)) return UNKNOWN_AMOUNT
+  return formatAmount(amount, currency, maximumFractionDigits)
+}
+
 /** Just the symbol ("€", "$"...), for a chart axis or dataset label that cannot show a full amount. */
 export function currencySymbol(currency: string): string {
   const part = new Intl.NumberFormat(intlLocale(), { style: 'currency', currency }).formatToParts(0).find((p) => p.type === 'currency')

@@ -21,7 +21,7 @@ func TestApplyTCOToFleetMetric(t *testing.T) {
 	}{
 		{
 			name: "electric vehicle with a year of history",
-			sum: TCOSummary{Powertrain: "EV", DistanceBasisKm: 10000, TotalKwhAdded: 1500, FullCost: 600000, FullCostPerKm: 0.6, DepreciationKnown: true,
+			sum: TCOSummary{Powertrain: "EV", DistanceBasisKm: 10000, TotalKwhAdded: 1500, FullCost: 600000, FullCostPerKm: ptrF(0.6), DepreciationKnown: true,
 				Completeness: TCOCompleteness{ScorePct: 90}, MonthlyCosts: []MonthlyCost{{Month: "2025-10"}, {Month: "2026-03"}}},
 			wantComp: true, wantKwh: fp(15), wantAnnual: 600000 * 12 / 13,
 		},

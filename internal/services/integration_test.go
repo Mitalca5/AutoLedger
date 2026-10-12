@@ -1953,7 +1953,7 @@ func TestIntegrationICEVehicleFuelLogs(t *testing.T) {
 	if sum.EstimatedEnergyDistanceKm != 0 {
 		t.Errorf("a combustion vehicle has no estimated energy distance, got %v", sum.EstimatedEnergyDistanceKm)
 	}
-	if sum.EnergyCostPerKm <= 0 {
+	if sum.EnergyCostPerKm == nil || *sum.EnergyCostPerKm <= 0 {
 		t.Errorf("energy cost per km = %v, want > 0 without any drive", sum.EnergyCostPerKm)
 	}
 	var monthlyKm, monthlyEnergy float64
@@ -2524,7 +2524,7 @@ func TestIntegrationHybridVehicleCombinesEnergies(t *testing.T) {
 	if sum.FuelFillUps != 2 || sum.TotalLiters != 70 || sum.TotalKwhAdded != 50 {
 		t.Errorf("volumes: fills=%d liters=%v kwh=%v", sum.FuelFillUps, sum.TotalLiters, sum.TotalKwhAdded)
 	}
-	if sum.EstimatedEnergyDistanceKm != 0 || sum.EnergyCostPerKm <= 0 {
+	if sum.EstimatedEnergyDistanceKm != 0 || sum.EnergyCostPerKm == nil || *sum.EnergyCostPerKm <= 0 {
 		t.Errorf("estimated distance=%v cost per km=%v", sum.EstimatedEnergyDistanceKm, sum.EnergyCostPerKm)
 	}
 	for _, w := range sum.Completeness.Warnings {
