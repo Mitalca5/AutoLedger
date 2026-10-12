@@ -56,12 +56,11 @@
     "placeOptional": "Lieu (optionnel)",
     "energyAddedKwh": "Énergie ajoutée (kWh)",
     "dateAndTime": "Date & Heure",
-    "teslamateChargeOfKwhThe": "Recharge TeslaMate du {date} (+{kwh_added} kWh). Le coût saisi ici ne sera pas écrasé par les synchronisations.",
     "newCharge": "Nouvelle recharge",
     "editCharge": "Modifier la recharge",
-    "chargeCost": "Coût de la recharge",
     "start": "Début de la charge",
-    "endOptional": "Fin de la charge (optionnel)"
+    "endOptional": "Fin de la charge (optionnel)",
+    "sourceLocked": "Données remontées par TeslaMate, en lecture seule ; le coût et les notes sont à vous et survivent aux synchronisations."
   },
   "chargesPanel": {
     "chargeSShownOutOf": "{length} recharge(s) affichée(s) sur {chargesTotal}",
@@ -70,7 +69,6 @@
     "kwh": "{cost}/kWh",
     "viewTheReceipt": "Voir le justificatif",
     "correctedCost": "Coût corrigé",
-    "manual": "Manuelle",
     "kwh2": "+{kwh_added} kWh",
     "chargeSWithoutACost": "{chargesWithoutCost} recharge(s) sans coût : le TCO est sous-estimé. Cliquer pour les compléter.",
     "showingOnlyTheChargesWithout": "Affichage des recharges sans coût uniquement — cliquer pour tout afficher",
@@ -414,5 +412,11 @@
     "calipers": "Nettoyage & graissage des étriers",
     "winterTires": "Pneus hiver (1er novembre)",
     "summerTires": "Pneus été (1er avril)"
+  },
+  "chargeOrigin": {
+    "TESLAMATE": "TeslaMate",
+    "WEBHOOK": "Home Assistant / script",
+    "CSV": "Import CSV",
+    "MANUAL": "Manuelle"
   }
 }

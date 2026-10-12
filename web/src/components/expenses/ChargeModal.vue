@@ -14,12 +14,12 @@ import ModalShell from '@/components/ModalShell.vue'
 import ChargeAmountFields from '@/components/charges/ChargeAmountFields.vue'
 import { loadMemory, rememberCharge } from '@/utils/quickAdd'
 import PublicChargeCalculatorModal from '@/components/expenses/PublicChargeCalculatorModal.vue'
-import { formatNumber } from '@/utils/numbers'
 import { useSubmit } from '@/composables/useSubmit'
 import { useSessionTariffCost } from '@/composables/useSessionTariffCost'
 import { sessionPriceRequest } from '@/utils/tariffSession'
+import { chargeFieldAccess, chargeOriginKey } from '@/utils/chargeProvenance'
 
-// Records a charge made outside TeslaMate, or completes / corrects the cost of `editing`.
+// Records a charge, or edits `editing`: the facts reported by TeslaMate are read-only, the cost and the notes are AutoLedger's.
 const props = defineProps<{ vehicleId: string; editing: any | null; documents: ExpenseDocumentHeader[]; currentOdometer: number }>()
 const emit = defineEmits<{
   saved: []
@@ -37,6 +37,7 @@ const { isUploadingDocument, onSelectExistingDoc, onFileInputChange } = useDocum
 
 const editingCharge = computed(() => props.editing)
 const baseCurrency = computed(() => vehicleStore.currency)
+const sourceLocked = computed(() => chargeFieldAccess(editingCharge.value).sourceLocked)
 
 const chargeForm = ref({
   date: toLocalDateTimeInput(new Date()),
@@ -148,35 +149,34 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
         <div class="min-w-0 pr-2">
           <h3 class="text-base font-bold text-white flex items-center gap-2 truncate">
             <Zap class="w-5 h-5 text-info-400 shrink-0" />
-            {{ !editingCharge ? $t('expenses.chargeModal.newCharge') : editingCharge.is_manual ? $t('expenses.chargeModal.editCharge') : $t('expenses.chargeModal.chargeCost') }}
+            {{ !editingCharge ? $t('expenses.chargeModal.newCharge') : $t('expenses.chargeModal.editCharge') }}
           </h3>
-          <p v-if="editingCharge && !editingCharge.is_manual" class="text-xs text-slate-400 mt-1">
-            {{ $t('expenses.chargeModal.teslamateChargeOfKwhThe', { date: formatDate(editingCharge.date), kwh_added: formatNumber(editingCharge.kwh_added, 2) }) }}
+          <p v-if="editingCharge" class="text-xs text-slate-400 mt-1">
+            <span class="px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">{{ $t(chargeOriginKey(editingCharge)) }}</span>
+            <span v-if="sourceLocked" class="ml-1.5">{{ $t('expenses.chargeModal.sourceLocked') }}</span>
           </p>
         </div>
     </template>
 
       <form id="charge-modal-form" @submit.prevent="handleSaveCharge" class="space-y-4">
-        <template v-if="!editingCharge || editingCharge.is_manual">
+        <div>
+          <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.start') }}</label>
+          <AppDatePicker id="charge-form-date" v-model="chargeForm.date" enable-time-picker required size="xs" :disabled="sourceLocked" />
+        </div>
+        <div>
+          <label for="charge-form-end" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.endOptional') }}</label>
+          <AppDatePicker id="charge-form-end" v-model="chargeForm.end_date" enable-time-picker clearable size="xs" :disabled="sourceLocked" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="charge-form-date" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.start') }}</label>
-            <AppDatePicker id="charge-form-date" v-model="chargeForm.date" enable-time-picker required size="xs" />
+            <label for="charge-form-address" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.placeOptional') }}</label>
+            <input id="charge-form-address" v-model="chargeForm.address" :placeholder="$t('expenses.chargeModal.chargerHome')" :disabled="sourceLocked" class="field" />
           </div>
           <div>
-            <label for="charge-form-end" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.endOptional') }}</label>
-            <AppDatePicker id="charge-form-end" v-model="chargeForm.end_date" enable-time-picker clearable size="xs" />
+            <label for="charge-form-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.odometerOptional') }}</label>
+            <DistanceInput text id="charge-form-odometer" v-model="chargeForm.odometer" inputmode="numeric" min="0" :disabled="sourceLocked" class="field" />
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="charge-form-address" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.placeOptional') }}</label>
-              <input id="charge-form-address" v-model="chargeForm.address" :placeholder="$t('expenses.chargeModal.chargerHome')" class="field" />
-            </div>
-            <div>
-              <label for="charge-form-odometer" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('expenses.chargeModal.odometerOptional') }}</label>
-              <DistanceInput text id="charge-form-odometer" v-model="chargeForm.odometer" inputmode="numeric" min="0" class="field" />
-            </div>
-          </div>
-        </template>
+        </div>
 
         <ChargeAmountFields
           ref="amounts"
@@ -184,7 +184,7 @@ const handleSaveCharge = () => runOnce(handleSaveChargeAction)
           v-model:cost="chargeForm.cost"
           id-prefix="charge-form"
           required
-          :hide-energy="!!editingCharge && !editingCharge.is_manual"
+          :energy-readonly="sourceLocked"
           :currency="chargeForm.currency"
           :suggested-price="suggestedPrice"
           :tariff="tariffCost"

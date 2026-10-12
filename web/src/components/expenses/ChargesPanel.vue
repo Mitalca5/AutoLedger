@@ -11,6 +11,7 @@ import { groupChargesByMonth } from '@/utils/expenses'
 import { formatChargeWindow } from '@/utils/dates'
 import { formatAmount } from '@/currency'
 import { formatNumber } from '@/utils/numbers'
+import { chargeDeletable, chargeOrigin, chargeOriginKey } from '@/utils/chargeProvenance'
 import { distanceUnit, formatPerDistanceValue, perDistance } from '@/units'
 
 const props = defineProps<{
@@ -98,8 +99,8 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
               <span class="text-sm font-bold text-info-400 shrink-0">
                 {{ $t('expenses.chargesPanel.kwh2', { kwh_added: formatNumber(c.kwh_added, 2) }) }}
               </span>
-              <span v-if="c.is_manual" class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.manual') }}</span>
-              <span v-else-if="c.cost_source === 'MANUAL'" class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
+              <span class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t(chargeOriginKey(c)) }}</span>
+              <span v-if="chargeOrigin(c) === 'TESLAMATE' && c.cost_source === 'MANUAL'" class="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">{{ $t('expenses.chargesPanel.correctedCost') }}</span>
               <button
                 v-if="c.document_id"
                 @click="emit('view-document', c.document_id, c.document_filename, false)"
@@ -129,12 +130,12 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
             <button
               @click="emit('edit', c)"
               class="tap p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-colors border border-slate-700/60"
-              :title="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')" :aria-label="c.is_manual ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
+              :title="chargeDeletable(c) ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')" :aria-label="chargeDeletable(c) ? $t('expenses.chargesPanel.editThisCharge') : $t('expenses.chargesPanel.fixCost')"
             >
               <Pencil class="w-3.5 h-3.5" />
             </button>
             <button
-              v-if="c.is_manual"
+              v-if="chargeDeletable(c)"
               @click="emit('delete', c)"
               class="tap p-1.5 bg-slate-800 hover:bg-rose-900/40 text-rose-400/80 hover:text-rose-300 focus-visible:text-rose-300 rounded-xl transition-colors border border-slate-700/60 hover:border-rose-500/40"
               :title="$t('expenses.chargesPanel.deleteThisCharge')" :aria-label="$t('expenses.chargesPanel.deleteThisCharge')"

@@ -89,3 +89,32 @@ func TestIntegrationProvenanceIsRecordedBySource(t *testing.T) {
 		}
 	}
 }
+
+func TestIntegrationChargeListExposesOrigin(t *testing.T) {
+	_, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "origin-list@example.com")
+	day := time.Date(2026, 3, 1, 8, 0, 0, 0, time.UTC)
+	cost := money.Cents(400)
+
+	tmID := 9
+	if _, err := repo.UpsertTeslaMateCharge(ctx, &models.ChargeLog{VehicleID: v.ID, TeslaMateChargeID: &tmID, Date: day, KwhAdded: 20, Cost: &cost, Currency: "EUR"}); err != nil {
+		t.Fatal(err)
+	}
+	eventID := "evt-origin"
+	if err := repo.CreateIngestedCharge(ctx, &models.ChargeLog{VehicleID: v.ID, Date: day.Add(24 * time.Hour), KwhAdded: 9, Cost: &cost, CostSource: "HOMEASSISTANT", Currency: "EUR", ExternalID: &eventID}); err != nil {
+		t.Fatal(err)
+	}
+
+	charges, _, err := repo.ListCharges(ctx, v.ID, false, 10, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]bool{}
+	for _, c := range charges {
+		got[c.Origin] = true
+	}
+	if len(charges) != 2 || !got["TESLAMATE"] || !got["WEBHOOK"] {
+		t.Fatalf("expected one TESLAMATE and one WEBHOOK charge, got %+v", got)
+	}
+}

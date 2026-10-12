@@ -65,7 +65,7 @@ func (r *Repository) GetLatestTeslaMateChargeDate(ctx context.Context, vehicleID
 const chargeSelectColumns = `
 	c.id, c.vehicle_id, c.teslamate_charge_id, c.date, c.end_date,
 	c.address, c.kwh_added, c.kwh_used, c.cost, c.cost_source, c.currency, c.fx_rate, c.odometer, c.is_manual, c.notes,
-	c.document_id, doc.filename, c.created_at
+	c.document_id, doc.filename, c.created_at, c.origin
 `
 
 func scanCharge(row pgx.Row, c *models.ChargeLog) error {
@@ -74,7 +74,7 @@ func scanCharge(row pgx.Row, c *models.ChargeLog) error {
 		&c.Address, &c.KwhAdded, &c.KwhUsed, &c.Cost, &c.CostSource, &c.Currency, &c.FxRate, &c.Odometer,
 		&c.IsManual, &c.Notes,
 		&c.DocumentID, &c.DocumentFilename,
-		&c.CreatedAt,
+		&c.CreatedAt, &c.Origin,
 	)
 }
 

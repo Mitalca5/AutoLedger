@@ -15,10 +15,10 @@ const props = withDefaults(
     required?: boolean
     /** The cost of the session under the vehicle's tariff: replaces the suggested price until the user types one. */
     tariff?: { cost: number; plan: string } | null
-    /** The energy is fixed (a synchronised charge): only the price and the cost are edited. */
-    hideEnergy?: boolean
+    /** The energy is fixed (a synchronised charge): shown, but only the price and the cost are edited. */
+    energyReadonly?: boolean
   }>(),
-  { variant: 'form', idPrefix: 'charge', required: false, hideEnergy: false },
+  { variant: 'form', idPrefix: 'charge', required: false, energyReadonly: false },
 )
 const kwh = defineModel<string>('kwh', { required: true })
 const cost = defineModel<string>('cost', { required: true })
@@ -37,9 +37,9 @@ const followsTariff = computed(() => !followsPlan.value && driver.value === 'tar
 
 <template>
   <div class="space-y-4">
-    <div v-if="!hideEnergy">
+    <div>
       <label :for="`${idPrefix}-kwh`" :class="labelClass">{{ $t('quickadd.quickChargeForm.energyAddedKwh') }}</label>
-      <NumberInput text :id="`${idPrefix}-kwh`" v-model="kwh" :min="quick ? '0' : '0.001'" :required="required" ref="kwhInput" :class="inputClass" />
+      <NumberInput text :id="`${idPrefix}-kwh`" v-model="kwh" :min="quick ? '0' : '0.001'" :required="required" :disabled="energyReadonly" ref="kwhInput" :class="inputClass" />
     </div>
 
     <div>
