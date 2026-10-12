@@ -1969,8 +1969,13 @@ func TestIntegrationICEVehicleFuelLogs(t *testing.T) {
 			t.Errorf("unexpected EV warning on a combustion vehicle: %q", w)
 		}
 	}
-	if sum.Completeness.ScorePct < 75 {
-		t.Errorf("completeness score = %d, unreasonably low for a vehicle with fill-ups", sum.Completeness.ScorePct)
+	if !sum.Completeness.ScoreAvailable {
+		t.Error("a vehicle with fill-ups has data to score")
+	}
+	for _, d := range sum.Completeness.Dimensions {
+		if (d.Key == "energy" || d.Key == "distance") && d.ScorePct != 100 {
+			t.Errorf("%s dimension = %d%%, want 100%% for a vehicle with fill-ups and odometer readings", d.Key, d.ScorePct)
+		}
 	}
 
 	// The comparison is built on an electric reference; the combustion vehicle only prefills the ICE side.
@@ -2788,4 +2793,21 @@ func TestIntegrationCurrentMonthCountsFinancingDueLater(t *testing.T) {
 		}
 	}
 	t.Fatalf("current month %s missing from %+v", current, sum.MonthlyCosts)
+}
+
+func TestIntegrationCompletenessWithoutDataHasNoScore(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "empty-score@example.com")
+
+	sum, err := NewTCOService(db.Pool, "UTC").ComputeVehicleTCO(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum.Completeness.ScoreAvailable || sum.Completeness.ScorePct != 0 {
+		t.Fatalf("an empty vehicle has no score, got available=%v score=%d", sum.Completeness.ScoreAvailable, sum.Completeness.ScorePct)
+	}
+	if sum.Completeness.Dimensions == nil || sum.Completeness.AcquisitionMissingFields == nil {
+		t.Error("lists must serialise as [] rather than null")
+	}
 }

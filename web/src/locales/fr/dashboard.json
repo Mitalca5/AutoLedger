@@ -39,7 +39,31 @@
     "odometerGap": "Trou d'odomètre avant ce trajet",
     "odometerRegression": "Odomètre en recul par rapport au trajet précédent",
     "distanceMismatch": "Distance différente du relevé d'odomètre",
-    "complete": "Compléter ({count})"
+    "complete": "Compléter ({count})",
+    "noScore": "Pas assez de données pour noter le TCO",
+    "noScoreHint": "Saisissez un trajet, une recharge ou une dépense : la note apparaît.",
+    "enterTheResale": "Saisir la valeur de revente estimée",
+    "enterTheHolding": "Saisir la durée de détention",
+    "enterTheResaleAndHolding": "Saisir la valeur de revente et la durée de détention",
+    "enterThePrice": "Saisir le prix d'achat",
+    "capped": "Plafonné sous le seuil de classement : la dépréciation manque.",
+    "showDimensions": "Ce que couvre la note",
+    "hideDimensions": "Masquer le détail de la note",
+    "notApplicable": "rien à évaluer",
+    "dimensions": {
+      "energy": "Recharges avec un coût (kWh)",
+      "energy_fuel": "Pleins de carburant saisis",
+      "energy_hybrid": "Recharges avec un coût et pleins saisis",
+      "distance": "Distance couverte par les trajets",
+      "distance_manual": "Distance couverte par les relevés et les trajets",
+      "distance_fuel": "Distance couverte par les relevés et les pleins",
+      "distance_hybrid": "Distance couverte par les relevés, les trajets et les pleins",
+      "tolls": "Trajets autoroutiers qualifiés",
+      "insurance": "Assurance saisie",
+      "acquisition": "Acquisition et dépréciation saisies",
+      "odometer": "Continuité de l'odomètre",
+      "currency": "Dépenses converties dans la devise du véhicule"
+    }
   },
   "energyBatterySection": {
     "teslamateGrafana": "Grafana TeslaMate",

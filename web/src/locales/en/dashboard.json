@@ -39,7 +39,31 @@
     "odometerGap": "Odometer gap before this drive",
     "odometerRegression": "Odometer lower than at the previous drive",
     "distanceMismatch": "Distance differs from the odometer reading",
-    "complete": "Complete ({count})"
+    "complete": "Complete ({count})",
+    "noScore": "Not enough data to score the TCO yet",
+    "noScoreHint": "Enter a drive, a charge or an expense and the score appears.",
+    "enterTheResale": "Enter the expected resale value",
+    "enterTheHolding": "Enter the holding period",
+    "enterTheResaleAndHolding": "Enter the resale value and holding period",
+    "enterThePrice": "Enter the purchase price",
+    "capped": "Capped below the ranking threshold: the depreciation is missing.",
+    "showDimensions": "What the score covers",
+    "hideDimensions": "Hide the score details",
+    "notApplicable": "nothing to evaluate",
+    "dimensions": {
+      "energy": "Charges with a cost (kWh)",
+      "energy_fuel": "Fuel fill-ups recorded",
+      "energy_hybrid": "Charges with a cost and fill-ups recorded",
+      "distance": "Distance covered by drives",
+      "distance_manual": "Distance covered by readings and drives",
+      "distance_fuel": "Distance covered by readings and fill-ups",
+      "distance_hybrid": "Distance covered by readings, drives and fill-ups",
+      "tolls": "Motorway drives qualified",
+      "insurance": "Insurance entered",
+      "acquisition": "Acquisition and depreciation entered",
+      "odometer": "Odometer continuity",
+      "currency": "Expenses converted to the vehicle currency"
+    }
   },
   "energyBatterySection": {
     "teslamateGrafana": "TeslaMate Grafana",

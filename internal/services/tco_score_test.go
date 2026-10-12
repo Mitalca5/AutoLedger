@@ -1,6 +1,9 @@
 package services
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCompletenessScore(t *testing.T) {
 	full := completenessInputs{
@@ -52,8 +55,8 @@ func TestCompletenessScoreCombustionVehicle(t *testing.T) {
 	}
 
 	in.fillUps = 0
-	if score, _ := completenessScore(in); score != 65 {
-		t.Errorf("score without any fill-up = %d, want 65 (energy 0.30 of the 0.85 left without tolls)", score)
+	if score, _ := completenessScore(in); score != 60 {
+		t.Errorf("score without any fill-up = %d, want 60 (energy 0.30 of the 0.75 left without tolls and odometer readings)", score)
 	}
 }
 
@@ -133,9 +136,10 @@ func TestCompletenessScoreNeutralisesTollsWithoutMotorwayDrives(t *testing.T) {
 		insurancePresent: false, acquisitionComplete: true,
 	}
 	score, dims := completenessScore(in)
-	// 0.10 of the remaining 0.85 is missing: 1 - 0.10/0.85 = 88.2 %, not the 90 % the tolls weight would give.
-	if score != 88 {
-		t.Fatalf("score = %d, want 88 with the tolls weight shared by the other dimensions", score)
+	// Tolls, odometer and currency have nothing to evaluate: 0.10 of the remaining 0.70 is missing,
+	// 1 - 0.10/0.70 = 85.7 %, not the 90 % the full weights would give.
+	if score != 86 {
+		t.Fatalf("score = %d, want 86 with the weights of the empty dimensions shared by the others", score)
 	}
 	var sum float64
 	for _, d := range dims {
@@ -150,7 +154,64 @@ func TestCompletenessScoreNeutralisesTollsWithoutMotorwayDrives(t *testing.T) {
 
 	in.highwayDrives, in.unqualifiedDrives = 2, 2
 	score, _ = completenessScore(in)
-	if score != 75 { // tolls 0 % (−15) and insurance missing (−10)
-		t.Errorf("score with two unqualified motorway drives = %d, want 75", score)
+	if score != 71 { // tolls 0 % (0.15) and insurance missing (0.10) of the 0.85 that applies
+		t.Errorf("score with two unqualified motorway drives = %d, want 71", score)
+	}
+}
+
+func TestCompletenessScoreNoDataIsNotComplete(t *testing.T) {
+	var empty completenessInputs
+	if completenessHasData(empty) {
+		t.Fatal("a vehicle with no distance and no expense has nothing to score")
+	}
+	if !completenessHasData(completenessInputs{basisKm: 10}) || !completenessHasData(completenessInputs{pricedEntries: 1}) ||
+		!completenessHasData(completenessInputs{kwhAdded: 1}) || !completenessHasData(completenessInputs{fillUps: 1}) {
+		t.Fatal("any distance or expense is data to score")
+	}
+
+	// Three manual drives, nothing else: no energy, no insurance, no acquisition. Never reassuring.
+	manual := completenessInputs{telemetryMode: "MANUAL", trackedKm: 120, basisKm: 120}
+	score, dims := completenessScore(manual)
+	if score > 30 {
+		t.Fatalf("score = %d, want a low score for a vehicle with drives only (dimensions %+v)", score, dims)
+	}
+	byKey := map[string]CompletenessDimension{}
+	for _, d := range dims {
+		byKey[d.Key] = d
+	}
+	if byKey["energy"].ScorePct != 0 {
+		t.Errorf("energy with no charge = %d%%, want 0", byKey["energy"].ScorePct)
+	}
+	for _, key := range []string{"tolls", "odometer", "currency"} {
+		if byKey[key].Applicable {
+			t.Errorf("%s has nothing to evaluate and must not be applicable: %+v", key, byKey[key])
+		}
+	}
+}
+
+func TestCompletenessScoreCappedWithoutDepreciation(t *testing.T) {
+	in := completenessInputs{
+		kwhAdded: 500, kwhPriced: 500, trackedKm: 10000, basisKm: 10000,
+		insurancePresent: true, acquisitionComplete: true, pricedEntries: 40, drivesWithOdometer: 200,
+	}
+	if score, _ := completenessScore(in); score != 100 {
+		t.Fatalf("complete vehicle = %d, want 100", score)
+	}
+	in.acquisitionComplete, in.depreciationUnknown = false, true
+	score, _ := completenessScore(in)
+	if score != depreciationMissingCap || score >= fleetComparableMinCompleteness {
+		t.Fatalf("score without depreciation = %d, want the cap %d under the ranking threshold", score, depreciationMissingCap)
+	}
+}
+
+func TestCompletenessDimensionsCarryTranslationKeys(t *testing.T) {
+	_, dims := completenessScore(completenessInputs{fuelOnly: true, fillUps: 1, basisKm: 1})
+	if dims[0].LabelKey != "energy_fuel" || dims[1].LabelKey != "distance_fuel" {
+		t.Fatalf("label keys = %q / %q", dims[0].LabelKey, dims[1].LabelKey)
+	}
+	for _, d := range dims {
+		if d.LabelKey == "" || strings.Contains(d.Label, "euro") {
+			t.Errorf("dimension %+v lacks a key or hard-codes euros", d)
+		}
 	}
 }

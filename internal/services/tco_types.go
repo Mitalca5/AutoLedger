@@ -74,17 +74,25 @@ type TCOCompleteness struct {
 	OdometerAnomalies   int     `json:"odometer_anomalies"`
 	InsuranceMissing    bool    `json:"insurance_missing"`
 	AcquisitionMissing  bool    `json:"acquisition_missing"`
+	// AcquisitionMissingFields names what the acquisition still lacks for the depreciation: "purchase_price",
+	// "resale_value" and/or "holding_period". Empty when the acquisition mode itself is missing or not applicable.
+	AcquisitionMissingFields []string `json:"acquisition_missing_fields"`
 	// StartOdometerMissing is true when the odometer at the start of ownership is not entered.
 	StartOdometerMissing bool     `json:"start_odometer_missing"`
 	Warnings             []string `json:"warnings"`
-	// ScorePct is a weighted completeness score (0-100) over the dimensions below.
+	// ScoreAvailable is false while the vehicle has no distance and no expense: there is nothing to score yet.
+	ScoreAvailable bool `json:"score_available"`
+	// ScorePct is a weighted completeness score (0-100) over the dimensions below; 0 when ScoreAvailable is false.
 	ScorePct   int                     `json:"score_pct"`
 	Dimensions []CompletenessDimension `json:"dimensions"`
 }
 
 // CompletenessDimension is one weighted component of the completeness score.
 type CompletenessDimension struct {
-	Key      string  `json:"key"`
+	Key string `json:"key"`
+	// LabelKey selects the translated label on the client (it differs by powertrain and tracking mode); Label is the
+	// English fallback.
+	LabelKey string  `json:"label_key"`
 	Label    string  `json:"label"`
 	ScorePct int     `json:"score_pct"`
 	Weight   float64 `json:"weight"`

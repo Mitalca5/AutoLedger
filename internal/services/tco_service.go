@@ -300,6 +300,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	sum.LeaseKmAllowanceToDate = round1(owned.LeaseKmAllowanceToDate)
 	if len(owned.Missing) > 0 {
 		comp.AcquisitionMissing = true
+		comp.AcquisitionMissingFields = owned.MissingFields
 		comp.Warnings = append(comp.Warnings, owned.Missing...)
 	}
 	comp.Warnings = append(comp.Warnings, owned.LeaseWarnings(now)...)
@@ -356,10 +357,13 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	}
 
 	comp.IsComplete = len(comp.Warnings) == 0
+	if comp.AcquisitionMissingFields == nil {
+		comp.AcquisitionMissingFields = []string{}
+	}
 	if comp.Warnings == nil {
 		comp.Warnings = []string{}
 	}
-	comp.ScorePct, comp.Dimensions = completenessScore(completenessInputs{
+	scoreInputs := completenessInputs{
 		kwhAdded:            kwhAdded,
 		kwhPriced:           kwhPriced,
 		highwayDrives:       highwayDrives,
@@ -378,7 +382,14 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		telemetryMode:       telemetryMode,
 		daysSinceOdometer:   daysSinceCheckpoint,
 		hasCheckpoints:      checkpointCount > 0,
-	})
+		depreciationUnknown: owned.DepreciationUnknown,
+	}
+	comp.ScoreAvailable = completenessHasData(scoreInputs)
+	if comp.ScoreAvailable {
+		comp.ScorePct, comp.Dimensions = completenessScore(scoreInputs)
+	} else {
+		comp.Dimensions = []CompletenessDimension{}
+	}
 
 	// 10. Aggregates
 	energy := byCategory[LedgerEnergy]

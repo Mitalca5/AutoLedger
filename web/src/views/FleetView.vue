@@ -401,7 +401,6 @@ onBeforeUnmount(() => {
           v-for="v in rankedVehicles"
           :key="v.vehicle_id"
           class="rounded-xl border border-slate-800 bg-slate-950/60 p-3"
-          :class="{ 'opacity-70': !v.comparable }"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
@@ -449,7 +448,7 @@ onBeforeUnmount(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60" :class="{ 'opacity-70': !v.comparable }">
+            <tr v-for="v in rankedVehicles" :key="v.vehicle_id" class="border-t border-slate-800/60">
               <td class="py-2 pr-4">
                 <span class="font-semibold text-white">{{ v.name }}</span>
                 <span v-if="cheapestPerKmIdSet.has(v.vehicle_id)" class="ml-2 inline-flex items-center gap-1 text-xs font-semibold uppercase text-success-400">
