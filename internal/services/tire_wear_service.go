@@ -368,9 +368,9 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 	}
 
 	condition := "GOOD"
-	if currentDepth <= 2.5 {
+	if currentDepth <= math.Max(minLegal, 2.5) {
 		condition = "CRITICAL"
-	} else if currentDepth <= 4.0 {
+	} else if currentDepth <= math.Max(4.0, minLegal+1.5) {
 		condition = "WARNING"
 	}
 
