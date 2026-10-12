@@ -63,7 +63,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 	if req.Mode != models.ComparisonModeRetrospective && req.Mode != models.ComparisonModeProjection {
 		return apierror.New("comparison.mode_invalid", "Invalid mode (RETROSPECTIVE or PROJECTION)")
 	}
-	if err := validateRange(req.AnnualKm, 1, 200_000, apierror.Newf("comparison.annual_km", "Invalid yearly mileage (%.0f to %.0f km)", apierror.Km(1), apierror.Km(200_000))); err != nil {
+	if err := validateRange(req.AnnualKm, 1, models.MaxComparisonAnnualKm, apierror.Newf("comparison.annual_km", "Invalid yearly mileage (%.0f to %.0f km)", apierror.Km(1), apierror.Km(models.MaxComparisonAnnualKm))); err != nil {
 		return err
 	}
 	if req.Years < 1 || req.Years > 15 {

@@ -67,3 +67,16 @@ type ComparisonScenario struct {
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 }
+
+// ComparisonInputLimits is the API contract shared by validation and the what-if editor.
+type ComparisonInputLimits struct {
+	AnnualKmMax         float64 `json:"annual_km_max"`
+	FuelPriceMax        float64 `json:"fuel_price_max"`
+	ElectricityPriceMax float64 `json:"electricity_price_max"`
+}
+
+const MaxComparisonAnnualKm = 200_000
+
+func ComparisonLimits() ComparisonInputLimits {
+	return ComparisonInputLimits{AnnualKmMax: MaxComparisonAnnualKm, FuelPriceMax: MaxFuelPricePerLiter, ElectricityPriceMax: money.MaxRate.Float()}
+}

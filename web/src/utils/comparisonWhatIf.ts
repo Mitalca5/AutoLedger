@@ -22,22 +22,31 @@ export const WHAT_IF_KEYS: WhatIfKey[] = ['annual_km', 'fuel_price', 'eur_per_kw
 // The sliders span half to twice the saved value; the field next to each slider accepts anything the API accepts.
 const SPAN = { low: 0.5, high: 2 }
 const STEPS: Record<WhatIfKey, number> = { annual_km: 500, fuel_price: 0.01, eur_per_kwh: 0.01 }
-// Hard limits of the API (validateComparisonRequest)
-const LIMITS: Record<WhatIfKey, { min: number; max: number }> = {
-  annual_km: { min: 1, max: 200_000 },
-  fuel_price: { min: 0, max: 999_999_999.999 },
-  eur_per_kwh: { min: 0, max: 999_999.999999 },
+// Limits travel with the computed result; the browser never guesses a currency-sized ceiling.
+export interface WhatIfInputLimits {
+  annual_km_max: number
+  fuel_price_max: number
+  electricity_price_max: number
 }
 
-export function whatIfBounds(base: WhatIfInputs): Record<WhatIfKey, WhatIfBound> {
+// What the API accepts for each field: the limits of the text fields next to the sliders.
+export function whatIfRanges(limits: WhatIfInputLimits): Record<WhatIfKey, { min: number; max: number }> {
+  return {
+    annual_km: { min: 1, max: limits.annual_km_max },
+    fuel_price: { min: 0, max: limits.fuel_price_max },
+    eur_per_kwh: { min: 0, max: limits.electricity_price_max },
+  }
+}
+
+export function whatIfBounds(base: WhatIfInputs, limits: WhatIfInputLimits): Record<WhatIfKey, WhatIfBound> {
   const out = {} as Record<WhatIfKey, WhatIfBound>
   for (const key of WHAT_IF_KEYS) {
     const step = STEPS[key]
-    const { min: floor, max: ceiling } = LIMITS[key]
+    const { min: floor, max: ceiling } = whatIfRanges(limits)[key]
     const value = Number(base[key]) || 0
     const ceilingOnStep = Math.floor(ceiling / step) * step
     // Round outwards to the step so that the saved value always sits on the track
-    const min = Math.max(floor, Math.floor((value * SPAN.low) / step) * step)
+    const min = Math.min(ceilingOnStep, Math.max(floor, Math.floor((value * SPAN.low) / step) * step))
     const max = Math.min(ceilingOnStep, Math.max(Math.ceil((value * SPAN.high) / step) * step, min + step))
     out[key] = { min: round(min, step), max: round(max, step), step }
   }
@@ -62,10 +71,12 @@ export function isWhatIfDirty(base: WhatIfInputs, explored: WhatIfInputs): boole
 }
 
 // The explored values are in range for the API; anything else is not sent.
-export function isWhatIfValid(explored: WhatIfInputs): boolean {
+export function isWhatIfValid(explored: WhatIfInputs, limits: WhatIfInputLimits | undefined): boolean {
+  if (!limits) return false
+  const ranges = whatIfRanges(limits)
   return WHAT_IF_KEYS.every((k) => {
     const v = Number(explored[k])
-    return Number.isFinite(v) && v >= LIMITS[k].min && v <= LIMITS[k].max
+    return Number.isFinite(v) && v >= ranges[k].min && v <= ranges[k].max
   })
 }
 

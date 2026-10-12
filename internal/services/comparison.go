@@ -64,12 +64,13 @@ type SensitivityRow struct {
 
 // ComparisonResult is the outcome of a comparison. TrackedSavings > 0 means the tracked vehicle is cheaper.
 type ComparisonResult struct {
-	Mode           string      `json:"mode"`
-	AnnualKm       float64     `json:"annual_km"`
-	YearsCount     int         `json:"years_count"`
-	Tracked        CostSide    `json:"tracked"`
-	ICE            CostSide    `json:"ice"`
-	TrackedSavings money.Cents `json:"tracked_savings"`
+	InputLimits    models.ComparisonInputLimits `json:"input_limits"`
+	Mode           string                       `json:"mode"`
+	AnnualKm       float64                      `json:"annual_km"`
+	YearsCount     int                          `json:"years_count"`
+	Tracked        CostSide                     `json:"tracked"`
+	ICE            CostSide                     `json:"ice"`
+	TrackedSavings money.Cents                  `json:"tracked_savings"`
 	// TrackedDepreciationKnown is false when the tracked vehicle was bought but has no depreciation entered: its side
 	// has a depreciation of zero, so the total saving would count depreciation on the other side only.
 	TrackedDepreciationKnown bool     `json:"tracked_depreciation_known"`
@@ -265,6 +266,7 @@ func computeCore(sc *models.ComparisonScenario, ev TrackedBaseline, km, fuelFact
 	iceSide, iceCash := ice.run(km, years)
 
 	res := ComparisonResult{
+		InputLimits:    models.ComparisonLimits(),
 		Mode:           sc.Mode,
 		AnnualKm:       km,
 		YearsCount:     years,
