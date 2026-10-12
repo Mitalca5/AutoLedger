@@ -41,10 +41,13 @@ export function formatMonthName(monthStr: string) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1)
 }
 
-/** The current month (or the latest one when it has no row yet) with the previous month's distance. */
-export function currentMonthStats(monthlyCosts: any[] | undefined, now = new Date()) {
+/**
+ * The current month (or the latest one when it has no row yet) with the previous month's distance. The server names the
+ * month in the reporting timezone; the clock of the browser is only the fallback.
+ */
+export function currentMonthStats(monthlyCosts: any[] | undefined, now = new Date(), currentMonth?: string) {
   if (!monthlyCosts?.length) return null
-  const key = now.toISOString().substring(0, 7) // YYYY-MM
+  const key = currentMonth || now.toISOString().substring(0, 7) // YYYY-MM
   const list = monthlyCosts
   const current = list.find((m: any) => m.month === key) || list[list.length - 1]
   const prevIdx = list.indexOf(current) - 1

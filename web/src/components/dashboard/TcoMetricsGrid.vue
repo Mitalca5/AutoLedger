@@ -4,6 +4,7 @@ import { canCharge, canRefuel, isFuelOnly } from '@/utils/vehicles'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount, formatAmountOrUnknown } from '@/currency'
 import GlossaryTip from '@/components/GlossaryTip.vue'
+import { formatMonthName } from '@/utils/dashboard'
 import { Coins, Zap, Receipt, TrendingUp } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit, litresToDisplayVolume, perDistance, perVolume, volumeUnitLabel } from '@/units'
 
@@ -59,6 +60,9 @@ const perUnit = (v: number | null | undefined) => formatAmountOrUnknown(v == nul
         {{ headline(tco?.total_cost) }}
       </div>
       <div class="mt-2 space-y-0.5">
+        <p v-if="tco?.monthly_costs?.length" class="text-xs text-slate-400">
+          {{ $t('dashboard.tcoMetricsGrid.periodSince', { month: formatMonthName(tco.monthly_costs[0].month) }) }}
+        </p>
         <p v-if="tco?.estimated_energy_cost" class="text-xs text-slate-400">
           {{ $t('dashboard.tcoMetricsGrid.ofWhichEstimatedEnergy', { amount: money(tco.estimated_energy_cost, 0) }) }}
           <GlossaryTip term="estimatedEnergy" />

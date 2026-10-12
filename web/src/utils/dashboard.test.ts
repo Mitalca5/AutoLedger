@@ -380,3 +380,21 @@ describe('countFollowUpItems', () => {
     expect(countFollowUpItems(null, [soon], true)).toBe(1)
   })
 })
+
+describe('currentMonthStats with the month named by the server', () => {
+  const list = [
+    { month: '2026-09', distance_km: 300, total: 100 },
+    { month: '2026-10', distance_km: 50, total: 20 },
+  ]
+
+  it('prefers the reporting-timezone month to the clock of the browser', () => {
+    // 23:30 UTC on 30 September is already October in a timezone ahead of UTC.
+    const s = currentMonthStats(list, new Date('2026-09-30T23:30:00Z'), '2026-10')!
+    expect(s.month).toBe('2026-10')
+    expect(s.prevDistance).toBe(300)
+  })
+
+  it('falls back to the clock when the server did not name it', () => {
+    expect(currentMonthStats(list, new Date('2026-09-30T23:30:00Z'))!.month).toBe('2026-09')
+  })
+})

@@ -2,17 +2,17 @@
 import { intlLocale } from '@/i18n'
 import { computed } from 'vue'
 import { ArrowRight, Calendar, PieChart } from 'lucide-vue-next'
-import { currentMonthStats as buildCurrentMonthStats } from '@/utils/dashboard'
+import { currentMonthStats as buildCurrentMonthStats, formatMonthName } from '@/utils/dashboard'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 import { distanceUnit, formatDistanceValue, perDistance } from '@/units'
 import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // Highlight of the current month; opens its cost detail
-const props = defineProps<{ monthlyCosts: any[] | undefined }>()
+const props = defineProps<{ monthlyCosts: any[] | undefined; currentMonth?: string }>()
 const vehicleStore = useVehicleStore()
 const emit = defineEmits<{ 'open-month': [month: any] }>()
-const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCosts))
+const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCosts, new Date(), props.currentMonth))
 </script>
 
 <template>
@@ -23,7 +23,7 @@ const currentMonthStats = computed(() => buildCurrentMonthStats(props.monthlyCos
       </div>
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs font-semibold text-sky-400 uppercase tracking-wider">{{ $t('dashboard.currentMonthBanner.activityThisMonth', { month: currentMonthStats.month }) }}</span>
+          <span class="text-xs font-semibold text-sky-400 uppercase tracking-wider">{{ $t('dashboard.currentMonthBanner.activityThisMonth', { month: formatMonthName(currentMonthStats.month) }) }}</span>
         </div>
         <div class="text-base sm:text-lg font-bold text-white flex items-center gap-x-3 gap-y-0.5 mt-0.5 flex-wrap">
           <span>{{ $t('dashboard.currentMonthBanner.kmDriven', { unit: distanceUnit(), distance_km: formatDistanceValue(currentMonthStats.distance_km) }) }}</span>

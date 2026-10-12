@@ -14,6 +14,8 @@ import { budgetUsage, parseBudgetInput } from '@/utils/fleetBudget'
 import { useConfirm } from '@/composables/useConfirm'
 import { formatDistance, currentDistanceUnit, perDistance, formatPerDistanceValue, formatFuelConsumptionValue, fuelConsumptionUnit } from '@/units'
 import { t } from '@/i18n'
+import { formatMonthLabel } from '@/utils/dates'
+import { formatMonthName } from '@/utils/dashboard'
 
 Chart.register(...registerables)
 
@@ -125,7 +127,7 @@ function renderChart() {
   chartInstance = new Chart(chartCanvas.value, {
     type: 'bar',
     data: {
-      labels: months,
+      labels: months.map(formatMonthLabel),
       datasets: [
         {
           label: t('fleet.chart.energyCost'),
@@ -278,7 +280,7 @@ onBeforeUnmount(() => {
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthCost') }}</span>
+          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthCost', { month: formatMonthName(summary.current_month) }) }}</span>
           <div class="p-2 bg-success-500/10 text-success-400 rounded-lg">
             <TrendingDown class="w-4 h-4" />
           </div>
@@ -291,7 +293,7 @@ onBeforeUnmount(() => {
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthDistance') }}</span>
+          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthDistance', { month: formatMonthName(summary.current_month) }) }}</span>
           <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
             <Gauge class="w-4 h-4" />
           </div>
@@ -304,7 +306,7 @@ onBeforeUnmount(() => {
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthEnergy') }}</span>
+          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthEnergy', { month: formatMonthName(summary.current_month) }) }}</span>
           <div class="p-2 bg-warning-500/10 text-warning-400 rounded-lg">
             <Zap class="w-4 h-4" />
           </div>

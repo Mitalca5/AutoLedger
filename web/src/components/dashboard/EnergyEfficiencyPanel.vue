@@ -253,7 +253,7 @@ onBeforeUnmount(() => {
         </thead>
         <tbody>
           <tr v-for="m in visibleMonths" :key="m.month">
-            <td>{{ m.month }}</td>
+            <td>{{ formatMonthLabel(m.month) }}</td>
             <td>{{ fmt(perUnit(m.consumption_kwh_100km), 1) }}</td>
             <td>{{ fmt(perUnit(m.cost_per_100km), 2) }}</td>
             <td>{{ fmt(perUnit(m.cost_per_100km_trailing), 2) }}</td>

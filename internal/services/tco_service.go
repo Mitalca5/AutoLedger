@@ -43,6 +43,15 @@ func perKm(amount money.Cents, km float64) *float64 {
 	return &v
 }
 
+// location is the reporting timezone, UTC when the configured name is unknown.
+func (s *TCOService) location() *time.Location {
+	loc, err := time.LoadLocation(s.timezone)
+	if err != nil {
+		return time.UTC
+	}
+	return loc
+}
+
 // vehicleBasics are the columns of the vehicle row the TCO and its monthly timeline start from.
 type vehicleBasics struct {
 	currentOdometer             float64
@@ -61,7 +70,8 @@ func (s *TCOService) loadVehicleBasics(ctx context.Context, vehicleID string) (v
 func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*TCOSummary, error) {
 	sum := &TCOSummary{}
 	comp := &sum.Completeness
-	now := time.Now()
+	now := time.Now().In(s.location())
+	sum.CurrentMonth = now.Format("2006-01")
 
 	// 1. Ownership contract and odometer
 	ownership, err := s.repo.GetVehicleOwnership(ctx, vehicleID)

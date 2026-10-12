@@ -157,7 +157,7 @@ onMounted(() => {
 
       <LeaseContractCard :tco="tco" />
 
-      <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" @open-month="openMonthDetail" />
+      <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" :current-month="tco?.current_month" @open-month="openMonthDetail" />
 
       <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount">
         <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />

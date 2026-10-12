@@ -239,7 +239,8 @@
     "fuel": "Carburant (pleins)",
     "energy": "Énergie (Charges)",
     "kwhOnly": "{total_kwh_added} kWh rechargés",
-    "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée"
+    "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée",
+    "periodSince": "Depuis {month}"
   },
   "nextDueCard": {
     "title": "Prochain entretien",

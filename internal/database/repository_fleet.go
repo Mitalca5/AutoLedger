@@ -10,8 +10,9 @@ import (
 	"github.com/teslacost/teslacost/internal/money"
 )
 
-// GetFleetSummary aggregates multi-vehicle household metrics.
-func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*models.FleetSummaryResponse, error) {
+// GetFleetSummary aggregates multi-vehicle household metrics. Months are calendar months of the reporting timezone
+// (an IANA name, UTC when unknown), the same boundaries as the vehicle TCO.
+func (r *Repository) GetFleetSummary(ctx context.Context, userID, timezone string) (*models.FleetSummaryResponse, error) {
 	vehicles, err := r.ListVehiclesByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch household vehicles: %w", err)
@@ -45,9 +46,15 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 		vehicleMap[v.ID] = v
 	}
 
-	now := time.Now().UTC()
-	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		loc = time.UTC
+		timezone = "UTC"
+	}
+	now := time.Now().In(loc)
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, loc)
 	startOfHistory := startOfMonth.AddDate(0, -11, 0)
+	res.CurrentMonth = now.Format("2006-01")
 
 	// 1. Per-vehicle current month distance
 	monthlyDistQuery := `
@@ -171,7 +178,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 
 	// 5. Monthly fleet history (last 12 months)
 	historyQuery := `
-		SELECT TO_CHAR(entry_date, 'YYYY-MM') as month_str,
+		SELECT TO_CHAR(entry_date AT TIME ZONE $3, 'YYYY-MM') as month_str,
 		       vehicle_id,
 		       category,
 		       COALESCE(SUM(amount_eur), 0) as total_eur
@@ -188,7 +195,7 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 	}
 	buckets := make(map[string]*monthBucket)
 
-	rows, err = r.pool.Query(ctx, historyQuery, vehicleIDs, startOfHistory)
+	rows, err = r.pool.Query(ctx, historyQuery, vehicleIDs, startOfHistory, timezone)
 	if err == nil {
 		for rows.Next() {
 			var mStr, vid, cat string
@@ -214,14 +221,14 @@ func (r *Repository) GetFleetSummary(ctx context.Context, userID string) (*model
 
 	// Distance per month for history
 	distHistoryQuery := `
-		SELECT TO_CHAR(start_time, 'YYYY-MM') as month_str,
+		SELECT TO_CHAR(start_time AT TIME ZONE $3, 'YYYY-MM') as month_str,
 		       COALESCE(SUM(distance_km), 0)
 		FROM drives
 		WHERE vehicle_id::text = ANY($1) AND start_time >= $2 AND deleted_upstream_at IS NULL
 		GROUP BY month_str;
 	`
 	distByMonth := make(map[string]float64)
-	rows, err = r.pool.Query(ctx, distHistoryQuery, vehicleIDs, startOfHistory)
+	rows, err = r.pool.Query(ctx, distHistoryQuery, vehicleIDs, startOfHistory, timezone)
 	if err == nil {
 		for rows.Next() {
 			var mStr string

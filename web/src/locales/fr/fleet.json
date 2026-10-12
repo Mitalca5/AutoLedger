@@ -5,11 +5,11 @@
   "kpi": {
     "vehicles": "Véhicules",
     "activeVehicles": "Actifs dans le foyer",
-    "monthCost": "Coût ce mois",
+    "monthCost": "Coût · {month}",
     "currentMonthTotal": "Dépenses mensuelles globales",
-    "monthDistance": "Distance ce mois",
+    "monthDistance": "Distance · {month}",
     "fleetTravelled": "Distance totale parcourue",
-    "monthEnergy": "Énergie ce mois",
+    "monthEnergy": "Énergie · {month}",
     "energyDelivered": "Énergie de recharge délivrée"
   },
   "vehicles": {

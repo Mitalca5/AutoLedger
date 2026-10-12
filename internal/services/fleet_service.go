@@ -20,7 +20,7 @@ const (
 
 // fleetStore is the slice of *database.Repository that FleetService uses.
 type fleetStore interface {
-	GetFleetSummary(ctx context.Context, userID string) (*models.FleetSummaryResponse, error)
+	GetFleetSummary(ctx context.Context, userID, timezone string) (*models.FleetSummaryResponse, error)
 	SetFleetMonthlyBudget(ctx context.Context, userID string, budget *money.Cents) error
 }
 
@@ -33,19 +33,26 @@ type vehicleTCO interface {
 type FleetService struct {
 	repo fleetStore
 	tco  vehicleTCO
+	// timezone is the reporting timezone: its calendar months bound the monthly figures.
+	timezone string
 }
 
 func NewFleetService(repo *database.Repository, tco *TCOService) *FleetService {
-	return &FleetService{repo: repo, tco: tco}
+	return &FleetService{repo: repo, tco: tco, timezone: tco.timezone}
 }
 
 // GetSummary returns consolidated KPIs, monthly breakdown and driver shares for all vehicles of a household, with
 // the per-kilometre comparison figures of each vehicle taken from its TCO.
 func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.FleetSummaryResponse, error) {
-	res, err := s.repo.GetFleetSummary(ctx, userID)
+	res, err := s.repo.GetFleetSummary(ctx, userID, s.timezone)
 	if err != nil {
 		return nil, err
 	}
+	loc, err := time.LoadLocation(s.timezone)
+	if err != nil {
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
 	sums := make(map[string]*TCOSummary, len(res.Vehicles))
 	for i := range res.Vehicles {
 		sum, err := s.tco.ComputeVehicleTCO(ctx, res.Vehicles[i].VehicleID)
@@ -54,10 +61,10 @@ func (s *FleetService) GetSummary(ctx context.Context, userID string) (*models.F
 			continue
 		}
 		sums[res.Vehicles[i].VehicleID] = sum
-		applyTCOToFleetMetric(&res.Vehicles[i], sum, time.Now())
+		applyTCOToFleetMetric(&res.Vehicles[i], sum, now)
 	}
 	if len(sums) == len(res.Vehicles) {
-		applyTCOMonthsToFleet(res, sums, time.Now())
+		applyTCOMonthsToFleet(res, sums, now)
 	}
 	return res, nil
 }

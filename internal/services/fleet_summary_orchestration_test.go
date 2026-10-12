@@ -17,7 +17,7 @@ type fakeFleetStore struct {
 	saved   bool
 }
 
-func (f *fakeFleetStore) GetFleetSummary(context.Context, string) (*models.FleetSummaryResponse, error) {
+func (f *fakeFleetStore) GetFleetSummary(context.Context, string, string) (*models.FleetSummaryResponse, error) {
 	return f.summary, f.err
 }
 

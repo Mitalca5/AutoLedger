@@ -239,7 +239,8 @@
     "fuel": "Fuel (fill-ups)",
     "energy": "Energy (charges)",
     "kwhOnly": "{total_kwh_added} kWh charged",
-    "ofWhichEstimatedEnergy": "of which {amount} estimated energy"
+    "ofWhichEstimatedEnergy": "of which {amount} estimated energy",
+    "periodSince": "Since {month}"
   },
   "nextDueCard": {
     "title": "Next maintenance",

@@ -455,7 +455,7 @@ func (h *HomeAssistantHandler) GetVehicleMetrics(w http.ResponseWriter, r *http.
 	}
 
 	// Calculate cost per 100km
-	fleetSummary, err := h.repo.GetFleetSummary(r.Context(), vehicle.UserID)
+	fleetSummary, err := h.repo.GetFleetSummary(r.Context(), vehicle.UserID, h.loc.String())
 	if err == nil && fleetSummary != nil {
 		for _, vm := range fleetSummary.Vehicles {
 			if vm.VehicleID == vehicleID && vm.EnergyCostPer100Km > 0 {
