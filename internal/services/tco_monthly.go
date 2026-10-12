@@ -2,17 +2,39 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"math"
 	"sort"
 	"time"
 
+	"github.com/teslacost/teslacost/internal/database"
 	"github.com/teslacost/teslacost/internal/models"
 	"github.com/teslacost/teslacost/internal/money"
 )
 
+// monthlyTimeline computes the monthly costs of a vehicle without the rest of the TCO (completeness, tags, tolls, tire
+// amortization...): what the drill-down of one month needs. It returns the same months as ComputeVehicleTCO.
+func (s *TCOService) monthlyTimeline(ctx context.Context, vehicleID string) ([]MonthlyCost, error) {
+	ownership, err := s.repo.GetVehicleOwnership(ctx, vehicleID)
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
+		return nil, fmt.Errorf("ownership: %w", err)
+	}
+	basics, err := s.loadVehicleBasics(ctx, vehicleID)
+	if err != nil {
+		return nil, fmt.Errorf("vehicle: %w", err)
+	}
+	in, err := s.loadSmoothingInputs(ctx, vehicleID, basics.powertrain)
+	if err != nil {
+		return nil, fmt.Errorf("odometer readings: %w", err)
+	}
+	months, _, _, err := s.monthlyCosts(ctx, vehicleID, ownership, basics.currentOdometer, basics.estKwh100km, basics.estPricePerKwh, time.Now(), in)
+	return months, err
+}
+
 // monthlyCosts builds the cash-basis monthly timeline (acquisition excluded) in the reporting timezone,
 // including linear smoothing of missing mileage between odometer checkpoints.
-func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownership *models.VehicleOwnership, currentOdometer float64, estKwh100km, estPricePerKwh *float64, now time.Time) ([]MonthlyCost, float64, float64, error) {
+func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownership *models.VehicleOwnership, currentOdometer float64, estKwh100km, estPricePerKwh *float64, now time.Time, in smoothingInputs) ([]MonthlyCost, float64, float64, error) {
 	monthlyMap := make(map[string]*MonthlyCost)
 	get := func(m string) *MonthlyCost {
 		if _, ok := monthlyMap[m]; !ok {
@@ -82,7 +104,7 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 	}
 
 	// Compute smoothed missing distance between checkpoints
-	smoothedMap, preTmMap, err := s.computeMileageSmoothing(ctx, vehicleID, ownership, currentOdometer, now)
+	smoothedMap, preTmMap, err := s.computeMileageSmoothing(ctx, vehicleID, ownership, currentOdometer, now, in)
 	if err != nil {
 		return nil, 0, 0, err
 	}
@@ -114,9 +136,17 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		get(m).TiresAmortized += amount
 	}
 
+	// Months are walked in order: the rounding remainder below lands on the latest month, not on a random one.
+	months := make([]string, 0, len(monthlyMap))
+	for m := range monthlyMap {
+		months = append(months, m)
+	}
+	sort.Strings(months)
+
 	var totalSmoothed, totalEstimated float64
 	var lastSmoothedMc, lastEstimatedMc *MonthlyCost
-	for _, mc := range monthlyMap {
+	for _, m := range months {
+		mc := monthlyMap[m]
 		mc.TrackedDistanceKm = round1(mc.DistanceKm)
 		mc.SmoothedKm = round1(mc.SmoothedKm)
 		mc.EstimatedEnergyKm = round1(mc.EstimatedEnergyKm)

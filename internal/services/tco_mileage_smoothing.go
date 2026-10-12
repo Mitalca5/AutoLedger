@@ -8,17 +8,88 @@ import (
 	"github.com/teslacost/teslacost/internal/models"
 )
 
+// smoothingInputs are the vehicle records the mileage smoothing reads. The caller loads them once per computation: the
+// TCO needs the same readings and fill-ups for its own distance figures.
+type smoothingInputs struct {
+	powertrain  string
+	checkpoints []models.OdometerCheckpoint
+	// fuelLogs is only read for a vehicle that refuels.
+	fuelLogs []models.FuelLog
+}
+
+// loadSmoothingInputs reads the odometer readings and, for a vehicle that refuels, its fill-ups.
+func (s *TCOService) loadSmoothingInputs(ctx context.Context, vehicleID, powertrain string) (smoothingInputs, error) {
+	in := smoothingInputs{powertrain: powertrain}
+	var err error
+	if in.checkpoints, err = s.repo.ListOdometerCheckpoints(ctx, vehicleID); err != nil {
+		return in, err
+	}
+	if models.PowertrainCanRefuel(powertrain) {
+		if in.fuelLogs, err = s.repo.ListFuelLogs(ctx, vehicleID); err != nil {
+			return in, err
+		}
+	}
+	return in, nil
+}
+
+// driveDistanceIndex answers "how far was driven between two instants" over a vehicle's drives, which are listed once
+// and sorted by start time instead of being queried for every odometer interval.
+type driveDistanceIndex struct {
+	starts []time.Time
+	km     []float64
+	synced []bool
+}
+
+// loadDriveDistanceIndex lists the distance of every drive that is not deleted upstream. A drive typed by hand is not
+// synced: its distance counts, its energy does not.
+func (s *TCOService) loadDriveDistanceIndex(ctx context.Context, vehicleID string) (*driveDistanceIndex, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT start_time, COALESCE(distance_km, 0), COALESCE(is_manual = FALSE, FALSE)
+		FROM drives
+		WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL
+		ORDER BY start_time;
+	`, vehicleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	idx := &driveDistanceIndex{}
+	for rows.Next() {
+		var start time.Time
+		var km float64
+		var synced bool
+		if err := rows.Scan(&start, &km, &synced); err != nil {
+			return nil, err
+		}
+		idx.starts = append(idx.starts, start)
+		idx.km = append(idx.km, km)
+		idx.synced = append(idx.synced, synced)
+	}
+	return idx, rows.Err()
+}
+
+// between sums the drives starting in [from, to): every drive for the tracked distance, only the synced ones for the
+// second figure. The starts are sorted, so the first drive of the interval is found by bisection and the intervals of
+// one pass, which do not overlap, cost one scan of the drives in total.
+func (d *driveDistanceIndex) between(from, to time.Time) (trackedKm, syncedKm float64) {
+	i := sort.Search(len(d.starts), func(i int) bool { return !d.starts[i].Before(from) })
+	for ; i < len(d.starts) && d.starts[i].Before(to); i++ {
+		trackedKm += d.km[i]
+		if d.synced[i] {
+			syncedKm += d.km[i]
+		}
+	}
+	return trackedKm, syncedKm
+}
+
 // computeMileageSmoothing interpolates missing mileage across months between known odometer checkpoints.
-func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID string, ownership *models.VehicleOwnership, currentOdometer float64, now time.Time) (map[string]float64, map[string]float64, error) {
+func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID string, ownership *models.VehicleOwnership, currentOdometer float64, now time.Time, in smoothingInputs) (map[string]float64, map[string]float64, error) {
 	loc, err := time.LoadLocation(s.timezone)
 	if err != nil {
 		loc = time.UTC
 	}
 
-	checkpoints, err := s.repo.ListOdometerCheckpoints(ctx, vehicleID)
-	if err != nil {
-		return nil, nil, err
-	}
+	checkpoints := in.checkpoints
 
 	type odoPoint struct {
 		date time.Time
@@ -26,18 +97,10 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 	}
 
 	var points []odoPoint
-	var powertrain string
-	if err := s.pool.QueryRow(ctx, `SELECT powertrain FROM vehicles WHERE id = $1;`, vehicleID).Scan(&powertrain); err != nil {
-		return nil, nil, err
-	}
-	usesFuel := models.PowertrainCanRefuel(powertrain)
+	usesFuel := models.PowertrainCanRefuel(in.powertrain)
 	if usesFuel {
 		// Fill-ups are odometer readings of a vehicle that refuels, like manual checkpoints.
-		fuelLogs, err := s.repo.ListFuelLogs(ctx, vehicleID)
-		if err != nil {
-			return nil, nil, err
-		}
-		for _, f := range fuelLogs {
+		for _, f := range in.fuelLogs {
 			if f.Odometer != nil {
 				points = append(points, odoPoint{date: f.Date.In(loc), odo: *f.Odometer})
 			}
@@ -163,6 +226,11 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 	smoothedByMonth := make(map[string]float64)
 	preTmByMonth := make(map[string]float64)
 
+	drives, err := s.loadDriveDistanceIndex(ctx, vehicleID)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	for i := 0; i < len(cleanPoints)-1; i++ {
 		p1 := cleanPoints[i]
 		p2 := cleanPoints[i+1]
@@ -180,16 +248,7 @@ func (s *TCOService) computeMileageSmoothing(ctx context.Context, vehicleID stri
 
 		// Distance of the drives in [t1, t2]: every drive counts for the distance, only synchronized
 		// ones for the energy (a manual drive's distance still needs its energy estimated before tracking).
-		var trackedKm, syncedKm float64
-		err := s.pool.QueryRow(ctx, `
-			SELECT COALESCE(SUM(distance_km), 0), COALESCE(SUM(distance_km) FILTER (WHERE is_manual = FALSE), 0)
-			FROM drives
-			WHERE vehicle_id = $1 AND deleted_upstream_at IS NULL
-			  AND start_time >= $2 AND start_time < $3;
-		`, vehicleID, t1, t2).Scan(&trackedKm, &syncedKm)
-		if err != nil {
-			return nil, nil, err
-		}
+		trackedKm, syncedKm := drives.between(t1, t2)
 
 		if missingKm := deltaOdo - trackedKm; missingKm > 1.0 {
 			intervalSmoothed, _ := allocateSmoothingForInterval(t1, t2, missingKm, firstTrackingTime)

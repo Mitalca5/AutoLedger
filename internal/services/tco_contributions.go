@@ -90,12 +90,13 @@ func (s *TCOService) MonthlyCostContributions(ctx context.Context, vehicleID, mo
 		return nil, err
 	}
 
-	summary, err := s.ComputeVehicleTCO(ctx, vehicleID)
+	// Only the monthly timeline is needed: the rest of the TCO is not recomputed for a drill-down.
+	timeline, err := s.monthlyTimeline(ctx, vehicleID)
 	if err != nil {
 		return nil, err
 	}
 	var mc MonthlyCost
-	for _, m := range summary.MonthlyCosts {
+	for _, m := range timeline {
 		if m.Month == month {
 			mc = m
 			break
