@@ -15,7 +15,6 @@ import DashboardFollowUp from '@/components/dashboard/DashboardFollowUp.vue'
 import DataQualityCard from '@/components/dashboard/DataQualityCard.vue'
 import LeaseContractCard from '@/components/dashboard/LeaseContractCard.vue'
 import TcoMetricsGrid from '@/components/dashboard/TcoMetricsGrid.vue'
-import CurrentMonthBanner from '@/components/dashboard/CurrentMonthBanner.vue'
 import MonthlyCostChart from '@/components/dashboard/MonthlyCostChart.vue'
 import CostBreakdownDonut from '@/components/dashboard/CostBreakdownDonut.vue'
 import MileageCostChart from '@/components/dashboard/MileageCostChart.vue'
@@ -129,6 +128,16 @@ onMounted(() => {
       </div>
 
       <!-- Charts Skeletons -->
+      <!-- One period for the monthly cost and mileage charts below; pinned only where there is room for it -->
+      <div class="sm:sticky sm:top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
+        <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
+        <MonthlyRangeSelector
+          :model-value="prefs.dashboardRange"
+          :label="$t('dashboard.dashboardView.chartsPeriod')"
+          @update:model-value="prefs.setDashboardRange"
+        />
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 h-80 flex flex-col justify-between">
           <div class="h-4 w-44 bg-slate-800 rounded"></div>
@@ -153,35 +162,25 @@ onMounted(() => {
     <div v-else class="space-y-4 sm:space-y-6">
       <UrgentRemindersBanner :reminders="dashboardReminders" />
 
-      <TcoMetricsGrid :tco="tco" />
-
-      <LeaseContractCard :tco="tco" />
-
-      <CurrentMonthBanner :monthly-costs="tco?.monthly_costs" :current-month="tco?.current_month" @open-month="openMonthDetail" />
-
+      <!-- What can be trusted and what is missing, before the figures -->
       <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount">
         <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
         <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
       </DashboardFollowUp>
 
-      <!-- One period for the energy, monthly cost and mileage sections below; pinned only where there is room for it -->
-      <div class="sm:sticky sm:top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
-        <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
-        <MonthlyRangeSelector
-          :model-value="prefs.dashboardRange"
-          :label="$t('dashboard.dashboardView.chartsPeriod')"
-          @update:model-value="prefs.setDashboardRange"
-        />
-      </div>
+      <TcoMetricsGrid :tco="tco" @open-month="openMonthDetail" />
 
-      <!-- Energy efficiency: consumption, real cost per 100 km and charging habits (electric vehicles) -->
+      <!-- Energy summary: consumption and real cost per 100 km (electric vehicles); the detail is on the energy page -->
       <EnergyEfficiencyPanel
         v-if="vehicleStore.activeVehicle && vehicleStore.canCharge && (!vehicleStore.canRefuel || (tco?.total_kwh_added || 0) > 0)"
         :vehicle-id="vehicleStore.activeVehicle.id"
         :grafana-url="vehicleStore.activeVehicle.teslamate_grafana_url"
         :sync-key="vehicleStore.lastSyncTimestamp"
         show-link
+        summary
       />
+
+      <LeaseContractCard :tco="tco" />
 
       <ResidualValuePanel
         v-if="vehicleStore.activeVehicle"
@@ -196,6 +195,7 @@ onMounted(() => {
 
       <MileageCostChart :monthly-costs="monthlyCosts" @open-month="openMonthDetail" />
 
+      <!-- Shows itself only once a drive carries a tag -->
       <TagBreakdown v-if="prefs.proPersoEnabled" :tco="tco" />
     </div>
 

@@ -4,7 +4,7 @@ import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
-import { Gauge } from 'lucide-vue-next'
+import { ChevronDown, Gauge } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import EnergyBatterySection from './EnergyBatterySection.vue'
 import EnergyTemperatureSection from './EnergyTemperatureSection.vue'
@@ -26,6 +26,8 @@ const props = defineProps<{
   // Dashboard: link to the energy page. Energy page: explain why the panel is empty.
   showLink?: boolean
   showEmpty?: boolean
+  // Dashboard: a closed disclosure with the headline figures; the charts, charging habits, temperature and battery stay on the energy page
+  summary?: boolean
 }>()
 
 const vehicleStore = useVehicleStore()
@@ -183,8 +185,14 @@ onBeforeUnmount(() => {
   <section v-if="!hasData && showEmpty" class="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
     {{ $t('dashboard.energyEfficiencyPanel.noData') }}
   </section>
-  <section v-else-if="hasData" id="energy-efficiency" class="scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
-    <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+  <component
+    :is="summary ? 'details' : 'section'"
+    v-else-if="hasData"
+    id="energy-efficiency"
+    class="group scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm"
+    aria-labelledby="energy-efficiency-title"
+  >
+    <component :is="summary ? 'summary' : 'div'" class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center" :class="summary ? 'tap cursor-pointer list-none' : ''">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">
           <Gauge class="h-4 w-4 text-info-400" aria-hidden="true" />
@@ -192,10 +200,15 @@ onBeforeUnmount(() => {
         </h3>
         <p class="mt-0.5 text-xs text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.whatTheCarUsesAnd') }}</p>
       </div>
-      <router-link v-if="showLink" to="/energy" class="tap-text text-xs font-semibold text-sky-400 underline">
+      <router-link v-if="showLink && !summary" to="/energy" class="tap-text text-xs font-semibold text-sky-400 underline">
         {{ $t('dashboard.energyEfficiencyPanel.seeEnergy') }}
       </router-link>
-    </div>
+      <span v-if="summary" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-300">
+        <span>{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} kWh/100 {{ distanceUnit() }}</span>
+        <span>{{ fmtMoney(perUnit(stats?.summary.cost_per_100km), currency) }}/100 {{ distanceUnit() }}</span>
+        <ChevronDown class="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+      </span>
+    </component>
 
     <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
@@ -233,7 +246,7 @@ onBeforeUnmount(() => {
       {{ $t('dashboard.energyEfficiencyPanel.derivedNote') }}
     </p>
 
-    <div v-if="showConsumption || showCost" class="grid grid-cols-1 gap-4" :class="{ 'lg:grid-cols-2': showConsumption && showCost }">
+    <div v-if="!summary && (showConsumption || showCost)" class="grid grid-cols-1 gap-4" :class="{ 'lg:grid-cols-2': showConsumption && showCost }">
       <div v-if="showConsumption">
         <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.monthlyConsumption') }}</h4>
         <div class="h-44 sm:h-56"><canvas ref="consumptionRef" :aria-label="$t('dashboard.energyEfficiencyPanel.monthlyConsumptionInKwhPer', { unit: distanceUnit() })"></canvas></div>
@@ -245,7 +258,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- A table is not clipped by sr-only (its width ignores the 1px), so the class goes on a wrapper -->
-    <div class="sr-only">
+    <div v-if="!summary" class="sr-only">
       <table>
         <caption>{{ $t('dashboard.energyEfficiencyPanel.consumptionAndEnergyCostPer') }}</caption>
         <thead>
@@ -262,7 +275,7 @@ onBeforeUnmount(() => {
       </table>
     </div>
 
-    <div v-if="acDc.classes.length > 0">
+    <div v-if="!summary && acDc.classes.length > 0">
       <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.howTheCarIsCharged') }}</h4>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
         <div v-if="acDc.classes.length > 1" class="md:col-span-2 bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center">
@@ -296,11 +309,15 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <template v-if="stats">
+    <template v-if="stats && !summary">
       <EnergyTemperatureSection v-if="basis?.temperature !== 'unavailable'" :stats="stats" />
       <EnergyBatterySection v-if="basis?.battery !== 'unavailable'" :stats="stats" :grafana-url="grafanaUrl" />
     </template>
-  </section>
+
+    <router-link v-if="summary" to="/energy" class="tap-text inline-block text-xs font-semibold text-sky-400 underline">
+      {{ $t('dashboard.energyEfficiencyPanel.seeEnergy') }}
+    </router-link>
+  </component>
   <p v-else-if="failed" role="alert" class="rounded-xl border border-slate-800 bg-slate-900 p-3 text-xs text-slate-400">
     {{ $t('dashboard.energyEfficiencyPanel.theEnergyEfficiencyStatisticsCould') }}
   </p>

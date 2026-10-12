@@ -3,17 +3,20 @@ import { formatPercent } from '@/utils/numbers'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
+import { computed } from 'vue'
 import { Briefcase, User } from 'lucide-vue-next'
 import { distanceUnit, formatDistanceValue } from '@/units'
 import { formatNumber } from '@/utils/numbers'
 
 // Pro / Perso split of the drives
-defineProps<{ tco: any | null }>()
+const props = defineProps<{ tco: any | null }>()
 const vehicleStore = useVehicleStore()
+// A split with no tag at all would read "Untagged 100 %": nothing to show until a drive is tagged
+const hasTags = computed(() => (props.tco?.tag_breakdown ?? []).some((item: any) => item.tag))
 </script>
 
 <template>
-  <div v-if="tco?.tag_breakdown?.length" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+  <div v-if="hasTags" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
     <h3 class="text-sm font-bold text-white mb-3">{{ $t('dashboard.tagBreakdown.breakdownByDriveCategoryWork') }}</h3>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div
