@@ -63,7 +63,7 @@
     "indicative": "Valeurs indicatives, à ajuster",
     "back": "Retour",
     "viewResult": "Voir le résultat",
-    "actual": "réel",
+    "projected": "projeté depuis vos coûts saisis",
     "evLess": "électrique −{amount}",
     "evMore": "électrique +{amount}",
     "title": "Comparatif",
@@ -263,6 +263,9 @@
     "failed": "Les chiffres explorés n'ont pas pu être calculés.",
     "saveAsNew": "Enregistrer comme nouvelle comparaison",
     "copyName": "{name} (et si)"
+  },
+  "exclusions": {
+    "note": "Non comparés : péages, stationnement, financement, abonnements et autres coûts n'ont pas de saisie côté thermique."
   },
   "currency": {
     "label": "Devise (code ISO)",

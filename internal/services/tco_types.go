@@ -188,6 +188,8 @@ type TCOSummary struct {
 
 	TagBreakdown []TagCostBreakdown `json:"tag_breakdown"`
 	MonthlyCosts []MonthlyCost      `json:"monthly_costs"`
+	// CurrentMonth is the month in progress (YYYY-MM) in the reporting timezone, the one the monthly costs end with.
+	CurrentMonth string `json:"current_month"`
 
 	Completeness TCOCompleteness `json:"completeness"`
 }

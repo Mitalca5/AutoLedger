@@ -17,7 +17,7 @@ type fakeFleetStore struct {
 	saved   bool
 }
 
-func (f *fakeFleetStore) GetFleetSummary(context.Context, string) (*models.FleetSummaryResponse, error) {
+func (f *fakeFleetStore) GetFleetSummary(context.Context, string, string) (*models.FleetSummaryResponse, error) {
 	return f.summary, f.err
 }
 
@@ -35,6 +35,16 @@ func (f fakeVehicleTCO) ComputeVehicleTCO(_ context.Context, vehicleID string) (
 	return nil, errors.New("no TCO")
 }
 
+// fakeEnergyStats answers the cost per 100 km of the energy statistics per vehicle; a missing vehicle has none.
+type fakeEnergyStats map[string]*float64
+
+func (f fakeEnergyStats) Compute(_ context.Context, vehicleID string) (*EnergyStats, error) {
+	if _, ok := f[vehicleID]; !ok {
+		return nil, errors.New("no energy statistics")
+	}
+	return &EnergyStats{Summary: EnergySummary{CostPer100km: f[vehicleID]}}, nil
+}
+
 func fleetOfTwo(month string) *models.FleetSummaryResponse {
 	return &models.FleetSummaryResponse{
 		MonthlyCosts: []models.FleetMonthlyCost{{Month: month, TotalCost: 999}},
@@ -47,7 +57,7 @@ func TestFleetSummaryRebuildsMonthsFromVehicleTCOs(t *testing.T) {
 	tco := func(total, energy money.Cents) *TCOSummary {
 		return &TCOSummary{Powertrain: "EV", MonthlyCosts: []MonthlyCost{{Month: month, Total: total, Energy: energy}}}
 	}
-	svc := &FleetService{repo: &fakeFleetStore{summary: fleetOfTwo(month)}, tco: fakeVehicleTCO{"a": tco(1000, 400), "b": tco(500, 100)}}
+	svc := &FleetService{repo: &fakeFleetStore{summary: fleetOfTwo(month)}, tco: fakeVehicleTCO{"a": tco(1000, 400), "b": tco(500, 100)}, energy: fakeEnergyStats{}}
 
 	got, err := svc.GetSummary(context.Background(), "u")
 	if err != nil {
@@ -68,7 +78,7 @@ func TestFleetSummaryRebuildsMonthsFromVehicleTCOs(t *testing.T) {
 func TestFleetSummaryKeepsStoredMonthsWhenAVehicleHasNoTCO(t *testing.T) {
 	month := time.Now().Format("2006-01")
 	only := &TCOSummary{Powertrain: "EV", MonthlyCosts: []MonthlyCost{{Month: month, Total: 1000, Energy: 400}}}
-	svc := &FleetService{repo: &fakeFleetStore{summary: fleetOfTwo(month)}, tco: fakeVehicleTCO{"a": only}}
+	svc := &FleetService{repo: &fakeFleetStore{summary: fleetOfTwo(month)}, tco: fakeVehicleTCO{"a": only}, energy: fakeEnergyStats{}}
 
 	got, err := svc.GetSummary(context.Background(), "u")
 	if err != nil {
@@ -85,7 +95,7 @@ func TestFleetSummaryKeepsStoredMonthsWhenAVehicleHasNoTCO(t *testing.T) {
 
 func TestFleetSummaryAndBudgetReportStoreErrors(t *testing.T) {
 	boom := errors.New("down")
-	svc := &FleetService{repo: &fakeFleetStore{err: boom}, tco: fakeVehicleTCO{}}
+	svc := &FleetService{repo: &fakeFleetStore{err: boom}, tco: fakeVehicleTCO{}, energy: fakeEnergyStats{}}
 	if _, err := svc.GetSummary(context.Background(), "u"); !errors.Is(err, boom) {
 		t.Errorf("summary error: got %v, want the store's", err)
 	}
@@ -97,5 +107,39 @@ func TestFleetSummaryAndBudgetReportStoreErrors(t *testing.T) {
 	budget := money.Cents(25000)
 	if err := (&FleetService{repo: store}).SetMonthlyBudget(context.Background(), "u", &budget); err != nil || !store.saved || *store.budget != 25000 {
 		t.Errorf("budget stored: err %v, saved %v", err, store.saved)
+	}
+}
+
+func TestFleetEnergyCostPer100KmComesFromTheEnergyStatistics(t *testing.T) {
+	stats := 3.73
+	svc := &FleetService{
+		repo:   &fakeFleetStore{summary: fleetOfTwo(time.Now().Format("2006-01"))},
+		tco:    fakeVehicleTCO{},
+		energy: fakeEnergyStats{"a": &stats, "b": nil},
+	}
+	got, err := svc.GetSummary(context.Background(), "u")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Vehicles[0].EnergyCostPer100Km != 3.73 {
+		t.Fatalf("vehicle a: got %v, want the energy-statistics 3.73", got.Vehicles[0].EnergyCostPer100Km)
+	}
+	if got.Vehicles[1].EnergyCostPer100Km != 0 {
+		t.Fatalf("vehicle b has no tracked figure: got %v, want 0 (unknown)", got.Vehicles[1].EnergyCostPer100Km)
+	}
+}
+
+func TestFleetEnergyCostPer100KmIsUnknownWhenTheStatisticsFail(t *testing.T) {
+	svc := &FleetService{
+		repo:   &fakeFleetStore{summary: fleetOfTwo(time.Now().Format("2006-01"))},
+		tco:    fakeVehicleTCO{},
+		energy: fakeEnergyStats{},
+	}
+	got, err := svc.GetSummary(context.Background(), "u")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Vehicles[0].EnergyCostPer100Km != 0 {
+		t.Fatalf("got %v, want 0", got.Vehicles[0].EnergyCostPer100Km)
 	}
 }

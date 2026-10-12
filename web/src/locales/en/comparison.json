@@ -63,7 +63,7 @@
     "indicative": "Indicative values, to adjust",
     "back": "Back",
     "viewResult": "View the result",
-    "actual": "actual",
+    "projected": "projected from your recorded costs",
     "evLess": "electric −{amount}",
     "evMore": "electric +{amount}",
     "title": "Comparison",
@@ -263,6 +263,9 @@
     "failed": "The explored figures could not be computed.",
     "saveAsNew": "Save as a new comparison",
     "copyName": "{name} (what if)"
+  },
+  "exclusions": {
+    "note": "Not compared: tolls, parking, financing, subscriptions and other costs have no combustion-side input."
   },
   "currency": {
     "label": "Currency (ISO code)",

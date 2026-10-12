@@ -1,0 +1,31 @@
+{
+  "cashPaid": {
+    "label": "Cash paid",
+    "definition": "Amounts actually paid, as recorded. Energy estimated for distance without drive data is included and always named."
+  },
+  "economicCost": {
+    "label": "Economic cost",
+    "definition": "Costs spread over the period they cover instead of the day they were paid."
+  },
+  "fullCost": {
+    "label": "Full cost",
+    "definition": "The economic cost plus depreciation: what owning the vehicle really costs."
+  },
+  "runningCost": {
+    "label": "Running cost",
+    "definition": "Energy or fuel, tolls and parking only."
+  },
+  "atTheWheel": {
+    "label": "Consumption at the wheel",
+    "definition": "Energy used while driving, as measured by the vehicle."
+  },
+  "atThePlug": {
+    "label": "Consumption at the plug",
+    "definition": "Energy drawn when charging, losses included, over the distance driven."
+  },
+  "estimatedEnergy": {
+    "label": "Estimated energy",
+    "definition": "Energy priced for distance driven without drive data, from the vehicle average consumption and price."
+  },
+  "about": "Definition of {term}"
+}

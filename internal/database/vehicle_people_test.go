@@ -171,7 +171,7 @@ func TestFleetSharesGroupAccountAndGuestDrivers(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	sum, err := repo.GetFleetSummary(ctx, owner.ID)
+	sum, err := repo.GetFleetSummary(ctx, owner.ID, "UTC")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -82,6 +82,9 @@ const breakEvenText = computed(() => {
   return `${outlay} ${net}`
 })
 
+// What the comparison leaves out on both sides, stated under the verdict, in print and in the CSV
+const exclusionsNote = computed(() => t('comparison.exclusions.note'))
+
 const costRows = computed(() => costRowValues(props.result).map((r) => ({ label: t(`comparison.rows.${r.key}`), tracked: r.tracked, ice: r.ice })))
 
 function exportResultCsv() {
@@ -93,6 +96,7 @@ function exportResultCsv() {
   rows.push([t('comparison.csv.perMonth'), Number(r.tracked.per_month).toFixed(2), Number(r.ice.per_month).toFixed(2)])
   rows.push([t('comparison.csv.costPerKm', { unit: distanceUnit() }), perDistance(r.tracked.cost_per_km).toFixed(3), perDistance(r.ice.cost_per_km).toFixed(3)])
   if (!depreciationMissing.value) rows.push([t(sk('comparison.csv.gap')), Number(r.tracked_savings).toFixed(2), ''])
+  rows.push([exclusionsNote.value, '', ''])
   rows.push(['', '', ''])
   rows.push(t(sk('comparison.csv.cumulativeHeader')).split(','))
   for (const p of r.cumulative) rows.push([p.year, Number(p.tracked).toFixed(2), Number(p.ice).toFixed(2)])
@@ -131,6 +135,7 @@ function printResult() {
         <div>
           <div class="text-lg font-bold text-white">{{ verdict }}</div>
           <div class="text-xs text-slate-400 mt-0.5">{{ scenario?.name }} · {{ $t('comparison.comparisonView.kmPerYear', { unit: distanceUnit(), km: fmtKm(result.annual_km) }) }}</div>
+          <div class="text-xs text-slate-400 mt-1" data-testid="comparison-exclusions">{{ exclusionsNote }}</div>
         </div>
       </div>
 
@@ -159,7 +164,7 @@ function printResult() {
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-sm font-semibold text-info-300">{{ $t(sk('comparison.comparisonView.electric')) }}</h2>
             <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-success-500/40 text-success-300' : 'border-slate-600 text-slate-400'">
-              {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.actual') : $t('comparison.comparisonView.estimated') }}
+              {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.projected') : $t('comparison.comparisonView.estimated') }}
             </span>
           </div>
           <div class="text-2xl font-bold text-white">{{ fmtMoney(result.tracked.total) }}</div>

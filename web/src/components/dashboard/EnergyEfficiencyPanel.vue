@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GlossaryTip from '@/components/GlossaryTip.vue'
 import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
@@ -182,7 +183,7 @@ onBeforeUnmount(() => {
   <section v-if="!hasData && showEmpty" class="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
     {{ $t('dashboard.energyEfficiencyPanel.noData') }}
   </section>
-  <section v-else-if="hasData" class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
+  <section v-else-if="hasData" id="energy-efficiency" class="scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm" aria-labelledby="energy-efficiency-title">
     <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">
@@ -198,7 +199,7 @@ onBeforeUnmount(() => {
 
     <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }}</dt>
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.actualConsumption') }} <GlossaryTip term="atTheWheel" /></dt>
         <dd class="mt-1 text-xl font-bold text-white">{{ fmt(perUnit(stats?.summary.consumption_kwh_100km), 1) }} <span class="text-xs font-medium text-slate-400">kWh/100 {{ distanceUnit() }}</span></dd>
         <dd class="mt-0.5 hidden text-xs text-slate-400 sm:block">{{ $t('dashboard.energyEfficiencyPanel.energyUsedWhileDrivingMeasured') }}</dd>
       </div>
@@ -252,7 +253,7 @@ onBeforeUnmount(() => {
         </thead>
         <tbody>
           <tr v-for="m in visibleMonths" :key="m.month">
-            <td>{{ m.month }}</td>
+            <td>{{ formatMonthLabel(m.month) }}</td>
             <td>{{ fmt(perUnit(m.consumption_kwh_100km), 1) }}</td>
             <td>{{ fmt(perUnit(m.cost_per_100km), 2) }}</td>
             <td>{{ fmt(perUnit(m.cost_per_100km_trailing), 2) }}</td>

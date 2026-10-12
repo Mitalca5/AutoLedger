@@ -1,0 +1,31 @@
+{
+  "cashPaid": {
+    "label": "Décaissé",
+    "definition": "Montants réellement payés, tels qu'enregistrés. L'énergie estimée pour la distance sans trajet est incluse et toujours nommée."
+  },
+  "economicCost": {
+    "label": "Coût économique",
+    "definition": "Coûts répartis sur la période qu'ils couvrent au lieu du jour où ils ont été payés."
+  },
+  "fullCost": {
+    "label": "Coût complet",
+    "definition": "Le coût économique plus la dépréciation : ce que coûte réellement la possession du véhicule."
+  },
+  "runningCost": {
+    "label": "Coût d'usage",
+    "definition": "Énergie ou carburant, péages et parkings uniquement."
+  },
+  "atTheWheel": {
+    "label": "Consommation à la roue",
+    "definition": "Énergie utilisée en roulant, telle que mesurée par le véhicule."
+  },
+  "atThePlug": {
+    "label": "Consommation à la prise",
+    "definition": "Énergie prélevée en charge, pertes comprises, rapportée à la distance parcourue."
+  },
+  "estimatedEnergy": {
+    "label": "Énergie estimée",
+    "definition": "Énergie valorisée pour la distance parcourue sans trajet enregistré, d'après la consommation et le prix moyens du véhicule."
+  },
+  "about": "Définition de {term}"
+}

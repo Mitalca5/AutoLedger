@@ -5,11 +5,11 @@
   "kpi": {
     "vehicles": "Vehicles",
     "activeVehicles": "Active in household",
-    "monthCost": "This Month Cost",
+    "monthCost": "Cost · {month}",
     "currentMonthTotal": "Total monthly spending",
-    "monthDistance": "This Month Distance",
+    "monthDistance": "Distance · {month}",
     "fleetTravelled": "Total distance traveled",
-    "monthEnergy": "This Month Energy",
+    "monthEnergy": "Energy · {month}",
     "energyDelivered": "Delivered charging energy"
   },
   "vehicles": {
@@ -48,9 +48,9 @@
     "title": "Cost per distance, side by side",
     "hint": "All powertrains, from each vehicle's TCO",
     "vehicle": "Vehicle",
-    "runningPerDistance": "Running cost / {unit}",
+    "runningPerDistance": "Cash paid / {unit}",
     "fullPerDistance": "Full cost / {unit}",
-    "energy": "Energy / 100",
+    "energy": "At the plug / 100",
     "annual": "Annual cost",
     "completeness": "Completeness",
     "kwh100": "{value} kWh/100 {unit}",
@@ -58,6 +58,6 @@
     "cheapest": "Cheapest",
     "indicative": "Indicative",
     "depreciationMissing": "Depreciation not entered",
-    "footnote": "Running cost covers energy, upkeep, insurance and financing; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). A vehicle under 60% completeness is shown but not ranked."
+    "footnote": "Cash paid covers energy, upkeep, insurance and financing, estimated energy included; full cost adds depreciation and amortized tires. Annual cost extrapolates the full cost over the observed history (three months minimum). Energy is charged energy at the plug. A vehicle under 60% completeness is shown but not ranked."
   }
 }

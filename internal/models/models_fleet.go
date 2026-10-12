@@ -4,8 +4,10 @@ import "github.com/teslacost/teslacost/internal/money"
 
 // FleetSummaryResponse aggregates multi-vehicle household metrics.
 type FleetSummaryResponse struct {
-	TotalVehicles    int         `json:"total_vehicles"`
-	Currency         string      `json:"currency"`
+	TotalVehicles int    `json:"total_vehicles"`
+	Currency      string `json:"currency"`
+	// CurrentMonth is the month in progress (YYYY-MM) in the reporting timezone.
+	CurrentMonth     string      `json:"current_month"`
 	CurrentMonthCost money.Cents `json:"current_month_cost"`
 	// MonthlyBudget is the household spending target for a month; nil when none is set.
 	MonthlyBudget          *money.Cents         `json:"monthly_budget"`
@@ -28,15 +30,17 @@ type FleetMonthlyCost struct {
 
 // VehicleFleetMetric provides comparison KPIs for each vehicle in the household fleet.
 type VehicleFleetMetric struct {
-	VehicleID          string      `json:"vehicle_id"`
-	Name               string      `json:"name"`
-	Make               string      `json:"make"`
-	Model              string      `json:"model"`
-	Currency           string      `json:"currency"`
-	CurrentOdometer    float64     `json:"current_odometer"`
-	MonthDistanceKm    float64     `json:"month_distance_km"`
-	MonthCost          money.Cents `json:"month_cost"`
-	EnergyCostPer100Km float64     `json:"energy_cost_per_100km"`
+	VehicleID       string      `json:"vehicle_id"`
+	Name            string      `json:"name"`
+	Make            string      `json:"make"`
+	Model           string      `json:"model"`
+	Currency        string      `json:"currency"`
+	CurrentOdometer float64     `json:"current_odometer"`
+	MonthDistanceKm float64     `json:"month_distance_km"`
+	MonthCost       money.Cents `json:"month_cost"`
+	// EnergyCostPer100Km is the energy-statistics figure (priced charges over the distance of the months driven), 0
+	// when it is not known.
+	EnergyCostPer100Km float64 `json:"energy_cost_per_100km"`
 
 	Powertrain string `json:"powertrain"`
 	// RunningCostPerKm is what the vehicle costs to run (energy, upkeep, insurance, financing); FullCostPerKm adds

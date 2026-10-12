@@ -784,6 +784,8 @@ export interface MemberKmShare {
 export interface FleetSummaryResponse {
   total_vehicles: number
   currency: string
+  /** Month in progress (YYYY-MM) in the reporting timezone. */
+  current_month: string
   current_month_cost: number
   monthly_budget: number | null
   current_month_distance_km: number

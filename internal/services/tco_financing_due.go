@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/teslacost/teslacost/internal/money"
 )
@@ -9,13 +10,13 @@ import (
 // financingDueLaterThisMonth sums the financing payments of the current month that are scheduled after today:
 // the cost_ledger view only holds payments whose date has passed, so the month in progress would otherwise
 // miss an instalment due on a later day. The conditions mirror the financing branches of that view (migration 34).
-func (s *TCOService) financingDueLaterThisMonth(ctx context.Context, vehicleID string) (string, money.Cents, error) {
+func (s *TCOService) financingDueLaterThisMonth(ctx context.Context, vehicleID string, now time.Time) (string, money.Cents, error) {
 	var month string
 	var amount money.Cents
 	err := s.pool.QueryRow(ctx, `
 		WITH bounds AS (
-			SELECT CURRENT_DATE AS today,
-			       (date_trunc('month', CURRENT_DATE) + interval '1 month')::date AS next_month
+			SELECT $2::date AS today,
+			       (date_trunc('month', $2::date) + interval '1 month')::date AS next_month
 		)
 		SELECT TO_CHAR(b.today, 'YYYY-MM'), COALESCE(SUM(due.amount), 0)
 		FROM bounds b
@@ -52,6 +53,6 @@ func (s *TCOService) financingDueLaterThisMonth(ctx context.Context, vehicleID s
 			      < LEAST(b.next_month, COALESCE(o.end_date, 'infinity'::date), COALESCE(o.option_exercised_date, 'infinity'::date))
 		) due ON true
 		GROUP BY b.today
-	`, vehicleID).Scan(&month, &amount)
+	`, vehicleID, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)).Scan(&month, &amount)
 	return month, amount, err
 }

@@ -454,19 +454,13 @@ func (h *HomeAssistantHandler) GetVehicleMetrics(w http.ResponseWriter, r *http.
 		}
 	}
 
-	// Calculate cost per 100km
-	fleetSummary, err := h.repo.GetFleetSummary(r.Context(), vehicle.UserID)
-	if err == nil && fleetSummary != nil {
-		for _, vm := range fleetSummary.Vehicles {
-			if vm.VehicleID == vehicleID && vm.EnergyCostPer100Km > 0 {
-				eff := vm.EnergyCostPer100Km
-				resp.CostPer100Km = &eff
-				break
-			}
-		}
+	// Cost per 100 km: the energy-statistics figure, the one the dashboard and the fleet show.
+	if stats, err := services.NewEnergyStatsService(h.repo.Pool(), h.loc.String()).Compute(r.Context(), vehicleID); err == nil && stats.Summary.CostPer100km != nil {
+		eff := *stats.Summary.CostPer100km
+		resp.CostPer100Km = &eff
 	}
 
-	// Fallback to estimated kWh / 100km * price/kWh if fleet calculation has no drives
+	// Fallback to estimated kWh / 100km * price/kWh when the statistics have no tracked distance
 	if resp.CostPer100Km == nil && vehicle.EstimatedKwh100km != nil && vehicle.EstimatedPricePerKwh != nil {
 		val := math.Round((*vehicle.EstimatedKwh100km**vehicle.EstimatedPricePerKwh)*100) / 100
 		resp.CostPer100Km = &val

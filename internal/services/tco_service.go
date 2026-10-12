@@ -43,6 +43,15 @@ func perKm(amount money.Cents, km float64) *float64 {
 	return &v
 }
 
+// location is the reporting timezone, UTC when the configured name is unknown.
+func (s *TCOService) location() *time.Location {
+	loc, err := time.LoadLocation(s.timezone)
+	if err != nil {
+		return time.UTC
+	}
+	return loc
+}
+
 // vehicleBasics are the columns of the vehicle row the TCO and its monthly timeline start from.
 type vehicleBasics struct {
 	currentOdometer             float64
@@ -61,7 +70,8 @@ func (s *TCOService) loadVehicleBasics(ctx context.Context, vehicleID string) (v
 func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*TCOSummary, error) {
 	sum := &TCOSummary{}
 	comp := &sum.Completeness
-	now := time.Now()
+	now := time.Now().In(s.location())
+	sum.CurrentMonth = now.Format("2006-01")
 
 	// 1. Ownership contract and odometer
 	ownership, err := s.repo.GetVehicleOwnership(ctx, vehicleID)
@@ -408,8 +418,9 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	sum.EnergyCost = energy
 	sum.EnergyCostPerKm = perKm(energy, basisKm)
 	sum.TotalKwhAdded = round1(kwhAdded)
+	// The price of a kWh is the electricity over the kWh that were priced: a hybrid's fuel is not part of it.
 	if kwhPriced > 0 {
-		sum.AvgCostPerKwh = round3(energy.Float() / kwhPriced)
+		sum.AvgCostPerKwh = round3((energy - sum.FuelEnergyCost).Float() / kwhPriced)
 	}
 	sum.TollsCost = travel
 	sum.TollsCostPerKm = perKm(travel, basisKm)
@@ -449,7 +460,7 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 		sum.FullCost += sum.EstimatedEnergyCost
 		sum.FullCostNet += sum.EstimatedEnergyCost
 		if sum.TotalKwhAdded > 0 {
-			sum.AvgCostPerKwh = round3(sum.EnergyCost.Float() / sum.TotalKwhAdded)
+			sum.AvgCostPerKwh = round3((sum.EnergyCost - sum.FuelEnergyCost).Float() / sum.TotalKwhAdded)
 		}
 	}
 	if comp.UntrackedDistanceKm > 0 {

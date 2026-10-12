@@ -28,7 +28,7 @@ func (s *TCOService) monthlyTimeline(ctx context.Context, vehicleID string) ([]M
 	if err != nil {
 		return nil, fmt.Errorf("odometer readings: %w", err)
 	}
-	months, _, _, err := s.monthlyCosts(ctx, vehicleID, ownership, basics.currentOdometer, basics.estKwh100km, basics.estPricePerKwh, time.Now(), in)
+	months, _, _, err := s.monthlyCosts(ctx, vehicleID, ownership, basics.currentOdometer, basics.estKwh100km, basics.estPricePerKwh, time.Now().In(s.location()), in)
 	return months, err
 }
 
@@ -202,7 +202,7 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		get(m).MaintenanceAmortized += amount
 	}
 
-	if dueMonth, due, err := s.financingDueLaterThisMonth(ctx, vehicleID); err != nil {
+	if dueMonth, due, err := s.financingDueLaterThisMonth(ctx, vehicleID, now); err != nil {
 		return nil, 0, 0, err
 	} else if due > 0 {
 		get(dueMonth).Financing += due
@@ -225,8 +225,40 @@ func (s *TCOService) monthlyCosts(ctx context.Context, vehicleID string, ownersh
 		return monthlyCosts[i].Month < monthlyCosts[j].Month
 	})
 
-	if len(monthlyCosts) == 0 {
-		monthlyCosts = append(monthlyCosts, MonthlyCost{Month: now.Format("2006-01")})
-	}
+	monthlyCosts = fillMonths(monthlyCosts, now.Format("2006-01"))
 	return monthlyCosts, round1(totalSmoothed), round1(totalEstimated), nil
+}
+
+// fillMonths makes the timeline continuous: every calendar month from the first one to the current month (or the last
+// recorded one when it is later) is present, a month without any record as an empty row. A range of N months is then N
+// calendar months, not the last N months that happen to hold data.
+func fillMonths(costs []MonthlyCost, current string) []MonthlyCost {
+	if len(costs) == 0 {
+		return []MonthlyCost{{Month: current}}
+	}
+	first, err := time.Parse("2006-01", costs[0].Month)
+	if err != nil {
+		return costs
+	}
+	last := costs[len(costs)-1].Month
+	if current > last {
+		last = current
+	}
+	byMonth := make(map[string]MonthlyCost, len(costs))
+	for _, mc := range costs {
+		byMonth[mc.Month] = mc
+	}
+	out := make([]MonthlyCost, 0, len(costs))
+	for m := first; ; m = m.AddDate(0, 1, 0) {
+		key := m.Format("2006-01")
+		if key > last {
+			break
+		}
+		if mc, ok := byMonth[key]; ok {
+			out = append(out, mc)
+		} else {
+			out = append(out, MonthlyCost{Month: key})
+		}
+	}
+	return out
 }

@@ -6,6 +6,7 @@ import {
   countFollowUpItems,
   computeMonthFixedVariable,
   currentMonthStats,
+  rollingWindowStats,
   filterMonthsByRange,
   formatMonthName,
   nextDueReminder,
@@ -378,5 +379,67 @@ describe('countFollowUpItems', () => {
   })
   it('ignores a missing completeness block', () => {
     expect(countFollowUpItems(null, [soon], true)).toBe(1)
+  })
+})
+
+describe('currentMonthStats with the month named by the server', () => {
+  const list = [
+    { month: '2026-09', distance_km: 300, total: 100 },
+    { month: '2026-10', distance_km: 50, total: 20 },
+  ]
+
+  it('prefers the reporting-timezone month to the clock of the browser', () => {
+    // 23:30 UTC on 30 September is already October in a timezone ahead of UTC.
+    const s = currentMonthStats(list, new Date('2026-09-30T23:30:00Z'), '2026-10')!
+    expect(s.month).toBe('2026-10')
+    expect(s.prevDistance).toBe(300)
+  })
+
+  it('falls back to the clock when the server did not name it', () => {
+    expect(currentMonthStats(list, new Date('2026-09-30T23:30:00Z'))!.month).toBe('2026-09')
+  })
+})
+
+describe('rollingWindowStats', () => {
+  const month = (m: string, total: number, extra: Record<string, number> = {}) => ({
+    month: m,
+    distance_km: 1000,
+    total,
+    energy: total,
+    ...extra,
+  })
+
+  it('sums the last twelve months and reconciles with the bars over the same window', () => {
+    const list = Array.from({ length: 15 }, (_, i) => month(`2026-${String(i + 1).padStart(2, '0')}`, 100 + i))
+    const w = rollingWindowStats(list)!
+    expect(w.months).toBe(12)
+    expect(w.fromMonth).toBe('2026-04')
+    expect(w.toMonth).toBe('2026-15')
+    const bars = list.slice(-12).reduce((sum, m) => sum + m.total, 0)
+    expect(w.cash).toBe(bars)
+    expect(w.distanceKm).toBe(12000)
+  })
+
+  it('reads the real window when the history is shorter', () => {
+    const w = rollingWindowStats([month('2026-08', 200), month('2026-09', 300)])!
+    expect(w.months).toBe(2)
+    expect(w.cash).toBe(500)
+  })
+
+  it('uses the spread cost for the economic figure and the estimate for the named part', () => {
+    const w = rollingWindowStats([
+      { month: '2026-09', distance_km: 500, total: 1200, tires: 800, tires_amortized: 100, energy: 400, smoothed_energy: 150 },
+    ])!
+    expect(w.cash).toBe(1200)
+    expect(w.economic).toBe(500)
+    expect(w.estimatedEnergy).toBe(150)
+    expect(w.economicPerKm).toBe(1)
+  })
+
+  it('leaves the cost per distance unknown without distance or without cost', () => {
+    expect(rollingWindowStats([{ month: '2026-09', distance_km: 0, total: 100, energy: 100 }])!.economicPerKm).toBeNull()
+    expect(rollingWindowStats([{ month: '2026-09', distance_km: 100, total: 0 }])!.economicPerKm).toBeNull()
+    expect(rollingWindowStats([])).toBeNull()
+    expect(rollingWindowStats(undefined)).toBeNull()
   })
 })
