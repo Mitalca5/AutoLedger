@@ -130,10 +130,7 @@ func (h *DriveHandler) List(w http.ResponseWriter, r *http.Request) {
 	enriched := make([]EnrichedDrive, len(drives))
 	for i, d := range drives {
 		kwh, energySource := services.DriveEnergyKwh(d.DistanceKm, d.EnergyConsumedKwh, d.ConsumptionKwh100km)
-		hasEstimates := energySource == services.EnergySourceDefault ||
-			rates.ElectricitySource == services.RateSourceDefault ||
-			rates.TiresSource == services.RateSourceDefault ||
-			rates.MaintenanceSource == services.RateSourceDefault
+		hasEstimates := energySource == services.EnergySourceDefault || rates.HasUnknownRate()
 
 		components := services.ComputeCostComponents(rates, d.DistanceKm, kwh)
 		elecCost := components.ElectricityCost

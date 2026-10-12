@@ -1036,6 +1036,66 @@ func TestCarpoolElectricityRecentCharges5Days(t *testing.T) {
 	}
 }
 
+func TestIntegrationFreeChargesAreAKnownElectricityRate(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "free_charges@example.com")
+	svc := NewCarpoolService(db.Pool, repo)
+
+	now := time.Date(2026, 6, 15, 12, 0, 0, 0, time.UTC)
+	free := money.Cents(0)
+	for i, daysAgo := range []int{1, 2} {
+		c := &models.ChargeLog{VehicleID: v.ID, Date: now.Add(-time.Duration(daysAgo) * 24 * time.Hour), KwhAdded: 30 + float64(i), Cost: &free, Currency: "EUR"}
+		if err := repo.CreateManualCharge(ctx, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	rates, err := svc.GetVehicleUnitRatesAt(ctx, v.ID, &now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rates.ElectricitySource != RateSourceRecentCharges || rates.ElectricityPerKwh != 0 {
+		t.Fatalf("free recent charges must give a known rate of zero, got %s %v", rates.ElectricitySource, rates.ElectricityPerKwh)
+	}
+
+	// Too old to be "recent": the history of priced charges still answers, with a zero price.
+	later := now.Add(120 * 24 * time.Hour)
+	rates, err = svc.GetVehicleUnitRatesAt(ctx, v.ID, &later)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rates.ElectricitySource != RateSourceHistory || rates.ElectricityPerKwh != 0 {
+		t.Fatalf("free history must give a known rate of zero, got %s %v", rates.ElectricitySource, rates.ElectricityPerKwh)
+	}
+}
+
+func TestIntegrationVehicleWithoutHistoryHasUnknownRatesNotDefaultAmounts(t *testing.T) {
+	db, repo := setupIntegrationDB(t, false)
+	ctx := context.Background()
+	v := mustVehicle(t, repo, "no_history@example.com")
+	svc := NewCarpoolService(db.Pool, repo)
+
+	rates, err := svc.GetVehicleUnitRates(ctx, v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, src := range map[string]string{"electricity": rates.ElectricitySource, "tires": rates.TiresSource, "maintenance": rates.MaintenanceSource} {
+		if src != RateSourceUnknown {
+			t.Errorf("%s rate source: got %s, want %s", name, src, RateSourceUnknown)
+		}
+	}
+	if rates.ElectricityPerKwh != 0 || rates.TiresPerKm != 0 || rates.MaintenancePerKm != 0 {
+		t.Errorf("no built-in amount may be applied: %+v", rates)
+	}
+	if !rates.HasUnknownRate() {
+		t.Error("unknown rates must be reported")
+	}
+	if got := ComputeCostComponents(rates, 100, 16); got.ElectricityCost != 0 || got.TiresCost != 0 || got.MaintenanceCost != 0 {
+		t.Errorf("unknown rates must not price a drive: %+v", got)
+	}
+}
+
 func TestCarpoolMonthlyInsuranceAllocation(t *testing.T) {
 	db, repo := setupIntegrationDB(t, false)
 	ctx := context.Background()

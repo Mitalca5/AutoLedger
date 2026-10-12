@@ -103,10 +103,17 @@ func TestDriveListPaginationFiltersAndCosts(t *testing.T) {
 	if all.Total != 3 || len(all.Drives) != 3 || all.Page != 1 || all.Limit != 50 {
 		t.Fatalf("defaults: %+v", all)
 	}
-	// The newest drive comes first; the cost breakdown is computed from the vehicle's estimates.
+	// The newest drive comes first. The vehicle has no charge, tire or maintenance history: its energy is known but
+	// no component is priced with a built-in amount, and the breakdown says so.
 	first := all.Drives[0]
-	if first.Costs.CostPerKm <= 0 || first.Costs.TotalCost <= 0 || first.Costs.ElectricityKwh != 2 || !first.Costs.HasEstimates {
+	if first.Costs.ElectricityKwh != 2 || !first.Costs.HasEstimates {
 		t.Fatalf("costs of the newest drive (10 km at 20 kWh/100 km): %+v", first.Costs)
+	}
+	if first.Costs.TotalCost != 0 || first.Costs.CostPerKm != 0 {
+		t.Fatalf("no built-in amount may price a drive: %+v", first.Costs)
+	}
+	if first.Costs.ElectricityRateSource != services.RateSourceUnknown || first.Costs.TiresRateSource != services.RateSourceUnknown || first.Costs.MaintenanceRateSource != services.RateSourceUnknown {
+		t.Fatalf("rate sources must be unknown: %+v", first.Costs)
 	}
 
 	if got := a.list(a.owner, "?limit=2&page=2"); got.Total != 3 || len(got.Drives) != 1 || got.Page != 2 || got.Limit != 2 {

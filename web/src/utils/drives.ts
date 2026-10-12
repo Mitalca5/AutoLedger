@@ -244,11 +244,11 @@ export function buildTripCostDrive(tg: any, tgDrives: any[]) {
     drives_count: tgDrives.length,
     costs: {
       electricity_kwh: Math.round(totalKwh),
-      electricity_rate: totalKwh > 0 ? elecCost / totalKwh : 0.22,
+      electricity_rate: totalKwh > 0 ? elecCost / totalKwh : 0,
       electricity_cost: elecCost,
-      tires_rate: totalKm > 0 ? tiresCost / totalKm : 0.02,
+      tires_rate: totalKm > 0 ? tiresCost / totalKm : 0,
       tires_cost: tiresCost,
-      maintenance_rate: totalKm > 0 ? maintCost / totalKm : 0.015,
+      maintenance_rate: totalKm > 0 ? maintCost / totalKm : 0,
       maintenance_cost: maintCost,
       insurance_rate: totalKm > 0 ? insurCost / totalKm : 0,
       insurance_cost: insurCost,
@@ -258,9 +258,9 @@ export function buildTripCostDrive(tg: any, tgDrives: any[]) {
       has_estimates: tgDrives.some((d) => d.costs?.has_estimates),
       // Without the sources, the modal would treat every rate as unknown (e.g. insurance "not entered")
       energy_source: pickSource(tgDrives, 'energy_source', ['DEFAULT', 'CONSUMPTION']),
-      electricity_rate_source: pickSource(tgDrives, 'electricity_rate_source', ['DEFAULT']),
-      tires_rate_source: pickSource(tgDrives, 'tires_rate_source', ['DEFAULT']),
-      maintenance_rate_source: pickSource(tgDrives, 'maintenance_rate_source', ['DEFAULT']),
+      electricity_rate_source: pickSource(tgDrives, 'electricity_rate_source', ['UNKNOWN']),
+      tires_rate_source: pickSource(tgDrives, 'tires_rate_source', ['UNKNOWN']),
+      maintenance_rate_source: pickSource(tgDrives, 'maintenance_rate_source', ['UNKNOWN']),
       insurance_source: pickSource(tgDrives, 'insurance_source', ['NONE', 'INSUFFICIENT_DISTANCE', 'RECORDED_EXPENSES']),
     },
   }
