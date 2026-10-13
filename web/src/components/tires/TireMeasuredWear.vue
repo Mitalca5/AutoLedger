@@ -2,6 +2,7 @@
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import TireWearBar from '@/components/tires/TireWearBar.vue'
 import TireWearComparison from '@/components/tires/TireWearComparison.vue'
+import { tireWearComparison } from '@/utils/tireWearComparison'
 
 // Wear measured from tread depth, shown next to the theoretical wear by distance
 defineProps<{ stat: any }>()
@@ -14,7 +15,8 @@ defineProps<{ stat: any }>()
     </div>
     <TireWearBar :pct="stat.wear_percentage" :condition="stat.condition" />
     <TireWearComparison :stat="stat" />
-    <p v-if="stat.wear_rate_source === 'measured' && stat.wear_rate_confidence < 0.5" class="text-xs text-slate-400">
+    <!-- With a comparison, the same caveat sits in its footnote -->
+    <p v-if="!tireWearComparison(stat) && stat.wear_rate_source === 'measured' && stat.wear_rate_confidence < 0.5" class="text-xs text-slate-400">
       {{ $t('tires.measuredWear.lowConfidence') }}
     </p>
   </div>

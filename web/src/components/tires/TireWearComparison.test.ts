@@ -14,26 +14,39 @@ const render = (value: any) => renderToString(createSSRApp(TireWearComparison, {
 afterEach(() => { setLocale('fr'); setDistanceUnit('km') })
 
 describe('measured tire wear display', () => {
-  it('names the lifespans and the gap without changing the recorded depth', async () => {
+  it('puts the two lifespans side by side and the gap in a pill', async () => {
     setLocale('en')
     const html = await render(stat)
     expect(html).toContain('Measured vs expected wear')
-    expect(html).toContain('26,667 km')
-    expect(html).toContain('40,000 km')
-    expect(html).toContain('Lifespan 33.3% shorter than expected')
-    expect(html).toContain('text-warning-400')
+    expect(html).toContain('26,667')
+    expect(html).toContain('40,000')
+    expect(html).toContain('Lifespan −33%')
+    expect(html).toContain('border-warning-500/30')
   })
-  it('does not colour a gap while the measure is thin', async () => {
+  it('signs a longer lifespan and colours it green', async () => {
+    setLocale('en')
+    const html = await render({ ...stat, wear_comparison: { ...stat.wear_comparison, measured_lifespan_km: 60000, expected_lifespan_km: 40000, delta_pct: 50 } })
+    expect(html).toContain('Lifespan +50%')
+    expect(html).toContain('border-success-500/30')
+  })
+  it('says the rate is on target instead of a zero gap', async () => {
+    setLocale('en')
+    expect(await render({ ...stat, wear_comparison: { ...stat.wear_comparison, delta_pct: 0 } })).toContain('On the expected rate')
+  })
+  it('keeps the gap neutral and carries the caveat in its footnote while the measure is thin', async () => {
     setLocale('en')
     const html = await render({ ...stat, wear_rate_confidence: 0.3 })
-    expect(html).toContain('shorter than expected')
-    expect(html).not.toContain('text-warning-400')
+    expect(html).toContain('Lifespan −33%')
+    expect(html).toContain('Measure still thin')
+    expect(html).not.toContain('border-warning-500/30')
+    expect(await render(stat)).not.toContain('Measure still thin')
   })
   it('converts the lifespans to miles and translates the labels', async () => {
     setLocale('en'); setDistanceUnit('mi')
     const miles = await render(stat)
-    expect(miles).toContain('16,570 mi')
-    expect(miles).toContain('24,855 mi')
+    expect(miles).toContain('16,570')
+    expect(miles).toContain('24,855')
+    expect(miles).toContain('mi')
     setLocale('fr'); setDistanceUnit('km')
     expect(await render(stat)).toContain('Usure mesurée et attendue')
   })

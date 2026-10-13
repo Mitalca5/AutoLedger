@@ -369,11 +369,12 @@
   },
   "wearComparison": {
     "title": "Usure mesurée et attendue",
-    "lifespans": "Durée de vie au rythme mesuré : {measured} · attendue : {expected}",
-    "shorter": "Durée de vie {pct} plus courte que prévu",
-    "longer": "Durée de vie {pct} plus longue que prévu",
-    "same": "L'usure correspond au rythme attendu",
-    "declared": "Référence : la durée de vie que vous avez saisie.",
-    "average": "Référence : le rythme moyen d'usure de la bande de roulement."
+    "measured": "Mesurée",
+    "expected": "Attendue",
+    "lifespanGap": "Durée de vie {gap}",
+    "same": "Conforme à l'attendu",
+    "declared": "Référence : la durée saisie.",
+    "average": "Référence : l'usure moyenne.",
+    "thin": "Mesure encore faible : ajoutez un relevé."
   }
 }
