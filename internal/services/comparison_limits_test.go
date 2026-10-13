@@ -13,4 +13,8 @@ func TestComparisonPublishesStorageAndValidationLimits(t *testing.T) {
 	if result.InputLimits.FuelPriceMax != models.MaxFuelPricePerLiter || result.InputLimits.ElectricityPriceMax != money.MaxRate.Float() || result.InputLimits.AnnualKmMax != models.MaxComparisonAnnualKm {
 		t.Fatalf("result lost API limits: %+v", result.InputLimits)
 	}
+	l := result.InputLimits
+	if l.YearsMax != models.MaxComparisonYears || l.AmountMax != money.Max.Float() || l.InflationMin != models.MinComparisonInflationPct || l.InflationMax != models.MaxComparisonInflationPct {
+		t.Fatalf("result lost the limits of the period, amounts and inflation: %+v", l)
+	}
 }

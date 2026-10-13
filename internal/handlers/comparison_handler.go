@@ -68,7 +68,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 	if err := validateRange(req.AnnualKm, 1, models.MaxComparisonAnnualKm, apierror.Newf("comparison.annual_km", "Invalid yearly mileage (%.0f to %.0f km)", apierror.Km(1), apierror.Km(models.MaxComparisonAnnualKm))); err != nil {
 		return err
 	}
-	if req.Years < 1 || req.Years > 15 {
+	if req.Years < 1 || req.Years > models.MaxComparisonYears {
 		return apierror.New("comparison.years", "Invalid duration (1 to 15 years)")
 	}
 
@@ -87,7 +87,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 	}
 
 	for _, pct := range []float64{req.Options.FuelInflationPct, req.Options.ElectricityInflationPct, req.Options.CostInflationPct} {
-		if err := validateRange(pct, -10, 30, apierror.New("comparison.inflation", "Invalid inflation (−10 to 30%)")); err != nil {
+		if err := validateRange(pct, models.MinComparisonInflationPct, models.MaxComparisonInflationPct, apierror.New("comparison.inflation", "Invalid inflation (−10 to 30%)")); err != nil {
 			return err
 		}
 	}

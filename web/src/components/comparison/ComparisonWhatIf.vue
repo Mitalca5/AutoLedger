@@ -14,6 +14,7 @@ import { HIGH_PRICE_MULTIPLIER } from '@/utils/energyPriceWarning'
 import { breakEvenDelta, breakEvenReasonKey } from '@/utils/comparisonBreakEven'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import {
+  hasExtendedLimits,
   isWhatIfValid,
   whatIfBase,
   whatIfBounds,
@@ -24,6 +25,7 @@ import {
   type WhatIfInputs,
   type WhatIfInputLimits,
   type WhatIfKey,
+  type WhatIfSliderKey,
 } from '@/utils/comparisonWhatIf'
 import { RotateCcw, SlidersHorizontal } from 'lucide-vue-next'
 
@@ -80,21 +82,38 @@ function fmtYears(v: number | null): string {
 }
 
 const fields = computed(() => [
-  { key: 'annual_km' as WhatIfKey, id: 'wi-km', label: t('comparison.whatIf.annualKm', { unit: distanceUnit() }) },
-  { key: 'fuel_price' as WhatIfKey, id: 'wi-fuel', label: t('comparison.whatIf.fuelPrice') },
-  { key: 'eur_per_kwh' as WhatIfKey, id: 'wi-elec', label: t('comparison.whatIf.electricityPrice') },
+  { key: 'annual_km' as WhatIfSliderKey, id: 'wi-km', label: t('comparison.whatIf.annualKm', { unit: distanceUnit() }) },
+  { key: 'fuel_price' as WhatIfSliderKey, id: 'wi-fuel', label: t('comparison.whatIf.fuelPrice') },
+  { key: 'eur_per_kwh' as WhatIfSliderKey, id: 'wi-elec', label: t('comparison.whatIf.electricityPrice') },
 ])
 
-const originalHint = (key: WhatIfKey) => {
+// The inputs without a slider: shown once the result carries their limits, tracked-side ones only with an electric vehicle.
+const showMore = computed(() => hasExtendedLimits(limits.value))
+const moreFields = computed(() => {
+  const money = (key: WhatIfKey, label: string) => ({ key, id: `wi-${key}`, label, step: 1 })
+  const pct = (key: WhatIfKey, label: string) => ({ key, id: `wi-${key}`, label, step: 0.1 })
+  return [
+    { key: 'years' as WhatIfKey, id: 'wi-years', label: t('comparison.whatIf.years_field'), step: 1 },
+    money('ice_purchase_price', t('comparison.whatIf.icePurchasePrice')),
+    money('tracked_purchase_price', t('comparison.whatIf.trackedPurchasePrice')),
+    money('ice_resale_value', t('comparison.whatIf.iceResaleValue')),
+    money('tracked_resale_value', t('comparison.whatIf.trackedResaleValue')),
+    pct('fuel_inflation_pct', t('comparison.whatIf.fuelInflation')),
+    pct('electricity_inflation_pct', t('comparison.whatIf.electricityInflation')),
+    pct('cost_inflation_pct', t('comparison.whatIf.costInflation')),
+  ]
+})
+
+const originalHint = (key: WhatIfSliderKey) => {
   const v = base.value[key]
   return key === 'annual_km' ? `${formatDistanceValue(v)} ${distanceUnit()}` : v.toLocaleString(intlLocale(), { maximumFractionDigits: 3 })
 }
 
-function warningFor(key: WhatIfKey) {
+function warningFor(key: WhatIfSliderKey) {
   return key === 'fuel_price' ? fuelWarning : key === 'eur_per_kwh' ? electricityWarning : null
 }
 
-function historicalMedian(key: WhatIfKey): string {
+function historicalMedian(key: WhatIfSliderKey): string {
   const median = key === 'fuel_price' ? history.value?.fuel.median : history.value?.electricity.median
   return formatAmount(key === 'fuel_price' ? perVolume(median || 0) : median || 0, props.currency)
 }
@@ -167,6 +186,17 @@ const breakEvenReasonText = computed(() => {
         </div>
       </div>
     </div>
+
+    <details v-if="showMore" class="mt-4" data-testid="what-if-more">
+      <summary class="text-xs font-semibold text-slate-300 cursor-pointer">{{ $t('comparison.whatIf.more') }}</summary>
+      <div class="grid gap-3 sm:grid-cols-2 mt-3">
+        <div v-for="f in moreFields" :key="f.key">
+          <label :for="f.id" class="text-xs font-semibold text-slate-300">{{ f.label }}</label>
+          <NumberInput :id="f.id" v-model="explored[f.key]" :min="ranges[f.key].min" :max="ranges[f.key].max" :step="f.step" class="field" />
+          <div class="text-[11px] text-slate-500 mt-0.5">{{ $t('comparison.whatIf.original', { value: base[f.key].toLocaleString(intlLocale(), { maximumFractionDigits: 3 }) }) }}</div>
+        </div>
+      </div>
+    </details>
 
     <div class="overflow-x-auto mt-5" aria-live="polite" :aria-busy="loading">
       <table class="w-full text-sm">

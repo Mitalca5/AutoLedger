@@ -74,10 +74,23 @@ type ComparisonInputLimits struct {
 	AnnualKmMax         float64 `json:"annual_km_max"`
 	FuelPriceMax        float64 `json:"fuel_price_max"`
 	ElectricityPriceMax float64 `json:"electricity_price_max"`
+	YearsMax            int     `json:"years_max"`
+	AmountMax           float64 `json:"amount_max"`
+	InflationMin        float64 `json:"inflation_min"`
+	InflationMax        float64 `json:"inflation_max"`
 }
 
-const MaxComparisonAnnualKm = 200_000
+const (
+	MaxComparisonAnnualKm     = 200_000
+	MaxComparisonYears        = 15
+	MinComparisonInflationPct = -10.0
+	MaxComparisonInflationPct = 30.0
+)
 
 func ComparisonLimits() ComparisonInputLimits {
-	return ComparisonInputLimits{AnnualKmMax: MaxComparisonAnnualKm, FuelPriceMax: MaxFuelPricePerLiter, ElectricityPriceMax: money.MaxRate.Float()}
+	return ComparisonInputLimits{
+		AnnualKmMax: MaxComparisonAnnualKm, FuelPriceMax: MaxFuelPricePerLiter, ElectricityPriceMax: money.MaxRate.Float(),
+		YearsMax: MaxComparisonYears, AmountMax: money.Max.Float(),
+		InflationMin: MinComparisonInflationPct, InflationMax: MaxComparisonInflationPct,
+	}
 }
