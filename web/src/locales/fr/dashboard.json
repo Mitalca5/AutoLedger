@@ -264,7 +264,7 @@
     "fuel": "Carburant (pleins)",
     "energy": "Énergie (Charges)",
     "ofWhichEstimatedEnergy": "dont {amount} d'énergie estimée",
-    "energyPanelLink": "Coût aux 100 {unit} : efficacité énergétique",
+    "energyPanelLink": "Efficacité énergétique",
     "energyHybrid": "Énergie (charges + pleins)",
     "hybridSplit": "Électricité {electricity} · carburant {fuel}",
     "cashPaidWindow": "Décaissé · dernier mois | Décaissé · {months} derniers mois",
@@ -293,12 +293,12 @@
     "title": "Prochain entretien",
     "empty": "Aucune échéance planifiée",
     "create": "Créer un rappel",
-    "viewReminders": "Voir les rappels"
+    "viewReminders": "Voir les rappels",
+    "othersSoon": "+{count} autre à prévoir | +{count} autres à prévoir"
   },
   "urgentRemindersBanner": {
     "viewTheReminders": "Consulter les rappels",
-    "overdue": "Entretien(s) en retard",
-    "dueSoon": "Entretien(s) à prévoir prochainement"
+    "overdue": "Entretien(s) en retard"
   },
   "donut": {
     "energy": "Énergie",

@@ -7,10 +7,12 @@ import { hasReminderSchedule, reminderDaysLabel } from '@/utils/expenses'
 import { distanceUnit, formatDistanceValue } from '@/units'
 
 // The maintenance that comes due next; overdue ones are left to the urgent banner, so the card hides when only those remain.
+// The other reminders already due soon are counted, not listed.
 const props = defineProps<{ reminders: MaintenanceReminder[]; canEdit: boolean }>()
 const next = computed(() => nextDueReminder(props.reminders))
 const hasSchedule = computed(() => props.reminders.some(hasReminderSchedule))
 const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
+const othersSoon = computed(() => props.reminders.filter((r) => r.status === 'DUE_SOON' && r !== next.value?.reminder).length)
 </script>
 
 <template>
@@ -40,6 +42,7 @@ const soon = computed(() => next.value?.reminder.status === 'DUE_SOON')
           <span v-if="next.reminder.remaining_days != null" class="text-xs font-semibold text-slate-300">
             {{ reminderDaysLabel({ remaining_days: next.reminder.remaining_days, scheduled_date: next.reminder.scheduled_date }) }}
           </span>
+          <span v-if="othersSoon > 0" class="text-xs text-slate-400">{{ $t('dashboard.nextDueCard.othersSoon', { count: othersSoon }, othersSoon) }}</span>
         </div>
         <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(next.progress * 100)" aria-valuemin="0" aria-valuemax="100">
           <div class="h-full rounded-full transition-all" :class="soon ? 'bg-warning-400' : 'bg-sky-500'" :style="{ width: `${Math.round(next.progress * 100)}%` }"></div>

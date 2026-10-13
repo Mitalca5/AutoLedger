@@ -43,53 +43,53 @@ const costPerKm = computed(() => (rolling.value ? rolling.value.economicPerKm : 
   <section class="space-y-3">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <!-- Economic cost per km -->
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex flex-col bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <div class="flex min-h-8 items-start justify-between gap-2 mb-2">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             {{ rolling ? $t('dashboard.tcoMetricsGrid.economicPerKmWindow', { unit: distanceUnit(), months: rolling.months }, rolling.months) : $t('dashboard.tcoMetricsGrid.fullCostPerKm', { unit: distanceUnit() }) }}
             <GlossaryTip term="economicCost" />
           </span>
-          <TrendingUp class="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-success-500/15 text-success-400"><TrendingUp class="w-4 h-4" aria-hidden="true" /></span>
         </div>
-        <div class="text-2xl font-extrabold text-white">
-          {{ perUnit(costPerKm) }}<span class="text-sm font-normal text-slate-400">/{{ distanceUnit() }}</span>
+        <div class="text-3xl font-extrabold text-success-400">
+          {{ perUnit(costPerKm) }}<span class="text-sm font-normal text-slate-300">/{{ distanceUnit() }}</span>
         </div>
         <p v-if="tco && tco.depreciation_known === false" class="mt-2 text-xs font-medium text-warning-400">
           {{ $t('dashboard.tcoMetricsGrid.depreciationMissing') }}
           <router-link to="/vehicles" class="underline">{{ $t('dashboard.tcoMetricsGrid.depreciationMissingAction') }}</router-link>
         </p>
-        <p v-else-if="rolling && tco?.full_cost_per_km" class="mt-2 text-xs text-slate-400">
+        <p v-else-if="rolling && tco?.full_cost_per_km" class="mt-2 text-xs text-slate-300">
           {{ $t('dashboard.tcoMetricsGrid.sincePurchasePerKm', { amount: perUnit(tco.full_cost_per_km), unit: distanceUnit() }) }}
         </p>
       </div>
 
       <!-- Cash paid -->
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex flex-col bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <div class="flex min-h-8 items-start justify-between gap-2 mb-2">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             {{ rolling ? $t('dashboard.tcoMetricsGrid.cashPaidWindow', { months: rolling.months }, rolling.months) : $t('dashboard.tcoMetricsGrid.totalCost') }}
             <GlossaryTip term="cashPaid" />
           </span>
-          <Coins class="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400"><Coins class="w-4 h-4" aria-hidden="true" /></span>
         </div>
         <div class="text-2xl font-extrabold text-white">{{ headline(rolling ? rolling.cash : tco?.total_cost) }}</div>
-        <p v-if="rolling && (rolling.estimatedEnergy || tco?.estimated_energy_cost)" class="mt-2 text-xs text-slate-400">
+        <p v-if="rolling && (rolling.estimatedEnergy || tco?.estimated_energy_cost)" class="mt-2 text-xs text-slate-300">
           {{ $t('dashboard.tcoMetricsGrid.ofWhichEstimatedEnergy', { amount: money(rolling.estimatedEnergy, 0) }) }}
           <GlossaryTip term="estimatedEnergy" />
         </p>
-        <p v-else-if="tco?.estimated_energy_cost" class="mt-2 text-xs text-slate-400">
+        <p v-else-if="tco?.estimated_energy_cost" class="mt-2 text-xs text-slate-300">
           {{ $t('dashboard.tcoMetricsGrid.ofWhichEstimatedEnergy', { amount: money(tco.estimated_energy_cost, 0) }) }}
           <GlossaryTip term="estimatedEnergy" />
         </p>
       </div>
 
       <!-- Current month -->
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex flex-col bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <div class="flex min-h-8 items-start justify-between gap-2 mb-2">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             {{ month ? $t('dashboard.tcoMetricsGrid.currentMonth', { month: formatMonthName(month.month) }) : $t('dashboard.tcoMetricsGrid.currentMonthShort') }}
           </span>
-          <Calendar class="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-400"><Calendar class="w-4 h-4" aria-hidden="true" /></span>
         </div>
         <template v-if="month">
           <div class="text-2xl font-extrabold text-white">{{ headline(month.total - month.scheduled) }}</div>
@@ -97,11 +97,11 @@ const costPerKm = computed(() => (rolling.value ? rolling.value.economicPerKm : 
           <p v-if="month.scheduled > 0" class="mt-0.5 text-xs text-slate-300">
             {{ $t('dashboard.tcoMetricsGrid.alreadyScheduled', { amount: money(month.scheduled) }) }}
           </p>
-          <p class="mt-2 text-xs text-slate-400">
+          <p class="mt-2 text-xs text-slate-300">
             {{ $t('dashboard.tcoMetricsGrid.monthDistance', { unit: distanceUnit(), distance_km: formatDistanceValue(month.distance_km) }) }}
             · {{ formatCostPerDistance(month.cost_per_km, vehicleStore.currency, 3, true) }}
           </p>
-          <button type="button" class="tap-text mt-1 text-xs font-semibold text-sky-400 underline" @click="emit('open-month', month.raw)">
+          <button type="button" class="tap-text mt-auto self-start pt-1 text-xs font-semibold text-sky-400 underline" @click="emit('open-month', month.raw)">
             {{ $t('dashboard.tcoMetricsGrid.viewTheBreakdown') }}
           </button>
         </template>
@@ -109,21 +109,21 @@ const costPerKm = computed(() => (rolling.value ? rolling.value.economicPerKm : 
       </div>
 
       <!-- Energy -->
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-        <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex flex-col bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
+        <div class="flex min-h-8 items-start justify-between gap-2 mb-2">
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ energyLabel }}</span>
-          <Zap class="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-400"><Zap class="w-4 h-4" aria-hidden="true" /></span>
         </div>
-        <div class="text-2xl font-extrabold text-white">{{ headline(tco?.energy_cost) }}</div>
-        <p class="mt-2 text-xs text-slate-400">{{ perUnit(tco?.energy_cost_per_km) }}/{{ distanceUnit() }}</p>
-        <button v-if="canCharge(tco?.powertrain)" type="button" class="tap-text mt-1 text-xs font-semibold text-sky-400 underline" @click="showEnergyPanel">
-          {{ $t('dashboard.tcoMetricsGrid.energyPanelLink', { unit: distanceUnit() }) }}
+        <div class="text-2xl font-extrabold text-sky-400">{{ headline(tco?.energy_cost) }}</div>
+        <p class="mt-2 text-xs text-slate-300">{{ perUnit(tco?.energy_cost_per_km) }}/{{ distanceUnit() }}</p>
+        <button v-if="canCharge(tco?.powertrain)" type="button" class="tap-text mt-auto self-start pt-1 text-xs font-semibold text-sky-400 underline" @click="showEnergyPanel">
+          {{ $t('dashboard.tcoMetricsGrid.energyPanelLink') }}
         </button>
       </div>
     </div>
 
     <details class="rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs text-slate-300 group">
-      <summary class="tap flex cursor-pointer list-none items-center justify-between gap-2 font-semibold text-slate-300">
+      <summary class="flex cursor-pointer list-none items-center justify-between gap-2 font-semibold text-slate-300">
         {{ $t('dashboard.tcoMetricsGrid.details') }}
         <ChevronDown class="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
       </summary>

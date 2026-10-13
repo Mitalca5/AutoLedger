@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
     class="group scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm"
     aria-labelledby="energy-efficiency-title"
   >
-    <component :is="summary ? 'summary' : 'div'" class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center" :class="summary ? 'tap cursor-pointer list-none' : ''">
+    <component :is="summary ? 'summary' : 'div'" class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center" :class="summary ? 'cursor-pointer list-none' : ''">
       <div>
         <h3 id="energy-efficiency-title" class="flex items-center gap-2 text-sm font-bold text-white">
           <Gauge class="h-4 w-4 text-info-400" aria-hidden="true" />

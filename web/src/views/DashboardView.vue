@@ -112,7 +112,7 @@ onMounted(() => {
     </div>
 
     <!-- SKELETON LOADING STATE -->
-    <div v-else-if="loading" class="space-y-6 animate-pulse">
+    <div v-else-if="loading" class="space-y-6 animate-pulse motion-reduce:animate-none">
       <!-- 4 KPI Card Skeletons -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div v-for="i in 4" :key="i" class="bg-slate-900 border border-slate-800 p-5 rounded-2xl h-32 flex flex-col justify-between">
@@ -162,13 +162,13 @@ onMounted(() => {
     <div v-else class="space-y-4 sm:space-y-6">
       <UrgentRemindersBanner :reminders="dashboardReminders" />
 
-      <!-- What can be trusted and what is missing, before the figures -->
+      <TcoMetricsGrid :tco="tco" @open-month="openMonthDetail" />
+
+      <!-- What can be trusted and what is missing, under the figures -->
       <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount">
         <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
         <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
       </DashboardFollowUp>
-
-      <TcoMetricsGrid :tco="tco" @open-month="openMonthDetail" />
 
       <!-- Energy summary: consumption and real cost per 100 km (electric vehicles); the detail is on the energy page -->
       <EnergyEfficiencyPanel

@@ -116,7 +116,7 @@ const sourceLabel = computed(() => (health.value?.source ? t(`dashboard.residual
 
 <template>
   <details class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs" :open="isOpen" @toggle="onToggle">
-    <summary class="tap flex cursor-pointer items-center justify-between gap-2 font-bold text-white">
+    <summary class="flex cursor-pointer items-center justify-between gap-2 font-bold text-white">
       <span>{{ $t('dashboard.residualPanel.title') }}</span>
       <span v-if="!isOpen" class="rounded-full border border-slate-700 bg-slate-800 px-2.5 py-0.5 text-[11px] font-semibold text-slate-300">{{ hasContent ? $t('dashboard.residualPanel.show') : $t('dashboard.residualPanel.configure') }}</span>
     </summary>

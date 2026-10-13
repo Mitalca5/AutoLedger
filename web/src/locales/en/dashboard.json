@@ -264,7 +264,7 @@
     "fuel": "Fuel (fill-ups)",
     "energy": "Energy (charges)",
     "ofWhichEstimatedEnergy": "of which {amount} estimated energy",
-    "energyPanelLink": "Cost per 100 {unit}: energy efficiency",
+    "energyPanelLink": "Energy efficiency",
     "energyHybrid": "Energy (charges + fill-ups)",
     "hybridSplit": "Electricity {electricity} · fuel {fuel}",
     "cashPaidWindow": "Cash paid · last month | Cash paid · last {months} months",
@@ -293,12 +293,12 @@
     "title": "Next maintenance",
     "empty": "No upcoming maintenance scheduled",
     "create": "Create a reminder",
-    "viewReminders": "View reminders"
+    "viewReminders": "View reminders",
+    "othersSoon": "+{count} other due soon | +{count} others due soon"
   },
   "urgentRemindersBanner": {
     "viewTheReminders": "View the reminders",
-    "overdue": "Overdue maintenance",
-    "dueSoon": "Maintenance due soon"
+    "overdue": "Overdue maintenance"
   },
   "donut": {
     "energy": "Energy",

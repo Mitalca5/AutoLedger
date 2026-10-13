@@ -18,10 +18,10 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
 <template>
   <details
     v-if="leaseContract"
-    class="group bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm space-y-4"
+    class="group bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm open:space-y-4"
   >
     <!-- Card Header: the contract state stays visible when the details are closed -->
-    <summary class="tap flex cursor-pointer list-none flex-col sm:flex-row sm:items-center justify-between gap-3 group-open:pb-3 group-open:border-b border-slate-800/80">
+    <summary class="flex cursor-pointer list-none flex-col sm:flex-row sm:items-center justify-between gap-3 group-open:pb-3 group-open:border-b border-slate-800/80">
       <div class="flex items-center gap-2.5 flex-wrap">
         <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
           <FileText class="w-3.5 h-3.5" />
@@ -35,17 +35,19 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
         </span>
       </div>
 
-      <!-- Monthly rent / downpayment -->
-      <div v-if="leaseContract.monthlyRent" class="self-start sm:self-auto text-left sm:text-right">
-        <span class="text-base sm:text-lg font-extrabold text-white">
-          {{ formatAmount(Number(leaseContract.monthlyRent), currency) }}
-        </span>
-        <span class="text-xs text-slate-400 font-normal"> {{ $t('dashboard.leaseContractCard.month') }}</span>
-        <span v-if="leaseContract.downPayment && leaseContract.downPayment > 0" class="block text-xs text-slate-400">
-          {{ $t('dashboard.leaseContractCard.downPayment', { downPayment: formatAmount(Number(leaseContract.downPayment), currency, 0) }) }}
-        </span>
+      <!-- Monthly rent / downpayment, with the disclosure chevron at the end of the row -->
+      <div class="flex items-center gap-3 sm:ml-auto">
+        <div v-if="leaseContract.monthlyRent" class="text-left sm:text-right">
+          <span class="text-base sm:text-lg font-extrabold text-white">
+            {{ formatAmount(Number(leaseContract.monthlyRent), currency) }}
+          </span>
+          <span class="text-xs text-slate-300 font-normal"> {{ $t('dashboard.leaseContractCard.month') }}</span>
+          <span v-if="leaseContract.downPayment && leaseContract.downPayment > 0" class="block text-xs text-slate-300">
+            {{ $t('dashboard.leaseContractCard.downPayment', { downPayment: formatAmount(Number(leaseContract.downPayment), currency, 0) }) }}
+          </span>
+        </div>
+        <ChevronDown class="hidden sm:block h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
       </div>
-      <ChevronDown class="hidden sm:block h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
     </summary>
 
     <!-- Progress Bars Section: 1 col on mobile, 2 cols on desktop if mileage allowance configured -->
