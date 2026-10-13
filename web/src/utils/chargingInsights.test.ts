@@ -3,12 +3,14 @@ import {
   OUTSIDE_COLOR,
   UNCLASSIFIED_COLOR,
   donutItems,
+  estimatedSeries,
   groupColors,
   groupLabel,
   monthlyDatasets,
   monthlyPrices,
   placeCategoryRows,
   savingsView,
+  totalsWithEstimate,
   unclassifiedShare,
   type HomeSavings,
   type PlaceStats,
@@ -142,5 +144,34 @@ describe('placeCategoryRows', () => {
 
   it('is empty without energy', () => {
     expect(placeCategoryRows({ ...stats, groups: [] })).toEqual([])
+  })
+})
+
+describe('estimated energy before tracking', () => {
+  const withEstimate = (): PlaceStats => {
+    const s = stats([group({})])
+    s.summary.estimated_km = 400
+    s.summary.estimated_kwh = 64
+    s.summary.estimated_cost = 16
+    s.series[0].estimated_kwh = 40
+    s.series[0].estimated_cost = 10
+    return s
+  }
+
+  it('adds the estimate to the recorded totals without altering them', () => {
+    const s = withEstimate()
+    expect(totalsWithEstimate(s.summary)).toEqual({ kwh: 214, cost: 46, estimatedKwh: 64, estimatedCost: 16, estimatedKm: 400 })
+    expect(s.summary.kwh_added).toBe(150)
+  })
+
+  it('keeps the totals recorded when the backend reports no estimate', () => {
+    expect(totalsWithEstimate(stats([]).summary)).toEqual({ kwh: 150, cost: 30, estimatedKwh: 0, estimatedCost: 0, estimatedKm: 0 })
+  })
+
+  it('gives one value per month, in kWh or cost, and nothing without an estimate', () => {
+    const s = withEstimate()
+    expect(estimatedSeries(s, 'energy')).toEqual([40, 0])
+    expect(estimatedSeries(s, 'cost')).toEqual([10, 0])
+    expect(estimatedSeries(stats([]), 'energy')).toBeNull()
   })
 })

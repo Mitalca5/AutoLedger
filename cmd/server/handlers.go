@@ -87,6 +87,10 @@ func newAPIHandlers(cfg *config.Config, repo *database.Repository, encryptor *cr
 	}
 	migrateLegacyDocuments(repo, storageService)
 
+	reportingLocation, err := time.LoadLocation(cfg.ReportingTimezone)
+	if err != nil {
+		reportingLocation = time.UTC
+	}
 	mileageService := services.NewMileageService(repo, cfg.ReportingTimezone)
 	tariffService := services.NewTariffServiceIn(cfg.ReportingTimezone)
 
@@ -98,7 +102,7 @@ func newAPIHandlers(cfg *config.Config, repo *database.Repository, encryptor *cr
 		expense:        handlers.NewExpenseHandler(repo, storageService),
 		chargingPlace:  handlers.NewChargingPlaceHandler(repo),
 		tco:            handlers.NewTCOHandler(repo, svc.tco),
-		energy:         handlers.NewEnergyHandler(repo, svc.energyStats),
+		energy:         handlers.NewEnergyHandler(repo, svc.energyStats, svc.tco, reportingLocation),
 		comparison:     handlers.NewComparisonHandler(repo, svc.comparison),
 		carpool:        handlers.NewCarpoolHandler(repo, svc.carpool),
 		checkpoint:     handlers.NewCheckpointHandler(repo),

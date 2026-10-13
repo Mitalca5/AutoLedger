@@ -252,3 +252,61 @@ func TestPlacePeriodBounds(t *testing.T) {
 		}
 	}
 }
+
+func TestEstimateEnergyMonthsPricesTheDistanceLikeTheTCO(t *testing.T) {
+	got := estimateEnergyMonths(map[string]float64{"2024-03": 400.04, "2024-01": 250, "2024-02": 0}, 16, 0.25)
+	if len(got) != 2 || got[0].Month != "2024-01" || got[1].Month != "2024-03" {
+		t.Fatalf("months = %+v, want 2024-01 and 2024-03 only, oldest first", got)
+	}
+	if got[0].KwhAdded != 40 || got[0].Cost != 1000 {
+		t.Fatalf("2024-01 = %+v, want 40 kWh and 10.00", got[0])
+	}
+	if got[1].Km != 400 || got[1].KwhAdded != 64 || got[1].Cost != 1600 {
+		t.Fatalf("2024-03 = %+v, want 400 km, 64 kWh and 16.00", got[1])
+	}
+}
+
+func TestAddEstimatedEnergyKeepsTheEstimateApartFromRecordedSessions(t *testing.T) {
+	loc := time.UTC
+	now := time.Date(2024, 6, 15, 12, 0, 0, 0, loc)
+	estimates := []EstimatedEnergyMonth{
+		{Month: "2024-01", Km: 250, KwhAdded: 40, Cost: 1000},
+		{Month: "2024-04", Km: 100, KwhAdded: 16, Cost: 400},
+		{Month: "2024-05", Km: 50, KwhAdded: 8, Cost: 200},
+	}
+	build := func(period PlacePeriod) *ChargingPlaceStats {
+		s := buildPlaceStats([]placeRow{{Month: "2024-05", Key: "", Sessions: 1, KwhAdded: 30, Cost: 900, PricedKwh: 30}}, period)
+		s.AddEstimatedEnergy(estimates, period, loc, now)
+		return s
+	}
+
+	all := build(PlacePeriod{})
+	if all.Summary.EstimatedKwh != 64 || all.Summary.EstimatedCost != 1600 || all.Summary.EstimatedKm != 400 {
+		t.Fatalf("whole history summary = %+v, want 64 kWh, 16.00 and 400 km estimated", all.Summary)
+	}
+	if all.Summary.KwhAdded != 30 || all.Summary.Cost != 900 {
+		t.Fatalf("recorded figures changed: %+v", all.Summary)
+	}
+	if len(all.Series) != 3 || all.Series[0].Month != "2024-01" || all.Series[0].KwhAdded != 0 || all.Series[0].EstimatedKwh != 40 {
+		t.Fatalf("series = %+v, want an estimate-only month 2024-01 first", all.Series)
+	}
+	if all.Series[2].KwhAdded != 30 || all.Series[2].EstimatedKwh != 8 {
+		t.Fatalf("2024-05 = %+v, want the recorded and the estimated energy side by side", all.Series[2])
+	}
+
+	// Three months back from June is April: January falls out of the period
+	recent := build(PlacePeriod{Months: 3})
+	if recent.Summary.EstimatedKwh != 24 || len(recent.Series) != 2 {
+		t.Fatalf("3 months = %+v / %+v, want April and May only", recent.Summary, recent.Series)
+	}
+
+	// A range of days takes only the months it covers entirely
+	partial := build(PlacePeriod{From: "2024-04-10", To: "2024-05-31"})
+	if partial.Summary.EstimatedKwh != 8 {
+		t.Fatalf("partial April: estimated = %v, want 8 (May only)", partial.Summary.EstimatedKwh)
+	}
+	full := build(PlacePeriod{From: "2024-04-01", To: "2024-05-31"})
+	if full.Summary.EstimatedKwh != 24 {
+		t.Fatalf("full April and May: estimated = %v, want 24", full.Summary.EstimatedKwh)
+	}
+}

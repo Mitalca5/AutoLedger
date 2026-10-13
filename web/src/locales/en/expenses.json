@@ -494,6 +494,9 @@
     "noteZero": "{count} session without energy is not counted. | {count} sessions without energy are not counted.",
     "basis": "The price is the recorded cost over the energy of the sessions whose cost is known; free sessions count as zero.",
     "monthlyCost": "Spend per month ({cur})",
+    "estimated": "Estimated before tracking",
+    "estimatedPart": "of which {kwh} kWh estimated over {distance} driven before tracking",
+    "estimatedCost": "of which {amount} estimated before tracking",
     "emptyPeriod": "No charge in this period."
   }
 }

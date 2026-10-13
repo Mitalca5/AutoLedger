@@ -44,6 +44,10 @@ type PlaceMonth struct {
 	PricedKwh   float64           `json:"priced_kwh"`
 	PricePerKwh *float64          `json:"price_per_kwh"`
 	Groups      []PlaceMonthGroup `json:"groups"`
+	// EstimatedKwh and EstimatedCost are the energy of the distance driven before tracking started, priced at the
+	// vehicle's own average; they are in none of the figures above.
+	EstimatedKwh  float64     `json:"estimated_kwh,omitempty"`
+	EstimatedCost money.Cents `json:"estimated_cost,omitempty"`
 }
 
 // Reasons the home substitution cannot be estimated.
@@ -80,6 +84,11 @@ type PlaceStatsSummary struct {
 	UnknownKwh      float64     `json:"unknown_kwh"`
 	// ZeroKwhSessions are sessions that recorded no energy; they are in none of the counts above.
 	ZeroKwhSessions int `json:"zero_kwh_sessions"`
+	// The energy of the distance driven before tracking started, estimated like the TCO does and kept apart from
+	// the recorded sessions: it has no session, no place and no known price.
+	EstimatedKm   float64     `json:"estimated_km,omitempty"`
+	EstimatedKwh  float64     `json:"estimated_kwh,omitempty"`
+	EstimatedCost money.Cents `json:"estimated_cost,omitempty"`
 }
 
 // PlacePeriod is the period of the statistics: the current and the previous Months months (0 = the whole history),
@@ -319,4 +328,46 @@ func (s *EnergyStatsService) PlaceStats(ctx context.Context, vehicleID, ownerID 
 // EmptyPlaceStats is the answer for a vehicle that cannot charge.
 func EmptyPlaceStats(period PlacePeriod) *ChargingPlaceStats {
 	return buildPlaceStats(nil, period)
+}
+
+// AddEstimatedEnergy folds the estimated pre-tracking energy of the months inside the period into the summary and the
+// monthly series, so the totals match the TCO. A custom range of days only takes the months it covers entirely: the
+// estimate is monthly and cannot be split by day.
+func (p *ChargingPlaceStats) AddEstimatedEnergy(estimates []EstimatedEnergyMonth, period PlacePeriod, loc *time.Location, now time.Time) {
+	since, until, err := period.bounds(loc, now)
+	if err != nil {
+		return
+	}
+	index := make(map[string]int, len(p.Series))
+	for i, m := range p.Series {
+		index[m.Month] = i
+	}
+	custom := period.From != "" || period.To != ""
+	for _, e := range estimates {
+		first, err := time.ParseInLocation("2006-01", e.Month, loc)
+		if err != nil {
+			continue
+		}
+		switch {
+		case since != nil && !custom && first.Before(*since):
+			continue
+		case custom && (first.Before(*since) || models.AddCalendarMonths(first, 1).After(*until)):
+			continue
+		}
+		s := &p.Summary
+		s.EstimatedKm += e.Km
+		s.EstimatedKwh += e.KwhAdded
+		s.EstimatedCost += e.Cost
+		i, ok := index[e.Month]
+		if !ok {
+			p.Series = append(p.Series, PlaceMonth{Month: e.Month, Groups: []PlaceMonthGroup{}})
+			i = len(p.Series) - 1
+			index[e.Month] = i
+		}
+		p.Series[i].EstimatedKwh += e.KwhAdded
+		p.Series[i].EstimatedCost += e.Cost
+	}
+	p.Summary.EstimatedKm = round1(p.Summary.EstimatedKm)
+	p.Summary.EstimatedKwh = round1(p.Summary.EstimatedKwh)
+	sort.Slice(p.Series, func(i, j int) bool { return p.Series[i].Month < p.Series[j].Month })
 }

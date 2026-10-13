@@ -7,13 +7,16 @@ import { api } from '@/services/api'
 import { currencySymbol, formatAmount } from '@/currency'
 import { intlLocale, t } from '@/i18n'
 import { formatNumber, formatPercent } from '@/utils/numbers'
+import { formatDistance } from '@/units'
 import {
   donutItems,
+  estimatedSeries,
   groupColors,
   groupLabel,
   monthlyDatasets,
   monthlyPrices,
   savingsView,
+  totalsWithEstimate,
   unclassifiedShare,
   OUTSIDE_CATEGORY,
   type BreakdownMode,
@@ -32,6 +35,7 @@ const emit = defineEmits<{ 'manage-places': [] }>()
 
 const AXIS_TEXT = '#94a3b8'
 const GRID_COLOR = '#1e293b'
+const ESTIMATED_COLOR = '#475569'
 
 // The last month by default, like the dashboard's presets; a custom range is two days picked on a calendar
 const range = ref<MonthlyRangeKey>('1M')
@@ -71,7 +75,8 @@ const outsideLabel = computed(() => t(placeCategoryKey('OUTSIDE')))
 const colors = computed(() => groupColors(stats.value?.groups ?? []))
 const savings = computed(() => (stats.value ? savingsView(stats.value.home_savings) : null))
 const visible = computed(() => props.hasCharges && !!stats.value)
-const empty = computed(() => !!stats.value && stats.value.summary.sessions === 0)
+const totals = computed(() => (stats.value ? totalsWithEstimate(stats.value.summary) : null))
+const empty = computed(() => !!stats.value && stats.value.summary.sessions === 0 && (totals.value?.estimatedKwh ?? 0) === 0)
 // A place named like its category would read twice ("Home · Home")
 const showCategory = (g: { name?: string; category?: string }) => !!g.category && g.category !== OUTSIDE_CATEGORY && (g.name ?? '').trim().toLowerCase() !== t(placeCategoryKey(g.category)).toLowerCase()
 const share = computed(() => (stats.value ? unclassifiedShare(stats.value) : 0))
@@ -82,6 +87,12 @@ const energyRef = ref<HTMLCanvasElement | null>(null)
 const priceRef = ref<HTMLCanvasElement | null>(null)
 let energyChart: Chart | null = null
 let priceChart: Chart | null = null
+
+// The energy of the distance driven before tracking started: the same bar the dashboard counts, in a muted tone
+function estimatedDatasets(s: PlaceStats) {
+  const data = estimatedSeries(s, mode.value)
+  return data ? [{ label: t('expenses.chargingInsights.estimated'), data, backgroundColor: ESTIMATED_COLOR, stack: 'stack' }] : []
+}
 
 function draw() {
   energyChart?.destroy()
@@ -95,7 +106,10 @@ function draw() {
       type: 'bar',
       data: {
         labels,
-        datasets: monthlyDatasets(s, colors.value, unclassifiedLabel.value, mode.value, outsideLabel.value).map((d) => ({ label: d.label, data: d.data, backgroundColor: d.color, stack: 'stack' })),
+        datasets: [
+          ...monthlyDatasets(s, colors.value, unclassifiedLabel.value, mode.value, outsideLabel.value).map((d) => ({ label: d.label, data: d.data, backgroundColor: d.color, stack: 'stack' })),
+          ...estimatedDatasets(s),
+        ],
       },
       options: {
         responsive: true,
@@ -181,12 +195,14 @@ onBeforeUnmount(() => {
     <dl class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 items-start">
       <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
         <dt class="text-xs text-slate-400">{{ $t('expenses.chargingInsights.energy') }}</dt>
-        <dd class="text-lg font-extrabold text-white">{{ $t('expenses.chargingInsights.kwh', { value: formatNumber(stats.summary.kwh_added, 0) }) }}</dd>
+        <dd class="text-lg font-extrabold text-white">{{ $t('expenses.chargingInsights.kwh', { value: formatNumber(totals?.kwh ?? 0, 0) }) }}</dd>
         <dd class="text-xs text-slate-400">{{ $t('expenses.chargingInsights.sessionsCount', { count: stats.summary.sessions }, stats.summary.sessions) }}</dd>
+        <dd v-if="totals && totals.estimatedKwh > 0" class="text-xs text-slate-400">{{ $t('expenses.chargingInsights.estimatedPart', { kwh: formatNumber(totals.estimatedKwh, 0), distance: formatDistance(totals.estimatedKm) }) }}</dd>
       </div>
       <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
         <dt class="text-xs text-slate-400">{{ $t('expenses.chargingInsights.spent') }}</dt>
-        <dd class="text-lg font-extrabold text-white">{{ formatAmount(stats.summary.cost, currency) }}</dd>
+        <dd class="text-lg font-extrabold text-white">{{ formatAmount(totals?.cost ?? 0, currency) }}</dd>
+        <dd v-if="totals && totals.estimatedCost > 0" class="text-xs text-slate-400">{{ $t('expenses.chargingInsights.estimatedCost', { amount: formatAmount(totals.estimatedCost, currency) }) }}</dd>
         <dd v-if="stats.summary.unknown_sessions" class="text-xs text-warning-400">{{ $t('expenses.chargingInsights.unknownCost', { count: stats.summary.unknown_sessions, kwh: formatNumber(stats.summary.unknown_kwh, 0) }) }}</dd>
       </div>
       <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">

@@ -21,6 +21,9 @@ export interface PlaceStatsMonth {
   priced_kwh: number
   price_per_kwh: number | null
   groups: { key: string; kwh_added: number; cost: number; priced_kwh: number }[]
+  /** Energy of the distance driven before tracking started, kept apart from the recorded sessions. */
+  estimated_kwh?: number
+  estimated_cost?: number
 }
 
 export interface HomeSavings {
@@ -47,6 +50,9 @@ export interface PlaceStats {
     unknown_sessions: number
     unknown_kwh: number
     zero_kwh_sessions: number
+    estimated_km?: number
+    estimated_kwh?: number
+    estimated_cost?: number
   }
   groups: PlaceStatsGroup[]
   series: PlaceStatsMonth[]
@@ -95,6 +101,25 @@ export function groupLabel(g: PlaceStatsGroup, unclassified: string, outside = '
 }
 
 export type BreakdownMode = 'energy' | 'cost'
+
+/** Recorded sessions plus the energy estimated before tracking started: the totals the dashboard shows. */
+export function totalsWithEstimate(summary: PlaceStats['summary']) {
+  const estimatedKwh = summary.estimated_kwh ?? 0
+  const estimatedCost = summary.estimated_cost ?? 0
+  return {
+    kwh: summary.kwh_added + estimatedKwh,
+    cost: summary.cost + estimatedCost,
+    estimatedKwh,
+    estimatedCost,
+    estimatedKm: summary.estimated_km ?? 0,
+  }
+}
+
+/** The monthly series of the estimated energy (kWh or cost), null when no month carries one. */
+export function estimatedSeries(stats: PlaceStats, mode: BreakdownMode): number[] | null {
+  const values = stats.series.map((m) => (mode === 'energy' ? m.estimated_kwh : m.estimated_cost) ?? 0)
+  return values.some((v) => v > 0) ? values : null
+}
 
 /** Donut items of the groups by energy (kWh) or by recorded cost. */
 export function donutItems(groups: PlaceStatsGroup[], mode: BreakdownMode, colors: Record<string, string>, unclassified: string, outside = '') {

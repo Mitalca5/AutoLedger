@@ -17,10 +17,17 @@ import (
 type EnergyHandler struct {
 	repo    *database.Repository
 	service *services.EnergyStatsService
+	tco     *services.TCOService
+	loc     *time.Location
 }
 
-func NewEnergyHandler(repo *database.Repository, service *services.EnergyStatsService) *EnergyHandler {
-	return &EnergyHandler{repo: repo, service: service}
+// NewEnergyHandler needs the TCO service for the energy estimated before tracking started, which the charging
+// statistics report next to the recorded sessions.
+func NewEnergyHandler(repo *database.Repository, service *services.EnergyStatsService, tco *services.TCOService, loc *time.Location) *EnergyHandler {
+	if loc == nil {
+		loc = time.UTC
+	}
+	return &EnergyHandler{repo: repo, service: service, tco: tco, loc: loc}
 }
 
 // GetStats returns the consumption, charge cost and charging habits of an electric vehicle.
@@ -78,7 +85,8 @@ func (h *EnergyHandler) GetPlaceStats(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, services.EmptyPlaceStats(period))
 		return
 	}
-	stats, err := h.service.PlaceStats(r.Context(), vehicleID, vehicle.UserID, period, time.Now())
+	now := time.Now()
+	stats, err := h.service.PlaceStats(r.Context(), vehicleID, vehicle.UserID, period, now)
 	if errors.Is(err, services.ErrInvalidPlacePeriod) {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_date_range", "from and to must be two days (YYYY-MM-DD), from not after to"))
 		return
@@ -87,5 +95,11 @@ func (h *EnergyHandler) GetPlaceStats(w http.ResponseWriter, r *http.Request) {
 		writeRepoError(w, r, err, "Failed to compute charging statistics")
 		return
 	}
+	estimates, err := h.tco.EstimatedEnergyByMonth(r.Context(), vehicleID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to compute charging statistics")
+		return
+	}
+	stats.AddEstimatedEnergy(estimates, period, h.loc, now)
 	writeJSON(w, http.StatusOK, stats)
 }

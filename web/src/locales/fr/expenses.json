@@ -494,6 +494,9 @@
     "noteZero": "{count} session sans énergie n'est pas comptée. | {count} sessions sans énergie ne sont pas comptées.",
     "basis": "Le prix est le coût enregistré rapporté à l'énergie des sessions dont le coût est connu ; les sessions gratuites comptent pour zéro.",
     "monthlyCost": "Dépense par mois ({cur})",
+    "estimated": "Estimé avant le suivi",
+    "estimatedPart": "dont {kwh} kWh estimés sur {distance} roulés avant le suivi",
+    "estimatedCost": "dont {amount} estimés avant le suivi",
     "emptyPeriod": "Aucune recharge sur cette période."
   }
 }
