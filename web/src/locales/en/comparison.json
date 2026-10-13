@@ -103,6 +103,8 @@
     "yearsAxis": "Years",
     "horizon": "Horizon",
     "horizonAll": "Whole period",
+    "savesMore": "saves more than the reference",
+    "savesLess": "saves less than the reference",
     "usage": "{years} year(s) · {km} {unit}/year"
   },
   "fields": {

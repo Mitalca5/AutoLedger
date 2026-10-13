@@ -334,7 +334,8 @@ onBeforeUnmount(() => {
             <td v-if="reference" data-testid="compare-gap">
               <template v-if="gapOf(r)">
                 {{ fmtSigned(gapOf(r)!.savings) }}{{ fmtPct(gapOf(r)!.savingsPct) }}
-                <div class="text-xs text-slate-400">{{ fmtBreakEvenGap(gapOf(r)!) }}</div>
+                <div class="text-xs text-slate-400">{{ gapOf(r)!.savings >= 0 ? $t('comparison.comparisonCompare.savesMore') : $t('comparison.comparisonCompare.savesLess') }}</div>
+                <div v-if="fmtBreakEvenGap(gapOf(r)!)" class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.breakEven') }} {{ fmtBreakEvenGap(gapOf(r)!) }}</div>
               </template>
               <span v-else class="text-xs text-slate-400">{{ $t('comparison.comparisonCompare.referenceBadge') }}</span>
             </td>
