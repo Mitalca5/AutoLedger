@@ -75,6 +75,8 @@ type ComparisonResult struct {
 	// has a depreciation of zero, so the total saving would count depreciation on the other side only.
 	TrackedDepreciationKnown bool     `json:"tracked_depreciation_known"`
 	BreakEvenYear            *float64 `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
+	// BreakEvenReason tells why BreakEvenYear is absent: one of the BreakEven* constants, empty when it is reached.
+	BreakEvenReason string `json:"break_even_reason,omitempty"`
 	// BreakEvenNetYear is the same break-even once each vehicle is credited with its value at that point (resale)
 	BreakEvenNetYear *float64            `json:"break_even_net_year,omitempty"`
 	Cumulative       []CumulativePoint   `json:"cumulative"`
@@ -230,6 +232,27 @@ func breakEven(evCash, iceCash []float64) *float64 {
 	return nil
 }
 
+// Why the break-even is not reached within the period.
+const (
+	BreakEvenPeriodTooShort = "period_too_short" // the running savings shrink the purchase gap but do not close it in time
+	BreakEvenNoSaving       = "no_saving"        // the tracked vehicle does not cost less to run
+	BreakEvenReversed       = "reversed"         // cheaper to buy, but it becomes the dearer one over the period
+)
+
+// breakEvenReason explains a missing outlay break-even. It is only meaningful when breakEven returned nil.
+func breakEvenReason(evCash, iceCash []float64) string {
+	first := iceCash[0] - evCash[0]
+	last := iceCash[len(iceCash)-1] - evCash[len(evCash)-1]
+	switch {
+	case first >= 0:
+		return BreakEvenReversed
+	case last > first:
+		return BreakEvenPeriodTooShort
+	default:
+		return BreakEvenNoSaving
+	}
+}
+
 // ComputeComparison compares the tracked-vehicle baseline with the equivalent ICE of the scenario over its period.
 // It is a pure function: no I/O, informational only.
 func ComputeComparison(sc *models.ComparisonScenario, ev TrackedBaseline) ComparisonResult {
@@ -278,6 +301,9 @@ func computeCore(sc *models.ComparisonScenario, ev TrackedBaseline, km, fuelFact
 		BreakEvenYear:            breakEven(evCash, iceCash),
 		BreakEvenNetYear:         breakEvenNet(tracked.netOfResale(evCash), ice.netOfResale(iceCash)),
 		Assumptions:              comparisonAssumptions(sc),
+	}
+	if res.BreakEvenYear == nil {
+		res.BreakEvenReason = breakEvenReason(evCash, iceCash)
 	}
 	for i := range evCash {
 		res.Cumulative = append(res.Cumulative, CumulativePoint{Year: i, Tracked: money.FromFloat(evCash[i]), ICE: money.FromFloat(iceCash[i])})

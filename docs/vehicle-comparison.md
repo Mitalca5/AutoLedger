@@ -20,9 +20,19 @@ Results show energy costs, maintenance, insurance, depreciation, total cost, cos
 - Financing, loans and leases are excluded. Depreciation follows the existing purchase/resale calculation; break-even compares purchase plus running outlays without deducting resale.
 - **Projection** remains a manually entered electric-versus-combustion scenario. A tracked hybrid comparison needs recorded hybrid data.
 
+## Break-even
+
+The break-even is the year after which the cumulated outlay of the tracked vehicle (purchase price plus yearly energy, maintenance, insurance and taxes, with the inflation of the scenario) drops below the combustion one. Resale value is not deducted; when a resale value is entered, a second figure credits each vehicle with its value at that point. The search stops at the end of the period and never extrapolates beyond it.
+
+When it is not reached, the result says why:
+
+- **the period is too short**: the running savings shrink the purchase price gap but do not close it within the period;
+- **no running saving**: the tracked vehicle does not cost less to run than the combustion one;
+- **reversed**: the tracked vehicle is cheaper to buy but ends up costing more than the combustion one over the period.
+
 ## What if
 
-The result of a **projection** has a **What if…?** section. Move the sliders, or type a value, for the annual distance, the fuel price per litre and the electricity price per kWh; the sliders span half to twice the saved value. The explored figures appear next to the saved ones: energy savings (fuel and electricity only), total savings (every cost of the scenario) and the break-even on the full cost are three separate figures. **Reset** returns to the saved values and **Save as a new comparison** opens the form with the explored values, leaving the original comparison unchanged.
+The result of a **projection** has a **What if…?** section. Move the sliders, or type a value, for the annual distance, the fuel price per litre and the electricity price per kWh; the sliders span half to twice the saved value. The explored figures appear next to the saved ones, with the gap: energy savings (fuel and electricity only), total savings (every cost of the scenario) and the break-even on the full cost are three separate figures. The break-even gap is in years, or states that the break-even becomes or stops being reached. **Reset** returns to the saved values and **Save as a new comparison** opens the form with the explored values, leaving the original comparison unchanged.
 
 The explored inputs are sent to the same calculation as a saved scenario and are not stored. A hypothetical price never reprices a recorded charge or fill-up. Distances and volumes follow the account settings. A tracked comparison uses its reference vehicle’s currency; a projection stores its chosen currency. Changing that code never converts amounts. An older projection takes the currency shared by all the vehicles of its owner; when they differ, its owner confirms the currency before viewing it. A projection saved without a currency takes that same shared currency; when the vehicles differ, the request is refused until a currency is chosen. comparisons in different currencies cannot share a chart or CSV. The section is available for projections only.
 

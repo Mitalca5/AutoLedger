@@ -123,6 +123,11 @@
   },
   "breakEven": {
     "notReached": "Break-even not reached over the period.",
+    "reason": {
+      "period_too_short": "Break-even not reached within {years} year(s): the running savings do not make up the purchase price gap in that time.",
+      "no_saving": "Break-even not reached: the tracked vehicle does not cost less to run than the combustion one.",
+      "reversed": "Break-even not reached: the tracked vehicle is cheaper to buy but ends up costing more than the combustion one over the period."
+    },
     "immediate": "The electric vehicle is cheaper from the purchase and stays so.",
     "netAfter": "Counting resale value, break-even after {years} year(s).",
     "netNotReached": "Counting resale value, break-even is not reached over the period.",
@@ -257,6 +262,8 @@
     "totalSavings": "Total savings (all costs)",
     "breakEven": "Break-even (full cost)",
     "notReached": "not reached",
+    "breakEvenReached": "reached",
+    "breakEvenLost": "no longer reached",
     "years": "{years} year(s)",
     "distinct": "Energy savings count fuel and electricity only; total savings include every cost of the scenario; the break-even is when the cumulated outlay of the electric vehicle drops below the combustion one.",
     "invalid": "One of the explored values is outside the accepted range.",

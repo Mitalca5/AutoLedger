@@ -78,7 +78,7 @@
     "totalCostPerScenario": "Coût total par scénario",
     "month": "{iceMonth}/mois",
     "month2": "{evMonth}/mois",
-    "breakEven": "Équilibre",
+    "breakEven": "Point mort",
     "gap": "Écart",
     "combustion": "Thermique",
     "electric": "Électrique",
@@ -122,12 +122,17 @@
     "more": "Sur {count} an, l'électrique vous coûte {amount} de plus. | Sur {count} ans, l'électrique vous coûte {amount} de plus."
   },
   "breakEven": {
-    "notReached": "Point d'équilibre non atteint sur la période.",
+    "notReached": "Point mort non atteint sur la période.",
+    "reason": {
+      "period_too_short": "Point mort non atteint en {years} an(s) : les économies d'usage ne compensent pas l'écart d'achat sur cette durée.",
+      "no_saving": "Point mort non atteint : le véhicule suivi ne coûte pas moins cher à l'usage que le thermique.",
+      "reversed": "Point mort non atteint : le véhicule suivi est moins cher à l'achat mais finit plus cher que le thermique sur la période."
+    },
     "immediate": "L'électrique est moins chère dès l'achat et le reste.",
-    "netAfter": "En tenant compte de la revente, point d'équilibre après {years} an(s).",
-    "netNotReached": "En tenant compte de la revente, point d'équilibre non atteint sur la période.",
+    "netAfter": "En tenant compte de la revente, point mort après {years} an(s).",
+    "netNotReached": "En tenant compte de la revente, point mort non atteint sur la période.",
     "netImmediate": "En tenant compte de la revente, l'électrique est moins chère à posséder sur toute la période.",
-    "after": "Point d'équilibre après {years} an(s) : les économies d'usage compensent l'écart d'achat."
+    "after": "Point mort après {years} an(s) : les économies d'usage compensent l'écart d'achat."
   },
   "rows": {
     "energy": "Énergie",
@@ -154,7 +159,7 @@
     "filePrefix": "comparatif",
     "header": "Poste,Electrique ({cur}),Thermique ({cur})",
     "scenariosFile": "comparatif-scenarios",
-    "scenariosHeader": "Scenario,Type,Duree (ans),{unit} par an,Total electrique ({cur}),Total thermique ({cur}),Ecart en faveur de l'electrique ({cur}),Point d'equilibre"
+    "scenariosHeader": "Scenario,Type,Duree (ans),{unit} par an,Total electrique ({cur}),Total thermique ({cur}),Ecart en faveur de l'electrique ({cur}),Point mort"
   },
   "compare": {
     "saves": "l'électrique économise",
@@ -199,7 +204,7 @@
       "gap": "Écart en faveur du véhicule hybride",
       "cumulativeHeader": "Année,Coût cumulé hybride,Coût cumulé thermique",
       "header": "Poste,Hybride ({cur}),Thermique ({cur})",
-      "scenariosHeader": "Scénario,Type,Durée (ans),{unit} par an,Total hybride ({cur}),Total thermique ({cur}),Écart en faveur de l'hybride ({cur}),Point d'équilibre"
+      "scenariosHeader": "Scénario,Type,Durée (ans),{unit} par an,Total hybride ({cur}),Total thermique ({cur}),Écart en faveur de l'hybride ({cur}),Point mort"
     },
     "compare": {
       "saves": "l'hybride économise",
@@ -257,6 +262,8 @@
     "totalSavings": "Économie totale (tous coûts)",
     "breakEven": "Point mort (coût complet)",
     "notReached": "non atteint",
+    "breakEvenReached": "atteint",
+    "breakEvenLost": "n'est plus atteint",
     "years": "{years} an(s)",
     "distinct": "L'économie d'énergie ne compte que le carburant et l'électricité ; l'économie totale inclut tous les coûts du scénario ; le point mort est le moment où les dépenses cumulées du véhicule électrique passent sous celles du thermique.",
     "invalid": "Une des valeurs explorées est hors de la plage acceptée.",

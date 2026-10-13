@@ -10,6 +10,7 @@ import { perVolume, volumeUnitLabel } from '@/units'
 import { useComparisonPriceHistory } from '@/composables/useComparisonPriceHistory'
 import { useEnergyPriceWarning } from '@/composables/useEnergyPriceWarning'
 import { HIGH_PRICE_MULTIPLIER } from '@/utils/energyPriceWarning'
+import { breakEvenDelta, breakEvenReasonKey } from '@/utils/comparisonBreakEven'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import {
   isWhatIfDirty,
@@ -145,8 +146,25 @@ const rows = computed(() => {
   return [
     { key: 'energy', label: t('comparison.whatIf.energySavings'), original: fmtSigned(o.energySavings), explored: e ? fmtSigned(e.energySavings) : '', delta: e ? fmtSigned(e.energySavings - o.energySavings) : '' },
     { key: 'total', label: t('comparison.whatIf.totalSavings'), original: fmtSigned(o.totalSavings), explored: e ? fmtSigned(e.totalSavings) : '', delta: e ? fmtSigned(e.totalSavings - o.totalSavings) : '' },
-    { key: 'breakEven', label: t('comparison.whatIf.breakEven'), original: fmtYears(o.breakEvenYear), explored: e ? fmtYears(e.breakEvenYear) : '', delta: '' },
+    { key: 'breakEven', label: t('comparison.whatIf.breakEven'), original: fmtYears(o.breakEvenYear), explored: e ? fmtYears(e.breakEvenYear) : '', delta: e ? fmtBreakEvenDelta(o.breakEvenYear, e.breakEvenYear) : '' },
   ]
+})
+
+function fmtBreakEvenDelta(original: number | null, explored: number | null): string {
+  const d = breakEvenDelta(original, explored)
+  if (d.kind === 'reached') return t('comparison.whatIf.breakEvenReached')
+  if (d.kind === 'lost') return t('comparison.whatIf.breakEvenLost')
+  if (d.kind === 'none') return ''
+  const sign = d.years > 0 ? '+' : d.years < 0 ? '−' : ''
+  return `${sign}${t('comparison.whatIf.years', { years: Math.abs(d.years).toLocaleString(intlLocale(), { maximumFractionDigits: 1 }) })}`
+}
+
+// Why the break-even shown for the explored values (or the saved ones until something changes) is missing.
+const breakEvenReasonText = computed(() => {
+  const shown = dirty.value && preview.value ? preview.value : props.result
+  if (!shown || (shown.break_even_year !== undefined && shown.break_even_year !== null)) return ''
+  const key = breakEvenReasonKey(shown.break_even_reason)
+  return key ? t(key, { years: shown.years_count }) : ''
 })
 </script>
 
@@ -211,6 +229,7 @@ const rows = computed(() => {
         </tbody>
       </table>
     </div>
+    <p v-if="breakEvenReasonText" class="text-xs text-slate-300 mt-2" data-testid="what-if-break-even-reason">{{ breakEvenReasonText }}</p>
     <p class="text-xs text-slate-500 mt-2">{{ $t('comparison.whatIf.distinct') }}</p>
     <p v-if="!valid" class="text-xs text-red-300 mt-2" role="alert">{{ $t('comparison.whatIf.invalid') }}</p>
     <p v-else-if="failed" class="text-xs text-red-300 mt-2" role="alert">{{ $t('comparison.whatIf.failed') }}</p>

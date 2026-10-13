@@ -77,14 +77,26 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 		mutate   func(sc *models.ComparisonScenario, ev *TrackedBaseline)
 		wantNil  bool
 		wantYear float64
+		// wantReason is the expected BreakEvenReason; empty when the break-even is reached
+		wantReason string
 	}{
 		{
 			name: "EV dearer to buy and to run never pays back",
 			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
 				sc.Years = 10
+				ev.InsuranceYearly = 5000
 			},
-			// Purchase gap 10000; yearly running: ICE 2200, EV 1100+... insurance makes the EV dearer to run
-			wantNil: true,
+			wantNil:    true,
+			wantReason: BreakEvenNoSaving,
+		},
+		{
+			name: "EV dearer to buy and cheaper to run, but not enough over the period",
+			mutate: func(sc *models.ComparisonScenario, ev *TrackedBaseline) {
+				sc.Years = 10
+			},
+			// Purchase gap 10000, running saving below 1000 a year
+			wantNil:    true,
+			wantReason: BreakEvenPeriodTooShort,
 		},
 		{
 			name: "cheap EV running costs repay the purchase gap",
@@ -111,7 +123,8 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 				ev.PurchaseNet = 20000
 				ev.InsuranceYearly = 5000
 			},
-			wantNil: true,
+			wantNil:    true,
+			wantReason: BreakEvenReversed,
 		},
 		{
 			name: "payback beyond the period",
@@ -120,7 +133,8 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 				ev.InsuranceYearly = 0
 				ev.MaintenanceYearly = 0
 			},
-			wantNil: true,
+			wantNil:    true,
+			wantReason: BreakEvenPeriodTooShort,
 		},
 	}
 	for _, tt := range tests {
@@ -128,6 +142,9 @@ func TestComputeComparisonBreakEven(t *testing.T) {
 			sc, ev := baseScenario(), baseEV()
 			tt.mutate(sc, &ev)
 			res := ComputeComparison(sc, ev)
+			if res.BreakEvenReason != tt.wantReason {
+				t.Fatalf("break-even reason = %q, want %q", res.BreakEvenReason, tt.wantReason)
+			}
 			if tt.wantNil {
 				if res.BreakEvenYear != nil {
 					t.Fatalf("break-even = %v, want none", *res.BreakEvenYear)

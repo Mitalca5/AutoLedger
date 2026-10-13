@@ -9,6 +9,7 @@ import { sideKey, type TrackedSide } from '@/utils/comparisonSide'
 import { costRowValues } from '@/utils/comparisonForm'
 import ComparisonCharts from '@/components/comparison/ComparisonCharts.vue'
 import ComparisonWhatIf from '@/components/comparison/ComparisonWhatIf.vue'
+import { breakEvenReasonKey } from '@/utils/comparisonBreakEven'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import { ArrowLeft, Download, Info, Pencil, Printer, TrendingDown, TrendingUp } from 'lucide-vue-next'
 
@@ -66,8 +67,11 @@ const savingsCards = computed<SavingsCard[]>(() => {
   })
 })
 
-function breakEvenSentence(be: number | null | undefined, keys: { none: string; now: string; after: string }): string {
-  if (be === undefined || be === null) return t(keys.none)
+function breakEvenSentence(be: number | null | undefined, keys: { none: string; now: string; after: string }, reason?: string): string {
+  if (be === undefined || be === null) {
+    const reasonKey = breakEvenReasonKey(reason)
+    return reasonKey ? t(reasonKey, { years: props.result?.years_count }) : t(keys.none)
+  }
   if (be === 0) return t(sk(keys.now))
   return t(keys.after, { years: Number(be).toLocaleString(intlLocale()) })
 }
@@ -75,7 +79,7 @@ function breakEvenSentence(be: number | null | undefined, keys: { none: string; 
 const breakEvenText = computed(() => {
   const r = props.result
   if (!r) return ''
-  const outlay = breakEvenSentence(r.break_even_year, { none: 'comparison.breakEven.notReached', now: 'comparison.breakEven.immediate', after: 'comparison.breakEven.after' })
+  const outlay = breakEvenSentence(r.break_even_year, { none: 'comparison.breakEven.notReached', now: 'comparison.breakEven.immediate', after: 'comparison.breakEven.after' }, r.break_even_reason)
   const hasResale = Number(r.tracked?.depreciation) > 0 || Number(r.ice?.depreciation) > 0
   if (!hasResale) return outlay
   const net = breakEvenSentence(r.break_even_net_year, { none: 'comparison.breakEven.netNotReached', now: 'comparison.breakEven.netImmediate', after: 'comparison.breakEven.netAfter' })
