@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { intlLocale, t } from '@/i18n'
 import { api } from '@/services/api'
 import { distanceUnit, formatDistanceValue } from '@/units'
@@ -9,11 +9,11 @@ import { formatAmount } from '@/currency'
 import { perVolume, volumeUnitLabel } from '@/units'
 import { useComparisonPriceHistory } from '@/composables/useComparisonPriceHistory'
 import { useEnergyPriceWarning } from '@/composables/useEnergyPriceWarning'
+import { useScenarioDraft } from '@/composables/useScenarioDraft'
 import { HIGH_PRICE_MULTIPLIER } from '@/utils/energyPriceWarning'
 import { breakEvenDelta, breakEvenReasonKey } from '@/utils/comparisonBreakEven'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import {
-  isWhatIfDirty,
   isWhatIfValid,
   whatIfBase,
   whatIfBounds,
@@ -38,67 +38,27 @@ const base = computed(() => whatIfBase(props.scenario))
 const limits = computed<WhatIfInputLimits>(() => props.result.input_limits)
 const bounds = computed(() => whatIfBounds(base.value, limits.value))
 const ranges = computed(() => whatIfRanges(limits.value))
-const explored = reactive<WhatIfInputs>({ ...base.value })
+// Both prices are advisory: an unusual one needs a confirmation before it is evaluated or saved.
+const confirmationPending = ref(false)
+
+const { draft: explored, dirty, valid, preview, loading, failed, reset } = useScenarioDraft<WhatIfInputs>({
+  base: () => base.value,
+  isValid: (d) => isWhatIfValid(d, limits.value),
+  payload: (d) => whatIfPayload(props.scenario, d),
+  preview: (payload) => api.previewComparison(payload),
+  blocked: () => confirmationPending.value,
+  debounceMs: DEBOUNCE_MS,
+})
+
 const history = useComparisonPriceHistory(() => props.referenceVehicleId, () => props.scenario?.ice?.fuel_type || '', () => props.currency)
 const warningContext = () => `${props.referenceVehicleId}:${props.scenario?.id}:${props.scenario?.ice?.fuel_type}:${props.currency}`
 const fuelWarning = useEnergyPriceWarning(() => explored.fuel_price, () => history.value?.fuel, warningContext)
 const electricityWarning = useEnergyPriceWarning(() => explored.eur_per_kwh, () => history.value?.electricity, warningContext)
 const needsConfirmation = computed(() => fuelWarning.needsConfirmation.value || electricityWarning.needsConfirmation.value)
-const preview = ref<any | null>(null)
-const loading = ref(false)
-const failed = ref(false)
+watch(needsConfirmation, (pending) => { confirmationPending.value = pending }, { immediate: true, flush: 'sync' })
 
-const dirty = computed(() => isWhatIfDirty(base.value, explored))
-const valid = computed(() => isWhatIfValid(explored, limits.value))
 const originalFigures = computed(() => whatIfFigures(props.result))
 const exploredFigures = computed(() => whatIfFigures(preview.value))
-
-let timer: ReturnType<typeof setTimeout> | undefined
-let sequence = 0
-
-function reset() {
-  Object.assign(explored, base.value)
-}
-
-// A new scenario or a recomputed result starts again from its own values.
-watch(base, reset)
-
-async function refresh() {
-  const current = ++sequence
-  loading.value = true
-  failed.value = false
-  try {
-    const res = await api.previewComparison(whatIfPayload(props.scenario, explored))
-    if (current === sequence) preview.value = res
-  } catch (err) {
-    console.error('Failed to preview the what-if', err)
-    if (current === sequence) failed.value = true
-  } finally {
-    if (current === sequence) loading.value = false
-  }
-}
-
-watch(
-  () => [JSON.stringify(explored), needsConfirmation.value],
-  () => {
-    clearTimeout(timer)
-    // A pending confirmation drops the previous result: it was computed for another price.
-    if (!dirty.value || needsConfirmation.value) {
-      sequence += 1
-      preview.value = null
-      loading.value = false
-      failed.value = false
-      return
-    }
-    if (!valid.value) return
-    timer = setTimeout(refresh, DEBOUNCE_MS)
-  },
-)
-
-onBeforeUnmount(() => {
-  clearTimeout(timer)
-  sequence += 1
-})
 
 function saveAsNew() {
   if (!valid.value || needsConfirmation.value) return
