@@ -166,11 +166,15 @@ func (h *ComparisonHandler) fillProjectionCurrency(ctx context.Context, userID s
 }
 
 // decodeAndCheck reads the request, validates it and checks the access to the reference vehicle.
-func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Request) (*SaveComparisonRequest, bool) {
+// A request without a name takes defaultName when it is not empty (a preview is never saved).
+func (h *ComparisonHandler) decodeAndCheck(w http.ResponseWriter, r *http.Request, defaultName string) (*SaveComparisonRequest, bool) {
 	var req SaveComparisonRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
 		return nil, false
+	}
+	if defaultName != "" && strings.TrimSpace(req.Name) == "" {
+		req.Name = defaultName
 	}
 	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
 	if err := validateComparisonRequest(&req); err != nil {
@@ -201,7 +205,7 @@ func (h *ComparisonHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ComparisonHandler) Create(w http.ResponseWriter, r *http.Request) {
-	req, ok := h.decodeAndCheck(w, r)
+	req, ok := h.decodeAndCheck(w, r, "")
 	if !ok {
 		return
 	}
@@ -214,7 +218,7 @@ func (h *ComparisonHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ComparisonHandler) Update(w http.ResponseWriter, r *http.Request) {
-	req, ok := h.decodeAndCheck(w, r)
+	req, ok := h.decodeAndCheck(w, r, "")
 	if !ok {
 		return
 	}
@@ -253,24 +257,12 @@ func (h *ComparisonHandler) Result(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
-// Preview evaluates a projection from the inputs of the request, without saving a scenario. It backs the
-// what-if section of a result: the explored values are never stored and never touch recorded costs.
+// Preview evaluates a scenario from the inputs of the request, without saving it. It backs the what-if
+// exploration of a result: the explored values are never stored and never touch recorded costs. A tracked
+// (retrospective) preview reads the reference vehicle's recorded costs, so it needs the same access as a saved one.
 func (h *ComparisonHandler) Preview(w http.ResponseWriter, r *http.Request) {
-	var req SaveComparisonRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
-		return
-	}
-	if req.Mode != models.ComparisonModeProjection {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("comparison.preview_projection_only", "The what-if exploration is only available for projections"))
-		return
-	}
-	if strings.TrimSpace(req.Name) == "" {
-		req.Name = "preview"
-	}
-	h.fillProjectionCurrency(r.Context(), middleware.GetUserID(r.Context()), &req)
-	if err := validateComparisonRequest(&req); err != nil {
-		writeErr(w, http.StatusBadRequest, err)
+	req, ok := h.decodeAndCheck(w, r, "preview")
+	if !ok {
 		return
 	}
 	res, err := h.service.Compare(r.Context(), req.toScenario(middleware.GetUserID(r.Context())))

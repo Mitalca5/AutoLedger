@@ -211,12 +211,13 @@ func TestPreviewComparisonDoesNotNeedASavedScenario(t *testing.T) {
 	}
 }
 
-func TestPreviewComparisonRefusesOtherModesAndInvalidInputs(t *testing.T) {
+func TestPreviewComparisonRefusesInvalidInputs(t *testing.T) {
 	h := NewComparisonHandler(nil, services.NewComparisonService(nil))
 
-	retro := validComparisonRequest()
-	if rec := previewRequest(t, h, retro); rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "comparison.preview_projection_only") {
-		t.Errorf("retrospective: status %d: %s", rec.Code, rec.Body)
+	noVehicle := validComparisonRequest()
+	noVehicle.VehicleID = nil
+	if rec := previewRequest(t, h, noVehicle); rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "comparison.vehicle_required") {
+		t.Errorf("retrospective without vehicle: status %d: %s", rec.Code, rec.Body)
 	}
 
 	for name, mutate := range map[string]func(r *SaveComparisonRequest){
@@ -274,5 +275,65 @@ func TestIntegrationProjectionWithoutCurrencyTakesTheOwnersSharedCurrency(t *tes
 	}
 	if rec := create(mixed.ID); rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "comparison.currency_required") {
 		t.Fatalf("mixed currencies must ask for the currency, got %d %s", rec.Code, rec.Body)
+	}
+}
+
+func TestIntegrationPreviewTrackedComparisonFollowsVehicleAccess(t *testing.T) {
+	repo := authTestRepo(t)
+	ctx := context.Background()
+	owner, err := repo.CreateUser(ctx, "cmp-preview-owner@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outsider, err := repo.CreateUser(ctx, "cmp-preview-outsider@example.com", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ev := &models.Vehicle{UserID: owner.ID, Name: "EV", Powertrain: models.PowertrainEV, Currency: "EUR", TeslaMateAuthType: models.AuthModeNone}
+	ice := &models.Vehicle{UserID: owner.ID, Name: "ICE", Powertrain: models.PowertrainICE, Currency: "EUR", TeslaMateAuthType: models.AuthModeNone}
+	for _, v := range []*models.Vehicle{ev, ice} {
+		if err := repo.CreateVehicle(ctx, v); err != nil {
+			t.Fatal(err)
+		}
+	}
+	h := NewComparisonHandler(repo, services.NewComparisonService(services.NewTCOService(repo.Pool(), "UTC")))
+	preview := func(userID, vehicleID string) *httptest.ResponseRecorder {
+		payload := validComparisonRequest()
+		payload.Name = ""
+		payload.VehicleID = &vehicleID
+		body, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req := httptest.NewRequest(http.MethodPost, "/api/comparison-scenarios/preview", bytes.NewReader(body))
+		req = req.WithContext(context.WithValue(req.Context(), middleware.UserIDKey, userID))
+		rec := httptest.NewRecorder()
+		h.Preview(rec, req)
+		return rec
+	}
+
+	rec := preview(owner.ID, ev.ID)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("owner: status %d: %s", rec.Code, rec.Body)
+	}
+	var res services.ComparisonResult
+	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
+		t.Fatal(err)
+	}
+	if res.Mode != models.ComparisonModeRetrospective || res.AnnualKm != 12000 || res.YearsCount != 5 {
+		t.Errorf("preview result: %+v", res)
+	}
+	if rec := preview(outsider.ID, ev.ID); rec.Code != http.StatusNotFound && rec.Code != http.StatusForbidden || strings.Contains(rec.Body.String(), "years_count") {
+		t.Errorf("outsider: status %d: %s", rec.Code, rec.Body)
+	}
+	if rec := preview(owner.ID, ice.ID); rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "comparison.needs_ev") {
+		t.Errorf("combustion vehicle: status %d: %s", rec.Code, rec.Body)
+	}
+	list, err := repo.ListComparisonScenarios(ctx, owner.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 0 {
+		t.Errorf("a preview stored %d scenario(s)", len(list))
 	}
 }

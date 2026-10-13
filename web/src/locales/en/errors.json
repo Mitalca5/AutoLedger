@@ -296,7 +296,6 @@
     "ev_consumption": "Invalid electric consumption ({p0} to {p1} kWh/100 {unit})",
     "electricity_price": "Electricity price is outside the supported range.",
     "needs_ev": "The tracked comparison requires an electric or plug-in hybrid vehicle; use projection mode for a combustion vehicle",
-    "preview_projection_only": "The what-if exploration is only available for projections",
     "mode_invalid": "Invalid mode (RETROSPECTIVE or PROJECTION)",
     "currency_required": "Choose the currency of the projection."
   },

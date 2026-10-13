@@ -296,7 +296,6 @@
     "ev_consumption": "Consommation électrique invalide ({p0} à {p1} kWh/100 {unit})",
     "electricity_price": "Le prix de l'électricité dépasse la plage prise en charge.",
     "needs_ev": "Le comparatif suivi nécessite un véhicule électrique ou hybride rechargeable ; utilisez la projection pour un véhicule thermique",
-    "preview_projection_only": "L'exploration « et si… » n'est disponible que pour les projections",
     "mode_invalid": "Mode invalide (RETROSPECTIVE ou PROJECTION)",
     "currency_required": "Choisissez la devise de la projection."
   },
