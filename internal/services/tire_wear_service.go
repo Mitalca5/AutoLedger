@@ -29,7 +29,8 @@ type TireWearStats struct {
 	EstimatedRemainingKm float64                   `json:"estimated_remaining_km"`
 	WearRateConfidence   float64                   `json:"wear_rate_confidence"` // weight of the measured rate in the blend with the average one (0 to 1)
 	WearRateSource       string                    `json:"wear_rate_source"`     // "measured" from the depth logs, "default" average EV wear
-	Condition            string                    `json:"condition"`            // "GOOD", "WARNING", "CRITICAL"
+	WearComparison       *TireWearComparison       `json:"wear_comparison,omitempty"`
+	Condition            string                    `json:"condition"` // "GOOD", "WARNING", "CRITICAL"
 	LogsCount            int                       `json:"logs_count"`
 	Sessions             []models.TireMountSession `json:"sessions"`
 
@@ -257,6 +258,10 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 		wearConfidence = measuredWear / (measuredWear + wearPriorMm)
 		wearRatePer10k = wearConfidence*measuredRate + (1-wearConfidence)*defaultWearRatePer10k
 	}
+	var wearComparison *TireWearComparison
+	if wearSource == "measured" {
+		wearComparison = compareMeasuredTireWear(measuredRate, usableDepth, tire.EstimatedLifespanKm)
+	}
 	// Measurements remain unchanged; only the forecast consumes the distance driven since the latest reading.
 	sinceReadingKm := totalDistance
 	readingOdometer := 0.0
@@ -402,6 +407,7 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 		EstimatedRemainingKm:   math.Round(estimatedRemainingKm),
 		WearRateConfidence:     math.Round(wearConfidence*100) / 100,
 		WearRateSource:         wearSource,
+		WearComparison:         wearComparison,
 		Condition:              condition,
 		LogsCount:              len(logs),
 		Sessions:               sessions,

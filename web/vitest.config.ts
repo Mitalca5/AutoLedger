@@ -1,8 +1,10 @@
 import { defineConfig } from 'vitest/config'
 import path from 'path'
+import vue from '@vitejs/plugin-vue'
 
-// Unit tests target framework-free modules (utils, composables), so no Vue or Tailwind plugin is loaded.
+// Tests stay in Node; the Vue plugin also allows rendering component contracts without a browser.
 export default defineConfig({
+  plugins: [vue()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

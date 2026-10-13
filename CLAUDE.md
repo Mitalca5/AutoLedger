@@ -20,7 +20,7 @@ make dev                         # go run ./cmd/server (needs DATABASE_URL + sec
 # Frontend (from web/)
 npm ci --ignore-scripts
 npm run typecheck                # vue-tsc --noEmit
-npm test                         # vitest, node environment: utils/composables only, no DOM
+npm test                         # vitest, node environment: utils/composables, plus components rendered to a string (no DOM)
 npm run build                    # typecheck + vite build; the Go build embeds web/dist
 ```
 
