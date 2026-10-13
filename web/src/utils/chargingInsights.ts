@@ -150,9 +150,10 @@ export function monthlyPrices(stats: PlaceStats): (number | null)[] {
 
 export type SavingsView =
   | { state: 'none'; reasonKey: string }
-  | { state: 'ok'; amount: number; better: boolean; awayKwh: number; awayCost: number; hypotheticalCost: number; homePrice: number; unclassifiedKwh: number }
+  | { state: 'ok'; amount: number; pct: number | null; better: boolean; awayKwh: number; awayCost: number; hypotheticalCost: number; homePrice: number; unclassifiedKwh: number }
 
-/** What the "if everything were charged at home" figure shows. A negative saving means charging away was cheaper. */
+/** What the "if everything were charged at home" figure shows. A negative saving means charging away was cheaper.
+ *  pct is the gap over what the away charges actually cost, null when that cost is zero. */
 export function savingsView(h: HomeSavings): SavingsView {
   if (h.reason === 'no_home' || h.home_price_per_kwh === null) {
     return { state: 'none', reasonKey: 'expenses.chargingInsights.savings.noHome' }
@@ -163,6 +164,7 @@ export function savingsView(h: HomeSavings): SavingsView {
   return {
     state: 'ok',
     amount: Math.abs(h.savings),
+    pct: h.away_cost > 0 ? (Math.abs(h.savings) / h.away_cost) * 100 : null,
     better: h.savings >= 0,
     awayKwh: h.away_priced_kwh,
     awayCost: h.away_cost,

@@ -466,6 +466,8 @@
       "title": "If everything were charged at home",
       "better": "{amount} less",
       "worse": "{amount} more",
+      "betterPct": "{amount} less ({pct})",
+      "worsePct": "{amount} more ({pct})",
       "basis": "{kwh} kWh charged away from home cost {cost}; at home ({price}/kWh) they would have cost {home}.",
       "worseBasis": "Charging away was cheaper than at home: {kwh} kWh cost {cost}, against {home} at {price}/kWh.",
       "noHome": "Classify the place you charge at home to get this figure.",

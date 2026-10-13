@@ -89,9 +89,12 @@ describe('savingsView', () => {
   const base: HomeSavings = { home_price_per_kwh: 0.2, home_priced_kwh: 100, away_sessions: 3, away_priced_kwh: 50, away_cost: 30, hypothetical_cost: 10, savings: 20, unclassified_kwh: 5 }
   it('reports the saving and its basis', () => {
     expect(savingsView(base)).toMatchObject({ state: 'ok', amount: 20, better: true, awayKwh: 50, homePrice: 0.2 })
+    // 20 saved on the 30 the away charges cost
+    expect(savingsView(base)).toMatchObject({ pct: (20 / 30) * 100 })
   })
   it('reports a cheaper away charging as a negative saving', () => {
-    expect(savingsView({ ...base, savings: -10 })).toMatchObject({ state: 'ok', amount: 10, better: false })
+    expect(savingsView({ ...base, savings: -10 })).toMatchObject({ state: 'ok', amount: 10, better: false, pct: (10 / 30) * 100 })
+    expect(savingsView({ ...base, away_cost: 0, savings: 0 })).toMatchObject({ state: 'ok', pct: null })
   })
   it('explains why there is no figure', () => {
     expect(savingsView({ ...base, reason: 'no_home', home_price_per_kwh: null })).toEqual({ state: 'none', reasonKey: 'expenses.chargingInsights.savings.noHome' })

@@ -220,7 +220,7 @@ onBeforeUnmount(() => {
         </dt>
         <template v-if="savings && savings.state === 'ok'">
           <dd class="text-lg font-extrabold" :class="savings.better ? 'text-success-400' : 'text-warning-400'">
-            {{ $t(savings.better ? 'expenses.chargingInsights.savings.better' : 'expenses.chargingInsights.savings.worse', { amount: formatAmount(savings.amount, currency) }) }}
+            {{ $t(`expenses.chargingInsights.savings.${savings.better ? 'better' : 'worse'}${savings.pct === null ? '' : 'Pct'}`, { amount: formatAmount(savings.amount, currency), pct: savings.pct === null ? '' : formatPercent(savings.pct, 0) }) }}
           </dd>
           <dd class="text-xs text-slate-400">
             {{ $t('expenses.chargingInsights.savings.short', { kwh: formatNumber(savings.awayKwh, 0), price: formatAmount(savings.homePrice, currency, 3) }) }}
@@ -236,18 +236,18 @@ onBeforeUnmount(() => {
               <ChevronDown class="w-3 h-3 transition-transform" :class="detailsOpen ? 'rotate-180' : ''" />
             </button>
           </dd>
+          <dd v-if="detailsOpen" class="mt-2 border-t border-success-500/20 pt-2 text-xs text-slate-300">
+            {{ $t(savings.better ? 'expenses.chargingInsights.savings.basis' : 'expenses.chargingInsights.savings.worseBasis', {
+              kwh: formatNumber(savings.awayKwh, 0),
+              cost: formatAmount(savings.awayCost, currency),
+              home: formatAmount(savings.hypotheticalCost, currency),
+              price: formatAmount(savings.homePrice, currency, 3),
+            }) }}
+          </dd>
         </template>
         <dd v-else-if="savings" class="text-xs text-slate-400 mt-1">{{ $t(savings.reasonKey) }}</dd>
       </div>
     </dl>
-    <p v-if="detailsOpen && savings && savings.state === 'ok'" class="text-xs text-slate-300 bg-slate-800/40 border border-slate-700/50 rounded-xl p-3">
-      {{ $t(savings.better ? 'expenses.chargingInsights.savings.basis' : 'expenses.chargingInsights.savings.worseBasis', {
-        kwh: formatNumber(savings.awayKwh, 0),
-        cost: formatAmount(savings.awayCost, currency),
-        home: formatAmount(savings.hypotheticalCost, currency),
-        price: formatAmount(savings.homePrice, currency, 3),
-      }) }}
-    </p>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <figure class="space-y-1.5">

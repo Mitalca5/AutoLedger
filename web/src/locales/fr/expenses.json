@@ -466,6 +466,8 @@
       "title": "Si tout était rechargé à domicile",
       "better": "{amount} de moins",
       "worse": "{amount} de plus",
+      "betterPct": "{amount} de moins ({pct})",
+      "worsePct": "{amount} de plus ({pct})",
       "basis": "{kwh} kWh rechargés hors domicile ont coûté {cost} ; à domicile ({price}/kWh) ils auraient coûté {home}.",
       "worseBasis": "Recharger ailleurs a coûté moins qu'à domicile : {kwh} kWh ont coûté {cost}, contre {home} à {price}/kWh.",
       "noHome": "Classez le lieu où vous rechargez à domicile pour obtenir ce chiffre.",
