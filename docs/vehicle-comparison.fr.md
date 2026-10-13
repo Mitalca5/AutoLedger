@@ -34,9 +34,19 @@ Lorsqu'il n'est pas atteint, le résultat en donne la raison :
 
 ## Et si
 
-Le résultat d'une **projection** comporte une section **Et si… ?**. Déplacez les curseurs, ou saisissez une valeur, pour la distance annuelle, le prix du carburant au litre et le prix de l'électricité au kWh ; les curseurs couvrent de la moitié au double de la valeur enregistrée. **Autres hypothèses** ouvre la durée (années entières), les prix d'achat et de revente des deux véhicules et l'inflation du carburant, de l'électricité et des autres coûts, avec les mêmes limites que le formulaire du scénario. Les chiffres explorés s'affichent à côté des chiffres enregistrés : l'économie d'énergie (carburant et électricité seulement), l'économie totale (tous les coûts du scénario) et le point mort sur le coût complet sont trois chiffres distincts. L'écart du point mort est exprimé en années, ou indique que le point mort devient atteint ou cesse de l'être. **Réinitialiser** revient aux valeurs enregistrées et **Enregistrer comme nouvelle comparaison** ouvre le formulaire avec les valeurs explorées, sans modifier la comparaison d'origine.
+Le résultat d'une comparaison comporte une section **Et si… ?**. Déplacez les curseurs, ou saisissez une valeur, pour la distance annuelle, le prix du carburant au litre et le prix de l'électricité au kWh ; les curseurs couvrent de la moitié au double de la valeur enregistrée. **Autres hypothèses** ouvre la durée (années entières), les prix d'achat et de revente des deux véhicules et l'inflation du carburant, de l'électricité et des autres coûts, avec les mêmes limites que le formulaire du scénario. Sur une comparaison **rétrospective**, le côté électrique continue de suivre vos coûts enregistrés : le prix du kWh part de la moyenne enregistrée (repérée *Mesuré*) et peut être modifié pour tester un autre tarif, par exemple la recharge en heures creuses ; consommation, entretien, assurance, taxes et coût d'acquisition sont affichés comme mesurés et ne sont pas modifiables. Un prix égal au prix enregistré n'est pas une surcharge. Les chiffres explorés s'affichent à côté des chiffres enregistrés : l'économie d'énergie (carburant et électricité seulement), l'économie totale (tous les coûts du scénario) et le point mort sur le coût complet sont trois chiffres distincts. L'écart du point mort est exprimé en années, ou indique que le point mort devient atteint ou cesse de l'être. **Réinitialiser** revient aux valeurs enregistrées et **Enregistrer comme nouvelle comparaison** ouvre le formulaire avec les valeurs explorées, sans modifier la comparaison d'origine.
 
 Les valeurs explorées passent par le même calcul qu'un scénario enregistré et ne sont pas stockées. Un prix hypothétique ne recalcule jamais une recharge ou un plein enregistré. Les distances, volumes et la devise suivent les réglages du compte. La section n'existe que pour les projections.
+
+## Comparer des scénarios
+
+Cochez deux ou trois comparaisons pour les afficher côte à côte. Le tableau montre chaque scénario sur sa propre distance et sa propre durée, ce qui rend les totaux difficiles à comparer ; rien de ce qui suit n'est enregistré :
+
+- **Même base pour tous les scénarios** applique une distance annuelle, une durée (en années entières) et une variation des prix de l'énergie (en %, appliquée au carburant et à l'électricité ; un scénario rétrospectif sans prix du kWh enregistré garde son électricité telle qu'enregistrée) à chaque scénario sélectionné, calculés par le même moteur qu'un scénario enregistré.
+- **Scénario de référence** ajoute une colonne avec l'écart de chaque scénario par rapport à lui : différence d'économie (montant et % de l'économie de la référence) et de point mort.
+- Le graphique d'**avantage cumulé** trace, pour chaque scénario, les dépenses du thermique moins celles de l'électrique année par année ; la courbe passe par zéro au point mort. Le sélecteur d'**horizon** limite les années affichées.
+
+Les scénarios dans des devises différentes ne sont pas comparés.
 
 ## Coûts de recharge gratuits et inconnus
 

@@ -32,9 +32,19 @@ When it is not reached, the result says why:
 
 ## What if
 
-The result of a **projection** has a **What if…?** section. Move the sliders, or type a value, for the annual distance, the fuel price per litre and the electricity price per kWh; the sliders span half to twice the saved value. **More assumptions** opens the period (whole years), the purchase and resale prices of both vehicles and the fuel, electricity and other-costs inflation, with the same limits as the scenario form. The explored figures appear next to the saved ones, with the gap: energy savings (fuel and electricity only), total savings (every cost of the scenario) and the break-even on the full cost are three separate figures. The break-even gap is in years, or states that the break-even becomes or stops being reached. **Reset** returns to the saved values and **Save as a new comparison** opens the form with the explored values, leaving the original comparison unchanged.
+The result of a comparison has a **What if…?** section. Move the sliders, or type a value, for the annual distance, the fuel price per litre and the electricity price per kWh; the sliders span half to twice the saved value. **More assumptions** opens the period (whole years), the purchase and resale prices of both vehicles and the fuel, electricity and other-costs inflation, with the same limits as the scenario form. On a **retrospective** comparison the electric side keeps following your recorded costs: the electricity price per kWh starts at the recorded average (marked *Measured*) and can be changed to try another tariff, such as off-peak charging; consumption, maintenance, insurance, taxes and acquisition cost are listed as measured and cannot be edited. A price equal to the recorded one is not an override. The explored figures appear next to the saved ones, with the gap: energy savings (fuel and electricity only), total savings (every cost of the scenario) and the break-even on the full cost are three separate figures. The break-even gap is in years, or states that the break-even becomes or stops being reached. **Reset** returns to the saved values and **Save as a new comparison** opens the form with the explored values, leaving the original comparison unchanged.
 
 The explored inputs are sent to the same calculation as a saved scenario and are not stored. A hypothetical price never reprices a recorded charge or fill-up. Distances and volumes follow the account settings. A tracked comparison uses its reference vehicle’s currency; a projection stores its chosen currency. Changing that code never converts amounts. An older projection takes the currency shared by all the vehicles of its owner; when they differ, its owner confirms the currency before viewing it. A projection saved without a currency takes that same shared currency; when the vehicles differ, the request is refused until a currency is chosen. comparisons in different currencies cannot share a chart or CSV. The section is available for projections only.
+
+## Comparing scenarios
+
+Tick two or three comparisons to set them side by side. The table shows each scenario on its own distance and period, which makes totals hard to compare; none of the following is saved:
+
+- **Same basis for every scenario** applies one annual distance, one period (whole years) and one change of energy prices (in %, applied to fuel and electricity; a retrospective scenario with no recorded price per kWh keeps its recorded electricity) to every selected scenario, computed by the same engine as a saved scenario.
+- **Reference scenario** adds a column with each scenario's gap against it: the difference of saving (amount and % of the reference saving) and of the break-even.
+- The **cumulative advantage** chart draws, for each scenario, the combustion outlay minus the electric outlay year by year; it crosses zero at the break-even. The **horizon** selector limits the years shown.
+
+Scenarios in different currencies are not compared.
 
 ## Free and unknown charging costs
 
