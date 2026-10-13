@@ -98,6 +98,9 @@ const (
 const (
 	defaultWearRatePer10k = 1.2 // average EV tread wear in mm per 10 000 km
 	wearPriorMm           = 1.0 // measured wear at which the measure and the average rate weigh the same
+	criticalDepthMm       = 2.5
+	warningDepthMm        = 4.0
+	warningMarginMm       = 1.5
 )
 
 const rotatedAxleWeight = (2*frontAxleWeight + 2*rearAxleWeight) / 4
@@ -165,6 +168,11 @@ func projectRemainingKm(remainingDepth, neutralRatePer10k float64, start models.
 	return km
 }
 
+// tireLifetimeDistanceAtReading includes the mileage already on the tire when tracking began.
+func tireLifetimeDistanceAtReading(tire *models.Tire, sessions []models.TireMountSession, odometer float64) float64 {
+	return tire.InitialDistanceKm + TireDistanceAtOdometer(sessions, odometer)
+}
+
 // CalculateTireWear computes wear metrics based on depth logs, mount sessions, and TeslaMate power telemetry.
 func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Tire, vehicleCurrentOdometer float64) (*TireWearStats, error) {
 	logs, err := s.repo.ListTireLogs(ctx, tire.ID)
@@ -207,7 +215,7 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 			logLo, logHi = oldestLog.Odometer, latestLog.Odometer
 		} else {
 			// Single measure: wear since new over the tire's whole life at that reading.
-			distanceTraveled = tire.InitialDistanceKm + TireDistanceAtOdometer(sessions, latestLog.Odometer)
+			distanceTraveled = tireLifetimeDistanceAtReading(tire, sessions, latestLog.Odometer)
 			measuredWear = math.Max(0, initialDepth-latestLog.DepthMm)
 			logLo, logHi = 0, latestLog.Odometer
 		}
@@ -254,9 +262,11 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 	readingOdometer := 0.0
 	if len(logs) > 0 {
 		readingOdometer = logs[0].Odometer
-		distanceAtReading := tire.InitialDistanceKm + TireDistanceAtOdometer(sessions, readingOdometer)
+		var distanceAtReading float64
 		if len(sessions) == 0 && tire.MountedOdometer != nil {
 			distanceAtReading = tire.AccumulatedDistanceKm + math.Max(0, readingOdometer-*tire.MountedOdometer)
+		} else {
+			distanceAtReading = tireLifetimeDistanceAtReading(tire, sessions, readingOdometer)
 		}
 		sinceReadingKm = math.Max(0, totalDistance-distanceAtReading)
 	}
@@ -368,9 +378,9 @@ func (s *TireWearService) CalculateTireWear(ctx context.Context, tire *models.Ti
 	}
 
 	condition := "GOOD"
-	if currentDepth <= math.Max(minLegal, 2.5) {
+	if currentDepth <= math.Max(minLegal, criticalDepthMm) {
 		condition = "CRITICAL"
-	} else if currentDepth <= math.Max(4.0, minLegal+1.5) {
+	} else if currentDepth <= math.Max(warningDepthMm, minLegal+warningMarginMm) {
 		condition = "WARNING"
 	}
 

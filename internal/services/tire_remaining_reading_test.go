@@ -68,3 +68,44 @@ func TestDynamicForecastConsumesUseSinceMeasuredDepth(t *testing.T) {
 		t.Fatalf("telemetry projection ignored use or rewrote depth: %+v %+v", a, b)
 	}
 }
+
+func TestTireReadingFallbackWithoutMountSessions(t *testing.T) {
+	for _, tc := range []struct {
+		name                   string
+		reading, current, want float64
+	}{
+		{"reading on current mount", 25000, 30000, 31667},
+		{"reading before current mount", 15000, 30000, 26667},
+		{"reading ahead of odometer", 35000, 30000, 36667},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			mount := 20000.0
+			tire := wearTire(models.TirePosFL)
+			tire.MountedOdometer = &mount
+			tire.AccumulatedDistanceKm = 12000
+			store := &fakeTireWearStore{logs: []models.TireLog{{DepthMm: 6, Odometer: tc.reading}}}
+			stats, err := NewTireWearService(store).CalculateTireWear(context.Background(), tire, tc.current)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if stats.EstimatedRemainingKm != tc.want {
+				t.Fatalf("remaining = %v, want %v", stats.EstimatedRemainingKm, tc.want)
+			}
+			if stats.CurrentDepthMm != 6 {
+				t.Fatal("recorded depth changed")
+			}
+		})
+	}
+}
+
+func TestTireLifetimeDistanceAtReadingIncludesInitialMileage(t *testing.T) {
+	tire := &models.Tire{InitialDistanceKm: 4000}
+	end := 15000.0
+	sessions := []models.TireMountSession{
+		{MountedOdometer: 10000, DismountedOdometer: &end},
+		{MountedOdometer: 25000},
+	}
+	if got := tireLifetimeDistanceAtReading(tire, sessions, 28000); got != 12000 {
+		t.Fatalf("lifetime distance = %v, want 12000", got)
+	}
+}
