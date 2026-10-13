@@ -366,5 +366,18 @@
     "value": "Sculpture {depth} mm · {pct} d'usure",
     "none": "Aucune mesure : ajoutez une profondeur pour remplacer l'estimation théorique.",
     "lowConfidence": "Peu de millimètres usés pour l'instant : la prévision s'appuie sur l'usure moyenne. Ajoute un relevé pour l'affiner."
+  },
+  "wearComparison": {
+    "title": "Usure mesurée et attendue",
+    "measured": "Mesurée",
+    "expected": "Attendue",
+    "rate": "{value} mm / {distance} {unit}",
+    "lifespan": "Durée de vie : {value} {unit}",
+    "faster": "Usure {pct} plus rapide que prévu",
+    "slower": "Usure {pct} plus lente que prévu",
+    "same": "L’usure correspond au rythme attendu",
+    "declared": "Référence : la durée de vie que vous avez saisie.",
+    "average": "Référence : le rythme moyen d’usure de la bande de roulement.",
+    "confidence": "Poids de la mesure dans la prévision : {pct}."
   }
 }

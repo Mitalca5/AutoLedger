@@ -366,5 +366,18 @@
     "value": "{depth} mm tread · {pct} worn",
     "none": "No measurement: add a tread depth to replace the theoretical estimate.",
     "lowConfidence": "Few millimetres worn so far: the forecast leans on the average wear rate. Add a reading to refine it."
+  },
+  "wearComparison": {
+    "title": "Measured vs expected wear",
+    "measured": "Measured",
+    "expected": "Expected",
+    "rate": "{value} mm / {distance} {unit}",
+    "lifespan": "Lifespan: {value} {unit}",
+    "faster": "Wears {pct} faster than expected",
+    "slower": "Wears {pct} slower than expected",
+    "same": "Wear matches the expected rate",
+    "declared": "Reference: the lifespan you entered.",
+    "average": "Reference: the average tread-wear rate.",
+    "confidence": "Measurement weight in the forecast: {pct}."
   }
 }
