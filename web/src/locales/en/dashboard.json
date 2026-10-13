@@ -2,7 +2,6 @@
   "dashboardView": {
     "createYourFirstVehicle": "Create your first vehicle",
     "noVehicleConfigured": "No vehicle configured.",
-    "viewDrives": "View drives",
     "expense": "+ Expense",
     "tcoDashboard": "TCO dashboard",
     "subtitle": "Actual cost of ownership and cost per {unit} for {name}",
@@ -267,10 +266,12 @@
     "energyPanelLink": "Energy efficiency",
     "energyHybrid": "Energy (charges + fill-ups)",
     "hybridSplit": "Electricity {electricity} · fuel {fuel}",
-    "cashPaidWindow": "Cash paid · last month | Cash paid · last {months} months",
+    "cashPaid": "Cash paid",
+    "viewExpenses": "View expenses",
     "economicWindow": "Economic cost: {amount} · {cost_per_km}/{unit}",
     "sincePurchase": "Since {month}: {amount}",
-    "economicPerKmWindow": "Economic cost / {unit} · last month | Economic cost / {unit} · last {months} months",
+    "economicPerKm": "Economic cost / {unit}",
+    "windowMonths": "last month | last {months} months",
     "sincePurchasePerKm": "Since purchase: {amount}/{unit}",
     "currentMonth": "{month}",
     "currentMonthShort": "Current month",
@@ -351,6 +352,8 @@
   },
   "residualPanel": {
     "title": "Battery health and residual value",
+    "history": "Battery health history",
+    "manageReadings": "Readings ({count})",
     "health": "Battery state of health",
     "noHealth": "Unknown yet: add a reading, or the new-battery capacity so the charges can be compared with it.",
     "healthHint": "A reading can come from an OBD2 scan, a garage report, TeslaMate or the ingestion API. Without one, the capacity estimated from your complete charges is compared with the new-battery capacity.",
@@ -378,6 +381,9 @@
     "advancedHint": "The residual value combines age, mileage and battery health. These weights set the share of each: keep the defaults if unsure."
   },
   "followUp": {
-    "title": "Follow-up"
+    "title": "Follow-up",
+    "toComplete": "data to complete",
+    "maintenanceSoon": "maintenance coming up",
+    "maintenanceToPlan": "maintenance to schedule"
   }
 }

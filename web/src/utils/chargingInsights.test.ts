@@ -9,6 +9,7 @@ import {
   monthlyDatasets,
   monthlyPrices,
   placeCategoryRows,
+  categoryColor,
   savingsView,
   totalsWithEstimate,
   unclassifiedShare,
@@ -176,5 +177,15 @@ describe('estimated energy before tracking', () => {
     expect(estimatedSeries(s, 'energy')).toEqual([40, 0])
     expect(estimatedSeries(s, 'cost')).toEqual([10, 0])
     expect(estimatedSeries(stats([]), 'energy')).toBeNull()
+  })
+})
+
+describe('categoryColor', () => {
+  it('gives each category its own hue, with a neutral colour for the unclassified ones', () => {
+    expect(categoryColor('HOME')).toBe('#34d399')
+    expect(categoryColor('PUBLIC')).toBe('#fbbf24')
+    expect(categoryColor('OUTSIDE')).toBe(OUTSIDE_COLOR)
+    expect(categoryColor('')).toBe(UNCLASSIFIED_COLOR)
+    expect(categoryColor('UNKNOWN')).toBe(UNCLASSIFIED_COLOR)
   })
 })

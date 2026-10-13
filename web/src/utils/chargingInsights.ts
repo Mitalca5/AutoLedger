@@ -72,6 +72,12 @@ const CATEGORY_COLORS: Record<PlaceCategory, string[]> = {
   OTHER: ['#a78bfa', '#8b5cf6', '#c4b5fd'],
 }
 
+/** The colour of a whole category (the first shade of its hue), for a chart that folds the places by category. */
+export function categoryColor(category: string): string {
+  if (category === OUTSIDE_CATEGORY) return OUTSIDE_COLOR
+  return CATEGORY_COLORS[category as PlaceCategory]?.[0] ?? UNCLASSIFIED_COLOR
+}
+
 /** A stable colour per group: its category's hue, a shade per place of that category. */
 export function groupColors(groups: PlaceStatsGroup[]): Record<string, string> {
   const used: Record<string, number> = {}

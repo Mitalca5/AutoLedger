@@ -11,7 +11,7 @@ import EnergyTemperatureSection from './EnergyTemperatureSection.vue'
 import CostDonut from '@/components/costs/CostDonut.vue'
 import { AXIS_TEXT, GRID_COLOR, fmt, fmtMoney, fmtPercent, perUnit, mergeAcDcClasses, type ChargeClass, type EnergyStats } from './energyStats'
 import { filterMonthsByRange, rangeToMonths } from '@/utils/dashboard'
-import { placeCategoryRows, type PlaceStats } from '@/utils/chargingInsights'
+import { categoryColor, placeCategoryRows, type PlaceStats } from '@/utils/chargingInsights'
 import { placeCategoryKey } from '@/utils/chargingPlaces'
 import { usePreferencesStore } from '@/stores/preferences'
 import { currencySymbol, formatAmount } from '@/currency'
@@ -39,6 +39,8 @@ const stats = ref<EnergyStats | null>(null)
 // Where the energy was charged, over the same period: the figures of the place view of the charges tab
 const placeStats = ref<PlaceStats | null>(null)
 const placeRows = computed(() => (placeStats.value ? placeCategoryRows(placeStats.value) : []))
+const placeDonutItems = computed(() => placeRows.value.map((r) => ({ label: placeLabel(r.category), color: categoryColor(r.category), amount: r.kwh })))
+const placeTotalKwh = computed(() => placeRows.value.reduce((sum, r) => sum + r.kwh, 0))
 const placeLabel = (category: string) => (category ? t(placeCategoryKey(category)) : t('expenses.chargingInsights.unclassified'))
 const failed = ref(false)
 const prefs = usePreferencesStore()
@@ -209,7 +211,8 @@ onBeforeUnmount(() => {
     :is="summary ? 'details' : 'section'"
     v-else-if="hasData"
     id="energy-efficiency"
-    class="group scroll-mt-20 space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm"
+    class="group scroll-mt-20 rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm"
+    :class="summary ? 'open:space-y-4' : 'space-y-4'"
     aria-labelledby="energy-efficiency-title"
   >
     <component :is="summary ? 'summary' : 'div'" class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center" :class="summary ? 'cursor-pointer list-none' : ''">
@@ -297,18 +300,37 @@ onBeforeUnmount(() => {
 
     <div v-if="placeRows.length > 0">
       <h4 class="mb-2 text-xs font-bold text-slate-200">{{ $t('dashboard.energyEfficiencyPanel.byPlace') }}</h4>
-      <ul class="space-y-1.5 text-xs">
-        <li v-for="r in placeRows" :key="r.category || 'unclassified'" class="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
-          <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-            <span class="font-semibold text-white">{{ placeLabel(r.category) }}</span>
-            <span class="text-slate-300">
-              {{ $t('dashboard.energyEfficiencyPanel.placeShare', { share: Math.round(r.sharePct), kwh: fmt(r.kwh, 0) }) }}
-              · {{ r.pricePerKwh === null ? $t('expenses.chargingInsights.noPrice') : $t('expenses.chargingInsights.pricePerKwh', { price: fmtMoney(r.pricePerKwh, currency, 3) }) }}
-            </span>
+      <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-5">
+        <div v-if="placeRows.length > 1" class="flex flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-950/60 p-3 md:col-span-2">
+          <div class="relative h-40 w-full">
+            <CostDonut
+              :items="placeDonutItems"
+              unit="kWh"
+              :show-legend="false"
+              :empty-label="$t('dashboard.energyEfficiencyPanel.noCharge')"
+              :chart-label="$t('dashboard.energyEfficiencyPanel.byPlace')"
+            />
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center text-center" aria-hidden="true">
+              <span class="text-base font-bold leading-tight text-white">{{ fmt(placeTotalKwh, 0) }}<span class="block text-xs font-medium text-slate-400">kWh</span></span>
+            </div>
           </div>
-          <p v-if="r.unknownSessions > 0" class="mt-0.5 text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.placeUnknown', { count: r.unknownSessions }) }}</p>
-        </li>
-      </ul>
+        </div>
+        <ul :class="placeRows.length > 1 ? 'md:col-span-3' : 'md:col-span-5'" class="space-y-1.5 text-xs">
+          <li v-for="r in placeRows" :key="r.category || 'unclassified'" class="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2">
+            <div class="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-3">
+              <span class="flex items-center gap-2 font-semibold text-white">
+                <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: categoryColor(r.category) }" aria-hidden="true"></span>
+                {{ placeLabel(r.category) }}
+              </span>
+              <span class="text-slate-300">
+                {{ $t('dashboard.energyEfficiencyPanel.placeShare', { share: Math.round(r.sharePct), kwh: fmt(r.kwh, 0) }) }}
+                · {{ r.pricePerKwh === null ? $t('expenses.chargingInsights.noPrice') : $t('expenses.chargingInsights.pricePerKwh', { price: fmtMoney(r.pricePerKwh, currency, 3) }) }}
+              </span>
+            </div>
+            <p v-if="r.unknownSessions > 0" class="mt-0.5 text-slate-400">{{ $t('dashboard.energyEfficiencyPanel.placeUnknown', { count: r.unknownSessions }) }}</p>
+          </li>
+        </ul>
+      </div>
       <router-link to="/energy?tab=CHARGES" class="tap-text mt-1 inline-block text-xs font-semibold text-sky-400 underline">
         {{ $t('dashboard.energyEfficiencyPanel.placeLink') }}
       </router-link>

@@ -4,6 +4,7 @@ import {
   buildLeaseSummary,
   buildMonthBreakdown,
   countFollowUpItems,
+  followUpItems,
   computeMonthFixedVariable,
   currentMonthStats,
   rollingWindowStats,
@@ -485,5 +486,19 @@ describe('monthlyCostSeries', () => {
 
   it('is empty without months', () => {
     expect(monthlyCostSeries([], 'cash')).toEqual({ series: [], totals: [] })
+  })
+})
+
+describe('followUpItems', () => {
+  const base = { interval_km: 10000, remaining_km: 1000 }
+  it('names the data to complete and the maintenance coming due', () => {
+    expect(followUpItems({ is_complete: false }, [{ ...base, status: 'DUE_SOON' }], true)).toEqual({ data: true, maintenance: 'soon' })
+  })
+  it('invites to plan a maintenance when nothing is scheduled', () => {
+    expect(followUpItems({ is_complete: true }, [], false)).toEqual({ data: false, maintenance: 'plan' })
+  })
+  it('has nothing to say when the data is complete and only overdue reminders remain', () => {
+    expect(followUpItems({ is_complete: true }, [{ ...base, status: 'OVERDUE', remaining_km: -5 }], true)).toEqual({ data: false, maintenance: null })
+    expect(followUpItems(null, [], true)).toEqual({ data: false, maintenance: null })
   })
 })

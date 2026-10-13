@@ -23,7 +23,7 @@ const leaseContract = computed(() => buildLeaseSummary(props.tco))
     <!-- Card Header: the contract state stays visible when the details are closed -->
     <summary class="flex cursor-pointer list-none flex-col sm:flex-row sm:items-center justify-between gap-3 group-open:pb-3 group-open:border-b border-slate-800/80">
       <div class="flex items-center gap-2.5 flex-wrap">
-        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-1.5">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-200 border border-slate-700 flex items-center gap-1.5">
           <FileText class="w-3.5 h-3.5" />
           {{ $t('dashboard.leaseContractCard.contract', { acquisitionType: leaseContract.acquisitionType }) }}
         </span>

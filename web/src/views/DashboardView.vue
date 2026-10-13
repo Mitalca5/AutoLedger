@@ -22,7 +22,8 @@ import TagBreakdown from '@/components/dashboard/TagBreakdown.vue'
 import MonthDetailModal from '@/components/dashboard/MonthDetailModal.vue'
 import MonthlyRangeSelector from '@/components/dashboard/MonthlyRangeSelector.vue'
 import { distanceUnit } from '@/units'
-import { countFollowUpItems } from '@/utils/dashboard'
+import { countFollowUpItems, followUpItems } from '@/utils/dashboard'
+import { t } from '@/i18n'
 import { hasReminderSchedule } from '@/utils/expenses'
 
 // The page loads the TCO and the reminders; each card and chart of the dashboard is a component that
@@ -35,6 +36,14 @@ const loading = ref(true)
 const loadError = ref<string | null>(null)
 const dashboardReminders = ref<MaintenanceReminder[]>([])
 const followUpCount = computed(() => countFollowUpItems(tco.value?.completeness, dashboardReminders.value, dashboardReminders.value.some(hasReminderSchedule)))
+const followUpLabels = computed(() => {
+  const items = followUpItems(tco.value?.completeness, dashboardReminders.value, dashboardReminders.value.some(hasReminderSchedule))
+  const labels: string[] = []
+  if (items.data) labels.push(t('dashboard.followUp.toComplete'))
+  if (items.maintenance === 'soon') labels.push(t('dashboard.followUp.maintenanceSoon'))
+  if (items.maintenance === 'plan') labels.push(t('dashboard.followUp.maintenanceToPlan'))
+  return labels
+})
 const selectedMonth = ref<any | null>(null)
 
 // Monthly costs for the charts; null until the TCO is loaded
@@ -84,22 +93,14 @@ onMounted(() => {
     <!-- Header Summary -->
     <PageHeader :title="$t('dashboard.dashboardView.tcoDashboard')" :icon="PageIcon">
       {{ $t('dashboard.dashboardView.subtitle', { unit: distanceUnit(), name: vehicleStore.activeVehicle?.name || $t('dashboard.dashboardView.yourVehicle') }) }}
+      <!-- The quick-add button and the bottom bar already cover this on a phone -->
       <template #actions>
-      <div class="flex items-center gap-2">
         <router-link
           to="/expenses"
-          class="btn btn-lg btn-secondary tap-text"
+          class="btn btn-lg btn-secondary tap-text max-sm:hidden"
         >
           {{ $t('dashboard.dashboardView.expense') }}
         </router-link>
-        <router-link
-          to="/drives"
-          class="btn btn-lg btn-secondary tap-text"
-        >
-          {{ $t('dashboard.dashboardView.viewDrives') }}
-        </router-link>
-      </div>
-    
       </template>
     </PageHeader>
 
@@ -129,7 +130,7 @@ onMounted(() => {
 
       <!-- Charts Skeletons -->
       <!-- One period for the monthly cost and mileage charts below; pinned only where there is room for it -->
-      <div class="sm:sticky sm:top-[4.25rem] z-30 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
+      <div class="sm:sticky sm:top-[4.25rem] z-30 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
         <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
         <MonthlyRangeSelector
           :model-value="prefs.dashboardRange"
@@ -165,10 +166,20 @@ onMounted(() => {
       <TcoMetricsGrid :tco="tco" @open-month="openMonthDetail" />
 
       <!-- What can be trusted and what is missing, under the figures -->
-      <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount">
+      <DashboardFollowUp v-if="tco?.completeness || followUpCount > 0" :count="followUpCount" :items="followUpLabels">
         <DataQualityCard :tco="tco" :vehicle-id="vehicleId" />
         <NextDueCard :reminders="dashboardReminders" :can-edit="vehicleStore.canEdit" />
       </DashboardFollowUp>
+
+      <!-- One period for the charts and the energy summary below; pinned only where there is room for it -->
+      <div class="sm:sticky sm:top-[4.25rem] z-30 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800 bg-slate-900/95 px-4 py-2 backdrop-blur-md">
+        <span class="text-xs font-semibold text-slate-300">{{ $t('dashboard.dashboardView.chartsPeriod') }}</span>
+        <MonthlyRangeSelector
+          :model-value="prefs.dashboardRange"
+          :label="$t('dashboard.dashboardView.chartsPeriod')"
+          @update:model-value="prefs.setDashboardRange"
+        />
+      </div>
 
       <!-- Energy summary: consumption and real cost per 100 km (electric vehicles); the detail is on the energy page -->
       <EnergyEfficiencyPanel
