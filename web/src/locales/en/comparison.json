@@ -272,5 +272,9 @@
     "hint": "Amounts keep this currency. Changing it does not convert them.",
     "legacy": "This older projection has no recorded currency. Confirm the original currency before saving or viewing it.",
     "same": "Select comparisons in the same known currency. Edit older projections to confirm their original currency."
+  },
+  "priceWarning": {
+    "high": "This price is more than {factor} times the median recorded for the selected vehicle ({median}/{unit}). Check the value or confirm that you want to keep it.",
+    "keep": "Keep this price"
   }
 }

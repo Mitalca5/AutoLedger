@@ -5,6 +5,11 @@ import { api } from '@/services/api'
 import { distanceUnit, formatDistanceValue } from '@/units'
 import DistanceInput from '@/components/DistanceInput.vue'
 import NumberInput from '@/components/NumberInput.vue'
+import { formatAmount } from '@/currency'
+import { perVolume, volumeUnitLabel } from '@/units'
+import { useComparisonPriceHistory } from '@/composables/useComparisonPriceHistory'
+import { useEnergyPriceWarning } from '@/composables/useEnergyPriceWarning'
+import { HIGH_PRICE_MULTIPLIER } from '@/utils/energyPriceWarning'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import {
   isWhatIfDirty,
@@ -23,7 +28,7 @@ import { RotateCcw, SlidersHorizontal } from 'lucide-vue-next'
 
 // Explore other annual distance, fuel and electricity prices on a projection without editing the saved scenario:
 // the explored result comes from the server's comparison engine, nothing is stored and recorded costs are untouched.
-const props = defineProps<{ scenario: any; result: any; currency: string }>()
+const props = defineProps<{ scenario: any; result: any; currency: string; referenceVehicleId?: string }>()
 const emit = defineEmits<{ 'save-as-new': [form: ComparisonForm] }>()
 
 const DEBOUNCE_MS = 250
@@ -33,6 +38,11 @@ const limits = computed<WhatIfInputLimits>(() => props.result.input_limits)
 const bounds = computed(() => whatIfBounds(base.value, limits.value))
 const ranges = computed(() => whatIfRanges(limits.value))
 const explored = reactive<WhatIfInputs>({ ...base.value })
+const history = useComparisonPriceHistory(() => props.referenceVehicleId, () => props.scenario?.ice?.fuel_type || '', () => props.currency)
+const warningContext = () => `${props.referenceVehicleId}:${props.scenario?.id}:${props.scenario?.ice?.fuel_type}:${props.currency}`
+const fuelWarning = useEnergyPriceWarning(() => explored.fuel_price, () => history.value?.fuel, warningContext)
+const electricityWarning = useEnergyPriceWarning(() => explored.eur_per_kwh, () => history.value?.electricity, warningContext)
+const needsConfirmation = computed(() => fuelWarning.needsConfirmation.value || electricityWarning.needsConfirmation.value)
 const preview = ref<any | null>(null)
 const loading = ref(false)
 const failed = ref(false)
@@ -68,10 +78,11 @@ async function refresh() {
 }
 
 watch(
-  () => ({ ...explored }),
+  () => [JSON.stringify(explored), needsConfirmation.value],
   () => {
     clearTimeout(timer)
-    if (!dirty.value) {
+    // A pending confirmation drops the previous result: it was computed for another price.
+    if (!dirty.value || needsConfirmation.value) {
       sequence += 1
       preview.value = null
       loading.value = false
@@ -89,6 +100,7 @@ onBeforeUnmount(() => {
 })
 
 function saveAsNew() {
+  if (!valid.value || needsConfirmation.value) return
   const form = whatIfForm(props.scenario, explored)
   form.name = t('comparison.whatIf.copyName', { name: props.scenario?.name || '' }).slice(0, 100)
   emit('save-as-new', form)
@@ -117,6 +129,15 @@ const originalHint = (key: WhatIfKey) => {
   return key === 'annual_km' ? `${formatDistanceValue(v)} ${distanceUnit()}` : v.toLocaleString(intlLocale(), { maximumFractionDigits: 3 })
 }
 
+function warningFor(key: WhatIfKey) {
+  return key === 'fuel_price' ? fuelWarning : key === 'eur_per_kwh' ? electricityWarning : null
+}
+
+function historicalMedian(key: WhatIfKey): string {
+  const median = key === 'fuel_price' ? history.value?.fuel.median : history.value?.electricity.median
+  return formatAmount(key === 'fuel_price' ? perVolume(median || 0) : median || 0, props.currency)
+}
+
 const rows = computed(() => {
   const o = originalFigures.value
   const e = exploredFigures.value
@@ -130,6 +151,7 @@ const rows = computed(() => {
 </script>
 
 <template>
+  <!-- Older cached results without API bounds cannot safely drive the what-if controls. -->
   <section v-if="limits" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 no-print" data-testid="what-if">
     <div class="flex items-center justify-between gap-3 mb-3">
       <h2 class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
@@ -158,6 +180,12 @@ const rows = computed(() => {
           <DistanceInput v-else-if="f.key === 'fuel_price'" :id="f.id" v-model="explored.fuel_price" kind="per-volume" :digits="3" :min="ranges.fuel_price.min" :max="ranges.fuel_price.max" class="field" />
           <NumberInput v-else :id="f.id" v-model="explored.eur_per_kwh" :min="ranges.eur_per_kwh.min" :max="ranges.eur_per_kwh.max" class="field" />
           <div class="text-[11px] text-slate-500 mt-0.5">{{ $t('comparison.whatIf.original', { value: originalHint(f.key) }) }}</div>
+        </div>
+        <div class="sm:col-span-3 empty:hidden" aria-live="polite">
+          <div v-if="valid && warningFor(f.key)?.needsConfirmation.value" class="rounded-lg border border-warning-500/40 p-3 text-xs text-warning-300">
+            <p>{{ $t('comparison.priceWarning.high', { factor: HIGH_PRICE_MULTIPLIER, median: historicalMedian(f.key), unit: f.key === 'fuel_price' ? volumeUnitLabel() : 'kWh' }) }}</p>
+            <button type="button" class="btn btn-secondary mt-2" @click="warningFor(f.key)?.confirm()">{{ $t('comparison.priceWarning.keep') }}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -188,7 +216,7 @@ const rows = computed(() => {
     <p v-else-if="failed" class="text-xs text-red-300 mt-2" role="alert">{{ $t('comparison.whatIf.failed') }}</p>
 
     <div class="flex justify-end mt-3">
-      <button type="button" class="btn btn-secondary" :disabled="!dirty || !valid" @click="saveAsNew">
+      <button type="button" class="btn btn-secondary" :disabled="!dirty || !valid || needsConfirmation" @click="saveAsNew">
         {{ $t('comparison.whatIf.saveAsNew') }}
       </button>
     </div>

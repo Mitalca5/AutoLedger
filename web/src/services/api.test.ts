@@ -226,6 +226,11 @@ describe('query building', () => {
     expect(lastUrl()).toBe('/api/vehicles/v1/carpools/estimate?')
   })
 
+  it('scopes comparison price history to the selected vehicle and fuel', async () => {
+    await api.getComparisonPriceHistory('vehicle/one', 'SP95_E10')
+    expect(lastUrl()).toBe('/api/comparison-scenarios/price-history?vehicle_id=vehicle%2Fone&fuel_type=SP95_E10')
+  })
+
   it('recalculates only the given carpool trips', async () => {
     await api.recalculateCarpools('v1', ['a'])
     expect(JSON.parse(fetchMock.mock.calls.at(-1)![1].body)).toEqual({ trip_ids: ['a'] })

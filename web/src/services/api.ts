@@ -404,6 +404,8 @@ export const api = {
   previewComparison: (data: any) =>
     request<any>('/comparison-scenarios/preview', { method: 'POST', body: JSON.stringify(data) }),
   getComparisonResult: (scenarioId: string) => request<any>(`/comparison-scenarios/${scenarioId}/result`),
+  getComparisonPriceHistory: (vehicleId: string, fuelType: string) =>
+    request<import('@/utils/energyPriceWarning').ComparisonPriceHistory>(`/comparison-scenarios/price-history?${new URLSearchParams({ vehicle_id: vehicleId, fuel_type: fuelType })}`),
   getComparisonDefaults: (vehicleId?: string, currency?: string) => {
     const params = new URLSearchParams()
     if (vehicleId) params.set('vehicle_id', vehicleId)

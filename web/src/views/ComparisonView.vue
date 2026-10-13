@@ -477,6 +477,7 @@ onMounted(async () => {
       :scenario="currentScenario"
       :side="resultSide"
       :currency="currency"
+      :reference-vehicle-id="vehicleStore.activeVehicle?.id"
       @back="view = 'list'"
       @edit="editScenario(currentScenario)"
       @save-as-new="startFromExplored"

@@ -1,6 +1,86 @@
 import { expect, test } from '@playwright/test'
 import { authHeaders, expectNoHorizontalScroll, useVehicle, vehicles, type Vehicle } from './helpers'
 
+test('what-if allows confirming an unusually high energy price without changing the saved scenario', async ({ page, request }) => {
+  const headers = await authHeaders(request)
+  const created = await request.post('/api/vehicles', { headers, data: { name: 'Price warning reference', powertrain: 'EV', currency: 'EUR' } })
+  expect(created.ok()).toBeTruthy()
+  const vehicle = await created.json()
+  let scenarioId: string | undefined
+  try {
+    for (let i = 0; i < 5; i++) {
+      const charge = await request.post(`/api/vehicles/${vehicle.id}/charges`, { headers, data: { date: '2026-01-01T12:00:00Z', kwh_added: 10, cost: 2, currency: 'EUR' } })
+      expect(charge.ok()).toBeTruthy()
+    }
+    const name = 'Relative price warning'
+    const saved = await request.post('/api/comparison-scenarios/', { headers, data: {
+      name, mode: 'PROJECTION', currency: 'EUR', annual_km: 12000, years: 5,
+      ice: { fuel_type: 'SP95_E10', l_per_100km: 6.5, fuel_price: 1.7 },
+      tracked: { kwh_per_100km: 16, eur_per_kwh: 0.2 },
+    } })
+    expect(saved.ok()).toBeTruthy()
+    scenarioId = (await saved.json()).id
+    await useVehicle(page, vehicle.id, '/comparison')
+    const history = page.waitForResponse(r => r.url().includes('/comparison-scenarios/price-history'))
+    await page.getByText(name, { exact: true }).click()
+    expect((await history).ok()).toBeTruthy()
+    await page.locator('#wi-elec').fill('0.8')
+    await expect(page.getByText(/more than 3 times/)).toBeVisible()
+    const save = page.getByRole('button', { name: 'Save as a new comparison' })
+    await expect(save).toBeDisabled()
+    await page.setViewportSize({ width: 320, height: 800 })
+    await expectNoHorizontalScroll(page)
+    const preview = page.waitForResponse(r => r.url().endsWith('/comparison-scenarios/preview'))
+    await page.getByRole('button', { name: 'Keep this price' }).click()
+    expect((await preview).ok()).toBeTruthy()
+    await expect(save).toBeEnabled()
+    await expect(page.locator('#wi-elec')).toHaveValue('0.8')
+    await page.locator('#wi-elec').fill('0.9')
+    await expect(page.getByRole('button', { name: 'Keep this price' })).toBeVisible()
+    const list = await request.get('/api/comparison-scenarios/', { headers })
+    const original = (await list.json()).find((s: any) => s.id === scenarioId)
+    expect(original.tracked.eur_per_kwh).toBe(0.2)
+  } finally {
+    if (scenarioId) await request.delete(`/api/comparison-scenarios/${scenarioId}`, { headers })
+    await request.delete(`/api/vehicles/${vehicle.id}`, { headers })
+  }
+})
+
+test('what-if asks before keeping an unusually high fuel price', async ({ page, request }) => {
+  const headers = await authHeaders(request)
+  const created = await request.post('/api/vehicles', { headers, data: { name: 'Fuel warning reference', powertrain: 'ICE', currency: 'EUR' } })
+  expect(created.ok()).toBeTruthy()
+  const vehicle = await created.json()
+  let scenarioId: string | undefined
+  try {
+    for (let i = 0; i < 5; i++) {
+      const fill = await request.post(`/api/vehicles/${vehicle.id}/fuel-logs`, { headers, data: { date: '2026-01-01T12:00:00Z', amount: 17, liters: 10, fuel_type: 'SP95_E10' } })
+      expect(fill.ok()).toBeTruthy()
+    }
+    const name = 'Relative fuel warning'
+    const saved = await request.post('/api/comparison-scenarios/', { headers, data: {
+      name, mode: 'PROJECTION', currency: 'EUR', annual_km: 12000, years: 5,
+      ice: { fuel_type: 'SP95_E10', l_per_100km: 6.5, fuel_price: 1.7 },
+      tracked: { kwh_per_100km: 16, eur_per_kwh: 0.2 },
+    } })
+    expect(saved.ok()).toBeTruthy()
+    scenarioId = (await saved.json()).id
+    await useVehicle(page, vehicle.id, '/comparison')
+    const history = page.waitForResponse(r => r.url().includes('/comparison-scenarios/price-history'))
+    await page.getByText(name, { exact: true }).click()
+    expect((await history).ok()).toBeTruthy()
+    await page.locator('#wi-fuel').fill('6')
+    await expect(page.getByText(/more than 3 times/)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Save as a new comparison' })).toBeDisabled()
+    await page.getByRole('button', { name: 'Keep this price' }).click()
+    await expect(page.getByRole('button', { name: 'Save as a new comparison' })).toBeEnabled()
+    await expect(page.locator('#wi-fuel')).toHaveValue('6')
+  } finally {
+    if (scenarioId) await request.delete(`/api/comparison-scenarios/${scenarioId}`, { headers })
+    await request.delete(`/api/vehicles/${vehicle.id}`, { headers })
+  }
+})
+
 let ev: Vehicle
 let ice: Vehicle
 

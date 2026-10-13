@@ -13,7 +13,7 @@ import type { ComparisonForm } from '@/utils/comparisonForm'
 import { ArrowLeft, Download, Info, Pencil, Printer, TrendingDown, TrendingUp } from 'lucide-vue-next'
 
 // The outcome of one scenario: verdict, savings, cost breakdown, charts and the CSV / print exports.
-const props = defineProps<{ result: any | null; scenario: any | null; side: TrackedSide; currency: string }>()
+const props = defineProps<{ result: any | null; scenario: any | null; side: TrackedSide; currency: string; referenceVehicleId?: string }>()
 const emit = defineEmits<{ back: []; edit: []; 'save-as-new': [form: ComparisonForm] }>()
 
 const sk = (key: string) => sideKey(key, props.side)
@@ -210,6 +210,7 @@ function printResult() {
         :scenario="scenario"
         :result="result"
         :currency="currency"
+        :reference-vehicle-id="referenceVehicleId"
         @save-as-new="emit('save-as-new', $event)"
       />
 
