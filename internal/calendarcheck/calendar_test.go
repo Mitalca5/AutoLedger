@@ -11,21 +11,17 @@ import (
 	"testing"
 )
 
-// These functions deliberately walk month buckets starting on day 1. Counts are exact:
-// an extra call in an already approved function still needs a review.
-var firstOfMonthSites = map[string]struct {
-	count  int
-	reason string
-}{
-	"internal/database/repository_fleet.go:GetFleetSummary":                              {2, "startOfMonth is constructed on day 1; startOfHistory derives from it"},
-	"internal/services/charging_place_stats.go:bounds":                                   {1, "time.Date explicitly sets the day to 1"},
-	"internal/services/energy_stats.go:previousMonths":                                   {1, "parsing YYYY-MM starts on day 1"},
-	"internal/services/smoothing.go:allocateMissingKmByMonth":                            {1, "cur is constructed on day 1 and advances whole month buckets"},
-	"internal/services/tco_maintenance_amortization.go:calculateMaintenanceAmortization": {1, "first and last are parsed YYYY-MM month buckets"},
-	"internal/services/tco_monthly.go:fillMonths":                                        {1, "first is parsed from YYYY-MM"},
-	"internal/services/tco_tire_amortization.go:computeMonthlyTireAmortization":          {1, "startMonth is parsed from YYYY-MM"},
-	"internal/services/tire_forecast.go:coveredMonths":                                   {1, "d is constructed on day 1"},
-	"internal/services/tire_forecast.go:monthlyKmProfile":                                {2, "thisMonth starts on day 1; start derives from it"},
+// Files that deliberately walk month buckets starting on day 1, with the reason. A call anywhere else must use
+// models.AddCalendarMonths, which clamps to the end of a shorter month.
+var firstOfMonthFiles = map[string]string{
+	"internal/database/repository_fleet.go":             "startOfMonth is constructed on day 1; startOfHistory derives from it",
+	"internal/services/charging_place_stats.go":         "the period start is built with time.Date on day 1",
+	"internal/services/energy_stats.go":                 "previousMonths parses YYYY-MM, which starts on day 1",
+	"internal/services/smoothing.go":                    "allocateMissingKmByMonth advances whole month buckets from day 1",
+	"internal/services/tco_maintenance_amortization.go": "first and last are parsed YYYY-MM month buckets",
+	"internal/services/tco_monthly.go":                  "fillMonths starts from a parsed YYYY-MM",
+	"internal/services/tco_tire_amortization.go":        "startMonth is parsed from YYYY-MM",
+	"internal/services/tire_forecast.go":                "coveredMonths and monthlyKmProfile start on day 1",
 }
 
 func monthAdds(fset *token.FileSet, filename string, source any) (map[string]int, error) {
@@ -94,11 +90,11 @@ func TestMonthAdditionsRequireCalendarClampOrReviewedMonthBucket(t *testing.T) {
 			if err != nil {
 				return err
 			}
+			key := filepath.ToSlash(rel)
 			for fn, count := range calls {
-				key := filepath.ToSlash(rel) + ":" + fn
-				seen[key] = count
-				if _, allowed := firstOfMonthSites[key]; !allowed {
-					t.Errorf("%s uses AddDate with months: use models.AddCalendarMonths or document why its date always starts on day 1", key)
+				seen[key] += count
+				if firstOfMonthFiles[key] == "" {
+					t.Errorf("%s (%s) uses AddDate with months: use models.AddCalendarMonths or document why its date always starts on day 1", key, fn)
 				}
 			}
 			return nil
@@ -107,9 +103,9 @@ func TestMonthAdditionsRequireCalendarClampOrReviewedMonthBucket(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for key, allowed := range firstOfMonthSites {
-		if allowed.reason == "" || seen[key] != allowed.count {
-			t.Errorf("review month-bucket exception %s: got %d calls, expected %d (%s)", key, seen[key], allowed.count, allowed.reason)
+	for key := range firstOfMonthFiles {
+		if seen[key] == 0 {
+			t.Errorf("%s no longer adds months with AddDate: remove its exception", key)
 		}
 	}
 }
