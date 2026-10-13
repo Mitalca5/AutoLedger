@@ -10,23 +10,21 @@ import (
 
 func TestMeasuredWearComparedWithDeclaredOrAverageLifespan(t *testing.T) {
 	for _, tc := range []struct {
-		name                          string
-		rate                          float64
-		declared                      int
-		expectedRate, lifespan, delta float64
-		reference                     string
+		name                      string
+		rate                      float64
+		declared                  int
+		measured, expected, delta float64
+		reference                 string
 	}{
-		{"declared lifespan", 2, 40000, 1.6, 40000, 25, "declared"},
-		{"average wear", 2.4, 0, 1.2, 53333, 100, "average"},
-		{"slower wear", 0.8, 40000, 1.6, 40000, -50, "declared"},
+		{"declared lifespan, faster wear", 2, 40000, 32000, 40000, -20, "declared"},
+		{"average wear", 2.4, 0, 26667, 53333, -50, "average"},
+		{"slower wear", 0.8, 40000, 80000, 40000, 100, "declared"},
+		{"matching wear", 1.6, 40000, 40000, 40000, 0, "declared"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			got := compareMeasuredTireWear(tc.rate, 6.4, tc.declared)
-			if got == nil || math.Abs(got.ExpectedRatePer10kKm-tc.expectedRate) > 1e-9 || got.ExpectedLifespanKm != tc.lifespan || got.DeltaPct != tc.delta || got.Reference != tc.reference {
+			if got == nil || got.MeasuredLifespanKm != tc.measured || got.ExpectedLifespanKm != tc.expected || got.DeltaPct != tc.delta || got.Reference != tc.reference {
 				t.Fatalf("unexpected comparison: %+v", got)
-			}
-			if got.MeasuredLifespanKm != math.Round(6.4/tc.rate*10000) {
-				t.Fatal("measured lifespan does not follow the raw measured rate")
 			}
 		})
 	}
@@ -48,7 +46,7 @@ func TestWearComparisonUsesMeasuredRateNotBlendedForecast(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stats.WearComparison == nil || stats.WearComparison.MeasuredRatePer10kKm != 2 || stats.WearComparison.MeasuredLifespanKm != 32000 || stats.WearComparison.DeltaPct != 25 {
+	if stats.WearComparison == nil || stats.WearComparison.MeasuredLifespanKm != 32000 || stats.WearComparison.ExpectedLifespanKm != 40000 || stats.WearComparison.DeltaPct != -20 {
 		t.Fatalf("unexpected measured comparison: %+v", stats.WearComparison)
 	}
 	if stats.WearRatePer10kKm >= 2 || stats.CurrentDepthMm != 6 {

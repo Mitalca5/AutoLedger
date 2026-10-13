@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { tireWearComparison, tireWearComparisonTone } from './tireWearComparison'
+import { tireWearComparison, tireWearComparisonTone, type TireWearComparison } from './tireWearComparison'
 
-const value = { measured_rate_per_10k_km: 2, expected_rate_per_10k_km: 1.6, measured_lifespan_km: 32000, expected_lifespan_km: 40000, delta_pct: 25, reference: 'declared' as const }
+const value: TireWearComparison = { measured_lifespan_km: 32000, expected_lifespan_km: 40000, delta_pct: -20, reference: 'declared' }
 
 describe('tire wear comparison', () => {
   it('appears only with a valid measured comparison, including an exact match', () => {
@@ -12,10 +12,18 @@ describe('tire wear comparison', () => {
     expect(tireWearComparison({ wear_rate_source: 'measured', wear_comparison: { ...value, measured_lifespan_km: NaN } })).toBeNull()
     expect(tireWearComparison(null)).toBeNull()
   })
-  it('highlights deviations strictly outside the 25 percent band', () => {
-    expect(tireWearComparisonTone(25)).toBe('text-slate-300')
-    expect(tireWearComparisonTone(-25)).toBe('text-slate-300')
-    expect(tireWearComparisonTone(25.1)).toBe('text-warning-400')
-    expect(tireWearComparisonTone(-25.1)).toBe('text-success-400')
+
+  it('colours a gap beyond 20 percent of the declared lifespan, in either direction', () => {
+    expect(tireWearComparisonTone({ ...value, delta_pct: -20 }, 0.8)).toBe('text-slate-300')
+    expect(tireWearComparisonTone({ ...value, delta_pct: 20 }, 0.8)).toBe('text-slate-300')
+    expect(tireWearComparisonTone({ ...value, delta_pct: -20.1 }, 0.8)).toBe('text-warning-400')
+    expect(tireWearComparisonTone({ ...value, delta_pct: 20.1 }, 0.8)).toBe('text-success-400')
+  })
+
+  it('stays neutral when the measure is thin or the reference is only the average rate', () => {
+    expect(tireWearComparisonTone({ ...value, delta_pct: -50 }, 0.49)).toBe('text-slate-300')
+    expect(tireWearComparisonTone({ ...value, delta_pct: -50 }, undefined)).toBe('text-slate-300')
+    expect(tireWearComparisonTone({ ...value, delta_pct: -50, reference: 'average' }, 0.9)).toBe('text-slate-300')
+    expect(tireWearComparisonTone({ ...value, delta_pct: -50 }, 0.5)).toBe('text-warning-400')
   })
 })

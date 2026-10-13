@@ -369,15 +369,11 @@
   },
   "wearComparison": {
     "title": "Measured vs expected wear",
-    "measured": "Measured",
-    "expected": "Expected",
-    "rate": "{value} mm / {distance} {unit}",
-    "lifespan": "Lifespan: {value} {unit}",
-    "faster": "Wears {pct} faster than expected",
-    "slower": "Wears {pct} slower than expected",
+    "lifespans": "Lifespan at the measured rate: {measured} · expected: {expected}",
+    "shorter": "Lifespan {pct} shorter than expected",
+    "longer": "Lifespan {pct} longer than expected",
     "same": "Wear matches the expected rate",
     "declared": "Reference: the lifespan you entered.",
-    "average": "Reference: the average tread-wear rate.",
-    "confidence": "Measurement weight in the forecast: {pct}."
+    "average": "Reference: the average tread-wear rate."
   }
 }
