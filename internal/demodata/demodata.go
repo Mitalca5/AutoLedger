@@ -8,6 +8,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/teslacost/teslacost/internal/models"
 )
 
 const Days = 240
@@ -234,7 +236,7 @@ func buildEV(today time.Time) Dataset {
 	ds.Reminders = []Reminder{
 		{"Brake fluid", today.AddDate(0, 0, 9)},
 		{"Cabin air filter", today.AddDate(0, 0, 45)},
-		{"Technical inspection", today.AddDate(0, 6, 0)},
+		{"Technical inspection", models.AddCalendarMonths(today, 6)},
 	}
 	ds.Tires = []Tire{
 		{"Michelin", "Pilot Sport 4", "235/45 R18", "SUMMER", at(200), 79200, "FL", ds.Vehicle.StartOdometer, 40000},
@@ -320,7 +322,7 @@ func buildICE(today time.Time) Dataset {
 	ds.Reminders = []Reminder{
 		{"Oil change", today.AddDate(0, 0, 14)},
 		{"Timing belt check", today.AddDate(0, 0, 60)},
-		{"Technical inspection", today.AddDate(0, 3, 0)},
+		{"Technical inspection", models.AddCalendarMonths(today, 3)},
 	}
 	for _, pos := range []string{"FL", "FR", "RL", "RR"} {
 		ds.Tires = append(ds.Tires, Tire{"Continental", "EcoContact 6", "195/55 R16", "SUMMER", at(235), 38800, pos, ds.Vehicle.StartOdometer, 45000})
