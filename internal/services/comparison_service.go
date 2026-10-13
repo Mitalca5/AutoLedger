@@ -142,6 +142,38 @@ func trackedBaselineFromTCO(sum *TCOSummary, annualKm float64, years int, now ti
 	return ev, notes
 }
 
+// measuredTracked reads the figures of the tracked side that come from recorded costs, before any override.
+func measuredTracked(sum *TCOSummary, ev TrackedBaseline, annualKm float64) *TrackedMeasured {
+	m := &TrackedMeasured{
+		EurPerKwh:         round3(sum.AvgCostPerKwh),
+		MaintenanceYearly: money.FromFloat(ev.MaintenancePerKm * annualKm),
+		InsuranceYearly:   money.FromFloat(ev.InsuranceYearly),
+		TaxYearly:         money.FromFloat(ev.TaxYearly),
+		PurchasePrice:     money.FromFloat(ev.PurchaseNet),
+	}
+	if sum.TotalKwhAdded > 0 && sum.DistanceBasisKm > 0 {
+		m.KwhPer100Km = round1(sum.TotalKwhAdded / sum.DistanceBasisKm * 100)
+	}
+	return m
+}
+
+// withElectricityPrice reprices the electricity part of the energy cost per km at the given price per kWh.
+// The recorded energy cost is scaled by the ratio to the recorded average price, so that free charging stays free;
+// without a recorded price the energy drawn per km is priced directly. The fuel part of a hybrid is untouched.
+func withElectricityPrice(ev TrackedBaseline, sum *TCOSummary, price float64) TrackedBaseline {
+	electricity := ev.EnergyPerKm - ev.FuelPerKm
+	switch {
+	case sum.AvgCostPerKwh > 0:
+		electricity *= price / sum.AvgCostPerKwh
+	case sum.TotalKwhAdded > 0 && sum.DistanceBasisKm > 0:
+		electricity = sum.TotalKwhAdded / sum.DistanceBasisKm * price
+	default:
+		return ev
+	}
+	ev.EnergyPerKm = electricity + ev.FuelPerKm
+	return ev
+}
+
 // annualTax turns the recorded taxes into a yearly amount. Under twelve months of history the recorded
 // total is kept as is, so a one-off tax is never multiplied up.
 func annualTax(total money.Cents, months int) money.Cents {
@@ -168,6 +200,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 	var ev TrackedBaseline
 	var notes []*apierror.Message
 	depreciationKnown := true
+	var measured *TrackedMeasured
 
 	if sc.Mode == models.ComparisonModeRetrospective {
 		if sc.VehicleID == nil {
@@ -191,6 +224,12 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 			return nil, err
 		}
 		ev.InsuranceYearly = annualInsurance.Float()
+		measured = measuredTracked(sum, ev, sc.AnnualKm)
+		if override := sc.Options.ElectricityPriceOverride; override > 0 {
+			ev = withElectricityPrice(ev, sum, override)
+			measured.ElectricityOverridden = true
+			notes = append(notes, apierror.NewMessagef("comparison.assumption.electricity_override", "Electricity priced at %.3f per kWh instead of the recorded average", override))
+		}
 		if estimated {
 			notes = append(notes, apierror.NewMessage("comparison.assumption.insurance_estimated", "Insurance payments without a coverage period: the last 12 months of payments are used as the annual estimate"))
 		}
@@ -206,6 +245,7 @@ func (s *ComparisonService) Compare(ctx context.Context, sc *models.ComparisonSc
 
 	res := ComputeComparison(sc, ev)
 	res.TrackedDepreciationKnown = depreciationKnown
+	res.TrackedMeasured = measured
 	res.Assumptions = append(notes, res.Assumptions...)
 	return &res, nil
 }

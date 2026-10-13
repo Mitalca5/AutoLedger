@@ -71,9 +71,11 @@ describe('scenarioToForm', () => {
     expect(form.mode).toBe('RETROSPECTIVE')
     expect(form.ice.fuel_type).toBe('DIESEL')
     expect(form.tracked).toEqual(emptyComparisonForm(true).tracked)
-    expect(form.options).toEqual({ fuel_inflation_pct: 3, electricity_inflation_pct: 0, cost_inflation_pct: 0, tracked_incentives: 0 })
+    expect(form.options).toEqual({ fuel_inflation_pct: 3, electricity_inflation_pct: 0, cost_inflation_pct: 0, tracked_incentives: 0, electricity_price_override: 0 })
     expect(hasAdvancedOptions(form)).toBe(true)
     expect(hasAdvancedOptions(emptyComparisonForm(true))).toBe(false)
+    // The electricity price override is a what-if figure, not an advanced option of the form
+    expect(hasAdvancedOptions({ ...emptyComparisonForm(true), options: { ...emptyComparisonForm(true).options, electricity_price_override: 0.1 } })).toBe(false)
   })
 
   it('keeps the entered electric side of a projection', () => {

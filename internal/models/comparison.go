@@ -50,6 +50,9 @@ type ScenarioOptions struct {
 	ElectricityInflationPct float64     `json:"electricity_inflation_pct,omitempty"`
 	CostInflationPct        float64     `json:"cost_inflation_pct,omitempty"` // Maintenance, insurance, taxes
 	TrackedIncentives       money.Cents `json:"tracked_incentives,omitempty"` // Deducted from the tracked vehicle purchase price (PROJECTION)
+	// ElectricityPriceOverride replaces the recorded average price per kWh of the tracked vehicle (RETROSPECTIVE),
+	// e.g. an off-peak tariff. Zero keeps the recorded price.
+	ElectricityPriceOverride float64 `json:"electricity_price_override,omitempty"`
 }
 
 // ComparisonScenario is a saved EV vs ICE comparison. It is informative only and never changes real data.

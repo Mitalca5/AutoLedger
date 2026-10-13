@@ -210,7 +210,7 @@ function printResult() {
       </div>
 
       <ComparisonWhatIf
-        v-if="scenario?.mode === 'PROJECTION'"
+        v-if="scenario"
         :scenario="scenario"
         :result="result"
         :currency="currency"

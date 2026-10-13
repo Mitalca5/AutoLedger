@@ -27,6 +27,8 @@ export function emptyComparisonForm(canCompareTracked: boolean) {
       electricity_inflation_pct: 0,
       cost_inflation_pct: 0,
       tracked_incentives: 0,
+      // Retrospective only: replaces the recorded average price per kWh; 0 keeps the recorded one
+      electricity_price_override: 0,
     },
     tracked: {
       kwh_per_100km: 16,
@@ -90,7 +92,8 @@ export function scenarioToForm(sc: any, canCompareTracked: boolean): ComparisonF
 }
 
 export function hasAdvancedOptions(form: ComparisonForm): boolean {
-  return Object.values(form.options).some((v) => Number(v) !== 0)
+  const { electricity_price_override: _override, ...advanced } = form.options
+  return Object.values(advanced).some((v) => Number(v) !== 0)
 }
 
 export function buildComparisonPayload(form: ComparisonForm, vehicleId: string | undefined) {
@@ -112,6 +115,7 @@ export function buildComparisonPayload(form: ComparisonForm, vehicleId: string |
       cost_inflation_pct: Number(form.options.cost_inflation_pct) || 0,
       // Incentives only apply when the electric vehicle is described by the user
       tracked_incentives: retro ? 0 : Number(form.options.tracked_incentives) || 0,
+      electricity_price_override: retro ? Number(form.options.electricity_price_override) || 0 : 0,
     },
   }
   if (retro) {

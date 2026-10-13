@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { WhatIfInputs } from './comparisonWhatIf'
-import { isWhatIfDirty, isWhatIfValid, whatIfBase, whatIfBounds, whatIfFigures, whatIfForm, whatIfPayload, whatIfRanges, hasExtendedLimits } from './comparisonWhatIf'
+import { isWhatIfDirty, isWhatIfValid, whatIfBase, whatIfBounds, whatIfFigures, whatIfForm, whatIfPayload, whatIfRanges, hasExtendedLimits, measuredElectricityPrice } from './comparisonWhatIf'
 
 const limits = { annual_km_max: 200_000, fuel_price_max: 999_999_999.999, electricity_price_max: 999_999.999999 }
 
@@ -190,5 +190,51 @@ describe('extended what-if inputs', () => {
     expect(r.years).toEqual({ min: 1, max: 15 })
     expect(r.ice_resale_value).toEqual({ min: 0, max: 9_999_999_999 })
     expect(r.fuel_inflation_pct).toEqual({ min: -10, max: 30 })
+  })
+})
+
+describe('retrospective what-if', () => {
+  const retro = {
+    name: 'Mon véhicule',
+    mode: 'RETROSPECTIVE',
+    vehicle_id: 'veh-1',
+    annual_km: 15000,
+    years: 4,
+    ice: { fuel_type: 'SP95_E10', l_per_100km: 6, fuel_price: 1.8, purchase_price: 24000 },
+    options: {},
+  }
+  const result = { tracked_measured: { eur_per_kwh: 0.215, kwh_per_100km: 17.6 } }
+
+  it('starts from the recorded price per kWh, which is not an override', () => {
+    const base = whatIfBase(retro, result)
+    expect(base.eur_per_kwh).toBe(0.215)
+    const form = whatIfForm(retro, base, 0.215)
+    expect(form.mode).toBe('RETROSPECTIVE')
+    expect(form.options.electricity_price_override).toBe(0)
+    expect(whatIfPayload(retro, base, 0.215).options.electricity_price_override).toBe(0)
+  })
+  it('sends another price as an override and leaves the tracked side to the records', () => {
+    const p = whatIfPayload(retro, { ...whatIfBase(retro, result), eur_per_kwh: 0.1, years: 6 }, 0.215)
+    expect(p.mode).toBe('RETROSPECTIVE')
+    expect(p.vehicle_id).toBe('veh-1')
+    expect(p.options.electricity_price_override).toBe(0.1)
+    expect(p.years).toBe(6)
+    expect(p.tracked).toBeUndefined()
+  })
+  it('starts from a saved override and keeps sending it', () => {
+    const saved = { ...retro, options: { electricity_price_override: 0.12 } }
+    const base = whatIfBase(saved, result)
+    expect(base.eur_per_kwh).toBe(0.12)
+    expect(whatIfPayload(saved, base, 0.215).options.electricity_price_override).toBe(0.12)
+    expect(isWhatIfDirty(base, { ...base, eur_per_kwh: 0.215 })).toBe(true)
+  })
+  it('has no recorded price when the vehicle never priced a kWh', () => {
+    expect(measuredElectricityPrice({ tracked_measured: {} })).toBe(0)
+    expect(measuredElectricityPrice(null)).toBe(0)
+  })
+  it('does not send an override from a projection', () => {
+    const p = whatIfPayload(scenario, { ...whatIfBase(scenario), eur_per_kwh: 0.3 })
+    expect(p.options.electricity_price_override).toBe(0)
+    expect(p.tracked.eur_per_kwh).toBe(0.3)
   })
 })

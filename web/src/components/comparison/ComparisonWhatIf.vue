@@ -15,7 +15,9 @@ import { breakEvenDelta, breakEvenReasonKey } from '@/utils/comparisonBreakEven'
 import type { ComparisonForm } from '@/utils/comparisonForm'
 import {
   hasExtendedLimits,
+  isRetrospective,
   isWhatIfValid,
+  measuredElectricityPrice,
   whatIfBase,
   whatIfBounds,
   whatIfRanges,
@@ -36,7 +38,11 @@ const emit = defineEmits<{ 'save-as-new': [form: ComparisonForm] }>()
 
 const DEBOUNCE_MS = 250
 
-const base = computed(() => whatIfBase(props.scenario))
+const retro = computed(() => isRetrospective(props.scenario))
+// A retrospective scenario follows the recorded costs: only the electricity price can be tried against them.
+const measuredPrice = computed(() => (retro.value ? measuredElectricityPrice(props.result) : 0))
+const measured = computed(() => (retro.value ? props.result?.tracked_measured : null))
+const base = computed(() => whatIfBase(props.scenario, props.result))
 const limits = computed<WhatIfInputLimits>(() => props.result.input_limits)
 const bounds = computed(() => whatIfBounds(base.value, limits.value))
 const ranges = computed(() => whatIfRanges(limits.value))
@@ -46,7 +52,7 @@ const confirmationPending = ref(false)
 const { draft: explored, dirty, valid, preview, loading, failed, reset } = useScenarioDraft<WhatIfInputs>({
   base: () => base.value,
   isValid: (d) => isWhatIfValid(d, limits.value),
-  payload: (d) => whatIfPayload(props.scenario, d),
+  payload: (d) => whatIfPayload(props.scenario, d, measuredPrice.value),
   preview: (payload) => api.previewComparison(payload),
   blocked: () => confirmationPending.value,
   debounceMs: DEBOUNCE_MS,
@@ -59,12 +65,25 @@ const electricityWarning = useEnergyPriceWarning(() => explored.eur_per_kwh, () 
 const needsConfirmation = computed(() => fuelWarning.needsConfirmation.value || electricityWarning.needsConfirmation.value)
 watch(needsConfirmation, (pending) => { confirmationPending.value = pending }, { immediate: true, flush: 'sync' })
 
+// What the tracked side takes from recorded costs, shown read-only so the user sees what follows the data.
+const measuredRows = computed(() => {
+  const m = measured.value
+  if (!m) return []
+  const rows: { key: string; label: string; value: string }[] = []
+  if (m.kwh_per_100km) rows.push({ key: 'kwh', label: t('comparison.whatIf.measuredKwh'), value: `${Number(m.kwh_per_100km).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })} kWh/100 ${distanceUnit()}` })
+  if (m.maintenance_yearly) rows.push({ key: 'maintenance', label: t('comparison.whatIf.measuredMaintenance'), value: fmtMoney(m.maintenance_yearly) })
+  if (m.insurance_yearly) rows.push({ key: 'insurance', label: t('comparison.whatIf.measuredInsurance'), value: fmtMoney(m.insurance_yearly) })
+  if (m.tax_yearly) rows.push({ key: 'tax', label: t('comparison.whatIf.measuredTax'), value: fmtMoney(m.tax_yearly) })
+  if (m.purchase_price) rows.push({ key: 'purchase', label: t('comparison.whatIf.measuredPurchase'), value: fmtMoney(m.purchase_price) })
+  return rows
+})
+
 const originalFigures = computed(() => whatIfFigures(props.result))
 const exploredFigures = computed(() => whatIfFigures(preview.value))
 
 function saveAsNew() {
   if (!valid.value || needsConfirmation.value) return
-  const form = whatIfForm(props.scenario, explored)
+  const form = whatIfForm(props.scenario, explored, measuredPrice.value)
   form.name = t('comparison.whatIf.copyName', { name: props.scenario?.name || '' }).slice(0, 100)
   emit('save-as-new', form)
 }
@@ -95,9 +114,10 @@ const moreFields = computed(() => {
   return [
     { key: 'years' as WhatIfKey, id: 'wi-years', label: t('comparison.whatIf.years_field'), step: 1 },
     money('ice_purchase_price', t('comparison.whatIf.icePurchasePrice')),
-    money('tracked_purchase_price', t('comparison.whatIf.trackedPurchasePrice')),
+    // Measured on a retrospective scenario, where only the combustion side is described by the user
+    ...(retro.value ? [] : [money('tracked_purchase_price', t('comparison.whatIf.trackedPurchasePrice'))]),
     money('ice_resale_value', t('comparison.whatIf.iceResaleValue')),
-    money('tracked_resale_value', t('comparison.whatIf.trackedResaleValue')),
+    ...(retro.value ? [] : [money('tracked_resale_value', t('comparison.whatIf.trackedResaleValue'))]),
     pct('fuel_inflation_pct', t('comparison.whatIf.fuelInflation')),
     pct('electricity_inflation_pct', t('comparison.whatIf.electricityInflation')),
     pct('cost_inflation_pct', t('comparison.whatIf.costInflation')),
@@ -177,6 +197,9 @@ const breakEvenReasonText = computed(() => {
           <DistanceInput v-else-if="f.key === 'fuel_price'" :id="f.id" v-model="explored.fuel_price" kind="per-volume" :digits="3" :min="ranges.fuel_price.min" :max="ranges.fuel_price.max" class="field" />
           <NumberInput v-else :id="f.id" v-model="explored.eur_per_kwh" :min="ranges.eur_per_kwh.min" :max="ranges.eur_per_kwh.max" class="field" />
           <div class="text-[11px] text-slate-500 mt-0.5">{{ $t('comparison.whatIf.original', { value: originalHint(f.key) }) }}</div>
+          <span v-if="retro && f.key === 'eur_per_kwh'" class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full border border-success-500/40 text-success-300" data-testid="what-if-measured-badge">
+            {{ $t('comparison.whatIf.measuredBadge', { value: measuredPrice.toLocaleString(intlLocale(), { maximumFractionDigits: 3 }) }) }}
+          </span>
         </div>
         <div class="sm:col-span-3 empty:hidden" aria-live="polite">
           <div v-if="valid && warningFor(f.key)?.needsConfirmation.value" class="rounded-lg border border-warning-500/40 p-3 text-xs text-warning-300">
@@ -185,6 +208,16 @@ const breakEvenReasonText = computed(() => {
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="measuredRows.length" class="mt-4" data-testid="what-if-measured">
+      <h3 class="text-xs font-semibold text-slate-300">{{ $t('comparison.whatIf.measuredTitle') }}</h3>
+      <dl class="grid gap-x-4 gap-y-1 sm:grid-cols-2 mt-2 text-xs">
+        <div v-for="r in measuredRows" :key="r.key" class="flex justify-between gap-2 border-b border-slate-800 py-1">
+          <dt class="text-slate-400">{{ r.label }}</dt>
+          <dd class="text-slate-200">{{ r.value }}</dd>
+        </div>
+      </dl>
     </div>
 
     <details v-if="showMore" class="mt-4" data-testid="what-if-more">

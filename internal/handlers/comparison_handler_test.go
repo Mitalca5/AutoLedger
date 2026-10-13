@@ -52,6 +52,11 @@ func TestValidateComparisonRequest(t *testing.T) {
 		{"negative purchase", func(r *SaveComparisonRequest) { r.ICE.PurchasePrice = -1 }, "expense.amount_positive"},
 		{"inflation out of range", func(r *SaveComparisonRequest) { r.Options.FuelInflationPct = 50 }, "comparison.inflation"},
 		{"retrospective without vehicle", func(r *SaveComparisonRequest) { r.VehicleID = nil }, "comparison.vehicle_required"},
+		{"retrospective electricity override out of range", func(r *SaveComparisonRequest) {
+			r.Options.ElectricityPriceOverride = money.MaxRate.Float() + 1
+		}, "comparison.electricity_price"},
+		{"retrospective negative electricity override", func(r *SaveComparisonRequest) { r.Options.ElectricityPriceOverride = -0.1 }, "comparison.electricity_price"},
+		{"retrospective electricity override", func(r *SaveComparisonRequest) { r.Options.ElectricityPriceOverride = 0.12 }, ""},
 		{"projection without EV", func(r *SaveComparisonRequest) { r.Mode = models.ComparisonModeProjection }, "comparison.ev_required"},
 		{"projection bad EV consumption", func(r *SaveComparisonRequest) {
 			r.Mode = models.ComparisonModeProjection
@@ -102,6 +107,17 @@ func TestValidateComparisonRequestNormalizesLinks(t *testing.T) {
 	}
 	if proj.VehicleID != nil {
 		t.Errorf("projection must not keep a vehicle, got %v", *proj.VehicleID)
+	}
+
+	override := validComparisonRequest()
+	override.Mode = models.ComparisonModeProjection
+	override.Tracked = &models.TrackedInputs{KwhPer100Km: 16, EurPerKwh: 0.2}
+	override.Options.ElectricityPriceOverride = 0.1
+	if err := validateComparisonRequest(&override); err != nil {
+		t.Fatal(err)
+	}
+	if override.Options.ElectricityPriceOverride != 0 {
+		t.Errorf("a projection prices electricity through its own input, got override %v", override.Options.ElectricityPriceOverride)
 	}
 }
 

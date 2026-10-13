@@ -100,12 +100,21 @@ function round(v: number, step: number): number {
   return Number(v.toFixed(decimals))
 }
 
-export function whatIfBase(scenario: any): WhatIfInputs {
+export const isRetrospective = (scenario: any): boolean => scenario?.mode === 'RETROSPECTIVE'
+
+// The price per kWh recorded on the tracked vehicle, from the result of a retrospective comparison; 0 when unknown.
+export function measuredElectricityPrice(result: any): number {
+  return Number(result?.tracked_measured?.eur_per_kwh) || 0
+}
+
+// `result` supplies the recorded price of a retrospective scenario, whose tracked side has no price of its own.
+export function whatIfBase(scenario: any, result?: any): WhatIfInputs {
   const n = (v: unknown) => Number(v) || 0
+  const retro = isRetrospective(scenario)
   return {
     annual_km: n(scenario?.annual_km),
     fuel_price: n(scenario?.ice?.fuel_price),
-    eur_per_kwh: n(scenario?.tracked?.eur_per_kwh),
+    eur_per_kwh: retro ? n(scenario?.options?.electricity_price_override) || measuredElectricityPrice(result) : n(scenario?.tracked?.eur_per_kwh),
     years: n(scenario?.years),
     ice_purchase_price: n(scenario?.ice?.purchase_price),
     tracked_purchase_price: n(scenario?.tracked?.purchase_price),
@@ -134,7 +143,9 @@ export function isWhatIfValid(explored: WhatIfInputs, limits: WhatIfInputLimits 
 }
 
 // The saved scenario with the explored values: the one input of the preview and of "Save as a new comparison".
-export function whatIfForm(scenario: any, explored: WhatIfInputs): ComparisonForm {
+// `measuredPrice` is the recorded price per kWh of a retrospective scenario: an explored price equal to it is not an
+// override, so the scenario keeps following the data.
+export function whatIfForm(scenario: any, explored: WhatIfInputs, measuredPrice = 0): ComparisonForm {
   const form = scenarioToForm(scenario, false)
   form.annual_km = Number(explored.annual_km)
   form.years = Number(explored.years)
@@ -144,7 +155,10 @@ export function whatIfForm(scenario: any, explored: WhatIfInputs): ComparisonFor
   form.options.fuel_inflation_pct = Number(explored.fuel_inflation_pct)
   form.options.electricity_inflation_pct = Number(explored.electricity_inflation_pct)
   form.options.cost_inflation_pct = Number(explored.cost_inflation_pct)
-  if (form.tracked) {
+  if (isRetrospective(scenario)) {
+    const price = Number(explored.eur_per_kwh)
+    form.options.electricity_price_override = price > 0 && price !== measuredPrice ? price : 0
+  } else if (form.tracked) {
     form.tracked.eur_per_kwh = Number(explored.eur_per_kwh)
     form.tracked.purchase_price = Number(explored.tracked_purchase_price)
     form.tracked.resale_value = Number(explored.tracked_resale_value)
@@ -152,8 +166,8 @@ export function whatIfForm(scenario: any, explored: WhatIfInputs): ComparisonFor
   return form
 }
 
-export function whatIfPayload(scenario: any, explored: WhatIfInputs) {
-  return buildComparisonPayload(whatIfForm(scenario, explored), undefined)
+export function whatIfPayload(scenario: any, explored: WhatIfInputs, measuredPrice = 0) {
+  return buildComparisonPayload(whatIfForm(scenario, explored, measuredPrice), undefined)
 }
 
 export interface WhatIfFigures {

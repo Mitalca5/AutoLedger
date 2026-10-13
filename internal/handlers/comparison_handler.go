@@ -101,7 +101,11 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 			return apierror.New("comparison.vehicle_required", "A vehicle is required in retrospective mode")
 		}
 		req.Tracked = nil
+		if err := validateRange(req.Options.ElectricityPriceOverride, 0, money.MaxRate.Float(), apierror.New("comparison.electricity_price", "Invalid electricity price: outside the supported range")); err != nil {
+			return err
+		}
 	case models.ComparisonModeProjection:
+		req.Options.ElectricityPriceOverride = 0
 		if strings.TrimSpace(req.Currency) == "" {
 			return apierror.New("comparison.currency_required", "Choose the currency of the projection")
 		}

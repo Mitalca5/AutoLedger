@@ -73,8 +73,11 @@ type ComparisonResult struct {
 	TrackedSavings money.Cents                  `json:"tracked_savings"`
 	// TrackedDepreciationKnown is false when the tracked vehicle was bought but has no depreciation entered: its side
 	// has a depreciation of zero, so the total saving would count depreciation on the other side only.
-	TrackedDepreciationKnown bool     `json:"tracked_depreciation_known"`
-	BreakEvenYear            *float64 `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
+	TrackedDepreciationKnown bool `json:"tracked_depreciation_known"`
+	// TrackedMeasured is the tracked side as measured from recorded costs (RETROSPECTIVE only), so that a draft can
+	// show which figures follow the data and which one is overridden.
+	TrackedMeasured *TrackedMeasured `json:"tracked_measured,omitempty"`
+	BreakEvenYear   *float64         `json:"break_even_year,omitempty"` // Years until cumulated tracked-vehicle cost drops below ICE
 	// BreakEvenReason tells why BreakEvenYear is absent: one of the BreakEven* constants, empty when it is reached.
 	BreakEvenReason string `json:"break_even_reason,omitempty"`
 	// BreakEvenNetYear is the same break-even once each vehicle is credited with its value at that point (resale)
@@ -82,6 +85,18 @@ type ComparisonResult struct {
 	Cumulative       []CumulativePoint   `json:"cumulative"`
 	Sensitivity      []SensitivityRow    `json:"sensitivity"`
 	Assumptions      []*apierror.Message `json:"assumptions"`
+}
+
+// TrackedMeasured lists the figures read from the tracked vehicle's recorded costs. A zero is "not measured".
+type TrackedMeasured struct {
+	KwhPer100Km       float64     `json:"kwh_per_100km,omitempty"`
+	EurPerKwh         float64     `json:"eur_per_kwh,omitempty"`
+	MaintenanceYearly money.Cents `json:"maintenance_yearly,omitempty"` // At the scenario's annual distance
+	InsuranceYearly   money.Cents `json:"insurance_yearly,omitempty"`
+	TaxYearly         money.Cents `json:"tax_yearly,omitempty"`
+	PurchasePrice     money.Cents `json:"purchase_price,omitempty"`
+	// ElectricityOverridden is true when EurPerKwh was replaced by the scenario's price override.
+	ElectricityOverridden bool `json:"electricity_overridden,omitempty"`
 }
 
 // sideRates is the internal, unit-free description of one vehicle.
