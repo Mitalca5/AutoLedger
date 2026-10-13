@@ -76,7 +76,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 	if !models.FuelTypes[ice.FuelType] {
 		return apierror.New("fuel.type_invalid", "Invalid fuel")
 	}
-	if err := validateRange(ice.LPer100Km, 0.1, 50, apierror.Newf("comparison.ice_consumption", "Invalid combustion consumption (%.1f to %.0f L/100 km)", apierror.PerKm(0.1), apierror.PerKm(50))); err != nil {
+	if err := validateRange(ice.LPer100Km, models.MinComparisonConsumption, models.MaxComparisonIceLPer100Km, apierror.Newf("comparison.ice_consumption", "Invalid combustion consumption (%.1f to %.0f L/100 km)", apierror.PerKm(models.MinComparisonConsumption), apierror.PerKm(models.MaxComparisonIceLPer100Km))); err != nil {
 		return err
 	}
 	if err := validateRange(ice.FuelPrice, 0, models.MaxFuelPricePerLiter, apierror.New("comparison.fuel_price", "Invalid fuel price: outside the supported range")); err != nil {
@@ -118,7 +118,7 @@ func validateComparisonRequest(req *SaveComparisonRequest) error {
 		if req.Tracked == nil {
 			return apierror.New("comparison.ev_required", "The electric vehicle data is required in projection mode")
 		}
-		if err := validateRange(req.Tracked.KwhPer100Km, 0.1, 100, apierror.Newf("comparison.ev_consumption", "Invalid electric consumption (%.1f to %.0f kWh/100 km)", apierror.PerKm(0.1), apierror.PerKm(100))); err != nil {
+		if err := validateRange(req.Tracked.KwhPer100Km, models.MinComparisonConsumption, models.MaxComparisonKwhPer100Km, apierror.Newf("comparison.ev_consumption", "Invalid electric consumption (%.1f to %.0f kWh/100 km)", apierror.PerKm(models.MinComparisonConsumption), apierror.PerKm(models.MaxComparisonKwhPer100Km))); err != nil {
 			return err
 		}
 		if err := validateRange(req.Tracked.EurPerKwh, 0, money.MaxRate.Float(), apierror.New("comparison.electricity_price", "Invalid electricity price: outside the supported range")); err != nil {

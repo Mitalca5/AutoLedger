@@ -1,9 +1,9 @@
 import { buildComparisonPayload, scenarioToForm, type ComparisonForm } from '@/utils/comparisonForm'
 import { comparisonSavings } from '@/utils/comparisonSavings'
 
-// The what-if section of a projection result: temporary inputs, in the API's units (km per year, price per litre,
-// price per kWh, years, amounts in the scenario's currency, yearly inflation in percent). They never replace the
-// saved scenario.
+// The editable inputs of a scenario: the saved values, or the draft being explored, in the API's units (km per year,
+// price per litre, price per kWh, consumption per 100 km, years, amounts in the scenario's currency, yearly inflation
+// in percent). A draft replaces the saved scenario only when it is saved.
 export interface WhatIfInputs {
   annual_km: number
   fuel_price: number
@@ -16,6 +16,14 @@ export interface WhatIfInputs {
   fuel_inflation_pct: number
   electricity_inflation_pct: number
   cost_inflation_pct: number
+  ice_l_per_100km: number
+  tracked_kwh_per_100km: number
+  ice_maintenance_yearly: number
+  ice_insurance_yearly: number
+  ice_tax_yearly: number
+  tracked_maintenance_yearly: number
+  tracked_insurance_yearly: number
+  tracked_tax_yearly: number
 }
 
 export interface WhatIfBound {
@@ -40,6 +48,24 @@ export const WHAT_IF_KEYS: WhatIfKey[] = [
   'fuel_inflation_pct',
   'electricity_inflation_pct',
   'cost_inflation_pct',
+  'ice_l_per_100km',
+  'tracked_kwh_per_100km',
+  'ice_maintenance_yearly',
+  'ice_insurance_yearly',
+  'ice_tax_yearly',
+  'tracked_maintenance_yearly',
+  'tracked_insurance_yearly',
+  'tracked_tax_yearly',
+]
+
+// The inputs of the electric side that a retrospective scenario takes from recorded costs: not editable there.
+export const MEASURED_KEYS: WhatIfKey[] = [
+  'tracked_purchase_price',
+  'tracked_resale_value',
+  'tracked_kwh_per_100km',
+  'tracked_maintenance_yearly',
+  'tracked_insurance_yearly',
+  'tracked_tax_yearly',
 ]
 
 // The sliders span half to twice the saved value; the field next to each slider accepts anything the API accepts.
@@ -54,11 +80,17 @@ export interface WhatIfInputLimits {
   amount_max?: number
   inflation_min?: number
   inflation_max?: number
+  ice_consumption_min?: number
+  ice_consumption_max?: number
+  ev_consumption_min?: number
+  ev_consumption_max?: number
 }
 
 // Whether the API sent the bounds of the inputs without a slider (a result computed by an older server has none).
 export function hasExtendedLimits(limits: WhatIfInputLimits | undefined): boolean {
-  return !!limits && limits.years_max !== undefined && limits.amount_max !== undefined && limits.inflation_min !== undefined && limits.inflation_max !== undefined
+  return !!limits && limits.years_max !== undefined && limits.amount_max !== undefined && limits.inflation_min !== undefined && limits.inflation_max !== undefined &&
+    limits.ice_consumption_min !== undefined && limits.ice_consumption_max !== undefined &&
+    limits.ev_consumption_min !== undefined && limits.ev_consumption_max !== undefined
 }
 
 // What the API accepts for each field: the limits of the text fields next to the sliders.
@@ -77,6 +109,14 @@ export function whatIfRanges(limits: WhatIfInputLimits): Record<WhatIfKey, { min
     fuel_inflation_pct: inflation,
     electricity_inflation_pct: inflation,
     cost_inflation_pct: inflation,
+    ice_l_per_100km: { min: limits.ice_consumption_min ?? 0, max: limits.ice_consumption_max ?? 0 },
+    tracked_kwh_per_100km: { min: limits.ev_consumption_min ?? 0, max: limits.ev_consumption_max ?? 0 },
+    ice_maintenance_yearly: amount,
+    ice_insurance_yearly: amount,
+    ice_tax_yearly: amount,
+    tracked_maintenance_yearly: amount,
+    tracked_insurance_yearly: amount,
+    tracked_tax_yearly: amount,
   }
 }
 
@@ -123,6 +163,14 @@ export function whatIfBase(scenario: any, result?: any): WhatIfInputs {
     fuel_inflation_pct: n(scenario?.options?.fuel_inflation_pct),
     electricity_inflation_pct: n(scenario?.options?.electricity_inflation_pct),
     cost_inflation_pct: n(scenario?.options?.cost_inflation_pct),
+    ice_l_per_100km: n(scenario?.ice?.l_per_100km),
+    tracked_kwh_per_100km: n(scenario?.tracked?.kwh_per_100km),
+    ice_maintenance_yearly: n(scenario?.ice?.maintenance_yearly),
+    ice_insurance_yearly: n(scenario?.ice?.insurance_yearly),
+    ice_tax_yearly: n(scenario?.ice?.tax_yearly),
+    tracked_maintenance_yearly: n(scenario?.tracked?.maintenance_yearly),
+    tracked_insurance_yearly: n(scenario?.tracked?.insurance_yearly),
+    tracked_tax_yearly: n(scenario?.tracked?.tax_yearly),
   }
 }
 
@@ -131,18 +179,19 @@ export function isWhatIfDirty(base: WhatIfInputs, explored: WhatIfInputs): boole
 }
 
 // The explored values are in range for the API; anything else is not sent. Without the extended limits only the
-// three slider inputs are checked, and the others are not editable.
-export function isWhatIfValid(explored: WhatIfInputs, limits: WhatIfInputLimits | undefined): boolean {
+// three slider inputs are checked, and the others are not editable. A retrospective scenario has no electric-side
+// inputs of its own, so they are not checked.
+export function isWhatIfValid(explored: WhatIfInputs, limits: WhatIfInputLimits | undefined, retro = false): boolean {
   if (!limits) return false
   const ranges = whatIfRanges(limits)
-  const keys = hasExtendedLimits(limits) ? WHAT_IF_KEYS : WHAT_IF_SLIDER_KEYS
+  const keys = (hasExtendedLimits(limits) ? WHAT_IF_KEYS : WHAT_IF_SLIDER_KEYS).filter((k) => !(retro && MEASURED_KEYS.includes(k)))
   return keys.every((k) => {
     const v = Number(explored[k])
     return Number.isFinite(v) && v >= ranges[k].min && v <= ranges[k].max && (k !== 'years' || Number.isInteger(v))
   })
 }
 
-// The saved scenario with the explored values: the one input of the preview and of "Save as a new comparison".
+// The saved scenario with the explored values: the one input of the preview and of the two ways to save it.
 // `measuredPrice` is the recorded price per kWh of a retrospective scenario: an explored price equal to it is not an
 // override, so the scenario keeps following the data.
 export function whatIfForm(scenario: any, explored: WhatIfInputs, measuredPrice = 0): ComparisonForm {
@@ -152,6 +201,10 @@ export function whatIfForm(scenario: any, explored: WhatIfInputs, measuredPrice 
   form.ice.fuel_price = Number(explored.fuel_price)
   form.ice.purchase_price = Number(explored.ice_purchase_price)
   form.ice.resale_value = Number(explored.ice_resale_value)
+  form.ice.l_per_100km = Number(explored.ice_l_per_100km)
+  form.ice.maintenance_yearly = Number(explored.ice_maintenance_yearly)
+  form.ice.insurance_yearly = Number(explored.ice_insurance_yearly)
+  form.ice.tax_yearly = Number(explored.ice_tax_yearly)
   form.options.fuel_inflation_pct = Number(explored.fuel_inflation_pct)
   form.options.electricity_inflation_pct = Number(explored.electricity_inflation_pct)
   form.options.cost_inflation_pct = Number(explored.cost_inflation_pct)
@@ -162,6 +215,10 @@ export function whatIfForm(scenario: any, explored: WhatIfInputs, measuredPrice 
     form.tracked.eur_per_kwh = Number(explored.eur_per_kwh)
     form.tracked.purchase_price = Number(explored.tracked_purchase_price)
     form.tracked.resale_value = Number(explored.tracked_resale_value)
+    form.tracked.kwh_per_100km = Number(explored.tracked_kwh_per_100km)
+    form.tracked.maintenance_yearly = Number(explored.tracked_maintenance_yearly)
+    form.tracked.insurance_yearly = Number(explored.tracked_insurance_yearly)
+    form.tracked.tax_yearly = Number(explored.tracked_tax_yearly)
   }
   return form
 }

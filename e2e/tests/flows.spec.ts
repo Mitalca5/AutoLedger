@@ -81,6 +81,57 @@ test('what-if asks before keeping an unusually high fuel price', async ({ page, 
   }
 })
 
+test('an adjusted scenario is saved in place or as another comparison from the result page', async ({ page, request }) => {
+  const headers = await authHeaders(request)
+  const created = await request.post('/api/vehicles', { headers, data: { name: 'Adjust scenario reference', powertrain: 'EV', currency: 'EUR' } })
+  expect(created.ok()).toBeTruthy()
+  const vehicle = await created.json()
+  const ids: string[] = []
+  try {
+    const name = 'Adjusted in place'
+    const saved = await request.post('/api/comparison-scenarios/', { headers, data: {
+      name, mode: 'PROJECTION', currency: 'EUR', annual_km: 12000, years: 5,
+      ice: { fuel_type: 'SP95_E10', l_per_100km: 6.5, fuel_price: 1.7 },
+      tracked: { kwh_per_100km: 16, eur_per_kwh: 0.2 },
+    } })
+    expect(saved.ok()).toBeTruthy()
+    const scenarioId = (await saved.json()).id
+    ids.push(scenarioId)
+    await useVehicle(page, vehicle.id, '/comparison')
+    await page.getByText(name, { exact: true }).click()
+    const save = page.getByTestId('what-if-save')
+    await expect(save).toBeDisabled()
+
+    // A field outside the three sliders is part of the same draft
+    await page.getByText(/More assumptions/).click()
+    const preview = page.waitForResponse(r => r.url().endsWith('/comparison-scenarios/preview'))
+    await page.locator('#wi-years').fill('8')
+    expect((await preview).ok()).toBeTruthy()
+    await expect(save).toBeEnabled()
+    await save.click()
+    await expect(save).toBeDisabled()
+    const list = await request.get('/api/comparison-scenarios/', { headers })
+    const updated = (await list.json()).find((s: any) => s.id === scenarioId)
+    expect(updated.years).toBe(8)
+
+    // Save as another comparison leaves the first one untouched
+    await page.getByText(/More assumptions/).click()
+    await page.locator('#wi-years').fill('3')
+    await page.getByRole('button', { name: 'Save as a new comparison' }).click()
+    await page.locator('#wi-new-name').fill('Adjusted copy')
+    await page.getByRole('button', { name: 'Create' }).click()
+    await expect(page.getByText('Adjusted copy').first()).toBeVisible()
+    const after = await (await request.get('/api/comparison-scenarios/', { headers })).json()
+    const copy = after.find((s: any) => s.name === 'Adjusted copy')
+    expect(copy?.years).toBe(3)
+    if (copy) ids.push(copy.id)
+    expect(after.find((s: any) => s.id === scenarioId).years).toBe(8)
+  } finally {
+    for (const id of ids) await request.delete(`/api/comparison-scenarios/${id}`, { headers })
+    await request.delete(`/api/vehicles/${vehicle.id}`, { headers })
+  }
+})
+
 let ev: Vehicle
 let ice: Vehicle
 

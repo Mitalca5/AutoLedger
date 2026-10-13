@@ -16,7 +16,7 @@ const scenario = {
 
 // The three slider inputs of a test, completed with the saved values of the other ones.
 const inputs = (o: { annual_km: number; fuel_price: number; eur_per_kwh: number }): WhatIfInputs => ({ ...whatIfBase(scenario), ...o })
-const extendedLimits = { ...limits, years_max: 15, amount_max: 9_999_999_999, inflation_min: -10, inflation_max: 30 }
+const extendedLimits = { ...limits, years_max: 15, amount_max: 9_999_999_999, inflation_min: -10, inflation_max: 30, ice_consumption_min: 0.1, ice_consumption_max: 50, ev_consumption_min: 0.1, ev_consumption_max: 100 }
 
 describe('whatIfBounds', () => {
   it('spans half to twice the saved value and keeps that value on the track', () => {
@@ -48,6 +48,14 @@ describe('what-if inputs', () => {
       fuel_inflation_pct: 2,
       electricity_inflation_pct: 0,
       cost_inflation_pct: 0,
+      ice_l_per_100km: 6.5,
+      tracked_kwh_per_100km: 16,
+      ice_maintenance_yearly: 0,
+      ice_insurance_yearly: 0,
+      ice_tax_yearly: 0,
+      tracked_maintenance_yearly: 0,
+      tracked_insurance_yearly: 0,
+      tracked_tax_yearly: 0,
     })
     expect(Object.values(whatIfBase(null)).every((v) => v === 0)).toBe(true)
   })
@@ -236,5 +244,44 @@ describe('retrospective what-if', () => {
     const p = whatIfPayload(scenario, { ...whatIfBase(scenario), eur_per_kwh: 0.3 })
     expect(p.options.electricity_price_override).toBe(0)
     expect(p.tracked.eur_per_kwh).toBe(0.3)
+  })
+})
+
+describe('every editable input of a scenario', () => {
+  const full = {
+    ...scenario,
+    ice: { ...scenario.ice, resale_value: 9000, maintenance_yearly: 700, insurance_yearly: 650, tax_yearly: 120 },
+    tracked: { ...scenario.tracked, resale_value: 20000, maintenance_yearly: 300, insurance_yearly: 800, tax_yearly: 0 },
+  }
+  const base = whatIfBase(full)
+
+  it('are read from the saved scenario and written back to the payload', () => {
+    expect(base.ice_maintenance_yearly).toBe(700)
+    expect(base.tracked_insurance_yearly).toBe(800)
+    const p = whatIfPayload(full, {
+      ...base,
+      ice_l_per_100km: 7.2,
+      tracked_kwh_per_100km: 18.5,
+      ice_maintenance_yearly: 900,
+      ice_insurance_yearly: 700,
+      ice_tax_yearly: 150,
+      tracked_maintenance_yearly: 250,
+      tracked_insurance_yearly: 850,
+      tracked_tax_yearly: 10,
+    })
+    expect(p.ice).toMatchObject({ l_per_100km: 7.2, maintenance_yearly: 900, insurance_yearly: 700, tax_yearly: 150 })
+    expect(p.tracked).toMatchObject({ kwh_per_100km: 18.5, maintenance_yearly: 250, insurance_yearly: 850, tax_yearly: 10 })
+  })
+  it('are checked against the consumption limits', () => {
+    expect(isWhatIfValid({ ...base, ice_l_per_100km: 0 }, extendedLimits)).toBe(false)
+    expect(isWhatIfValid({ ...base, ice_l_per_100km: 50.1 }, extendedLimits)).toBe(false)
+    expect(isWhatIfValid({ ...base, tracked_kwh_per_100km: 100 }, extendedLimits)).toBe(true)
+    expect(isWhatIfValid({ ...base, tracked_kwh_per_100km: 100.5 }, extendedLimits)).toBe(false)
+  })
+  it('leave out the electric side of a retrospective scenario, which has no inputs of its own', () => {
+    const retroBase = { ...base, tracked_kwh_per_100km: 0, tracked_insurance_yearly: 0 }
+    expect(isWhatIfValid(retroBase, extendedLimits)).toBe(false)
+    expect(isWhatIfValid(retroBase, extendedLimits, true)).toBe(true)
+    expect(isWhatIfValid({ ...retroBase, ice_l_per_100km: 0 }, extendedLimits, true)).toBe(false)
   })
 })

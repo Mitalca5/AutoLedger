@@ -33,8 +33,9 @@ import { RotateCcw, SlidersHorizontal } from 'lucide-vue-next'
 
 // Explore other annual distance, fuel and electricity prices on a projection without editing the saved scenario:
 // the explored result comes from the server's comparison engine, nothing is stored and recorded costs are untouched.
-const props = defineProps<{ scenario: any; result: any; currency: string; referenceVehicleId?: string }>()
-const emit = defineEmits<{ 'save-as-new': [form: ComparisonForm] }>()
+const props = defineProps<{ scenario: any; result: any; currency: string; referenceVehicleId?: string; saving?: boolean; saveError?: string }>()
+// `save` replaces the saved scenario with the draft; `save-as` stores it as another one, under the given name.
+const emit = defineEmits<{ save: [form: ComparisonForm]; 'save-as': [form: ComparisonForm] }>()
 
 const DEBOUNCE_MS = 250
 
@@ -51,7 +52,7 @@ const confirmationPending = ref(false)
 
 const { draft: explored, dirty, valid, preview, loading, failed, reset } = useScenarioDraft<WhatIfInputs>({
   base: () => base.value,
-  isValid: (d) => isWhatIfValid(d, limits.value),
+  isValid: (d) => isWhatIfValid(d, limits.value, retro.value),
   payload: (d) => whatIfPayload(props.scenario, d, measuredPrice.value),
   preview: (payload) => api.previewComparison(payload),
   blocked: () => confirmationPending.value,
@@ -81,12 +82,34 @@ const measuredRows = computed(() => {
 const originalFigures = computed(() => whatIfFigures(props.result))
 const exploredFigures = computed(() => whatIfFigures(preview.value))
 
-function saveAsNew() {
-  if (!valid.value || needsConfirmation.value) return
-  const form = whatIfForm(props.scenario, explored, measuredPrice.value)
-  form.name = t('comparison.whatIf.copyName', { name: props.scenario?.name || '' }).slice(0, 100)
-  emit('save-as-new', form)
+const canSave = computed(() => dirty.value && valid.value && !needsConfirmation.value && !props.saving)
+const naming = ref(false)
+const newName = ref('')
+
+function saveChanges() {
+  if (!canSave.value) return
+  emit('save', whatIfForm(props.scenario, explored, measuredPrice.value))
 }
+
+function startSaveAs() {
+  if (!canSave.value) return
+  newName.value = t('comparison.whatIf.copyName', { name: props.scenario?.name || '' }).slice(0, 100)
+  naming.value = true
+}
+
+function saveAs() {
+  const name = newName.value.trim().slice(0, 100)
+  if (!canSave.value || !name) return
+  const form = whatIfForm(props.scenario, explored, measuredPrice.value)
+  form.name = name
+  naming.value = false
+  emit('save-as', form)
+}
+
+// Leaving the naming step when the draft goes back to the saved values
+watch(dirty, (d) => {
+  if (!d) naming.value = false
+})
 
 function fmtMoney(v: number): string {
   return Number(v || 0).toLocaleString(intlLocale(), { style: 'currency', currency: props.currency, maximumFractionDigits: 0 })
@@ -113,11 +136,19 @@ const moreFields = computed(() => {
   const pct = (key: WhatIfKey, label: string) => ({ key, id: `wi-${key}`, label, step: 0.1 })
   return [
     { key: 'years' as WhatIfKey, id: 'wi-years', label: t('comparison.whatIf.years_field'), step: 1 },
+    { key: 'ice_l_per_100km' as WhatIfKey, id: 'wi-ice_l_per_100km', label: t('comparison.whatIf.iceConsumption'), step: 0.1 },
+    ...(retro.value ? [] : [{ key: 'tracked_kwh_per_100km' as WhatIfKey, id: 'wi-tracked_kwh_per_100km', label: t('comparison.whatIf.trackedConsumption'), step: 0.1 }]),
     money('ice_purchase_price', t('comparison.whatIf.icePurchasePrice')),
     // Measured on a retrospective scenario, where only the combustion side is described by the user
     ...(retro.value ? [] : [money('tracked_purchase_price', t('comparison.whatIf.trackedPurchasePrice'))]),
     money('ice_resale_value', t('comparison.whatIf.iceResaleValue')),
     ...(retro.value ? [] : [money('tracked_resale_value', t('comparison.whatIf.trackedResaleValue'))]),
+    money('ice_maintenance_yearly', t('comparison.whatIf.iceMaintenance')),
+    ...(retro.value ? [] : [money('tracked_maintenance_yearly', t('comparison.whatIf.trackedMaintenance'))]),
+    money('ice_insurance_yearly', t('comparison.whatIf.iceInsurance')),
+    ...(retro.value ? [] : [money('tracked_insurance_yearly', t('comparison.whatIf.trackedInsurance'))]),
+    money('ice_tax_yearly', t('comparison.whatIf.iceTax')),
+    ...(retro.value ? [] : [money('tracked_tax_yearly', t('comparison.whatIf.trackedTax'))]),
     pct('fuel_inflation_pct', t('comparison.whatIf.fuelInflation')),
     pct('electricity_inflation_pct', t('comparison.whatIf.electricityInflation')),
     pct('cost_inflation_pct', t('comparison.whatIf.costInflation')),
@@ -257,9 +288,20 @@ const breakEvenReasonText = computed(() => {
     <p v-if="!valid" class="text-xs text-red-300 mt-2" role="alert">{{ $t('comparison.whatIf.invalid') }}</p>
     <p v-else-if="failed" class="text-xs text-red-300 mt-2" role="alert">{{ $t('comparison.whatIf.failed') }}</p>
 
-    <div class="flex justify-end mt-3">
-      <button type="button" class="btn btn-secondary" :disabled="!dirty || !valid || needsConfirmation" @click="saveAsNew">
+    <p v-if="saveError" class="text-xs text-red-300 mt-2" role="alert">{{ saveError }}</p>
+    <div class="flex flex-wrap items-end justify-end gap-2 mt-3">
+      <div v-if="naming" class="flex items-end gap-2 mr-auto">
+        <div>
+          <label for="wi-new-name" class="text-xs font-semibold text-slate-300">{{ $t('comparison.whatIf.newName') }}</label>
+          <input id="wi-new-name" v-model="newName" type="text" maxlength="100" class="field" @keydown.enter.prevent="saveAs" />
+        </div>
+        <button type="button" class="btn btn-primary" :disabled="!newName.trim() || !canSave" @click="saveAs">{{ $t('comparison.whatIf.create') }}</button>
+      </div>
+      <button type="button" class="btn btn-secondary" :disabled="!dirty || !valid || needsConfirmation || saving" @click="startSaveAs">
         {{ $t('comparison.whatIf.saveAsNew') }}
+      </button>
+      <button type="button" class="btn btn-primary" data-testid="what-if-save" :disabled="!canSave" @click="saveChanges">
+        {{ $t('comparison.whatIf.save') }}
       </button>
     </div>
   </section>

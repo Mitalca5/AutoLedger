@@ -81,6 +81,11 @@ type ComparisonInputLimits struct {
 	AmountMax           float64 `json:"amount_max"`
 	InflationMin        float64 `json:"inflation_min"`
 	InflationMax        float64 `json:"inflation_max"`
+	// Consumption of the combustion vehicle (L/100 km) and of an electric one described by the user (kWh/100 km)
+	IceConsumptionMin float64 `json:"ice_consumption_min"`
+	IceConsumptionMax float64 `json:"ice_consumption_max"`
+	EVConsumptionMin  float64 `json:"ev_consumption_min"`
+	EVConsumptionMax  float64 `json:"ev_consumption_max"`
 }
 
 const (
@@ -88,6 +93,9 @@ const (
 	MaxComparisonYears        = 15
 	MinComparisonInflationPct = -10.0
 	MaxComparisonInflationPct = 30.0
+	MinComparisonConsumption  = 0.1
+	MaxComparisonIceLPer100Km = 50.0
+	MaxComparisonKwhPer100Km  = 100.0
 )
 
 func ComparisonLimits() ComparisonInputLimits {
@@ -95,5 +103,7 @@ func ComparisonLimits() ComparisonInputLimits {
 		AnnualKmMax: MaxComparisonAnnualKm, FuelPriceMax: MaxFuelPricePerLiter, ElectricityPriceMax: money.MaxRate.Float(),
 		YearsMax: MaxComparisonYears, AmountMax: money.Max.Float(),
 		InflationMin: MinComparisonInflationPct, InflationMax: MaxComparisonInflationPct,
+		IceConsumptionMin: MinComparisonConsumption, IceConsumptionMax: MaxComparisonIceLPer100Km,
+		EVConsumptionMin: MinComparisonConsumption, EVConsumptionMax: MaxComparisonKwhPer100Km,
 	}
 }

@@ -157,15 +157,25 @@ function editScenario(sc: any) {
   loadDefaults()
 }
 
-// A what-if saved as a new comparison opens the form with the explored values; the original stays as it is.
-function startFromExplored(explored: ComparisonForm) {
-  Object.assign(form, explored)
-  showAdvanced.value = hasAdvancedOptions(form)
-  editingId.value = null
-  formError.value = ''
-  step.value = 1
-  view.value = 'edit'
-  loadDefaults()
+// The adjusted scenario of the result page, saved over the open scenario or as another one.
+const resultSaving = ref(false)
+const resultSaveError = ref('')
+
+async function saveAdjusted(adjusted: ComparisonForm, asNew: boolean) {
+  const id = currentScenario.value?.id
+  if (resultSaving.value || (!asNew && !id)) return
+  resultSaving.value = true
+  resultSaveError.value = ''
+  try {
+    const payload = buildComparisonPayload(adjusted, vehicleStore.activeVehicle?.id)
+    const saved = asNew ? await api.createComparisonScenario(payload) : await api.updateComparisonScenario(id, payload)
+    await loadScenarios()
+    await openResult(saved)
+  } catch (err: any) {
+    resultSaveError.value = err?.message || t('comparison.errors.saveFailed')
+  } finally {
+    resultSaving.value = false
+  }
 }
 
 async function nextStep() {
@@ -480,7 +490,10 @@ onMounted(async () => {
       :reference-vehicle-id="vehicleStore.activeVehicle?.id"
       @back="view = 'list'"
       @edit="editScenario(currentScenario)"
-      @save-as-new="startFromExplored"
+      :saving="resultSaving"
+      :save-error="resultSaveError"
+      @save="saveAdjusted($event, false)"
+      @save-as="saveAdjusted($event, true)"
     />
   </div>
 </template>

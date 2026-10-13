@@ -17,4 +17,7 @@ func TestComparisonPublishesStorageAndValidationLimits(t *testing.T) {
 	if l.YearsMax != models.MaxComparisonYears || l.AmountMax != money.Max.Float() || l.InflationMin != models.MinComparisonInflationPct || l.InflationMax != models.MaxComparisonInflationPct {
 		t.Fatalf("result lost the limits of the period, amounts and inflation: %+v", l)
 	}
+	if l.IceConsumptionMin != models.MinComparisonConsumption || l.IceConsumptionMax != models.MaxComparisonIceLPer100Km || l.EVConsumptionMin != models.MinComparisonConsumption || l.EVConsumptionMax != models.MaxComparisonKwhPer100Km {
+		t.Fatalf("result lost the consumption limits: %+v", l)
+	}
 }
