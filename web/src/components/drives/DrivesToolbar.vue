@@ -1,26 +1,32 @@
 <script setup lang="ts">
-import { intlLocale } from '@/i18n'
+import { intlLocale, t } from '@/i18n'
 import { formatDistance } from '@/units'
-import { computed } from 'vue'
-import { ChevronLeft, ChevronRight, X, Search, Calendar } from 'lucide-vue-next'
-import AppDatePicker from '@/components/AppDatePicker.vue'
-import { currentYearMonth, formatMonthLabel, shiftMonth, sumDriveCosts } from '@/utils/drives'
+import { computed, ref } from 'vue'
+import { X, Search, SlidersHorizontal, Calendar } from 'lucide-vue-next'
+import ModalShell from '@/components/ModalShell.vue'
+import ListSummary from '@/components/ListSummary.vue'
+import DrivesPeriodControls from '@/components/drives/DrivesPeriodControls.vue'
+import { useIsMobile } from '@/composables/useIsMobile'
+import { formatMonthLabel, periodBounds, sumDriveCosts, type PeriodMode } from '@/utils/drives'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
 
-type PeriodMode = 'ALL' | 'MONTH' | 'CUSTOM'
-
-// Period, month and address filters shared by the drives list and the trips list, plus the metrics of what is listed
-// (the current page of drives, or the trips in trip mode).
+// One bar for the list filters: the period, the address search, and the quick filters of the page in the `filters`
+// slot. On a phone the bar is a summary of the period and a Filters button; the period and the quick filters are
+// edited in a sheet. Also shows the metrics of what is listed (the current page of drives, or the trips in trip mode).
 // Every change of a filter is reported with change so the page reloads from the first page.
-const props = withDefaults(defineProps<{ total: number; loading: boolean; drives: any[]; mode?: 'DRIVES' | 'TRIPS'; collapsed?: boolean }>(), { mode: 'DRIVES', collapsed: false })
+const props = withDefaults(defineProps<{ total: number; loading: boolean; drives: any[]; mode?: 'DRIVES' | 'TRIPS'; activeCount?: number }>(), { mode: 'DRIVES', activeCount: 0 })
 const emit = defineEmits<{ change: [] }>()
 const vehicleStore = useVehicleStore()
 const periodMode = defineModel<PeriodMode>('periodMode', { required: true })
 const selectedMonth = defineModel<string>('selectedMonth', { required: true })
+const anchorDay = defineModel<string>('anchorDay', { required: true })
 const customFrom = defineModel<string>('customFrom', { required: true })
 const customTo = defineModel<string>('customTo', { required: true })
 const searchQuery = defineModel<string>('searchQuery', { required: true })
+
+const isMobile = useIsMobile()
+const sheetOpen = ref(false)
 
 let searchDebounceTimeout: any = null
 
@@ -35,176 +41,143 @@ function clearSearch() {
 }
 
 const formattedSelectedMonth = computed(() => formatMonthLabel(selectedMonth.value))
-const isCurrentMonth = computed(() => selectedMonth.value === currentYearMonth())
 
-function prevMonth() {
-  selectedMonth.value = shiftMonth(selectedMonth.value, -1)
-  emit('change')
-}
-
-function nextMonth() {
-  selectedMonth.value = shiftMonth(selectedMonth.value, 1)
-  emit('change')
-}
-
-function resetToCurrentMonth() {
-  selectedMonth.value = currentYearMonth()
-  emit('change')
-}
-
-function setPeriodMode(mode: PeriodMode) {
-  periodMode.value = mode
-  emit('change')
-}
-
-function onMonthChange() {
-  emit('change')
-}
-
-function onCustomDateChange() {
-  emit('change')
-}
+// What the period is, in a few words, for the phone's summary button
+const periodSummary = computed(() => {
+  const b = periodBounds({ mode: periodMode.value, anchor: anchorDay.value, month: selectedMonth.value, from: customFrom.value, to: customTo.value })
+  if (!b.from && !b.to) return t('drives.drivesToolbar.units.ALL')
+  const fmt = (iso?: string) => (iso ? new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '…')
+  if (b.from === b.to) return fmt(b.from)
+  if (periodMode.value === 'MONTH') return formattedSelectedMonth.value
+  if (periodMode.value === 'YEAR') return (b.from ?? '').slice(0, 4)
+  return `${fmt(b.from)} – ${fmt(b.to)}`
+})
 
 // Summary metrics of current page drives
 const pageDistance = computed(() => props.drives.reduce((acc, d) => acc + (d.distance_km || 0), 0))
 const pageEnergy = computed(() => props.drives.reduce((acc, d) => acc + (d.energy_consumed_kwh || 0), 0))
 const pageCost = computed(() => sumDriveCosts(props.drives))
+const summaryChips = computed(() => {
+  const distance = { label: t('drives.drivesToolbar.pageDistance').replace(/:$/, ''), value: formatDistance(pageDistance.value), tone: 'sky' as const }
+  if (props.mode === 'TRIPS') return [{ ...distance, label: t('drives.drivesToolbar.totalDistance').replace(/:$/, '') }]
+  return [
+    distance,
+    { label: t('drives.drivesToolbar.pageEnergy').replace(/:$/, ''), value: t('drives.drivesToolbar.kwh', { pageEnergy: Math.round(pageEnergy.value).toLocaleString(intlLocale()) }), tone: 'amber' as const },
+    { label: t('drives.drivesToolbar.pageCost').replace(/:$/, ''), value: formatAmount(pageCost.value, vehicleStore.currency), tone: 'emerald' as const },
+  ]
+})
 </script>
 
 <template>
   <div class="space-y-3">
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
-      <!-- Period Mode & Navigation (Mix A + C); behind the filters button on a phone while it is closed -->
-      <div class="flex-wrap items-center gap-2" :class="collapsed ? 'hidden sm:flex' : 'flex'">
-        <!-- Period mode selector -->
-        <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80">
-          <button
-            @click="setPeriodMode('ALL')"
-            class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
-            :class="periodMode === 'ALL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
-          >
-            {{ $t('drives.drivesToolbar.all') }}
-          </button>
-          <button
-            @click="setPeriodMode('MONTH')"
-            class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
-            :class="periodMode === 'MONTH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
-          >
-            <Calendar class="w-3.5 h-3.5" />
-            {{ $t('drives.drivesToolbar.byMonth') }}
-          </button>
-          <button
-            @click="setPeriodMode('CUSTOM')"
-            class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
-            :class="periodMode === 'CUSTOM' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
-          >
-            {{ $t('drives.drivesToolbar.period') }}
-          </button>
-        </div>
-
-        <!-- Month Selector with Prev/Next buttons (when periodMode === 'MONTH') -->
-        <div v-if="periodMode === 'MONTH'" class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800/80">
-          <button
-            @click="prevMonth"
-            class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            :title="$t('drives.drivesToolbar.previousMonth')" :aria-label="$t('drives.drivesToolbar.previousMonth')"
-          >
-            <ChevronLeft class="w-4 h-4" />
-          </button>
-          <label for="drives-month-select" class="sr-only">{{ $t('drives.drivesToolbar.selectTheMonth') }}</label>
-          <div class="w-40 sm:w-44">
-            <AppDatePicker
-              id="drives-month-select"
-              v-model="selectedMonth"
-              month-picker
-              size="xs"
-              :clearable="false"
-              @change="onMonthChange"
-            />
-          </div>
-          <button
-            @click="nextMonth"
-            class="tap p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            :title="$t('drives.drivesToolbar.nextMonth')" :aria-label="$t('drives.drivesToolbar.nextMonth')"
-          >
-            <ChevronRight class="w-4 h-4" />
-          </button>
-          <button
-            v-if="!isCurrentMonth"
-            @click="resetToCurrentMonth"
-            class="text-xs text-rose-400 hover:text-rose-300 font-medium ml-1 px-1.5 py-0.5 bg-rose-500/10 rounded-md border border-rose-500/20"
-            :title="$t('drives.drivesToolbar.backToTheCurrentMonth')"
-          >
-            {{ $t('drives.drivesToolbar.thisMonth') }}
-          </button>
-        </div>
-
-        <!-- Custom Date Range (when periodMode === 'CUSTOM') -->
-        <div v-if="periodMode === 'CUSTOM'" class="flex items-center gap-2 bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800/80 text-xs">
-          <label for="drives-filter-from" class="text-slate-400 shrink-0">{{ $t('drives.drivesToolbar.from') }}</label>
-          <div class="w-36">
-            <AppDatePicker
-              id="drives-filter-from"
-              v-model="customFrom"
-              size="xs"
-              @change="onCustomDateChange"
-            />
-          </div>
-          <label for="drives-filter-to" class="text-slate-400 shrink-0">{{ $t('drives.drivesToolbar.to') }}</label>
-          <div class="w-36">
-            <AppDatePicker
-              id="drives-filter-to"
-              v-model="customTo"
-              size="xs"
-              @change="onCustomDateChange"
-            />
-          </div>
-        </div>
+    <!-- Phone: the period and the filters are in a sheet -->
+    <div v-if="isMobile" class="space-y-2 rounded-2xl border border-slate-800 bg-slate-900 p-3">
+      <div class="flex items-center gap-2">
+        <button type="button" class="btn btn-secondary min-w-0 flex-1 justify-start" @click="sheetOpen = true">
+          <Calendar class="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
+          <span class="truncate">{{ periodSummary }}</span>
+        </button>
+        <button type="button" class="btn btn-secondary shrink-0" @click="sheetOpen = true">
+          <SlidersHorizontal class="h-3.5 w-3.5" aria-hidden="true" />
+          <span>{{ $t('drives.drivesView.filters') }}</span>
+          <span v-if="activeCount > 0" class="rounded-full bg-rose-600 px-1.5 text-xs font-bold text-white">{{ activeCount }}</span>
+        </button>
       </div>
-
-      <!-- Search Bar -->
-      <div class="relative min-w-[240px] max-w-sm flex-1">
-        <label for="drives-search-input" class="sr-only">{{ $t('drives.drivesToolbar.searchForACityOr') }}</label>
-        <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div class="relative">
+        <label for="drives-search-input-phone" class="sr-only">{{ $t('drives.drivesToolbar.searchForACityOr') }}</label>
+        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
-          id="drives-search-input"
+          id="drives-search-input-phone"
           type="text"
           v-model="searchQuery"
           @input="onSearchInput"
           :placeholder="$t('drives.drivesToolbar.searchForACityAddress')"
-          class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors"
+          class="w-full rounded-xl border border-slate-800 bg-slate-950 py-1.5 pl-9 pr-8 text-xs text-white placeholder-slate-500 transition-colors focus:border-rose-500 focus:outline-none"
         />
         <button
           v-if="searchQuery"
           @click="clearSearch"
-          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-white"
           :title="$t('drives.drivesToolbar.clearTheSearch')" :aria-label="$t('drives.drivesToolbar.clearTheSearch')"
         >
-          <X class="w-3.5 h-3.5" />
+          <X class="h-3.5 w-3.5" />
         </button>
       </div>
     </div>
 
-    <!-- Quick Metrics Summary for Current Selection -->
-    <div v-if="total > 0 && !loading && mode === 'TRIPS'" class="flex flex-wrap items-center gap-3 text-xs text-slate-400 px-1">
-      <span class="font-medium text-slate-300">
-        <strong class="text-white">{{ total }}</strong> {{ $t('drives.drivesToolbar.tripSFound') }}
-        <i18n-t v-if="periodMode === 'MONTH'" keypath="drives.drivesToolbar.inMonth" tag="span"><template #month><span class="text-rose-400 font-semibold">{{ formattedSelectedMonth }}</span></template></i18n-t>
-      </span>
-      <span class="text-slate-400">•</span>
-      <span>{{ $t('drives.drivesToolbar.totalDistance') }} <strong class="text-white">{{ formatDistance(pageDistance) }}</strong></span>
+    <ModalShell v-if="isMobile" v-model:open="sheetOpen" :title="$t('drives.drivesView.filters')" :icon="SlidersHorizontal" icon-class="text-slate-300" size="sm">
+      <div class="space-y-5">
+        <section class="space-y-2">
+          <h4 class="text-xs font-semibold text-slate-400">{{ $t('drives.drivesToolbar.period') }}</h4>
+          <DrivesPeriodControls
+            v-model:period-mode="periodMode"
+            v-model:selected-month="selectedMonth"
+            v-model:anchor-day="anchorDay"
+            v-model:custom-from="customFrom"
+            v-model:custom-to="customTo"
+            @change="emit('change')"
+          />
+        </section>
+        <section v-if="$slots.filters" class="space-y-2">
+          <h4 class="text-xs font-semibold text-slate-400">{{ $t('drives.drivesView.quickFilters') }}</h4>
+          <div class="flex flex-wrap items-center gap-2"><slot name="filters" /></div>
+        </section>
+      </div>
+      <template #footer>
+        <button type="button" class="btn btn-lg btn-primary w-full" @click="sheetOpen = false">
+          {{ $t('drives.drivesToolbar.showResults', { count: total }) }}
+        </button>
+      </template>
+    </ModalShell>
+
+    <!-- Larger screens: one bar -->
+    <div v-else class="space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-3">
+      <div class="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+        <DrivesPeriodControls
+          v-model:period-mode="periodMode"
+          v-model:selected-month="selectedMonth"
+          v-model:anchor-day="anchorDay"
+          v-model:custom-from="customFrom"
+          v-model:custom-to="customTo"
+          @change="emit('change')"
+        />
+
+        <!-- Search Bar -->
+        <div class="relative min-w-[240px] max-w-sm flex-1">
+          <label for="drives-search-input" class="sr-only">{{ $t('drives.drivesToolbar.searchForACityOr') }}</label>
+          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            id="drives-search-input"
+            type="text"
+            v-model="searchQuery"
+            @input="onSearchInput"
+            :placeholder="$t('drives.drivesToolbar.searchForACityAddress')"
+            class="w-full rounded-xl border border-slate-800 bg-slate-950 py-1.5 pl-9 pr-8 text-xs text-white placeholder-slate-500 transition-colors focus:border-rose-500 focus:outline-none"
+          />
+          <button
+            v-if="searchQuery"
+            @click="clearSearch"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-white"
+            :title="$t('drives.drivesToolbar.clearTheSearch')" :aria-label="$t('drives.drivesToolbar.clearTheSearch')"
+          >
+            <X class="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick filters of the page, in the same bar -->
+      <div v-if="$slots.filters" class="flex flex-wrap items-center gap-2 border-t border-slate-800 pt-3">
+        <slot name="filters" />
+      </div>
     </div>
-    <div v-else-if="total > 0 && !loading" class="flex flex-wrap items-center gap-3 text-xs text-slate-400 px-1">
-      <span class="font-medium text-slate-300">
-        <strong class="text-white">{{ total }}</strong> {{ $t('drives.drivesToolbar.driveSFound') }}
-        <i18n-t v-if="periodMode === 'MONTH'" keypath="drives.drivesToolbar.inMonth" tag="span"><template #month><span class="text-rose-400 font-semibold">{{ formattedSelectedMonth }}</span></template></i18n-t>
-      </span>
-      <span class="text-slate-400">•</span>
-      <span>{{ $t('drives.drivesToolbar.pageDistance') }} <strong class="text-white">{{ formatDistance(pageDistance) }}</strong></span>
-      <span class="text-slate-400">•</span>
-      <span>{{ $t('drives.drivesToolbar.pageEnergy') }} <strong class="text-white">{{ $t('drives.drivesToolbar.kwh', { pageEnergy: Math.round(pageEnergy).toLocaleString(intlLocale()) }) }}</strong></span>
-      <span class="text-slate-400">•</span>
-      <span>{{ $t('drives.drivesToolbar.pageCost') }} <strong class="text-white">{{ formatAmount(pageCost, vehicleStore.currency) }}</strong></span>
-    </div>
+
+    <!-- The figures of what is listed: shown once, as chips -->
+    <ListSummary v-if="total > 0 && !loading" :chips="summaryChips">
+      <strong class="text-white">{{ total }}</strong>
+      {{ mode === 'TRIPS' ? $t('drives.drivesToolbar.tripSFound') : $t('drives.drivesToolbar.driveSFound') }}
+      <i18n-t v-if="periodMode === 'MONTH'" keypath="drives.drivesToolbar.inMonth" tag="span">
+        <template #month><span class="font-semibold text-slate-200">{{ formattedSelectedMonth }}</span></template>
+      </i18n-t>
+    </ListSummary>
   </div>
 </template>

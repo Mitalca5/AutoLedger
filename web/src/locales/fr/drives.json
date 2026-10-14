@@ -25,6 +25,7 @@
     "setUpTheLink": "Configurer la liaison",
     "deselectPage": "Désélectionner la page",
     "selectPage": "Sélectionner la page",
+    "quickFilters": "Filtres rapides",
     "tagsUpdated": "Tags mis à jour pour {count} trajet(s).",
     "driverUpdated": "Conducteur mis à jour pour {count} trajet(s).",
     "batchTagError": "Erreur lors du taggage par lot : {message}",
@@ -57,6 +58,7 @@
   },
   "driveBulkActions": {
     "driver": "Conducteur",
+    "chooseDriver": "Choisir…",
     "changeDriver": "Définir le conducteur des trajets sélectionnés",
     "addToTrip": "Ajouter voyage",
     "export": "Export",
@@ -220,6 +222,29 @@
     "display": "Affichage"
   },
   "drivesToolbar": {
+    "showResults": "Voir {count} résultats",
+    "units": {
+      "ALL": "Tout",
+      "DAY": "Jour",
+      "WEEK": "Semaine",
+      "MONTH": "Mois",
+      "YEAR": "Année",
+      "CUSTOM": "Période"
+    },
+    "current": {
+      "DAY": "Aujourd'hui",
+      "WEEK": "Cette semaine",
+      "MONTH": "Ce mois-ci",
+      "YEAR": "Cette année"
+    },
+    "previous": "Précédent",
+    "next": "Suivant",
+    "presets": {
+      "lastMonth": "Mois dernier",
+      "last30": "30 jours",
+      "last90": "90 jours",
+      "thisYear": "Cette année"
+    },
     "tripSFound": "voyage(s) trouvé(s)",
     "totalDistance": "Distance totale :",
     "pageCost": "Coût page :",

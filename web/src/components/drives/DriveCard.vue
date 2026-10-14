@@ -118,46 +118,35 @@ const formatDate = formatDayTime
         class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/70 rounded-xl flex items-center gap-2 text-left shadow-sm"
         :title="$t('drives.driveCard.actualCostPriceCalculatedFor')"
       >
-        <div class="p-1 rounded-lg bg-success-500/10 text-success-400">
-          <Coins class="w-3.5 h-3.5" />
-        </div>
+        <Coins class="w-3.5 h-3.5 text-slate-400" />
         <div>
           <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
             <span>{{ d.costs?.has_estimates ? '~' : '' }}{{ formatAmount(d.costs?.total_cost || 0, vehicleStore.currency) }}</span>
-            <span class="text-xs font-normal text-success-400 font-mono">
+            <span class="text-xs font-normal text-slate-400 font-mono">
               {{ formatCostPerDistance(d.costs?.cost_per_km, vehicleStore.currency, 3, true) }}
             </span>
           </div>
         </div>
       </div>
 
-      <!-- Quick Carpool Button -->
-      <button
-        v-if="vehicleStore.canEdit"
-        @click="router.push({ path: '/carpools', query: { new_drive_id: d.id } })"
-        class="btn btn-secondary tap hover:text-rose-400 hover:border-rose-500/40"
-        :title="$t('drives.driveCard.createACarpoolFromThis')"
-      >
-        <Users class="w-3.5 h-3.5 text-rose-500" />
-        <span class="hidden md:inline">{{ $t('drives.driveCard.carpool') }}</span>
-      </button>
-
-      <!-- Manual Drive Actions -->
-      <template v-if="vehicleStore.canEdit && d.is_manual">
+      <!-- Row actions: quiet icons, the coloured buttons belong to the selection bar -->
+      <template v-if="vehicleStore.canEdit">
         <button
-          @click="emit('edit', d)"
-          class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
-          :title="$t('common.edit')" :aria-label="$t('common.edit')"
+          type="button"
+          @click="router.push({ path: '/carpools', query: { new_drive_id: d.id } })"
+          class="row-action"
+          :title="$t('drives.driveCard.createACarpoolFromThis')" :aria-label="$t('drives.driveCard.carpool')"
         >
-          <Pencil class="w-3.5 h-3.5" />
+          <Users class="w-4 h-4" />
         </button>
-        <button
-          @click="emit('delete', d)"
-          class="tap p-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/40 transition-all"
-          :title="$t('common.delete')" :aria-label="$t('common.delete')"
-        >
-          <Trash2 class="w-3.5 h-3.5" />
-        </button>
+        <template v-if="d.is_manual">
+          <button type="button" @click="emit('edit', d)" class="row-action" :title="$t('common.edit')" :aria-label="$t('common.edit')">
+            <Pencil class="w-4 h-4" />
+          </button>
+          <button type="button" @click="emit('delete', d)" class="row-action row-action-danger" :title="$t('common.delete')" :aria-label="$t('common.delete')">
+            <Trash2 class="w-4 h-4" />
+          </button>
+        </template>
       </template>
     </div>
   </div>

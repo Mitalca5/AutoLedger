@@ -41,6 +41,7 @@
     "unsupportedFormat": "Unsupported file format. Accepted formats: {accept}"
   },
   "bulkSelectionBar": {
+    "more": "More",
     "clearTheSelectionEsc": "Clear the selection (Esc)",
     "outOfView": "({offScreenCount} out of view)",
     "selected": {

@@ -239,19 +239,19 @@ test('an electric vehicle lists no fill-up on the odometer page', async ({ page 
   await expect(page.getByText('Fill-up', { exact: true })).toHaveCount(0)
 })
 
-test('the drive filters sit behind a button on a phone and stay visible on a wide screen', async ({ page }) => {
+test('the drive filters sit in a sheet on a phone and in the bar on a wide screen', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await useVehicle(page, ev.id, '/drives')
   const toggle = page.getByRole('button', { name: /^Filters/ })
   const withToll = page.getByRole('button', { name: /With toll/ })
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect(toggle).toBeVisible()
   await expect(withToll).toBeHidden()
   await expect(page.getByPlaceholder(/Search for a city/)).toBeVisible()
   await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByRole('dialog')).toBeVisible()
   await withToll.click()
-  await expect(toggle).toContainText('1')
-  await toggle.click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
   await expect(withToll).toBeHidden()
   await expect(toggle).toContainText('1')
 

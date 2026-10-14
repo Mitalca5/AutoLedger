@@ -47,29 +47,8 @@ function onDriverChange(e: Event) {
     :metrics-summary="selectedSummaryMetrics"
     @clear="emit('clear')"
   >
-    <!-- Direct Carpool button for single or multi-drives -->
+    <!-- The one primary action: complete the tolls of the selection -->
     <button
-      type="button"
-      @click="emit('carpool')"
-      class="btn btn-primary"
-    >
-      <Users class="w-3.5 h-3.5" />
-      <span>{{ selectedDriveIds.length > 1 ? $t('drives.driveBulkActions.carpoolMany', { count: selectedDriveIds.length }) : $t('drives.driveBulkActions.carpool') }}</span>
-    </button>
-
-    <!-- Fusion Voyage Group -->
-    <button
-      type="button"
-      @click="emit('group')"
-      class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors"
-    >
-      <Layers class="w-3.5 h-3.5" />
-      <span>{{ $t('drives.driveBulkActions.mergeToll') }}</span>
-    </button>
-
-    <!-- Auto toll -->
-    <button
-      v-if="vehicleStore.canEdit"
       type="button"
       @click="emit('bulk-toll')"
       :disabled="bulkApplyingToll"
@@ -80,58 +59,42 @@ function onDriverChange(e: Event) {
       <span>{{ bulkApplyingToll ? $t('drives.driveBulkActions.applying') : $t('drives.driveBulkActions.autoToll', { count: selectedDriveIds.length }) }}</span>
     </button>
 
-    <!-- Batch driver -->
-    <select
-      v-if="people.length"
-      value=""
-      @change="onDriverChange"
-      class="btn btn-secondary pr-7"
-      :aria-label="$t('drives.driveBulkActions.driver')"
-      :title="$t('drives.driveBulkActions.changeDriver')"
-    >
-      <option value="" disabled>{{ $t('drives.driveBulkActions.driver') }}…</option>
-      <option :value="DEFAULT_DRIVER">{{ defaultDriverLabel }}</option>
-      <option v-for="p in people" :key="p.id" :value="p.id">{{ p.name }}</option>
-    </select>
-
-    <!-- Batch Tag actions -->
-    <button
-      v-if="prefs.proPersoEnabled"
-      type="button"
-      @click="emit('tag', 'Pro')"
-      class="px-2.5 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors"
-      :title="$t('drives.driveBulkActions.markTheSelectionAsWork')"
-    >
-      <span>{{ $t('drives.driveBulkActions.work') }}</span>
+    <button type="button" @click="emit('carpool')" class="btn btn-secondary">
+      <Users class="w-3.5 h-3.5" />
+      <span>{{ selectedDriveIds.length > 1 ? $t('drives.driveBulkActions.carpoolMany', { count: selectedDriveIds.length }) : $t('drives.driveBulkActions.carpool') }}</span>
     </button>
 
-    <button
-      v-if="prefs.proPersoEnabled"
-      type="button"
-      @click="emit('tag', 'Perso')"
-      class="px-2.5 py-1.5 bg-success-500/20 hover:bg-success-500/30 text-success-300 border border-success-500/40 text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors"
-      :title="$t('drives.driveBulkActions.markTheSelectionAsPersonal')"
-    >
-      <span>{{ $t('drives.driveBulkActions.personal') }}</span>
+    <button type="button" @click="emit('group')" class="btn btn-secondary">
+      <Layers class="w-3.5 h-3.5" />
+      <span>{{ $t('drives.driveBulkActions.mergeToll') }}</span>
     </button>
 
-    <button
-      type="button"
-      @click="emit('export')"
-      class="btn btn-secondary"
-      :title="$t('drives.driveBulkActions.exportTheSelectionAsCsv')"
-    >
-      <Download class="w-3.5 h-3.5 text-slate-300" />
-      <span>{{ $t('drives.driveBulkActions.export') }}</span>
-    </button>
+    <!-- Occasional actions -->
+    <template #more>
+      <label v-if="people.length" class="block px-3 pt-1.5 pb-1 text-xs font-semibold text-slate-400">
+        {{ $t('drives.driveBulkActions.driver') }}
+        <select value="" @change="onDriverChange" class="field mt-1 w-full font-normal" :title="$t('drives.driveBulkActions.changeDriver')">
+          <option value="" disabled>{{ $t('drives.driveBulkActions.chooseDriver') }}</option>
+          <option :value="DEFAULT_DRIVER">{{ defaultDriverLabel }}</option>
+          <option v-for="p in people" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
+      </label>
 
-    <button
-      type="button"
-      @click="emit('add-to-trip')"
-      class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors"
-    >
-      <Plus class="w-3.5 h-3.5" />
-      <span>{{ $t('drives.driveBulkActions.addToTrip') }}</span>
-    </button>
+      <template v-if="prefs.proPersoEnabled">
+        <button type="button" role="menuitem" class="menu-item" :title="$t('drives.driveBulkActions.markTheSelectionAsWork')" @click="emit('tag', 'Pro')">
+          <span class="h-2 w-2 rounded-full bg-blue-400"></span>{{ $t('drives.driveBulkActions.work') }}
+        </button>
+        <button type="button" role="menuitem" class="menu-item" :title="$t('drives.driveBulkActions.markTheSelectionAsPersonal')" @click="emit('tag', 'Perso')">
+          <span class="h-2 w-2 rounded-full bg-success-400"></span>{{ $t('drives.driveBulkActions.personal') }}
+        </button>
+      </template>
+
+      <button type="button" role="menuitem" class="menu-item" :title="$t('drives.driveBulkActions.exportTheSelectionAsCsv')" @click="emit('export')">
+        <Download class="w-3.5 h-3.5 text-slate-400" />{{ $t('drives.driveBulkActions.export') }}
+      </button>
+      <button type="button" role="menuitem" class="menu-item" @click="emit('add-to-trip')">
+        <Plus class="w-3.5 h-3.5 text-slate-400" />{{ $t('drives.driveBulkActions.addToTrip') }}
+      </button>
+    </template>
   </BulkSelectionBar>
 </template>

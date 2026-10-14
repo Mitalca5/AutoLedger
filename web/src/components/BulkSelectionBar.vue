@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
-import { X } from 'lucide-vue-next'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { X, MoreHorizontal } from 'lucide-vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -22,18 +22,35 @@ const emit = defineEmits<{
   (e: 'clear'): void
 }>()
 
+// The "More" popover holds the occasional actions, so the bar keeps one primary action and a few secondary ones
+const moreOpen = ref(false)
+const moreRoot = ref<HTMLElement | null>(null)
+
 function onKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && props.count > 0 && !props.disabled) {
-    emit('clear')
+  if (e.key !== 'Escape') return
+  if (moreOpen.value) {
+    moreOpen.value = false
+    return
   }
+  if (props.count > 0 && !props.disabled) emit('clear')
+}
+
+function closeOnAction(e: MouseEvent) {
+  if ((e.target as HTMLElement).closest('button')) moreOpen.value = false
+}
+
+function onDocumentClick(e: MouseEvent) {
+  if (moreOpen.value && moreRoot.value && !moreRoot.value.contains(e.target as Node)) moreOpen.value = false
 }
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown)
+  document.addEventListener('click', onDocumentClick)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
@@ -68,6 +85,28 @@ onUnmounted(() => {
     <!-- Right contextual actions + Clear button -->
     <div class="flex items-center gap-2 flex-wrap shrink-0">
       <slot />
+
+      <div v-if="$slots.more" ref="moreRoot" class="relative">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          :aria-expanded="moreOpen"
+          aria-haspopup="menu"
+          @click="moreOpen = !moreOpen"
+        >
+          <MoreHorizontal class="w-3.5 h-3.5" />
+          <span>{{ $t('shell.bulkSelectionBar.more') }}</span>
+        </button>
+        <div
+          v-if="moreOpen"
+          role="menu"
+          class="absolute right-0 top-full z-40 mt-2 w-64 space-y-0.5 rounded-xl border border-slate-700 bg-slate-800 p-1.5 shadow-2xl"
+          @click="closeOnAction"
+          @change="moreOpen = false"
+        >
+          <slot name="more" />
+        </div>
+      </div>
 
       <button
         type="button"

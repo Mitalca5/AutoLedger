@@ -64,6 +64,67 @@ export function monthRange(yearMonth: string) {
   return { from: `${y}-${mm}-01`, to: `${y}-${mm}-${String(lastDay).padStart(2, '0')}` }
 }
 
+export type PeriodMode = 'ALL' | 'DAY' | 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM'
+/** The modes that step with the arrows: one day, one ISO week (Monday to Sunday), one month, one year. */
+export type PeriodUnit = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR'
+
+const dayOf = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+const isoOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+export function todayIso(now: Date = new Date()) {
+  return isoOf(now)
+}
+
+/** The from/to days of the unit containing `anchor` (YYYY-MM-DD). */
+export function unitRange(unit: PeriodUnit, anchor: string) {
+  const a = dayOf(anchor)
+  if (unit === 'DAY') return { from: anchor, to: anchor }
+  if (unit === 'WEEK') {
+    const monday = new Date(a.getFullYear(), a.getMonth(), a.getDate() - ((a.getDay() + 6) % 7))
+    return { from: isoOf(monday), to: isoOf(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)) }
+  }
+  if (unit === 'MONTH') return monthRange(anchor.slice(0, 7))
+  return { from: `${a.getFullYear()}-01-01`, to: `${a.getFullYear()}-12-31` }
+}
+
+/** The anchor one unit before (-1) or after (+1) `anchor`. A month or a year keeps the day, clamped to the target month. */
+export function shiftAnchor(unit: PeriodUnit, anchor: string, dir: -1 | 1) {
+  const a = dayOf(anchor)
+  if (unit === 'DAY') return isoOf(new Date(a.getFullYear(), a.getMonth(), a.getDate() + dir))
+  if (unit === 'WEEK') return isoOf(new Date(a.getFullYear(), a.getMonth(), a.getDate() + 7 * dir))
+  if (unit === 'MONTH') {
+    const last = new Date(a.getFullYear(), a.getMonth() + dir + 1, 0).getDate()
+    return isoOf(new Date(a.getFullYear(), a.getMonth() + dir, Math.min(a.getDate(), last)))
+  }
+  const last = new Date(a.getFullYear() + dir, a.getMonth() + 1, 0).getDate()
+  return isoOf(new Date(a.getFullYear() + dir, a.getMonth(), Math.min(a.getDate(), last)))
+}
+
+/** The from/to days narrowing the list for a mode, or an empty object for "all". */
+export function periodBounds(f: { mode: PeriodMode; anchor: string; month: string; from: string; to: string }): { from?: string; to?: string } {
+  if (f.mode === 'ALL') return {}
+  if (f.mode === 'CUSTOM') return { from: f.from || undefined, to: f.to || undefined }
+  if (f.mode === 'MONTH') return f.month ? monthRange(f.month) : {}
+  return unitRange(f.mode, f.anchor)
+}
+
+export type PeriodPreset = 'lastMonth' | 'last30' | 'last90' | 'thisYear'
+
+const isoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+/** The from/to days (YYYY-MM-DD) of a ready-made period, relative to `today`. */
+export function presetRange(preset: PeriodPreset, today: Date = new Date()) {
+  const y = today.getFullYear()
+  const m = today.getMonth()
+  if (preset === 'lastMonth') return { from: isoDay(new Date(y, m - 1, 1)), to: isoDay(new Date(y, m, 0)) }
+  if (preset === 'thisYear') return { from: `${y}-01-01`, to: isoDay(today) }
+  const days = preset === 'last30' ? 29 : 89
+  return { from: isoDay(new Date(y, m, today.getDate() - days)), to: isoDay(today) }
+}
+
 export function formatMonthLabel(yearMonth: string) {
   if (!yearMonth) return ''
   const [y, m] = yearMonth.split('-').map(Number)

@@ -11,7 +11,8 @@ const selectedTag = defineModel<string>('selectedTag', { required: true })
 </script>
 
 <template>
-  <div id="drives-filter-groups" class="items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl flex-wrap">
+  <div id="drives-filter-groups" class="flex flex-wrap items-center gap-2">
+    <span class="hidden px-2 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-400 sm:inline">{{ $t('drives.drivesView.quickFilters') }}</span>
     <ToQualifyFilter
       :count="unqualifiedCount"
       :active="unqualifiedOnly"
@@ -44,7 +45,7 @@ const selectedTag = defineModel<string>('selectedTag', { required: true })
         @click="selectedTag = ''"
         :aria-pressed="selectedTag === ''"
         class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-        :class="selectedTag === '' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-slate-400 hover:text-white border border-transparent'"
+        :class="selectedTag === '' ? 'bg-slate-700 text-white border border-slate-600' : 'text-slate-400 hover:text-white border border-transparent'"
       >
         {{ $t('drives.drivesView.all') }}
       </button>

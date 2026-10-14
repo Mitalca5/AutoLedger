@@ -25,6 +25,7 @@
     "setUpTheLink": "Set up the link",
     "deselectPage": "Deselect the page",
     "selectPage": "Select the page",
+    "quickFilters": "Quick filters",
     "tagsUpdated": "Tags updated for {count} drive(s).",
     "driverUpdated": "Driver updated for {count} drive(s).",
     "batchTagError": "Batch tagging failed: {message}",
@@ -57,6 +58,7 @@
   },
   "driveBulkActions": {
     "driver": "Driver",
+    "chooseDriver": "Choose…",
     "changeDriver": "Set the driver of the selected drives",
     "addToTrip": "Add to trip",
     "export": "Export",
@@ -220,6 +222,29 @@
     "display": "Display"
   },
   "drivesToolbar": {
+    "showResults": "Show {count} results",
+    "units": {
+      "ALL": "All",
+      "DAY": "Day",
+      "WEEK": "Week",
+      "MONTH": "Month",
+      "YEAR": "Year",
+      "CUSTOM": "Range"
+    },
+    "current": {
+      "DAY": "Today",
+      "WEEK": "This week",
+      "MONTH": "This month",
+      "YEAR": "This year"
+    },
+    "previous": "Previous",
+    "next": "Next",
+    "presets": {
+      "lastMonth": "Last month",
+      "last30": "30 days",
+      "last90": "90 days",
+      "thisYear": "This year"
+    },
     "tripSFound": "trip(s) found",
     "totalDistance": "Total distance:",
     "pageCost": "Page cost:",

@@ -41,6 +41,7 @@
     "unsupportedFormat": "Format de fichier non pris en charge. Formats acceptés : {accept}"
   },
   "bulkSelectionBar": {
+    "more": "Plus",
     "clearTheSelectionEsc": "Annuler la sélection (Échap)",
     "outOfView": "(dont {offScreenCount} hors de la vue)",
     "selected": {
