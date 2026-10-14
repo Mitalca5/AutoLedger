@@ -269,6 +269,7 @@
     "end_before_start": "The end of ownership is before the start of the contract",
     "resale_needs_end": "A resale price needs the end of ownership date",
     "resale_above_cost": "The estimated resale value exceeds the purchase cost net of grants",
+    "resale_above_price": "The estimated value at the end of the contract exceeds the value of the vehicle at its start",
     "loan_required": "The amount borrowed is required",
     "loan_above_cost": "The amount borrowed exceeds the purchase cost",
     "loan_rate": "The loan rate must be between 0 and 30%",
@@ -349,6 +350,7 @@
   },
   "residual": {
     "missing_inputs": "Set the purchase price, expected resale value and holding period in the ownership section first",
+    "lease_missing_inputs": "Set the value of the vehicle at the start of the contract and its estimated value at the end of the contract in the ownership section first",
     "invalid_options": "Invalid projection assumptions"
   },
   "demo": {

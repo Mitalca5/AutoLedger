@@ -99,11 +99,7 @@ func (c *client) seed(ds demodata.Dataset, apiToken string) error {
 		return err
 	}
 	if o := ds.Ownership; o.PriceCents > 0 {
-		err := c.do("PUT", "/api/vehicles/"+v.ID+"/ownership", map[string]any{
-			"acquisition_type": "CASH", "start_date": day(o.Date), "start_odometer": o.Odometer,
-			"purchase_price": units(o.PriceCents), "purchase_fees": units(o.FeesCents),
-		}, nil, "")
-		if err != nil {
+		if err := c.do("PUT", "/api/vehicles/"+v.ID+"/ownership", ownershipPayload(o), nil, ""); err != nil {
 			return err
 		}
 	}
@@ -200,4 +196,25 @@ func main() {
 			log.Fatalf("%s: %v", key, err)
 		}
 	}
+}
+
+// ownershipPayload is the ownership of a demo vehicle: a LOA when it has a lease, a cash purchase otherwise.
+func ownershipPayload(o demodata.Ownership) map[string]any {
+	if l := o.Lease; l != nil {
+		return map[string]any{
+			"acquisition_type": "LOA", "start_date": day(o.Date), "start_odometer": o.Odometer,
+			"purchase_price": units(o.PriceCents), "expected_resale_value": units(l.EndValueCents),
+			"lease_monthly_rent": units(l.MonthlyRentCents), "lease_duration_months": l.DurationMonths,
+			"lease_down_payment": units(l.DownPaymentCents), "lease_km_allowance_per_year": l.KmAllowancePerYear,
+			"lease_excess_km_price": l.ExcessKmPrice, "lease_purchase_option_price": units(l.OptionPriceCents),
+		}
+	}
+	payload := map[string]any{
+		"acquisition_type": "CASH", "start_date": day(o.Date), "start_odometer": o.Odometer,
+		"purchase_price": units(o.PriceCents), "purchase_fees": units(o.FeesCents),
+	}
+	if o.ResaleCents > 0 && o.HoldingMonths > 0 {
+		payload["expected_resale_value"], payload["expected_holding_months"] = units(o.ResaleCents), o.HoldingMonths
+	}
+	return payload
 }

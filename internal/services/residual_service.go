@@ -116,12 +116,41 @@ func (s *ResidualService) Residual(ctx context.Context, vehicle *models.Vehicle,
 	if err != nil {
 		return nil, err
 	}
+	now := s.now()
+	lease := own.AcquisitionType == models.AcquisitionLOA && own.InLeasePhase(now)
+	if lease {
+		if own, err = leaseAsOwned(own); err != nil {
+			return nil, err
+		}
+	}
 	startKm := 0.0
 	if own.StartOdometer != nil {
 		startKm = *own.StartOdometer
 	}
-	ageMonths := s.now().Sub(own.StartDate).Hours() / 24 / avgMonthDays
-	return computeResidual(own, ageMonths, math.Max(vehicle.CurrentOdometer-startKm, 0), health.HealthPercent, opts)
+	ageMonths := now.Sub(own.StartDate).Hours() / 24 / avgMonthDays
+	out, err := computeResidual(own, ageMonths, math.Max(vehicle.CurrentOdometer-startKm, 0), health.HealthPercent, opts)
+	if err != nil || !lease {
+		return out, err
+	}
+	out.Lease = true
+	if own.LeasePurchaseOptionPrice != nil {
+		margin := out.ExpectedValue - *own.LeasePurchaseOptionPrice
+		out.PurchaseOption, out.OptionMargin = own.LeasePurchaseOptionPrice, &margin
+	}
+	return out, nil
+}
+
+// leaseAsOwned reads a running LOA the way an owned vehicle is read: the value of the vehicle at the start of the
+// contract, depreciating to its estimated market value at the end of the contract. Those two figures are entered
+// with the contract, not with the owned phase that only starts once the purchase option is exercised.
+func leaseAsOwned(own *models.VehicleOwnership) (*models.VehicleOwnership, error) {
+	if own.PurchasePrice == nil || own.ExpectedResaleValue == nil || *own.PurchasePrice <= 0 || *own.ExpectedResaleValue <= 0 ||
+		own.LeaseDurationMonths == nil || *own.LeaseDurationMonths <= 0 {
+		return nil, apierror.New("residual.lease_missing_inputs", "Set the value of the vehicle at the start of the contract and its estimated value at the end of the contract first")
+	}
+	leased := *own
+	leased.ExpectedHoldingMonths = own.LeaseDurationMonths
+	return &leased, nil
 }
 
 func computeResidual(own *models.VehicleOwnership, ageMonths, distanceKm float64, healthPct *float64, opts ResidualOptions) (*models.ResidualValue, error) {

@@ -142,3 +142,53 @@ func TestResidualUsesAgeOdometerAndRecordedHealth(t *testing.T) {
 		t.Fatalf("expected the recorded health to weigh on the value, got %+v", out)
 	}
 }
+
+func leasedOwnership(value, endValue, option *money.Cents, months int, optionExercised *time.Time) *models.VehicleOwnership {
+	return &models.VehicleOwnership{
+		AcquisitionType: models.AcquisitionLOA, StartDate: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		LeaseDurationMonths: &months, PurchasePrice: value, ExpectedResaleValue: endValue,
+		LeasePurchaseOptionPrice: option, OptionExercisedDate: optionExercised,
+	}
+}
+
+func TestResidualOfARunningLOADepreciatesOverTheContractAndComparesTheOption(t *testing.T) {
+	value, endValue, option := money.Cents(4000000), money.Cents(2000000), money.Cents(2300000)
+	svc := NewResidualService(fakeResidualStore{ownership: leasedOwnership(&value, &endValue, &option, 48, nil)}, nil)
+	svc.now = func() time.Time { return time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC) }
+	out, err := svc.Residual(context.Background(), &models.Vehicle{ID: "v"}, ResidualOptions{HealthWeight: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !out.Lease || out.HoldingMonths != 48 || out.Progress < 0.49 || out.Progress > 0.51 {
+		t.Fatalf("expected half of a 48-month lease, got %+v", out)
+	}
+	if out.PurchaseOption == nil || *out.PurchaseOption != option || out.OptionMargin == nil || *out.OptionMargin != -300000 {
+		t.Fatalf("an option above the expected value must give a negative margin, got %+v", out)
+	}
+}
+
+func TestResidualOfALOAWithoutTheContractValuesNamesTheLeaseInputs(t *testing.T) {
+	endValue := money.Cents(2000000)
+	svc := NewResidualService(fakeResidualStore{ownership: leasedOwnership(nil, &endValue, nil, 48, nil)}, nil)
+	svc.now = func() time.Time { return time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC) }
+	_, err := svc.Residual(context.Background(), &models.Vehicle{ID: "v"}, ResidualOptions{})
+	if e, ok := err.(*apierror.Error); !ok || e.Code != "residual.lease_missing_inputs" {
+		t.Fatalf("expected residual.lease_missing_inputs, got %v", err)
+	}
+}
+
+func TestResidualOfALOAWithTheOptionExercisedFollowsTheOwnedPhase(t *testing.T) {
+	price, resale, holding := money.Cents(2300000), money.Cents(1500000), 36
+	exercised := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
+	own := leasedOwnership(&price, &resale, &price, 12, &exercised)
+	own.ExpectedHoldingMonths = &holding
+	svc := NewResidualService(fakeResidualStore{ownership: own}, nil)
+	svc.now = func() time.Time { return time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC) }
+	out, err := svc.Residual(context.Background(), &models.Vehicle{ID: "v"}, ResidualOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Lease || out.PurchaseOption != nil || out.HoldingMonths != 36 {
+		t.Fatalf("an exercised option is an owned vehicle, got %+v", out)
+	}
+}

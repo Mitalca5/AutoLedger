@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue'
 import { api } from '@/services/api'
 import { formatAmount } from '@/currency'
 import { useVehicleStore } from '@/stores/vehicle'
+import { residualNeeds, type ResidualNeeds } from '@/utils/residual'
 import { ChevronDown, TrendingDown } from 'lucide-vue-next'
 
 // What the vehicle is worth today and what it should fetch at the end of the holding period, from the purchase
@@ -17,10 +18,12 @@ interface Residual {
   current_value: number; depreciation: number; progress: number
   holding_months: number; age_months: number; distance_km: number; purchase_price: number; expected_resale_value: number
   curve: { month: number; value: number }[]
+  lease?: boolean; purchase_option?: number; option_margin?: number
 }
 
 const residual = ref<Residual | null>(null)
 const missing = ref(false)
+const needs = ref<ResidualNeeds | null>(null)
 const expectedKm = ref('')
 const kmShare = ref('50')
 const healthWeight = ref('1')
@@ -37,16 +40,29 @@ async function load() {
   } catch {
     residual.value = null
     missing.value = true
+    await loadNeeds()
+  }
+}
+
+// Names what is missing from the ownership; without it the card falls back to the generic message.
+async function loadNeeds() {
+  try {
+    needs.value = residualNeeds(await api.getOwnership(props.vehicleId))
+  } catch {
+    needs.value = null
   }
 }
 
 watch(() => [props.vehicleId, props.refreshKey], () => {
   residual.value = null
   missing.value = false
-  load()
+  needs.value = null
+  void load()
 }, { immediate: true })
 
 const cur = computed(() => vehicleStore.currency)
+const isLease = computed(() => residual.value?.lease === true)
+const optionMargin = computed(() => residual.value?.option_margin ?? null)
 const progressPct = computed(() => Math.round(Math.min(Math.max(residual.value?.progress ?? 0, 0), 1) * 100))
 const curvePath = computed(() => {
   const curve = residual.value?.curve ?? []
@@ -73,7 +89,13 @@ const marker = computed(() => {
     <!-- Nothing to estimate yet -->
     <div v-if="missing" class="space-y-3 rounded-xl border border-dashed border-slate-700 bg-slate-950/40 p-4">
       <p class="font-semibold text-slate-200">{{ $t('dashboard.resale.missingTitle') }}</p>
-      <p class="text-slate-400">{{ $t('dashboard.resale.missingBody') }}</p>
+      <p v-if="needs?.notOwnable" class="text-slate-400">{{ $t('dashboard.resale.notOwnable') }}</p>
+      <template v-else>
+        <p class="text-slate-400">{{ needs?.lease ? $t('dashboard.resale.missingLeaseBody') : $t('dashboard.resale.missingBody') }}</p>
+        <ul v-if="needs?.fields.length" class="list-disc space-y-0.5 pl-5 text-slate-300">
+          <li v-for="f in needs.fields" :key="f">{{ $t(`dashboard.resale.field.${f}`) }}</li>
+        </ul>
+      </template>
       <router-link to="/vehicles" class="btn btn-secondary">{{ $t('dashboard.resale.missingAction') }}</router-link>
     </div>
 
@@ -89,10 +111,24 @@ const marker = computed(() => {
           <div class="h-full rounded-full bg-violet-500 transition-all" :style="{ width: `${progressPct}%` }"></div>
         </div>
         <div class="mt-1.5 flex justify-between gap-2 text-slate-400">
-          <span>{{ $t('dashboard.resale.purchase') }} <strong class="text-slate-200">{{ formatAmount(residual.purchase_price, cur) }}</strong></span>
-          <span class="text-right">{{ $t('dashboard.resale.expectedResale', { months: residual.holding_months }) }} <strong class="text-slate-200">{{ formatAmount(residual.expected_resale_value, cur) }}</strong></span>
+          <span>{{ isLease ? $t('dashboard.resale.leaseStart') : $t('dashboard.resale.purchase') }} <strong class="text-slate-200">{{ formatAmount(residual.purchase_price, cur) }}</strong></span>
+          <span class="text-right">{{ isLease ? $t('dashboard.resale.leaseEnd', { months: residual.holding_months }) : $t('dashboard.resale.expectedResale', { months: residual.holding_months }) }} <strong class="text-slate-200">{{ formatAmount(residual.expected_resale_value, cur) }}</strong></span>
         </div>
         <p class="mt-2 text-slate-400">{{ $t('dashboard.resale.summary', { depreciation: formatAmount(residual.depreciation, cur), progress: progressPct }) }}</p>
+      </div>
+
+      <!-- Leased: what the vehicle should be worth against the price of the purchase option -->
+      <div v-if="isLease && optionMargin !== null && residual.purchase_option !== undefined" class="rounded-xl border border-slate-800 bg-slate-950/40 p-3">
+        <p class="flex justify-between gap-2 text-slate-400">
+          <span>{{ $t('dashboard.resale.purchaseOption') }}</span>
+          <strong class="text-slate-200">{{ formatAmount(residual.purchase_option, cur) }}</strong>
+        </p>
+        <p class="mt-1 font-semibold" :class="optionMargin >= 0 ? 'text-emerald-400' : 'text-amber-400'">
+          {{ optionMargin >= 0
+            ? $t('dashboard.resale.optionWorthIt', { amount: formatAmount(optionMargin, cur) })
+            : $t('dashboard.resale.optionAboveValue', { amount: formatAmount(-optionMargin, cur) }) }}
+        </p>
+        <p class="mt-1 text-slate-500">{{ $t('dashboard.resale.optionHint') }}</p>
       </div>
 
       <svg v-if="curvePath" viewBox="0 0 200 40" preserveAspectRatio="none" class="h-16 w-full" role="img" :aria-label="$t('dashboard.resale.curve')">

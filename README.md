@@ -118,7 +118,7 @@ French captures sit next to the English ones (`*.fr.png`); `scripts/screenshots/
 - **Monthly Cost Drill-Down**: The energy and insurance amounts of a month list the recorded charges, fill-ups and payments they add up to, with the estimate for distance driven before tracking shown separately.
 - **Charging by Place**: Energy → Charges breaks the charging down by month and by place (home, work, public) with weighted prices, free and unknown costs kept apart, and what charging everything at home would have cost.
 - **Energy Analytics** (vehicles that charge): Real consumption in kWh/100 km, home vs AC vs DC charging efficiency, battery temperature correlation, and cold-weather impact.
-- **Battery health and residual value**: Source-agnostic state of health (OBD2 or garage readings, TeslaMate, or estimated from complete charges) and a resale value projection built from your own purchase price and expected resale, adjusted for age, distance and battery health.
+- **Battery health and residual value**: Source-agnostic state of health (OBD2 or garage readings, TeslaMate, or estimated from complete charges) and a resale value projection built from your own purchase price and expected resale, adjusted for age, distance and battery health. Under a LOA it starts from the value of the vehicle at the start of the contract, runs to its estimated market value at the end, and compares that value with the purchase option.
 
 ### 🛞 Tire Lifecycle Management
 - **Axle-Level Tracking**: Mount, swap, and dismount tires across axles (`FL`, `FR`, `RL`, `RR`, `STORAGE`, `DISPOSED`) with chronological session logs.

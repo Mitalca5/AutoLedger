@@ -420,6 +420,18 @@ async function deleteOwnershipAction() {
               <AppDatePicker id="own-option-date" v-model="ownershipForm.option_exercised_date" size="sm" :clearable="true" />
             </div>
           </div>
+          <!-- What the leased vehicle is worth, to compare with the option: it feeds the resale value estimate -->
+          <div v-if="!ownershipForm.option_exercised_date" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="own-lease-start-value" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.leaseStartValue', { cur: currencySymbol(currency) }) }}</label>
+              <NumberInput id="own-lease-start-value" v-model="ownershipForm.purchase_price" min="0" :placeholder="$t('common.example', { value: '42000' })" class="field" />
+            </div>
+            <div>
+              <label for="own-lease-end-value" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.ownershipWizardModal.leaseEndValue', { cur: currencySymbol(currency) }) }}</label>
+              <NumberInput id="own-lease-end-value" v-model="ownershipForm.expected_resale_value" min="0" :placeholder="$t('common.example', { value: '22000' })" class="field" />
+            </div>
+            <p class="sm:col-span-2 text-xs text-slate-500">{{ $t('vehicles.ownershipWizardModal.leaseValueHint') }}</p>
+          </div>
         </div>
       </div>
 

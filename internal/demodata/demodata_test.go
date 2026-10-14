@@ -116,3 +116,19 @@ func TestDatasetsCarryAnAcquisitionAndRecentActivity(t *testing.T) {
 		}
 	}
 }
+
+func TestEVDatasetIsALeaseWithAnOptionAboveItsValueAndICEIsAPurchaseWithAPlannedResale(t *testing.T) {
+	ev, _ := Build("ev", ref)
+	l := ev.Ownership.Lease
+	if l == nil || l.DurationMonths <= 0 || l.MonthlyRentCents <= 0 || l.KmAllowancePerYear <= 0 {
+		t.Fatalf("ev: expected a complete LOA, got %+v", ev.Ownership)
+	}
+	if l.EndValueCents <= 0 || l.EndValueCents > ev.Ownership.PriceCents || l.OptionPriceCents <= l.EndValueCents {
+		t.Errorf("ev: the option must exceed the expected end value, which must not exceed the start value: %+v", l)
+	}
+	ice, _ := Build("ice", ref)
+	o := ice.Ownership
+	if o.Lease != nil || o.ResaleCents <= 0 || o.ResaleCents > o.PriceCents || o.HoldingMonths <= 0 {
+		t.Errorf("ice: expected a purchase with a planned resale, got %+v", o)
+	}
+}

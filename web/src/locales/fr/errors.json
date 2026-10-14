@@ -269,6 +269,7 @@
     "end_before_start": "La fin de détention précède le début du contrat",
     "resale_needs_end": "Un prix de revente requiert la date de fin de détention",
     "resale_above_cost": "La valeur de revente estimée dépasse le coût d'achat net des aides",
+    "resale_above_price": "La valeur estimée en fin de contrat dépasse la valeur du véhicule au début du contrat",
     "loan_required": "Le montant emprunté est requis",
     "loan_above_cost": "Le montant emprunté dépasse le coût d'achat",
     "loan_rate": "Le taux du crédit doit être compris entre 0 et 30 %",
@@ -349,6 +350,7 @@
   },
   "residual": {
     "missing_inputs": "Renseignez d’abord le prix d’achat, la valeur de revente attendue et la durée de détention dans la section propriété",
+    "lease_missing_inputs": "Renseignez d’abord la valeur du véhicule au début du contrat et sa valeur estimée en fin de contrat dans la section propriété",
     "invalid_options": "Hypothèses de projection invalides"
   },
   "demo": {

@@ -203,6 +203,16 @@ func buildOwnership(vehicleID string, req *SaveOwnershipRequest) (*models.Vehicl
 				if err := owned(); err != nil {
 					return nil, err
 				}
+			} else {
+				// Value of the vehicle at the start of the contract and estimated at its end: they feed the
+				// resale value estimate while the vehicle is leased.
+				if err := validateOptionalAmounts(req.PurchasePrice); err != nil {
+					return nil, err
+				}
+				if req.PurchasePrice != nil && req.ExpectedResaleValue != nil && *req.ExpectedResaleValue > *req.PurchasePrice {
+					return nil, apierror.New("ownership.resale_above_price", "The estimated value at the end of the contract exceeds the value of the vehicle at its start")
+				}
+				o.PurchasePrice, o.ExpectedResaleValue = req.PurchasePrice, req.ExpectedResaleValue
 			}
 		}
 		if o.OptionExercisedDate == nil && req.SalePrice != nil {

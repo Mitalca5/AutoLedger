@@ -41,4 +41,11 @@ type ResidualValue struct {
 	// Depreciation is the purchase price minus the current value.
 	Depreciation money.Cents          `json:"depreciation"`
 	Curve        []ResidualValuePoint `json:"curve"`
+	// Lease is set while the vehicle is under a LOA: PurchasePrice is then its value at the start of the contract
+	// and ExpectedValue its estimated market value at the end of it.
+	Lease bool `json:"lease,omitempty"`
+	// PurchaseOption is the buyout price of the LOA and OptionMargin what the vehicle is expected to be worth
+	// above it at the end of the contract (negative when the option costs more than the vehicle).
+	PurchaseOption *money.Cents `json:"purchase_option,omitempty"`
+	OptionMargin   *money.Cents `json:"option_margin,omitempty"`
 }

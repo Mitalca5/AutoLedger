@@ -40,12 +40,30 @@ type Expense struct {
 	Date        time.Time
 }
 
-// Ownership is the acquisition record of the vehicle (cash purchase).
+// Ownership is the acquisition record of the vehicle: a cash purchase, or a LOA when Lease is set (PriceCents is
+// then the value of the vehicle at the start of the contract).
 type Ownership struct {
 	Date       time.Time
 	Odometer   float64
 	PriceCents int64
 	FeesCents  int64
+	// ResaleCents and HoldingMonths are the planned resale of a purchase; with a Lease the planned value is
+	// Lease.EndValueCents instead.
+	ResaleCents   int64
+	HoldingMonths int
+	Lease         *Lease
+}
+
+// Lease is a LOA contract.
+type Lease struct {
+	DurationMonths     int
+	MonthlyRentCents   int64
+	DownPaymentCents   int64
+	KmAllowancePerYear float64
+	ExcessKmPrice      float64
+	OptionPriceCents   int64
+	// EndValueCents is the estimated market value of the vehicle at the end of the contract.
+	EndValueCents int64
 }
 
 type Reminder struct {
@@ -224,7 +242,12 @@ func buildEV(today time.Time) Dataset {
 	}
 	ds.FinalOdometer = odo
 	at := func(d int) time.Time { return today.AddDate(0, 0, -d) }
-	ds.Ownership = Ownership{Date: at(Days + 30), Odometer: ds.Vehicle.StartOdometer - 400, PriceCents: 4290000, FeesCents: 38000}
+	ds.Ownership = Ownership{Date: at(Days + 30), Odometer: ds.Vehicle.StartOdometer - 400, PriceCents: 4290000, FeesCents: 38000,
+		// An option priced above the expected market value: the dashboard says returning the car is the better deal.
+		Lease: &Lease{
+			DurationMonths: 48, MonthlyRentCents: 38900, DownPaymentCents: 400000, KmAllowancePerYear: 12000,
+			ExcessKmPrice: 0.12, OptionPriceCents: 2350000, EndValueCents: 2100000,
+		}}
 	ds.Expenses = []Expense{
 		{"maintenance", "INSURANCE", "Insurance, 12 months", 58000, at(215)},
 		{"maintenance", "MAINTENANCE", "Annual inspection", 18900, at(150)},
@@ -310,7 +333,7 @@ func buildICE(today time.Time) Dataset {
 	}
 	ds.FinalOdometer = odo
 	at := func(d int) time.Time { return today.AddDate(0, 0, -d) }
-	ds.Ownership = Ownership{Date: at(Days + 90), Odometer: ds.Vehicle.StartOdometer - 1500, PriceCents: 1450000, FeesCents: 12000}
+	ds.Ownership = Ownership{Date: at(Days + 90), Odometer: ds.Vehicle.StartOdometer - 1500, PriceCents: 1450000, FeesCents: 12000, ResaleCents: 850000, HoldingMonths: 60}
 	ds.Expenses = []Expense{
 		{"maintenance", "INSURANCE", "Insurance, 12 months", 61200, at(230)},
 		{"maintenance", "MAINTENANCE", "Service: oil, oil filter, air filter", 21900, at(120)},
