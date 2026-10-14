@@ -458,6 +458,17 @@ async function testModalConnection() {
           </div>
         </div>
       </div>
+
+      <!-- 5. Péages: la détection automatique repose sur un jeu de données français -->
+      <div class="pt-3 border-t border-slate-800">
+        <label for="vehicle-toll-detection" class="block text-xs font-semibold text-slate-300 mb-1">{{ $t('vehicles.vehicleFormModal.tollDetection') }}</label>
+        <select id="vehicle-toll-detection" v-model="form.toll_detection" class="field">
+          <option value="auto">{{ $t('vehicles.vehicleFormModal.tollDetectionAuto') }}</option>
+          <option value="on">{{ $t('vehicles.vehicleFormModal.tollDetectionOn') }}</option>
+          <option value="off">{{ $t('vehicles.vehicleFormModal.tollDetectionOff') }}</option>
+        </select>
+        <p class="text-xs text-slate-400 mt-1">{{ $t('vehicles.vehicleFormModal.tollDetectionHint') }}</p>
+      </div>
     </form>
     <template #footer>
       <button type="button" @click="open = false" class="btn btn-lg btn-secondary">

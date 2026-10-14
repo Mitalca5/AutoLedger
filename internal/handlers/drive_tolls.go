@@ -75,6 +75,11 @@ func (h *DriveHandler) DetectTolls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !vehicle.TollDetectionActive {
+		writeAPIError(w, http.StatusConflict, apierror.New("toll.detection_disabled", "Toll detection is turned off for this vehicle"))
+		return
+	}
+
 	detection, err := h.tollDetectionService.DetectTolls(r.Context(), vehicle, driveID)
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
@@ -103,6 +108,11 @@ func (h *DriveHandler) ApplyTollEstimate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if !vehicle.TollDetectionActive {
+		writeAPIError(w, http.StatusConflict, apierror.New("toll.detection_disabled", "Toll detection is turned off for this vehicle"))
+		return
+	}
+
 	result, err := h.tollDetectionService.ApplyTollEstimate(r.Context(), vehicle, driveID)
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
@@ -127,6 +137,11 @@ func (h *DriveHandler) ApplyTollEstimatesBulk(w http.ResponseWriter, r *http.Req
 
 	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor)
 	if vehicle == nil {
+		return
+	}
+
+	if !vehicle.TollDetectionActive {
+		writeAPIError(w, http.StatusConflict, apierror.New("toll.detection_disabled", "Toll detection is turned off for this vehicle"))
 		return
 	}
 

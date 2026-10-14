@@ -323,6 +323,12 @@ func (s *TCOService) ComputeVehicleTCO(ctx context.Context, vehicleID string) (*
 	`, vehicleID).Scan(&comp.UnqualifiedDrives, &highwayDrives, &drivesWithOdometer, &ledgerEntries); err != nil {
 		return nil, fmt.Errorf("unqualified drives: %w", err)
 	}
+	// Without toll detection the motorway drives are not qualified, so they neither weigh on the score nor warn.
+	if tollActive, err := s.repo.TollDetectionActive(ctx, vehicleID); err != nil {
+		return nil, fmt.Errorf("toll detection: %w", err)
+	} else if !tollActive {
+		comp.UnqualifiedDrives, highwayDrives = 0, 0
+	}
 	if comp.UnqualifiedDrives > 0 {
 		comp.Warnings = append(comp.Warnings, fmt.Sprintf(
 			"%d motorway-type drive(s) with no toll entered and not qualified as “no toll”", comp.UnqualifiedDrives))

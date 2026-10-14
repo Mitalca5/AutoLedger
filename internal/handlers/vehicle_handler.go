@@ -53,6 +53,19 @@ type SaveVehicleRequest struct {
 	DefaultDriverID      *string         `json:"default_driver_id"`
 	TariffPlanID         *string         `json:"tariff_plan_id"`
 	IsHomeChargerDefault bool            `json:"is_home_charger_default"`
+	TollDetection        *string         `json:"toll_detection"` // auto, on or off; omitted keeps it on update, auto on creation
+}
+
+// parseTollDetection validates the toll detection mode of a request; a missing value is fallback.
+func parseTollDetection(raw *string, fallback string) (string, error) {
+	if raw == nil {
+		return fallback, nil
+	}
+	mode := strings.TrimSpace(*raw)
+	if !models.ValidTollDetection(mode) {
+		return "", apierror.New("vehicle.toll_detection_invalid", "Invalid toll detection mode (auto, on or off)")
+	}
+	return mode, nil
 }
 
 // trimmedText is the trimmed value of an optional free-text field, empty when absent.
@@ -149,6 +162,11 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
+	tollDetection, err := parseTollDetection(req.TollDetection, models.TollDetectionAuto)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
 	powertrain := req.Powertrain
 	if powertrain == "" {
 		powertrain = models.PowertrainEV
@@ -218,12 +236,14 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		DefaultDriverID:          req.DefaultDriverID,
 		TariffPlanID:             req.TariffPlanID,
 		IsHomeChargerDefault:     req.IsHomeChargerDefault,
+		TollDetection:            tollDetection,
 	}
 
 	if err := h.repo.CreateVehicle(r.Context(), v); err != nil {
 		writeRepoError(w, r, err, "Failed to create vehicle")
 		return
 	}
+	v.TollDetectionActive, _ = h.repo.TollDetectionActive(r.Context(), v.ID)
 
 	writeJSON(w, http.StatusCreated, v)
 }
@@ -342,11 +362,18 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	existing.TariffPlanID = req.TariffPlanID
 	existing.IsHomeChargerDefault = req.IsHomeChargerDefault
+	tollDetection, err := parseTollDetection(req.TollDetection, existing.TollDetection)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	existing.TollDetection = tollDetection
 
 	if err := h.repo.UpdateVehicle(r.Context(), existing); err != nil {
 		writeAPIError(w, http.StatusInternalServerError, apierror.New("internal", "Failed to update vehicle"))
 		return
 	}
+	existing.TollDetectionActive, _ = h.repo.TollDetectionActive(r.Context(), existing.ID)
 
 	writeJSON(w, http.StatusOK, existing)
 }

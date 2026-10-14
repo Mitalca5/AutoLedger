@@ -9,7 +9,7 @@ import BulkSelectionBar from '@/components/BulkSelectionBar.vue'
 import { Receipt, Layers, Users, Plus, Download } from 'lucide-vue-next'
 
 // Actions on the drives selected in the list; the page runs them.
-const props = defineProps<{ selectedDriveIds: string[]; selectedOffPage: number; selectedSummaryMetrics: string; bulkApplyingToll: boolean; people: VehiclePerson[] }>()
+const props = defineProps<{ selectedDriveIds: string[]; selectedOffPage: number; selectedSummaryMetrics: string; bulkApplyingToll: boolean; people: VehiclePerson[]; tollDetectionActive: boolean }>()
 const emit = defineEmits<{
   clear: []
   carpool: []
@@ -49,6 +49,7 @@ function onDriverChange(e: Event) {
   >
     <!-- The one primary action: complete the tolls of the selection -->
     <button
+      v-if="tollDetectionActive"
       type="button"
       @click="emit('bulk-toll')"
       :disabled="bulkApplyingToll"
@@ -59,7 +60,7 @@ function onDriverChange(e: Event) {
       <span>{{ bulkApplyingToll ? $t('drives.driveBulkActions.applying') : $t('drives.driveBulkActions.autoToll', { count: selectedDriveIds.length }) }}</span>
     </button>
 
-    <button type="button" @click="emit('carpool')" class="btn btn-secondary">
+    <button type="button" @click="emit('carpool')" class="btn" :class="tollDetectionActive ? 'btn-secondary' : 'btn-primary'">
       <Users class="w-3.5 h-3.5" />
       <span>{{ selectedDriveIds.length > 1 ? $t('drives.driveBulkActions.carpoolMany', { count: selectedDriveIds.length }) : $t('drives.driveBulkActions.carpool') }}</span>
     </button>

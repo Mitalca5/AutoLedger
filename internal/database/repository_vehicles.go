@@ -45,6 +45,9 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 		}
 	}
 	v.TelemetryMode = v.DerivedTelemetryMode()
+	if v.TollDetection == "" {
+		v.TollDetection = models.TollDetectionAuto
+	}
 	// The default driver is a person of the vehicle, created below once the vehicle exists.
 	v.DefaultDriverID = nil
 	query := `
@@ -52,15 +55,15 @@ func (r *Repository) CreateVehicle(ctx context.Context, v *models.Vehicle) error
 			user_id, name, vin, current_odometer,
 			estimated_kwh_100km, estimated_price_per_kwh, currency, powertrain,
 			telemetry_mode, make, model,
-			default_driver_id, tariff_plan_id, is_home_charger_default
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+			default_driver_id, tariff_plan_id, is_home_charger_default, toll_detection
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 		RETURNING id, created_at, updated_at;
 	`
 	err = tx.QueryRow(ctx, query,
 		v.UserID, v.Name, v.Vin, v.CurrentOdometer,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Currency, v.Powertrain,
 		v.TelemetryMode, v.Make, v.Model,
-		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
+		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault, v.TollDetection,
 	).Scan(&v.ID, &v.CreatedAt, &v.UpdatedAt)
 	if err != nil {
 		return fmt.Errorf("failed to create vehicle: %w", err)
@@ -130,7 +133,7 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 		SELECT v.id, v.user_id, v.name, v.vin, v.current_odometer,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
 		       v.telemetry_mode, v.make, v.model,
-		       v.default_driver_id, v.tariff_plan_id, v.is_home_charger_default,
+		       v.default_driver_id, v.tariff_plan_id, v.is_home_charger_default, v.toll_detection,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $1 THEN 'OWNER' ELSE 'VIEWER' END) as role
 		FROM vehicles v
@@ -152,7 +155,7 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 			&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 			&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
 			&v.TelemetryMode, &v.Make, &v.Model,
-			&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault,
+			&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault, &v.TollDetection,
 			&v.CreatedAt, &v.UpdatedAt, &role,
 		); err != nil {
 			return nil, err
@@ -168,6 +171,9 @@ func (r *Repository) ListVehiclesByUserID(ctx context.Context, userID string) ([
 		return nil, err
 	}
 	for i := range list {
+		if err := r.fillTollDetectionActive(ctx, &list[i]); err != nil {
+			return nil, err
+		}
 		sanitizeVehicleForRole(&list[i])
 	}
 	return list, nil
@@ -184,7 +190,7 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	query := `
 		SELECT v.id, v.user_id, v.name, v.vin, v.current_odometer,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
-		       v.telemetry_mode, v.make, v.model,
+		       v.telemetry_mode, v.make, v.model, v.toll_detection,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $2 THEN 'OWNER' ELSE 'VIEWER' END) as role
 		FROM vehicles v
@@ -195,7 +201,7 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	err := r.pool.QueryRow(ctx, query, id, userID).Scan(
 		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
-		&v.TelemetryMode, &v.Make, &v.Model,
+		&v.TelemetryMode, &v.Make, &v.Model, &v.TollDetection,
 		&v.CreatedAt, &v.UpdatedAt, &role,
 	)
 	if err != nil {
@@ -206,6 +212,9 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	}
 	v.Role = models.VehicleRole(role)
 	if err := r.loadTeslaMateSources(ctx, []*models.Vehicle{&v}); err != nil {
+		return nil, err
+	}
+	if err := r.fillTollDetectionActive(ctx, &v); err != nil {
 		return nil, err
 	}
 	sanitizeVehicleForRole(&v)
@@ -236,11 +245,14 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		    estimated_kwh_100km = $4, estimated_price_per_kwh = $5,
 		    powertrain = $6, telemetry_mode = $7, make = $8, model = $9,
 		    default_driver_id = $10, tariff_plan_id = $11,
-		    is_home_charger_default = $12,
+		    is_home_charger_default = $12, toll_detection = $13,
 		    updated_at = NOW()
-		WHERE id = $13;
+		WHERE id = $14;
 	`
 	v.TelemetryMode = v.DerivedTelemetryMode()
+	if v.TollDetection == "" {
+		v.TollDetection = models.TollDetectionAuto
+	}
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
@@ -250,7 +262,7 @@ func (r *Repository) UpdateVehicle(ctx context.Context, v *models.Vehicle) error
 		v.Name, v.Vin, v.CurrentOdometer,
 		v.EstimatedKwh100km, v.EstimatedPricePerKwh, v.Powertrain,
 		v.TelemetryMode, v.Make, v.Model,
-		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault,
+		v.DefaultDriverID, v.TariffPlanID, v.IsHomeChargerDefault, v.TollDetection,
 		v.ID,
 	)
 	if err != nil {
@@ -495,3 +507,39 @@ func (r *Repository) GetVehicleMemberRole(ctx context.Context, vehicleID, userID
 // ============================================================================
 // Drives & Trip Groups
 // ============================================================================
+
+// tollDetectionActiveSQL tells whether the toll detection and the qualification of the motorway drives apply to a
+// vehicle. 'on' and 'off' are explicit. 'auto' follows the evidence of driving in France: a GPS detection that found a
+// toll station, an automatic toll expense, a drive whose address names France, or the French interface of the owner
+// (the stored addresses carry no country when they were entered by hand, and the detection only runs once shown).
+const tollDetectionActiveSQL = `
+	SELECT v.toll_detection = 'on' OR (v.toll_detection = 'auto' AND (
+	       u.language = 'fr'
+	    OR EXISTS (SELECT 1 FROM toll_detections td WHERE td.vehicle_id = v.id
+	               AND CASE WHEN jsonb_typeof(td.segments) = 'array' THEN jsonb_array_length(td.segments) ELSE 0 END > 0)
+	    OR EXISTS (SELECT 1 FROM drive_expenses de WHERE de.vehicle_id = v.id AND de.source = 'AUTO_TOLL')
+	    OR EXISTS (SELECT 1 FROM drives d WHERE d.vehicle_id = v.id
+	               AND (d.start_address ILIKE '%france%' OR d.end_address ILIKE '%france%'))))
+	FROM vehicles v JOIN users u ON u.id = v.user_id
+	WHERE v.id::text = $1`
+
+// TollDetectionActive reports whether the toll detection applies to a vehicle (see tollDetectionActiveSQL).
+func (r *Repository) TollDetectionActive(ctx context.Context, vehicleID string) (bool, error) {
+	var active bool
+	if err := r.pool.QueryRow(ctx, tollDetectionActiveSQL, vehicleID).Scan(&active); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, ErrNotFound
+		}
+		return false, fmt.Errorf("failed to resolve toll detection: %w", err)
+	}
+	return active, nil
+}
+
+func (r *Repository) fillTollDetectionActive(ctx context.Context, v *models.Vehicle) error {
+	active, err := r.TollDetectionActive(ctx, v.ID)
+	if err != nil {
+		return err
+	}
+	v.TollDetectionActive = active
+	return nil
+}

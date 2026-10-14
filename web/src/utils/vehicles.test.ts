@@ -64,6 +64,14 @@ describe('vehicle form', () => {
     expect(f2.teslamate_car_id).toBe(3)
   })
 
+  it('carries the toll detection mode, falling back to automatic', () => {
+    expect(emptyVehicleForm().toll_detection).toBe('auto')
+    expect(vehicleFormFrom({ name: 'M3', toll_detection: 'off' }).toll_detection).toBe('off')
+    expect(vehicleFormFrom({ name: 'M3', toll_detection: 'on' }).toll_detection).toBe('on')
+    expect(vehicleFormFrom({ name: 'M3' }).toll_detection).toBe('auto')
+    expect(vehicleFormFrom({ name: 'M3', toll_detection: 'sometimes' }).toll_detection).toBe('auto')
+  })
+
   it('fills an existing vehicle, rounding the odometer and never restoring secrets', () => {
     const f = vehicleFormFrom({ name: 'M3', current_odometer: 1234.6, teslamate_api_url: 'http://x', teslamate_auth_type: 'BASIC', teslamate_basic_user: 'me', estimated_kwh_100km: 15 })
     expect(f.current_odometer).toBe(1235)

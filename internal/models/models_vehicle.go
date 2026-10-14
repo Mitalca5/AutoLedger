@@ -49,8 +49,27 @@ type Vehicle struct {
 	DefaultDriverID          *string     `json:"default_driver_id,omitempty"`
 	TariffPlanID             *string     `json:"tariff_plan_id,omitempty"`
 	IsHomeChargerDefault     bool        `json:"is_home_charger_default"`
+	TollDetection            string      `json:"toll_detection"`        // TollDetectionAuto | TollDetectionOn | TollDetectionOff
+	TollDetectionActive      bool        `json:"toll_detection_active"` // Derived by the repository, never entered
 	CreatedAt                time.Time   `json:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at"`
+}
+
+// Toll detection modes of a vehicle. The detection (GPS trace matched against the French motorway dataset) and the
+// qualification of the motorway drives that follows it are shown only where it is active; manual tolls always are.
+const (
+	TollDetectionAuto = "auto"
+	TollDetectionOn   = "on"
+	TollDetectionOff  = "off"
+)
+
+// ValidTollDetection reports whether the value is a known toll detection mode.
+func ValidTollDetection(mode string) bool {
+	switch mode {
+	case TollDetectionAuto, TollDetectionOn, TollDetectionOff:
+		return true
+	}
+	return false
 }
 
 // Telemetry modes describe how a vehicle's data arrives. The server derives the mode from the vehicle's

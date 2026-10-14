@@ -296,6 +296,17 @@ watch(
   () => clearSelection()
 )
 
+// The qualification queue and the toll source only exist with the toll detection: leave them when it goes away
+watch(
+  () => vehicleStore.tollDetectionActive,
+  (active) => {
+    if (active) return
+    unqualifiedOnly.value = false
+    tollSource.value = ''
+  },
+  { immediate: true }
+)
+
 // A work/personal filter left on would hide drives with no way to clear it once the classification is off
 watch(
   () => prefs.proPersoEnabled,
@@ -464,6 +475,7 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
           v-model:toll-source="tollSource"
           v-model:selected-tag="selectedTag"
           :unqualified-count="unqualifiedCount"
+          :toll-detection-active="vehicleStore.tollDetectionActive"
           :pro-perso-enabled="prefs.proPersoEnabled"
         />
         <!-- The trips: the queue of detected trips to qualify -->
@@ -484,6 +496,7 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
       :selected-off-page="selectedOffPage"
       :selected-summary-metrics="selectedSummaryMetrics"
       :bulk-applying-toll="bulkApplyingToll"
+      :toll-detection-active="vehicleStore.tollDetectionActive"
       :people="vehiclePeople"
       @clear="clearSelection"
       @carpool="handleCarpoolSelectedDrives"

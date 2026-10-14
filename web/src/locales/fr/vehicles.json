@@ -70,7 +70,12 @@
     "telemetrySettings": "Configuration du connecteur de télémétrie",
     "copyFromExisting": "Copier les réglages de {name}",
     "advancedOptions": "Options complémentaires (Tarifs & Énergie)",
-    "advancedOptionsDesc": "Plan tarifaire, borne domicile par défaut et consommations estimées"
+    "advancedOptionsDesc": "Plan tarifaire, borne domicile par défaut et consommations estimées",
+    "tollDetection": "Détection des péages (France)",
+    "tollDetectionAuto": "Automatique : affichée quand ce véhicule roule en France",
+    "tollDetectionOn": "Toujours activée",
+    "tollDetectionOff": "Désactivée",
+    "tollDetectionHint": "Détecte les péages d’un trajet à partir de sa trace GPS et liste les trajets autoroutiers restant à qualifier. Les données de référence ne couvrent que les autoroutes françaises. Les péages saisis à la main restent toujours disponibles."
   },
   "vehicleMembersModal": {
     "leave": "Quitter",

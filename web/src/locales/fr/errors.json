@@ -123,6 +123,7 @@
     "grafana_url_base": "L'URL Grafana doit être une adresse de base, sans paramètres",
     "grafana_url_invalid": "URL Grafana invalide (http:// ou https:// requis)",
     "grafana_url_credentials": "L'URL Grafana ne doit pas contenir d'identifiants",
+    "toll_detection_invalid": "Mode de détection des péages invalide (auto, on ou off)",
     "powertrain_invalid": "Motorisation invalide (EV, ICE, PHEV ou REEV)",
     "currency_invalid": "Devise invalide : {p0}",
     "not_specified": "L'événement doit indiquer son véhicule"
@@ -209,6 +210,7 @@
   "toll": {
     "apply_failed": "Échec de l'application du tarif de péage",
     "detection_failed": "Échec de la détection des péages (TeslaMateAPI injoignable ou trajet non disponible)",
+    "detection_disabled": "La détection des péages est désactivée pour ce véhicule",
     "no_gps": "Ce trajet n'a pas de tracé GPS TeslaMate disponible",
     "bulk_limit": "Maximum {p0} trajets à la fois"
   },

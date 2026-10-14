@@ -67,6 +67,19 @@ describe('vehicle selection', () => {
     expect(store.userRole).toBe('OWNER')
   })
 
+  it('reports the toll detection the server decided, and keeps it shown until told otherwise', async () => {
+    const store = await freshStore()
+    expect(store.tollDetectionActive).toBe(true)
+
+    api.getVehicles.mockResolvedValue([{ id: 'v1', toll_detection_active: false }, { id: 'v2', toll_detection_active: true }, { id: 'v3' }])
+    await store.fetchVehicles()
+    expect(store.tollDetectionActive).toBe(false)
+    store.setActiveVehicle('v2')
+    expect(store.tollDetectionActive).toBe(true)
+    store.setActiveVehicle('v3')
+    expect(store.tollDetectionActive).toBe(true)
+  })
+
   it('keeps a stored vehicle that still exists and replaces one that vanished', async () => {
     storage.set('teslacost_active_vehicle', 'v2')
     let store = await freshStore()

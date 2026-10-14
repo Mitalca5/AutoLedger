@@ -64,7 +64,7 @@ async function loadTollDetection(drive: any) {
   tollDetection.value = null
   tollDetectionError.value = ''
   showTollSegments.value = false
-  if (!props.vehicleId || drive.is_trip_group) return
+  if (!props.vehicleId || drive.is_trip_group || !vehicleStore.tollDetectionActive) return
   try {
     tollDetection.value = await api.getTollDetection(props.vehicleId, drive.id)
   } catch (err) {
@@ -81,7 +81,7 @@ const canApplyTollEstimate = computed(
     !existingTollExpense.value?.trip_group_id
 )
 // The detection needs the GPS trace of a TeslaMate drive; a trip or a manual drive has none
-const canDetectTolls = computed(() => !selectedCostDrive.value?.is_trip_group && !!selectedCostDrive.value?.teslamate_drive_id)
+const canDetectTolls = computed(() => vehicleStore.tollDetectionActive && !selectedCostDrive.value?.is_trip_group && !!selectedCostDrive.value?.teslamate_drive_id)
 // Nothing to apply when the toll already recorded is that same estimate
 const estimateMatchesExistingToll = computed(
   () => existingTollExpense.value?.source === 'AUTO_TOLL' && Math.abs(Number(existingTollExpense.value.amount) - (tollDetectionEstimatedTotal.value ?? Number.NaN)) < 0.005

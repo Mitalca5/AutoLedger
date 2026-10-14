@@ -115,6 +115,7 @@ export function emptyVehicleForm(existingVehicles?: { teslamate_car_id?: number 
     tariff_plan_id: null as string | null,
     default_driver_id: null as string | null,
     is_home_charger_default: false,
+    toll_detection: 'auto' as 'auto' | 'on' | 'off',
   }
 }
 
@@ -142,6 +143,7 @@ export function vehicleFormFrom(v: any): VehicleForm {
     tariff_plan_id: v.tariff_plan_id || null,
     default_driver_id: v.default_driver_id || null,
     is_home_charger_default: !!v.is_home_charger_default,
+    toll_detection: (['auto', 'on', 'off'].includes(v.toll_detection) ? v.toll_detection : 'auto') as 'auto' | 'on' | 'off',
   }
 }
 

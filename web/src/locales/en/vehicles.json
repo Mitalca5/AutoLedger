@@ -70,7 +70,12 @@
     "telemetrySettings": "Telemetry connector settings",
     "copyFromExisting": "Copy settings from {name}",
     "advancedOptions": "Additional options (Tariffs & Energy)",
-    "advancedOptionsDesc": "Tariff plan, default home charger and estimated consumption"
+    "advancedOptionsDesc": "Tariff plan, default home charger and estimated consumption",
+    "tollDetection": "Toll detection (France)",
+    "tollDetectionAuto": "Automatic: shown where this vehicle drives in France",
+    "tollDetectionOn": "Always on",
+    "tollDetectionOff": "Off",
+    "tollDetectionHint": "Detects the motorway tolls of a drive from its GPS trace, and lists the motorway drives still to qualify. The reference data covers French motorways only. Tolls entered by hand are always available."
   },
   "vehicleMembersModal": {
     "leave": "Leave",

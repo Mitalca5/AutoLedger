@@ -123,6 +123,7 @@
     "grafana_url_base": "The Grafana URL must be a base address, without parameters",
     "grafana_url_invalid": "Invalid Grafana URL (http:// or https:// required)",
     "grafana_url_credentials": "The Grafana URL must not contain credentials",
+    "toll_detection_invalid": "Invalid toll detection mode (auto, on or off)",
     "powertrain_invalid": "Invalid powertrain (EV, ICE, PHEV or REEV)",
     "currency_invalid": "Invalid currency: {p0}",
     "not_specified": "The event must name its vehicle"
@@ -209,6 +210,7 @@
   "toll": {
     "apply_failed": "Could not apply the toll fare",
     "detection_failed": "Toll detection failed (TeslaMateAPI unreachable or drive unavailable)",
+    "detection_disabled": "Toll detection is turned off for this vehicle",
     "no_gps": "This drive has no TeslaMate GPS trace available",
     "bulk_limit": "At most {p0} drives at a time"
   },

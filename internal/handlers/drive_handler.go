@@ -67,11 +67,15 @@ func (h *DriveHandler) List(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")
 
 	// Ensure vehicle belongs to user with at least VIEWER role
-	if v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleViewer); v == nil {
+	vehicle := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleViewer)
+	if vehicle == nil {
 		return
 	}
+	tollActive := vehicle.TollDetectionActive
 
 	filter := parseDriveFilter(r)
+	// The qualification filter means nothing without toll detection.
+	filter.UnqualifiedOnly = filter.UnqualifiedOnly && tollActive
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page <= 0 {
 		page = 1
@@ -108,15 +112,18 @@ func (h *DriveHandler) List(w http.ResponseWriter, r *http.Request) {
 		writeRepoError(w, r, err, "Failed to load drive expenses")
 		return
 	}
-	needsQualification, err := h.repo.DrivesNeedingTollQualification(r.Context(), vehicleID, driveIDs)
-	if err != nil {
-		writeRepoError(w, r, err, "Failed to list drives")
-		return
-	}
-	unqualifiedCount, err := h.repo.CountUnqualifiedDrives(r.Context(), vehicleID)
-	if err != nil {
-		writeRepoError(w, r, err, "Failed to list drives")
-		return
+	// Without toll detection there is nothing to qualify: no drive is flagged and none is counted.
+	needsQualification := map[string]bool{}
+	unqualifiedCount := 0
+	if tollActive {
+		if needsQualification, err = h.repo.DrivesNeedingTollQualification(r.Context(), vehicleID, driveIDs); err != nil {
+			writeRepoError(w, r, err, "Failed to list drives")
+			return
+		}
+		if unqualifiedCount, err = h.repo.CountUnqualifiedDrives(r.Context(), vehicleID); err != nil {
+			writeRepoError(w, r, err, "Failed to list drives")
+			return
+		}
 	}
 
 	// Insurance is a fixed daily/monthly cost, not a per-km one: allocate each day's flat
