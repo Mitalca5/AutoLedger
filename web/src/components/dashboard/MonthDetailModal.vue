@@ -180,8 +180,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               <span>{{ $t('dashboard.monthDetailModal.fixedCosts') }} : <strong class="text-white">{{ formatPercent(selectedMonthBreakdown.fixedVar.fixedPct, 0) }}</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.fixedAmount, currency) }})</span>
             </span>
             <span class="text-slate-400">•</span>
-            <span class="flex items-center gap-1.5 text-info-300">
-              <span class="w-2 h-2 rounded-full bg-info-500"></span>
+            <span class="flex items-center gap-1.5 text-amber-300">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
               <span>{{ $t('dashboard.monthDetailModal.variableCosts') }} : <strong class="text-white">{{ formatPercent(selectedMonthBreakdown.fixedVar.variablePct, 0) }}</strong> ({{ formatAmount(selectedMonthBreakdown.fixedVar.variableAmount, currency) }})</span>
             </span>
           </div>
@@ -190,12 +190,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <!-- Bicolor bar -->
         <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden flex" role="progressbar" :aria-label="$t('dashboard.monthDetailModal.fixedVsVariable')">
           <div
-            class="bg-gradient-to-r from-sky-500 to-sky-500 h-full transition-all duration-300"
+            class="bg-sky-500 h-full transition-all duration-300"
             :style="{ width: `${selectedMonthBreakdown.fixedVar.fixedPct}%` }"
             :title="`${$t('dashboard.monthDetailModal.fixedCosts')}: ${selectedMonthBreakdown.fixedVar.fixedPct}%`"
           ></div>
           <div
-            class="bg-gradient-to-r from-info-500 to-sky-400 h-full transition-all duration-300"
+            class="bg-amber-400 h-full transition-all duration-300"
             :style="{ width: `${selectedMonthBreakdown.fixedVar.variablePct}%` }"
             :title="`${$t('dashboard.monthDetailModal.variableCosts')}: ${selectedMonthBreakdown.fixedVar.variablePct}%`"
           ></div>
