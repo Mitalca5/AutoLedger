@@ -220,7 +220,7 @@ onBeforeUnmount(() => {
       <div class="flex flex-wrap items-center justify-between gap-2">
         <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.budget.title') }}</span>
         <div v-if="!editingBudget" class="flex items-center gap-3 text-xs font-semibold">
-          <button type="button" @click="startEditBudget" class="tap-text text-rose-400 hover:text-rose-300">
+          <button type="button" @click="startEditBudget" class="tap-text px-2 text-rose-400 hover:text-rose-300">
             {{ summary.monthly_budget ? t('fleet.budget.edit') : t('fleet.budget.set') }}
           </button>
           <button v-if="summary.monthly_budget" type="button" :disabled="savingBudget" @click="saveBudget(null)" class="tap-text text-slate-400 hover:text-white">
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
         <button type="button" @click="editingBudget = false" class="btn btn-lg btn-secondary">{{ t('common.cancel') }}</button>
       </form>
       <template v-if="usage && summary.monthly_budget && !editingBudget">
-        <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(usage.percent)" aria-valuemin="0" aria-valuemax="100">
+        <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" :aria-valuenow="Math.round(usage.percent)" aria-valuemin="0" aria-valuemax="100" :aria-label="t('fleet.budget.title')">
           <div
             class="h-full rounded-full"
             :class="usage.status === 'over' ? 'bg-rose-500' : usage.status === 'warning' ? 'bg-warning-400' : 'bg-success-500'"

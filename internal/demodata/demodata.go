@@ -54,6 +54,30 @@ type Ownership struct {
 	Lease         *Lease
 }
 
+// CarpoolLeg is one stage of a carpooled trip, with the costs the driver recorded for it.
+type CarpoolLeg struct {
+	From, To         string
+	DistanceKm       float64
+	ElectricityCents int64
+	TollsCents       int64
+}
+
+// CarpoolPassenger rides from the start of leg Board to the end of leg Alight (0-based leg indexes).
+type CarpoolPassenger struct {
+	Name          string
+	Board, Alight int
+	Seats         int
+	PaidCents     int64
+}
+
+// Carpool is a multi-leg shared trip where passengers get on and off along the way.
+type Carpool struct {
+	Title      string
+	DaysAgo    int
+	Legs       []CarpoolLeg
+	Passengers []CarpoolPassenger
+}
+
 // Lease is a LOA contract.
 type Lease struct {
 	DurationMonths     int
@@ -103,6 +127,10 @@ type Dataset struct {
 	Tires     []Tire
 	// Ownership is the acquisition of the vehicle, which completes the TCO.
 	Ownership Ownership
+	// Carpool fills the carpooling page; nil leaves it empty.
+	Carpool *Carpool
+	// MonthlyBudgetCents is the household budget shown on the fleet page (account level); 0 sets none.
+	MonthlyBudgetCents int64
 	// Comparison is nil for a dataset that carries no scenario.
 	Comparison *Comparison
 	// FinalOdometer is the odometer after the last event.
@@ -119,8 +147,10 @@ func Build(key string, today time.Time) (Dataset, error) {
 		return buildEV(today), nil
 	case "ice":
 		return buildICE(today), nil
+	case "layout":
+		return buildLayout(today), nil
 	}
-	return Dataset{}, fmt.Errorf("unknown dataset %q (expected ev or ice)", key)
+	return Dataset{}, fmt.Errorf("unknown dataset %q (expected ev, ice or layout)", key)
 }
 
 func round(v float64, decimals int) float64 {
@@ -248,6 +278,19 @@ func buildEV(today time.Time) Dataset {
 			DurationMonths: 48, MonthlyRentCents: 38900, DownPaymentCents: 400000, KmAllowancePerYear: 12000,
 			ExcessKmPrice: 0.12, OptionPriceCents: 2350000, EndValueCents: 2100000,
 		}}
+	// The second passenger gets on at the stop of the first leg and rides to the end, so the legs are shared unevenly.
+	ds.Carpool = &Carpool{
+		Title: "Lyon to Annecy, Friday evening", DaysAgo: 12,
+		Legs: []CarpoolLeg{
+			{From: "Lyon", To: "Chambery", DistanceKm: 112, ElectricityCents: 1150, TollsCents: 1120},
+			{From: "Chambery", To: "Annecy", DistanceKm: 52, ElectricityCents: 540, TollsCents: 0},
+		},
+		Passengers: []CarpoolPassenger{
+			{Name: "Alice", Board: 0, Alight: 1, Seats: 1, PaidCents: 1500},
+			{Name: "Bruno", Board: 1, Alight: 1, Seats: 1, PaidCents: 300},
+		},
+	}
+	ds.MonthlyBudgetCents = 45000
 	ds.Expenses = []Expense{
 		{"maintenance", "INSURANCE", "Insurance, 12 months", 58000, at(215)},
 		{"maintenance", "MAINTENANCE", "Annual inspection", 18900, at(150)},
@@ -349,6 +392,98 @@ func buildICE(today time.Time) Dataset {
 	}
 	for _, pos := range []string{"FL", "FR", "RL", "RR"} {
 		ds.Tires = append(ds.Tires, Tire{"Continental", "EcoContact 6", "195/55 R16", "SUMMER", at(235), 38800, pos, ds.Vehicle.StartOdometer, 45000})
+	}
+	return ds
+}
+
+// buildLayout is a plug-in hybrid made to stress the rendering rather than to look like a real car: very long
+// names, another currency, a far-off outlier drive and a tiny one, a large expense, an overdue reminder and a
+// purchase with no planned resale (the full cost then reports what is missing). It is not part of the default
+// set seeded for the public demo.
+func buildLayout(today time.Time) Dataset {
+	rng := rand.New(rand.NewSource(23))
+	const (
+		long        = "Workplace car park, level -2, bay 14, next to the visitors entrance and the cycle store"
+		consumption = 17.0 // kWh/100 km, electric part
+		tank        = 43.0
+	)
+	ds := Dataset{Key: "layout", Vehicle: Vehicle{
+		Name:       "Family estate plug-in hybrid, the long name that has to be truncated on a phone",
+		Make:       "A manufacturer with a particularly long name",
+		Model:      "Touring 1.5 plug-in hybrid four-wheel drive Executive Premium",
+		Powertrain: "PHEV", StartOdometer: 12800, Currency: "GBP", KWhPer100Km: 17, PricePerKWh: 0.28,
+	}}
+	odo := ds.Vehicle.StartOdometer
+	fuel := 20.0
+	for i := 0; i < Days; i++ {
+		day := today.AddDate(0, 0, -(Days - i))
+		wd := day.Weekday()
+		if wd == time.Sunday || (wd == time.Saturday && rng.Intn(2) == 0) {
+			continue
+		}
+		km := round(12+rng.Float64()*28, 1)
+		switch i {
+		case Days / 3:
+			km = 420.4 // a long motorway day
+		case Days / 2:
+			km = 0.3 // a bump of the garage
+		}
+		start := day.Add(8 * time.Hour)
+		to := long
+		if i%3 == 0 {
+			to = "Home"
+		}
+		ds.Events = append(ds.Events, Event{
+			ID: fmt.Sprintf("demo-layout-drive-%03d", i), Type: "drive", At: start,
+			Data: map[string]any{
+				"start_time": rfc(start), "end_time": rfc(start.Add(time.Duration(km*1.5+1) * time.Minute)),
+				"duration_min": int(km*1.5) + 1, "distance": km,
+				"start_odometer": round(odo, 1), "end_odometer": round(odo+km, 1),
+				"start_address": "Home", "end_address": to, "energy_kwh": round(km*consumption/100, 2),
+			},
+		})
+		odo += km
+		fuel -= km * 0.055
+		if i%4 == 0 {
+			added := round(6+rng.Float64()*8, 2)
+			at := day.Add(19 * time.Hour)
+			ds.Events = append(ds.Events, Event{
+				ID: fmt.Sprintf("demo-layout-charge-%03d", i), Type: "charging_session_end", At: at,
+				Data: map[string]any{
+					"start_time": rfc(at), "end_time": rfc(at.Add(3 * time.Hour)),
+					"energy_kwh": added, "energy_added_kwh": added, "cost": round(added*0.28, 2),
+					"location": "Home", "charger_name": "Home", "odometer_km": round(odo, 1),
+				},
+			})
+		}
+		if fuel < 8 {
+			liters := round(tank-fuel, 2)
+			at := day.Add(18 * time.Hour)
+			ds.Events = append(ds.Events, Event{
+				ID: fmt.Sprintf("demo-layout-fuel-%03d", i), Type: "fuel", At: at,
+				Data: map[string]any{
+					"liters": liters, "price_per_liter": 1.52, "amount": round(liters*1.52, 2),
+					"fuel_type": "SP95_E10", "is_full_tank": true, "odometer_km": round(odo, 1),
+				},
+			})
+			fuel = tank
+		}
+	}
+	ds.FinalOdometer = odo
+	at := func(d int) time.Time { return today.AddDate(0, 0, -d) }
+	ds.Ownership = Ownership{Date: at(Days + 20), Odometer: ds.Vehicle.StartOdometer - 20, PriceCents: 3800000, FeesCents: 25000}
+	ds.Expenses = []Expense{
+		{"maintenance", "REPAIR", "Hybrid battery cooling system replaced under the extended warranty claim, labour and parts, second visit", 428000, at(45)},
+		{"maintenance", "INSURANCE", "Comprehensive insurance with breakdown cover and courtesy car, 12 months", 112000, at(200)},
+		{"maintenance", "MAINTENANCE", "Annual service", 24900, at(90)},
+		{"toll", "", "Dartford Crossing", 250, at(30)},
+	}
+	ds.Reminders = []Reminder{
+		{"MOT test, overdue since last week and needs to be booked before the insurance renewal", today.AddDate(0, 0, -10)},
+		{"Software update at the dealer", today.AddDate(0, 0, 5)},
+	}
+	for _, pos := range []string{"FL", "FR", "RL", "RR"} {
+		ds.Tires = append(ds.Tires, Tire{"Winter brand with a long name", "All-season model with a long name", "225/45 R19 96W XL", "WINTER", at(Days + 10), 31200, pos, ds.Vehicle.StartOdometer, 12000})
 	}
 	return ds
 }

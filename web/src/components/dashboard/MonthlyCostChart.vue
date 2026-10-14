@@ -152,7 +152,7 @@ onUnmounted(() => {
           :key="opt"
           type="button"
           :aria-pressed="mode === opt"
-          :class="['tap-text px-2.5 text-xs font-semibold rounded-md transition-colors', mode === opt ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white']"
+          :class="['tap-text justify-center px-2.5 text-xs font-semibold rounded-md transition-colors pointer-coarse:min-w-11', mode === opt ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white']"
           @click="mode = opt"
         >
           {{ opt === 'economic' ? $t('dashboard.monthlyCostChart.economic') : $t('dashboard.monthlyCostChart.cash') }}

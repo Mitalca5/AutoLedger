@@ -91,7 +91,7 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
           {{ $t('expenses.maintenancePanel.serviceBook') }}
         </button>
         <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-          <input v-model="bookWithProofs" type="checkbox" class="rounded border-slate-700 bg-slate-800 text-rose-600" />
+          <input v-model="bookWithProofs" type="checkbox" class="select-box" />
           {{ $t('expenses.maintenancePanel.serviceBookWithProofs') }}
         </label>
         <p class="text-xs text-slate-400 basis-full">{{ $t('expenses.maintenancePanel.serviceBookHint') }}</p>

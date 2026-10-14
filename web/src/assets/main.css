@@ -255,6 +255,17 @@
   }
 }
 
+/* The label around a .select-box is the hit area of the checkbox: the box itself stays 16px. */
+label:has(> .select-box) {
+  min-height: 2.25rem;
+}
+@media (pointer: coarse) {
+  label:has(> .select-box) {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
 /* Text buttons, links and chips: same hit area as .tap, laid out inline. */
 .tap-text {
   min-height: 2.25rem;
@@ -336,6 +347,10 @@
 /* The compact date pickers (the month navigator of a toolbar) trade the 16px of touch fields for a size that fits their width. */
 .app-datepicker-wrapper.size-xs {
   --touch-font-size: 0.8125rem;
+}
+/* A date field of a form or of a sheet is a field like any other: 16px on touch, or the page zooms on focus. */
+[role="dialog"] .app-datepicker-wrapper.size-xs {
+  --touch-font-size: 16px;
 }
 
 /* The list a select opens is drawn by the browser: give it the app's dark surface, with the chosen

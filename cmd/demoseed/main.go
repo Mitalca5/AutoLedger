@@ -103,12 +103,22 @@ func (c *client) seed(ds demodata.Dataset, apiToken string) error {
 			return err
 		}
 	}
+	if ds.MonthlyBudgetCents > 0 {
+		if err := c.do("PUT", "/api/fleet/budget", map[string]any{"amount": units(ds.MonthlyBudgetCents)}, nil, ""); err != nil {
+			return err
+		}
+	}
 	for _, e := range ds.Events {
 		err := c.do("POST", "/api/integrations/homeassistant/event", map[string]any{
 			"event_type": e.Type, "vehicle_id": v.ID, "event_id": e.ID,
 			"timestamp": e.At.Format(time.RFC3339), "data": e.Data,
 		}, nil, apiToken)
 		if err != nil {
+			return err
+		}
+	}
+	if cp := ds.Carpool; cp != nil {
+		if err := c.do("POST", "/api/vehicles/"+v.ID+"/carpools", carpoolPayload(cp), nil, ""); err != nil {
 			return err
 		}
 	}
@@ -170,7 +180,7 @@ func main() {
 	url := flag.String("url", "http://localhost:8080", "base URL of the AutoLedger instance")
 	email := flag.String("email", "demo@autoledger.example", "demo account email (created when absent)")
 	password := flag.String("password", os.Getenv("DEMO_PASSWORD"), "demo account password (default: $DEMO_PASSWORD)")
-	sets := flag.String("datasets", "ev,ice", "comma-separated datasets: ev, ice")
+	sets := flag.String("datasets", "ev,ice", "comma-separated datasets: ev, ice, layout (a hybrid with long names and another currency, for layout checks)")
 	flag.Parse()
 	if *password == "" {
 		log.Fatal("a password is required (-password or $DEMO_PASSWORD)")
@@ -217,4 +227,28 @@ func ownershipPayload(o demodata.Ownership) map[string]any {
 		payload["expected_resale_value"], payload["expected_holding_months"] = units(o.ResaleCents), o.HoldingMonths
 	}
 	return payload
+}
+
+// carpoolPayload is the API body of a demo carpooled trip, dated DaysAgo days back.
+func carpoolPayload(cp *demodata.Carpool) map[string]any {
+	legs := make([]map[string]any, 0, len(cp.Legs))
+	total := 0.0
+	for _, l := range cp.Legs {
+		legs = append(legs, map[string]any{
+			"start_label": l.From, "end_label": l.To, "distance_km": l.DistanceKm,
+			"electricity_cost": units(l.ElectricityCents), "tolls_cost": units(l.TollsCents),
+		})
+		total += l.DistanceKm
+	}
+	passengers := make([]map[string]any, 0, len(cp.Passengers))
+	for _, p := range cp.Passengers {
+		passengers = append(passengers, map[string]any{
+			"passenger_name": p.Name, "seats": p.Seats, "amount_paid": units(p.PaidCents),
+			"board_stop_index": p.Board, "alight_stop_index": p.Alight + 1,
+		})
+	}
+	return map[string]any{
+		"title": cp.Title, "date": day(time.Now().AddDate(0, 0, -cp.DaysAgo)), "distance_km": total,
+		"legs": legs, "passengers": passengers,
+	}
 }

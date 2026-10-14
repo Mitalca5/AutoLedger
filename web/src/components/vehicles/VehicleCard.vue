@@ -162,7 +162,8 @@ function clearCardTestResult() {
     </div>
 
     <!-- Actions -->
-    <div class="mt-4 pt-3 flex items-center justify-between gap-2 flex-wrap">
+    <!-- A grid of two on a phone: wrapped flex rows left one button alone and misaligned -->
+    <div class="mt-4 pt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
       <button
         @click="emit('members', v)"
         class="btn btn-secondary"
@@ -209,11 +210,11 @@ function clearCardTestResult() {
       <button
         v-if="vehicleStore.activeVehicleId !== v.id"
         @click="vehicleStore.setActiveVehicle(v.id)"
-        class="ml-auto px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-rose-400 font-semibold rounded-lg"
+        class="col-span-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-rose-400 font-semibold rounded-lg sm:col-span-1 sm:ml-auto"
       >
         {{ $t('vehicles.vehicleCard.select') }}
       </button>
-      <span v-else class="ml-auto text-xs font-semibold text-rose-400 px-3 py-1.5 bg-rose-500/10 rounded-lg">
+      <span v-else class="col-span-2 text-center text-xs font-semibold text-rose-400 px-3 py-1.5 bg-rose-500/10 rounded-lg sm:col-span-1 sm:ml-auto">
         {{ $t('vehicles.vehicleCard.activeVehicle') }}
       </span>
     </div>

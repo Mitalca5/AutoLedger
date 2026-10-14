@@ -308,15 +308,17 @@ onMounted(async () => {
       </div>
       <ul class="grid gap-3 md:grid-cols-2">
         <li v-for="sc in scenarios" :key="sc.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3">
-          <input
-            :id="`cmp-select-${sc.id}`"
-            type="checkbox"
-            class="rounded border-slate-600 bg-slate-800 shrink-0"
-            :checked="selectedIds.includes(sc.id)"
-            :disabled="!selectedIds.includes(sc.id) && selectedIds.length >= MAX_COMPARE"
-            :aria-label="$t('comparison.comparisonView.selectFor', { name: sc.name })"
-            @change="toggleSelected(sc.id)"
-          />
+          <label class="tap shrink-0 cursor-pointer">
+            <input
+              :id="`cmp-select-${sc.id}`"
+              type="checkbox"
+              class="select-box"
+              :checked="selectedIds.includes(sc.id)"
+              :disabled="!selectedIds.includes(sc.id) && selectedIds.length >= MAX_COMPARE"
+              :aria-label="$t('comparison.comparisonView.selectFor', { name: sc.name })"
+              @change="toggleSelected(sc.id)"
+            />
+          </label>
           <button class="text-left min-w-0 flex-1" @click="openResult(sc)">
             <div class="text-sm font-semibold text-white truncate">{{ sc.name }}</div>
             <div class="text-xs text-slate-400">
