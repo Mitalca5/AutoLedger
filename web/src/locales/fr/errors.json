@@ -132,7 +132,8 @@
     "missing_start_time": "La date et l'heure de début sont requises",
     "invalid_distance": "La distance doit être supérieure à 0",
     "cannot_edit_synced": "Seuls les trajets saisis manuellement peuvent être modifiés",
-    "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés"
+    "cannot_delete_synced": "Seuls les trajets saisis manuellement peuvent être supprimés",
+    "bulk_limit": "Maximum {p0} trajets à la fois"
   },
   "fuel": {
     "combustion_only": "Les pleins de carburant ne concernent pas les véhicules électriques",

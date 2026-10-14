@@ -1,13 +1,13 @@
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { t } from '@/i18n'
-import { api } from '@/services/api'
+import { api, type VehiclePerson } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
 import { downloadCsv } from '@/utils/csv'
 import { applyBatchTag, driveCsvHeaders, driveCsvRows } from '@/utils/drives'
 
-// What the bulk bar does with the selected drives: tag, export, carpool and toll estimates.
+// What the bulk bar does with the selected drives: tag, driver, export, carpool and toll estimates.
 export function useDriveBulkActions(options: {
   drives: Ref<any[]>
   selectedDrives: Readonly<Ref<Record<string, any>>>
@@ -38,6 +38,41 @@ export function useDriveBulkActions(options: {
       void showAlert(t('drives.drivesView.tagsUpdated', { count: ids.length }), t('common.success'), 'success')
     } catch (err: any) {
       void showAlert(t('drives.drivesView.batchTagError', { message: err.message }), t('shell.confirm.error'), 'danger')
+    }
+  }
+
+  // Batch driver: a person of the vehicle, or null for "the vehicle's default driver"
+  const vehiclePeople = ref<VehiclePerson[]>([])
+  async function loadVehiclePeople() {
+    const id = vehicleStore.activeVehicle?.id
+    vehiclePeople.value = []
+    if (!id) return
+    try {
+      vehiclePeople.value = await api.getVehiclePeople(id)
+    } catch {
+      vehiclePeople.value = []
+    }
+  }
+  watch(() => vehicleStore.activeVehicle?.id, loadVehiclePeople, { immediate: true })
+
+  async function handleBatchDriver(driverId: string | null) {
+    if (!vehicleStore.activeVehicle || !selectedDriveIds.value.length) return
+    const ids = [...selectedDriveIds.value]
+    const person = vehiclePeople.value.find((p) => p.id === driverId)
+    try {
+      await api.updateDrivesDriver(vehicleStore.activeVehicle.id, ids, driverId)
+      for (const id of ids) {
+        for (const d of [selectedDrives.value[id], drives.value.find((x) => x.id === id)]) {
+          if (d) {
+            d.driver_id = driverId
+            d.driver_name = person?.name ?? null
+          }
+        }
+      }
+      void showAlert(t('drives.drivesView.driverUpdated', { count: ids.length }), t('common.success'), 'success')
+      await loadDrives()
+    } catch (err: any) {
+      void showAlert(t('common.errorWithMessage', { message: err.message }), t('shell.confirm.error'), 'danger')
     }
   }
 
@@ -81,5 +116,5 @@ export function useDriveBulkActions(options: {
     }
   }
 
-  return { bulkApplyingToll, handleBatchTag, exportSelectedDrives, handleCarpoolSelectedDrives, handleBulkApplyToll }
+  return { bulkApplyingToll, vehiclePeople, handleBatchDriver, handleBatchTag, exportSelectedDrives, handleCarpoolSelectedDrives, handleBulkApplyToll }
 }

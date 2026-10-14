@@ -257,6 +257,11 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({ driver_id: driverId }),
     }),
+  updateDrivesDriver: (vehicleId: string, driveIds: string[], driverId: string | null) =>
+    request<{ success: boolean; updated: number }>(`/vehicles/${vehicleId}/drives/driver`, {
+      method: 'PUT',
+      body: JSON.stringify({ drive_ids: driveIds, driver_id: driverId }),
+    }),
   previewCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>
     request<CSVPreviewResult>(`/vehicles/${vehicleId}/import/preview`, { method: 'POST', body: csvImportForm(file, opts) }),
   executeCSVImport: (vehicleId: string, file: File, opts: CSVImportOptions) =>

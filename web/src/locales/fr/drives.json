@@ -26,6 +26,7 @@
     "deselectPage": "Désélectionner la page",
     "selectPage": "Sélectionner la page",
     "tagsUpdated": "Tags mis à jour pour {count} trajet(s).",
+    "driverUpdated": "Conducteur mis à jour pour {count} trajet(s).",
     "batchTagError": "Erreur lors du taggage par lot : {message}",
     "csvFileName": "trajets_export",
     "tagUpdateError": "Erreur de mise à jour du tag : {message}",
@@ -55,6 +56,8 @@
     "noTrip": "Aucun trajet auquel ajouter ces trajets pour l'instant"
   },
   "driveBulkActions": {
+    "driver": "Conducteur",
+    "changeDriver": "Définir le conducteur des trajets sélectionnés",
     "addToTrip": "Ajouter voyage",
     "export": "Export",
     "exportTheSelectionAsCsv": "Exporter la sélection en CSV",

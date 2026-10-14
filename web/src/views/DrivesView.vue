@@ -250,7 +250,7 @@ const showTripEditModal = ref(false)
 const tripBeingEdited = ref<any | null>(null)
 const showAddToTripModal = ref(false)
 const showGroupModal = ref(false)
-const { bulkApplyingToll, handleBatchTag, exportSelectedDrives, handleCarpoolSelectedDrives, handleBulkApplyToll } = useDriveBulkActions({
+const { bulkApplyingToll, vehiclePeople, handleBatchDriver, handleBatchTag, exportSelectedDrives, handleCarpoolSelectedDrives, handleBulkApplyToll } = useDriveBulkActions({
   drives,
   selectedDrives,
   selectedDriveIds,
@@ -507,11 +507,13 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
       :selected-off-page="selectedOffPage"
       :selected-summary-metrics="selectedSummaryMetrics"
       :bulk-applying-toll="bulkApplyingToll"
+      :people="vehiclePeople"
       @clear="clearSelection"
       @carpool="handleCarpoolSelectedDrives"
       @group="showGroupModal = true"
       @bulk-toll="handleBulkApplyToll"
       @tag="handleBatchTag"
+      @driver="handleBatchDriver"
       @export="exportSelectedDrives"
       @add-to-trip="openAddToTrip"
     />

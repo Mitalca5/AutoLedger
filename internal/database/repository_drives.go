@@ -357,6 +357,20 @@ func (r *Repository) SetDriveDriver(ctx context.Context, driveID, vehicleID stri
 	return nil
 }
 
+// SetDrivesDriver assigns or clears the driver of several drives of a vehicle in one statement and
+// returns how many were updated; ids that are not drives of the vehicle are ignored.
+func (r *Repository) SetDrivesDriver(ctx context.Context, vehicleID string, driveIDs []string, driverID *string) (int64, error) {
+	tag, err := r.pool.Exec(ctx, `
+		UPDATE drives
+		SET driver_id = $1, updated_at = NOW()
+		WHERE id::text = ANY($2) AND vehicle_id = $3;
+	`, driverID, driveIDs, vehicleID)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
+
 func (r *Repository) DeleteManualDrive(ctx context.Context, driveID, vehicleID string) error {
 	tag, err := r.pool.Exec(ctx, `DELETE FROM drives WHERE id = $1 AND vehicle_id = $2 AND is_manual = TRUE;`, driveID, vehicleID)
 	if err != nil {

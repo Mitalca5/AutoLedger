@@ -214,6 +214,50 @@ func (h *DriveHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"success": true, "driver_id": req.DriverID})
 }
 
+// MaxBulkDriverDrives bounds one bulk driver change.
+const MaxBulkDriverDrives = 500
+
+type UpdateDrivesDriverRequest struct {
+	DriveIDs []string `json:"drive_ids"`
+	DriverID *string  `json:"driver_id"`
+}
+
+// UpdateDrivesDriver assigns, changes or clears the driver of several drives at once.
+func (h *DriveHandler) UpdateDrivesDriver(w http.ResponseWriter, r *http.Request) {
+	vehicleID := chi.URLParam(r, "vehicleId")
+	if v := requireVehicleAccess(w, r, h.repo, vehicleID, models.RoleEditor); v == nil {
+		return
+	}
+
+	var req UpdateDrivesDriverRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("request.invalid_body", "Invalid request body"))
+		return
+	}
+	if len(req.DriveIDs) == 0 {
+		writeAPIError(w, http.StatusBadRequest, apierror.New("trip.drive_required", "Select at least one drive"))
+		return
+	}
+	if len(req.DriveIDs) > MaxBulkDriverDrives {
+		writeAPIError(w, http.StatusBadRequest, apierror.Newf("drive.bulk_limit", "At most %d drives at a time", MaxBulkDriverDrives))
+		return
+	}
+	if req.DriverID != nil && *req.DriverID == "" {
+		req.DriverID = nil
+	}
+	if !h.driverBelongs(w, r, vehicleID, req.DriverID) {
+		return
+	}
+
+	updated, err := h.repo.SetDrivesDriver(r.Context(), vehicleID, req.DriveIDs, req.DriverID)
+	if err != nil {
+		writeRepoError(w, r, err, "Failed to update driver")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"success": true, "updated": updated, "driver_id": req.DriverID})
+}
+
 // Delete removes a manually entered drive.
 func (h *DriveHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicleId")

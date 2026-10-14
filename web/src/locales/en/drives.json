@@ -26,6 +26,7 @@
     "deselectPage": "Deselect the page",
     "selectPage": "Select the page",
     "tagsUpdated": "Tags updated for {count} drive(s).",
+    "driverUpdated": "Driver updated for {count} drive(s).",
     "batchTagError": "Batch tagging failed: {message}",
     "csvFileName": "drives_export",
     "tagUpdateError": "Could not update the tag: {message}",
@@ -55,6 +56,8 @@
     "noTrip": "No trip to add these drives to yet"
   },
   "driveBulkActions": {
+    "driver": "Driver",
+    "changeDriver": "Set the driver of the selected drives",
     "addToTrip": "Add to trip",
     "export": "Export",
     "exportTheSelectionAsCsv": "Export the selection as CSV",

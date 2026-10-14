@@ -1,22 +1,41 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
+import { t } from '@/i18n'
+import type { VehiclePerson } from '@/services/api'
+import { defaultDriver } from '@/utils/vehicles'
 import { usePreferencesStore } from '@/stores/preferences'
 import BulkSelectionBar from '@/components/BulkSelectionBar.vue'
 import { Receipt, Layers, Users, Plus, Download } from 'lucide-vue-next'
 
 // Actions on the drives selected in the list; the page runs them.
-defineProps<{ selectedDriveIds: string[]; selectedOffPage: number; selectedSummaryMetrics: string; bulkApplyingToll: boolean }>()
+const props = defineProps<{ selectedDriveIds: string[]; selectedOffPage: number; selectedSummaryMetrics: string; bulkApplyingToll: boolean; people: VehiclePerson[] }>()
 const emit = defineEmits<{
   clear: []
   carpool: []
   group: []
   'bulk-toll': []
   tag: [tag: 'Pro' | 'Perso']
+  driver: [driverId: string | null]
   export: []
   'add-to-trip': []
 }>()
 const vehicleStore = useVehicleStore()
 const prefs = usePreferencesStore()
+
+// "" is the placeholder; DEFAULT_DRIVER clears the driver so the vehicle's default applies
+const DEFAULT_DRIVER = '__default__'
+const defaultDriverLabel = computed(() => {
+  const d = defaultDriver(props.people, vehicleStore.activeVehicle?.default_driver_id)
+  return d ? t('drives.defaultDriver', { name: d.name }) : t('drives.unassignedDriver')
+})
+function onDriverChange(e: Event) {
+  const el = e.target as HTMLSelectElement
+  const value = el.value
+  el.value = ''
+  if (!value) return
+  emit('driver', value === DEFAULT_DRIVER ? null : value)
+}
 </script>
 
 <template>
@@ -60,6 +79,20 @@ const prefs = usePreferencesStore()
       <Receipt class="w-3.5 h-3.5" />
       <span>{{ bulkApplyingToll ? $t('drives.driveBulkActions.applying') : $t('drives.driveBulkActions.autoToll', { count: selectedDriveIds.length }) }}</span>
     </button>
+
+    <!-- Batch driver -->
+    <select
+      v-if="people.length"
+      value=""
+      @change="onDriverChange"
+      class="btn btn-secondary pr-7"
+      :aria-label="$t('drives.driveBulkActions.driver')"
+      :title="$t('drives.driveBulkActions.changeDriver')"
+    >
+      <option value="" disabled>{{ $t('drives.driveBulkActions.driver') }}…</option>
+      <option :value="DEFAULT_DRIVER">{{ defaultDriverLabel }}</option>
+      <option v-for="p in people" :key="p.id" :value="p.id">{{ p.name }}</option>
+    </select>
 
     <!-- Batch Tag actions -->
     <button

@@ -19,6 +19,7 @@ func (h *apiHandlers) registerDriveRoutes(r chi.Router) {
 	r.Post("/{vehicleId}/drives", h.drive.Create)
 	r.Put("/{vehicleId}/drives/{driveId}", h.drive.Update)
 	r.Delete("/{vehicleId}/drives/{driveId}", h.drive.Delete)
+	r.Put("/{vehicleId}/drives/driver", h.drive.UpdateDrivesDriver)
 	r.Put("/{vehicleId}/drives/{driveId}/driver", h.drive.UpdateDriver)
 	r.Get("/{vehicleId}/drives/{driveId}/expenses", h.drive.GetDriveExpenses)
 

@@ -132,7 +132,8 @@
     "missing_start_time": "Start date and time are required",
     "invalid_distance": "Distance must be greater than 0",
     "cannot_edit_synced": "Only manually logged drives can be edited",
-    "cannot_delete_synced": "Only manually logged drives can be deleted"
+    "cannot_delete_synced": "Only manually logged drives can be deleted",
+    "bulk_limit": "At most {p0} drives at a time"
   },
   "fuel": {
     "combustion_only": "Fuel fill-ups do not apply to electric vehicles",
