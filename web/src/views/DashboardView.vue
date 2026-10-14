@@ -7,7 +7,8 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { usePreferencesStore } from '@/stores/preferences'
 import { api, type MaintenanceReminder } from '@/services/api'
 
-import ResidualValuePanel from '@/components/dashboard/ResidualValuePanel.vue'
+import BatteryHealthCard from '@/components/dashboard/BatteryHealthCard.vue'
+import ResaleValueCard from '@/components/dashboard/ResaleValueCard.vue'
 import EnergyEfficiencyPanel from '@/components/dashboard/EnergyEfficiencyPanel.vue'
 import UrgentRemindersBanner from '@/components/dashboard/UrgentRemindersBanner.vue'
 import NextDueCard from '@/components/dashboard/NextDueCard.vue'
@@ -45,6 +46,8 @@ const followUpLabels = computed(() => {
   return labels
 })
 const selectedMonth = ref<any | null>(null)
+// Bumped when a battery reading changes: the resale estimate depends on the health
+const resaleRefresh = ref(0)
 
 // Monthly costs for the charts; null until the TCO is loaded
 const monthlyCosts = computed(() => (tco.value ? tco.value.monthly_costs || [] : null))
@@ -193,11 +196,19 @@ onMounted(() => {
 
       <LeaseContractCard :tco="tco" />
 
-      <ResidualValuePanel
-        v-if="vehicleStore.activeVehicle"
-        :vehicle-id="vehicleStore.activeVehicle.id"
-        :show-battery="vehicleStore.canCharge"
-      />
+      <!-- Two unrelated questions, so two cards: how healthy the battery is, and what the vehicle is worth -->
+      <div v-if="vehicleStore.activeVehicle" class="grid grid-cols-1 items-start gap-6" :class="vehicleStore.canCharge ? 'lg:grid-cols-2' : ''">
+        <BatteryHealthCard
+          v-if="vehicleStore.canCharge"
+          :vehicle-id="vehicleStore.activeVehicle.id"
+          @updated="resaleRefresh++"
+        />
+        <ResaleValueCard
+          :vehicle-id="vehicleStore.activeVehicle.id"
+          :has-battery="vehicleStore.canCharge"
+          :refresh-key="resaleRefresh"
+        />
+      </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <MonthlyCostChart :monthly-costs="monthlyCosts" @open-month="openMonthDetail" />

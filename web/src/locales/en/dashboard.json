@@ -350,40 +350,46 @@
     "financingNote": "Smoothed: {smoothed} (monthly payment made: {paid})",
     "other": "Subscriptions, taxes and other"
   },
-  "residualPanel": {
-    "title": "Battery health and residual value",
-    "history": "Battery health history",
-    "manageReadings": "Readings ({count})",
-    "health": "Battery state of health",
-    "noHealth": "Unknown yet: add a reading, or the new-battery capacity so the charges can be compared with it.",
-    "healthHint": "A reading can come from an OBD2 scan, a garage report, TeslaMate or the ingestion API. Without one, the capacity estimated from your complete charges is compared with the new-battery capacity.",
-    "date": "Reading date",
-    "percent": "Health (%)",
-    "newCapacity": "New capacity (kWh)",
-    "addReading": "Add",
-    "readingRequired": "Enter a health percentage or a new-battery capacity first.",
-    "deleteReading": "Delete the reading of {date}",
-    "residual": "Projected resale value",
-    "expectedKm": "Planned distance",
-    "kmShare": "Weight of the distance (%)",
-    "healthWeight": "Health weight",
-    "summary": "{depreciation} lost so far · {progress}% of the planned depreciation",
-    "curve": "Projected value over the holding period",
-    "curveHint": "Curve from your purchase price to the {value} expected after {months} months; adjusted for age, distance and battery health.",
-    "source": {
-      "reading": "recorded reading",
-      "capacity": "recorded capacities",
-      "charges": "estimated from charges"
-    },
-    "configure": "Set up",
-    "show": "Show",
-    "advanced": "Advanced settings",
-    "advancedHint": "The residual value combines age, mileage and battery health. These weights set the share of each: keep the defaults if unsure."
-  },
   "followUp": {
     "title": "Follow-up",
     "toComplete": "data to complete",
     "maintenanceSoon": "maintenance coming up",
     "maintenanceToPlan": "maintenance to schedule"
+  },
+  "batteryHealth": {
+    "title": "Battery health",
+    "history": "Battery health history",
+    "manageReadings": "Readings ({count})",
+    "noHealth": "Unknown for now: add a reading, or the capacity of the new battery to compare the charges with.",
+    "healthHint": "A reading can come from an OBD2 scan, a garage report, TeslaMate or the ingestion API. Otherwise the capacity estimated from your full charges is compared with that of the new battery.",
+    "date": "Reading date",
+    "percent": "Health (%)",
+    "newCapacity": "New capacity (kWh)",
+    "addReading": "Add",
+    "readingRequired": "Enter a health percentage or the capacity of the new battery first.",
+    "deleteReading": "Delete the reading of {date}",
+    "source": {
+      "reading": "recorded reading",
+      "capacity": "recorded capacities",
+      "charges": "estimated from the charges"
+    }
+  },
+  "resale": {
+    "title": "Estimated resale value",
+    "today": "Estimated value today",
+    "progress": "Share of the expected depreciation reached",
+    "purchase": "Purchase",
+    "expectedResale": "Resale after {months} months",
+    "summary": "{depreciation} lost so far · {progress} % of the expected depreciation",
+    "curve": "Projected value over the holding period",
+    "missingTitle": "Not enough information to estimate the value",
+    "missingBody": "Enter the purchase price, the expected resale value and the holding period in the ownership section of the vehicle.",
+    "missingAction": "Fill in the ownership",
+    "assumptions": "Assumptions",
+    "expectedKm": "Total mileage at resale",
+    "expectedKmHint": "The odometer you expect when you sell. Left empty, it is extrapolated from your driving so far.",
+    "kmShare": "Weight of the distance (%)",
+    "healthWeight": "Weight of the health",
+    "advancedHint": "The value combines age, mileage and battery health. These weights set the share of each: keep the defaults if unsure."
   }
 }

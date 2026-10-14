@@ -350,12 +350,17 @@
     "financingNote": "Lissé : {smoothed} (mensualité réglée : {paid})",
     "other": "Abonnements, taxes & autres"
   },
-  "residualPanel": {
-    "title": "Santé de la batterie et valeur résiduelle",
+  "followUp": {
+    "title": "À suivre",
+    "toComplete": "données à compléter",
+    "maintenanceSoon": "entretien à prévoir",
+    "maintenanceToPlan": "échéance à planifier"
+  },
+  "batteryHealth": {
+    "title": "Santé de la batterie",
     "history": "Historique de la santé de la batterie",
     "manageReadings": "Mesures ({count})",
-    "health": "État de santé de la batterie",
-    "noHealth": "Inconnu pour l’instant : ajoutez une mesure, ou la capacité de la batterie neuve pour y comparer les charges.",
+    "noHealth": "Inconnue pour l’instant : ajoutez une mesure, ou la capacité de la batterie neuve pour y comparer les charges.",
     "healthHint": "Une mesure peut venir d’un scan OBD2, d’un rapport de garage, de TeslaMate ou de l’API d’ingestion. À défaut, la capacité estimée à partir de vos charges complètes est comparée à celle de la batterie neuve.",
     "date": "Date de la mesure",
     "percent": "Santé (%)",
@@ -363,27 +368,28 @@
     "addReading": "Ajouter",
     "readingRequired": "Saisissez d'abord un pourcentage de santé ou une capacité de batterie neuve.",
     "deleteReading": "Supprimer la mesure du {date}",
-    "residual": "Valeur de revente projetée",
-    "expectedKm": "Distance prévue",
-    "kmShare": "Poids de la distance (%)",
-    "healthWeight": "Poids de la santé",
-    "summary": "{depreciation} perdus à ce jour · {progress} % de la dépréciation prévue",
-    "curve": "Valeur projetée sur la durée de détention",
-    "curveHint": "Courbe de votre prix d’achat jusqu’aux {value} attendus après {months} mois ; ajustée selon l’âge, la distance et la santé de la batterie.",
     "source": {
       "reading": "mesure enregistrée",
       "capacity": "capacités enregistrées",
       "charges": "estimée via les charges"
-    },
-    "configure": "Configurer",
-    "show": "Afficher",
-    "advanced": "Réglages avancés",
-    "advancedHint": "La valeur résiduelle combine l'âge, le kilométrage et la santé de la batterie. Ces poids règlent la part de chacun : laissez les valeurs par défaut si vous hésitez."
+    }
   },
-  "followUp": {
-    "title": "À suivre",
-    "toComplete": "données à compléter",
-    "maintenanceSoon": "entretien à prévoir",
-    "maintenanceToPlan": "échéance à planifier"
+  "resale": {
+    "title": "Valeur de revente estimée",
+    "today": "Valeur estimée aujourd’hui",
+    "progress": "Part de la dépréciation prévue atteinte",
+    "purchase": "Achat",
+    "expectedResale": "Revente après {months} mois",
+    "summary": "{depreciation} perdus à ce jour · {progress} % de la dépréciation prévue",
+    "curve": "Valeur projetée sur la durée de détention",
+    "missingTitle": "Il manque des informations pour estimer la valeur",
+    "missingBody": "Renseignez le prix d’achat, la valeur de revente attendue et la durée de détention dans la section propriété du véhicule.",
+    "missingAction": "Renseigner la propriété",
+    "assumptions": "Hypothèses",
+    "expectedKm": "Kilométrage total à la revente",
+    "expectedKmHint": "Le compteur attendu au moment de la revente. Laissé vide, il est extrapolé de votre conduite jusqu’ici.",
+    "kmShare": "Poids de la distance (%)",
+    "healthWeight": "Poids de la santé",
+    "advancedHint": "La valeur combine l’âge, le kilométrage et la santé de la batterie. Ces poids règlent la part de chacun : laissez les valeurs par défaut si vous hésitez."
   }
 }
