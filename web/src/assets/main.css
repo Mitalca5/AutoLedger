@@ -208,6 +208,21 @@
   }
 }
 
+/* A modal slides up from the bottom edge on a phone (it is a bottom sheet there). */
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (max-width: 639px) {
+  .modal-panel {
+    animation: sheet-up 0.22s ease-out;
+  }
+}
+
 /* Icon buttons and row checkboxes: 36px hit area with a mouse, 44px on touch screens. */
 .tap {
   min-width: 2.25rem;

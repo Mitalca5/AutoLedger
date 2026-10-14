@@ -18,5 +18,5 @@ export function modalLayerClass(nested: boolean): string {
 
 /** The footer bar every modal shares, with the alignment of its buttons. */
 export function modalFooterClass(layout: string): string {
-  return `px-5 py-3.5 border-t border-slate-800/80 flex shrink-0 bg-slate-900/95 ${layout}`.trim()
+  return `px-5 pt-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] border-t border-slate-800/80 flex shrink-0 bg-slate-900/95 ${layout}`.trim()
 }

@@ -7,6 +7,7 @@ import { modalFooterClass, modalLayerClass, modalWidthClass, type ModalSize } fr
 // The frame every modal shares: backdrop on its own layer, a panel of one of three widths, a header with its title, an
 // optional icon and the close button, a scrolling body and an optional footer. A click on the backdrop and Escape close it;
 // v-dialog on the panel keeps the focus inside and protects what has been typed. Extra attributes land on the panel.
+// On a phone the panel is a bottom sheet: full width, anchored to the bottom edge, rounded on top, sliding up.
 defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(
@@ -32,11 +33,14 @@ const footer = computed(() => modalFooterClass(props.footerClass))
 <template>
   <div
     v-if="open"
-    class="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    class="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
     :class="layer"
     @click.self="open = false"
   >
-    <div v-dialog v-bind="$attrs" class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden my-auto" :class="width">
+    <div v-dialog v-bind="$attrs" class="modal-panel bg-slate-900 border border-slate-800 max-sm:border-b-0 rounded-t-2xl sm:rounded-2xl w-full max-sm:max-w-none max-h-[92dvh] sm:max-h-[calc(100dvh-2rem)] flex flex-col shadow-2xl overflow-hidden sm:my-auto" :class="width">
+      <div class="flex justify-center pt-2 sm:hidden shrink-0 bg-slate-900/95" aria-hidden="true">
+        <span class="h-1 w-10 rounded-full bg-slate-700"></span>
+      </div>
       <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between gap-3 shrink-0 bg-slate-900/95">
         <slot name="title">
           <h3 class="text-base font-bold text-white flex items-center gap-2 min-w-0">
