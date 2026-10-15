@@ -141,7 +141,7 @@ func main() {
 
 	bgCtx, cancelBg := context.WithCancel(context.Background())
 	defer cancelBg()
-	startWorkers(bgCtx, cfg, repo, syncService)
+	startWorkers(bgCtx, cfg, repo, syncService, notificationService)
 
 	go func() {
 		defer func() {

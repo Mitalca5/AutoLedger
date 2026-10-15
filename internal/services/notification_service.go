@@ -22,6 +22,7 @@ type notificationStore interface {
 	ListMaintenanceReminders(ctx context.Context, vehicleID string, currentOdo float64) ([]models.MaintenanceReminder, error)
 	MarkReminderNotified(ctx context.Context, reminderID string, notifiedAt time.Time, notifiedOdo float64) error
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
+	ListVehiclesWithActiveWebhook(ctx context.Context) ([]models.Vehicle, error)
 }
 
 // NotificationService handles evaluation of maintenance reminders and dispatching homelab webhooks.
@@ -121,6 +122,30 @@ func (s *NotificationService) CheckAndNotify(ctx context.Context, vehicle *model
 		}
 	}
 
+	return nil
+}
+
+// CheckAllVehicles evaluates the reminders of every vehicle with an active webhook against its recorded odometer,
+// whatever feeds that vehicle (TeslaMate, Home Assistant, manual entries). It is the scheduled counterpart of the
+// check run after a TeslaMate odometer change, and the only one that catches a reminder reaching its due date.
+// A failing vehicle is logged and does not stop the others.
+func (s *NotificationService) CheckAllVehicles(ctx context.Context) error {
+	if s.repo == nil {
+		return nil
+	}
+	vehicles, err := s.repo.ListVehiclesWithActiveWebhook(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to list vehicles with a webhook: %w", err)
+	}
+	for i := range vehicles {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		v := &vehicles[i]
+		if err := s.CheckAndNotify(ctx, v, v.CurrentOdometer); err != nil {
+			slog.Error("reminder check failed", "component", "notification", "vehicle_id", v.ID, "error", err)
+		}
+	}
 	return nil
 }
 

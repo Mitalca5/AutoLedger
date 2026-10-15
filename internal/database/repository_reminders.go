@@ -214,6 +214,31 @@ func (r *Repository) GetVehicleWebhook(ctx context.Context, vehicleID string) (*
 	return &w, nil
 }
 
+// ListVehiclesWithActiveWebhook returns the vehicles whose webhook is enabled, with the fields a reminder check
+// needs (identity, owner, name, current odometer).
+func (r *Repository) ListVehiclesWithActiveWebhook(ctx context.Context) ([]models.Vehicle, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT v.id, v.user_id, v.name, v.current_odometer
+		FROM vehicles v
+		JOIN vehicle_webhooks w ON w.vehicle_id = v.id
+		WHERE w.enabled AND btrim(w.url) <> ''
+		ORDER BY v.created_at;
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var vehicles []models.Vehicle
+	for rows.Next() {
+		var v models.Vehicle
+		if err := rows.Scan(&v.ID, &v.UserID, &v.Name, &v.CurrentOdometer); err != nil {
+			return nil, err
+		}
+		vehicles = append(vehicles, v)
+	}
+	return vehicles, rows.Err()
+}
+
 func (r *Repository) UpsertVehicleWebhook(ctx context.Context, w *models.VehicleWebhook) error {
 	query := `
 		INSERT INTO vehicle_webhooks (vehicle_id, url, type, enabled)

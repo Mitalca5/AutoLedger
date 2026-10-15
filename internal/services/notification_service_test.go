@@ -19,14 +19,29 @@ type fakeNotificationStore struct {
 	reminders        []models.MaintenanceReminder
 	markedNotifiedID string
 	language         string
+	activeVehicles   []models.Vehicle
+	checkedOdometers []float64
+	listErr          error
+	webhookErr       error
 }
 
 func (f *fakeNotificationStore) GetVehicleWebhook(ctx context.Context, vehicleID string) (*models.VehicleWebhook, error) {
+	if f.webhookErr != nil {
+		return nil, f.webhookErr
+	}
 	return f.webhook, nil
 }
 
 func (f *fakeNotificationStore) ListMaintenanceReminders(ctx context.Context, vehicleID string, currentOdo float64) ([]models.MaintenanceReminder, error) {
+	f.checkedOdometers = append(f.checkedOdometers, currentOdo)
 	return f.reminders, nil
+}
+
+func (f *fakeNotificationStore) ListVehiclesWithActiveWebhook(ctx context.Context) ([]models.Vehicle, error) {
+	if f.listErr != nil {
+		return nil, f.listErr
+	}
+	return f.activeVehicles, nil
 }
 
 func (f *fakeNotificationStore) MarkReminderNotified(ctx context.Context, reminderID string, notifiedAt time.Time, notifiedOdo float64) error {
@@ -278,5 +293,79 @@ func TestComputeStatus(t *testing.T) {
 	rem.ComputeStatus(40100, now)
 	if rem.Status != "OVERDUE" || *rem.RemainingKm != -100 {
 		t.Errorf("expected OVERDUE with -100 km left, got %s, %v", rem.Status, rem.RemainingKm)
+	}
+}
+
+func TestCheckAllVehiclesEvaluatesEachVehicleAtItsRecordedOdometer(t *testing.T) {
+	var callCount int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	store := &fakeNotificationStore{
+		webhook: &models.VehicleWebhook{URL: server.URL, Type: "GENERIC", Enabled: true},
+		reminders: []models.MaintenanceReminder{
+			{ID: "rem-1", Title: "Inspection", Status: "OVERDUE", WebhookEnabled: true},
+		},
+		activeVehicles: []models.Vehicle{
+			{ID: "v1", Name: "Zoe", CurrentOdometer: 41000},
+			{ID: "v2", Name: "Clio", CurrentOdometer: 87000},
+		},
+	}
+	svc := NewNotificationService(store)
+
+	if err := svc.CheckAllVehicles(context.Background()); err != nil {
+		t.Fatalf("CheckAllVehicles: %v", err)
+	}
+	if len(store.checkedOdometers) != 2 || store.checkedOdometers[0] != 41000 || store.checkedOdometers[1] != 87000 {
+		t.Fatalf("reminders must be evaluated at each vehicle's own odometer, got %v", store.checkedOdometers)
+	}
+	if callCount != 2 {
+		t.Fatalf("a due reminder must be sent for each vehicle, got %d webhook calls", callCount)
+	}
+}
+
+func TestCheckAllVehiclesWithoutWebhookVehiclesDoesNothing(t *testing.T) {
+	store := &fakeNotificationStore{}
+	svc := NewNotificationService(store)
+	if err := svc.CheckAllVehicles(context.Background()); err != nil {
+		t.Fatalf("CheckAllVehicles: %v", err)
+	}
+	if len(store.checkedOdometers) != 0 {
+		t.Fatalf("no vehicle has an active webhook, got %v", store.checkedOdometers)
+	}
+}
+
+func TestCheckAllVehiclesReportsAListingFailure(t *testing.T) {
+	cause := errors.New("database unavailable")
+	svc := NewNotificationService(&fakeNotificationStore{listErr: cause})
+	if err := svc.CheckAllVehicles(context.Background()); !errors.Is(err, cause) {
+		t.Fatalf("CheckAllVehicles = %v, want the listing error", err)
+	}
+}
+
+func TestCheckAllVehiclesKeepsGoingWhenOneVehicleFails(t *testing.T) {
+	store := &fakeNotificationStore{
+		webhookErr:     errors.New("webhook lookup failed"),
+		activeVehicles: []models.Vehicle{{ID: "v1", Name: "Zoe"}, {ID: "v2", Name: "Clio"}},
+	}
+	svc := NewNotificationService(store)
+	if err := svc.CheckAllVehicles(context.Background()); err != nil {
+		t.Fatalf("a failing vehicle must not fail the run, got %v", err)
+	}
+}
+
+func TestCheckAllVehiclesStopsWhenTheContextEnds(t *testing.T) {
+	store := &fakeNotificationStore{activeVehicles: []models.Vehicle{{ID: "v1", Name: "Zoe"}}}
+	svc := NewNotificationService(store)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := svc.CheckAllVehicles(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("CheckAllVehicles = %v, want context.Canceled", err)
+	}
+	if len(store.checkedOdometers) != 0 {
+		t.Fatalf("no vehicle must be evaluated after the context ended, got %v", store.checkedOdometers)
 	}
 }

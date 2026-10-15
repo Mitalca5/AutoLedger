@@ -18,6 +18,10 @@ TeslaMate sync (`internal/services/sync_*.go`): per-vehicle background jobs, res
 
 teslamateapi facts (verified in its source, its README has no field docs): drives/charges carry `battery_details{start_battery_level,end_battery_level}` and `outside_temp_avg` in `units.unit_of_temperature` (F is possible); `charge_energy_used` is `GREATEST(used, added)`, so used == added means "not measured" (DC); missing levels arrive as 0; `/battery-health` reports current capacity over the best capacity ever observed.
 
+## Maintenance reminder webhooks
+
+`NotificationService.CheckAndNotify` evaluates one vehicle's reminders at a given odometer and posts the vehicle's webhook for each due one, at most once per 7 days unless the odometer moved by 500 km. It runs from two places: the TeslaMate sync, right after it recorded a higher odometer, and `runReminderChecks` (`cmd/server/workers.go`), which calls `CheckAllVehicles` at start-up and then every hour for every vehicle with an enabled webhook, at the odometer recorded for it. The scheduled run is what notifies a Home Assistant, manual or combustion vehicle, and a reminder that reaches its due date while the vehicle is parked.
+
 ## Home Assistant charging events
 
 Charging sessions pushed by Home Assistant or a script (`POST /api/integrations/homeassistant/event`, `homeassistant_handler.go`) carry an optional `event_id`, stored as `external_id`: a session already recorded (same `event_id`, or without one a start within 30 min and an energy within 0.5 kWh), or still pending, is answered `200 duplicate`. A session without a vehicle goes to the home charger's default vehicle, otherwise to the only electric vehicle the account can edit, otherwise to `pending_charges` (a charger shared by several vehicles); assigning a pending charge is one transaction (`AssignPendingCharge`) and keeps the event's cost, battery levels and `event_id`. An odometer reading must name its vehicle. Nothing generated is stored as text (no note, no default location).
