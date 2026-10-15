@@ -139,7 +139,7 @@ A feature that needs one of these goes to an issue for discussion first.
 
 ## Releases
 
-A release is a `vX.Y.Z` tag on a commit whose `ci.yml` run is green (new feature: minor bump, fixes only: patch). `release.yml` publishes the image and creates the GitHub Release with generated notes, then a `chore: sync version files to X.Y.Z` PR updates `cmd/server/main.go`, `web/package.json`, `web/package-lock.json` (its two version lines) and `web/src/version.ts`.
+A release is a `vX.Y.Z` tag on a commit whose `ci.yml` run is green (new feature: minor bump, fixes only: patch). `release.yml` publishes the image and creates the GitHub Release with generated notes. The version reaches the binary and the SPA only through the image build argument `APP_VERSION` (the tag); a build from the sources reports `dev`, and no version file is edited at release time.
 
 Replace the generated list of PR titles with written release notes (`gh release edit vX.Y.Z --notes-file`), in English, for a user of the app rather than a contributor:
 
@@ -147,7 +147,7 @@ Replace the generated list of PR titles with written release notes (`gh release 
 - `### New features`: one bullet per feature, saying what the user can now do, not how it is built.
 - `### Improvements`: changes to existing behaviour, performance, UI and site.
 - `### Bug fixes`: one bullet per fix, saying what was wrong from the user's side.
-- `### Documentation` and `### Maintenance` (dependencies, CI, version sync) only when there is something to say; omit an empty section.
+- `### Documentation` and `### Maintenance` (dependencies, CI) only when there is something to say; omit an empty section.
 - Related PRs are merged into one bullet (a feature and its follow-up fixes read as one line), each bullet ends with its PR numbers `(#123, #124)`, and the version-sync PR is not listed.
 - End with the `**Full Changelog**` compare link of the generated notes.
 

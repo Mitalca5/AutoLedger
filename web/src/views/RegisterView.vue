@@ -7,7 +7,6 @@ import { useVehicleStore } from '@/stores/vehicle'
 import { Zap, Lock, Mail, AlertCircle, ShieldAlert } from 'lucide-vue-next'
 import { APP_NAME } from '@/brand'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
-import { APP_VERSION } from '@/version'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -146,7 +145,6 @@ async function handleSubmit() {
 
       <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col items-center gap-2">
         <LanguageSwitcher />
-        <span class="text-xs font-mono text-slate-400">{{ APP_NAME }} {{ APP_VERSION }}</span>
       </div>
     </div>
   </div>
