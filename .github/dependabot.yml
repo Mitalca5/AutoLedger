@@ -19,6 +19,10 @@ updates:
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # The runtime image stays on Node 22 (Dockerfile, ci.yml): types of a later major describe APIs that do not exist
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /scripts/screenshots
