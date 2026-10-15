@@ -1,16 +1,20 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { intlLocale } from '@/i18n'
 import { Users, TrendingUp, CreditCard, Receipt } from 'lucide-vue-next'
 import { useVehicleStore } from '@/stores/vehicle'
 import { formatAmount } from '@/currency'
+import { formatPercentOrUnknown } from '@/utils/numbers'
 import { distanceUnit, formatDistanceValue, perDistance } from '@/units'
 
 // Totals of all the carpool trips of the vehicle
-defineProps<{ summary: any }>()
+const props = defineProps<{ summary: any }>()
 
 const vehicleStore = useVehicleStore()
 // Carpool amounts are in the vehicle's own currency
 const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
+// A vehicle with no cost yet has no recovery rate: a dash, not 0 %
+const coverageRate = computed(() => formatPercentOrUnknown(props.summary.coverage_rate_pct))
 </script>
 
 <template>
@@ -55,7 +59,7 @@ const fmt = (v: number) => formatAmount(Number(v || 0), vehicleStore.currency)
         <span class="text-xs font-medium text-slate-400">{{ $t('carpool.carpoolSummaryGrid.costRecoveryRate') }}</span>
         <div class="p-2 bg-rose-500/10 rounded-xl text-rose-400"><TrendingUp class="w-4 h-4" /></div>
       </div>
-      <div class="mt-2"><span class="text-2xl font-bold text-rose-400">{{ summary.coverage_rate_pct || 0 }} %</span></div>
+      <div class="mt-2"><span class="text-2xl font-bold text-rose-400">{{ coverageRate }}</span></div>
       <div class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.ofTheTotalActualCost', { total_real_cost: fmt(summary.total_real_cost) }) }}</div>
     </div>
 

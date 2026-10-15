@@ -1,4 +1,5 @@
 import { intlLocale } from '@/i18n'
+import { UNKNOWN_AMOUNT } from '@/currency'
 
 /** A number with a fixed count of decimals in the current language ("0,0198", "18.7"), for display only. */
 export function formatNumber(value: number, digits = 1): string {
@@ -8,6 +9,12 @@ export function formatNumber(value: number, digits = 1): string {
 /** A percentage in the current language, with the language's own spacing ("18,7 %" in French). */
 export function formatPercent(value: number, digits = 1): string {
   return (value / 100).toLocaleString(intlLocale(), { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits })
+}
+
+/** Like `formatPercent`, but `null`, `undefined` and NaN are an unknown figure and read as a dash, never as 0 %. */
+export function formatPercentOrUnknown(value: number | null | undefined, digits = 1): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return UNKNOWN_AMOUNT
+  return formatPercent(value, digits)
 }
 
 /** What a decimal field accepts: "16,5", "16.5", "1 234,5" and "1.234,5" all read as numbers; anything else is NaN. */

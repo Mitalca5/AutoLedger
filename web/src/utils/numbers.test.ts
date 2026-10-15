@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setLocale } from '@/i18n'
-import { formatDecimalInput, formatNumber, formatPercent, parseDecimal } from './numbers'
+import { formatDecimalInput, formatNumber, formatPercent, formatPercentOrUnknown, parseDecimal } from './numbers'
 
 const plain = (s: string) => s.replace(/[  ]/g, ' ')
 
@@ -16,6 +16,21 @@ describe('formatNumber', () => {
     setLocale('en')
     expect(formatNumber(39.25, 2)).toBe('39.25')
     expect(formatNumber(1234.5, 1)).toBe('1,234.5')
+  })
+})
+
+describe('formatPercentOrUnknown', () => {
+  beforeEach(() => setLocale('fr'))
+
+  it('formats a known rate, zero included', () => {
+    expect(plain(formatPercentOrUnknown(64.1))).toBe('64,1 %')
+    expect(plain(formatPercentOrUnknown(0))).toBe('0,0 %')
+  })
+
+  it('reads an unknown rate as a dash, never as 0 %', () => {
+    expect(formatPercentOrUnknown(null)).toBe('—')
+    expect(formatPercentOrUnknown(undefined)).toBe('—')
+    expect(formatPercentOrUnknown(Number.NaN)).toBe('—')
   })
 })
 

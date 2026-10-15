@@ -345,7 +345,8 @@ func (r *Repository) GetCarpoolSummary(ctx context.Context, vehicleID string) (*
 	`, vehicleID).Scan(&s.TotalPassengers)
 
 	if s.TotalRealCost > 0 {
-		s.CoverageRatePct = math.Round((s.TotalRevenue.Float()/s.TotalRealCost.Float())*1000) / 10
+		rate := math.Round((s.TotalRevenue.Float()/s.TotalRealCost.Float())*1000) / 10
+		s.CoverageRatePct = &rate
 		s.TotalSaved = s.TotalRevenue
 	}
 	if s.TotalDistanceKm > 0 {

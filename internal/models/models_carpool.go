@@ -126,8 +126,9 @@ type CarpoolSummary struct {
 	TotalRevenue    money.Cents `json:"total_revenue"`
 	TotalNetCost    money.Cents `json:"total_net_cost"`
 	TotalSaved      money.Cents `json:"total_saved"`
-	CoverageRatePct float64     `json:"coverage_rate_pct"`
-	NetCostPerKm    float64     `json:"net_cost_per_km"`
+	// CoverageRatePct is the share of the real cost the passengers paid back; nil (null) when there is no cost yet
+	CoverageRatePct *float64 `json:"coverage_rate_pct"`
+	NetCostPerKm    float64  `json:"net_cost_per_km"`
 	// Fair shares over all trips: what passengers should cover given the legs they rode, and the driver's own share
 	TotalPassengersShare money.Cents `json:"total_passengers_share"`
 	TotalDriverShare     money.Cents `json:"total_driver_share"`

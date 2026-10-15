@@ -8,7 +8,7 @@ import QualifyActions from '@/components/drives/QualifyActions.vue'
 import { needsTollQualification } from '@/utils/drives'
 import { formatDayTime } from '@/utils/dates'
 import { formatAmount } from '@/currency'
-import { distanceUnit, formatDistance, perDistance } from '@/units'
+import { distanceUnit, formatDistance, formatPerDistanceValue } from '@/units'
 import { formatCostPerDistance } from '@/utils/costPerDistance'
 
 // One drive of the list: click opens its cost breakdown.
@@ -67,7 +67,7 @@ const formatDate = formatDayTime
             :class="d.energy_estimated ? 'text-slate-400' : 'text-info-400'"
             :title="d.energy_estimated ? $t('drives.driveCard.estimatedConsumption') : undefined"
           >
-            {{ $t(d.energy_estimated ? 'drives.driveCard.kwh100kmEstimated' : 'drives.driveCard.kwh100km', { unit: distanceUnit(), consumption_kwh_100km: Math.round(perDistance(d.consumption_kwh_100km) * 10) / 10 }) }}
+            {{ $t(d.energy_estimated ? 'drives.driveCard.kwh100kmEstimated' : 'drives.driveCard.kwh100km', { unit: distanceUnit(), consumption_kwh_100km: formatPerDistanceValue(d.consumption_kwh_100km) }) }}
           </span>
           <!-- Clean tag pills -->
           <span

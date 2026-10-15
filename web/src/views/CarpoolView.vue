@@ -36,7 +36,7 @@ const summary = ref<any>({
   total_real_cost: 0,
   total_revenue: 0,
   total_net_cost: 0,
-  coverage_rate_pct: 0,
+  coverage_rate_pct: null,
   net_cost_per_km: 0,
   total_passengers_share: 0,
   total_driver_share: 0,
