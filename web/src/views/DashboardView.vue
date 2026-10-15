@@ -94,7 +94,7 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- Header Summary -->
-    <PageHeader :title="$t('dashboard.dashboardView.tcoDashboard')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.dashboard')" :icon="PageIcon">
       {{ $t('dashboard.dashboardView.subtitle', { unit: distanceUnit(), name: vehicleStore.activeVehicle?.name || $t('dashboard.dashboardView.yourVehicle') }) }}
       <!-- The quick-add button and the bottom bar already cover this on a phone -->
       <template #actions>

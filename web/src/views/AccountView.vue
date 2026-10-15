@@ -171,7 +171,7 @@ onMounted(() => {
 
 <template>
   <div class="mx-auto max-w-3xl space-y-6">
-    <PageHeader :title="$t('account.accountView.accountAndSecurity')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.account')" :icon="PageIcon">
       {{ $t('account.accountView.signInPasswordAndConnected') }}
     </PageHeader>
 

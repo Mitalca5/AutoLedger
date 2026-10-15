@@ -422,7 +422,7 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
     <AddressBackfillNotice v-if="vehicleId" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @resolved="loadDrives(true)" />
 
     <!-- Header & Filter Tabs -->
-    <PageHeader :title="$t('drives.drivesView.drivesAndTrips')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.drives')" :icon="PageIcon">
       {{ $t('drives.drivesView.drivesActualEnergyAndTolls', { unit: distanceUnit(), total }) }}
       <template #actions>
       <!-- Actions & Tag Filters container -->
@@ -450,7 +450,7 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
       </template>
     </PageHeader>
 
-    <TabBar :model-value="viewMode" :tabs="viewTabs" :label="$t('drives.drivesView.drivesAndTrips')" id-prefix="drives-tab" @update:model-value="switchView($event as 'DRIVES' | 'TRIPS')" />
+    <TabBar :model-value="viewMode" :tabs="viewTabs" :label="$t('shell.nav.drives')" id-prefix="drives-tab" @update:model-value="switchView($event as 'DRIVES' | 'TRIPS')" />
 
     <!-- Filters & Navigation Toolbar (Drives Mode) -->
     <DrivesToolbar

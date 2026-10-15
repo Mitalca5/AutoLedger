@@ -18,7 +18,6 @@
     "emailAddress": "Email address",
     "identity": "Identity",
     "signInPasswordAndConnected": "Sign-in, password and connected devices.",
-    "accountAndSecurity": "Account and security",
     "preferences": "Preferences",
     "proPersoTitle": "Tell work and personal drives apart",
     "proPersoHelp": "Shows the work / personal classification of drives (filters, badges, bulk selection) and the dashboard breakdown. Setting of this browser only; classifications already made are kept."

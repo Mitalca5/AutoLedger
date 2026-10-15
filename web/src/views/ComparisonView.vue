@@ -275,7 +275,7 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <PageHeader :title="$t('comparison.comparisonView.electricCombustionComparison')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.comparison')" :icon="PageIcon">
       {{ $t('comparison.comparisonView.forInformationOnlyNoneOf') }}
       <template #actions>
       <button

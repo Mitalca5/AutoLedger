@@ -128,8 +128,7 @@
     "deleteTitle": "Delete the vehicle",
     "deleteMessage": "Delete this vehicle and all its history? This cannot be undone.",
     "addAVehicle": "Add a vehicle",
-    "setUpYourVehiclesAnd": "Set up your vehicles and the synchronization with TeslaMateApi",
-    "vehicleManagement": "Vehicle management"
+    "setUpYourVehiclesAnd": "Set up your vehicles and the synchronization with TeslaMateApi"
   },
   "ownershipWizardModal": {
     "leaseStart": "Lease start",

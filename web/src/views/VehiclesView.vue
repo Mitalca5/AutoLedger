@@ -130,7 +130,7 @@ function openMembersModal(v: any) {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <PageHeader :title="$t('vehicles.vehiclesView.vehicleManagement')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.vehicles')" :icon="PageIcon">
       {{ $t('vehicles.vehiclesView.setUpYourVehiclesAnd') }}
       <template #actions>
       <button

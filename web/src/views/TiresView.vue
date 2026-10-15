@@ -211,7 +211,7 @@ async function onLogSaved() {
 <template>
   <div class="space-y-6">
     <!-- Header & Actions -->
-    <PageHeader :title="$t('tires.tiresView.tiresAndLifeCycles')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.tires')" :icon="PageIcon">
       {{ $t('tires.tiresView.wearTrackingInMmEstimated') }}
       <template #actions>
       <!-- Action Buttons -->
@@ -247,7 +247,7 @@ async function onLogSaved() {
       <span>{{ $t('tires.tiresView.youAreViewingThisVehicle') }} <strong>{{ $t('tires.tiresView.readOnly') }}</strong>{{ $t('tires.tiresView.modeChangesToTiresRotations') }}</span>
     </div>
 
-    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('tires.tiresView.tiresAndLifeCycles')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
+    <TabBar :model-value="activeTab" :tabs="tabs" :label="$t('shell.nav.tires')" id-prefix="tires-tab" @update:model-value="activeTab = $event as 'chassis' | 'storage' | 'disposed'" />
 
     <!-- Sticky Bulk Selection Bar -->
     <BulkSelectionBar

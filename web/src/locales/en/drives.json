@@ -16,7 +16,6 @@
     "trips": "Trips",
     "drives": "Drives",
     "drivesActualEnergyAndTolls": "{total} drives • Actual energy and tolls, wear and fixed costs spread per {unit}",
-    "drivesAndTrips": "Drives and trips",
     "newDrive": "New drive",
     "importCsv": "Import CSV",
     "noTelemetryBanner": "This vehicle runs in manual or semi-automatic mode. You can log drives manually or import your history via CSV.",

@@ -18,7 +18,6 @@
     "emailAddress": "Adresse e-mail",
     "identity": "Identité",
     "signInPasswordAndConnected": "Connexion, mot de passe et appareils connectés.",
-    "accountAndSecurity": "Compte & sécurité",
     "preferences": "Préférences",
     "proPersoTitle": "Distinguer trajets Pro et Perso",
     "proPersoHelp": "Affiche le classement Pro / Perso des trajets (filtres, pastilles, sélection groupée) et la répartition du tableau de bord. Réglage propre à ce navigateur ; les classements déjà faits sont conservés."

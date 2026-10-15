@@ -16,7 +16,6 @@
     "trips": "Voyages",
     "drives": "Trajets",
     "drivesActualEnergyAndTolls": "{total} trajets • Énergie et péages réels, usure et charges fixes réparties au {unit}",
-    "drivesAndTrips": "Trajets & Voyages",
     "newDrive": "Nouveau trajet",
     "importCsv": "Importer CSV",
     "noTelemetryBanner": "Ce véhicule fonctionne en suivi autonome ou semi-auto. Vous pouvez enregistrer vos trajets manuellement ou importer vos historiques au format CSV.",

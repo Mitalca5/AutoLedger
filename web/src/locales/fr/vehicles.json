@@ -128,8 +128,7 @@
     "deleteTitle": "Supprimer le véhicule",
     "deleteMessage": "Supprimer ce véhicule et tout son historique ? Cette action est irréversible.",
     "addAVehicle": "Ajouter un véhicule",
-    "setUpYourVehiclesAnd": "Configurez vos véhicules et la synchronisation avec TeslaMateApi",
-    "vehicleManagement": "Gestion des véhicules"
+    "setUpYourVehiclesAnd": "Configurez vos véhicules et la synchronisation avec TeslaMateApi"
   },
   "ownershipWizardModal": {
     "leaseStart": "Début du contrat de location",

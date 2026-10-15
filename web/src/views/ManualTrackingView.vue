@@ -21,7 +21,7 @@ const vehicleStore = useVehicleStore()
 
 <template>
   <div class="space-y-5">
-    <PageHeader :title="$t('manual.manualTrackingView.manualTracking')" :icon="PageIcon">
+    <PageHeader :title="$t('shell.nav.odometer')" :icon="PageIcon">
       {{ $t('manual.manualTrackingView.subtitleMileage') }}{{ vehicleStore.activeVehicle ? ` · ${vehicleStore.activeVehicle.name}` : '' }}{{ $t('manual.manualTrackingView.independent') }}
     </PageHeader>
 
