@@ -17,6 +17,8 @@ import {
   sortRemindersByUrgency,
   summarizeUrgentReminders,
   groupRemindersByDue,
+  monthlyRangeOptions,
+  rangeToMonths,
 } from './dashboard'
 
 describe('filterMonthsByRange', () => {
@@ -500,5 +502,14 @@ describe('followUpItems', () => {
   it('has nothing to say when the data is complete and only overdue reminders remain', () => {
     expect(followUpItems({ is_complete: true }, [{ ...base, status: 'OVERDUE', remaining_km: -5 }], true)).toEqual({ data: false, maintenance: null })
     expect(followUpItems(null, [], true)).toEqual({ data: false, maintenance: null })
+  })
+})
+
+describe('period presets', () => {
+  it('lists the shortest period first and the whole history last', () => {
+    expect(monthlyRangeOptions.map((o) => o.key)).toEqual(['1M', '3M', '6M', '1Y', 'ALL'])
+    const months = monthlyRangeOptions.map((o) => rangeToMonths(o.key))
+    expect(months.slice(0, -1)).toEqual([1, 3, 6, 12])
+    expect(months[months.length - 1]).toBe(0)
   })
 })

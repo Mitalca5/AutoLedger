@@ -173,7 +173,8 @@ onBeforeUnmount(() => {
         </button>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <MonthlyRangeSelector v-model="range" ascending :custom="customRange !== null" :label="$t('expenses.chargingInsights.period')" @pick="customRange = null" />
+        <span class="text-xs font-semibold text-slate-300">{{ $t('expenses.chargingInsights.period') }}</span>
+        <MonthlyRangeSelector v-model="range" :custom="customRange !== null" :label="$t('expenses.chargingInsights.period')" @pick="customRange = null" />
         <AppDateRangePicker :model-value="customRange" :max="today" :aria-label="$t('expenses.chargingInsights.period')" @update:model-value="pickRange" />
         <div class="flex items-center gap-1 bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/70 sm:ml-auto" role="group">
           <button

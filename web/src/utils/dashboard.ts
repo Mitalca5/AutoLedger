@@ -2,12 +2,13 @@ import { intlLocale, t } from '@/i18n'
 import { COST_COLORS } from '@/utils/costBreakdown'
 import { formatAmount } from '@/currency'
 import { distanceUnit, formatDistanceValue } from '@/units'
+// The shortest period first, the whole history last: the order of every period selector
 export const monthlyRangeOptions = [
-  { key: 'ALL', labelKey: 'dashboard.range.all' },
-  { key: '1Y', labelKey: 'dashboard.range.oneYear' },
-  { key: '6M', labelKey: 'dashboard.range.sixMonths' },
-  { key: '3M', labelKey: 'dashboard.range.threeMonths' },
   { key: '1M', labelKey: 'dashboard.range.oneMonth' },
+  { key: '3M', labelKey: 'dashboard.range.threeMonths' },
+  { key: '6M', labelKey: 'dashboard.range.sixMonths' },
+  { key: '1Y', labelKey: 'dashboard.range.oneYear' },
+  { key: 'ALL', labelKey: 'dashboard.range.all' },
 ] as const
 export type MonthlyRangeKey = (typeof monthlyRangeOptions)[number]['key']
 
