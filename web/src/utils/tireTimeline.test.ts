@@ -55,6 +55,26 @@ describe('buildTireTimeline', () => {
   })
 })
 
+describe('buildTireTimeline origin', () => {
+  it('starts the axis at the acquisition odometer instead of 0 km', () => {
+    const tl = buildTireTimeline(allWheels('a', 'Ventus', 'SUMMER', 43000, null), 52000, 41000)
+    expect(tl.minKm).toBe(41000)
+    expect(tl.lanes[0].gaps).toEqual([{ startKm: 41000, endKm: 43000 }])
+  })
+
+  it('keeps 0 km when the acquisition odometer is unknown', () => {
+    const tl = buildTireTimeline(allWheels('a', 'Ventus', 'SUMMER', 5000, null), 20000, null)
+    expect(tl.minKm).toBe(0)
+    expect(tl.lanes[0].gaps).toEqual([{ startKm: 0, endKm: 5000 }])
+  })
+
+  it('does not hide a tire fitted before the recorded acquisition odometer', () => {
+    const tl = buildTireTimeline(allWheels('a', 'Ventus', 'SUMMER', 30000, null), 52000, 41000)
+    expect(tl.minKm).toBe(30000)
+    expect(tl.lanes[0].gaps).toEqual([])
+  })
+})
+
 describe('groupTimelineTires', () => {
   const tire = (tireId: string, position: string): TimelineTireInfo => ({
     tireId, label: 'B M', dimension: '195/55R16', position, startKm: 0, endKm: 10, ongoing: false, season: 'WINTER', mountedDate: '2024-11-01', dismountedDate: '2025-04-01',

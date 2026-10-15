@@ -36,6 +36,8 @@ export interface TimelineLane {
 }
 
 export interface TireTimeline {
+  // Where the axis starts: the odometer the vehicle was acquired at (0 when unknown), or the first fitting if earlier
+  minKm: number
   maxKm: number
   lanes: TimelineLane[]
   legend: { key: string; color: string }[]
@@ -89,6 +91,7 @@ function buildLane(
   shortLabel: string,
   sessions: FlatSession[],
   colorFor: (key: string) => string,
+  minKm: number,
   maxKm: number,
 ): TimelineLane {
   const grouped: TimelineSegment[] = []
@@ -115,7 +118,7 @@ function buildLane(
 
   const segments: TimelineSegment[] = []
   const gaps: TimelineGap[] = []
-  let cursor = 0
+  let cursor = minKm
   for (const seg of grouped) {
     if (seg.startKm > cursor) gaps.push({ startKm: cursor, endKm: seg.startKm })
     const start = Math.max(seg.startKm, cursor)
@@ -156,9 +159,14 @@ function mergeLanes(id: string, label: string, shortLabel: string, a: TimelineLa
 
 // Splits only as far as the data requires: one lane if every wheel had the same tires over the same
 // km, one per axle if left/right always match, otherwise one per wheel (per axle where sides match).
-export function buildTireTimeline(tires: any[], currentOdometer: number): TireTimeline {
+export function buildTireTimeline(tires: any[], currentOdometer: number, startOdometer: number | null = null): TireTimeline {
   const flat = flattenSessions(tires, currentOdometer)
   const maxKm = Math.max(currentOdometer, ...flat.map((s) => s.endKm), 0)
+  // The kilometres driven before the vehicle was acquired are not part of its history: the axis starts at the
+  // acquisition odometer, unless a tire was fitted earlier than that (an inconsistent entry stays visible).
+  const earliest = flat.length > 0 ? flat[0].startKm : Infinity
+  const acquired = startOdometer !== null && Number.isFinite(startOdometer) && startOdometer > 0 ? startOdometer : 0
+  const minKm = Math.max(0, Math.min(acquired, earliest, maxKm))
 
   const colorByKey = new Map<string, string>()
   const colorFor = (key: string) => {
@@ -176,6 +184,7 @@ export function buildTireTimeline(tires: any[], currentOdometer: number): TireTi
         w,
         flat.filter((s) => s.position === w || !(WHEELS as readonly string[]).includes(s.position)),
         colorFor,
+        minKm,
         maxKm,
       ),
     ]),
@@ -190,7 +199,7 @@ export function buildTireTimeline(tires: any[], currentOdometer: number): TireTi
   }
 
   const legend = [...colorByKey.entries()].map(([key, color]) => ({ key, color }))
-  return { maxKm, lanes, legend }
+  return { minKm, maxKm, lanes, legend }
 }
 
 export function tickStep(maxKm: number): number {

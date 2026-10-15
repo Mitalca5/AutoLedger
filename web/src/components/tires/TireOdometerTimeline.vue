@@ -9,17 +9,20 @@ import { useEscapeToClose } from '@/composables/useEscapeToClose'
 
 // The tires fitted over the odometer, one thin bar per axle or wheel. A segment shows its detail in a card anchored to
 // it: on hover for a glance, pinned by a click (or a tap) to reach the tire sheets.
-const props = defineProps<{ tires: any[]; currentOdometer: number }>()
+const props = defineProps<{ tires: any[]; currentOdometer: number; startOdometer?: number | null }>()
 const emit = defineEmits<{ (e: 'select-tire', tireId: string): void }>()
 
-const timeline = computed(() => buildTireTimeline(props.tires, Math.round(props.currentOdometer || 0)))
+const timeline = computed(() => buildTireTimeline(props.tires, Math.round(props.currentOdometer || 0), props.startOdometer ?? null))
 
 const root = ref<HTMLElement | null>(null)
 const hovered = ref<TimelineSegment | null>(null)
 const pinned = ref<TimelineSegment | null>(null)
 const shown = computed(() => pinned.value ?? hovered.value)
 
-const pct = (km: number) => (timeline.value.maxKm > 0 ? (km / timeline.value.maxKm) * 100 : 0)
+// A position on the axis, as a percentage of its width; a length is passed as an offset from `minKm`
+const span = computed(() => timeline.value.maxKm - timeline.value.minKm)
+const pct = (km: number) => (span.value > 0 ? ((km - timeline.value.minKm) / span.value) * 100 : 0)
+const pctLength = (km: number) => (span.value > 0 ? (km / span.value) * 100 : 0)
 const fmtKm = (km: number) => formatDistance(km)
 
 const hasData = computed(() => timeline.value.lanes.some((l) => l.segments.length > 0))
@@ -30,10 +33,11 @@ const barHeight = computed(() => (multiLane.value ? 'h-3' : 'h-4'))
 
 const ticks = computed(() => {
   // Round steps in the account's unit, placed on the km scale of the bars
+  const min = kmToDisplayDistance(timeline.value.minKm)
   const max = kmToDisplayDistance(timeline.value.maxKm)
   const step = tickStep(max)
   const out: number[] = []
-  for (let d = 0; d <= max; d += step) out.push(displayDistanceToKm(d))
+  for (let d = Math.ceil(min / step) * step; d <= max; d += step) out.push(displayDistanceToKm(d))
   return out
 })
 
@@ -87,7 +91,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
   <div ref="root" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h3 class="text-sm font-bold text-white">{{ $t('tires.tireOdometerTimeline.tiresFittedByMileage') }}</h3>
-      <span class="text-xs text-slate-400">0 → {{ fmtKm(timeline.maxKm) }}</span>
+      <span class="text-xs text-slate-400">{{ fmtKm(timeline.minKm) }} → {{ fmtKm(timeline.maxKm) }}</span>
     </div>
 
     <div v-if="!hasData" class="p-6 text-center text-xs text-slate-400 bg-slate-950/40 rounded-2xl">
@@ -113,7 +117,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
                 class="absolute top-0 h-full"
                 :style="{
                   left: pct(gap.startKm) + '%',
-                  width: pct(gap.endKm - gap.startKm) + '%',
+                  width: pctLength(gap.endKm - gap.startKm) + '%',
                   backgroundImage: 'repeating-linear-gradient(45deg, #334155 0 3px, transparent 3px 6px)',
                 }"
                 :title="$t('tires.tireOdometerTimeline.noTire', { from: fmtKm(gap.startKm), to: fmtKm(gap.endKm) })"
@@ -126,7 +130,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
                   { 'ring-2 ring-white ring-inset': pinned?.id === seg.id },
                   shown?.id === seg.id ? 'brightness-125' : '',
                 ]"
-                :style="{ left: pct(seg.startKm) + '%', width: pct(seg.endKm - seg.startKm) + '%', backgroundColor: seg.color }"
+                :style="{ left: pct(seg.startKm) + '%', width: pctLength(seg.endKm - seg.startKm) + '%', backgroundColor: seg.color }"
               ></div>
             </div>
             <button
@@ -135,7 +139,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
               type="button"
               data-timeline-keep
               class="absolute top-0 h-full rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              :style="{ left: pct(seg.startKm) + '%', width: pct(seg.endKm - seg.startKm) + '%' }"
+              :style="{ left: pct(seg.startKm) + '%', width: pctLength(seg.endKm - seg.startKm) + '%' }"
               :aria-label="$t('tires.tireOdometerTimeline.segment', { lane: lane.label, tire: seg.tires[0].label, from: fmtKm(seg.startKm), to: fmtKm(seg.endKm) })"
               :aria-pressed="pinned?.id === seg.id"
               @mouseenter="hovered = seg"

@@ -11,6 +11,7 @@ import { t } from '@/i18n'
 import { ref, onMounted, computed, watch } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import { useConfirm } from '@/composables/useConfirm'
+import { api } from '@/services/api'
 import BulkSelectionBar from '@/components/BulkSelectionBar.vue'
 import SelectAllToggle from '@/components/SelectAllToggle.vue'
 import TireQuickRotationBar from '@/components/tires/TireQuickRotationBar.vue'
@@ -134,8 +135,25 @@ watch(
   }
 )
 
+// The odometer the vehicle was acquired at: the timeline starts there rather than at 0 km. Best effort, the
+// timeline falls back to 0 when the vehicle has no ownership record.
+const startOdometer = ref<number | null>(null)
+async function loadStartOdometer() {
+  const id = vehicleStore.activeVehicle?.id
+  startOdometer.value = null
+  if (!id) return
+  try {
+    const ownership = await api.getOwnership(id)
+    if (vehicleStore.activeVehicle?.id === id) startOdometer.value = Number(ownership?.start_odometer) || null
+  } catch {
+    // no ownership record: the axis starts at 0
+  }
+}
+watch(() => vehicleStore.activeVehicle?.id, loadStartOdometer)
+
 onMounted(() => {
   loadTires()
+  loadStartOdometer()
 })
 
 function openPackSwapModal() {
@@ -296,6 +314,7 @@ async function onLogSaved() {
       <TireOdometerTimeline
         :tires="tires"
         :current-odometer="vehicleStore.activeVehicle?.current_odometer || 0"
+        :start-odometer="startOdometer"
         @select-tire="openTimelineTire"
       />
       <TireQuickRotationBar v-if="vehicleStore.canEdit" :has-mounted-tires="hasMountedTires" @rotated="loadTires" />
