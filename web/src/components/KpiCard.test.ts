@@ -4,8 +4,13 @@ import { renderToString } from '@vue/server-renderer'
 import { i18n, setLocale } from '@/i18n'
 import KpiCard from './KpiCard.vue'
 
-const render = (props: Record<string, unknown>, slot?: string) =>
-  renderToString(createSSRApp({ render: () => h(KpiCard as any, props, slot ? { default: () => h('p', slot) } : undefined) }).use(i18n))
+const render = (props: Record<string, unknown>, slot?: string, badge?: string) =>
+  renderToString(createSSRApp({
+    render: () => h(KpiCard as any, props, {
+      ...(slot ? { default: () => h('p', slot) } : {}),
+      ...(badge ? { badge: () => h('span', badge) } : {}),
+    }),
+  }).use(i18n))
 
 afterEach(() => setLocale('fr'))
 
@@ -48,6 +53,12 @@ describe('KpiCard', () => {
     expect(html).toContain('+12 %')
     expect(html).toContain('text-danger-400')
     expect(html).toContain('of which tolls')
+  })
+
+  it('colours the value with a warning tone and shows a badge next to the label', async () => {
+    const html = await render({ label: 'Extra cost', value: '480 €', tone: 'warning' }, undefined, 'estimated')
+    expect(html).toContain('text-warning-400')
+    expect(html).toContain('estimated')
   })
 
   it('opens the detail through a button when there is no target', async () => {

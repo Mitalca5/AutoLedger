@@ -9,7 +9,7 @@ import { UNKNOWN_AMOUNT } from '@/currency'
 // slot; `actionLabel` adds the single link or button that opens the detail behind the figure.
 export interface KpiDelta {
   text: string
-  tone?: 'good' | 'bad' | 'neutral'
+  tone?: 'good' | 'warning' | 'bad' | 'neutral'
 }
 const props = withDefaults(defineProps<{
   label: string
@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<{
   period?: string
   term?: string
   icon?: Component
-  tone?: 'default' | 'sky' | 'success'
+  tone?: 'default' | 'sky' | 'success' | 'warning'
   // The dense tile of a panel inside a disclosure: no icon, smaller figure, a darker background.
   compact?: boolean
   delta?: KpiDelta
@@ -29,8 +29,8 @@ const emit = defineEmits<{ action: [] }>()
 // The app's own unknown marker, as returned by the amount and number formatters, reads as unknown too
 const unknown = computed(() => props.value == null || props.value === UNKNOWN_AMOUNT)
 
-const valueTones = { default: 'text-white', sky: 'text-sky-400', success: 'text-success-400' }
-const deltaTones = { good: 'text-success-400', bad: 'text-danger-400', neutral: 'text-slate-300' }
+const valueTones = { default: 'text-white', sky: 'text-sky-400', success: 'text-success-400', warning: 'text-warning-400' }
+const deltaTones = { good: 'text-success-400', warning: 'text-warning-400', bad: 'text-danger-400', neutral: 'text-slate-300' }
 const actionClass = "tap-text mt-auto self-start pt-1 text-xs font-semibold text-sky-400 underline after:absolute after:inset-0 after:content-['']"
 </script>
 
@@ -45,6 +45,7 @@ const actionClass = "tap-text mt-auto self-start pt-1 text-xs font-semibold text
         <span v-if="term" class="relative z-10"><GlossaryTip :term="term" /></span>
         <span v-if="period" class="block font-medium normal-case tracking-normal text-slate-400">{{ period }}</span>
       </span>
+      <slot name="badge" />
       <span v-if="icon && !compact" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-300">
         <component :is="icon" class="h-4 w-4" aria-hidden="true" />
       </span>

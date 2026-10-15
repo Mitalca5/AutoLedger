@@ -7,6 +7,7 @@ import { downloadCsv } from '@/utils/csv'
 import { comparisonSavings } from '@/utils/comparisonSavings'
 import { sideKey, type TrackedSide } from '@/utils/comparisonSide'
 import { costRowValues } from '@/utils/comparisonForm'
+import KpiCard from '@/components/KpiCard.vue'
 import ComparisonCharts from '@/components/comparison/ComparisonCharts.vue'
 import ComparisonWhatIf from '@/components/comparison/ComparisonWhatIf.vue'
 import { breakEvenReasonKey } from '@/utils/comparisonBreakEven'
@@ -148,40 +149,39 @@ function printResult() {
           {{ $t('comparison.depreciationMissing.card') }}
           <router-link to="/vehicles" class="font-semibold text-sky-400 underline">{{ $t('dashboard.tcoMetricsGrid.depreciationMissingAction') }}</router-link>
         </div>
-        <div v-for="card in savingsCards" :key="card.key" class="bg-slate-900 border border-slate-800 rounded-2xl p-4" :data-testid="`savings-${card.key}`">
-          <h2 class="text-sm font-semibold text-slate-300">{{ $t(`comparison.savings.${card.key}Title`) }}</h2>
-          <div class="text-2xl font-bold mt-1" :class="card.positive ? 'text-success-400' : 'text-warning-400'">
-            {{ fmtMoney(card.amount) }}
-            <span class="text-sm font-medium">{{ $t(card.positive ? 'comparison.savings.saved' : 'comparison.savings.extra') }}</span>
-          </div>
-          <div class="text-xs text-slate-400 mt-1">
+        <KpiCard
+          v-for="card in savingsCards"
+          :key="card.key"
+          :label="$t(`comparison.savings.${card.key}Title`)"
+          :value="fmtMoney(card.amount)"
+          :unit="` ${$t(card.positive ? 'comparison.savings.saved' : 'comparison.savings.extra')}`"
+          :tone="card.positive ? 'success' : 'warning'"
+          :data-testid="`savings-${card.key}`"
+        >
+          <p class="mt-1 text-xs text-slate-400">
             <template v-if="card.percent !== null">{{ $t(card.positive ? 'comparison.savings.less' : 'comparison.savings.more', { percent: card.percent }) }}</template>
             <template v-if="card.percent !== null && card.perMonth !== null"> · </template>
             <template v-if="card.perMonth !== null">{{ $t('comparison.savings.month', { amount: card.perMonth }) }}</template>
-          </div>
-          <div class="text-xs text-slate-500 mt-1">{{ $t(`comparison.savings.${card.key}Hint`) }}</div>
-        </div>
+          </p>
+          <p class="mt-1 text-xs text-slate-400">{{ $t(`comparison.savings.${card.key}Hint`) }}</p>
+        </KpiCard>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="text-sm font-semibold text-info-300">{{ $t(sk('comparison.comparisonView.electric')) }}</h2>
+        <KpiCard :label="$t(sk('comparison.comparisonView.electric'))" :value="fmtMoney(result.tracked.total)">
+          <template #badge>
             <span class="text-xs px-2 py-0.5 rounded-full border" :class="result.mode === 'RETROSPECTIVE' ? 'border-success-500/40 text-success-300' : 'border-slate-600 text-slate-400'">
               {{ result.mode === 'RETROSPECTIVE' ? $t('comparison.comparisonView.projected') : $t('comparison.comparisonView.estimated') }}
             </span>
-          </div>
-          <div class="text-2xl font-bold text-white">{{ fmtMoney(result.tracked.total) }}</div>
-          <div class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.tracked.per_month), cost_per_km: fmtMoney(perDistance(result.tracked.cost_per_km), 3) }) }}</div>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="text-sm font-semibold text-warning-300">{{ $t('comparison.comparisonView.combustion') }}</h2>
+          </template>
+          <p class="mt-1 text-xs text-slate-400">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.tracked.per_month), cost_per_km: fmtMoney(perDistance(result.tracked.cost_per_km), 3) }) }}</p>
+        </KpiCard>
+        <KpiCard :label="$t('comparison.comparisonView.combustion')" :value="fmtMoney(result.ice.total)">
+          <template #badge>
             <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">{{ $t('comparison.comparisonView.estimated') }}</span>
-          </div>
-          <div class="text-2xl font-bold text-white">{{ fmtMoney(result.ice.total) }}</div>
-          <div class="text-xs text-slate-400 mt-1">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.ice.per_month), cost_per_km: fmtMoney(perDistance(result.ice.cost_per_km), 3) }) }}</div>
-        </div>
+          </template>
+          <p class="mt-1 text-xs text-slate-400">{{ $t('comparison.comparisonView.monthKm', { unit: distanceUnit(), per_month: fmtMoney(result.ice.per_month), cost_per_km: fmtMoney(perDistance(result.ice.cost_per_km), 3) }) }}</p>
+        </KpiCard>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
