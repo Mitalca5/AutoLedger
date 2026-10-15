@@ -1,54 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteComponent, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-import DashboardView from '@/views/DashboardView.vue'
-import FleetView from '@/views/FleetView.vue'
-import DrivesView from '@/views/DrivesView.vue'
-import TiresView from '@/views/TiresView.vue'
-import ExpensesView from '@/views/ExpensesView.vue'
-import VehiclesView from '@/views/VehiclesView.vue'
-import AccountView from '@/views/AccountView.vue'
-import CarpoolView from '@/views/CarpoolView.vue'
-import ComparisonView from '@/views/ComparisonView.vue'
-import ManualTrackingView from '@/views/ManualTrackingView.vue'
-import LoginView from '@/views/LoginView.vue'
-import RegisterView from '@/views/RegisterView.vue'
-import OnboardingView from '@/views/OnboardingView.vue'
-import OIDCCallbackView from '@/views/OIDCCallbackView.vue'
+// Every view is its own chunk, loaded on first navigation: the sign-in page does not download the whole app.
+// A page that needs a signed-in session.
+const authRoute = (path: string, name: string, component: RouteComponent): RouteRecordRaw => ({
+  path,
+  name,
+  component,
+  meta: { requiresAuth: true },
+})
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: '/',
-      name: 'dashboard',
-      component: DashboardView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/fleet',
-      name: 'fleet',
-      component: FleetView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/drives',
-      name: 'drives',
-      component: DrivesView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/carpools',
-      name: 'carpools',
-      component: CarpoolView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/odometer',
-      name: 'odometer',
-      component: ManualTrackingView,
-      meta: { requiresAuth: true },
-    },
+    authRoute('/', 'dashboard', () => import('@/views/DashboardView.vue')),
+    authRoute('/fleet', 'fleet', () => import('@/views/FleetView.vue')),
+    authRoute('/drives', 'drives', () => import('@/views/DrivesView.vue')),
+    authRoute('/carpools', 'carpools', () => import('@/views/CarpoolView.vue')),
+    authRoute('/odometer', 'odometer', () => import('@/views/ManualTrackingView.vue')),
     {
       // Former address of the odometer page; the energy estimate and the fill-ups moved to the energy page
       path: '/manual',
@@ -59,22 +28,12 @@ const router = createRouter({
         return { path: '/odometer' }
       },
     },
-    {
-      path: '/comparison',
-      name: 'comparison',
-      component: ComparisonView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/tires',
-      name: 'tires',
-      component: TiresView,
-      meta: { requiresAuth: true },
-    },
+    authRoute('/comparison', 'comparison', () => import('@/views/ComparisonView.vue')),
+    authRoute('/tires', 'tires', () => import('@/views/TiresView.vue')),
     {
       path: '/expenses',
       name: 'expenses',
-      component: ExpensesView,
+      component: () => import('@/views/ExpensesView.vue'),
       meta: { requiresAuth: true },
       // Maintenance and reminders moved to their own menu entry
       beforeEnter: (to) => {
@@ -86,7 +45,7 @@ const router = createRouter({
     {
       path: '/maintenance',
       name: 'maintenance',
-      component: ExpensesView,
+      component: () => import('@/views/ExpensesView.vue'),
       meta: { requiresAuth: true, section: 'maintenance' },
       beforeEnter: (to) => {
         const tab = String(to.query.tab ?? '').toUpperCase()
@@ -97,41 +56,31 @@ const router = createRouter({
     {
       path: '/energy',
       name: 'energy',
-      component: ExpensesView,
+      component: () => import('@/views/ExpensesView.vue'),
       meta: { requiresAuth: true, section: 'energy' },
     },
-    {
-      path: '/vehicles',
-      name: 'vehicles',
-      component: VehiclesView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/account',
-      name: 'account',
-      component: AccountView,
-      meta: { requiresAuth: true },
-    },
+    authRoute('/vehicles', 'vehicles', () => import('@/views/VehiclesView.vue')),
+    authRoute('/account', 'account', () => import('@/views/AccountView.vue')),
     {
       path: '/login',
       name: 'login',
-      component: LoginView,
+      component: () => import('@/views/LoginView.vue'),
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView,
+      component: () => import('@/views/RegisterView.vue'),
     },
     {
       path: '/onboarding',
       name: 'onboarding',
-      component: OnboardingView,
+      component: () => import('@/views/OnboardingView.vue'),
     },
     {
       // OIDC SSO callback — the API has already set the session cookies before redirecting here.
       path: '/oidc-callback',
       name: 'oidc-callback',
-      component: OIDCCallbackView,
+      component: () => import('@/views/OIDCCallbackView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
@@ -185,6 +134,29 @@ router.beforeEach(async (to, _from, next) => {
     next({ name: 'dashboard' })
   } else {
     next()
+  }
+})
+
+// A new deployment removes the hashed chunks of the previous build: a navigation that fails to fetch one reloads the
+// page on the target route once, which gets the current index and its chunks.
+router.onError((error, to) => {
+  const message = String((error as Error)?.message ?? error)
+  if (!/Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(message)) return
+  const key = 'al-chunk-reload'
+  try {
+    if (sessionStorage.getItem(key) === to.fullPath) return
+    sessionStorage.setItem(key, to.fullPath)
+  } catch {
+    // storage blocked: reload anyway, a second failure is not retried by the browser's cache-busting reload
+  }
+  window.location.assign(to.fullPath)
+})
+
+router.afterEach(() => {
+  try {
+    sessionStorage.removeItem('al-chunk-reload')
+  } catch {
+    // storage blocked
   }
 })
 
