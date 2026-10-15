@@ -14,6 +14,7 @@ import { buildDriveBreakdown } from '@/utils/costBreakdown'
 import { formatAmount } from '@/currency'
 import CostDonut from '@/components/costs/CostDonut.vue'
 import ModalShell from '@/components/ModalShell.vue'
+import CostTotalBar from '@/components/CostTotalBar.vue'
 import { distanceUnit, formatDistance, kmToDisplayDistance, speedUnit } from '@/units'
 import { formatCostPerDistance } from '@/utils/costPerDistance'
 import DriveCostLegs from '@/components/drives/DriveCostLegs.vue'
@@ -276,21 +277,12 @@ async function handleDriverChange(event: Event) {
           :refresh-drive="refreshDrive"
         />
 
-        <!-- Grand Total Card -->
-        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border border-success-500/30 p-4 rounded-2xl flex items-center justify-between shadow-lg">
-          <div>
-            <span class="text-xs font-semibold text-success-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
-            <div class="text-2xl font-black text-white">
-              {{ formatAmount(selectedCostDrive.costs?.total_cost || 0, vehicleCurrency) }}
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
-            <div class="text-lg font-extrabold text-success-400 font-mono">
-              {{ formatCostPerDistance(selectedCostDrive.costs?.cost_per_km, vehicleCurrency, 3, true) }}
-            </div>
-          </div>
-        </div>
+        <CostTotalBar
+          :total="formatAmount(selectedCostDrive.costs?.total_cost || 0, vehicleCurrency)"
+          :per-distance="formatCostPerDistance(selectedCostDrive.costs?.cost_per_km, vehicleCurrency, 3, true)"
+          :total-label="$t('drives.driveCostModal.totalCostPrice')"
+          :per-distance-label="$t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() })"
+        />
       </div>
       </div>
 

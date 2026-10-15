@@ -9,7 +9,9 @@ import { buildCarpoolBreakdown } from '@/utils/costBreakdown'
 import { carpoolCoverage, formatDate, stopNames } from '@/utils/carpool'
 import { formatAmount } from '@/currency'
 import ModalShell from '@/components/ModalShell.vue'
-import { distanceUnit, formatDistance, perDistance } from '@/units'
+import CostTotalBar from '@/components/CostTotalBar.vue'
+import { formatCostPerDistance } from '@/utils/costPerDistance'
+import { distanceUnit, formatDistance } from '@/units'
 
 // Detail of a carpool trip, laid out like the drive and trip cost breakdown: summary, legs, cost split, passengers,
 // total. A leg made from a drive opens the cost detail of that drive, like the legs of a trip. The form to change the
@@ -152,20 +154,13 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
         </div>
 
         <!-- Balance: the total of the drive detail, then who paid what and what is left, each figure once -->
-        <div class="bg-gradient-to-r from-slate-800 to-slate-800/80 border p-4 rounded-2xl space-y-3 shadow-lg" :class="trip.net_cost <= 0 ? 'border-success-500/40' : 'border-success-500/30'">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-xs font-semibold text-success-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.totalCostPrice') }}</span>
-              <div class="text-2xl font-black text-white">{{ fmt(trip.total_cost) }}</div>
-            </div>
-            <div class="text-right">
-              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ $t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() }) }}</span>
-              <div class="text-lg font-extrabold text-success-400 font-mono">
-                {{ formatAmount(perDistance(trip.distance_km > 0 ? trip.total_cost / trip.distance_km : 0), vehicleStore.currency, 3) }}<span class="text-xs font-normal text-slate-400">/{{ distanceUnit() }}</span>
-              </div>
-            </div>
-          </div>
-
+        <CostTotalBar
+          :total="fmt(trip.total_cost)"
+          :per-distance="formatCostPerDistance(trip.distance_km > 0 ? trip.total_cost / trip.distance_km : 0, vehicleStore.currency, 3, true)"
+          :total-label="$t('drives.driveCostModal.totalCostPrice')"
+          :per-distance-label="$t('drives.driveCostModal.costPerKilometre', { unit: distanceUnit() })"
+          :strong="trip.net_cost <= 0"
+        >
           <!-- What the passengers paid, against what they owed (the tick) -->
           <div class="pt-3 border-t border-slate-700/60 space-y-2">
             <div class="flex items-baseline justify-between gap-2">
@@ -215,7 +210,7 @@ const stops = computed(() => stopNames(props.trip?.legs || []))
               <span v-else class="font-bold text-success-400 text-sm">{{ $t('carpool.carpoolTripList.netSurplus', { net_cost: fmt(Math.abs(trip.net_cost)) }) }}</span>
             </div>
           </div>
-        </div>
+        </CostTotalBar>
 
     <template #footer>
         <button @click="open = false" class="btn btn-lg btn-secondary">
