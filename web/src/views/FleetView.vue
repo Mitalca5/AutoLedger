@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GlossaryTip from '@/components/GlossaryTip.vue'
 import LoadError from '@/components/LoadError.vue'
+import KpiCard from '@/components/KpiCard.vue'
 import ListSkeleton from '@/components/ListSkeleton.vue'
 import { formatNumber, formatPercent } from '@/utils/numbers'
 import PageHeader from '@/components/PageHeader.vue'
@@ -263,58 +264,37 @@ onBeforeUnmount(() => {
 
     <!-- KPI Grid -->
     <div v-if="summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.vehicles') }}</span>
-          <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-            <Car class="w-4 h-4" />
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-white mt-2">{{ summary.total_vehicles }}</p>
-        <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.activeVehicles') }}</p>
-      </div>
+      <KpiCard :label="t('fleet.kpi.vehicles')" :icon="Car" :value="String(summary.total_vehicles)">
+        <p class="mt-1 text-xs text-slate-400">{{ t('fleet.kpi.activeVehicles') }}</p>
+      </KpiCard>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthCost', { month: formatMonthName(summary.current_month) }) }}</span>
-          <div class="p-2 bg-success-500/10 text-success-400 rounded-lg">
-            <TrendingDown class="w-4 h-4" />
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-white mt-2">
-          {{ formatAmount(summary.current_month_cost, summary.currency) }}
-        </p>
+      <KpiCard
+        :label="t('fleet.kpi.monthCost', { month: formatMonthName(summary.current_month) })"
+        :icon="TrendingDown"
+        :value="formatAmount(summary.current_month_cost, summary.currency)"
+      >
         <p v-for="tot in otherTotals" :key="tot.currency" class="text-lg font-bold text-white tabular-nums" data-testid="fleet-currency-total">
           {{ formatAmount(tot.current_month_cost, tot.currency) }}
         </p>
-        <p class="text-xs text-slate-400 mt-1">{{ otherTotals.length ? t('fleet.kpi.perCurrency') : t('fleet.kpi.currentMonthTotal') }}</p>
-      </div>
+        <p class="mt-1 text-xs text-slate-400">{{ otherTotals.length ? t('fleet.kpi.perCurrency') : t('fleet.kpi.currentMonthTotal') }}</p>
+      </KpiCard>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthDistance', { month: formatMonthName(summary.current_month) }) }}</span>
-          <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
-            <Gauge class="w-4 h-4" />
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-white mt-2">
-          {{ formatDistance(summary.current_month_distance_km) }}
-        </p>
-        <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.fleetTravelled') }}</p>
-      </div>
+      <KpiCard
+        :label="t('fleet.kpi.monthDistance', { month: formatMonthName(summary.current_month) })"
+        :icon="Gauge"
+        :value="formatDistance(summary.current_month_distance_km)"
+      >
+        <p class="mt-1 text-xs text-slate-400">{{ t('fleet.kpi.fleetTravelled') }}</p>
+      </KpiCard>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ t('fleet.kpi.monthEnergy', { month: formatMonthName(summary.current_month) }) }}</span>
-          <div class="p-2 bg-warning-500/10 text-warning-400 rounded-lg">
-            <Zap class="w-4 h-4" />
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-white mt-2">
-          {{ formatNumber(summary.current_month_energy_kwh) }} <span class="text-sm font-normal text-slate-400">kWh</span>
-        </p>
-        <p class="text-xs text-slate-400 mt-1">{{ t('fleet.kpi.energyDelivered') }}</p>
-      </div>
+      <KpiCard
+        :label="t('fleet.kpi.monthEnergy', { month: formatMonthName(summary.current_month) })"
+        :icon="Zap"
+        :value="formatNumber(summary.current_month_energy_kwh)"
+        unit=" kWh"
+      >
+        <p class="mt-1 text-xs text-slate-400">{{ t('fleet.kpi.energyDelivered') }}</p>
+      </KpiCard>
     </div>
 
     <!-- Cost per distance comparison -->
