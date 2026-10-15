@@ -25,6 +25,18 @@ describe('KpiCard', () => {
     expect(html).toContain('text-slate-400')
   })
 
+  it('reads the formatters\' own unknown marker as unknown', async () => {
+    const html = await render({ label: 'Efficiency', value: '—', unit: ' kWh' })
+    expect(html).not.toContain('kWh')
+    expect(html).toContain('text-slate-400')
+  })
+
+  it('has a dense variant for the panels inside a disclosure', async () => {
+    const html = await render({ label: 'Consumption', value: '15,2', unit: ' kWh/100 km', compact: true })
+    expect(html).toContain('bg-slate-950/60')
+    expect(html).toContain('text-xl')
+  })
+
   it('adds the definition tip when a glossary term is given', async () => {
     setLocale('en')
     const html = await render({ label: 'Cash paid', value: '1 200 €', term: 'cashPaid' })

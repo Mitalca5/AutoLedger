@@ -3,6 +3,7 @@ import { t } from '@/i18n'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { BatteryMedium } from 'lucide-vue-next'
+import KpiCard from '@/components/KpiCard.vue'
 import { AXIS_TEXT, GRID_COLOR, fmt, type EnergyStats } from './energyStats'
 
 Chart.register(...registerables)
@@ -86,26 +87,30 @@ onBeforeUnmount(() => chart?.destroy())
       {{ $t('dashboard.energyBatterySection.battery') }}
     </h4>
 
-    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.healthAccordingToTeslamate') }}</dt>
-        <dd v-if="latest" class="mt-1 text-xl font-bold text-white">
-          {{ fmt(latest.health_percent, 1) }} <span class="text-xs font-medium text-slate-400">%</span>
-        </dd>
-        <dd v-else class="mt-1 text-sm text-slate-400">{{ $t('dashboard.energyBatterySection.noMeasurementYet') }}</dd>
-        <dd class="mt-0.5 text-xs text-slate-400">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <KpiCard
+        compact
+        :label="$t('dashboard.energyBatterySection.healthAccordingToTeslamate')"
+        :value="latest ? fmt(latest.health_percent, 1) : null"
+        unit=" %"
+      >
+        <p v-if="!latest" class="mt-1 text-sm text-slate-400">{{ $t('dashboard.energyBatterySection.noMeasurementYet') }}</p>
+        <p class="mt-0.5 text-xs text-slate-400">
           <template v-if="latest">{{ $t('dashboard.energyBatterySection.kwhOutOfKwhThe', { value: fmt(latest.current_capacity_kwh, 1), value2: fmt(latest.max_capacity_kwh, 1) }) }}</template>
           <template v-else>{{ $t('dashboard.energyBatterySection.readAtEachSynchronizationIf') }} <code>battery-health</code>.</template>
-        </dd>
-      </div>
-      <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $t('dashboard.energyBatterySection.estimatedCapacity') }}</dt>
-        <dd class="mt-1 text-xl font-bold text-white">{{ fmt(stats.summary.estimated_capacity_kwh, 1) }} <span class="text-xs font-medium text-slate-400">kWh</span></dd>
-        <dd class="mt-0.5 text-xs text-slate-400">
+        </p>
+      </KpiCard>
+      <KpiCard
+        compact
+        :label="$t('dashboard.energyBatterySection.estimatedCapacity')"
+        :value="fmt(stats.summary.estimated_capacity_kwh, 1)"
+        unit=" kWh"
+      >
+        <p class="mt-0.5 text-xs text-slate-400">
           {{ $t('dashboard.energyBatterySection.medianOfTheLastCharges', { capacity_samples: stats.summary.capacity_samples ?? 0 }) }}
-        </dd>
-      </div>
-    </dl>
+        </p>
+      </KpiCard>
+    </div>
 
     <div v-if="showChart" class="h-44 sm:h-52">
       <canvas ref="canvas" :aria-label="$t('dashboard.energyBatterySection.batteryCapacityPerMonthTeslamate')"></canvas>
