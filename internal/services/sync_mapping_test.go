@@ -1,6 +1,7 @@
 package services
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -60,5 +61,55 @@ func TestBuildDriveStoresBatteryLevelsAndCelsius(t *testing.T) {
 	}
 	if d.StartBatteryLevel == nil || *d.StartBatteryLevel != 81 || d.EndBatteryLevel == nil || *d.EndBatteryLevel != 71 {
 		t.Errorf("battery levels: %v %v", d.StartBatteryLevel, d.EndBatteryLevel)
+	}
+}
+
+func TestBuildDriveConsumptionIsDerivedFromEnergyAndDistanceInKm(t *testing.T) {
+	start := time.Date(2026, 10, 13, 22, 20, 0, 0, time.UTC)
+	cases := []struct {
+		name   string
+		td     teslamate.Drive
+		units  *teslamate.Units
+		wantKm *float64
+	}{
+		{
+			name: "km",
+			td: teslamate.Drive{
+				OdometerDetails:   teslamate.OdometerDetails{OdometerDistance: 8.3},
+				EnergyConsumedNet: fptr(1.2),
+			},
+			units:  &teslamate.Units{UnitOfLength: "km"},
+			wantKm: fptr(14.457831325301205),
+		},
+		{
+			name: "miles",
+			td: teslamate.Drive{
+				OdometerDetails:   teslamate.OdometerDetails{OdometerDistance: 10},
+				EnergyConsumedNet: fptr(3.2186),
+			},
+			units:  &teslamate.Units{UnitOfLength: "mi"},
+			wantKm: fptr(20), // 10 mi is 16.0934 km
+		},
+		{
+			name: "no energy",
+			td:   teslamate.Drive{OdometerDetails: teslamate.OdometerDetails{OdometerDistance: 8.3}},
+		},
+		{
+			name: "no distance",
+			td:   teslamate.Drive{EnergyConsumedNet: fptr(1.2)},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			d := buildDrive("v1", c.td, c.units, start, start.Add(11*time.Minute))
+			switch {
+			case c.wantKm == nil && d.ConsumptionKwh100km != nil:
+				t.Fatalf("consumption = %v, want none", *d.ConsumptionKwh100km)
+			case c.wantKm != nil && d.ConsumptionKwh100km == nil:
+				t.Fatalf("consumption missing, want %v", *c.wantKm)
+			case c.wantKm != nil && math.Abs(*d.ConsumptionKwh100km-*c.wantKm) > 0.01:
+				t.Fatalf("consumption = %v, want %v", *d.ConsumptionKwh100km, *c.wantKm)
+			}
+		})
 	}
 }

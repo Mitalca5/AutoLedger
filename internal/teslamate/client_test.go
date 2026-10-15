@@ -198,7 +198,7 @@ func TestBatteryAndTemperatureFieldsAreDecoded(t *testing.T) {
 			w.Write([]byte(`{"data":{"car":{"car_id":1},"drives":[
 				{"drive_id":3,"start_date":"2026-02-03T08:00:00Z","end_date":"2026-02-03T09:00:00Z","odometer_details":{"odometer_start":1,"odometer_end":41,"odometer_distance":40},
 				 "battery_details":{"start_usable_battery_level":80,"start_battery_level":81,"end_usable_battery_level":70,"end_battery_level":71,"reduced_range":false,"is_sufficiently_precise":true},
-				 "outside_temp_avg":-2.5,"inside_temp_avg":20.1,"energy_consumed_net":6.1,"consumption_net":0.152}],
+				 "outside_temp_avg":-2.5,"inside_temp_avg":20.1,"energy_consumed_net":6.1,"consumption_net":152}],
 				"units":{"unit_of_length":"km","unit_of_temperature":"C"}}}`))
 		case "/api/v1/cars/1/battery-health":
 			w.Write([]byte(`{"data":{"car":{"car_id":1},"battery_health":{"max_range":480,"current_range":462,"max_capacity":78.4,"current_capacity":75.1,"rated_efficiency":140.5,"battery_health_percentage":95.79},"units":{"unit_of_length":"km"}}}`))

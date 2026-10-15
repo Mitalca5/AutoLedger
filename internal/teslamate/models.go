@@ -81,7 +81,6 @@ type Drive struct {
 	PowerMax          int             `json:"power_max"`
 	PowerMin          int             `json:"power_min"`
 	EnergyConsumedNet *float64        `json:"energy_consumed_net"`
-	ConsumptionNet    *float64        `json:"consumption_net"`
 	BatteryDetails    BatteryDetails  `json:"battery_details"`
 	OutsideTempAvg    *float64        `json:"outside_temp_avg"` // Unit of Units.UnitOfTemperature, null when unknown
 }

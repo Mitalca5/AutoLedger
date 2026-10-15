@@ -9,6 +9,7 @@ import (
 
 	"github.com/teslacost/teslacost/internal/apierror"
 	"github.com/teslacost/teslacost/internal/models"
+	"github.com/teslacost/teslacost/internal/services/ingest"
 	"github.com/teslacost/teslacost/internal/teslamate"
 )
 
@@ -106,6 +107,14 @@ func buildDrive(vehicleID string, td teslamate.Drive, units *teslamate.Units, st
 
 	startLevel, endLevel := batteryLevels(td.BatteryDetails)
 
+	// TeslaMate reports its own "consumption_net" in Wh per distance unit; the stored figure is kWh/100 km,
+	// derived here from the energy and the distance in km.
+	var consumption *float64
+	if td.EnergyConsumedNet != nil && *td.EnergyConsumedNet > 0 && distKm > 0 {
+		c := ingest.Consumption100km(*td.EnergyConsumedNet, distKm)
+		consumption = &c
+	}
+
 	tmDriveID := td.DriveID
 	return &models.Drive{
 		VehicleID:           vehicleID,
@@ -123,7 +132,7 @@ func buildDrive(vehicleID string, td teslamate.Drive, units *teslamate.Units, st
 		StartAddress:        startAddr,
 		EndAddress:          endAddr,
 		EnergyConsumedKwh:   td.EnergyConsumedNet,
-		ConsumptionKwh100km: td.ConsumptionNet,
+		ConsumptionKwh100km: consumption,
 		StartBatteryLevel:   startLevel,
 		EndBatteryLevel:     endLevel,
 		OutsideTempC:        tempCelsius(td.OutsideTempAvg, units),
