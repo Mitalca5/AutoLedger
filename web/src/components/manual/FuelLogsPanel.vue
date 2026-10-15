@@ -223,8 +223,8 @@ onMounted(load)
 
     <div v-if="loading && !stats" class="text-sm text-slate-400">{{ $t('manual.fuelLogsPanel.loading') }}</div>
     <LoadError v-else-if="loadError !== null" :message="loadError" @retry="load" />
-    <EmptyState v-else-if="logs.length === 0">
-      {{ $t('manual.fuelLogsPanel.noFillUpRecordedEnter', { unit: distanceUnit() }) }}
+    <EmptyState v-else-if="logs.length === 0" :icon="Fuel" :title="$t('manual.fuelLogsPanel.noFillUpRecordedEnter')">
+      {{ $t('manual.fuelLogsPanel.noFillUpHint', { unit: distanceUnit() }) }}
     </EmptyState>
     <ul v-else class="space-y-2">
       <li v-for="log in logs" :key="log.id" class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">

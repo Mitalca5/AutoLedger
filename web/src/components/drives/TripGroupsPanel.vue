@@ -27,8 +27,12 @@ const formatDate = formatDayTime
 <template>
   <div class="space-y-3">
     <div v-if="loadingTrips" class="text-center py-12 text-slate-400">{{ $t('common.loading') }}</div>
-    <EmptyState v-else-if="!tripGroups.length">
-      {{ hasFilters ? $t('drives.tripGroupsPanel.noTripMatchesTheFilters') : $t('drives.tripGroupsPanel.noTripsSelectSeveralDrives') }}
+    <EmptyState
+      v-else-if="!tripGroups.length"
+      :icon="Layers"
+      :title="hasFilters ? $t('drives.tripGroupsPanel.noTripMatchesTheFilters') : $t('drives.tripGroupsPanel.noTripsSelectSeveralDrives')"
+    >
+      <template v-if="!hasFilters">{{ $t('drives.tripGroupsPanel.noTripsHint') }}</template>
     </EmptyState>
     <template v-else>
     <template

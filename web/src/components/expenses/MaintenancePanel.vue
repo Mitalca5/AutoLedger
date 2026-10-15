@@ -4,7 +4,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import { intlLocale } from '@/i18n'
 import { useVehicleStore } from '@/stores/vehicle'
 import { computed, ref } from 'vue'
-import { Repeat, Plus, Pencil, Trash2, Paperclip, FileDown } from 'lucide-vue-next'
+import { Repeat, Plus, Pencil, Trash2, Paperclip, FileDown, Landmark, Wrench } from 'lucide-vue-next'
 import { api } from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { saveBlob } from '@/utils/download'
@@ -54,8 +54,12 @@ const total = computed(() => maintenanceTotal(visible.value, vehicleStore.curren
 <template>
   <div>
     <ListSkeleton v-if="loading" />
-    <EmptyState v-else-if="!ofKind.length">
-      {{ kind === 'fixed' ? $t('expenses.maintenancePanel.noFixedExpense') : $t('expenses.maintenancePanel.noMaintenanceExpense') }}
+    <EmptyState
+      v-else-if="!ofKind.length"
+      :icon="kind === 'fixed' ? Landmark : Wrench"
+      :title="kind === 'fixed' ? $t('expenses.maintenancePanel.noFixedExpense') : $t('expenses.maintenancePanel.noMaintenanceExpense')"
+    >
+      <template v-if="kind === 'fixed'">{{ $t('expenses.maintenancePanel.noFixedExpenseHint') }}</template>
       <template v-if="vehicleStore.canEdit" #actions>
         <button class="btn btn-primary" @click="emit('add')">
           <Plus class="h-3.5 w-3.5" /> {{ $t('expenses.expensesView.add') }}

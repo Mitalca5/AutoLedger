@@ -31,6 +31,7 @@ import TireDuplicateSessionModal from '@/components/tires/TireDuplicateSessionMo
 import TireBatchDisposeModal from '@/components/tires/TireBatchDisposeModal.vue'
 import TireCopyHistoryModal from '@/components/tires/TireCopyHistoryModal.vue'
 import { Archive, Copy, Disc, History, Package, Pencil, Plus, Snowflake } from 'lucide-vue-next'
+import EmptyState from '@/components/EmptyState.vue'
 import { getLastDismountInfo } from '@/utils/tires'
 
 // The page owns the tire list, the selection and which modal is open; each modal owns its form and
@@ -329,14 +330,14 @@ async function onLogSaved() {
         <span>{{ $t('tires.tiresView.tireSInThisView', { length: currentTabTireIds.length }) }}</span>
       </div>
 
-      <div v-if="tires.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-10 text-center text-slate-400 space-y-3">
-        <Disc class="w-10 h-10 mx-auto text-slate-400" />
-        <h3 class="text-base font-bold text-white">{{ $t('tires.tiresView.noTireYet') }}</h3>
-        <p class="text-xs text-slate-400 max-w-sm mx-auto">{{ $t('tires.tiresView.noTireYetHint') }}</p>
-        <button v-if="vehicleStore.canEdit" type="button" @click="openAddModal()" class="btn btn-lg btn-primary">
-          {{ $t('tires.tiresView.addTires') }}
-        </button>
-      </div>
+      <EmptyState v-if="tires.length === 0" :icon="Disc" :title="$t('tires.tiresView.noTireYet')">
+        {{ $t('tires.tiresView.noTireYetHint') }}
+        <template v-if="vehicleStore.canEdit" #actions>
+          <button type="button" @click="openAddModal()" class="btn btn-primary">
+            {{ $t('tires.tiresView.addTires') }}
+          </button>
+        </template>
+      </EmptyState>
 
       <!-- Cartes des 4 roues -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">

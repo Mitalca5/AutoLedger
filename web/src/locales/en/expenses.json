@@ -76,7 +76,7 @@
     "kwh3": "{estimated_price_per_kwh}/kWh",
     "kwh100km": "{estimated_kwh_100km} kWh/100 {unit}",
     "energyEstimateActive": "Energy estimate active:",
-    "empty": "No charge recorded yet.",
+    "empty": "No charge recorded yet",
     "unknownPlace": "Unknown charging place",
     "editThisCharge": "Edit this charge",
     "fixCost": "Enter / correct the cost",
@@ -124,7 +124,7 @@
     "open": "Open",
     "viewTheFile": "View the file",
     "uploadAFirstDocument": "Upload a first document",
-    "noReceiptOrInvoiceUploaded": "No receipt or invoice uploaded for this vehicle.",
+    "noReceiptOrInvoiceUploaded": "No receipt or invoice uploaded",
     "documentS": "{length} document(s)",
     "receiptsInvoicesTicketsWorkshopReports": "Receipts (invoices, tickets, workshop reports) are stored on the server. Several expenses can be attached to the same file.",
     "linkedExpenses": "{count} linked expense(s)",
@@ -196,11 +196,12 @@
     "total": "Total",
     "count": "{n} expense(s)",
     "noMatch": "No expense matches these filters.",
-    "noMaintenanceExpense": "No maintenance expense recorded.",
-    "noFixedExpense": "No fixed cost recorded (insurance, tax, subscription, financing).",
+    "noMaintenanceExpense": "No maintenance expense recorded",
+    "noFixedExpense": "No fixed cost recorded",
     "serviceBook": "Service book (PDF)",
     "serviceBookWithProofs": "Attach proofs (pictures)",
-    "serviceBookHint": "The book lists the vehicle's maintenance, without fixed costs, for the year chosen above or for all years."
+    "serviceBookHint": "The book lists the vehicle's maintenance, without fixed costs, for the year chosen above or for all years.",
+    "noFixedExpenseHint": "Insurance, tax, subscription, financing."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Send an automatic webhook notification (Discord / Telegram / Gotify) when the threshold is crossed",
@@ -351,7 +352,7 @@
     "carpool": "Carpool",
     "createACarpoolForThis": "Create a carpool for this drive",
     "viewTheReceipt": "View the receipt",
-    "noTollOrParkingRecorded": "No toll or parking recorded.",
+    "noTollOrParkingRecorded": "No toll or parking recorded",
     "emptyHint": "Tolls and parking fees show up here, and the ones recorded on a drive are listed with it. Add one by hand for a trip you did not record.",
     "addFirst": "Add a toll or parking fee"
   },

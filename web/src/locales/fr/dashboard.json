@@ -121,12 +121,13 @@
     "threeMonthAverage": "Moyenne sur 3 mois",
     "chargingEfficiencyEmpty": "Le rendement compare l'énergie stockée dans la batterie à l'énergie tirée du réseau (compteur ou borne). Les recharges synchronisées par TeslaMate ou une intégration la portent ; sans elle, il reste inconnu.",
     "chargingEfficiencyAction": "Voir les recharges",
-    "noData": "Pas encore de données d'efficacité : elles apparaissent dès que des relevés de compteur et des recharges couvrent une même période.",
+    "noData": "Pas encore de données d'efficacité",
     "seeEnergy": "Voir l'énergie",
     "byPlace": "Où la voiture est rechargée",
     "placeShare": "{share} % des kWh ({kwh} kWh)",
     "placeUnknown": "{count} recharge(s) sans coût, hors du prix",
-    "placeLink": "Tous les lieux et les prix"
+    "placeLink": "Tous les lieux et les prix",
+    "noDataHint": "Elles apparaissent dès que des relevés de compteur et des recharges couvrent une même période."
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Trajets d'au moins {min}, groupés par température extérieure moyenne ; tranches de moins de {band} masquées.",

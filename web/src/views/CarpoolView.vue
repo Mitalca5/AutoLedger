@@ -18,6 +18,7 @@ import { downloadCsv } from '@/utils/csv'
 import { toggleTag } from '@/utils/drives'
 import { carpoolCsvHeaders, carpoolCsvRows } from '@/utils/carpool'
 import { Users, Plus } from 'lucide-vue-next'
+import EmptyState from '@/components/EmptyState.vue'
 
 // The page loads the trips and owns the selection and which trip the modal edits; the summary, the list and the
 // form are components. Other pages open it with a drive, drives or a trip group in the query string.
@@ -263,8 +264,8 @@ onMounted(() => {
       <span>{{ $t('carpool.carpoolView.youAreViewingThisVehicle') }} <strong>{{ $t('carpool.carpoolView.readOnly') }}</strong>{{ $t('carpool.carpoolView.modeCreatingAndEditingCarpools') }}</span>
     </div>
 
-    <!-- KPI Summary Grid -->
-    <CarpoolSummaryGrid :summary="summary" />
+    <!-- KPI Summary Grid: totals of the trips below, nothing to total before the first one -->
+    <CarpoolSummaryGrid v-if="trips.length > 0" :summary="summary" />
 
     <!-- Loading -->
     <div v-if="loading" class="space-y-4 animate-pulse">
@@ -274,25 +275,15 @@ onMounted(() => {
     <!-- Empty State -->
     <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadData" />
 
-    <div v-else-if="trips.length === 0" class="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center max-w-2xl mx-auto space-y-4">
-      <div class="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto">
-        <Users class="w-8 h-8" />
-      </div>
-      <div>
-        <h3 class="text-lg font-bold text-white">{{ $t('carpool.carpoolView.noCarpooledTripYet') }}</h3>
-        <p class="text-sm text-slate-400 mt-1 max-w-md mx-auto">
-          {{ $t('carpool.carpoolView.selectTheLegsOfYour', { APP_NAME }) }}
-        </p>
-      </div>
-      <button
-        v-if="vehicleStore.canEdit"
-        @click="openCreateModal()"
-        class="btn btn-lg btn-primary"
-      >
-        <Plus class="w-4 h-4" />
-        {{ $t('carpool.carpoolView.createMyFirstCarpool') }}
-      </button>
-    </div>
+    <EmptyState v-else-if="trips.length === 0" :icon="Users" :title="$t('carpool.carpoolView.noCarpooledTripYet')">
+      {{ $t('carpool.carpoolView.selectTheLegsOfYour', { APP_NAME }) }}
+      <template v-if="vehicleStore.canEdit" #actions>
+        <button @click="openCreateModal()" class="btn btn-primary">
+          <Plus class="w-4 h-4" />
+          {{ $t('carpool.carpoolView.createMyFirstCarpool') }}
+        </button>
+      </template>
+    </EmptyState>
 
     <!-- Trips List -->
     <CarpoolTripList

@@ -26,10 +26,10 @@
     "costRecoveryRate": "Cost recovery rate",
     "totalReceivedFromPassengers": "Total received from passengers",
     "fairShareDue": "Fair share due: {total_passengers_share}",
-    "people": "people",
+    "people": "person | people",
     "passengersCarried": "Passengers carried",
     "kmShared": "{total_distance_km} {unit} shared",
-    "trips": "trips",
+    "trips": "trip | trips",
     "carpooledTrips": "Carpooled trips",
     "covered": "Passengers' shares covered",
     "below": "{amount} below their share"

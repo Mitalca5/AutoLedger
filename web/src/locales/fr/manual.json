@@ -36,7 +36,7 @@
     "mileageKmOptional": "Kilométrage ({unit}, optionnel)",
     "partial": "partiel",
     "estimated": "estimé",
-    "noFillUpRecordedEnter": "Aucun plein enregistré. Saisissez la date, le kilométrage et le montant de chaque plein : le coût au {unit} est calculé à partir de ces relevés.",
+    "noFillUpRecordedEnter": "Aucun plein enregistré",
     "loading": "Chargement…",
     "consumptionIsCalculatedBetweenTwo": "La consommation se calcule entre deux pleins complets avec les quantités renseignées.",
     "theConsumptionOfIntervalS": "La consommation de {estimated_segments} intervalle(s) est donc approximative (≈).",
@@ -63,10 +63,11 @@
     "deleteTitle": "Supprimer le plein",
     "deleteMessage": "Supprimer le plein du {date} ({amount}) ?",
     "deleteFailed": "Suppression impossible.",
-    "saving": "Enregistrement…"
+    "saving": "Enregistrement…",
+    "noFillUpHint": "Saisissez la date, le kilométrage et le montant de chaque plein : le coût au {unit} est calculé à partir de ces relevés."
   },
   "odometerReadingsPanel": {
-    "noManualReadingYet": "Aucun relevé pour l'instant.",
+    "noManualReadingYet": "Aucun relevé pour l'instant",
     "fromHomeAssistant": "Home Assistant",
     "fromHomeAssistantHint": "Relevé remonté par l'intégration Home Assistant, un point par jour. Il ne peut pas être modifié, seulement supprimé.",
     "loadingTheReadings": "Chargement des relevés...",

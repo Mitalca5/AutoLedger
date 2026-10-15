@@ -2,7 +2,7 @@
   "drivesView": {
     "pageOf": "Page {page} of {totalPages}",
     "resetTheFilters": "Reset the filters",
-    "noDriveFoundForThis": "No drive found for this selection or period.",
+    "noDriveFoundForThis": "No drive found for this selection or period",
     "personal": "Personal",
     "work": "Work",
     "all": "All",
@@ -267,7 +267,7 @@
     "inMonth": "in {month}"
   },
   "tripGroupsPanel": {
-    "noTripMatchesTheFilters": "No trip matches the filters.",
+    "noTripMatchesTheFilters": "No trip matches the filters",
     "loadingTheDrives": "Loading the drives...",
     "removeThisDriveFromThe": "Remove this drive from the trip",
     "deleteTheTrip": "Delete the trip",
@@ -277,12 +277,13 @@
     "consolidatedCostOfTheTrip": "Consolidated cost of the trip (click the row for the detail)",
     "carpoolS": "{carpool_count} carpool(s)",
     "legS": "{length} leg(s)",
-    "noTripsSelectSeveralDrives": "No trips. Select several drives then “Merge & toll” to create one.",
+    "noTripsSelectSeveralDrives": "No trips yet",
     "costsAmount": "{amount} costs",
     "costDetail": "Cost detail",
     "hide": "Hide",
     "legs": "Legs",
-    "dateSeparator": ": "
+    "dateSeparator": ": ",
+    "noTripsHint": "Select several drives, then “Merge & toll” to create one."
   },
   "tripEditModal": {
     "name": "Name",

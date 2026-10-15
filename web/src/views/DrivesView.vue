@@ -401,22 +401,8 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
 <template>
   <div class="space-y-6">
     <!-- Drives informational banner when no telemetry is linked -->
-    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate && total === 0" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-info-500/30 bg-info-500/10 p-4 text-sm text-info-200">
+    <div v-if="vehicleStore.activeVehicle && !vehicleStore.hasTeslaMate && total === 0" class="rounded-2xl border border-info-500/30 bg-info-500/10 p-4 text-sm text-info-200">
       <span>{{ $t('drives.drivesView.noTelemetryBanner') }}</span>
-      <div v-if="vehicleStore.canEdit" class="flex items-center gap-2">
-        <button
-          @click="openCSVImportModal"
-          class="rounded-lg bg-info-500/20 px-2.5 py-1 text-xs font-semibold text-info-300 hover:bg-info-500/30 transition-colors"
-        >
-          {{ $t('drives.drivesView.importCsv') }}
-        </button>
-        <button
-          @click="openManualDriveModal()"
-          class="rounded-lg bg-info-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-info-500 transition-colors"
-        >
-          {{ $t('drives.drivesView.newDrive') }}
-        </button>
-      </div>
     </div>
 
     <AddressBackfillNotice v-if="vehicleId" :vehicle-id="vehicleId" :can-edit="vehicleStore.canEdit" @resolved="loadDrives(true)" />
@@ -514,8 +500,7 @@ async function toggleDriveTag(drive: any, tagToToggle: string) {
     <LoadError v-else-if="loadError !== null" :message="loadError" @retry="loadDrives()" />
 
     <!-- EMPTY STATE -->
-    <EmptyState v-else-if="!drives.length">
-      {{ $t('drives.drivesView.noDriveFoundForThis') }}
+    <EmptyState v-else-if="!drives.length" :icon="PageIcon" :title="$t('drives.drivesView.noDriveFoundForThis')">
       <template #actions>
       <EmptySourceHints v-if="!(searchQuery || periodMode !== 'ALL' || selectedTag || unqualifiedOnly || hasTollOnly)" @import-csv="openCSVImportModal" />
       <button

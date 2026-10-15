@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GlossaryTip from '@/components/GlossaryTip.vue'
 import KpiCard from '@/components/KpiCard.vue'
+import EmptyState from '@/components/EmptyState.vue'
 import { t } from '@/i18n'
 import { formatMonthLabel } from '@/utils/dates'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
@@ -205,9 +206,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="!hasData && showEmpty" class="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-    {{ $t('dashboard.energyEfficiencyPanel.noData') }}
-  </section>
+  <EmptyState v-if="!hasData && showEmpty" :icon="Gauge" :title="$t('dashboard.energyEfficiencyPanel.noData')">
+    {{ $t('dashboard.energyEfficiencyPanel.noDataHint') }}
+  </EmptyState>
   <component
     :is="summary ? 'details' : 'section'"
     v-else-if="hasData"

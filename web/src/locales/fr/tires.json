@@ -11,7 +11,7 @@
     "noTireInGarageStorage": "Aucun pneu stocké au garage",
     "scrapped": "Mis au rebut ({length})",
     "catalogueAndGarageStock": "Catalogue & Stock au garage ({length})",
-    "tiresFittedOnTheVehicle": "Pneus montés sur le véhicule (4)",
+    "tiresFittedOnTheVehicle": "Pneus montés sur le véhicule",
     "tireSInThisView": "{length} pneu(s) dans cette vue",
     "scrap": "Mettre au rebut",
     "scrapTheSelectedTires": "Mettre au rebut les pneus sélectionnés",

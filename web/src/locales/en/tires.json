@@ -11,7 +11,7 @@
     "noTireInGarageStorage": "No tire in garage storage",
     "scrapped": "Scrapped ({length})",
     "catalogueAndGarageStock": "Catalogue and garage stock ({length})",
-    "tiresFittedOnTheVehicle": "Tires fitted on the vehicle (4)",
+    "tiresFittedOnTheVehicle": "Tires fitted on the vehicle",
     "tireSInThisView": "{length} tire(s) in this view",
     "scrap": "Scrap",
     "scrapTheSelectedTires": "Scrap the selected tires",

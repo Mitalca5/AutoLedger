@@ -31,17 +31,12 @@ const vehicleStore = useVehicleStore()
     </div>
 
     <ListSkeleton v-if="loading" />
-    <EmptyState v-else-if="!documents.length">
-      {{ $t('expenses.documentsPanel.noReceiptOrInvoiceUploaded') }}
-      <template #actions>
-      <button
-        v-if="vehicleStore.canEdit"
-        @click="emit('upload')"
-        class="btn btn-lg btn-primary"
-      >
-        <UploadCloud class="w-4 h-4" />
-        {{ $t('expenses.documentsPanel.uploadAFirstDocument') }}
-      </button>
+    <EmptyState v-else-if="!documents.length" :icon="Paperclip" :title="$t('expenses.documentsPanel.noReceiptOrInvoiceUploaded')">
+      <template v-if="vehicleStore.canEdit" #actions>
+        <button @click="emit('upload')" class="btn btn-primary">
+          <UploadCloud class="w-4 h-4" />
+          {{ $t('expenses.documentsPanel.uploadAFirstDocument') }}
+        </button>
       </template>
     </EmptyState>
 

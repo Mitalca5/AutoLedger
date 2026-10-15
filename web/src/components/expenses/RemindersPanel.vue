@@ -4,6 +4,7 @@ import { computed, ref } from 'vue'
 import { useVehicleStore } from '@/stores/vehicle'
 import type { MaintenanceReminder, VehicleWebhook } from '@/services/api'
 import { Plus, AlertTriangle, Bell, Clock, CheckCircle2, Radio, Sparkles, CircleDashed, Settings } from 'lucide-vue-next'
+import EmptyState from '@/components/EmptyState.vue'
 import { reminderPresets, type ReminderPreset } from '@/utils/expenses'
 import { groupRemindersByDue } from '@/utils/dashboard'
 import ReminderRow from '@/components/expenses/ReminderRow.vue'
@@ -94,43 +95,30 @@ const groups = computed(() => groupRemindersByDue(props.reminders))
     <ListSkeleton v-if="loadingReminders" :label="$t('expenses.remindersPanel.loadingTheReminders')" />
 
     <!-- Empty state -->
-    <div v-else-if="!reminders.length" class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 space-y-4">
-      <div class="p-3 bg-sky-500/10 border border-sky-500/20 text-sky-400 w-12 h-12 rounded-2xl mx-auto flex items-center justify-center">
-        <Bell class="w-6 h-6" />
-      </div>
-      <div>
-        <h3 class="text-base font-bold text-white">{{ $t('expenses.remindersPanel.noMaintenanceReminderConfigured') }}</h3>
-        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
-          {{ $t('expenses.remindersPanel.trackTireWearCabinFilter') }}
-        </p>
-      </div>
-
-      <div v-if="vehicleStore.canEdit" class="pt-2">
-        <p class="text-xs font-semibold text-slate-300 mb-3">{{ $t('expenses.remindersPanel.addAStandardReminderIn') }}</p>
-        <div class="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
-          <button
-            v-for="preset in reminderPresets()"
-            :key="preset.title"
-            type="button"
-            @click="emit('add', preset)"
-            class="btn btn-secondary"
-          >
-            <Sparkles class="w-3 h-3 text-sky-400" />
-            {{ preset.title }}
-          </button>
-        </div>
-      </div>
-
-      <div v-if="vehicleStore.canEdit" class="pt-2">
-        <button
-          @click="emit('add', null)"
-          class="btn btn-lg btn-primary"
-        >
+    <EmptyState v-else-if="!reminders.length" :icon="Bell" :title="$t('expenses.remindersPanel.noMaintenanceReminderConfigured')">
+      {{ $t('expenses.remindersPanel.trackTireWearCabinFilter') }}
+      <template v-if="vehicleStore.canEdit" #actions>
+        <button @click="emit('add', null)" class="btn btn-primary">
           <Plus class="w-4 h-4" />
           {{ $t('expenses.remindersPanel.createACustomReminder') }}
         </button>
-      </div>
-    </div>
+        <div class="pt-2">
+          <p class="text-xs font-semibold text-slate-300 mb-3">{{ $t('expenses.remindersPanel.addAStandardReminderIn') }}</p>
+          <div class="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
+            <button
+              v-for="preset in reminderPresets()"
+              :key="preset.title"
+              type="button"
+              @click="emit('add', preset)"
+              class="btn btn-secondary"
+            >
+              <Sparkles class="w-3 h-3 text-sky-400" />
+              {{ preset.title }}
+            </button>
+          </div>
+        </div>
+      </template>
+    </EmptyState>
 
     <!-- Reminders by due date -->
     <div v-else class="space-y-5">

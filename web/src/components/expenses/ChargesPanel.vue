@@ -74,8 +74,7 @@ const monthLabel = (date: string) => new Date(date).toLocaleDateString(intlLocal
       <span v-else>{{ $t('expenses.chargesPanel.chargeSWithoutACost', { chargesWithoutCost }) }}</span>
     </button>
     <ListSkeleton v-if="loading" />
-    <EmptyState v-else-if="!charges.length">
-      {{ $t('expenses.chargesPanel.empty') }}
+    <EmptyState v-else-if="!charges.length" :icon="Zap" :title="$t('expenses.chargesPanel.empty')">
       <template #actions>
         <EmptySourceHints quick-kind="CHARGE" @import-csv="emit('import-csv')" />
       </template>

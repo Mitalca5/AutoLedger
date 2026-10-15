@@ -76,7 +76,7 @@
     "kwh3": "{estimated_price_per_kwh}/kWh",
     "kwh100km": "{estimated_kwh_100km} kWh/100 {unit}",
     "energyEstimateActive": "Estimation d'énergie active :",
-    "empty": "Aucune recharge enregistrée pour le moment.",
+    "empty": "Aucune recharge enregistrée pour le moment",
     "unknownPlace": "Lieu de recharge inconnu",
     "editThisCharge": "Modifier cette recharge",
     "fixCost": "Renseigner / corriger le coût",
@@ -124,7 +124,7 @@
     "open": "Ouvrir",
     "viewTheFile": "Consulter le fichier",
     "uploadAFirstDocument": "Téléverser un premier document",
-    "noReceiptOrInvoiceUploaded": "Aucun justificatif ou facture téléversé pour ce véhicule.",
+    "noReceiptOrInvoiceUploaded": "Aucun justificatif ou facture téléversé",
     "documentS": "{length} document(s)",
     "receiptsInvoicesTicketsWorkshopReports": "Les justificatifs (factures, tickets, rapports d'atelier) sont stockés directement dans la base de données. Plusieurs dépenses peuvent être rattachées au même fichier.",
     "linkedExpenses": "{count} dépense(s) liée(s)",
@@ -196,11 +196,12 @@
     "total": "Total",
     "count": "{n} dépense(s)",
     "noMatch": "Aucune dépense ne correspond à ces filtres.",
-    "noMaintenanceExpense": "Aucune dépense d'entretien enregistrée.",
-    "noFixedExpense": "Aucun frais fixe enregistré (assurance, taxe, abonnement, financement).",
+    "noMaintenanceExpense": "Aucune dépense d'entretien enregistrée",
+    "noFixedExpense": "Aucun frais fixe enregistré",
     "serviceBook": "Carnet d'entretien (PDF)",
     "serviceBookWithProofs": "Joindre les justificatifs (images)",
-    "serviceBookHint": "Le carnet reprend les entretiens du véhicule, sans les frais fixes, pour l'année choisie ci-dessus ou toutes les années."
+    "serviceBookHint": "Le carnet reprend les entretiens du véhicule, sans les frais fixes, pour l'année choisie ci-dessus ou toutes les années.",
+    "noFixedExpenseHint": "Assurance, taxe, abonnement, financement."
   },
   "reminderModal": {
     "sendAnAutomaticWebhookNotification": "Envoyer une notification webhook automatique (Discord / Telegram / Gotify) lors du franchissement du seuil",
@@ -351,7 +352,7 @@
     "carpool": "Covoiturer",
     "createACarpoolForThis": "Créer un covoiturage pour ce trajet",
     "viewTheReceipt": "Voir le justificatif",
-    "noTollOrParkingRecorded": "Aucun péage ou parking enregistré.",
+    "noTollOrParkingRecorded": "Aucun péage ou parking enregistré",
     "emptyHint": "Les péages et parkings apparaissent ici, ceux saisis sur un trajet y sont listés. Ajoutez-en un à la main pour un déplacement non enregistré.",
     "addFirst": "Ajouter un péage ou un parking"
   },

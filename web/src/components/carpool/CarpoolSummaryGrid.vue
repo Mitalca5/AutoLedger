@@ -25,7 +25,7 @@ const covered = computed(() => props.summary.total_revenue >= props.summary.tota
       :label="$t('carpool.carpoolSummaryGrid.carpooledTrips')"
       :icon="Users"
       :value="String(summary.total_trips)"
-      :unit="` ${$t('carpool.carpoolSummaryGrid.trips')}`"
+      :unit="` ${$t('carpool.carpoolSummaryGrid.trips', {}, summary.total_trips)}`"
     >
       <p class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.kmShared', { unit: distanceUnit(), total_distance_km: formatDistanceValue(summary.total_distance_km || 0) }) }}</p>
     </KpiCard>
@@ -34,7 +34,7 @@ const covered = computed(() => props.summary.total_revenue >= props.summary.tota
       :label="$t('carpool.carpoolSummaryGrid.passengersCarried')"
       :icon="Users"
       :value="String(summary.total_passengers)"
-      :unit="` ${$t('carpool.carpoolSummaryGrid.people')}`"
+      :unit="` ${$t('carpool.carpoolSummaryGrid.people', {}, summary.total_passengers)}`"
     >
       <p class="mt-1 text-xs text-slate-400">{{ $t('carpool.carpoolSummaryGrid.fairShareDue', { total_passengers_share: fmt(summary.total_passengers_share) }) }}</p>
     </KpiCard>

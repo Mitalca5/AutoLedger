@@ -26,10 +26,10 @@
     "costRecoveryRate": "Taux d'amortissement",
     "totalReceivedFromPassengers": "Total perçu passagers",
     "fairShareDue": "Part équitable due : {total_passengers_share}",
-    "people": "personnes",
+    "people": "personne | personnes",
     "passengersCarried": "Passagers transportés",
     "kmShared": "{total_distance_km} {unit} partagés",
-    "trips": "voyages",
+    "trips": "voyage | voyages",
     "carpooledTrips": "Trajets covoiturés",
     "covered": "Parts des passagers couvertes",
     "below": "{amount} sous leur part"

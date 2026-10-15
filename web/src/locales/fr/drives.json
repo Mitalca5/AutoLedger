@@ -2,7 +2,7 @@
   "drivesView": {
     "pageOf": "Page {page} sur {totalPages}",
     "resetTheFilters": "Réinitialiser les filtres",
-    "noDriveFoundForThis": "Aucun trajet trouvé pour cette sélection ou période.",
+    "noDriveFoundForThis": "Aucun trajet trouvé pour cette sélection ou période",
     "personal": "Perso",
     "work": "Pro",
     "all": "Tous",
@@ -267,7 +267,7 @@
     "inMonth": "en {month}"
   },
   "tripGroupsPanel": {
-    "noTripMatchesTheFilters": "Aucun voyage ne correspond aux filtres.",
+    "noTripMatchesTheFilters": "Aucun voyage ne correspond aux filtres",
     "loadingTheDrives": "Chargement des trajets...",
     "removeThisDriveFromThe": "Retirer ce trajet du voyage",
     "deleteTheTrip": "Supprimer le voyage",
@@ -277,12 +277,13 @@
     "consolidatedCostOfTheTrip": "Coût consolidé du voyage (cliquez sur la ligne pour le détail)",
     "carpoolS": "{carpool_count} covoit",
     "legS": "{length} étape(s)",
-    "noTripsSelectSeveralDrives": "Aucun voyage. Sélectionnez plusieurs trajets puis « Fusionner & Péage » pour en créer un.",
+    "noTripsSelectSeveralDrives": "Aucun voyage pour le moment",
     "costsAmount": "{amount} frais",
     "costDetail": "Détail coûts",
     "hide": "Masquer",
     "legs": "Étapes",
-    "dateSeparator": " : "
+    "dateSeparator": " : ",
+    "noTripsHint": "Sélectionnez plusieurs trajets puis « Fusionner & Péage » pour en créer un."
   },
   "tripEditModal": {
     "name": "Nom",

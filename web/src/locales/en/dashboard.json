@@ -121,12 +121,13 @@
     "threeMonthAverage": "3-month average",
     "chargingEfficiencyEmpty": "Efficiency compares the energy stored in the battery with the energy drawn from the grid (meter or charger). Charges synced by TeslaMate or an integration carry it; without it, the figure stays unknown.",
     "chargingEfficiencyAction": "See the charges",
-    "noData": "No efficiency data yet: it appears once odometer readings and charges cover the same period.",
+    "noData": "No efficiency data yet",
     "seeEnergy": "See energy",
     "byPlace": "Where it is charged",
     "placeShare": "{share} % of kWh ({kwh} kWh)",
     "placeUnknown": "{count} session(s) without a cost, not in the price",
-    "placeLink": "All places and prices"
+    "placeLink": "All places and prices",
+    "noDataHint": "It appears once odometer readings and charges cover the same period."
   },
   "energyTemperatureSection": {
     "drivesOfAtLeast5": "Drives of at least {min}, grouped by average outside temperature; bands under {band} are hidden.",

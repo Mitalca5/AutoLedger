@@ -36,7 +36,7 @@
     "mileageKmOptional": "Mileage ({unit}, optional)",
     "partial": "partial",
     "estimated": "estimated",
-    "noFillUpRecordedEnter": "No fill-up recorded. Enter the date, mileage and amount of each fill-up: the cost per {unit} is calculated from these readings.",
+    "noFillUpRecordedEnter": "No fill-up recorded",
     "loading": "Loading…",
     "consumptionIsCalculatedBetweenTwo": "Consumption is calculated between two full tanks with the quantities entered.",
     "theConsumptionOfIntervalS": "The consumption of {estimated_segments} interval(s) is therefore approximate (≈).",
@@ -63,10 +63,11 @@
     "deleteTitle": "Delete the fill-up",
     "deleteMessage": "Delete the fill-up of {date} ({amount})?",
     "deleteFailed": "Could not delete.",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "noFillUpHint": "Enter the date, mileage and amount of each fill-up: the cost per {unit} is calculated from these readings."
   },
   "odometerReadingsPanel": {
-    "noManualReadingYet": "No reading yet.",
+    "noManualReadingYet": "No reading yet",
     "fromHomeAssistant": "Home Assistant",
     "fromHomeAssistantHint": "Reported by the Home Assistant integration, one point per day. It cannot be edited, only deleted.",
     "loadingTheReadings": "Loading the readings...",

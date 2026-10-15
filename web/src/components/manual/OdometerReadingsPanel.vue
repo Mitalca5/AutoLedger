@@ -3,6 +3,7 @@ import { intlLocale, t } from '@/i18n'
 import DistanceInput from '@/components/DistanceInput.vue'
 import { computed, ref, watch, onMounted } from 'vue'
 import { Fuel, Gauge, Edit2, Trash2 } from 'lucide-vue-next'
+import EmptyState from '@/components/EmptyState.vue'
 import AppDatePicker from '@/components/AppDatePicker.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { useVehicleStore } from '@/stores/vehicle'
@@ -185,9 +186,7 @@ onMounted(() => {
 
       <div v-if="loading" class="py-8 text-center text-xs text-slate-400">{{ $t('manual.odometerReadingsPanel.loadingTheReadings') }}</div>
 
-      <div v-else-if="history.length === 0" class="py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800 text-xs text-slate-400">
-        {{ $t('manual.odometerReadingsPanel.noManualReadingYet') }}
-      </div>
+      <EmptyState v-else-if="history.length === 0" compact :title="$t('manual.odometerReadingsPanel.noManualReadingYet')" />
 
       <div v-else class="space-y-2">
         <div
