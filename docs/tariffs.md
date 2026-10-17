@@ -56,3 +56,5 @@ left to the manual cost entry.
 - The same calculation fills the cost of a synchronised charge that has none, from its recorded start and end.
 
 `standing_charge_cents` records an optional monthly standing charge for the plan.
+
+Automatic pricing only uses a tariff in the vehicle's currency, including its dated versions and the owner's default. A mismatched tariff leaves the cost unknown; no exchange rate is inferred. The calculation response includes `currency` when a plan applies. In the charge form, automatic pricing is unavailable while the entry uses a different currency.

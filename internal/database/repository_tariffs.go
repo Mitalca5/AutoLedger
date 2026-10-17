@@ -90,20 +90,32 @@ func (r *Repository) GetTariffPlanByID(ctx context.Context, id, userID string) (
 // GetVehicleTariffPlan returns the plan assigned to the vehicle, or the default plan of its owner.
 func (r *Repository) GetVehicleTariffPlan(ctx context.Context, vehicleID string) (*models.TariffPlan, error) {
 	var tariffID *string
-	var userID string
-	err := r.pool.QueryRow(ctx, `SELECT tariff_plan_id, user_id FROM vehicles WHERE id = $1;`, vehicleID).Scan(&tariffID, &userID)
+	var userID, currency string
+	err := r.pool.QueryRow(ctx, `SELECT tariff_plan_id, user_id, currency FROM vehicles WHERE id = $1;`, vehicleID).Scan(&tariffID, &userID, &currency)
 	if err != nil {
 		return nil, err
 	}
 	if tariffID != nil {
 		p, err := r.GetTariffPlanByID(ctx, *tariffID, userID)
 		if err == nil {
-			return p, nil
+			return tariffInCurrency(p, currency)
 		}
 	}
 
 	// Fallback to user default plan
-	return r.GetDefaultTariffPlan(ctx, userID)
+	plan, err := r.GetDefaultTariffPlan(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return tariffInCurrency(plan, currency)
+}
+
+// An automatic amount has no exchange rate: leave it unknown when currencies differ.
+func tariffInCurrency(plan *models.TariffPlan, currency string) (*models.TariffPlan, error) {
+	if plan.Currency != currency {
+		return nil, ErrNotFound
+	}
+	return plan, nil
 }
 
 // GetVehicleTariffPlanAt returns the version of the vehicle's tariff that covers day (YYYY-MM-DD): the plans of the
@@ -115,11 +127,11 @@ func (r *Repository) GetVehicleTariffPlanAt(ctx context.Context, vehicleID, day 
 	}
 	version, err := scanTariffPlan(r.pool.QueryRow(ctx, `
 		SELECT `+tariffPlanColumns+` FROM tariff_plans
-		WHERE user_id = $1 AND lower(name) = lower($2)
+		WHERE user_id = $1 AND lower(name) = lower($2) AND currency = $4
 		  AND (valid_from IS NULL OR valid_from <= $3::date)
 		  AND (valid_to IS NULL OR valid_to >= $3::date)
 		ORDER BY valid_from DESC NULLS LAST, created_at DESC
-		LIMIT 1;`, plan.UserID, plan.Name, day))
+		LIMIT 1;`, plan.UserID, plan.Name, day, plan.Currency))
 	if errors.Is(err, pgx.ErrNoRows) {
 		return plan, nil
 	}

@@ -51,3 +51,5 @@ Une grille tarifaire chiffre l'énergie d'une session de recharge à domicile lo
 - Le même calcul renseigne le coût d'une recharge synchronisée qui n'en a pas, d'après son début et sa fin enregistrés.
 
 `standing_charge_cents` enregistre un abonnement mensuel facultatif pour la grille.
+
+Le calcul automatique utilise uniquement un tarif dans la devise du véhicule, y compris ses versions datées et le tarif par défaut du propriétaire. Un tarif dans une autre devise laisse le coût inconnu ; aucun taux de change n’est déduit. La réponse du calcul contient `currency` lorsqu’un tarif s’applique. Dans le formulaire de recharge, le calcul automatique est désactivé si la saisie utilise une autre devise.

@@ -283,11 +283,12 @@ func (h *TariffHandler) Calculate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// plan is null when no tariff prices the session: the client keeps the cost the user types
-	var planName *string
+	var planName, currency *string
 	if plan != nil && plan.AppliesOn(h.tariffService.DayOf(req.StartTime)) {
 		planName = &plan.Name
+		currency = &plan.Currency
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"cost": cost, "plan": planName})
+	writeJSON(w, http.StatusOK, map[string]any{"cost": cost, "plan": planName, "currency": currency})
 }
 
 func (h *TariffHandler) CalculatePublic(w http.ResponseWriter, r *http.Request) {

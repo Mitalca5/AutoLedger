@@ -56,7 +56,7 @@ const chargeForm = ref({
 const places = ref<{ id: string; name: string }[]>([])
 
 // The vehicle's tariff prices a session that has no cost yet from its hours, whether it was typed here or synchronised
-const pricesFromTariff = computed(() => open.value && !(editingCharge.value && editingCharge.value.cost !== null && editingCharge.value.cost !== undefined))
+const pricesFromTariff = computed(() => open.value && chargeForm.value.currency === baseCurrency.value && !(editingCharge.value && editingCharge.value.cost !== null && editingCharge.value.cost !== undefined))
 const tariffCost = useSessionTariffCost(
   () => sessionPriceRequest(props.vehicleId, chargeForm.value.date, chargeForm.value.end_date, chargeForm.value.kwh_added),
   pricesFromTariff,
