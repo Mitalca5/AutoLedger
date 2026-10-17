@@ -190,7 +190,8 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	query := `
 		SELECT v.id, v.user_id, v.name, v.vin, v.current_odometer,
 		       v.estimated_kwh_100km, v.estimated_price_per_kwh, v.currency, v.powertrain,
-		       v.telemetry_mode, v.make, v.model, v.toll_detection,
+		       v.telemetry_mode, v.make, v.model,
+		       v.default_driver_id, v.tariff_plan_id, v.is_home_charger_default, v.toll_detection,
 		       v.created_at, v.updated_at,
 		       COALESCE(vm.role, CASE WHEN v.user_id::text = $2 THEN 'OWNER' ELSE 'VIEWER' END) as role
 		FROM vehicles v
@@ -201,7 +202,8 @@ func (r *Repository) GetVehicleByID(ctx context.Context, id, userID string) (*mo
 	err := r.pool.QueryRow(ctx, query, id, userID).Scan(
 		&v.ID, &v.UserID, &v.Name, &v.Vin, &v.CurrentOdometer,
 		&v.EstimatedKwh100km, &v.EstimatedPricePerKwh, &v.Currency, &v.Powertrain,
-		&v.TelemetryMode, &v.Make, &v.Model, &v.TollDetection,
+		&v.TelemetryMode, &v.Make, &v.Model,
+		&v.DefaultDriverID, &v.TariffPlanID, &v.IsHomeChargerDefault, &v.TollDetection,
 		&v.CreatedAt, &v.UpdatedAt, &role,
 	)
 	if err != nil {
