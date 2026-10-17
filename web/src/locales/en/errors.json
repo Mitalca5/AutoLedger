@@ -117,7 +117,7 @@
     "name_required": "Vehicle name is required",
     "url_required": "URL is required",
     "estimate_consumption_range": "The average consumption must be between 0 and {p0} kWh/100 {unit}",
-    "estimate_rate_range": "The electricity rate must be between 0 and 10 per kWh",
+    "estimate_rate_range": "The electricity rate must be between 0 and {p0} per kWh",
     "ice_no_teslamate": "A combustion vehicle cannot be linked to TeslaMate",
     "grafana_url_too_long": "Grafana URL too long (300 characters maximum)",
     "grafana_url_base": "The Grafana URL must be a base address, without parameters",

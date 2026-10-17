@@ -117,7 +117,7 @@
     "name_required": "Le nom du véhicule est requis",
     "url_required": "L'URL est requise",
     "estimate_consumption_range": "La consommation moyenne doit être comprise entre 0 et {p0} kWh/100 {unit}",
-    "estimate_rate_range": "Le tarif de l'électricité doit être compris entre 0 et 10 par kWh",
+    "estimate_rate_range": "Le tarif de l'électricité doit être compris entre 0 et {p0} par kWh",
     "ice_no_teslamate": "Un véhicule thermique ne peut pas être relié à TeslaMate",
     "grafana_url_too_long": "URL Grafana trop longue (300 caractères maximum)",
     "grafana_url_base": "L'URL Grafana doit être une adresse de base, sans paramètres",

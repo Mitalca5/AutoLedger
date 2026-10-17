@@ -154,6 +154,10 @@ func (h *VehicleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateEstimatedEnergyRate(req.EstimatedPricePerKwh); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
 	if req.Name == "" {
 		writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.name_required", "Vehicle name is required"))
 		return
@@ -281,6 +285,10 @@ func (h *VehicleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateEstimatedEnergyRate(req.EstimatedPricePerKwh); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
 	if req.Powertrain != "" {
 		if err := validatePowertrain(req.Powertrain, req.TeslaMateAPIURL); err != nil {
 			writeErr(w, http.StatusBadRequest, err)
@@ -394,8 +402,8 @@ func (h *VehicleHandler) UpdateEstimatedEnergy(w http.ResponseWriter, r *http.Re
 		writeAPIError(w, http.StatusBadRequest, apierror.Newf("vehicle.estimate_consumption_range", "The average consumption must be between 0 and %.0f kWh/100km", apierror.PerKm(100)))
 		return
 	}
-	if req.EstimatedPricePerKwh != nil && (*req.EstimatedPricePerKwh < 0 || *req.EstimatedPricePerKwh > 10) {
-		writeAPIError(w, http.StatusBadRequest, apierror.New("vehicle.estimate_rate_range", "The electricity rate must be between 0 and 10 per kWh"))
+	if err := validateEstimatedEnergyRate(req.EstimatedPricePerKwh); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
 

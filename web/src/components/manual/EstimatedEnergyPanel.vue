@@ -56,7 +56,7 @@ async function save() {
     void showAlert(t('manual.estimatedEnergyPanel.invalidConsumption', { unit: distanceUnit(), min, max }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
     return
   }
-  if (rate !== null && (rate < 0 || rate > 10)) {
+  if (rate !== null && (!Number.isFinite(rate) || rate < 0)) {
     void showAlert(t('manual.estimatedEnergyPanel.invalidRate', { cur: currencySymbol(vehicleStore.currency) }), t('manual.estimatedEnergyPanel.invalidField'), 'warning')
     return
   }
@@ -135,7 +135,6 @@ onMounted(() => {
               id="pre-tm-rate"
               v-model="form.price_per_kwh"
               min="0.01"
-              max="5"
               :placeholder="$t('common.example', { value: $n(0.22) })"
               :disabled="!canEdit"
               class="field"

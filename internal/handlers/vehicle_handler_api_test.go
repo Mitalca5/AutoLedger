@@ -195,7 +195,7 @@ func TestVehicleEstimatedEnergy(t *testing.T) {
 	a.do(a.ownerID, http.StatusBadRequest, "PUT", path, `{`)
 	a.do(a.ownerID, http.StatusBadRequest, "PUT", path, `{"estimated_kwh_100km":0}`)
 	a.do(a.ownerID, http.StatusBadRequest, "PUT", path, `{"estimated_kwh_100km":101}`)
-	a.do(a.ownerID, http.StatusBadRequest, "PUT", path, `{"estimated_price_per_kwh":11}`)
+	a.do(a.ownerID, http.StatusBadRequest, "PUT", path, `{"estimated_price_per_kwh":1000000}`)
 	a.do(a.other, http.StatusNotFound, "PUT", path, `{"estimated_kwh_100km":15}`)
 	a.do(a.viewer, http.StatusForbidden, "PUT", path, `{"estimated_kwh_100km":15}`)
 	out := decodeObj(t, a.do(a.editor, http.StatusOK, "PUT", path, `{"estimated_kwh_100km":16.5,"estimated_price_per_kwh":0.25}`))
